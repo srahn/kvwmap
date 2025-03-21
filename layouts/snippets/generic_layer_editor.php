@@ -89,7 +89,7 @@ $dataset_operation_position = $this->user->rolle->dataset_operations_position;
 $layer = $this->qlayerset[$i];
 if (!$invisible_attributes) {
 	$invisible_attributes = array();
-	$invisible_attributes[$layer['Layer_ID']] = array();
+	$invisible_attributes[$layer['layer_id']] = array();
 };
 $size = 16;
 $select_width = 'width: 100%;'; 
@@ -140,7 +140,7 @@ if ($doit == true) {
 		}
 	} ?>
 	<div id="layer" onclick="remove_calendar();">
-		<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>"><?
+		<input type="hidden" value="" id="changed_<? echo $layer['layer_id']; ?>" name="changed_<? echo $layer['layer_id']; ?>"><?
 		if ($this->new_entry != true AND $layer['requires'] == '') { ?>
 			<table border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tr>
@@ -166,13 +166,13 @@ if ($doit == true) {
 					<td align="right" valign="top" style="padding: 0 10 0 0">
 					</td>
 					<td valign="top" style="padding: 0 0 0 0">
-						<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
+						<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['layer_id']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
 					</td>
 					<? } ?>
 					<td height="30" width="99%" align="center"><h2><? echo $layer_name; ?></h2></td>
 					<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 					<td valign="top" style="padding: 0 10 0 0">
-						<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
+						<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['layer_id']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
 					</td>
 					<td align="right" valign="top">
 					</td>
@@ -185,10 +185,10 @@ if ($doit == true) {
 			<? echo $layer['paging']; ?>
 			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" style="cursor: pointer; margin: 12px" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
 			<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">
-				<input type="checkbox" onclick="toggleAll(this, <? echo $layer['Layer_ID']; ?>, 'alle');" checked> --alle--<br>
+				<input type="checkbox" onclick="toggleAll(this, <? echo $layer['layer_id']; ?>, 'alle');" checked> --alle--<br>
 <? 			for ($j = 0; $j < count($layer['attributes']['name']); $j++) {
 					if ($layer['attributes']['visible'][$j]) { ?>					
-						<input type="checkbox" onclick="toggleColumn(this, <? echo $layer['Layer_ID']; ?>, '<? echo $layer['attributes']['name'][$j]; ?>');" checked> <? echo ($layer['attributes']['alias'][$j] ?: $layer['attributes']['name'][$j]) . '<br>'; 
+						<input type="checkbox" onclick="toggleColumn(this, <? echo $layer['layer_id']; ?>, '<? echo $layer['attributes']['name'][$j]; ?>');" checked> <? echo ($layer['attributes']['alias'][$j] ?: $layer['attributes']['name'][$j]) . '<br>'; 
 					}
 				}	?>
 			</div>
@@ -207,7 +207,7 @@ if ($doit == true) {
 							if($layer['attributes']['group'][0] != ''){
 								echo '<tr><td style="border:none"></td><td style="border:none"></td>';
 								$explosion = explode(';', $layer['attributes']['group'][0]);
-								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
+								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
 								echo '<td id="'.$groupname.'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
 								$colspan = 0;
 								for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
@@ -215,7 +215,7 @@ if ($doit == true) {
 									if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
 										$explosion = explode(';', $layer['attributes']['group'][$j]);
 										if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-										$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
+										$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
 										if($collapsed)echo '1';
 										else echo $colspan;
 										echo '" data-colspan="'.$colspan.'" data-origcolspan="'.$colspan.'">';
@@ -226,7 +226,7 @@ if ($doit == true) {
 										}
 										if($j < count($this->qlayerset[$i]['attributes']['name'])-1){
 											$explosion = explode(';', $layer['attributes']['group'][$j+1]);
-											$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
+											$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
 											echo '<td id="'.$groupname.'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
 										}
 									}
@@ -241,17 +241,17 @@ if ($doit == true) {
 					  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								$collapsed = ($explosion[1] == 'collapsed');
-								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
+								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
 								if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 									if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-											echo '<td style="' . ($collapsed ? 'display: none;' : '') . 'position: relative; background-clip: padding-box;" id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['Layer_ID'] . ' group_'.$groupname.'"';
+											echo '<td style="' . ($collapsed ? 'display: none;' : '') . 'position: relative; background-clip: padding-box;" id="column_' . $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['layer_id'] . ' group_'.$groupname.'"';
 											echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
 											if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
-												$this->editable = $layer['Layer_ID'];
+												$this->editable = $layer['layer_id'];
 											}
 											if($layer['attributes']['alias'][$j] == ''){
 												$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
@@ -260,7 +260,7 @@ if ($doit == true) {
 											echo 'width="100%"';
 											echo '><tr><td>';
 											if($this->formvars['printversion'] == '' AND $layer['attributes']['form_element_type'][$j] != 'SubFormPK' AND $layer['attributes']['form_element_type'][$j] != 'SubFormEmbeddedPK'){
-												echo '<a title="Sortieren nach '.$layer['attributes']['alias'][$j].'" href="javascript:change_orderby(\''.$layer['attributes']['name'][$j].'\', '.$layer['Layer_ID'].');">
+												echo '<a title="Sortieren nach '.$layer['attributes']['alias'][$j].'" href="javascript:change_orderby(\''.$layer['attributes']['name'][$j].'\', '.$layer['layer_id'].');">
 																'.$layer['attributes']['alias'][$j].'</a>';
 											}
 											else{
@@ -276,7 +276,7 @@ if ($doit == true) {
 												echo '<td align="right"><a href="javascript:;" title="(TT.MM.JJJJ)"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
 											}
 											echo '</td>';
-											echo '<td><div onmousedown="resizestart(document.getElementById(\'column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
+											echo '<td><div onmousedown="resizestart(document.getElementById(\'column_' . $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
 											echo '</tr></table>';
 											echo '</td>';
 										}
@@ -299,11 +299,11 @@ if ($doit == true) {
 						$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
 					}
 				}
-				$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID'].'|';
+				$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['layer_id'].'|';
 		?>
 			<tr 
 			<? if ($this->user->rolle->tooltipquery == 1 AND $this->user->rolle->querymode == 1 AND $layer['attributes']['the_geom'] != '') { ?>
-				onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"
+				onmouseenter="highlight_object(<? echo $layer['layer_id']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"
 			<? } ?>
 			>
 				<td style="background-color:<? echo BG_DEFAULT; ?>;">
@@ -311,9 +311,9 @@ if ($doit == true) {
 				  <table>
 						<tr>
 							<td style="line-height: 1px; ">
-								<a name="anchor_<? echo $layer['Layer_ID']; ?>_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>">
-								<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>"> 
-								<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" onchange="count_selected(<? echo $layer['Layer_ID']; ?>);" class="check_<? echo $layer['Layer_ID']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>">&nbsp;
+								<a name="anchor_<? echo $layer['layer_id']; ?>_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>">
+								<input type="hidden" value="" onchange="changed_<? echo $layer['layer_id']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['layer_id'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>"> 
+								<input id="<? echo $layer['layer_id'].'_'.$k; ?>" type="checkbox" onchange="count_selected(<? echo $layer['layer_id']; ?>);" class="check_<? echo $layer['layer_id']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['layer_id']; ?>">&nbsp;
 							</td>
 						</tr>
 				  </table>
@@ -325,7 +325,7 @@ if ($doit == true) {
 				for($j = 0; $j < count($layer['attributes']['name']); $j++){
 					$explosion = explode(';', $layer['attributes']['group'][$j]);
 					if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-					$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
+					$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
 					if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 						echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 					}
@@ -335,25 +335,25 @@ if ($doit == true) {
 					if($layer['attributes']['visible'][$j]){
 						if($layer['attributes']['type'][$j] != 'geometry') {
 							if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-								echo '<td id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('gle_attribute_value group_'.$groupname.' value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j], $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: left'.($collapsed ? ';display: none' : ''))) . '>';
+								echo '<td id="value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('gle_attribute_value group_'.$groupname.' value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j], $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: left'.($collapsed ? ';display: none' : ''))) . '>';
 								if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
-									echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
+									echo calendar($layer['attributes']['type'][$j], $layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 								}
 								echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width);
-								echo '<div onmousedown="resizestart(document.getElementById(\'column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
+								echo '<div onmousedown="resizestart(document.getElementById(\'column_' . $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
 								echo '</td>';
 								if($layer['attributes']['privileg'][$j] >= '0'){
-									$this->form_field_names .= $layer['Layer_ID'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
+									$this->form_field_names .= $layer['layer_id'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 								}
 							}
 						}
 						else {
-							$this->form_field_names .= $layer['Layer_ID'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';Geometrie;'.$layer['attributes']['nullable'][$j].'|';
+							$this->form_field_names .= $layer['layer_id'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';Geometrie;'.$layer['attributes']['nullable'][$j].'|';
 						}
 					}
 					else{
-						$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" readonly="true" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
-						$this->form_field_names .= $layer['Layer_ID'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
+						$invisible_attributes[$layer['layer_id']][] = '<input type="hidden" readonly="true" name="'.$layer['layer_id'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+						$this->form_field_names .= $layer['layer_id'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					}
 				}
 						if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
@@ -369,13 +369,13 @@ if ($doit == true) {
 										<table cellspacing="0" cellpadding="0">
 											<tr>
 		<?								if($privileg == 1 AND !$lock[$k]) { ?>
-												<td style="padding: 0 0 0 10;"><a onclick="checkForUnsavedChanges(event);" title="<? echo $strEditGeom; ?>" target="root" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&selected_layer_id=<? echo $layer['Layer_ID'];?>&dimension=<? echo $dimension; ?>"><div class="button edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+												<td style="padding: 0 0 0 10;"><a onclick="checkForUnsavedChanges(event);" title="<? echo $strEditGeom; ?>" target="root" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&selected_layer_id=<? echo $layer['layer_id'];?>&dimension=<? echo $dimension; ?>"><div class="button edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 		<?								} 
 										if($layer['shape'][$k][$layer['attributes']['the_geom']]){ ?>
-												<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-										<? if($layer['Layer_ID'] > 0){ ?>
-												<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'false');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-												<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+												<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['layer_id'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+										<? if($layer['layer_id'] > 0){ ?>
+												<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo $layer['layer_id'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'false');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+												<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo $layer['layer_id'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 										<? }} ?>
 											</tr>
 										</table>
@@ -396,20 +396,20 @@ if ($doit == true) {
 						</tr>
 		<?		$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 				} ?>
-						<tr onclick="toggle_statistic_row(<? echo $layer['Layer_ID']; ?>);">
+						<tr onclick="toggle_statistic_row(<? echo $layer['layer_id']; ?>);">
 							<td style="background-color:<? echo BG_TR; ?>;" valign="top" align="center">
 								&Sigma;
 							</td><?
 							for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
+								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
 								if($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1){ ?>
 									<td valign="top" class="group_<? echo $groupname; ?>" <? if($collapsed)echo 'style="display: none"'; ?> >
-										<div class="statistic_row_<? echo $layer['Layer_ID']; ?>" style="display:none"><?php
+										<div class="statistic_row_<? echo $layer['layer_id']; ?>" style="display:none"><?php
 										$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
 										if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
 											$values = array_map(
@@ -445,14 +445,14 @@ if ($doit == true) {
 								if ($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1) {
 									$column_name = $this->qlayerset[$i]['attributes']['name'][$j]; ?>
 									<td style="border: none; position: relative; padding: 0">
-										<div id="result_filter_<? echo $layer['Layer_ID'] . '_' . $column_name; ?>" class="gle_result_filter">
+										<div id="result_filter_<? echo $layer['layer_id'] . '_' . $column_name; ?>" class="gle_result_filter">
 											<? 
-											if (!empty($this->result_values[$layer['Layer_ID']][$column_name])) {
-												natsort($this->result_values[$layer['Layer_ID']][$column_name]);
+											if (!empty($this->result_values[$layer['layer_id']][$column_name])) {
+												natsort($this->result_values[$layer['layer_id']][$column_name]);
 												echo '<i class="fa fa-filter" aria-hidden="true" style="color: #bfbfbf"></i>
-															<select multiple="true" class="value_list" style="height: ' . (((count($this->result_values[$layer['Layer_ID']][$column_name]) + 1) * 22) + 6) . 'px;" onchange="filter_results(\'attr_' . $layer['Layer_ID'] . '_' . $column_name . '\', this)">
+															<select multiple="true" class="value_list" style="height: ' . (((count($this->result_values[$layer['layer_id']][$column_name]) + 1) * 22) + 6) . 'px;" onchange="filter_results(\'attr_' . $layer['layer_id'] . '_' . $column_name . '\', this)">
 																<option value="#all#">alle</option>';
-												foreach ($this->result_values[$layer['Layer_ID']][$column_name] as $value => $output) {
+												foreach ($this->result_values[$layer['layer_id']][$column_name] as $value => $output) {
 													echo '<option value="' . $value . '">' . $output . '</option>';
 												}
 												echo '</select>';
@@ -464,21 +464,21 @@ if ($doit == true) {
 						</tr>
 
 		<?
-					if($this->new_entry != true AND $this->editable == $layer['Layer_ID']){
+					if($this->new_entry != true AND $this->editable == $layer['layer_id']){
 		?>
-						<tr id="edit_all1_<? echo $layer['Layer_ID']; ?>" style="height: 30px">
-							<td colspan="200" style="border: none;vertical-align: bottom"><a href="javascript:switch_edit_all(<? echo $layer['Layer_ID']; ?>);"><? echo $strEditAll; ?></a></td>
+						<tr id="edit_all1_<? echo $layer['layer_id']; ?>" style="height: 30px">
+							<td colspan="200" style="border: none;vertical-align: bottom"><a href="javascript:switch_edit_all(<? echo $layer['layer_id']; ?>);"><? echo $strEditAll; ?></a></td>
 						</tr>
-						<tr id="edit_all2_<? echo $layer['Layer_ID']; ?>" style="height: 30px; display: none">
-							<td colspan="200" style="border: none;vertical-align: bottom"><a href="javascript:switch_edit_all(<? echo $layer['Layer_ID']; ?>);"><? echo $strEditAll; ?></a></td>
+						<tr id="edit_all2_<? echo $layer['layer_id']; ?>" style="height: 30px; display: none">
+							<td colspan="200" style="border: none;vertical-align: bottom"><a href="javascript:switch_edit_all(<? echo $layer['layer_id']; ?>);"><? echo $strEditAll; ?></a></td>
 						</tr>
-						<tr id="edit_all3_<? echo $layer['Layer_ID']; ?>" bgcolor="<?php echo BG_DEFAULT ?>" style="display: none">
+						<tr id="edit_all3_<? echo $layer['layer_id']; ?>" bgcolor="<?php echo BG_DEFAULT ?>" style="display: none">
 						<td></td>
 					  <?
 					  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
+								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
@@ -517,7 +517,7 @@ if ($doit == true) {
 					  ?>
 					  </tr>
 
-						<tr id="edit_all4_<? echo $layer['Layer_ID']; ?>" style="display: none">
+						<tr id="edit_all4_<? echo $layer['layer_id']; ?>" style="display: none">
 							<td style="text-align: center; background-color:<? echo BG_DEFAULT; ?>;">
 								<span style="--left: 0px" data-tooltip="Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen."></span>
 							</td>
@@ -525,7 +525,7 @@ if ($doit == true) {
 								for($j = 0; $j < count($layer['attributes']['name']); $j++){
 									$explosion = explode(';', $layer['attributes']['group'][$j]);
 									if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-									$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
+									$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
 									if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 										echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 									}
@@ -538,7 +538,7 @@ if ($doit == true) {
 												echo '<td class="group_'.$groupname.'" '.($collapsed? 'style="display: none"' : '').'>';
 												if(!in_array($layer['attributes']['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
 													if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
-														echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
+														echo calendar($layer['attributes']['type'][$j], $layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 													}
 													echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, true);
 												}
@@ -561,8 +561,8 @@ if ($doit == true) {
 				include('dataset_operations.php');
 			} ?>
 		</table> <?
-		for ($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++) {
-			echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
+		for ($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++) {
+			echo $invisible_attributes[$layer['layer_id']][$l]."\n";
 		} ?>
 		<script type="text/javascript">
 			var filters = document.querySelectorAll('.gle_result_filter');
@@ -576,10 +576,10 @@ if ($doit == true) {
 			[].forEach.call(vchangers, function(vchanger){if(vchanger.oninput)vchanger.oninput();});
 		</script>
 
-		<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
-		<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
+		<input type="hidden" name="checkbox_names_<? echo $layer['layer_id']; ?>" value="<? echo $checkbox_names; ?>">
+		<input type="hidden" name="orderby<? echo $layer['layer_id']; ?>" id="orderby<? echo $layer['layer_id']; ?>" value="<? echo $this->formvars['orderby'.$layer['layer_id']]; ?>">
 	</div><?
 }
 elseif($layer['requires'] == ''){
-	$this->noMatchLayers[$layer['Layer_ID']] = $layer['Name'];
+	$this->noMatchLayers[$layer['layer_id']] = $layer['Name'];
 } ?>

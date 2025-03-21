@@ -40,7 +40,7 @@ class LayerNames
               if(!empty($this->layers[$i]))
               {
                   $layer_name = $this->layers[$i]->get('Name');
-                  $layer_id = $this->layers[$i]->get('Layer_ID');
+                  $layer_id = $this->layers[$i]->get('layer_id');
                   $layer_names[$layer_name] = $layer_id;
               }
             }

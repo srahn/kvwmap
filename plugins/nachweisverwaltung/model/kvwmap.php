@@ -356,7 +356,7 @@
       $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
 	    if(!$GUI->formvars['geom_from_layer']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-	      $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+	      $GUI->formvars['geom_from_layer'] = $layerset[0]['layer_id'];
 	    }      
       # Ausführen von Aktionen vor der Anzeige der Karte und der Zeichnung
 			$oldscale=round($GUI->map_scaledenom);  
@@ -1385,7 +1385,7 @@
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+      $GUI->formvars['geom_from_layer'] = $layerset[0]['layer_id'];
     }
     $oldscale=round($GUI->map_scaledenom);  
 		$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
@@ -1673,7 +1673,7 @@
     # Spaltenname und from-where abfragen
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+      $GUI->formvars['geom_from_layer'] = $layerset[0]['layer_id'];
     }
     $GUI->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());

@@ -39,10 +39,10 @@ $zindex = 100;
 
 for ($i = 0; $i < $anzLayer; $i++) {	
 	if ($this->qlayerset[$i]['count'] !== 0) {		# entweder größer 0 oder nicht gesetzt, da Template
-		$this->queried_layers[$this->qlayerset[$i]['Layer_ID']] = $this->qlayerset[$i]['Name_or_alias'];
-		if ($active_layer_tab == NULL OR $this->qlayerset[$i]['Layer_ID'] == $this->user->rolle->last_query_layer) {
+		$this->queried_layers[$this->qlayerset[$i]['layer_id']] = $this->qlayerset[$i]['Name_or_alias'];
+		if ($active_layer_tab == NULL OR $this->qlayerset[$i]['layer_id'] == $this->user->rolle->last_query_layer) {
 			# entweder der erste Layer mit Treffern oder der zuletzt angeguckte Layer
-			$active_layer_tab = $this->qlayerset[$i]['Layer_ID'];
+			$active_layer_tab = $this->qlayerset[$i]['layer_id'];
 		}
 	}
 }
@@ -51,11 +51,11 @@ for($i=0;$i<$anzLayer;$i++){
 	$gesamt = $this->qlayerset[$i]['count'];
   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
 	   # Blätterfunktion
-	   if(value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['Layer_ID']) == ''){
-		   $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] = 0;
+	   if(value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['layer_id']) == ''){
+		   $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] = 0;
 		 }
-		 $von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
-	   $bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
+		 $von = $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] + 1;
+	   $bis = $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] + $this->formvars['anzahl'];
 	   if($bis > $gesamt){
 	   	$bis = $gesamt;
 	   }
@@ -64,9 +64,9 @@ for($i=0;$i<$anzLayer;$i++){
 
 	   	<tr valign="top">
 	   		<td align="right" width="38%">';
-	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
-					$this->qlayerset[$i]['paging'].= '<a href="javascript:firstdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-	   			$this->qlayerset[$i]['paging'].= '<a href="javascript:prevdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
+	   		if($this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
+					$this->qlayerset[$i]['paging'].= '<a href="javascript:firstdatasets('.$this->qlayerset[$i]['layer_id'].');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+	   			$this->qlayerset[$i]['paging'].= '<a href="javascript:prevdatasets('.$this->qlayerset[$i]['layer_id'].');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
 	   		}
 	      $this->qlayerset[$i]['paging'].= '
 				</td>
@@ -75,8 +75,8 @@ for($i=0;$i<$anzLayer;$i++){
 				</td>
 	      <td width="38%">';
 	      if($bis < $gesamt AND value_of($this->formvars, 'printversion') == ''){
-	      	$this->qlayerset[$i]['paging'].= '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-					$this->qlayerset[$i]['paging'].= '<a href="javascript:lastdatasets('.$this->qlayerset[$i]['Layer_ID'].', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
+	      	$this->qlayerset[$i]['paging'].= '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['layer_id'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+					$this->qlayerset[$i]['paging'].= '<a href="javascript:lastdatasets('.$this->qlayerset[$i]['layer_id'].', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
 	      }
 	      $this->qlayerset[$i]['paging'].= '
 				</td>
@@ -85,17 +85,17 @@ for($i=0;$i<$anzLayer;$i++){
 	   </table>';	 
   }
 
-	if (isset($this->queried_layers[$this->qlayerset[$i]['Layer_ID']])) {
-		if ($active_layer_tab == $this->qlayerset[$i]['Layer_ID']) {
+	if (isset($this->queried_layers[$this->qlayerset[$i]['layer_id']])) {
+		if ($active_layer_tab == $this->qlayerset[$i]['layer_id']) {
 			$layer_visibility = '';
 			$active_tab = 'active_tab';
 		}
-		$layer_tabs .= '<div class="gle_layer_tab ' . $active_tab . '" style="z-index: ' . $zindex . '" onclick="toggle_layer(this, ' . $this->qlayerset[$i]['Layer_ID'] . ')">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
+		$layer_tabs .= '<div class="gle_layer_tab ' . $active_tab . '" style="z-index: ' . $zindex . '" onclick="toggle_layer(this, ' . $this->qlayerset[$i]['layer_id'] . ')">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
 		$zindex--;
 	}
 
 	echo '
-		<div class="layer_results ' . $layer_visibility . '" id="result_' . $this->qlayerset[$i]['Layer_ID'] . '">
+		<div class="layer_results ' . $layer_visibility . '" id="result_' . $this->qlayerset[$i]['layer_id'] . '">
 	';
 
 	$layer_visibility = 'collapsed';
@@ -127,7 +127,7 @@ for($i=0;$i<$anzLayer;$i++){
    	 	 echo '<br><span class="fett">' . SNIPPETS . $template . '</span>';
    	 	 echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
    	 	 echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, Ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
-   	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung mÃ¶glich)';
+   	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['layer_id'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung mÃ¶glich)';
    	 }
    }
 	}
@@ -178,9 +178,9 @@ if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != '
 		<td align="right">
     <? if ($this->user->rolle->visually_impaired) { ?>
 				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
-				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
+				<a href="javascript:switch_gle_view(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
 				<? }else{ ?>
-				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
+				<a href="javascript:switch_gle_view(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 				<? } ?>
 		<? } ?>
 		</td>
@@ -277,11 +277,11 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
   	}
   	else{
 			for ($i = 0; $i < $anzLayer; $i++) {
-				if ($this->formvars[$queryfield . $this->qlayerset[$i]['Layer_ID']] == 1) {
-					#echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
-					echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['Layer_ID']).'">';
-					echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[$i]['sql']).'">';
-					echo '<input type="hidden" name="gle_scrollposition_' . $this->qlayerset[$i]['Layer_ID'] . '" value="' . $this->formvars['gle_scrollposition_' . $this->qlayerset[$i]['Layer_ID']] . '">';
+				if ($this->formvars[$queryfield . $this->qlayerset[$i]['layer_id']] == 1) {
+					#echo '<input name="qLayer'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="1">';
+					echo '<input id="offset_'.$this->qlayerset[$i]['layer_id'].'" name="offset_'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="'.value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['layer_id']).'">';
+					echo '<input name="sql_'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[$i]['sql']).'">';
+					echo '<input type="hidden" name="gle_scrollposition_' . $this->qlayerset[$i]['layer_id'] . '" value="' . $this->formvars['gle_scrollposition_' . $this->qlayerset[$i]['layer_id']] . '">';
 				}
 			}
 			echo '<input name="go" type="hidden" value="Sachdaten">';

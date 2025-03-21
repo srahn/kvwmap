@@ -6,9 +6,9 @@
 function show_details(flurstkennz, lfdnr){
 	document.GUI.go.value = 'Layer-Suche_Suchen';
 	document.GUI.search.value = 'true';
-	document.GUI.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
+	document.GUI.selected_layer_id.value = <? echo $this->qlayerset[$i]['layer_id'] ?>;
 	document.GUI.details.value = 'true';
-	document.GUI.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = '';
+	document.GUI.offset_<? echo $this->qlayerset[$i]['layer_id']; ?>.value = '';
 	if(document.GUI.fromsearch.value == 1){
 <?	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['type']); $j++){
   		if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
@@ -33,7 +33,7 @@ function go_back(){
 	document.GUI.details.value = '';
 	if(document.GUI.fromsearch.value == 1){
 		document.GUI.go.value = 'Layer-Suche_Suchen';
-		document.GUI.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = document.GUI._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value; 
+		document.GUI.offset_<? echo $this->qlayerset[$i]['layer_id']; ?>.value = document.GUI._offset_<? echo $this->qlayerset[$i]['layer_id']; ?>.value; 
 <?	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['type']); $j++){
   		if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
 				echo '
@@ -73,8 +73,8 @@ function go_back(){
 				</table><br>
 			';
 			
-  		echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['qLayer'.$this->qlayerset[$i]['Layer_ID']].'">';
-  		echo '<input name="_offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['_offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
+  		echo '<input name="qLayer'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="'.$this->formvars['qLayer'.$this->qlayerset[$i]['layer_id']].'">';
+  		echo '<input name="_offset_'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="'.$this->formvars['_offset_'.$this->qlayerset[$i]['layer_id']].'">';
   		echo '<input type="hidden" name="fromsearch" value="'.$this->formvars['fromsearch'].'">';
   		
   		for($j = 0; $j < count($this->qlayerset[$i]['attributes']['type']); $j++){
@@ -89,7 +89,7 @@ function go_back(){
 			
 		}
 		else{
-			echo '<input name="_offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
+			echo '<input name="_offset_'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->qlayerset[$i]['layer_id']].'">';
 			for($j = 0; $j < count($this->qlayerset[$i]['attributes']['type']); $j++){
 	  		if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
 					echo '
@@ -265,7 +265,7 @@ function go_back(){
 ?>
 <input type="hidden" name="details" value="<? echo $this->formvars['details']; ?>">
 <input type="hidden" name="search" value="">
-<input type="hidden" name="selected_layer_id" value="<? echo $this->qlayerset[$i]['Layer_ID'] ?>">
+<input type="hidden" name="selected_layer_id" value="<? echo $this->qlayerset[$i]['layer_id'] ?>">
 <? if($this->search != true){ ?>
 	<input type="hidden" name="value_flurstkennz" value="">
 	<input type="hidden" name="operator_flurstkennz" value="">

@@ -72,14 +72,14 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 					# ... und/oder Tabelle beginnen				
 		
 ?>
-	<div class="gsm_tabelle_gruppe gsm_tabelle_gruppe_zu" id="colgroup<? echo $layer['Layer_ID'].'_'.$i.'_'.$searchmask_number; ?>" style="<? if(!$collapsed)echo 'display: none;'; ?>">
-		<div class="gsm_tabelle_gruppe_name" onclick="javascript:document.getElementById('<? echo 'group'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number; ?>').style.display='block'; document.getElementById('<? echo 'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number; ?>').style.display='none'">
+	<div class="gsm_tabelle_gruppe gsm_tabelle_gruppe_zu" id="colgroup<? echo $layer['layer_id'].'_'.$i.'_'.$searchmask_number; ?>" style="<? if(!$collapsed)echo 'display: none;'; ?>">
+		<div class="gsm_tabelle_gruppe_name" onclick="javascript:document.getElementById('<? echo 'group'.$layer['layer_id'].'_'.$i.'_'.$searchmask_number; ?>').style.display='block'; document.getElementById('<? echo 'colgroup'.$layer['layer_id'].'_'.$i.'_'.$searchmask_number; ?>').style.display='none'">
 			<div>+</div>
 			<div><? echo $groupname; ?></div>
 		</div>
 	</div>
-	<div class="gsm_tabelle_gruppe gsm_tabelle_gruppe_auf" id="group<? echo $layer['Layer_ID'].'_'.$i.'_'.$searchmask_number; ?>" style="<? if($collapsed)echo 'display: none;'; ?>">
-		<div class="gsm_tabelle_gruppe_name" onclick="javascript:document.getElementById('<? echo 'group'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number; ?>').style.display='none'; document.getElementById('<? echo 'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number; ?>').style.display='block';">
+	<div class="gsm_tabelle_gruppe gsm_tabelle_gruppe_auf" id="group<? echo $layer['layer_id'].'_'.$i.'_'.$searchmask_number; ?>" style="<? if($collapsed)echo 'display: none;'; ?>">
+		<div class="gsm_tabelle_gruppe_name" onclick="javascript:document.getElementById('<? echo 'group'.$layer['layer_id'].'_'.$i.'_'.$searchmask_number; ?>').style.display='none'; document.getElementById('<? echo 'colgroup'.$layer['layer_id'].'_'.$i.'_'.$searchmask_number; ?>').style.display='block';">
 			<div>–</div>
 			<div><? echo $groupname; ?></div>
 		</div>

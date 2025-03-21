@@ -452,7 +452,7 @@ class GUI {
 					(
 						(	# Karte
 							(
-								$this->formvars[$queryfield . $layerset[$i]['Layer_ID']] == '1' OR 
+								$this->formvars[$queryfield . $layerset[$i]['layer_id']] == '1' OR 
 								$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
 							) AND
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
@@ -465,9 +465,9 @@ class GUI {
 					)
 				) {
 				# Dieser Layer soll abgefragt werden
-				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);				
-				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
-				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
+				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['layer_id'], $this->Stelle->pgdbhost);				
+				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['layer_id']);
+				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['layer_id'], $layerdb, $privileges['attributenames']);
 
 				if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
@@ -562,11 +562,11 @@ class GUI {
 					$sql_where .= " AND " . $layerset[$i]['Filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
-				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {
-					foreach($disabled_class_expressions[$layerset[$i]['Layer_ID']] as $disabled_class) {
-						$disabled_class_filter[$layerset[$i]['Layer_ID']][] = '(' . (mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
+				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['layer_id'], $disabled_class_expressions)) {
+					foreach($disabled_class_expressions[$layerset[$i]['layer_id']] as $disabled_class) {
+						$disabled_class_filter[$layerset[$i]['layer_id']][] = '(' . (mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
 					}
-					$sql_where .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter[$layerset[$i]['Layer_ID']]) . "), true)";
+					$sql_where .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter[$layerset[$i]['layer_id']]) . "), true)";
 				}	
 								
 				$sql = "SELECT " . $query_parts['select'] . " FROM (SELECT " . $pfad . ") as query WHERE 1=1 ".$sql_where;
@@ -1306,8 +1306,8 @@ class rolle {
 		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
 		$this->database->execSQL($sql);
     while ($row = $this->database->result->fetch_assoc()) {
-			if ($layerset['layer_ids'][$row['Layer_ID']]['classification'] == $row['classification']) {
-  			$result[$row['Layer_ID']][] = $row;
+			if ($layerset['layer_ids'][$row['layer_id']]['classification'] == $row['classification']) {
+  			$result[$row['layer_id']][] = $row;
 			}
 		}
 		return $result ?: [];
@@ -1540,8 +1540,8 @@ class rolle {
 			}
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'Name' : 'alias'];
 			$layer[$i] = $rs;
-			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
-			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
+			$layer['layer_ids'][$rs['layer_id']] = &$layer[$i];
+			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['layer_id'];
 			$i++;
 		}
 		return $layer;

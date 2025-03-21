@@ -129,7 +129,7 @@
 <? if($this->formvars['go'] == 'jagdbezirk_show_data'){ ?>
 <input name="form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
 <input name="search" type="hidden" value="true">
-<input name="selected_layer_id" type="hidden" value="<? echo $this->qlayerset[$i]['Layer_ID']; ?>">
+<input name="selected_layer_id" type="hidden" value="<? echo $this->qlayerset[$i]['layer_id']; ?>">
 <input name="operator_oid" type="hidden" value="=">
 <input name="value_oid" type="hidden" value="<? echo $this->qlayerset[$i]['shape'][0]['oid']; ?>">
 <input name="keinzurueck" type="hidden" value="1">

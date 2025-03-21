@@ -218,7 +218,7 @@
     else{
       $groupid = $dbmap->newGroup('eigene Abfragen', 0);
     }
-    $GUI->formvars['original_layer_id'] = $layerset[0]['Layer_ID'];
+    $GUI->formvars['original_layer_id'] = $layerset[0]['layer_id'];
     $GUI->formvars['user_id'] = $GUI->user->id;
     $GUI->formvars['stelle_id'] = $GUI->Stelle->id;
     $GUI->formvars['aktivStatus'] = 1;
@@ -883,9 +883,9 @@
 
     $GUI->mapDB = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-		$layerdb = $GUI->mapDB->getlayerdatabase($layer[0]['Layer_ID'], $GUI->Stelle->pgdbhost);
-    $privileges = $GUI->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
-    $layer[0]['attributes'] = $GUI->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $layerdb, $privileges['attributenames']);
+		$layerdb = $GUI->mapDB->getlayerdatabase($layer[0]['layer_id'], $GUI->Stelle->pgdbhost);
+    $privileges = $GUI->Stelle->get_attributes_privileges($layer[0]['layer_id']);
+    $layer[0]['attributes'] = $GUI->mapDB->read_layer_attributes($layer[0]['layer_id'], $layerdb, $privileges['attributenames']);
 
 		for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
 			$layer[0]['attributes']['privileg'][$j] = $privileges[$layer[0]['attributes']['name'][$j]];
@@ -895,7 +895,7 @@
     $GUI->main = $layer[0]['template'];
 
 		$GUI->user->rolle->delete_last_query();
-		$GUI->user->rolle->save_last_query('Flurstueck_Anzeigen', $layer[0]['Layer_ID'], implode(';', $FlurstKennzListe), NULL, NULL, NULL);
+		$GUI->user->rolle->save_last_query('Flurstueck_Anzeigen', $layer[0]['layer_id'], implode(';', $FlurstKennzListe), NULL, NULL, NULL);
 
     for ($i=0;$i<$anzFlurst;$i++) {
       $GUI->qlayerset[0]['shape'][$i]['flurstkennz'] = $FlurstKennzListe[$i];

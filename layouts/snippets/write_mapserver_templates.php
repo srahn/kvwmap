@@ -16,8 +16,8 @@ if ($this->formvars['go_plus'] == '') { ?>
 		</tr><?php
 	foreach($this->layers AS $layer) { ?>
 		<tr>
-			<td><? echo $layer->get('Layer_ID'); ?></td>
-			<td style="text-align: left"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $layer->get('Layer_ID'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $layer->get('Name'); ?></a></td>
+			<td><? echo $layer->get('layer_id'); ?></td>
+			<td style="text-align: left"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $layer->get('layer_id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $layer->get('Name'); ?></a></td>
 			<td><? echo $write_options[$layer->get('write_mapserver_templates')]; ?></td></tr><?
 	} ?>
 	</table>
@@ -30,7 +30,7 @@ else { ?>
 	<table border="1" cellpadding="2" cellspacing="0" style="margin-top: 20px">
 		<tr><th>Layer</th><th>geschrieben</th></tr><?php
 		foreach($this->layers AS $layer) { ?>
-			<tr><td style="text-align: left"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $layer->get('Layer_ID'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $layer->get('Name'); ?></a></td><td style="text-align: center"><i class="fa fa-check" style="color: darkgreen"></i></td></tr><?
+			<tr><td style="text-align: left"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $layer->get('layer_id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $layer->get('Name'); ?></a></td><td style="text-align: center"><i class="fa fa-check" style="color: darkgreen"></i></td></tr><?
 		} ?>
 	</table>
 	<p><p><?

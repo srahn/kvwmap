@@ -66,7 +66,7 @@ function change_orderby(attribute, layer_id){
 			$this->qlayerset[$i]['attributes']['alias'][$j] = $this->qlayerset[$i]['attributes']['name'][$j];
 		}
 		if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
-			echo '<td><a title="'.$this->qlayerset[$i]['attributes']['tooltip'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$this->qlayerset[$i]['attributes']['name'][$j].'\', '.$this->qlayerset[$i]['Layer_ID'].');"><b>'.$this->qlayerset[$i]['attributes']['alias'][$j].'</b></a></td>';
+			echo '<td><a title="'.$this->qlayerset[$i]['attributes']['tooltip'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$this->qlayerset[$i]['attributes']['name'][$j].'\', '.$this->qlayerset[$i]['layer_id'].');"><b>'.$this->qlayerset[$i]['attributes']['alias'][$j].'</b></a></td>';
 		}
 	}
 ?></tr>
@@ -86,17 +86,17 @@ function change_orderby(attribute, layer_id){
 							echo ' readonly style="background-color:#ffffff; border: none"';
 						}
 						if($j > 0)echo ' size="7"';else echo ' size="20"';
-						echo ' type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">';
+						echo ' type="text" name="'.$this->qlayerset[$i]['layer_id'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">';
 					}
 		  	}
   			echo '
 						</td>
 				';
 				?>
-		  	<input id="<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$k; ?>" type="hidden" value="on" name="check;<? echo $this->qlayerset[$i]['attributes']['table_alias_name'][$this->qlayerset[$i]['attributes']['name'][0]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][0]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][0]].'_oid']; ?>">
+		  	<input id="<? echo $this->qlayerset[$i]['layer_id'].'_'.$k; ?>" type="hidden" value="on" name="check;<? echo $this->qlayerset[$i]['attributes']['table_alias_name'][$this->qlayerset[$i]['attributes']['name'][0]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][0]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][0]].'_oid']; ?>">
 		  	<?
 				if($this->qlayerset[$i]['attributes']['privileg'][$j] >= '0' AND !($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] == 'Auswahlfeld')){
-					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'|';
+					$this->form_field_names .= $this->qlayerset[$i]['layer_id'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'|';
 	  		}
 			}
 
@@ -114,7 +114,7 @@ function change_orderby(attribute, layer_id){
 					<td></td>
 					<td height="23" colspan="3">
 						<b>Diagramm erzeugen für das Jahr:&nbsp;</b>
-						<select style="width:170px" name="chartvalue_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" onchange="create_chart(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
+						<select style="width:170px" name="chartvalue_<?php echo $this->qlayerset[$i]['layer_id']; ?>" onchange="create_chart(<?php echo $this->qlayerset[$i]['layer_id']; ?>);">
 							<option value="">--- Bitte Wählen ---</option>
 							<?
 							for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
@@ -126,13 +126,13 @@ function change_orderby(attribute, layer_id){
 						</select>
 					</td>
 				</tr>
-				<tr id="charts_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" style="display:none">
+				<tr id="charts_<?php echo $this->qlayerset[$i]['layer_id']; ?>" style="display:none">
 					<td></td>
 					<td>
 						<table>
 							<tr>
 								<td colspan="2">
-									&nbsp;&nbsp;<select name="charttype_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" onchange="change_charttype(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
+									&nbsp;&nbsp;<select name="charttype_<?php echo $this->qlayerset[$i]['layer_id']; ?>" onchange="change_charttype(<?php echo $this->qlayerset[$i]['layer_id']; ?>);">
 										<option value="bar">Balkendiagramm</option>
 										<option value="mirrorbar">doppeltes Balkendiagramm</option>
 									</select>
@@ -143,7 +143,7 @@ function change_orderby(attribute, layer_id){
 									&nbsp;&nbsp;Beschriftung:
 								</td>
 								<td>
-									<select style="width:170px" id="" name="chartlabel_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" >
+									<select style="width:170px" id="" name="chartlabel_<?php echo $this->qlayerset[$i]['layer_id']; ?>" >
 										<?
 										for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 											if($this->qlayerset[$i]['attributes']['name'][$j] != $this->qlayerset[$i]['attributes']['the_geom']){
@@ -161,12 +161,12 @@ function change_orderby(attribute, layer_id){
 								<td>
 								</td>
 							</tr>
-							<tr id="split_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" style="display:none">
+							<tr id="split_<?php echo $this->qlayerset[$i]['layer_id']; ?>" style="display:none">
 								<td>
 									&nbsp;&nbsp;Trenn-Attribut:
 								</td>
 								<td>
-									<select style="width:133px" name="chartsplit_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" onchange="create_chart(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
+									<select style="width:133px" name="chartsplit_<?php echo $this->qlayerset[$i]['layer_id']; ?>" onchange="create_chart(<?php echo $this->qlayerset[$i]['layer_id']; ?>);">
 										<option value="">--- Bitte Wählen ---</option>
 										<?
 										for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
@@ -192,6 +192,6 @@ function change_orderby(attribute, layer_id){
 		<td>&nbsp;</td>
 	</tr>
 </table>
-<input type="hidden" name="checkbox_names_<? echo $this->qlayerset[$i]['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
-<input type="hidden" name="orderby<? echo $this->qlayerset[$i]['Layer_ID']; ?>" id="orderby<? echo $this->qlayerset[$i]['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$this->qlayerset[$i]['Layer_ID']]; ?>">
+<input type="hidden" name="checkbox_names_<? echo $this->qlayerset[$i]['layer_id']; ?>" value="<? echo $checkbox_names; ?>">
+<input type="hidden" name="orderby<? echo $this->qlayerset[$i]['layer_id']; ?>" id="orderby<? echo $this->qlayerset[$i]['layer_id']; ?>" value="<? echo $this->formvars['orderby'.$this->qlayerset[$i]['layer_id']]; ?>">
 

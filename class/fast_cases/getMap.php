@@ -556,9 +556,9 @@ class GUI {
 						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['Gruppe']] = true;
 					}
 					if(value_of($layerset['list'][$i], 'requires') == ''){
-						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
+						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['layer_id'];				# die Layer-IDs in einer Gruppe
 					}
-					$this->layer_id_string .= $layerset['list'][$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
+					$this->layer_id_string .= $layerset['list'][$i]['layer_id'].'|';							# alle Layer-IDs hintereinander in einem String
 
 					if (value_of($layerset['list'][$i], 'requires') != '') {
 						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
@@ -572,7 +572,7 @@ class GUI {
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
 						$error = msGetErrorObj();
 						while ($error && $error->code != MS_NOERR) {
-							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['Layer_ID'] . 
+							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['layer_id'] . 
 							'<br>&nbsp;&nbsp;in der Routine ' . $error->routine . ' Msg="' . $error->message . '" code=' . $error->code;
 							$error = $error->next();
 						}
@@ -637,7 +637,7 @@ class GUI {
 		$layer = new LayerObj($map);
 		$layer->name = $layerset[$layer_name_attribute];
 		$layer->metadata->set('wms_name', $layerset['wms_name'] ?: ''); #Mapserver8
-		$layer->metadata->set('kvwmap_layer_id', $layerset['Layer_ID']);
+		$layer->metadata->set('kvwmap_layer_id', $layerset['layer_id']);
 		$layer->metadata->set('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
 			$layer->metadata->set('ows_keywordlist', $layerset['wms_keywordlist']);
@@ -1385,7 +1385,7 @@ class GUI {
 				if($layer['requires'] == ''){
 					if($this->check_layer_visibility($layer))$layerhiddenflag = '0';
 					else $layerhiddenflag = '1';
-					$this->layerhiddenstring .= $layer['Layer_ID'].' '.$layerhiddenflag.' ';
+					$this->layerhiddenstring .= $layer['layer_id'].' '.$layerhiddenflag.' ';
 				}
 			}
 		}
@@ -2451,7 +2451,7 @@ class db_mapObj {
 			$rs['alias_link'] = replace_params_link(
 				$rs['alias'],
 				rolle::$layer_params,
-				$rs['Layer_ID']
+				$rs['layer_id']
 			);
 			foreach (array('Name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params_rolle(
@@ -2462,7 +2462,7 @@ class db_mapObj {
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
-				$rs['Class'] = $this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
+				$rs['Class'] = $this->read_Classes($rs['layer_id'], $this->disabled_classes, false, $rs['classification']);
 			}
 			if ($rs['maxscale'] > 0) {
 				$rs['maxscale'] = $rs['maxscale'] + 0.3;
@@ -2472,16 +2472,16 @@ class db_mapObj {
 			}
 			$layer['list'][$i] = $rs;
 			# Pointer auf requires-Array
-			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];
+			$layer['list'][$i]['required'] =& $requires_layer[$rs['layer_id']];
 			if ($rs['requires'] != '') {
 				# requires-Array füllen
-				$requires_layer[$rs['requires']][] = $rs['Layer_ID'];
+				$requires_layer[$rs['requires']][] = $rs['layer_id'];
 				if ($rs['queryable']) {
 					# wenn der untergeordnete Layer queryable ist, wird queryable auch beim übergeordneten gesetzt, damit die Checkbox in der Legende erscheint
 					$layer['layer_ids'][$rs['requires']]['queryable'] = $rs['queryable'];
 				}
 			}
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i]; # damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$layer['layer_ids'][$rs['layer_id']] =& $layer['list'][$i]; # damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
 		}
 		return $layer;

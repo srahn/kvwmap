@@ -20,7 +20,7 @@
         <td><?php echo $GemObj->getGemeindeName($rs['gemeinde']); ?></td>
         <td align="right"><?php echo $rs['bodenrichtwert']; ?>&nbsp;&euro;</td>
         <td><?php echo $rs['verfahrensgrund'].' '.$rs['verfahrensgrund_zusatz'];; ?></td>
-        <td><a href="index.php?go=Bodenrichtwertformular_Anzeige&layer_id=<? echo $this->qlayerset[$i]['Layer_ID']; ?>&gid=<?php echo $rs['gid']; ?>">Anzeigen</a></td>
+        <td><a href="index.php?go=Bodenrichtwertformular_Anzeige&layer_id=<? echo $this->qlayerset[$i]['layer_id']; ?>&gid=<?php echo $rs['gid']; ?>">Anzeigen</a></td>
     </tr><?php
     }
     ?></table>

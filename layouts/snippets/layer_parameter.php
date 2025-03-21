@@ -39,7 +39,7 @@
 								echo '<ul>';
 								for ($j = 0; $j < $layer_count; $j++){
 									echo '<li>
-										<a href="index.php?go=Layereditor&selected_layer_id=' . $this->params_layer[$this->params[$i]['id']][$j]['Layer_ID'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->params_layer[$this->params[$i]['id']][$j]['Name'] . ' (' . $this->params_layer[$this->params[$i]['id']][$j]['Layer_ID'] . ')</a>
+										<a href="index.php?go=Layereditor&selected_layer_id=' . $this->params_layer[$this->params[$i]['id']][$j]['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->params_layer[$this->params[$i]['id']][$j]['Name'] . ' (' . $this->params_layer[$this->params[$i]['id']][$j]['layer_id'] . ')</a>
 									</li>';
 								}
 								echo '</ul>';

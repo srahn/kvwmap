@@ -48,7 +48,7 @@ function change_orderby(attribute, layer_id){
 </script>
 <?php
   $layer = $this->qlayerset[$i];
-  $layerId = $layer['Layer_ID'];
+  $layerId = $layer['layer_id'];
   $resultSet = $layer['shape'];
   $attributes = $layer['attributes'];
 ?>

@@ -105,7 +105,7 @@
 		global $strShowFK;
 		global $strNewEmbeddedPK;
 		global $hover_preview;
-		$layer_id = $layer['Layer_ID'];
+		$layer_id = $layer['layer_id'];
 		if ($dataset === NULL) {
 			$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
 		}

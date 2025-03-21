@@ -10,12 +10,12 @@
 	}
   else{																																		# falls man mal ein eigenes Subformular einbinden will
 	  if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
-			$this->subform_classname = 'subform_'.$this->qlayerset[$i]['Layer_ID'];
+			$this->subform_classname = 'subform_'.$this->qlayerset[$i]['layer_id'];
 	   	include(SNIPPETS.$this->qlayerset[$i]['template']);
 	  }
 		else{
 			if(file_exists(PLUGINS.$this->qlayerset[$i]['template'])){
-				$this->subform_classname = 'subform_'.$this->qlayerset[$i]['Layer_ID'];
+				$this->subform_classname = 'subform_'.$this->qlayerset[$i]['layer_id'];
 				include(PLUGINS.$this->qlayerset[$i]['template']);			# Pluginviews
 			}
 		}  	 
@@ -34,7 +34,7 @@
       <? }
 				}
       if($this->qlayerset[$i]['template']==''){ # wenn man ein Template für einen embeddeden Layer gesetzt hat, will man diesen Layer ja nur in der embeddeten Anzeige sehen?>
-   			<input type="button" name="extrabutton" value="Datensatz anzeigen" onclick="overlay_link('go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][0][$this->qlayerset[$i]['maintable'].'_oid']; ?>');">
+   			<input type="button" name="extrabutton" value="Datensatz anzeigen" onclick="overlay_link('go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->qlayerset[$i]['layer_id'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][0][$this->qlayerset[$i]['maintable'].'_oid']; ?>');">
    		<? } ?>
       </td>
     </tr>

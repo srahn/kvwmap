@@ -238,10 +238,10 @@ function rotate_print_extent(angle){
 									if($layerset[$i]['aktivStatus'] != 0 
 									AND !empty($layerset[$i]['Class'])){
 										$name = $layerset[$i]['Name_or_alias'];
-										if ($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] == '' AND $layerset[$i]['Layer_ID'] > 0) {
-											$this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] = 'on';
+										if ($this->formvars['legendlayer'.$layerset[$i]['layer_id']] == '' AND $layerset[$i]['layer_id'] > 0) {
+											$this->formvars['legendlayer'.$layerset[$i]['layer_id']] = 'on';
 										}
-										echo '<input type="checkbox" name="legendlayer'.$layerset[$i]['Layer_ID'].'" '.($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] == 'on' ? 'checked="true"' : '').' >&nbsp;'.$name.'<br>';
+										echo '<input type="checkbox" name="legendlayer'.$layerset[$i]['layer_id'].'" '.($this->formvars['legendlayer'.$layerset[$i]['layer_id']] == 'on' ? 'checked="true"' : '').' >&nbsp;'.$name.'<br>';
 									}
 								}
 								?>

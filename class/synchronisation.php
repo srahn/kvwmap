@@ -111,12 +111,12 @@ class synchro {
 		$this->count = 0;
 		for ($i = 0; $i < count($export_layerset); $i++) {
 			$this->commands = array();
-			$layerdb = $mapDB->getlayerdatabase($export_layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
-			$attributes = $mapDB->read_layer_attributes($export_layerset[$i]['Layer_ID'], $layerdb, NULL);
+			$layerdb = $mapDB->getlayerdatabase($export_layerset[$i]['layer_id'], $this->Stelle->pgdbhost);
+			$attributes = $mapDB->read_layer_attributes($export_layerset[$i]['layer_id'], $layerdb, NULL);
 			$currenttime = date('Y-m-d_H-i-s', time());
-			$this->trans_id[$i] = $this->user->id . "_" . $currenttime . "_" . $export_layerset[$i]['Layer_ID'];
+			$this->trans_id[$i] = $this->user->id . "_" . $currenttime . "_" . $export_layerset[$i]['layer_id'];
 			$where = " WHERE ST_WITHIN(st_transform(" . $attributes['all_table_names'][0] . "." . $attributes['the_geom'] . ", " . $this->user->rolle->epsg_code . "), st_geomfromtext('" . $formvars['newpathwkt'] . "', " . $this->user->rolle->epsg_code . "))";
-			if ($this->export_layer_table_data($mapDB, $this->trans_id[$i], $attributes, $layerdb, $export_layerset[$i]['Layer_ID'], $where, $formvars['leeren'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
+			if ($this->export_layer_table_data($mapDB, $this->trans_id[$i], $attributes, $layerdb, $export_layerset[$i]['layer_id'], $where, $formvars['leeren'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
 				$this->commands[] = POSTGRESBINPATH . "psql -U " . $this->database->user . " -f " . SYNC_PATH . $this->trans_id[$i] . ".sql " . $this->database->dbName;
 				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabellen auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
 				foreach ($this->commands as $command) {
@@ -136,10 +136,10 @@ class synchro {
 		$this->oldcount = 0;
 		for ($i = 0; $i < count($import_layerset); $i++) {
 			$this->commands = array();
-			$layerdb = $mapDB->getlayerdatabase($import_layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
-			$attributes = $mapDB->read_layer_attributes($import_layerset[$i]['Layer_ID'], $layerdb, NULL);
-			if ($this->import_layer_table_data($mapDB, $attributes, $layerdb, $import_layerset[$i]['Layer_ID'], $import_layerset[$i]['Name'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
-				$this->commands[] = POSTGRESBINPATH . "psql -U " . $this->database->user . " -f " . SYNC_PATH . $import_layerset[$i]['Layer_ID'] . ".sql " . $this->database->dbName;
+			$layerdb = $mapDB->getlayerdatabase($import_layerset[$i]['layer_id'], $this->Stelle->pgdbhost);
+			$attributes = $mapDB->read_layer_attributes($import_layerset[$i]['layer_id'], $layerdb, NULL);
+			if ($this->import_layer_table_data($mapDB, $attributes, $layerdb, $import_layerset[$i]['layer_id'], $import_layerset[$i]['Name'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
+				$this->commands[] = POSTGRESBINPATH . "psql -U " . $this->database->user . " -f " . SYNC_PATH . $import_layerset[$i]['layer_id'] . ".sql " . $this->database->dbName;
 				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabellen auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
 				foreach ($this->commands as $command) {
 					exec($command, $output, $ret);

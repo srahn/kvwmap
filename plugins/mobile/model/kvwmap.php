@@ -316,8 +316,8 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 				'log'	=> 'In der Stelle wurden keine Sync-Layer gefunden. Es wurden keine Änderungen vom Client auf den Server übertragen und es gab auch keine Änderungen vom Server zu holen!'
 			);
 		}
-		$layerdb = $mapDB->getlayerdatabase($sync_layers[0]->get('Layer_ID'), $GUI->Stelle->pgdbhost);
-		$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $sync_layers[0]->get('Layer_ID');
+		$layerdb = $mapDB->getlayerdatabase($sync_layers[0]->get('layer_id'), $GUI->Stelle->pgdbhost);
+		$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $sync_layers[0]->get('layer_id');
 		$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
 		$result = $sync->sync_all($GUI->formvars['client_id'], $GUI->user->Vorname . ' ' . $GUI->user->Name, $GUI->formvars['client_time'], $GUI->formvars['last_delta_version'], $GUI->formvars['client_deltas'], $sync_layers);
 		$GUI->debug->write('sync_all abgeschlossen.');
@@ -540,7 +540,7 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 	);
 
 	$layer = array(
-		"id" => $layerset['Layer_ID'],
+		"id" => $layerset['layer_id'],
 		"title" => $layerset['Name'],
 		"alias" => $layerset['alias'],
 		"id_attribute" => $layerset['oid'],
@@ -741,7 +741,7 @@ $GUI->mobile_create_sync_table = function ($layerdb) use ($GUI) {
 
 $GUI->mobile_prepare_layer_sync_all = function ($layerdb, $id, $sync) use ($GUI) {
 	include_once(CLASSPATH . 'Layer.php');
-	$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
+	$layer = Layer::find($GUI, 'layer_id = ' . $id)[0];
 
 	$sql = "
 		SELECT EXISTS (
@@ -771,7 +771,7 @@ $GUI->mobile_prepare_layer_sync_all = function ($layerdb, $id, $sync) use ($GUI)
 
 $GUI->mobile_prepare_layer_sync = function ($layerdb, $id, $sync) use ($GUI) {
 	include_once(CLASSPATH . 'Layer.php');
-	$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
+	$layer = Layer::find($GUI, 'layer_id = ' . $id)[0];
 
 	$sql = "
 		SELECT EXISTS (

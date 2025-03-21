@@ -26,7 +26,7 @@ class LayerClass extends MyObject {
 		$this->debug->show('Copy LayerClass id: ' . $this->get($this->identifier) . ' mit neuer layer_id: ' . $layer_id, LayerClass::$write_debug);
 		$new_class = clone $this;
 		unset($new_class->data[$this->identifier]);
-		$new_class->set('Layer_ID', $layer_id);
+		$new_class->set('layer_id', $layer_id);
 		$new_class->create();
 
 		$this->copy_styles2classes($new_class);

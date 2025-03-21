@@ -13,12 +13,12 @@
 		}
 		else{																																		# falls man mal ein eigenes Subformular einbinden will			
 		  if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
-				$this->subform_classname = 'subform_'.$this->qlayerset[$i]['Layer_ID'];
+				$this->subform_classname = 'subform_'.$this->qlayerset[$i]['layer_id'];
 		   	include(SNIPPETS.$this->qlayerset[$i]['template']);
 		  }
 			else{
 				if(file_exists(PLUGINS.$this->qlayerset[$i]['template'])){
-					$this->subform_classname = 'subform_'.$this->qlayerset[$i]['Layer_ID'];
+					$this->subform_classname = 'subform_'.$this->qlayerset[$i]['layer_id'];
 					include(PLUGINS.$this->qlayerset[$i]['template']);			# Pluginviews
 				}
 			}  	 

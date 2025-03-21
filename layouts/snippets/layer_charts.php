@@ -44,7 +44,7 @@
 				url: 'index.php',
 				data: {
 					go: 'chart_speichern',
-					layer_id: <? echo $layer['Layer_ID']; ?>,
+					layer_id: <? echo $layer['layer_id']; ?>,
 					title: $('.diagram_form_elem_' + id + '[name="diagram_title"]').val(),
 					type: $('.diagram_form_elem_' + id + '[name="diagram_type"]').val(),
 					value_attribute_label: $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_label"]').val(),
@@ -181,8 +181,8 @@
 					</div>
 					<script>
 						let chart_type_<? echo $id; ?> = '<? echo $chart->get('type'); ?>';
-						let values_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('value_attribute_name'); ?>').map((k, v) => { return v.value });
-						let names_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('label_attribute_name'); ?>').map((k, v) => { return (v.options?.[v.selectedIndex].text) ?? v.value});
+						let values_<? echo $id; ?> = $('.attr_<? echo $layer['layer_id']; ?>_<? echo $chart->get('value_attribute_name'); ?>').map((k, v) => { return v.value });
+						let names_<? echo $id; ?> = $('.attr_<? echo $layer['layer_id']; ?>_<? echo $chart->get('label_attribute_name'); ?>').map((k, v) => { return (v.options?.[v.selectedIndex].text) ?? v.value});
 						let labels_<? echo $id; ?> = [];
 						let data_<? echo $id; ?> = [];
 						for (let i = 0; i < names_<? echo $id; ?>.length; i++) {

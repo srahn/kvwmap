@@ -38,7 +38,7 @@ class Layer extends MyObject {
 		);
 		parent::__construct($gui, 'layer');
 		$this->stelle_id = ($gui->stelle ? $gui->stelle->id : null);
-		$this->identifier = 'Layer_ID';
+		$this->identifier = 'layer_id';
 		$this->geometry_types = array('Point', 'LineString', 'Polygon');
 		$this->geom_column = 'geom';
 	}
@@ -58,7 +58,7 @@ class Layer extends MyObject {
 	 */
 	public static	function find_by_id($gui, $id) {
 		$obj = new Layer($gui);
-		$layer = $obj->find_by('Layer_ID', $id);
+		$layer = $obj->find_by('layer_id', $id);
 		if ($layer->get_id() == '') {
 			return false;
 		}
@@ -116,7 +116,7 @@ class Layer extends MyObject {
 		}
 		else {
 			while ($rs = $database->result->fetch_assoc()) {
-				$duplicate_layer_ids[] = $rs['Layer_ID'];
+				$duplicate_layer_ids[] = $rs['layer_id'];
 			}
 		}
 		return $duplicate_layer_ids;
@@ -439,7 +439,7 @@ l.Name AS sub_layer_name
 		$success = true;
 		$this->debug->show('<p>Clone Templatelayer: ' . $this->get($this->identifier), Layer::$write_debug);
 		$new_layer = clone $this;
-		unset($new_layer->data['Layer_ID']);
+		unset($new_layer->data['layer_id']);
 		foreach ($attributes AS $key => $value) {
 			$new_layer->set($key, $value);
 		}
@@ -459,15 +459,15 @@ l.Name AS sub_layer_name
 	* Kopiere die Klassen des Layers mit anderer Layer_id
 	*/
 	function copy_classes($new_layer_id) {
-		foreach(LayerClass::find($this->gui, 'Layer_id = ' . $this->get('Layer_ID')) AS $layer_class) {
-			$this->debug->show('Copy class: ' . $layer_class->get('Name') . ' mit layer id: ' . $this->get('Layer_ID') . ' => ' . $new_layer_id, Layer::$write_debug);
+		foreach(LayerClass::find($this->gui, 'Layer_id = ' . $this->get('layer_id')) AS $layer_class) {
+			$this->debug->show('Copy class: ' . $layer_class->get('Name') . ' mit layer id: ' . $this->get('layer_id') . ' => ' . $new_layer_id, Layer::$write_debug);
 			$layer_class->copy($new_layer_id);
 		}
 	}
 
 	function copy_layer_attributes($new_layer_id) {
-		foreach(LayerAttribute::find($this->gui, 'Layer_id = ' . $this->get('Layer_ID')) AS $attribute) {
-			$this->debug->show('Copy Attribute: ' . $attribute->get('name') . ' mit neuer layer id: ' . $this->get('Layer_ID') . ' => ' . $new_layer_id, Layer::$write_debug);
+		foreach(LayerAttribute::find($this->gui, 'Layer_id = ' . $this->get('layer_id')) AS $attribute) {
+			$this->debug->show('Copy Attribute: ' . $attribute->get('name') . ' mit neuer layer id: ' . $this->get('layer_id') . ' => ' . $new_layer_id, Layer::$write_debug);
 			$attribute->copy($new_layer_id);
 		}
 	}
@@ -510,7 +510,7 @@ l.Name AS sub_layer_name
 				function($attribute) {
 					return explode(',', $attribute->get('options'))[0];
 				},
-				LayerAttribute::find($this->gui, "Layer_ID = " . $this->get('Layer_ID') . " AND form_element_type LIKE 'SubForm%PK'")
+				LayerAttribute::find($this->gui, "Layer_ID = " . $this->get('layer_id') . " AND form_element_type LIKE 'SubForm%PK'")
 			)
 		);
 		if (count($subform_layer_ids) > 0) {
@@ -531,7 +531,7 @@ l.Name AS sub_layer_name
 				function($attribute) {
 					return $attribute->get('layer_id');
 				},
-				LayerAttribute::find($this->gui, "Layer_ID != " . $this->get('Layer_ID') . " AND options LIKE '" . $this->get('Layer_ID') . ",%' AND form_element_type LIKE 'SubForm%PK'")
+				LayerAttribute::find($this->gui, "Layer_ID != " . $this->get('layer_id') . " AND options LIKE '" . $this->get('layer_id') . ",%' AND form_element_type LIKE 'SubForm%PK'")
 			)
 		);
 		if (count($parentform_layer_ids) > 0) {
@@ -550,7 +550,7 @@ l.Name AS sub_layer_name
 			'</li><li>',
 			array_map(
 				function($layer) use ($anchor) {
-					return '<a title="Layereditor anzeigen" href="index.php?go=Layereditor&selected_layer_id=' . $layer->get('Layer_ID') . '#' . $anchor . '" target="_blank">' . $layer->get('Name') . ' (ID: ' . $layer->get('Layer_ID') . ')</a>';
+					return '<a title="Layereditor anzeigen" href="index.php?go=Layereditor&selected_layer_id=' . $layer->get('layer_id') . '#' . $anchor . '" target="_blank">' . $layer->get('Name') . ' (ID: ' . $layer->get('layer_id') . ')</a>';
 				},
 				$layers
 			)
@@ -582,12 +582,12 @@ l.Name AS sub_layer_name
 		include_once(CLASSPATH . 'LayerAttribute.php');
 
 		$layerAttributes = new stdClass();
-		foreach (LayerAttribute::find_visible($this->gui, $stelle_id, $this->get('Layer_ID')) AS $attr) {
+		foreach (LayerAttribute::find_visible($this->gui, $stelle_id, $this->get('layer_id')) AS $attr) {
 			$key = $attr->get('name');
 			$value = ($attr->get('alias') == '' ? $attr->get('name') : $attr->get('alias'));
 			$layerAttributes->$key = $value;
 		}
-		$classes = LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'));
+		$classes = LayerClass::find($this->gui, 'layer_id = ' . $this->get('layer_id'));
 		if ($this->get('icon') != '') {
 			$legendgraphic = $this->get('icon');
 		}
@@ -640,7 +640,7 @@ l.Name AS sub_layer_name
 		include_once(CLASSPATH . 'LayerAttribute.php');
 
 		$layerAttributes = new stdClass();
-		foreach (LayerAttribute::find_visible($this->gui, $stelle_id, $this->get('Layer_ID')) AS $attr) {
+		foreach (LayerAttribute::find_visible($this->gui, $stelle_id, $this->get('layer_id')) AS $attr) {
 			$key = $attr->get('name');
 			$value = ($attr->get('alias') == '' ? $attr->get('name') : $attr->get('alias'));
 			$layerAttributes->$key = $value;
@@ -654,7 +654,7 @@ l.Name AS sub_layer_name
 					'gast' =>(int)$stelle_id,
 					'go' => 'Daten_Export_Exportieren',
 					'Stelle_ID' => (int)$stelle_id,
-					'selected_layer_id' => (int)$this->get('Layer_ID'),
+					'selected_layer_id' => (int)$this->get('layer_id'),
 					'export_format' =>	'GeoJSON',
 					'browserwidth' => 800,
 					'browserheight' => 600,
@@ -688,7 +688,7 @@ l.Name AS sub_layer_name
 					'gast' => (int)$stelle_id,
 					'go' => 'Daten_Export_Exportieren',
 					'Stelle_ID' => (int)$stelle_id,
-					'selected_layer_id' => (int)$this->get('Layer_ID'),
+					'selected_layer_id' => (int)$this->get('layer_id'),
 					'export_format' =>	'GeoJSON',
 					'browserwidth' => 800,
 					'browserheight' => 600,
@@ -708,7 +708,7 @@ l.Name AS sub_layer_name
 					'gast' => (int)$stelle_id,
 					'go' => 'Daten_Export_Exportieren',
 					'Stelle_ID' => (int)$stelle_id,
-					'selected_layer_id' => (int)$this->get('Layer_ID'),
+					'selected_layer_id' => (int)$this->get('layer_id'),
 					'export_format' =>	'GeoJSON',
 					'browserwidth' => 800,
 					'browserheight' => 600,
@@ -748,7 +748,7 @@ l.Name AS sub_layer_name
 				function($class) use ($classitem, $datentyp, $layer_opacity) {
 					return $class->get_layerdef($classitem, $datentyp, $layer_opacity);
 				},
-				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'), 'legendorder')
+				LayerClass::find($this->gui, 'layer_id = ' . $this->get('layer_id'), 'legendorder')
 			),
 #			'icon' => (Object) array(
 #				'iconUrl' => 'images/Haus.svg',

@@ -9,7 +9,7 @@ Dieses Snippet wird nicht mehr verwendet
  $attributes = $layer['attributes'];
  $size = 28;
  $select_width = 'width:190px;';
- $this->subform_classname = 'subform_'.$layer['Layer_ID'];
+ $this->subform_classname = 'subform_'.$layer['layer_id'];
 
   	$doit = false;
 	  $anzObj = count_or_0($this->qlayerset[$i]['shape']);
@@ -46,7 +46,7 @@ Dieses Snippet wird nicht mehr verwendet
 				$lock[$k] = true;
 			}
 			for($j = 0; $j < count($attributes['name']); $j++){
-				$layer_id = $layer['Layer_ID'];
+				$layer_id = $layer['layer_id'];
 				$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
 				$name = $attributes['name'][$j];																# der Name des Attributs
 				$alias = $attributes['alias'][$j];															# der Aliasname des Attributs
@@ -59,7 +59,7 @@ Dieses Snippet wird nicht mehr verwendet
 
 				if($attributes['name'][$j] == 'vorschau')continue;		# Vorschauattribut nicht nochmal anzeigen
 				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
-					$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
+					$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
 				}
 				if($this->new_entry == true AND $attributes['default'][$j] != '' AND $layer['shape'][$k][$attributes['name'][$j]] == ''){		# Default-Werte setzen
 					$layer['shape'][$k][$attributes['name'][$j]] = $attributes['default'][$j];
@@ -85,7 +85,7 @@ Dieses Snippet wird nicht mehr verwendet
 <?				if($attributes['type'][$j] != 'geometry'){
 						echo '<td  valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-							$this->editable = $layer['Layer_ID'];
+							$this->editable = $layer['layer_id'];
 						}
 						if($attributes['alias'][$j] == ''){
 							$attributes['alias'][$j] = $attributes['name'][$j];
@@ -102,13 +102,13 @@ Dieses Snippet wird nicht mehr verwendet
 						echo '</td><td>';
 		  			if($attributes['constraints'][$j] != '' AND $attributes['constraints'][$j] != 'PRIMARY KEY'){
 		  				if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-								echo '<input readonly style="background-color:#e8e3da;" size="6" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
+								echo '<input readonly style="background-color:#e8e3da;" size="6" type="text" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
 							}
 							else{
-		  					echo '<select title="'.$attributes['alias'][$j].'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+		  					echo '<select title="'.$attributes['alias'][$j].'" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 								foreach ($attributes['enum'][$j] as $enum_key => $enum) {
 									echo '<option ';
-									if ($enum_key == $layer['shape'][$k][$attributes['name'][$j]] OR ($enum_key != '' AND $enum_key == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
+									if ($enum_key == $layer['shape'][$k][$attributes['name'][$j]] OR ($enum_key != '' AND $enum_key == $this->formvars[$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
 										echo 'selected ';
 									}
 									echo 'value="' . $enum_key . '">' . $enum['output'] . '</option>';
@@ -119,14 +119,14 @@ Dieses Snippet wird nicht mehr verwendet
 		  			else{
 		  				switch ($attributes['form_element_type'][$j]){
 									case 'Textfeld' : {
-										echo '<textarea cols="23" onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
+										echo '<textarea cols="23" onchange="set_changed_flag(document.GUI.changed_'.$layer['layer_id'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-family:arial,verdana,helvetica,sans-serif;"';
 										}
 										else{
 											echo ' style="font-family:arial,verdana,helvetica,sans-serif;"';
 										}
-										echo ' rows="2" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">'.$layer['shape'][$k][$attributes['name'][$j]].'</textarea>';
+										echo ' rows="2" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">'.$layer['shape'][$k][$attributes['name'][$j]].'</textarea>';
 									}break;
 
 									case 'Auswahlfeld' : {
@@ -144,7 +144,7 @@ Dieses Snippet wird nicht mehr verwendet
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="background-color:#e8e3da;"';
 										}
-										echo ' size="40" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
+										echo ' size="40" type="text" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
 										if($this->new_entry != true){
 											if($layer['shape'][$k][$attributes['name'][$j]] != ''){
 												echo '&nbsp;<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
@@ -178,7 +178,7 @@ Dieses Snippet wird nicht mehr verwendet
 										$attribute_foreign_keys = $attributes['subform_fkeys'][$j];	# die FKeys des aktuellen Attributes
 										for($f = 0; $f < count($attribute_foreign_keys); $f++){
 											if($dataset[$attribute_foreign_keys[$f]] == ''){
-												$dataset[$attribute_foreign_keys[$f]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar'];
+												$dataset[$attribute_foreign_keys[$f]] = $this->formvars[$layer['layer_id'].';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar'];
 											}
 											echo '<input style="';
 											if($attributes['privileg'][$attribute_foreign_keys[$f]] == '0' OR $lock[$k]){
@@ -187,17 +187,17 @@ Dieses Snippet wird nicht mehr verwendet
 											else{
 												'" ';
 											}
-											echo ' id="'.$attributes['real_name'][$attribute_foreign_keys[$f]].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar" value="'.$dataset[$attribute_foreign_keys[$f]].'">';
+											echo ' id="'.$attributes['real_name'][$attribute_foreign_keys[$f]].'_'.$k.'" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar" value="'.$dataset[$attribute_foreign_keys[$f]].'">';
 											if($attributes['privileg'][$attribute_foreign_keys[$f]] > 0 AND !$lock[$k]){
 												echo '<br>';
 											}
-											$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar|';
+											$this->form_field_names .= $layer['layer_id'].';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar|';
 										}
 										echo '<input style="border:0px;background-color:transparent;"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="background-color:#e8e3da;"';
 										}
-										echo ' size="50" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
+										echo ' size="50" type="text" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
 										if($this->new_entry != true){
 											if($dataset[$attributes['name'][$j]] != ''){
 												echo '&nbsp;<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
@@ -239,7 +239,7 @@ Dieses Snippet wird nicht mehr verwendet
 															if($attributes['embedded'][$j] == true){
 																echo '&embedded=true';
 															}
-															echo '&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j];
+															echo '&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['layer_id'].'&targetattribute='.$attributes['name'][$j];
 															echo '\', new Array(document.getElementById(\''.$attributes['name'][$j].'_'.$k.'\')), \'\');
 														</script>
 													';
@@ -255,8 +255,8 @@ Dieses Snippet wird nicht mehr verwendet
 													}
 													$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
 													echo '&data='.str_replace('&', '<und>', $data);
-													echo '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;'.$strNewEmbeddedPK.'</a></td></tr></table>';
-													echo '<div style="display:inline" id="subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
+													echo '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['layer_id'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['layer_id'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['layer_id'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;'.$strNewEmbeddedPK.'</a></td></tr></table>';
+													echo '<div style="display:inline" id="subform'.$layer['layer_id'].'_'.$k.'_'.$j.'"></div>';
 												}
 												else{
 													echo '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a ';
@@ -276,7 +276,7 @@ Dieses Snippet wird nicht mehr verwendet
 
 									case 'Time': {
 										echo '<input readonly style="border:0px;background-color:transparent;"';
-										echo ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
+										echo ' size="'.$size.'" type="text" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
 									}break;
 
 									case 'Dokument': {
@@ -296,14 +296,14 @@ Dieses Snippet wird nicht mehr verwendet
 			  							}
 			  							echo '</td><td>';
 			  							if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-			  								echo '<a href="javascript:delete_document(\''.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');">Dokument <br>lÃ¶schen</a>';
+			  								echo '<a href="javascript:delete_document(\''.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');">Dokument <br>lÃ¶schen</a>';
 			  							}
 											echo '</td></tr></table>';
-											echo '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
+											echo '<input type="hidden" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
 
 										}
 										if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" size="43" type="file" onchange="this.title=this.value;" accept="image/*" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['layer_id'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" size="43" type="file" onchange="this.title=this.value;" accept="image/*" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 										}
 										else{
 											echo '&nbsp;';
@@ -322,9 +322,9 @@ Dieses Snippet wird nicht mehr verwendet
 											echo '</a><br>';
 										}
 										if($attributes['privileg'][$j] != '0' OR $lock[$k]){
-											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" size="61" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
+											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['layer_id'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" size="61" type="text" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 										}else{
-											echo '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
+											echo '<input type="hidden" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 										}
 									} break;
 
@@ -348,10 +348,10 @@ Dieses Snippet wird nicht mehr verwendet
 											$href = str_replace('$'.$explosion2[0], $layer['shape'][$k][$explosion2[0]], $href);
 										}
 										if($explosion[2] == 'embedded'){
-											echo '<a href="javascript:if(document.getElementById(\'dynamicLink'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+											echo '<a href="javascript:if(document.getElementById(\'dynamicLink'.$layer['layer_id'].'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer['layer_id'].'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer['layer_id'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 											echo $alias;
 											echo '</a><br>';
-											echo '<div style="display:inline" id="dynamicLink'.$layer['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
+											echo '<div style="display:inline" id="dynamicLink'.$layer['layer_id'].'_'.$k.'_'.$j.'"></div>';
 										}
 										else{
 											echo '<a ';
@@ -363,17 +363,17 @@ Dieses Snippet wird nicht mehr verwendet
 									} break;
 
 									case 'Fläche': {
-										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" class="custom_area" id="'.$layer_id.'_'.$name.'_'.$k.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['layer_id'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" class="custom_area" id="'.$layer_id.'_'.$name.'_'.$k.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="background-color:#e8e3da;"';
 										}
-										echo ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
+										echo ' size="'.$size.'" type="text" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 									}break;
 									
 									case 'Zahl': {
 										# bei Zahlen Tausendertrennzeichen einfÃ¼gen 
 										$value = tausenderTrenner($layer['shape'][$k][$attributes['name'][$j]]);
-										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['layer_id'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;"';
 										}
@@ -383,12 +383,12 @@ Dieses Snippet wird nicht mehr verwendet
 										if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
 											echo ' maxlength="'.$attributes['length'][$j].'"';
 										}
-										echo ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
+										echo ' size="'.$size.'" type="text" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
 									}break;
 									
 									default : {
 										$value = $layer['shape'][$k][$attributes['name'][$j]];
-										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['layer_id'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;"';
 										}
@@ -398,12 +398,12 @@ Dieses Snippet wird nicht mehr verwendet
 										if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
 											echo ' maxlength="'.$attributes['length'][$j].'"';
 										}
-										echo ' size="'.$size.'" type="text" class="' . $this->subform_classname . '" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].';'.$attributes['saveable'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
+										echo ' size="'.$size.'" type="text" class="' . $this->subform_classname . '" name="'.$layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].';'.$attributes['saveable'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
 									}
 								}
 		  			}
 						if($attributes['privileg'][$j] >= '0' AND !($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld')){
-							$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
+							$this->form_field_names .= $layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
 						}
 		  		}
 		  		else {
@@ -412,7 +412,7 @@ Dieses Snippet wird nicht mehr verwendet
 		  			$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
 		  			$dimension = $attributes['dimension'][$j];
 		  			$privileg = $attributes['privileg'][$j];
-		  			$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].'|';
+		  			$this->form_field_names .= $layer['layer_id'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].'|';
 		  		}
 ?>
 					</td>
@@ -460,16 +460,16 @@ Dieses Snippet wird nicht mehr verwendet
 	<?
 									if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 	?>
-				    					<a href="index.php?go=PolygonEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
+				    					<a href="index.php?go=PolygonEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['layer_id'];?>&selected_layer_id=<? echo $layer['layer_id'];?>"><? echo $strEditGeom; ?></a>
 	<?
 									} elseif($geomtype == 'POINT') {
 	?>
-				    					<a href="index.php?go=PointEditor&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&tablename=<? echo $tablename; ?>&columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
+				    					<a href="index.php?go=PointEditor&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&tablename=<? echo $tablename; ?>&columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['layer_id'];?>"><? echo $strEditGeom; ?></a>
 	<?
 				    				}
 				    				elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
 	?>
-				    					<a href="index.php?go=LineEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
+				    					<a href="index.php?go=LineEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['layer_id'];?>&selected_layer_id=<? echo $layer['layer_id'];?>"><? echo $strEditGeom; ?></a>
 	<?
 				    				}
 	?>
@@ -493,16 +493,16 @@ Dieses Snippet wird nicht mehr verwendet
 <?
 								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 ?>
-			    					<a href="index.php?go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
+			    					<a href="index.php?go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['layer_id'];?>"><? echo $strMapZoom; ?></a>
 <?
 								} elseif($geomtype == 'POINT') {
 ?>
-			    					<a href="index.php?go=zoomtoPoint&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&tablename=<? echo $tablename; ?>&columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
+			    					<a href="index.php?go=zoomtoPoint&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&tablename=<? echo $tablename; ?>&columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['layer_id'];?>"><? echo $strMapZoom; ?></a>
 <?
 			    				}
 			    				elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
 ?>
-			    					<a href="index.php?go=zoomToLine&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
+			    					<a href="index.php?go=zoomToLine&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['layer_id'];?>"><? echo $strMapZoom; ?></a>
 <?
 			    				}
 ?>
@@ -517,7 +517,7 @@ Dieses Snippet wird nicht mehr verwendet
 	}
 ?>
 </table>
-<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_name; ?>">
+<input type="hidden" name="checkbox_names_<? echo $layer['layer_id']; ?>" value="<? echo $checkbox_name; ?>">
 <?
   }
   else {

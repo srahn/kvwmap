@@ -51,7 +51,7 @@ backto = function(go){
 
 show_all = function(){
 	currentform.go.value = 'get_last_query';
-	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = 0;
+	currentform.offset_<? echo $this->qlayerset[$i]['layer_id']; ?>.value = 0;
 	currentform.anzahl.value = currentform.anzahl.options[currentform.anzahl.options.length-1].value;
 	overlay_submit(currentform, false);
 }
@@ -86,8 +86,8 @@ hide_versions = function(flst){
 	$gesamt = $this->qlayerset[$i]['count'];
   $anzObj = count_or_0($this->qlayerset[$i]['shape']);
 	if($gesamt == '')$gesamt = $anzObj;
-	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + 1;
-	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + $this->formvars['anzahl'];
+	$von = $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] ?: 0 + 1;
+	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] ?: 0 + $this->formvars['anzahl'];
   if ($anzObj>0) {
 		$this->begriffsbestimmungen = flurstueck::getNutzungBegriffsbestimmungen($this->pgdatabase);
 		$this->found = 'true';
@@ -177,7 +177,7 @@ hide_versions = function(flst){
   </tr>
   <tr>
     <td>
-			<div <? if($this->user->rolle->querymode == 1 AND $flst->oid){ ?>onmouseenter="highlight_object(<? echo $this->qlayerset[$i]['Layer_ID']; ?>, '<? echo $flst->oid; ?>');" <? } ?> style="position:relative; top:0px; right:0px; padding:0px; border: 1px solid <?php echo BG_DEFAULT ?>;">
+			<div <? if($this->user->rolle->querymode == 1 AND $flst->oid){ ?>onmouseenter="highlight_object(<? echo $this->qlayerset[$i]['layer_id']; ?>, '<? echo $flst->oid; ?>');" <? } ?> style="position:relative; top:0px; right:0px; padding:0px; border: 1px solid <?php echo BG_DEFAULT ?>;">
 				<table width="100%" border="0" cellspacing="0" cellpadding="0">
 					<tr>
 						<td colspan="2">
@@ -897,11 +897,11 @@ hide_versions = function(flst){
 													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.$zoomlink;else $zoom_all = true;
 											?>
 													&nbsp;&nbsp;
-													<a title="Zoom auf Flurstück" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													<a title="Zoom auf Flurstück" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['layer_id'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;
 													<a target="root" title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;
-													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['layer_id'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													
 											<? }
 											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>

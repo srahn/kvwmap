@@ -408,12 +408,12 @@
 					<table><?	
 						if (isset($this->active_layers)) {
 							for ($i = 0; $i < count($this->active_layers); $i++) { ?>
-								<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
+								<tr id="layer_<? echo $this->active_layers[$i]['layer_id']; ?>" class="tr_hover">
 									<td>
 										<? echo $this->active_layers[$i]['Name_or_alias']; ?>
 									</td>
 									<td>
-										<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['Layer_ID']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
+										<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['layer_id']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
 									</td>
 								</tr><?
 							}

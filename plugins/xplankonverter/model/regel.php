@@ -595,10 +595,10 @@ class Regel extends PgObject {
 			$this->debug->show('nein, Prüfe ob der Layer existiert.', Regel::$write_debug);
 			if ($this->gml_layer_exists()) {
 				$this->debug->show("Layer {$this->gml_layer->get('Name')} existiert.", Regel::$write_debug);
-				$this->debug->show("Lösche Layer mit ID: " . $this->gml_layer->get('Layer_ID'), Regel::$write_debug);
+				$this->debug->show("Lösche Layer mit ID: " . $this->gml_layer->get('layer_id'), Regel::$write_debug);
 
 				$formvars_before = $this->gui->formvars;
-				$this->gui->formvars['selected_layer_id'] = $this->gml_layer->get('Layer_ID');
+				$this->gui->formvars['selected_layer_id'] = $this->gml_layer->get('layer_id');
 				$this->gui->LayerLoeschen();
 				$this->gui->formvars = $formvars_before;
 			}

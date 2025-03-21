@@ -1894,7 +1894,7 @@ class stelle {
 		} else {
 			$i = 0;
 			while ($rs = $this->database->result->fetch_assoc()) {
-				$layer['ID'][] 						= $rs['Layer_ID'];
+				$layer['ID'][] 						= $rs['layer_id'];
 				$layer['Name'][]					= $rs['Name'];
 				$layer['alias'][]					= $rs['alias'];
 				$layer['Name_or_alias']		= $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
@@ -1967,7 +1967,7 @@ class stelle {
 	// 	else {
 	// 		$i = 0;
 	// 		while ($rs = $this->database->result->fetch_assoc()) {
-	// 			$layer['ID'][] 						= $rs['Layer_ID'];
+	// 			$layer['ID'][] 						= $rs['layer_id'];
 	// 			$layer['Bezeichnung'][]		= $rs['Name'];
 	// 			$layer['drawingorder'][]	= $rs['drawingorder'];
 	// 			$layer['legendorder'][]		= $rs['legendorder'];
@@ -2056,7 +2056,7 @@ class stelle {
 				$rs['Name'] = replace_params_rolle($rs['Name']);
 				$rs['alias'] = replace_params_rolle($rs['alias']);
 				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
-				$layer['ID'][] = $rs['Layer_ID'];
+				$layer['ID'][] = $rs['layer_id'];
 				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
 				$layer['export_privileg'][] = $rs['export_privileg'];
 			}
@@ -2141,7 +2141,7 @@ class stelle {
 				$rs['Name'] = replace_params_rolle($rs['Name']);
 				$rs['alias'] = replace_params_rolle($rs['alias']);
 				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
-				$layer['ID'][] = $rs['Layer_ID'];
+				$layer['ID'][] = $rs['layer_id'];
 				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
 				$layer['Gruppe'][] = $rs['Gruppe'];
 				$layer['Gruppenname'][] = $rs['Gruppenname'];
@@ -2167,14 +2167,14 @@ class stelle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		$layerset=$this->getLayer('');
 		for ($i=0;$i<count($layerset);$i++) {
-			if ($formvars['thema'.$layerset[$i]['Layer_ID']]==1) {
+			if ($formvars['thema'.$layerset[$i]['layer_id']]==1) {
 				$aktiv_status=1;
 			}
 			else {
 				$aktiv_status=0;
 			}
 			$sql ='UPDATE used_layer SET aktivStatus="'.$aktiv_status.'"';
-			$sql.=' WHERE Stelle_ID='.$this->id.' AND Layer_ID='.$layerset[$i]['Layer_ID'];
+			$sql.=' WHERE Stelle_ID='.$this->id.' AND Layer_ID='.$layerset[$i]['layer_id'];
 			$this->debug->write("<p>file:stelle.php class:stelle->setAktivLayer - Speichern der aktiven Layer zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -2186,14 +2186,14 @@ class stelle {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		$layerset=$this->getLayer('');
 		for ($i=0;$i<count($layerset);$i++) {
-			if ($formvars['qLayer'.$layerset[$i]['Layer_ID']]) {
+			if ($formvars['qLayer'.$layerset[$i]['layer_id']]) {
 				$query_status=1;
 			}
 			else {
 				$query_status=0;
 			}
 			$sql ='UPDATE used_layer set queryStatus="'.$query_status.'"';
-			$sql.=' WHERE Layer_ID='.$layerset[$i]['Layer_ID'];
+			$sql.=' WHERE Layer_ID='.$layerset[$i]['layer_id'];
 			$this->debug->write("<p>file:stelle.php class:stelle->setQueryStatus - Speichern des Abfragestatus der Layer zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -2267,7 +2267,7 @@ class stelle {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		while ($rs=$this->database->result->fetch_assoc()) {
-			$layer[] = ($result == 'only_ids' ? $rs['Layer_ID'] : $rs);
+			$layer[] = ($result == 'only_ids' ? $rs['layer_id'] : $rs);
 		}
 		return $layer;
 	}
@@ -2313,7 +2313,7 @@ class stelle {
 			),
 			'baseLayers' => array_map(
 				function($layer2Stelle) {
-					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('layer_id'));
 					if ($layer) {
 						// return only baselayer_def if layer has been found
 						return $layer->get_baselayers_def($this->id);
@@ -2323,13 +2323,13 @@ class stelle {
 			),
 			'overlays' => array_map(
 				function($layer2Stelle) {
-					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('layer_id'));
 					if ($layer) {
 						// return overlay_def only if layer has been found
 						$layer->minScale = $layer2Stelle->get('minscale');
 						$layer->maxScale = $layer2Stelle->get('maxscale');
 						$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
-						#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
+						#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('layer_id');
 						return $layer->get_overlays_def($this->id);
 					}
 				},

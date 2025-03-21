@@ -7,14 +7,14 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 		<th class="datensatz_header" colspan="20"> 
 			<table width="100%" cellspacing="0" cellpadding="0">
 				<tr><?
-					if ($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0) { ?>
+					if ($layer['connectiontype'] == 6 AND $layer['layer_id'] > 0) { ?>
 						<td style="padding: 3px">
 								<input
-								id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
+								id="<? echo $layer['layer_id'] . '_' . $k; ?>"
 								type="checkbox"
-								class="check_<? echo $layer['Layer_ID']; ?> <? if (value_of($layer['attributes'], 'Editiersperre') AND $layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
-								name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>"
-								onchange="count_selected(<? echo $layer['Layer_ID']; ?>);"
+								class="check_<? echo $layer['layer_id']; ?> <? if (value_of($layer['attributes'], 'Editiersperre') AND $layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
+								name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['layer_id']; ?>"
+								onchange="count_selected(<? echo $layer['layer_id']; ?>);"
 							>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
 							if (value_of($layer['shape'][$k], value_of($layer['attributes'], 'Editiersperre')) == 't') { ?>
 								<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">
@@ -58,30 +58,30 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 ?>				<td align="right">
 						<table cellspacing="0" cellpadding="0" class="button_background" style="border-left: 1px solid #bbb">
 							<tr><?
-								if ($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0) {
+								if ($layer['connectiontype'] == 6 AND $layer['layer_id'] > 0) {
 									if ($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
-										<td><a title="<? echo $strDontRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><? 
+										<td><a title="<? echo $strDontRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['layer_id']; ?>, <? echo $k; ?>);remove_from_clipboard(<? echo $layer['layer_id']; ?>);"><div class="button nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><? 
 									}
 									else { ?>
-										<td><a title="<? echo $strRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
+										<td><a title="<? echo $strRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['layer_id']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['layer_id']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 									}	?>
-									<td><a title="<? echo $strCreateDatasetLink; ?>" href="javascript:void(0)" onclick="showURL('go=Layer-Suche_Suchen&selected_layer_id=<? echo $layer['Layer_ID']; ?>&value_<? echo $layer['maintable']; ?>_oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', '<? echo $strCreateDatasetLink; ?>');"><div class="button url_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td> <?
+									<td><a title="<? echo $strCreateDatasetLink; ?>" href="javascript:void(0)" onclick="showURL('go=Layer-Suche_Suchen&selected_layer_id=<? echo $layer['layer_id']; ?>&value_<? echo $layer['maintable']; ?>_oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', '<? echo $strCreateDatasetLink; ?>');"><div class="button url_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td> <?
 								}
 								if ($layer['privileg'] > '0') { ?>
-									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="button use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);dublicate_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strCopyDataset; ?>"><div class="button copy_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
+									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['layer_id']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['layer_id']; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="button use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['layer_id']; ?>, <? echo $k; ?>);dublicate_dataset(<? echo $layer['layer_id']; ?>)" title="<? echo $strCopyDataset; ?>"><div class="button copy_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 								}
 								if ($layer['connectiontype'] == 6 AND $layer['export_privileg'] != 0) { ?>
-									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);daten_export(<? echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);" title="<? echo $strExportThis; ?>"><div class="button datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
+									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['layer_id']; ?>, <? echo $k; ?>);daten_export(<? echo $layer['layer_id']; ?>, <? echo $layer['count']; ?>);" title="<? echo $strExportThis; ?>"><div class="button datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 								} 
 								if ($layer['layouts']) { ?>
-									<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strPrintDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
+									<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strPrintDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['layer_id']; ?>, <? echo $k; ?>);print_data(<?php echo $layer['layer_id']; ?>);"><div class="button drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 								}
 								if ($layer['privileg'] == '2' AND value_of($layer['shape'][$k], value_of($layer['attributes'], 'Editiersperre')) != 't') { ?>
 									<td>
 										<a
 											onclick="checkForUnsavedChanges(event);"
-											href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $layer['Layer_ID']; ?>);"
+											href="javascript:select_this_dataset(<? echo $layer['layer_id']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $layer['layer_id']; ?>);"
 											title="<? echo $strDeleteThisDataset; ?>"
 										><div class="button datensatz_loeschen"><img  src="<? echo GRAPHICSPATH . 'leer.gif'; ?>"></div></a>
 									</td><?

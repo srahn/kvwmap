@@ -263,7 +263,7 @@ function preventflickering(evt){
 			AND !empty($layerset[$i]['Class'])
 		) {
 			$name = $layerset[$i]['Name_or_alias'];
-			echo '<input type="hidden" name="legendlayer'.$layerset[$i]['Layer_ID'].'" value="'.($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] != '' ? 'on' : 'off').'" >';
+			echo '<input type="hidden" name="legendlayer'.$layerset[$i]['layer_id'].'" value="'.($this->formvars['legendlayer'.$layerset[$i]['layer_id']] != '' ? 'on' : 'off').'" >';
 		}
 	}
 	

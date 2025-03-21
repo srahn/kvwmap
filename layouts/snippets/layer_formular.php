@@ -860,7 +860,7 @@ from
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDdlAttribute; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
 							include_once(CLASSPATH . 'LayerAttribute.php');
-							$attributes = LayerAttribute::find($this, 'layer_id = ' . $this->formvars['Layer_ID']);
+							$attributes = LayerAttribute::find($this, 'layer_id = ' . $this->formvars['layer_id']);
 							echo FormObject::createSelectField(
 								'ddl_attribute',
 								array_map(

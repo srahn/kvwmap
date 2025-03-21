@@ -15,7 +15,7 @@
       $GUI->formvars['loc_y'] = $GUI->formvars['loc_x'] = $GUI->formvars['pathwkt'] = $GUI->formvars['newpath'] = $GUI->formvars['newpathwkt'] = '';
     }
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
-    $GUI->formvars['boris_layer_id'] = $layer[0]['Layer_ID'];
+    $GUI->formvars['boris_layer_id'] = $layer[0]['layer_id'];
     $GUI->main = PLUGINS."bodenrichtwerte/view/bodenrichtwerterfassung_vboris.php";
     $saved_scale = $GUI->reduce_mapwidth(100);
 		$GUI->loadMap('DataBase');
@@ -43,7 +43,7 @@
     # Spaltenname und from-where abfragen
     if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+      $GUI->formvars['geom_from_layer'] = $layerset[0]['layer_id'];
     }
     $oldscale=round($GUI->map_scaledenom);
     if ($GUI->formvars['CMD']!='') {

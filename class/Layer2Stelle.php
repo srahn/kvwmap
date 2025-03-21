@@ -6,7 +6,7 @@ class Layer2Stelle extends MyObject {
 
 	function __construct($gui) {
 		parent::__construct($gui, 'used_layer');
-		$this->identifier = array('Layer_ID', 'Stelle_ID');
+		$this->identifier = array('layer_id', 'Stelle_ID');
 	}
 
 	public static	function find($gui, $where) {

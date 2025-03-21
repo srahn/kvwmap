@@ -14,7 +14,7 @@ class LayerParam extends MyObject {
 				"alias" => 'Layer',
 				"table" => 'layer',
 				"vorschau" => 'Name',
-				"pk" => 'Layer_ID',
+				"pk" => 'layer_id',
 				"fk" => 'Gruppe'
 			)
 		);

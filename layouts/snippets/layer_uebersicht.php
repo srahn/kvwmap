@@ -229,7 +229,7 @@
 					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="metadatenlink-column">Metadatenlink</th>
 					<th class="dataowner_name-column"><? echo $strDataOwnerName; ?></th>
 				</tr><?
-				if ($this->formvars['order'] == 'Layer_ID') {
+				if ($this->formvars['order'] == 'layer_id') {
 					foreach ($this->layers['ID'] as $l => $layer) {
 						echo $this->outputLayer($l, 10)['output'];
 					}

@@ -1251,7 +1251,7 @@ class rolle {
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i = 0; $i < count($this->layerset) - 1; $i++) {
-			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>'; exit;
+			#echo $i.' '.$this->layerset[$i]['layer_id'].' '.$formvars['thema'.$this->layerset[$i]['layer_id']].'<br>'; exit;
 			$aktiv_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'layer_id'));
 			$requires_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'requires'));
 			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
@@ -1321,17 +1321,17 @@ class rolle {
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		for ($i=0; $i<count($this->layerset)-1; $i++){
-			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'Layer_ID'));
+			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'layer_id'));
 			if($query_status !== ''){	
-				if($this->layerset[$i]['Layer_ID'] > 0){
+				if($this->layerset[$i]['layer_id'] > 0){
 					$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+					$sql.=' AND layer_id='.$this->layerset[$i]['layer_id'];
 				}
 				else{		# Rollenlayer
 					$sql ='UPDATE rollenlayer set queryStatus="'.$query_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND id='.-$this->layerset[$i]['Layer_ID'];
+					$sql.=' AND id='.-$this->layerset[$i]['layer_id'];
 				}
 				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
 				$this->database->execSQL($sql,4, $this->loglevel);
@@ -1401,7 +1401,7 @@ class rolle {
 						SET
 							drawingorder = " . $layerset['list'][$id]['drawingorder'] . "
 						WHERE
-							layer_id = " . $layerset['list'][$id]['Layer_ID'] . " AND
+							layer_id = " . $layerset['list'][$id]['layer_id'] . " AND
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . "
 					";
@@ -2396,9 +2396,9 @@ class rolle {
 		$layers = array();
 		$query = array();
 		for($i=0; $i < count($layerset['list']); $i++){
-			if($layerset['list'][$i]['Layer_ID'] > 0 AND $layerset['list'][$i]['aktivStatus'] == 1){
-				$layers[] = $layerset['list'][$i]['Layer_ID'];
-				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['Layer_ID'];
+			if($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivStatus'] == 1){
+				$layers[] = $layerset['list'][$i]['layer_id'];
+				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
 			}
 		}
 		$sql = "

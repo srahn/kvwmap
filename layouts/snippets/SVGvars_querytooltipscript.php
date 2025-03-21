@@ -6,8 +6,8 @@ $layerset = $this->layerset['list'];
 $SVGvars_querytooltipscript = '
 		var layernumber = new Array();';
 for($i = 0; $i < count_or_0($layerset); $i++){
-	if($layerset[$i]['Layer_ID'] != ''){
-		$SVGvars_querytooltipscript.= 'layernumber['.$i.'] = '.$layerset[$i]['Layer_ID'].';
+	if($layerset[$i]['layer_id'] != ''){
+		$SVGvars_querytooltipscript.= 'layernumber['.$i.'] = '.$layerset[$i]['layer_id'].';
 		';
 	}
 }

@@ -51,7 +51,7 @@ function save(){
 
 <?php
 
-	$this->qlayerset[$i]['Layer_ID'] = LAYER_ID_JAGDBEZIRKE;		// damit man alle Jagd-Layer abfragen und editieren kann, wird die Layer-ID vom Lagbezirks_Layer genommen
+	$this->qlayerset[$i]['layer_id'] = LAYER_ID_JAGDBEZIRKE;		// damit man alle Jagd-Layer abfragen und editieren kann, wird die Layer-ID vom Lagbezirks_Layer genommen
 
   $anzObj = count_or_0($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {
@@ -79,7 +79,7 @@ function save(){
 	}
 	###### Abfrage der Flst.-Rechte (für Eigentümeranzeige) ########
 	$flst_layer = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-	$flst_privileges = $this->Stelle->get_attributes_privileges($flst_layer[0]['Layer_ID']);
+	$flst_privileges = $this->Stelle->get_attributes_privileges($flst_layer[0]['layer_id']);
 	################################################################	
 	for ($j=0;$j<$anzObj;$j++) {
 		$paechterliste = $jagdkataster->get_paechter($this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']);
@@ -89,7 +89,7 @@ function save(){
   <tr><td>&nbsp;</td></tr>
   <tr>
     <td>
-			<input type="hidden" value="1" name="changed_<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>">
+			<input type="hidden" value="1" name="changed_<? echo $this->qlayerset[$i]['layer_id'].'_'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>">
       <table border="1" cellspacing="0" cellpadding="2" width="100%">
       <colgroup>
        <col width="30%">
@@ -98,9 +98,9 @@ function save(){
         <tr width="100%">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Name Jagdbezirk</span></td>
           <td valign="top">
-          	<input type="text" <? if($privileg_['name'] == 0)echo 'readonly'; ?> name="<? echo $this->qlayerset[$i]['Layer_ID'].';name;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['name']; ?>">
+          	<input type="text" <? if($privileg_['name'] == 0)echo 'readonly'; ?> name="<? echo $this->qlayerset[$i]['layer_id'].';name;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['name']; ?>">
           	<?
-          	$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';name;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
+          	$this->form_field_names .= $this->qlayerset[$i]['layer_id'].';name;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
           	?>
           </td>
         </tr>
@@ -108,7 +108,7 @@ function save(){
         <tr width="100%">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Art</span></td>
           <td valign="top">
-          	<select onchange="update_form(this.value);" name="<? echo $this->qlayerset[$i]['Layer_ID'].';art;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>">
+          	<select onchange="update_form(this.value);" name="<? echo $this->qlayerset[$i]['layer_id'].';art;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>">
           		<option value="">--- Bitte wählen ---</option>
               <option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'ejb'){echo 'selected';} ?> value="ejb">Eigenjagdbezirk</option>
               <option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'ajb'){echo 'selected';} ?> value="ajb">Abgerundeter Eigenjagdbezirk</option>
@@ -124,7 +124,7 @@ function save(){
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'apf'){echo 'selected';} ?> value="apf">Anpachtfläche</option>
 			  		</select>
 			  		<?
-			  		$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';art;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
+			  		$this->form_field_names .= $this->qlayerset[$i]['layer_id'].';art;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
 			  		?>
           </td>
         </tr>
@@ -145,9 +145,9 @@ function save(){
         <tr id="lfdnr" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf', 'atv'))){ echo 'none';}else{echo '';} ?>">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">lfd. Nr. Condition</span></td>
           <td valign="top">
-          	<input type="text" name="<? echo $this->qlayerset[$i]['Layer_ID'].';id;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['id']; ?>">
+          	<input type="text" name="<? echo $this->qlayerset[$i]['layer_id'].';id;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['id']; ?>">
           	<?
-			  		$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';id;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
+			  		$this->form_field_names .= $this->qlayerset[$i]['layer_id'].';id;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
 			  		?>
           </td>
         </tr>
@@ -155,21 +155,21 @@ function save(){
         <tr id="zuordnung" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf', 'atv'))){ echo '';}else{echo 'none';} ?>">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Zuordnung (lfd. Nr. EJB)</span></td>
           <td valign="top">
-          	<input type="text" name="<? echo $this->qlayerset[$i]['Layer_ID'].';jb_zuordnung;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['jb_zuordnung']; ?>">
+          	<input type="text" name="<? echo $this->qlayerset[$i]['layer_id'].';jb_zuordnung;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['jb_zuordnung']; ?>">
           	<?
-			  		$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';jb_zuordnung;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
+			  		$this->form_field_names .= $this->qlayerset[$i]['layer_id'].';jb_zuordnung;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
 			  		?>
           </td>
         </tr>
         <tr id="status" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('ejb', 'jbe', 'jbf', 'agf', 'atf', 'apf', 'atv'))){ echo '';}else{echo 'none';} ?>">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Status</span></td>
           <td valign="top">
-          	<select name="<? echo $this->qlayerset[$i]['Layer_ID'].';status;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>">
+          	<select name="<? echo $this->qlayerset[$i]['layer_id'].';status;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>">
           		<option value="0" <? if($this->qlayerset[$i]['shape'][$j]['status'] == 'f'){echo 'selected="true"';} ?>>aktuell</option>
           		<option value="1" <? if($this->qlayerset[$i]['shape'][$j]['status'] == 't'){echo 'selected="true"';} ?>>historisch</option>
           	</select>
           	<?
-			  		$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';status;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
+			  		$this->form_field_names .= $this->qlayerset[$i]['layer_id'].';status;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
 			  		?>
           </td>
         </tr>
@@ -177,12 +177,12 @@ function save(){
         <tr id="verzicht" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('ejb','ajb'))){ echo '';}else{echo 'none';} ?>">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Verzicht gem. §3</span></td>
           <td valign="top">
-          	<select name="<? echo $this->qlayerset[$i]['Layer_ID'].';verzicht;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>">
+          	<select name="<? echo $this->qlayerset[$i]['layer_id'].';verzicht;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1'; ?>">
           		<option <? if($this->qlayerset[$i]['shape'][$j]['verzicht'] == 'f'){echo 'selected';} ?> value="0">nein</option>
   						<option <? if($this->qlayerset[$i]['shape'][$j]['verzicht'] == 't'){echo 'selected';} ?> value="1">ja</option>
           	</select>
           	<?
-			  		$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';verzicht;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
+			  		$this->form_field_names .= $this->qlayerset[$i]['layer_id'].';verzicht;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid'].';Text;1|';
 			  		?>
           </td>
         </tr>
@@ -221,7 +221,7 @@ function save(){
         <tr><td colspan="2">&nbsp;</td></tr>
         <tr>
           <td colspan="2" bgcolor="<?php echo BG_DEFAULT ?>">
-            <a target="root" href="" onclick="this.href='index.php?go=zoomto_dataset&oid=<?php echo $this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>&layer_tablename=jagdbezirke&layer_columnname=the_geom&layer_id=<? echo $this->qlayerset[$i]['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>.checked;">Kartenausschnitt</a>&nbsp;&nbsp;<span>Selektieren</span><input type="checkbox" name="selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>" value="1">&nbsp;|&nbsp;
+            <a target="root" href="" onclick="this.href='index.php?go=zoomto_dataset&oid=<?php echo $this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>&layer_tablename=jagdbezirke&layer_columnname=the_geom&layer_id=<? echo $this->qlayerset[$i]['layer_id'];?>&selektieren='+currentform.selektieren<? echo $this->qlayerset[$i]['layer_id'].'_'.$j; ?>.checked;">Kartenausschnitt</a>&nbsp;&nbsp;<span>Selektieren</span><input type="checkbox" name="selektieren<? echo $this->qlayerset[$i]['layer_id'].'_'.$j; ?>" value="1">&nbsp;|&nbsp;
 						<? if($flst_privileges['eigentuemer'] != ''){ ?>
             <a target="root" href="index.php?go=jagdkatastereditor_Flurstuecke_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">enthaltene Flurstücke</a>&nbsp;|&nbsp;
             <a target="root" href="index.php?go=jagdkatastereditor_Eigentuemer_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">Eigentümer auflisten</a>&nbsp;|&nbsp;
@@ -279,7 +279,7 @@ else {
 <input name="form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
 <input name="go" type="hidden" value="jagdbezirke_auswaehlen_Suchen">
 <input name="search" type="hidden" value="true">
-<input name="selected_layer_id" type="hidden" value="<? echo $this->qlayerset[$i]['Layer_ID']; ?>">
+<input name="selected_layer_id" type="hidden" value="<? echo $this->qlayerset[$i]['layer_id']; ?>">
 <input name="operator_oid" type="hidden" value="=">
 <input name="value_oid" type="hidden" value="<? echo $this->qlayerset[$i]['shape'][0][$this->qlayerset[$i]['maintable'] . '_oid']; ?>">
 <input name="keinzurueck" type="hidden" value="1">

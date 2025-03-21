@@ -9,12 +9,12 @@ if (isset($this) AND is_object($this) AND get_class($this) == 'administration') 
   $sql = '';
   foreach ($layers as $layer){
     try {
-      echo '<br>Layer-ID: ' . $layer->get('Layer_ID') . ':';
-      $layerdb = $mapDB->getlayerdatabase($layer->get('Layer_ID'), $GUI->Stelle->pgdbhost);
+      echo '<br>Layer-ID: ' . $layer->get('layer_id') . ':';
+      $layerdb = $mapDB->getlayerdatabase($layer->get('layer_id'), $GUI->Stelle->pgdbhost);
       if ($layerdb) {
-        $query_attributes = $mapDB->read_layer_attributes($layer->get('Layer_ID'), $layerdb, NULL, false, false, false);
+        $query_attributes = $mapDB->read_layer_attributes($layer->get('layer_id'), $layerdb, NULL, false, false, false);
         try {
-          $attributes = $mapDB->getDataAttributes($layerdb, $layer->get('Layer_ID'));
+          $attributes = $mapDB->getDataAttributes($layerdb, $layer->get('layer_id'));
           $order = 2;
           foreach($attributes as $attribute){
             if(is_array($attribute) AND $attributes['the_geom'] != $attribute['name']){
@@ -23,7 +23,7 @@ if (isset($this) AND is_object($this) AND get_class($this) == 'administration') 
                 INSERT INTO 
                   layer_labelitems
                 VALUES (
-                  " . $layer->get('Layer_ID') . ",
+                  " . $layer->get('layer_id') . ",
                   '" . $attribute['name'] . "',
                   '" . $query_attributes['alias'][$index] . "',
                   " . (($layer->get('labelitem') == $attribute['name']) ? '1' : $order) . ");";

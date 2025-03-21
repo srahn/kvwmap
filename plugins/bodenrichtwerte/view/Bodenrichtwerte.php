@@ -21,7 +21,7 @@
         <td><?php echo $GemObj->getGemeindeName($rs['gemeinde']); ?></td>
         <td align="right"><?php echo $rs['bodenrichtwert']; ?>&nbsp;&euro;</td>
         <td><?php echo $rs['verfahrensgrund'].' '.$rs['verfahrensgrund_zusatz'];; ?></td>
-        <td><a target="root" href="index.php?go=Bodenrichtwertformular_Aendern&layer_id=<? echo $this->qlayerset[$i]['Layer_ID']; ?>&gid=<?php echo $rs['gid']; ?>">&Auml;ndern</a></td>
+        <td><a target="root" href="index.php?go=Bodenrichtwertformular_Aendern&layer_id=<? echo $this->qlayerset[$i]['layer_id']; ?>&gid=<?php echo $rs['gid']; ?>">&Auml;ndern</a></td>
         <td><a href="javascript:Bestaetigung('index.php?go=Bodenrichtwertzone_Loeschen&gid=<?php echo $rs['gid']; ?>','Wollen Sie das Objekt mit der ID: <?php echo $rs['gid']; ?> wirklich löschen?')">L&ouml;schen</a></td>
     </tr><?php
     }

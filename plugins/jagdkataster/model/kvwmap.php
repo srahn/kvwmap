@@ -6,8 +6,8 @@
     $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
     $jagdkataster->clientepsg = $GUI->user->rolle->epsg_code;
 		
-		$privileges = $GUI->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
-    $layer[0]['attributes'] = $GUI->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $GUI->pgdatabase, $privileges['attributenames']);
+		$privileges = $GUI->Stelle->get_attributes_privileges($layer[0]['layer_id']);
+    $layer[0]['attributes'] = $GUI->mapDB->read_layer_attributes($layer[0]['layer_id'], $GUI->pgdatabase, $privileges['attributenames']);
     if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
       for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
         $layer[0]['attributes']['privileg'][$j] = '0';
@@ -106,7 +106,7 @@
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+      $GUI->formvars['geom_from_layer'] = $layerset[0]['layer_id'];
     }
     $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
     $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);

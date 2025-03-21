@@ -74,7 +74,7 @@
 		if ($ret['success'] AND $GUI->database->result->num_rows() == 1) {
 			$nix_gefunden = false;
 			$rs = $GUI->database->result->fetch_assoc();
-			$GUI->formvars['selected_layer_id'] = $rs['Layer_ID'];
+			$GUI->formvars['selected_layer_id'] = $rs['layer_id'];
 			$GUI->neuer_Layer_Datensatz();
 		}
 		else {
@@ -82,7 +82,7 @@
 				while ($rs = $GUI->database->result->fetch_assoc()) {
 					if ($rs['Name'] == 'Straßen') {
 						$nix_gefunden = false;
-						$GUI->formvars['selected_layer_id'] = $rs['Layer_ID'];
+						$GUI->formvars['selected_layer_id'] = $rs['layer_id'];
 						$GUI->neuer_Layer_Datensatz();
 					}
 				}
