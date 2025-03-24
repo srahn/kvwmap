@@ -730,7 +730,7 @@ class stelle {
 		return $ret[1];
 	}
 
-	function getStellen($order, $user_id = 0, $where = "1") {
+	function getStellen($order, $user_id = 0, $where = 'true') {
 		global $admin_stellen;
 		$stellen = array(
 			'ID' => array(),
@@ -741,49 +741,49 @@ class stelle {
 		);
 		$sql = "
 			SELECT
-				s.ID,
-				s.Bezeichnung,
+				s.id,
+				s.bezeichnung,
 				s.show_shared_layers,
 				(
 					SELECT 
-						group_concat(es.Bezeichnung)
+						string_agg(es.bezeichnung, ', ')
 					FROM 
-						stellen_hierarchie AS h,
-						stelle es
+						kvwmap.stellen_hierarchie AS h,
+						kvwmap.stelle es
 					WHERE
-						s.ID = h.child_id AND 
-						es.ID = h.parent_id
-				) as Bezeichnung_parent,
+						s.id = h.child_id AND 
+						es.id = h.parent_id
+				) as bezeichnung_parent,
 				(
 					SELECT
 						max(last_time_id)
 					FROM
-						rolle
+						kvwmap.rolle
 					WHERE
-					rolle.stelle_id = s.ID
+						rolle.stelle_id = s.id
 				) as last_time_id
 			FROM
-				stelle AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
-				rolle AS r ON s.ID = r.stelle_id
+				kvwmap.stelle AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
+				kvwmap.rolle AS r ON s.id = r.stelle_id
 				" : "") . "
 			WHERE " .
 				$where . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " AND
 				(r.user_id = " . $user_id . " OR r.stelle_id IS NULL)" : "") . "
 			ORDER BY " .
-				($order != '' ? $order : "s.Bezeichnung") . "
+				($order != '' ? $order : "s.bezeichnung") . "
 		";
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:stelle->getStellen - Abfragen aller Stellen<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$ret = $this->database->execSQL($sql);
+		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-		while($rs = $this->database->result->fetch_array()) {
-			$stellen['ID'][] = $rs['ID'];
-			$stellen['index'][$rs['ID']] = $i;
-			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
+		while($rs = pg_fetch_array($ret[1])) {
+			$stellen['ID'][] = $rs['id'];
+			$stellen['index'][$rs['id']] = $i;
+			$stellen['Bezeichnung'][] = $rs['bezeichnung'];
 			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
-			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
+			$stellen['Bezeichnung_parent'][] = $rs['bezeichnung_parent'];
 			$stellen['last_time_id'][] = $rs['last_time_id'];
 			$i++;
 		}

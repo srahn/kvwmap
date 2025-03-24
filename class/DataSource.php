@@ -1,7 +1,7 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'LayerDataSource.php');
-class DataSource extends MyObject
+class DataSource extends PgObject
 {
 
 	static $write_debug = false;
@@ -49,7 +49,7 @@ class DataSource extends MyObject
 
 	function __construct($gui)
 	{
-		parent::__construct($gui, 'datasources');
+		parent::__construct($gui, 'kvwmap', 'datasources');
 		$this->validations = array(
 			array(
 				'attribute' => 'beschreibung',
@@ -93,9 +93,9 @@ class DataSource extends MyObject
 
 	public static function find_by_layer_id($gui, $layer_id) {
 		$datasource = new DataSource($gui);
-		$layer_datasources = LayerDataSource::find($gui, '`layer_id` = ' . $layer_id);
+		$layer_datasources = LayerDataSource::find($gui, 'layer_id = ' . $layer_id);
 		if (count($layer_datasources) > 0) {
-			$datasources = $datasource->find_where('`id` IN (' . implode(
+			$datasources = $datasource->find_where('id IN (' . implode(
 				', ',
 				array_map(
 					function ($layer_datasource) {

@@ -3928,17 +3928,16 @@ echo '			</table>
 			SELECT DISTINCT
 				r.user_id
 			FROM
-				rolle r JOIN
-				user u ON r.user_id = u.ID
+				kvwmap.rolle r JOIN
+				kvwmap.user u ON r.user_id = u.ID
 			WHERE
 				r.stelle_id IN (" . implode(', ', $admin_stellen) . ") AND
-				u.id = '" . $this->database->mysqli->real_escape_string($user_id) . "'
-		";
+				u.id = " . ($user_id);
 		#echo '<br>sql: ' . $sql;
 
-		$ret = $this->database->execSQL($sql, 0, 0);
+		$ret = $this->pgdatabase->execSQL($sql, 0, 0);
 		if ($ret['success']) {
-			if ($this->database->result->num_rows == 1) {
+			if (pg_num_rows($ret[1]) == 1) {
 				$result = true;
 			}
 		}
@@ -8538,8 +8537,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
 		if ($this->formvars['selected_layer_id'] > 0) {
 			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
-			$layer_labelitems = new MyObject($this, 'layer_labelitems');
-			$this->layerdata['labelitems'] = $layer_labelitems->find_where('layer_id = ' . $this->formvars['selected_layer_id'], 'order');
+			$layer_labelitems = new PgObject($this, 'kvwmap', 'layer_labelitems');
+			$this->layerdata['labelitems'] = $layer_labelitems->find_where('layer_id = ' . $this->formvars['selected_layer_id'], '"order"');
 			$this->layerdata['charts'] = LayerChart::find($this, 'layer_id = ' . $this->formvars['selected_layer_id']);
 			$this->layerdata['datasources'] = DataSource::find_by_layer_id($this, $this->formvars['selected_layer_id']);
 			$this->layerdata['datasource_ids'] = array_map(function($datasource) { return $datasource->get('id'); }, $this->layerdata['datasources']);
@@ -21081,7 +21080,7 @@ class db_mapObj{
 		return $datatypes;
 	}
 
-	function getall_Layer($order = 'Gruppenname, Name', $only_listed = false, $user_id = NULL, $stelle_id = NULL) {
+	function getall_Layer($order = 'gruppenname, name', $only_listed = false, $user_id = NULL, $stelle_id = NULL) {
 		global $language;
 		global $admin_stellen;
 		$more_from = '';
@@ -21101,12 +21100,12 @@ class db_mapObj{
 		if ($language != 'german') {
 			$gruppenname_column = "
 			CASE
-				WHEN g.Gruppenname_" . $language . " != \"\" THEN g.Gruppenname_" . $language . "
-				ELSE g.Gruppenname
+				WHEN g.gruppenname_" . $language . " != \"\" THEN g.gruppenname_" . $language . "
+				ELSE g.gruppenname
 			END";
 		}
 		else {
-			$gruppenname_column = "g.Gruppenname";
+			$gruppenname_column = "g.gruppenname";
 		}
 
 		if ($only_listed) {
@@ -21115,10 +21114,10 @@ class db_mapObj{
 
 		if ($user_id != NULL AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
-				LEFT JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
-				LEFT JOIN rolle radm ON ul.Stelle_ID = radm.stelle_id
+				LEFT JOIN kvwmap.used_layer ul ON l.layer_id = ul.layer_id
+				LEFT JOIN kvwmap.rolle radm ON ul.stelle_id = radm.stelle_id
 			";
-			$where[] = "(radm.user_id = " . $this->User_ID . " OR ul.Layer_id IS NULL)";
+			$where[] = "(radm.user_id = " . $this->User_ID . " OR ul.layer_id IS NULL)";
 		}
 
 		if (
@@ -21136,9 +21135,9 @@ class db_mapObj{
 			SELECT DISTINCT " .
 				$name_column . " AS Name," .
 				$gruppenname_column . " AS Gruppenname,
-				l.Layer_ID,
-				l.Gruppe,
-				l.Datentyp,
+				l.layer_id,
+				l.gruppe,
+				l.datentyp,
 				l.connectiontype,
 				l.metalink,
 				l.kurzbeschreibung,
@@ -21155,8 +21154,8 @@ class db_mapObj{
 				" . ($this->GUI->plugin_loaded('mobile') ? ', l.vector_tile_url' : '') . "
 				" . ($this->GUI->plugin_loaded('portal') ? ', l.cluster_option' : '') . "
 			FROM
-				layer l LEFT JOIN
-				u_groups g ON l.Gruppe = g.id" .
+				kvwmap.layer l LEFT JOIN
+				kvwmap.u_groups g ON l.Gruppe = g.id" .
 				$more_from .
 			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
 			$order . "
@@ -21164,7 +21163,7 @@ class db_mapObj{
 		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+    if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		$layer = array(
 			'ID' => array(),
@@ -21193,10 +21192,10 @@ class db_mapObj{
 		if ($this->GUI->plugin_loaded('portal')) {
 			$layer['cluster_option'] = array();
 		}
-		while ($rs = $ret['result']->fetch_array()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$layer['ID'][] = $rs['layer_id'];
 			$layer['Bezeichnung'][] = $rs['name'];
-			$layer['gruppe'][] = $rs['Gruppenname'];
+			$layer['gruppe'][] = $rs['gruppenname'];
 			$layer['GruppeID'][] = $rs['gruppe'];
 			$layer['datentyp'][] = $rs['datentyp'];
 			$layer['connectiontype'][] = $rs['connectiontype'];
@@ -21413,15 +21412,15 @@ class db_mapObj{
 			SELECT
 				*
 			FROM
-				layer
+				kvwmap.layer
 			WHERE
-				Layer_ID = " . $id ."
+				layer_id = " . $id ."
 		";
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layer - Lesen eines Layers:<br>" . $sql, 4);
-		$this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		$layer = $this->db->result->fetch_array();
+		$ret = $this->db->execSQL($sql);
+		if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		$layer = pg_fetch_array($ret[1]);
 		if ($replace_params) {
 			foreach (array('classitem', 'classification', 'data', 'pfad') AS $key) {
 				$layer[$key] = replace_params_rolle(

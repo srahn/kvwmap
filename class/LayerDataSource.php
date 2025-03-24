@@ -1,6 +1,6 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class LayerDataSource extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class LayerDataSource extends PgObject {
 
 	static $write_debug = false;
 	static $title = array(
@@ -35,7 +35,7 @@ class LayerDataSource extends MyObject {
 	);
 
 	function __construct($gui) {
-		parent::__construct($gui, 'layer_datasources');
+		parent::__construct($gui, 'kvwmap', 'layer_datasources');
 		$this->identifiers = array(
 			array(
 				'key' => 'layer_id',

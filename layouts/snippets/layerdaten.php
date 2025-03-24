@@ -50,15 +50,15 @@
 	<tr align="center">
 		<td><h2><?php echo $this->titel; ?></h2></td>
 	</tr><?
-	if ($this->formvars['order']=="Name" or $this->formvars['order']=="Alias") { ?>
+	if ($this->formvars['order']=="name" or $this->formvars['order']=="alias") { ?>
 		<tr height="50px" valign="bottom">
 			<td><?
 				$umlaute=array("Ä","Ö","Ü");
 				for ($i=0;$i<count($this->layerdaten['ID']);$i++) {
-					if ($this->formvars['order']=="Name") {
+					if ($this->formvars['order']=="name") {
 						$anzeigename=$this->layerdaten['Bezeichnung'][$i];
 					}
-					if ($this->formvars['order']=="Alias") {
+					if ($this->formvars['order']=="alias") {
 						$anzeigename=$this->layerdaten['alias'][$i];
 					}
 					if (!in_array(strtoupper(mb_substr($anzeigename,0,1,'UTF-8')),$umlaute) AND strtolower(mb_substr($anzeigename,0,1,'UTF-8')) != $first) {
@@ -76,8 +76,8 @@
 						$this->add_message('info', $strNoLayers);
 					}
 					else {
-						$switch_to_order = ($this->formvars['order'] == 'name' ? 'Alias' : 'name');
-						$alias_first = $this->formvars['order'] == 'Alias';
+						$switch_to_order = ($this->formvars['order'] == 'name' ? 'alias' : 'name');
+						$alias_first = $this->formvars['order'] == 'alias';
 						?>
 						<table width="100%" border="0" cellspacing="0" cellpadding="2">
 							<tr>
@@ -113,12 +113,12 @@
 								<th>&nbsp;</th>
 							</tr><?
 							for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
-								if ($this->formvars['order'] == "Name" or $this->formvars['order'] == "Alias") {
-									if ($this->formvars['order'] == "Name" or $this->layerdaten['alias'][$i] != '') {
-										if ($this->formvars['order'] == "Name") {
+								if ($this->formvars['order'] == "name" or $this->formvars['order'] == "alias") {
+									if ($this->formvars['order'] == "name" or $this->layerdaten['alias'][$i] != '') {
+										if ($this->formvars['order'] == "name") {
 											$anzeigename=$this->layerdaten['Bezeichnung'][$i];
 										}
-										if ($this->formvars['order'] == "Alias") {
+										if ($this->formvars['order'] == "alias") {
 											$anzeigename=$this->layerdaten['alias'][$i];
 										}
 										$first=strtoupper(mb_substr($anzeigename,0,1,'UTF-8'));
@@ -166,7 +166,7 @@
 										}
 									}
 								}
-								if ($this->formvars['order'] != "Alias" or ($this->formvars['order'] == "Alias" and $this->layerdaten['alias'][$i] != '')) { ?>
+								if ($this->formvars['order'] != "alias" or ($this->formvars['order'] == "alias" and $this->layerdaten['alias'][$i] != '')) { ?>
 									<tr class="listen-tr<?
 										echo (($has_sync_layer AND $this->layerdaten['sync'][$i]) ? ' sync' : ' no-sync');
 										echo (($has_shared_layer AND $this->layerdaten['shared_from'][$i] != '') ? ' shared' : ' no-shared');

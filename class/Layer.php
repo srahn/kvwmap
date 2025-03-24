@@ -1,11 +1,11 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'LayerAttribute.php');
 include_once(CLASSPATH . 'LayerChart.php');
 include_once(CLASSPATH . 'DataSource.php');
 include_once(CLASSPATH . 'LayerDataSource.php');
 
-class Layer extends MyObject {
+class Layer extends PgObject {
 
 	static $write_debug = false;
 	public $geometry_types;
@@ -36,7 +36,7 @@ class Layer extends MyObject {
 				"fk" => 'layer_id'
 			)
 		);
-		parent::__construct($gui, 'layer');
+		parent::__construct($gui, 'kvwmap', 'layer');
 		$this->stelle_id = ($gui->stelle ? $gui->stelle->id : null);
 		$this->identifier = 'layer_id';
 		$this->geometry_types = array('Point', 'LineString', 'Polygon');
