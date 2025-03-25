@@ -14661,10 +14661,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		$crontab_dir = '/var/www/cron/';
 		if (!file_exists($crontab_dir . 'gisadmin')) {
-			mkdir($crontab_dir);
+			mkdir($crontab_dir . 'gisadmin');
 		}
 		if (!file_exists($crontab_dir . 'root')) {
-			mkdir($crontab_dir);
+			mkdir($crontab_dir . 'root');
 		}
 		# schreibt die Zeilen in die crontab Dateien von root und gisadmin falls vorhanden
 		foreach ($crontab_lines AS $user => $lines) {
