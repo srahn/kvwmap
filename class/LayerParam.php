@@ -9,6 +9,7 @@ class LayerParam extends MyObject {
 
 	function __construct($gui) {
 		parent::__construct($gui, 'layer_parameter');
+		$this->gui = $gui;
 		$this->has_many = array(
 			"layers" => array(
 				"alias" => 'Layer',
