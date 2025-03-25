@@ -580,8 +580,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						<?
 							if ($i == 0) {
 								echo '<div class="fett scrolltable_header">';
-								if (strpos($this->formvars['order'], 'rissnummer') === false){ ?>
-									<a href="javascript:add_to_order('rissnummer');" title="nach Rissnr. sortieren"><span class="fett">Rissnr.</span></a> <? 
+								if (strpos($this->formvars['order'], 'blattnummer') === false){ ?>
+									<a href="javascript:add_to_order('blattnummer');" title="nach Blattnr. sortieren"><span class="fett">Blattnr.</span></a> <? 
 								} 
 								else { ?>
 									<span class="fett">Rissnr.</span> <?
