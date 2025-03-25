@@ -3,6 +3,12 @@
 	$result = Notification::find_for_user($this);
 ?>
 
+<style>
+	#search_div {
+		display: none;
+	}
+</style>
+
 <div title="Benachrichtigungen" style="float: right; display: block;">
 	<div id="user_notifications" style="display: none; position: absolute;right: 30px; z-index: 9999;padding: 5px;top: 30px;"><?
 		if ($result['success']) {
