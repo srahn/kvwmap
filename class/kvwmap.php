@@ -17668,7 +17668,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# - limit for the size of shared layers?
 	}
 
-	function get_layer_params_form($stelle_id = NULL, $layer_id = NULL, $only_from_attribute = '', $hover_preview = true){
+	function get_layer_params_form($stelle_id = NULL, $layer_id = NULL, $only_from_attribute = '', $hover_preview = true, $open = false){
 		$output = '';
 		include_once(CLASSPATH.'FormObject.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -17707,12 +17707,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 									foreach($params AS $param) {
 										$output .= '
-										<tr id="layer_parameter_'.$param['key'].'_tr">
+										<tr id="layer_parameter_'.$param['key'].'_tr">';
+											if (!$open) {
+												$output .= '
 											<td valign="top" class="rollenwahl-option-header">
 												<span>' . $param['alias'] .
 												 ((count_or_0($this->params_layer[$param['id']]) == 1 AND $layer_id == NULL)? ' (' . $this->params_layer[$param['id']][0]['name'] . ')' : '') . ':
 												</span>
-											</td>
+											</td>';
+											}
+											$output .= '
 											<td>
 												'.($layer_id == NULL ?
 													FormObject::createSelectField(
@@ -17755,6 +17759,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						</tr>
 					</table>
 					';
+				}
+				if ($open) {
+					$output .= "█document.querySelector('#options_" . $layer_id . " .placeholder').onmouseenter();
+											 document.querySelector('#options_" . $layer_id . " .placeholder').onclick();";
 				}
 			}
 		}

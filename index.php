@@ -448,7 +448,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'getLayerParamsForm' : {
-				echo $GUI->get_layer_params_form($GUI->formvars['stelle_id']);
+				echo $GUI->get_layer_params_form($GUI->formvars['stelle_id'], $GUI->formvars['layer_id'], '', true, $GUI->formvars['open']);
 			} break;
 
 			case 'setLayerParams' : {

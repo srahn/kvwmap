@@ -99,6 +99,12 @@ if ($formvars['go'] == 'health_check') {
 // $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 // $GUI->database->execSQL("SET CHARACTER SET ".MYSQL_CHARSET.";",0,0);
 
+$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
+if (!$GUI->pgdatabase->open(POSTGRES_CONNECTION_ID)) {
+	echo $GUI->pgdatabase->err_msg;
+	exit;
+}
+
 /*
 *	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
 */
