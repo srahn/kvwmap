@@ -874,10 +874,6 @@ select[name="geom_from_layer"] {
 	background-color: #c5d4e7;
 }
 
-#search_div {
-	display: none;
-}
-
 #geo_name_search_result_div{
 	position: absolute;
 	z-index: 1000000;
