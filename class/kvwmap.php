@@ -17797,18 +17797,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$classes = $mapDB->read_Classes($this->layerdaten['Layer_ID']);
 			$anzahl = count($classes);
 			for ($i = 0; $i < $anzahl; $i++) {
-				if ($classes[$i]['Expression'] != '') {
+				if ($classes[$i]['Expression'] != '' AND strpos($classes[$i]['Expression'], 'Cluster_FeatureCount') === false) {
 					$expressions[$classes[$i]['classification']][] = mapserverExp2SQL($classes[$i]['Expression'], $this->layerdaten['classitem']);
 				}
 			}
 			if (empty($expressions)) {
 				$html .= '<div style="background: lightgray; padding: 2px">Keine Expressions vorhanden.</div><br>';
-				return array(
-					'success' => true,
-					'msg' => $html,
-					'html' => $html,
-					'num_unclassified' => 0
-				);
+				if ($output_html) {
+					return $html;
+				}
+				else {
+					return array(
+						'success' => true,
+						'msg' => $html,
+						'html' => $html,
+						'num_unclassified' => 0
+					);
+				}
 			}
 			else {
 				foreach ($expressions as $classification => $exps) {
