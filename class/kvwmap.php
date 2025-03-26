@@ -477,10 +477,9 @@ class GUI {
 		}
 		$disabled_classes = $mapDB->read_disabled_classes();
 		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes, false, $layer[0]['classification']);
-		echo '
-		<div class="layerOptions" id="options_content_'.$this->formvars['layer_id'].'">
+		echo '		
 			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0);" onclick="closeLayerOptions(' . $this->formvars['layer_id'] . ')" title="Schlie&szlig;en"><img style="border:none" src="' . GRAPHICSPATH . 'exit2.png"></img></a></div>
-			<table cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
+			<table cellspacing="0" cellpadding="0" style="padding: 0 3px 8px 0">
 				<tr>
 					<td class="layerOptionsHeader">
 						<span class="fett">' . ucfirst($this->layerOptions) . '</span>
@@ -836,7 +835,6 @@ echo '			</table>
 					</td>
 				</tr>
 			</table>
-		</div>
 		█
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
@@ -1276,7 +1274,7 @@ echo '			</table>
 		if ($visible) {
 			$legend = '<tr><td valign="top">';
 
-			$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
+			$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"><div class="layerOptions" id="options_content_'.$layer['Layer_ID'].'"></div></div>';
 
 			if (!empty($layer['shared_from'])) {
 				$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
@@ -17739,7 +17737,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 														rolle::$layer_params[$param['key']],													# value
 														1,																														# size
 														'',																														# style
-														'',																														# onchange
+														($open? "setLayerParam('" . $param['key'] . "')" : ''),				# onchange
 														'layer_parameter_' . $param['key'],														# id
 														'',																														# multiple
 														'',																														# class
