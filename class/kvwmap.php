@@ -17760,8 +17760,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					';
 				}
 				if ($open) {
-					$output .= "█document.querySelector('#options_" . $layer_id . " .placeholder').onmouseenter();
-											 document.querySelector('#options_" . $layer_id . " .placeholder').onclick();";
+					$output .= "█";
+					if (count($params) == 1) {
+						$output .= "document.querySelector('#options_" . $layer_id . " .placeholder').onmouseenter();
+											  document.querySelector('#options_" . $layer_id . " .placeholder').onclick();";
+					}
 				}
 			}
 		}
