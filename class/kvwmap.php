@@ -477,10 +477,9 @@ class GUI {
 		}
 		$disabled_classes = $mapDB->read_disabled_classes();
 		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes, false, $layer[0]['classification']);
-		echo '
-		<div class="layerOptions" id="options_content_'.$this->formvars['layer_id'].'">
+		echo '		
 			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0);" onclick="closeLayerOptions(' . $this->formvars['layer_id'] . ')" title="Schlie&szlig;en"><img style="border:none" src="' . GRAPHICSPATH . 'exit2.png"></img></a></div>
-			<table cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
+			<table cellspacing="0" cellpadding="0" style="padding: 0 3px 8px 0">
 				<tr>
 					<td class="layerOptionsHeader">
 						<span class="fett">' . ucfirst($this->layerOptions) . '</span>
@@ -836,7 +835,6 @@ echo '			</table>
 					</td>
 				</tr>
 			</table>
-		</div>
 		█
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
@@ -1276,7 +1274,7 @@ echo '			</table>
 		if ($visible) {
 			$legend = '<tr><td valign="top">';
 
-			$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"> </div>';
+			$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"><div class="layerOptions" id="options_content_'.$layer['layer_id'].'"></div></div>';
 
 			if (!empty($layer['shared_from'])) {
 				$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
@@ -3571,7 +3569,7 @@ echo '			</table>
 	function delete_user2notification() {
 		include_once(CLASSPATH . 'User2Notification.php');
 		include(CLASSPATH . 'formatter.php');
-		$result = User2Notification::delete_for_user($this, $this->formvars['notification_id'], $this->user->id)[0];
+		$result = User2Notification::delete_for_user($this, $this->formvars['notification_id'], $this->user->id);
 		$formatter = new formatter($result, 'json', 'application/json');
 		echo $formatter->output();
 	}
@@ -17738,7 +17736,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 														rolle::$layer_params[$param['key']],													# value
 														1,																														# size
 														'',																														# style
-														'',																														# onchange
+														($open? "setLayerParam('" . $param['key'] . "')" : ''),				# onchange
 														'layer_parameter_' . $param['key'],														# id
 														'',																														# multiple
 														'',																														# class
@@ -17761,8 +17759,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					';
 				}
 				if ($open) {
-					$output .= "█document.querySelector('#options_" . $layer_id . " .placeholder').onmouseenter();
-											 document.querySelector('#options_" . $layer_id . " .placeholder').onclick();";
+					$output .= "█";
+					if (count($params) == 1) {
+						$output .= "document.querySelector('#options_" . $layer_id . " .placeholder').onmouseenter();
+											  document.querySelector('#options_" . $layer_id . " .placeholder').onclick();";
+					}
 				}
 			}
 		}
@@ -17796,18 +17797,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$classes = $mapDB->read_Classes($this->layerdaten['layer_id']);
 			$anzahl = count($classes);
 			for ($i = 0; $i < $anzahl; $i++) {
-				if ($classes[$i]['Expression'] != '') {
+				if ($classes[$i]['Expression'] != '' AND strpos($classes[$i]['Expression'], 'Cluster_FeatureCount') === false) {
 					$expressions[$classes[$i]['classification']][] = mapserverExp2SQL($classes[$i]['Expression'], $this->layerdaten['classitem']);
 				}
 			}
 			if (empty($expressions)) {
 				$html .= '<div style="background: lightgray; padding: 2px">Keine Expressions vorhanden.</div><br>';
-				return array(
-					'success' => true,
-					'msg' => $html,
-					'html' => $html,
-					'num_unclassified' => 0
-				);
+				if ($output_html) {
+					return $html;
+				}
+				else {
+					return array(
+						'success' => true,
+						'msg' => $html,
+						'html' => $html,
+						'num_unclassified' => 0
+					);
+				}
 			}
 			else {
 				foreach ($expressions as $classification => $exps) {

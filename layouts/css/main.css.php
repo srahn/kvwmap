@@ -470,11 +470,11 @@ span[data-tooltip]:hover::after {
 .custom-select {
 	background-color: #e9e9ed;
   position: relative;
-  /*width: 250px;*/
+  width: 200px;
   border: 1px solid #888;
 	border-radius: 2px;
   align-items: center;
-	margin: 0 3px 3px 0;
+	margin: 0 0 3px 0;
 }
 
 .custom-select .dropdown {
@@ -491,10 +491,10 @@ span[data-tooltip]:hover::after {
   top: 1px;
   right: 0;
   left: 0;
-	max-height: 400px;
+	max-height: 350px;
 	overflow-y: auto;
 	overflow-x: hidden;
-	margin: 0;
+	margin: 0 0 0 -1px;
 }
 
 .custom-select .dropdown.upward {
@@ -2542,8 +2542,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .layerOptions, #legendOptions{
-	min-width: 220px;
-	border: 1px solid #cccccc;
+	min-width: 200px;
 	background: #EDEFEF;
 	padding:0px;
 	position:absolute;
@@ -2553,7 +2552,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .layerOptions{
 	top:300px;
-	right:210px;
+	right:240px;
 }
 
 .layerOptionsIcon{

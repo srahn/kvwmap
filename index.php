@@ -452,7 +452,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'setLayerParams' : {
-				$GUI->setLayerParams();
+				$GUI->setLayerParams($GUI->formvars['prefix']);
 				echo "onLayerParamsUpdated('success')";
 			} break;
 

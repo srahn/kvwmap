@@ -1243,13 +1243,13 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 
 function getLayerOptions(layer_id){
 	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
-	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
+	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_content_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
 	document.GUI.layer_options_open.value = layer_id;
 }
 
 function getLayerParamsForm(layer_id){
 	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
-	ahah('index.php', 'go=getLayerParamsForm&layer_id=' + layer_id + '&open=1', new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
+	ahah('index.php', 'go=getLayerParamsForm&layer_id=' + layer_id + '&open=1', new Array(document.getElementById('options_content_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
 	document.GUI.layer_options_open.value = layer_id;
 }
 
@@ -1288,7 +1288,7 @@ function getGroupOptions(group_id) {
 
 function closeLayerOptions(layer_id){
 	document.GUI.layer_options_open.value = '';
-	document.getElementById('options_'+layer_id).innerHTML=' ';
+	document.getElementById('options_content_'+layer_id).innerHTML=' ';
 }
 
 function closeGroupOptions(group_id) {
@@ -1300,6 +1300,13 @@ function saveLayerOptions(layer_id){
 	var formdata = new FormData(document.GUI);
 	formdata.set('go', 'saveLayerOptions');
 	ahah("index.php",	formdata, [], []);
+	neuLaden();
+}
+
+function setLayerParam(name) {
+	var data = 'go=setLayerParams&prefix=options_&options_layer_parameter_' + name + '=' + document.getElementById('layer_parameter_' + name).value;
+	ahah('index.php', data, [], []);
+	document.GUI.legendtouched.value = 1;
 	neuLaden();
 }
 
