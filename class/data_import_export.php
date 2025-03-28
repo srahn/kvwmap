@@ -1623,7 +1623,7 @@ class data_import_export {
 					}
 					# temp. Tabelle wieder löschen
 					$sql = 'DROP TABLE ' . $temp_table;
-					// $ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
+					$ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
 					if ($this->formvars['export_format'] != 'CSV') {
 						$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
 					}
