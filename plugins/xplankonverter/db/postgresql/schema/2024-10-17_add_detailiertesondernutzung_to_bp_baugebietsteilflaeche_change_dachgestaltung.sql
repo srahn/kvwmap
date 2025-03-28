@@ -17,7 +17,7 @@ BEGIN;
   WHERE
     NOT EXISTS (
       SELECT xmi_id FROM xplan_uml.uml_classes WHERE xmi_id = 'EAID_C2728C8E-CBD5-4BA0-8B2E-B6545C1D7A6D'
-    );
+    )
   RETURNING id;
 
   -- Erzeuge UML-Attribut detailierteSondernutzung in Klasse BP_BaugebietsTeilFlaeche
