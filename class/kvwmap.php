@@ -17877,7 +17877,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	 */
 	function compose_filter($filter, $epsg_code) {
 		$filterstring = '';
-		if ($filter != '') {
+		if (!empty($filter)) {
 			$filterparts = array();
 			for ($i = 0; $i < count($filter); $i++) {
 				if ($filter[$i]['type'] == 'geometry') {
@@ -17911,8 +17911,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 				}
 			}
+			$filterstring = '(' . implode(' AND ', $filterparts) . ')';
 		}
-		return '(' . implode(' AND ', $filterparts) . ')';
+		return $filterstring;
 	}
 } # end of class GUI
 
