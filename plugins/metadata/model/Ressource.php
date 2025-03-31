@@ -78,7 +78,8 @@ class Ressource extends PgObject {
 		// $ressource->show = true;
 		$ressources = $ressource->find_where(
 			"
-				status_id > -1 AND
+				(von_eneka OR use_for_datapackage) AND
+				(status_id IS NULL OR status_id > -1) AND
 				auto_update AND
 				(
 					last_updated_at IS NULL OR
@@ -186,23 +187,29 @@ class Ressource extends PgObject {
 			$results = $ressource->getSQLResults("
 				SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0 AND status_id < 11;
 			");
-			echo 'res: ' . print_r($results, true);
 			if ($results[0]['num_running'] < 10) {
-				$ressources = Ressource::find_outdated($gui, NULL, 1); // liefert nur die erste gefundene zurück
+				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running']); // liefert nur die erste gefundene zurück
 			}
 		}
-		// $gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
 
 		if (count($ressources) > 0) {
-			$ressource = $ressources[0];
-			$gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ') method_only: ' . $method_only);
-			$result = $ressource->run_update($method_only);
-			$ressource->log($result, true);
+			$gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
+			foreach ($ressources AS $ressource) {
+				// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
+				if ($gui->formvars['dry_run'] == 1) {
+					echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
+				}
+				else {
+					$result = $ressource->run_update($method_only);
+					$ressource->log($result, false);
+					return $result;
+				}
+			}
 		}
 		else {
 			return array(
 				'success' => true,
-				'msg' => 'Es sind zur Zeit keine Ressourcen zu aktualisieren.'
+				'msg' => 'Nichts zu tun'
 			);
 		}
 	}
@@ -235,7 +242,7 @@ class Ressource extends PgObject {
 	}
 
 	function run_update($method_only = '') {
-		// $this->debug->show('Run Update für Ressource id: ' . $this->get_id(), true);
+		$this->debug->show('Update Ressource ' . $this->get_id(), true);
 		$this->update_status(1, $msg);
 
 		if ($this->must_be_executed('download', $method_only)) {
@@ -256,20 +263,20 @@ class Ressource extends PgObject {
 
 			// Update metadata document
 			$this->gui->formvars['aktivesLayout'] = 4;
-			$this->gui->formvars['chosen_layer_id'] = $this->layer_id;
+			$this->gui->formvars['chosen_layer_id'] = METADATA_RESSOURCES_LAYER_ID;
 			$this->gui->formvars['oid'] = $this->get_id();
 			$this->gui->formvars['archivieren'] = 1;
 			$this->gui->formvars['no_output'] = true;
 
 			include_once(CLASSPATH . 'Layer.php');
-			$layer = Layer::find_by_id($this->gui, $this->layer_id);
+			$layer = Layer::find_by_id($this->gui, METADATA_RESSOURCES_LAYER_ID);
 			# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen object_id
 			# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
 			# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
 			$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $this->get_id();
-			$this->gui->formvars['checkbox_names_' . $this->layer_id] = $checkbox_name;
+			$this->gui->formvars['checkbox_names_' . METADATA_RESSOURCES_LAYER_ID] = $checkbox_name;
 			$this->gui->formvars[$checkbox_name] = 'on';
-			$result = $this->gui->generischer_sachdaten_druck_drucken(
+			$result = $this->gui->generischer_sachdaten_druck_createPDF(
 				NULL, // pdfobject
 				NULL, // offsetx
 				NULL, // offsety
@@ -277,15 +284,18 @@ class Ressource extends PgObject {
 				false // append
 			);
 			$this->gui->outputfile = basename($result['pdf_file']);
-			$this->gui->pdf_archivieren($this->layer_id, $this->get_id(), $result['pdf_file']);
-			$this->debug->show('Metadatendokument für Ressource erzeugt: ' . $result['pdf_file'], true);
-			// Currently update status will be set to uptodate only if data has been transformed
-			$this->update_status(0, ' Datum der letzten Aktualisierung gesetzt.');
+			$this->gui->pdf_archivieren(METADATA_RESSOURCES_LAYER_ID, $this->get_id(), $result['pdf_file']);
+			$this->debug->show('Metadatendokument für Ressource ' . $this->get_id() . ' aktualisiert.', true);
 		}
 
+		if ($method_only == '') {
+			$this->update_status(0, ' Datum der letzten Aktualisierung gesetzt.');
+		}
+		$last_updated_at = date("Y-m-d");
+		$this->update_status(0, '', $last_updated_at);
 		return array(
 			'success' => true,
-			'msg' => $msg . 'Ressource erfolgreich aktualisiert.'
+			'msg' => $msg . '<br>Ressource ' . $this->get_id() . ' am ' . $last_updated_at . ' erfolgreich aktualisiert.'
 		);
 	}
 
@@ -296,25 +306,31 @@ class Ressource extends PgObject {
 	 * @param Integer $status_id
 	 * @param String (optional) $msg
 	 */
-	function update_status($status_id, $msg = '') {
+	function update_status($status_id, $msg = '', $date = '') {
+		// $this->debug->show('Set status_id: ' . $status_id, true);
 		$attributes = array('status_id = ' . (string)$status_id);
 		$last_updated_at = date('Y-m-d H:i:s', time());
 		if ($msg != '') {
-			echo '<br>Update Status auf id: ' . $status_id . '<br>Msg: ' . $msg . ' ' . $last_updated_at;
+			$this->debug->show('Ressource ' . $this->get_id() . ' uptodate: ' . $last_updated_at, true);
 		}
 		if ($this->get('status_id') != 0 AND $status_id == 0) {
 			$attributes[] = "last_updated_at = '" . $last_updated_at . "'";
 		}
+		$attributes = array();
+		$attributes[] = "status_id = " . (string)$status_id;
+		if ($date != '') {
+			$attributes[] = "last_updated_at = '" . $date . "'";
+		}
+		$this->update_attr($attributes, true);
 		// $this->show = true;
 		// echo '<br>Update status_id: ' . $this->get('status_id') . ' auf ' . $status_id;
-		$this->update_attr($attributes, false);
 	}
 
 	####################
 	# Download methods #
 	####################
 	function download() {
-		$this->debug->show('Starte Funktion download', true);
+		// $this->debug->show('Starte Funktion download', true);
 		if ($this->get('download_method') != '') {
 			$method_name = 'download_' . $this->get('download_method');
 			if (!method_exists($this, $method_name)) {
@@ -694,7 +710,7 @@ class Ressource extends PgObject {
 	# Unpack methods #
 	##################
 	function unpack() {
-		$this->debug->show('Starte Funktion unpack', true);
+		// $this->debug->show('Starte Funktion unpack', true);
 		if ($this->get('unpack_method') != '') {
 			$method_name = 'unpack_' . $this->get('unpack_method');
 			if (!method_exists($this, $method_name)) {
@@ -720,7 +736,7 @@ class Ressource extends PgObject {
 	 * and remove the zip-files afterward
 	 */
 	function unpack_unzip() {
-		$this->debug->show('Starte Funktion unpack_unzip', true);
+		// $this->debug->show('Starte Funktion unpack_unzip', true);
 		if ($this->get('dest_path') == '') {
 			return array(
 				'success' => false,
@@ -745,9 +761,8 @@ class Ressource extends PgObject {
 		$err_msg = array();
 		foreach (glob($download_path . '*') as $filename) {
 			if (finfo_file($finfo, $filename) == 'application/zip') {
-				echo '<br>filename: ' . $filename;
 				$cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
-				$this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
+				$this->debug->show('Packe ' . $filename . ' aus', true);
 				$descriptorspec = [
 					0 => ["pipe", "r"],  // stdin
 					1 => ["pipe", "w"],  // stdout
@@ -1118,11 +1133,43 @@ class Ressource extends PgObject {
 		}
 	}
 
+	function import_mastr() {
+		$import_command = 'mastrImport';
+		$this->debug->show("Importiere Markstammdaten mit Befehl: " . $import_command, true);
+		$url = 'gdalcmdserver:8080/t/?tool=' . $import_command;
+		// echo '<br>url:   ' . urldecode($url) . '<br><br>';
+		// echo '<br>url:   ' . $url . '<br><br>';
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$output = curl_exec($ch);
+		#echo '<br>output: ' . $output;
+		$result = json_decode($output);
+		$ret = $result->exitCode;
+		if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Einlesen des Mastr!'
+			);
+		}
+		else {
+			return array(
+				'success' => true,
+				'msg' => 'Import Mastr erfolgreich ausgeführt.'
+			);
+		}
+	}
+
 	/**
 	 * Import shape with ogr2ogr to Postgres
+	 * Import only one if $this->get('import_layer') is defined else all shapes in $shape_path
 	 */
 	function import_ogr2ogr_shape() {
 		$this->debug->show('Starte Funktion import_org2ogr_shape', true);
+		$shape_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$imported_shape_files = array();
+
 		if ($this->get('import_table') == '') {
 			return array(
 				'success' => false,
@@ -1133,59 +1180,144 @@ class Ressource extends PgObject {
 		$dest_path = $this->get_full_path($this->get('dest_path'));
 
 		if ($this->get('import_layer') != '') {
-			// shape file is set explicit
-			if (file_exists($dest_path . $this->get('import_layer') . '.shp')) {
-				$shp_ext = 'shp';
-			}
-			elseif (file_exists($dest_path . $this->get('import_layer') . '.SHP')) {
-				$shp_ext = 'SHP';
-			}
-			else {
+			// shape file is set explicit. Import only this
+			// load only one shape
+			$files = glob($shape_path . $this->get('import_layer') . '.[sS][hH][pP]');
+			if (count($files) == 0) {
 				return array(
 					'success' => false,
-					'msg' => 'Die Shape-Datei mit dem Namen ' . $this->get('import_layer') . ' existiert nicht im Verzeichnis ' . $dest_dir
+					'msg' => 'Die Shape-Datei mit dem Namen ' . $this->get('import_layer') . ' existiert nicht im Verzeichnis ' . $shape_path
 				);
 			}
-			$shp_file = $this->get('import_layer') . '.' . $shp_ext;
+
+			$shape_file = $files[0];
+			$this->debug->show('Shape-Datei ' . $shape_file . ' gefunden.', true);
+			$result = $this->shape_file_import($shape_file);
+			if (!$result['success']) {
+				return array(
+					'success' => false,
+					'msg' => $result['msg']
+				);
+			}
+			else {
+				$imported_shape_files[] = $shape_file;
+			}
 		}
 		else {
-			// find the shape file name in dest_path
-			$files = array_filter(
-				scandir($dest_path),
-				function($entry) use ($dest_path) {
-					return is_file($dest_path . $entry);
+			$this->debug->show('Importiere alle Shape-Dateien in Verzeichnis ' . $shape_path, true);
+			// import all shape files in shape_path
+			foreach (glob($shape_path . '*.[sS][hH][pP]') AS $shape_file) {
+				$this->debug->show('Shape-Datei ' . $shape_file . ' gefunden.', true);
+				$result = $this->shape_file_import($shape_file);
+				if (!$result['success']) {
+					return array(
+						'success' => false,
+						'msg' => $result['msg']
+					);
 				}
-			);
-
-			$this->debug->show('Dateien im Verzeichnis:<br>' . implode('<br>', $files), true);
-			$result = required_shape_files_exists($files);
-			if (!$result['success']) { return $result; }
-			$shp_file = '';
-			foreach($files AS $file) {
-				$info = pathinfo($dest_path . $file);
-				if (strtolower($info['extension']) == 'shp') {
-					$shp_file = $info['basename'];
+				else {
+					$imported_shape_files[] = $shape_file;
 				}
 			};
 		}
-
-		$this->debug->show('Der Name des Shapes lautet: ' . $shp_file, true);
-
-		$result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $shp_file, $this->database, '', NULL, '-overwrite', 'UTF-8', true);
-		if ($result != '') {
-			return array(
-				'success' => false,
-				'msg' => $result
-			);
-		}
 		return array(
 			'success' => true,
-			'msg' => 'Shape-Datei ' . $shp_file . ' erfolgreich eingelesen.'
+			'msg' => 'Shape-Dateien geladen: ' . implode(', ', $imported_shape_files)
+		);
+	}
+
+	/**
+	 * Function imports data with ogr2ogr from an ESRI Geodatabase file to postgres
+	 * Import with ogr2ogr command: ogr2ogr --config OGR_TRUNCATE YES -f PostgreSQL -dim XY -nlt CONVERT_TO_LINEAR -a_srs EPSG:5650 PG:"host=$host user=$user password=\'$password\' dbname=$dbname active_schema=$import_schema" $gdb_file
+	 */
+	function import_ogr2ogr_gdb() {
+		if (!$this->get('dest_path')) {
+			return array(
+				'success' => false,
+				'msg' => 'Es muss ein Zielverzeichnis angegeben sein!'
+			);
+		}
+		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		if (!file_exists($dest_path)) {
+			return array(
+				'success' => false,
+				'msg' => 'Das angegebene Zielverzeichnis ' . $dest_path . ' existiert nicht!'
+			);
+		}
+		if (!$this->get('import_file')) {
+			return array(
+				'success' => false,
+				'msg' => 'Es muss eine Importdatei angegeben werden!'
+			);
+		}
+		$gdb_file = rtrim($dest_path, '/') . '/' . $this->get('import_file');
+		if (!file_exists($gdb_file)) {
+			return array(
+				'success' => false,
+				'msg' => 'Importdatei ' . $gdb_file . ' nicht auf dem Server gefunden!'
+			);
+		}
+		if (!$this->get('import_schema')) {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein Importschema angegeben!'
+			);
+		}
+
+		$this->debug->show('Starte mit Einlesen der GDB-Datei ' . $gdb_file, true);
+		$result = $this->gui->data_import_export->ogr2ogr_import(
+			$this->get('import_schema'),
+			'',
+			$this->get('import_epsg') != '' ? $this->get('import_epsg') : 25833,
+			$gdb_file,
+			$this->database,
+			'',
+			NULL,
+			'--config OGR_TRUNCATE YES',
+			'UTF-8',
+			false
+		);
+
+		if ($result != 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Einlesen der GDB-Datei ' . $gdb_file
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'GDB-Datei erfolgreich geladen!'
+		);
+	}
+
+	function shape_file_import($shape_file) {
+		$this->debug->show('Starte mit Einlesen der Shape-Datei ' . $shape_file);
+		$pathinfo = pathinfo($shape_file);
+		$result = required_shape_files_exists(glob($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.*'));
+		if (!$result['success']) { return $result; }
+		$import_table = strtolower(sonderzeichen_umwandeln($pathinfo['filename']));
+		$this->debug->show('Importiere in Tabelle ' . ($this->get('import_schema') != '' ? $this->get('import_schema') : $import_table) . '.' . $import_table, true);
+		$result = $this->gui->data_import_export->ogr2ogr_import(
+			$this->get('import_schema') != '' ? $this->get('import_schema') : $import_table,
+			$import_table,
+			$this->get('import_epsg') != '' ? $this->get('import_epsg') : 25833,
+			$shape_file,
+			$this->database,
+			'',
+			NULL,
+			'-overwrite',
+			'UTF-8',
+			true
+		);
+		return array(
+			'success' => ($result == 0),
+			'msg' => ($result == 0 ? 'Shape-Datei ' . $shape_file . ' erfolgreich eingelesen' : 'Fehler beim Einlesen der Shape-Datei ' . $shape_file)
 		);
 	}
 
 	function import_ogr2ogr_gml() {
-		$this->debug->show('Starte Funktion import_org2ogr_gml', true);
+		// $this->debug->show('Starte Funktion import_org2ogr_gml', true);
 		if ($this->get('import_table') == '') {
 			return array(
 				'success' => false,
@@ -1223,8 +1355,9 @@ class Ressource extends PgObject {
 
 		$err_msg = array();
 		$first = true;
+		$this->database->create_schema($this->get('import_schema'));
 		foreach ($gml_files as $gml_file) {
-			echo '<br>Importiere Datei: ' . $dest_path . $gml_file;
+			$this->debug->show('Importiere Datei: ' . $dest_path . $gml_file, true);
 			// $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $gml_file, $this->database, $this->get('import_layer'), NULL, ($first ? '-overwrite' : '-append'), 'UTF-8', true);
 			$result = $this->gui->data_import_export->ogr2ogr_import(
 				$this->get('import_schema'),
@@ -1252,23 +1385,6 @@ class Ressource extends PgObject {
 		return array(
 			'success' => true,
 			'msg' => 'Anzahl erfolgreich gelesener GML-Dateien: ' . count($gml_files) . '.'
-		);
-	}
-
-	function import_ogr2ogr_gdb() {
-		$this->debug->show('Starte Funktion import_org2ogr_gdb', true);
-		if ($this->get('import_schema') == '') {
-			return array(
-				'success' => false,
-				'msg' => 'Es ist kein Name für das Importschema angegeben!'
-			);
-		}
-
-		// Hier weiter mit Implementierung gdb-Import.
-
-		return array(
-			'success' => true,
-			'msg' => 'Anzahl erfolgreich gelesener gdb-Tabellen: ' . count($gdb_files) . '.'
 		);
 	}
 
@@ -1515,7 +1631,7 @@ class Ressource extends PgObject {
 
 	function transform_exec_sql() {
 		$sql = $this->get('transform_command');
-		$this->debug->show("Transformiere Ressource mit SQL: " . $sql, true);
+		$this->debug->show("Transform Ressource " . $this->get_id() . " mit sql", true);
 		$query = $this->execSQL($sql);
 		if (!$query) {
 			return array(

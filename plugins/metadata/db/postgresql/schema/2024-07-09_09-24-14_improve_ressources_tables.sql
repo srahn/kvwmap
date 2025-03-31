@@ -97,7 +97,7 @@ BEGIN;
     reihenfolge INTEGER
   );
   INSERT INTO metadata.update_status (id, status, reihenfolge) VALUES
-  (-1, 'Abbruch wegem Fehler', 11),
+  (-1, 'Abbruch wegen Fehler', 11),
   ( 0, 'Uptodate', 1),
   ( 1, 'Update gestartet', 2),
   ( 2, 'Download gestartet', 3),

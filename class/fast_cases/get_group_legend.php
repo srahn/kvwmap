@@ -142,13 +142,15 @@ function replace_params_rolle($str, $additional_params = NULL) {
 			$params = array_merge($params, $additional_params);
 		}
 		$str = replace_params($str, $params);
-		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
-		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
+		$current_time = time();
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d', $current_time), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);
 		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
 		$str = str_replace('$STELLE_ID', rolle::$stelle_ID, $str);
 		$str = str_replace('$STELLE', rolle::$stelle_bezeichnung, $str);
 		$str = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $str);
 		$str = str_replace('$LANGUAGE', rolle::$language, $str);
+		$str = str_replace('$EXPORT', rolle::$export, $str);
 	}
 	return $str;
 }
@@ -165,7 +167,7 @@ function replace_params($str, $params) {
 function replace_params_link($str, $params, $layer_id) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerParamsForm(' . $layer_id .  ')">' . $value . '</a>', $str);
 		}
 	}
 	return $str;
@@ -1471,7 +1473,7 @@ class GUI {
 		if ($visible) {
 			$legend = '<tr><td valign="top">';
 
-			$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
+			$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"><div class="layerOptions" id="options_content_'.$layer['Layer_ID'].'"></div></div>';
 
 			if (!empty($layer['shared_from'])) {
 				$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
@@ -2204,6 +2206,7 @@ class rolle {
 	static $user_ID;
 	static $stelle_ID;
 	static $stelle_bezeichnung;
+	static $export;
 	var $minx;
 	var $newtime;
 	var $gui_object;
@@ -2216,14 +2219,15 @@ class rolle {
 		$this->debug = $debug;
 		$this->user_id = $user_id;
 		$this->stelle_id = $stelle_id;
-		$this->database=$database;
+		$this->database = $database;
 		rolle::$user_ID = $user_id;
 		rolle::$stelle_ID = $stelle_id;
 		rolle::$stelle_bezeichnung = $this->gui_object->Stelle->Bezeichnung;
+		rolle::$export = 'false';
 		$this->loglevel = 0;
 	}
 
-  function readSettings() {
+	function readSettings() {
 		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql = "

@@ -640,8 +640,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			fieldstring = form_fields[i] + '';
 			field = fieldstring.split(';');
 			var element = document.getElementsByName(fieldstring)[0];
-			if (element != undefined && element.type != 'hidden' && field[4] != 'SubFormFK' && field[7] != '0' && (element.readOnly != true) && field[5] == '0' && element.value == ''){
-			  message('Das Feld '+element.title+' erfordert eine Eingabe.');
+			if (
+				element != undefined &&
+				element.type != 'hidden' &&
+				// field[4] != 'SubFormFK' &&
+				field[7] != '0' &&
+				element.readOnly != true &&
+				field[5] == '0' &&
+				element.value == ''
+			) {
+			  message('Das Feld ' + element.title +' erfordert eine Eingabe.');
 				return;
 			}
 			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)){
@@ -724,7 +732,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
-		ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
+		ahah('index.php', formData, new Array(''), new Array('execute_function'));
 	}
 
 	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, list_edit){
@@ -1004,7 +1012,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	}
 
 	daten_export = function(layer_id, anzahl, format){
-		enclosingForm.all.value = document.getElementsByName('all_' + layer_id)[0].value;
+		enclosingForm.all.value = (document.getElementById('all_' + layer_id + '_2').checked? '1' : '');
 		if(enclosingForm.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
 			var option = document.createElement("option");
 			option.text = anzahl;

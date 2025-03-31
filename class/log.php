@@ -65,8 +65,8 @@ class Debugger {
 	}
 
 	function show($msg, $debug = false) {
-		$nl = ($this->mime_type == 'text/html' ? '<br>' : "\n" . date('Y-m-d H:i:s') . ': ');
 		if ($debug AND $this->user_funktion == 'admin') {
+			$nl = ($this->mime_type == 'text/html' ? '<br>' : "\n" . date('Y-m-d H:i:s') . ': ');
 			echo $nl . $msg;
 		}
 	}

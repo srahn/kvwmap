@@ -539,12 +539,14 @@
 							else{
 								$enum = $attributes['enum'][$index];
 							}
-							if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
+							if ($attributes['nullable'][$index] != '0') {
+								$strPleaseSelect = $gui->strPleaseSelect;
+							}
 							$onchange = 'set_changed_flag(this, \'changed_'.$layer_id.'_'.$oid.'\');';
 							$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class);
 						}break;
 						default : {
-							$datapart .= '<input class="'.$field_class.'" style="';
+							$datapart .= '<input title="' . $attributes['alias'][$index] . '" class="'.$field_class.'" style="';
 							if($attributes['privileg'][$name_] == '0'){
 								$datapart .= ';background-color:transparent;border:0px;display:none;background-color:#e8e3da;" readonly ';
 							}
@@ -607,8 +609,13 @@
 				$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&targetlayer_id='.$layer_id;
-				$reloadParams .= '&targetattribute='.$name;
-				$reloadParams .= '&reload='.$attributes['reload'][$j];
+				$reloadParams .= '&targetattribute='.$name;				
+				if ($attributes['no_subform_reload'][$j] == true) {
+					$reloadParams .= '&reload=0';
+				}
+				else {
+					$reloadParams .= '&reload='.$attributes['reload'][$j];
+				}
 				$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$key].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 				$reloadParams .= '&tablename_mother='.$attributes['table_name'][$attributes['the_geom']];											# dito
 				$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito

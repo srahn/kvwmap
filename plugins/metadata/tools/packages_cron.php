@@ -15,7 +15,7 @@
     include(CLASSPATH . 'postgresql.php');
 
     define('DBWRITE', DEFAULTDBWRITE);
-
+    $language = 'german';
     $debug = new Debugger(DEBUGFILE);
     $debug->user_funktion = 'admin';
 

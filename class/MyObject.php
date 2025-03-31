@@ -616,22 +616,23 @@ class MyObject {
 		return $results;
 	}
 
-	function delete() {
+	function delete($where = NULL) {
 		$sql = "
 			DELETE
 			FROM
 				`" . $this->tableName . "`
 			WHERE
-				" . $this->get_identifier_expression() . "
+				" . ($where ?: $this->get_identifier_expression()) . "
 		";
 		#$this->debug->show('MyObject delete sql: ' . $sql, true);
 		$result = $this->database->execSQL($sql);
 		$err_msg = $this->database->errormessage;
-		$results[] = array(
+		$result = array(
 			'success' => ($err_msg == ''),
+			'msg' => ($err_msg == '' ? 'Abfrage zum Löschen erfolgreich' : 'Fehler bei Ausführung der Löschanfrage!'),
 			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
 		);
-		return $results;
+		return $result;
 	}
 
 	function reset_auto_increment() {

@@ -1,9 +1,13 @@
 <?
   include(LAYOUTPATH.'languages/PolygonEditor_'.rolle::$language.'.php');
+	global $selectable_scales;
+	$selectable_scales = array_reverse($selectable_scales);
 ?>
 
 <script type="text/javascript">
 <!--
+
+document.getElementById('container_paint').style.overflow = 'hidden';
 
 function toggle_vertices(){	
 	SVG.toggle_vertices();
@@ -291,7 +295,20 @@ $legendheight = $this->map->height + 20;
 			<div id="dokein-foot">
 				<div id="dokein-scale-koord">
 					<div class="dokein-scale-koord-child">
-						<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>">
+						<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+							<div valign="top" style="height:0px; position:relative;">
+								<div id="scales" style="display:none; position:absolute; left:66px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+									<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="setScale(this);">
+										<? 
+											foreach($selectable_scales as $scale){
+												echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
+											}
+										?>
+									</select>
+								</div>
+							</div>
+							<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" onkeyup="if (event.keyCode == 13) { setScale(this); }" autocomplete="off" size="5" value="<?php echo round($this->map->scaledenom); ?>">
+						</div>
 					</div>
 					<div class="dokein-scale-koord-child">
 						<? if($this->user->rolle->runningcoords != '0'){ ?>
