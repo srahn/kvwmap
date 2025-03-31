@@ -284,7 +284,7 @@ else {
 							set_session_vars($GUI->formvars);
 							unset($GUI->formvars['Stelle_ID']);
 							unset($GUI->formvars['token']);
-							unset($GUI->fromvars['passwort']);
+							unset($GUI->formvars['passwort']);
 							unset($GUI->formvars['new_password']);
 							unset($GUI->formvars['new_password_2']);
 							unset($GUI->formvars['email']);
