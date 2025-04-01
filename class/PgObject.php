@@ -38,9 +38,9 @@ class PgObject {
 	*
 	*/
 
-	private $select;
-	private $from;
-	private $where;
+	public $select;
+	public $from;
+	public $where;
 
 	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
@@ -150,10 +150,8 @@ class PgObject {
 	 * @param string $limit?
 	 * @return array PgObject An array with all found object
 	 */
-	function find_where($where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
-		// echo '<br>PgObject->find_where';
+	function find_where($where, $order = NULL, $select = '*', $limit = NULL) {
 		$select = (empty($select) ? $this->select : $select);
-		$from = (empty($from) ? $this->schema . '."' . $this->tableName . '"' : $from);
 		$where = (empty($where) ? "true" : $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
 		$limit = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
@@ -161,11 +159,11 @@ class PgObject {
 			SELECT
 				" . $select . "
 			FROM
-				" . $from . "
+				" . $this->schema . ".\"" . $this->tableName . "\"
 			WHERE
 				" . $where . "
-				" . $order . "
-				" . $limit . "
+			" . $order . "
+			" . $limit . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
