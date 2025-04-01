@@ -19,6 +19,7 @@
 // xplankonverter_import_zusammenzeichnung
 // xplankonverter_inspire_gml_generieren
 // xplankonverter_konvertierung
+// xplankonverter_konvertierung_anzeigen
 // xplankonverter_konvertierungen_index
 // xplankonverter_konvertierung_loeschen
 // xplankonverter_konvertierung_status
@@ -86,12 +87,22 @@ function isInStelleAllowed($stelle, $requestStelleId) {
 }
 
 if (stripos($GUI->go, 'xplankonverter_') === 0) {
+	$GUI->sanitize([
+		'konvertierung_id' => 'int'
+	]);
 	$GUI->formvars['konvertierung_id'] = trim($GUI->formvars['konvertierung_id']);
 	$xplankonverter_file_path = XPLANKONVERTER_FILE_PATH . ($GUI->formvars['konvertierung_id'] != '' ? $GUI->formvars['konvertierung_id'] . '/' : '');
-	if (!file_exists($xplankonverter_file_path)) {
-		mkdir($xplankonverter_file_path, 0777);
-		$GUI->add_message('warning', 'Der Dateipfad ' . $xplankonverter_file_path . ' für die Konvertierung ' . $GUI->formvars['konvertierung_id'] . ' fehlte und musste neu angelegt werden.');
-		return false;
+	$konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+	if ($konvertierung->data != NULL) {
+		if ($konvertierung->get('stelle_id') != Rolle::$stelle_ID) {
+			$GUI->add_message('warning', 'Die Konvertierung mit der id ' . $GUI->formvars['konvertierung_id'] . ' gehört nicht zu dieser Stelle!');
+			$GUI->formvars['konvertierung_id'] = '';
+		}
+		if (!file_exists($xplankonverter_file_path)) {
+			mkdir($xplankonverter_file_path, 0777);
+			$GUI->add_message('warning', 'Der Dateipfad ' . $xplankonverter_file_path . ' für die Konvertierung ' . $GUI->formvars['konvertierung_id'] . ' fehlte und musste neu angelegt werden.');
+			// return false;
+		}
 	}
 	$xplankonverter_logfile = $xplankonverter_file_path . 'xplankonverter.log';
 	$GUI->xlog = new LogFile(
@@ -1691,15 +1702,15 @@ function go_switch_xplankonverter($go) {
 			}
 
 			$new_konvertierung = $GUI->konvertierung;
-			$zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen(
+			$konvertierungen = Konvertierung::find_konvertierungen(
 				$GUI,
 				$GUI->konvertierung->get('planart'),
 				$GUI->konvertierung->plan_class,
 				$GUI->konvertierung->get_plan_attribut_aktualitaet()
 			);
 
-			if (count($zusammenzeichnungen['published']) > 0) {
-				$old_konvertierung = Konvertierung::find_by_id($GUI, 'id', $zusammenzeichnungen['published'][0]->get('id'));
+			if (count($konvertierungen['published']) > 0) {
+				$old_konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierungen['published'][0]->get('id'));
 				$result = $old_konvertierung->archiv_old_zusammenzeichnung();
 				if (!$result['success']) {
 					send_error($result['msg']);
@@ -1719,7 +1730,7 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-			$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . ' ist von Nutzer ' . $GUI->user->Vorname . ' ' . $GUI->user->Nachname . ' (login: ' . $GUI->user->login_name . ") aktualisiert worden.\n\nDiese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_zusammenzeichnung&planart=" . $GUI->formvars['planart'] . "}\n\nIhr Team von " . TITLE);
+			$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . ' ist von Nutzer ' . $GUI->user->Vorname . ' ' . $GUI->user->Nachname . ' (login: ' . $GUI->user->login_name . ") aktualisiert worden.\n\nDiese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_konvertierung_anzeigen&planart=" . $GUI->formvars['planart'] . "}\n\nIhr Team von " . TITLE);
 			if (!$result['success']) {
 				send_error($result['msg']);
 				break;
@@ -1761,7 +1772,7 @@ function go_switch_xplankonverter($go) {
 			if (!$GUI->konvertierung->download_files_exists('uploaded_xplan_gml')) {
 				$GUI->add_message('warning', 'Die Dateien sind nicht auf dem Server oder an der falschen Stelle.');
 				if ($GUI->formvars['page'] === 'zusammenzeichnung') {
-					go_switch('xplankonverter_zusammenzeichnung');
+					go_switch('xplankonverter_konvertierung_anzeigen');
 					exit;
 				}
 				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
@@ -1780,7 +1791,7 @@ function go_switch_xplankonverter($go) {
 			if (!file_exists($filename)) {
 				$GUI->add_message('warning', 'Diese Datei ist nicht vorhanden. Wenden Sie sich an den Support.');
 				if ($GUI->formvars['page'] === 'zusammenzeichnung') {
-					go_switch('xplankonverter_zusammenzeichnung');
+					go_switch('xplankonverter_konvertierung_anzeigen');
 					exit;
 				}
 				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
@@ -2557,10 +2568,18 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_zusammenzeichnung' : {
+			// Dieser Fall ist nur noch ein Alias für xplankonverter_konvertierung_anzeigen
+			// weil nicht nur Zusammenzeichnungen hochgeladen werden können.
+		}
+		case 'xplankonverter_konvertierung_anzeigen' : {
 			if ((array_key_exists('planart', $GUI->formvars) AND $GUI->formvars['planart'] != 'Plan')) {
-				$GUI->zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
+				$GUI->sanitize([
+					'konvertierung_id' => 'int',
+					'planart' => 'text'
+				]);
+				$GUI->konvertierungen = Konvertierung::find_konvertierungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet, $GUI->formvars['konvertierung_id']);
 			}
-			$GUI->main = '../../plugins/xplankonverter/view/zusammenzeichnung.php';
+			$GUI->main = '../../plugins/xplankonverter/view/konvertierung.php';
 			$GUI->output();
 		} break;
 

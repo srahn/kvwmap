@@ -184,7 +184,7 @@ class Zusammenzeichnung {
             style="display: none"
             type="button"
             value="Zur neuen Zusammenzeichnung"
-            onclick="window.location='index.php?go=xplankonverter_zusammenzeichnung&planart=${this.planart}&csrf_token=${this.csrf_token}'"
+            onclick="window.location='index.php?go=xplankonverter_konvertierung_anzeigen&planart=${this.planart}&csrf_token=${this.csrf_token}'"
           >
         </div>
       `);
@@ -213,9 +213,10 @@ class Zusammenzeichnung {
       success: (result) => {
         console.log('Response import_zusammenzeichnung: %o', result);
         if (result.success) {
-          this.nextStep('import_zusammenzeichnung', 'ok')
+          this.nextStep('import_zusammenzeichnung', 'ok');
         }
         else {
+          console.log('Response nicht erfolgreich');
           if (result.msg && result.msg.includes('Warnung')) {
             // Auch diese Warnung soll als ok dargestellt werden.
             this.nextStep('import_zusammenzeichnung', 'ok');
@@ -225,7 +226,7 @@ class Zusammenzeichnung {
           else {
             this.nextStep('import_zusammenzeichnung', 'error');
             console.error(result.msg);
-            message([{ type: 'error', msg: `Fehler beim Import ${$this.config.genitiv}!<br>${result.msg}` }]);
+            message([{ type: 'error', msg: `Fehler beim Import ${this.config.genitiv}!<br>${result.msg}` }]);
           }
         }
       },
@@ -613,11 +614,12 @@ class Zusammenzeichnung {
 
   nextStep = (step, success) => {
     // confirm step
-    //console.log('confirm_step: %o', this.process[step]);
+    console.log('confirm_step: %o', this.process[step]);
     $('#upload_zusammenzeichnung_step_' + this.process[step].nr).addClass(this.confirm_class[success]);
     $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success] + '" aria-hidden="true" ></i>');
     if (success == 'ok') {
       // call next step
+      console.log('call step ' + this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]);
       this[this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]];
     }
     else {

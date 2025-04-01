@@ -384,7 +384,7 @@
 			return $upload_validation_result;
 		}
 
-		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . $konvertierung->config['plan_file_name']);
+		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . $upload_validation_result['plan_file_name']);
 
 		if (!$result_zusammenzeichnung['success']) {
 			return $result_zusammenzeichnung;
@@ -726,9 +726,9 @@
 	};
 
   $GUI->xplankonverter_remove_failed_konvertierungen = function() use ($GUI) {
-    $zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
-    foreach($zusammenzeichnungen['faulty'] AS $faulty_zusammenzeichnung) {
-      $faulty_zusammenzeichnung->destroy();
+    $konvertierungen = Konvertierung::find_konvertierungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
+    foreach($konvertierungen['faulty'] AS $faulty_konvertierung) {
+      $faulty_konvertierung->destroy();
     }
     return array(
       'success' => true,
