@@ -23,7 +23,7 @@ class Gml_extractor {
 		$result = $this->get_source_srid();
 		if (! $result['success']) {
 			return array(
-				'succes' => false,
+				'success' => false,
 				'msg' => 'Import der GML in die Datenbank mit ogr2ogr_gmlas fehlgeschlagen Fehler: ' . $result['msg']
 			);
 		}
@@ -2334,7 +2334,7 @@ class Gml_extractor {
 	/*
 	 * Finds and inserts all regeln from a specific konvertierung into the xplankonverter.regeln table
 	 */
-	function insert_all_regeln_into_db($konvertierung_id, $stelle_id) {
+	function insert_all_regeln_into_db($konvertierung_id, $stelle_id, $simplify_fachdaten_geom = null) {
 		$geometry_type = ''; # Default
 		$bereiche_ids = $this->get_all_bereiche_ids_of_konvertierung($konvertierung_id);
 		# TODO Check for each regel if bereich = bereich, and enter it accordingly in rule
@@ -2358,7 +2358,7 @@ class Gml_extractor {
 					// echo '<br>Geometrie-Types: ' . print_r($geometry_types, true);
 					foreach ($geometry_types as $geometry_type) {
 						echo '<br>handle geometry_type: ' . $geometry_type;
-						$sql_regel = $this->get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_gml_id, $geometry_type);
+						$sql_regel = $this->get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_gml_id, $geometry_type, $simplify_fachdaten_geom);
 						$sql_regel = str_replace("'", "''", $sql_regel); # Replaces all single commas with 2x single commas to escape them in SQL
 						# TODO: pk Hier vorher existierende Regeln der konvertierung des Bereiches löschen damit sie nicht mehrfach drin sind.
 						// echo '<br>gmlas_to_geml_regel: ' . $sql_regel;
@@ -2396,8 +2396,10 @@ class Gml_extractor {
 	 * @param string $geom_type
 	 * @return string SQL der Regel die auf der gmlas_feature_table basiert
 	 */
-	function get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_id, $geom_type) {
-		echo '<p>Erzeuge Regel SQL für gmlas feature table: ' . $gmlas_feature_table . ' in Bereich: ' . $bereich_id . ' für Geometrietyp: '. $geom_type;
+	function get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_id, $geom_type,$simplify_fachdaten_geom = null) {
+		#echo '<p>Erzeuge Regel SQL für gmlas feature table: ' . $gmlas_feature_table . ' in Bereich: ' . $bereich_id . ' für Geometrietyp: '. $geom_type, $simplify_fachdaten_geom = null;
+
+		$simplify_fachdaten_geom = floatval($simplify_fachdaten_geom);
 		$gml_class = $gmlas_feature_table; # Is this always the case?
 		$gmlas_attributes = $this->get_gmlas_attributes_with_content($this->gmlas_schema, $gmlas_feature_table);
 		echo '<br>gmlas_attribute with content: <pre>' . print_r($gmlas_attributes, true) . '</pre>';
@@ -2428,24 +2430,33 @@ class Gml_extractor {
 					# fix for varying encountered gml-geometry types that are valid for xplanung (according to konformitaetsbedingungen-document) but can cause problems
 					# e.g. in display, in export, for wms/wfs services or are not supported by the konverter
 					if ($mapping['t_column'] == 'position') {
-						if(($geom_type == 'ST_CurvePolygon') or
+						$mapping['regel'] = 'gmlas.position';
+						// Konvertiere curves to line
+						if (
+							($geom_type == 'ST_CurvePolygon') or
 							($geom_type == 'ST_MultiSurface') or
 							($geom_type == 'ST_CompoundCurve') or
-							($geom_type == 'ST_MultiCurve'))
-						{
-							$mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
+							($geom_type == 'ST_MultiCurve')
+						) {
+							$mapping['regel'] = 'ST_CurveToLine(' . $mapping['regel'] . ')';
 						}
 						// Cast to multi-geometries (konverter-convention)
 						else if(($geom_type == 'ST_Point') or
 							($geom_type == 'ST_LineString') or
 							($geom_type == 'ST_Polygon'))
 						{
-							$mapping['regel'] = 'ST_Multi(gmlas.position) AS position';
+							$mapping['regel'] = 'ST_Multi(gmlas.position)';
 						} else {
-							$mapping['regel'] = 'gmlas.position AS position';
+							$mapping['regel'] = 'gmlas.position';
 						}
+
+						// Simplify
+						if ($simplify_fachdaten_geom AND $simplify_fachdaten_geom > 0) {
+							$mapping['regel'] = 'ST_SimplifyPreserveTopology(' . $mapping['regel'] . ', ' . strval($simplify_fachdaten_geom) . ')';
+						}
+						$mapping['regel'] .= ' AS position';
 					}
-					echo '<br>Append column regel for gml_attribute ' . $mapping['t_column'] . ': '. $mapping['t_column'];
+
 					$gml_attributes[] = $mapping['t_column'];
 					$select_sql[] = $mapping['regel'];
 				}

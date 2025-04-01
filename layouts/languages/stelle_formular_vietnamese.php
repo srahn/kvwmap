@@ -26,6 +26,8 @@
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'Tên cơ quan liên hệ OWS';
 	$strOwsContactOrganizationHint = 'Name of responsible organization';
+  $strOwsContactUrl = 'URL';
+  $strOwsContactUrlHint = 'Home page url with further informationen about the contact or the geodata.';
   $strOwsContactEmailAddress = '�?ịa chỉ email liên hệ OWS';
   $strOwsContactEmailAddressHint = '';
   $strOwsContactPerson = 'Ngư�?i liên hệ OWS';
