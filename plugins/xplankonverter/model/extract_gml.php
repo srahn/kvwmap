@@ -22,7 +22,7 @@ class Gml_extractor {
 		$result = $this->get_source_srid();
 		if (! $result['success']) {
 			return array(
-				'succes' => false,
+				'success' => false,
 				'msg' => 'Import der GML in die Datenbank mit ogr2ogr_gmlas fehlgeschlagen Fehler: ' . $result['msg']
 			);
 		}
@@ -2272,7 +2272,7 @@ class Gml_extractor {
 	/*
 	 * Finds and inserts all regeln from a specific konvertierung into the xplankonverter.regeln table
 	 */
-	function insert_all_regeln_into_db($konvertierung_id, $stelle_id) {
+	function insert_all_regeln_into_db($konvertierung_id, $stelle_id, $simplify_fachdaten_geom = null) {
 		$geometry_type = ''; # Default
 		$bereiche_ids = $this->get_all_bereiche_ids_of_konvertierung($konvertierung_id);
 		# TODO Check for each regel if bereich = bereich, and enter it accordingly in rule
@@ -2290,7 +2290,7 @@ class Gml_extractor {
 					# use only ST_Point, ST_MultiPoint, ST_LineString, ST_MultiLineString, ST_Polygon and ST_MultiPolygon
 					$geometry_types = $this->get_geometry_types_of_class_in_schema($c, $this->gmlas_schema);
 					foreach($geometry_types as $g) {
-						$sql_regel = $this->get_gmlas_to_gml_regel_for_class_in_bereich_with_geom($c, $bereich_gml_id, $g);
+						$sql_regel = $this->get_gmlas_to_gml_regel_for_class_in_bereich_with_geom($c, $bereich_gml_id, $g, $simplify_fachdaten_geom);
 						$sql_regel = str_replace("'", "''", $sql_regel); # Replaces all single commas with 2x single commas to escape them in SQL
 						# TODO: pk Hier vorher existierende Regeln der konvertierung des Bereiches löschen damit sie nicht mehrfach drin sind.
 						$this->insert_regel_into_db($c, $sql_regel, $g, $konvertierung_id, $stelle_id, $bereich_gml_id, $bereich_index);
@@ -2323,7 +2323,8 @@ class Gml_extractor {
 	/*
 	 * Returns the SQL of a specified regel for a specific class in a specific bereich with a specific geometry type
 	 */
-	function get_gmlas_to_gml_regel_for_class_in_bereich_with_geom($gmlas_class, $bereich_id, $geom_type) {
+	function get_gmlas_to_gml_regel_for_class_in_bereich_with_geom($gmlas_class, $bereich_id, $geom_type, $simplify_fachdaten_geom = null) {
+		$simplify_fachdaten_geom = floatval($simplify_fachdaten_geom);
 		$gml_class = $gmlas_class; # Is this always the case?
 		$gmlas_attributes = $this->get_attributes_with_values_for_class_in_schema($gmlas_class, $this->gmlas_schema);
 		# echo '<pre>'; print_r($gmlas_attributes); echo '</pre>';
@@ -2350,22 +2351,24 @@ class Gml_extractor {
 					# fix for varying encountered gml-geometry types that are valid for xplanung (according to konformitaetsbedingungen-document) but can cause problems
 					# e.g. in display, in export, for wms/wfs services or are not supported by the konverter
 					if ($mapping['t_column'] == 'position') {
-						if(($geom_type == 'ST_CurvePolygon') or
+						$mapping['regel'] = 'gmlas.position';
+						// Konvertiere curves to line
+						if (
+							($geom_type == 'ST_CurvePolygon') or
 							($geom_type == 'ST_MultiSurface') or
 							($geom_type == 'ST_CompoundCurve') or
-							($geom_type == 'ST_MultiCurve'))
-						{
-							$mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
+							($geom_type == 'ST_MultiCurve')
+						) {
+							$mapping['regel'] = 'ST_CurveToLine(' . $mapping['regel'] . ')';
 						}
-						// Cast to multi-geometries (konverter-convention)
-						else if(($geom_type == 'ST_Point') or
-							($geom_type == 'ST_LineString') or
-							($geom_type == 'ST_Polygon'))
-						{
-							$mapping['regel'] = 'ST_Multi(gmlas.position) AS position';
-						} else {
-							$mapping['regel'] = 'gmlas.position AS position';
+
+						// Simplify
+						if ($simplify_fachdaten_geom AND $simplify_fachdaten_geom > 0) {
+							$mapping['regel'] = 'ST_SimplifyPreserveTopology(' . $mapping['regel'] . ', ' . strval($simplify_fachdaten_geom) . ')';
 						}
+
+						// Make Multi and add alias
+						$mapping['regel'] = 'ST_Multi(' . $mapping['regel'] . ') AS position';
 					}
 					$gml_attributes[] = $mapping['t_column'];
 					$select_sql .= $mapping['regel'];

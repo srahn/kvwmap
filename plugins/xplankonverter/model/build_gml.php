@@ -388,8 +388,15 @@ class Gml_builder {
 				 ($sequence_attr == 15 && substr($uml_attribute['origin'],0,2) == 'RP') ||
 				 ($sequence_attr == 19 && substr($uml_attribute['origin'],0,2) == 'SO'))
 			) {
-				$gml_object_reftextinhalt = str_replace(array('#','GML_','Gml_','gml_'), '', $gml_object['reftextinhalt']);
-				$gmlStr .= "<{$xplan_ns_prefix}refTextInhalt xlink:href=\"#GML_" . $gml_object_reftextinhalt . "\"/>";
+				# multiple values are currently commaseparated in database
+				$aggregated_objekte_gml_ids = explode(',', str_replace($prefixes_or_signs_to_remove, '', $gml_object['reftextinhalt']));
+				// entnimmt mögliche doppelte Werte
+				$aggregated_objekte_gml_ids = array_unique($aggregated_objekte_gml_ids);
+				foreach ($aggregated_objekte_gml_ids as $objekt_gml_id) {
+					if (!empty($objekt_gml_id)) {
+						$gmlStr .= "<{$xplan_ns_prefix}refTextInhalt xlink:href=\"#GML_{$objekt_gml_id}\"/>";
+					}
+				}
 			}
 
 			#$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
@@ -422,7 +429,7 @@ class Gml_builder {
 							$codeSpaceUri = ltrim($gml_value_array[0], '"(');
 							$code_value = $gml_value_array[1];
 							if(!empty($codeSpaceUri) || !empty($code_value)) {
-								$gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
+								$gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">" . htmlentities(trim($code_value, '"')) . "</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
 							}
 							break;
 						case "DataType" :

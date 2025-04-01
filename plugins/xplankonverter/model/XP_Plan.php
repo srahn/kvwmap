@@ -166,6 +166,64 @@ class XP_Plan extends PgObject {
 		);
 	}
 
+	/**
+	 * Function query, set and return extent of all plans with where condition
+	 * that are in epsg of $this->geom_column in $this->extent variable
+	 * additional it query and set the extents in epsg given in $ows_srs string
+	 * @param String $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
+	 * e.g. "EPSG:25833 EPSG:25832 EPSG:4326 5650"
+	 * with an empty string in $ows_srs only extent in geom_column srs will be queried, set and returned.
+	 * @return Array Array with extent in geom_column srs, other extents will be set in extents array with epsg codes as keys
+	 * $this->extent contains the array of minx, miny, maxx, maxy in srs of geom_column
+	 * $this->extent['25832'] eg. contains the same extent in EPSG:25832
+	 */
+	function get_extent($ows_srs = '', $where = '') {
+		if ($where == '') {
+			$where = $this->get_id_condition(array($this->get($this->identifier)));
+		}
+		$epsg_codes = explode(' ', trim(preg_replace('~[EPSGepsg: ]+~', ' ', $ows_srs)));
+		$extents = array();
+		$sql = "
+			SELECT
+				ST_XMin(ST_EXTENT(" . $this->geom_column . ")) AS minx,
+				ST_YMin(ST_EXTENT(" . $this->geom_column . ")) AS miny,
+				ST_XMax(ST_EXTENT(" . $this->geom_column . ")) AS maxx,
+				ST_YMax(ST_EXTENT(" . $this->geom_column . ")) AS maxy
+			FROM
+				" . $this->schema . '.' . $this->tableName . " p JOIN
+				xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+			WHERE
+				" . $where . "
+		";
+		#echo $sql; exit;
+		$this->debug->show('get_extent sql: ' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->extent = pg_fetch_assoc($query);
+
+		foreach ($epsg_codes AS $epsg_code) {
+			if ($epsg_code != '') {
+				$geom_column = 'ST_Transform(' . $this->geom_column . ', ' . $epsg_code . ')';
+				$sql = "
+					SELECT
+						ST_XMin(ST_EXTENT(" . $geom_column . ")) AS minx,
+						ST_YMin(ST_EXTENT(" . $geom_column . ")) AS miny,
+						ST_XMax(ST_EXTENT(" . $geom_column . ")) AS maxx,
+						ST_YMax(ST_EXTENT(" . $geom_column . ")) AS maxy
+					FROM
+						" . $this->schema . '.' . $this->tableName . " p JOIN
+						xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+					WHERE
+						" . $where . "
+				";
+				$sqls[] = $sql;
+				$this->debug->show('get_extent sql: ' . $sql, false);
+				$query = pg_query($this->database->dbConn, $sql);
+				$this->extents[$epsg_code] = pg_fetch_assoc($query);
+			}
+		}
+		return $this->extent;
+	}
+
 	/*
 	* Get the name of first planart
 	* @return string

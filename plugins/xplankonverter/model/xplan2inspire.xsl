@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- DOCUMENTATION -->
-<!-- XPlan2INSPIRE for XPlanung 5.11 RP_Schema to INSPIRE PLU 4.0 -->
+<!-- XPlan2INSPIRE for XPlanung 5.41 RP_Schema to INSPIRE PLU 4.0 -->
 <!-- BP, FP, LP and SO elements are currently not supported -->
 
 <!-- Still requires external timeStamp generation. XSLT 2.0 allows this through <xsl:value-of select="current-dateTime()"/>-->
@@ -12,7 +12,7 @@
 <!-- other INSPIRE geometries in PLU are more permissive than XPlanung -->
 
 <!-- FIXES 2018-10-05:
-- Update of all namespaces to version 5.1 (implicitly version 5.11)
+- Update of all namespaces to version 5.4 (implicitly version 5.41)
 - Implementation of various changes specified by the XPlanung AG-Modellierung (see www.xplanungwiki.de for more details)
 -->
 
@@ -28,9 +28,9 @@
 - Consider automation of xslt creation by holding transformation logic in a database
 -->
 <xsl:stylesheet version="1.0"
-                xmlns="http://www.xplanung.de/xplangml/5/1"
+                xmlns="http://www.xplanung.de/xplangml/5/4"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:xplan="http://www.xplanung.de/xplangml/5/1"
+                xmlns:xplan="http://www.xplanung.de/xplangml/5/4"
                 xmlns:wfs="http://www.opengis.net/wfs/2.0"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                 xmlns:gml="http://www.opengis.net/gml/3.2"
@@ -38,7 +38,7 @@
                 xmlns:plu="http://inspire.ec.europa.eu/schemas/plu/4.0"
                 xmlns:base="http://inspire.ec.europa.eu/schemas/base/3.3"
                 xmlns:base2="http://inspire.ec.europa.eu/schemas/base2/1.0"
-                xsi:schemaLocation="http://www.xplanung.de/xplangml/5/1 http://www.xplanungwiki.de/upload/XPlanGML/5.1/Schema/XPlanung-Operationen.xsd
+                xsi:schemaLocation="http://www.xplanung.de/xplangml/5/4 http://www.xplanungwiki.de/upload/XPlanGML/5.4/Schema/XPlanung-Operationen.xsd
                 http://inspire.ec.europa.eu/schemas/plu/4.0 http://inspire.ec.europa.eu/schemas/plu/4.0/PlannedLandUse.xsd
                 http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd
                 http://inspire.ec.europa.eu/schemas/base/3.3 http://inspire.ec.europa.eu/schemas/base/3.3/BaseTypes.xsd"

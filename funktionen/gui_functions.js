@@ -465,7 +465,7 @@ function fetchMessageFromURL(url) {
 * @param string confim_value The Value that will be send with the callback function wenn the message ist confirmed
 * @param string callback The name of the function called when the user confirmd the message
 */
-function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancel_button_value = 'Abbrechen', width = null) {
+function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancel_button_value = 'Abbrechen', maxWidth = null, width = null) {
 	//console.log('Show Message: %o: ', messages);
 	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
@@ -478,8 +478,11 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 	else {
 		msgBoxDiv.html('');
 	}
+	if (maxWidth != null) {
+		msgBoxDiv.css('maxWidth', maxWidth);
+	}
 	if (width != null) {
-		msgBoxDiv.css('maxWidth', width);
+		msgBoxDiv.css('width', width);
 	}
 	if (document.getElementById('messages') == null) {
     msgBoxDiv.append('<div id="messages"></div>');
@@ -539,7 +542,7 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 		}
 		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
 			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="' + confirm_button_value + '" style="margin: 10px 0px 0px 0px;">');
-			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancel_button_value + '" style="margin: 0px 0px -6px 8px;">');
+			msgBoxDiv.append('<input id="message_cancel_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancel_button_value + '" style="margin: 0px 0px -6px 8px;">');
 		}
 	});
 	
@@ -555,6 +558,10 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 		clearTimeout(messageTimeoutID);
 		$('#message_box').stop().fadeIn();
 	}
+}
+
+function dialog(divId, message, yesCallback, noCallback = () => {}, cancelCallback = () => {}) {
+
 }
 
 function onload_functions() {

@@ -82,7 +82,7 @@ class Konvertierung extends PgObject {
 					'plan_title' => 'Flächennutzungsplan',
 					'plan_short_title' => 'F-Plan',
 					'plan_class' => 'FP_Plan',
-					'plan_abk' => 'fbplan',
+					'plan_abk' => 'fplan',
 					'plan_abk_plural' => 'fplaene',
 					'plan_layer_id' => XPLANKONVERTER_FP_PLAENE_LAYER_ID,
 					'plan_attribut_aktualitaet' => 'wirksamkeitsdatum, aenderungenbisdatum, genehmigungsdatum',
@@ -101,7 +101,7 @@ class Konvertierung extends PgObject {
 						'check_class_completeness',
 						'replace_zusammenzeichnung'
 					)
-				);
+        );
 				$config['upload_bedingungen'] = "
 					<li>Die Daten müssen in einem ZIP-Archiv abgelegt sein.</li>
 					<li>Die GML-Datei im ZIP-Archiv muss die Dateibezeichnung \"Zusammenzeichnung.gml\" aufweisen.</li>
@@ -134,18 +134,18 @@ class Konvertierung extends PgObject {
 			} break;
 			case ('RP-Plan') : {
 				$config = array(
-					'title' => 'Regionaler Raumordnungsplan',
-					'artikel' => 'Der',
-					'singular' => 'regionale Raumordnungsplan',
-					'akkusativ' => 'regionalen Raumordnungsplan',
-					'genitiv' => 'des regionalen Raumordnungsplanes',
-					'genitiv_plural' => 'der regionalen Raumordnungspläne',
-					'plural' => 'Regionale Raumordnungspläne',
+					'title' => 'Regionales Raumordnungsprogramm',
+					'artikel' => 'Das',
+					'singular' => 'Regionales Raumordnungsprogramm',
+					'akkusativ' => 'Regionalen Raumordnungsprogramm',
+					'genitiv' => 'des Regionalen Raumordnungsprogramms',
+					'genitiv_plural' => 'der Regionalen Raumordnungsprogramme',
+					'plural' => 'Regionale Raumordnungsprogramme',
 					'keine_zusammenzeichnung' => 'keine veröffentlichte Version',
-					'plan_title' => 'Regionaler Raumordnungsplan',
+					'plan_title' => 'Regionales Raumordnungsprogramm',
 					'plan_short_title' => 'RP-Plan',
 					'plan_class' => 'RP_Plan',
-					'plan_abk' => 'rbplan',
+					'plan_abk' => 'rplan',
 					'plan_abk_plural' => 'rplaene',
 					'plan_layer_id' => XPLANKONVERTER_RP_PLAENE_LAYER_ID,
 					'plan_attribut_aktualitaet' => 'datumdesinkrafttretens, planbeschlussdatum, genehmigungsdatum',
@@ -176,6 +176,7 @@ class Konvertierung extends PgObject {
 					'singular' => 'XPlan',
 					'nominativ' => 'XPlan',
 					'plural' => 'XPläne',
+					'genitiv' => 'des Plans',
 					'genitiv_plural' => 'der XPläne',
 					'keine_zusammenzeichnung' => 'keine veröffentlichte Version',
 					'plan_title' => 'Plan',
@@ -404,7 +405,7 @@ class Konvertierung extends PgObject {
 			'archived' => array(),
 			'faulty' => array()
 		);
-		$konvertierung = new Konvertierung($gui);
+		$konvertierung = new Konvertierung($gui, $planart);
 		$where_condition = ($planart == 'FP-Plan' ? '(p.zusammenzeichnung OR p.zusammenzeichnung IS NULL)' : 'true');
 		$sql = "
 			SELECT
@@ -445,20 +446,101 @@ class Konvertierung extends PgObject {
 			}
 			$zusammenzeichnungen[$konvertierung->art][] = clone $konvertierung;
 		}
-		if (file_exists(XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $gui->Stelle->id)) {
-			$zusammenzeichnungen['archived'] = glob(XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $gui->Stelle->id . '/Zusammenzeichnung_*');
+    $archiv_dir = XPLANKONVERTER_FILE_PATH . 'archiv/' . $gui->Stelle->id . '/' . $konvertierung->config['plan_abk_plural'] . '/';
+		if (file_exists($archiv_dir)) {
+			$zusammenzeichnungen['archived'] = glob($archiv_dir . '*');
 			rsort($zusammenzeichnungen['archived'],  SORT_STRING);
 		}
-		if ($gui->user->id == 3) {
-			#echo 'z: ' . print_r(array_map(function($z) { return array_map(function($x) { return $x->data['id']; }, $z); }, $zusammenzeichnungen), true); exit;
+		if (($gui->user->id == 2) || ($gui->user->id == 3)){
+			//echo 'z: ' . print_r(array_map(function($z) { return array_map(function($x) { return $x->data['id']; }, $z); }, $zusammenzeichnungen), true); exit;
 		}
 		return $zusammenzeichnungen;
 	}
 
-	function archiv_old_zusammenzeichnung() {
-		# Zippe Zusammenzeichnung und Geltungsbereiche aus Verzeichnis $GUI->konvertierung->get_file_path('uploaded_xplan_gml'); (XPLANKONVERTER_FILE_PATH/<konvertierung_id>/uploaded_xplan_gml/)
-		$zip_path = XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $this->gui->Stelle->id . '/';
-		$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
+	// function archiv_old_zusammenzeichnung() {
+	// 	# Zippe Zusammenzeichnung und Geltungsbereiche aus Verzeichnis $GUI->konvertierung->get_file_path('uploaded_xplan_gml'); (XPLANKONVERTER_FILE_PATH/<konvertierung_id>/uploaded_xplan_gml/)
+	// 	$zip_path = XPLANKONVERTER_FILE_PATH . 'archiv/' . $this->gui->Stelle->id . '/' . $konvertierung->config['plan_abk_plural'] . '/';
+	// 	$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
+	// 	$this->gui->debug->write('Archiviere Plan in zip_file: ' . $zip_file);
+	// 	if (!file_exists($zip_path)) {
+	// 		mkdir($zip_path, 0775, true);
+	// 	}
+
+	// 	$archive = new ZipArchive();
+
+	// 	if ($archive->open($zip_path . $zip_file, (ZipArchive::CREATE | ZipArchive::OVERWRITE)) !== true) {
+	// 		return array(
+	// 			'success' => false,
+	// 			'msg' => "Kann Zip-Archiv " . $zip_path . $zip_file . " nicht anlegen"
+	// 		);
+	// 	}
+	// 	$this->gui->debug->write('Zip-Datei angelegt.');
+	// 	$archive->addGlob($this->get_file_path('uploaded_xplan_gml') . '*.gml');
+	// 	$this->gui->debug->write('GML-Dateien aus Verzeichnis: ' . $this->get_file_path('uploaded_xplan_gml') . ' zur Zip-Datei hinzufügen.');
+	// 	if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
+	// 		try {
+	// 			$archive->close();
+	// 		}
+	// 		catch (Exception $e) {
+	// 			return array(
+	// 				'success' => false,
+	// 				'msg' => "Fehler beim Hinzufügen der hochgeladenen Dateien aus Verzeichnis " . $this->get_file_path('uploaded_xplan_gml') . " in das Archiv."
+	// 			);
+	// 		}
+	// 	}
+
+	// 	$geodata_metadata_url = METADATA_CATALOG . '/srv/api/records/' . $this->get('metadata_dataset_uuid') . '/formatters/xml?approved=true';
+	// 	$geodata_metadata_file = @file_get_contents($geodata_metadata_url);
+	// 	$this->gui->debug->write('Metadaten von URL: ' . $geodata_metadata_url . ' zur Zipdatei hinzufügen.');
+	// 	if ($geodata_metadata_file !== FALSE) {
+	// 		#add it to the zip
+	// 		$archive->addFromString('Metadaten.xml', $geodata_metadata_file);
+	// 		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
+	// 			try {
+	// 				$archive->close();
+	// 			}
+	// 			catch (Exception $e) {
+	// 				return array(
+	// 					'success' => false,
+	// 					'msg' => "Fehler beim Hinzufügen der Metadatendatei von " . $geodata_metadata_url . " in das Archiv"
+	// 				);
+	// 			}
+	// 		}
+	// 	}
+
+	// 	try {
+	// 		$this->gui->debug->write('Löschen der archivierten Konvertierung id: ' . $this->get('id'));
+	// 		$this->destroy();
+	// 		$archive->close();
+	// 	}
+	// 	catch (Exception $e) {
+	// 		if ($archive->numFiles > 0) {
+	// 			return array(
+	// 				'success' => false,
+	// 				'msg' => "Fehler beim Schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage()
+	// 			);
+	// 		}
+	// 		else {
+	// 			return array(
+	// 				'success' => true,
+	// 				'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' für die vorherige Konvertierung erfolgreich angelegt und Objekt in Datenbank gelöscht.'
+	// 			);
+	// 		}
+	// 	}
+	// 	return array(
+	// 		'success' => true,
+	// 		'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' für die vorherige Konvertierung erfolgreich angelegt und Objekt in Datenbank gelöscht.'
+	// 	);
+	// }
+
+	/**
+	 * Sichert die Daten des alten Planes der aktualisiert wird in eine ZIP-Datei und legt sie im Unterordner archiv/<stelle_id>/<planart> ab.
+	 */
+	function archiv_old_plan() {
+		# Zippe Dateien in Verzeichnis $GUI->konvertierung->get_file_path('uploaded_xplan_gml'); (XPLANKONVERTER_FILE_PATH/<konvertierung_id>/uploaded_xplan_gml/)
+		$zip_path = XPLANKONVERTER_FILE_PATH . 'archiv/' . $this->gui->Stelle->id . '/' . $this->config['plan_abk_plural'] . '/';
+		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
+		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
 		if (!file_exists($zip_path)) {
 			mkdir($zip_path, 0775, true);
 		}
@@ -471,13 +553,17 @@ class Konvertierung extends PgObject {
 				'msg' => "Kann Zip-Archiv " . $zip_path . $zip_file . " nicht anlegen"
 			);
 		}
-
+		$this->gui->xlog->write('Zip-Datei angelegt.');
 		$archive->addGlob($this->get_file_path('uploaded_xplan_gml') . '*.gml');
+		$this->gui->xlog->write('GML-Dateien aus Verzeichnis: ' . $this->get_file_path('uploaded_xplan_gml') . ' zur Zip-Datei hinzufügen.');
+		$this->gui->xlog->write('Files: ' . implode("\n", glob($this->get_file_path('uploaded_xplan_gml') . '*.gml')));
 		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
 			try {
+				$this->gui->xlog->write('Fehler bei Hinzufügen der Datein in die ZIP-Datei. zipArchiv status: ' . $zipArchiv->status);
 				$archive->close();
 			}
 			catch (Exception $e) {
+				$this->gui->xlog->write('Fehler bei Schließen des zipArchivs');
 				return array(
 					'success' => false,
 					'msg' => "Fehler beim Hinzufügen der hochgeladenen Dateien aus Verzeichnis " . $this->get_file_path('uploaded_xplan_gml') . " in das Archiv."
@@ -487,6 +573,7 @@ class Konvertierung extends PgObject {
 
 		$geodata_metadata_url = METADATA_CATALOG . '/srv/api/records/' . $this->get('metadata_dataset_uuid') . '/formatters/xml?approved=true';
 		$geodata_metadata_file = @file_get_contents($geodata_metadata_url);
+		$this->gui->debug->write('Metadaten von URL: ' . $geodata_metadata_url . ' zur Zipdatei hinzufügen.');
 		if ($geodata_metadata_file !== FALSE) {
 			#add it to the zip
 			$archive->addFromString('Metadaten.xml', $geodata_metadata_file);
@@ -504,10 +591,16 @@ class Konvertierung extends PgObject {
 		}
 
 		try {
+			$this->gui->xlog('Anzahl Files in ZIP-File: ' . $archive->numFiles);
+			$this->gui->debug->write('Löschen der archivierten Konvertierung id: ' . $this->get('id'));
+			$this->gui->xlog('Löschen der archivierten Konvertierung id: ' . $this->get('id'));
 			$this->destroy();
+			$this->gui->xlog('Konvertierung gelöscht.');
 			$archive->close();
+			$this->gui->xlog('Archiv geschlossen.');
 		}
 		catch (Exception $e) {
+			$this->gui->xlog("Fehler beim Schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage());
 			if ($archive->numFiles > 0) {
 				return array(
 					'success' => false,
@@ -517,12 +610,50 @@ class Konvertierung extends PgObject {
 			else {
 				return array(
 					'success' => true,
-					'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' erfolgreich angelegt und Konvertierung gelöscht.'
+					'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' für die vorherige Konvertierung erfolgreich angelegt und Objekt in Datenbank gelöscht.'
 				);
 			}
 		}
+		return array(
+			'success' => true,
+			'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' für die vorherige Konvertierung erfolgreich angelegt und Objekt in Datenbank gelöscht.'
+		);
 	}
 
+	function archiv_old_plan_test() {
+		# Zippe Dateien in Verzeichnis $GUI->konvertierung->get_file_path('uploaded_xplan_gml'); (XPLANKONVERTER_FILE_PATH/<konvertierung_id>/uploaded_xplan_gml/)
+		$zip_path = XPLANKONVERTER_FILE_PATH . 'archiv/' . $this->gui->Stelle->id . '/' . $this->config['plan_abk_plural'] . '/';
+		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
+		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
+		if (!file_exists($zip_path)) {
+			mkdir($zip_path, 0775, true);
+		}
+
+		$archive = new ZipArchive();
+
+		if ($archive->open($zip_path . $zip_file, (ZipArchive::CREATE | ZipArchive::OVERWRITE)) !== true) {
+			return array(
+				'success' => false,
+				'msg' => "Kann Zip-Archiv " . $zip_path . $zip_file . " nicht anlegen"
+			);
+		}
+		$this->gui->xlog->write('Zip-Datei angelegt.');
+		$archive->addGlob($this->get_file_path('uploaded_xplan_gml') . '*.gml');
+		$this->gui->xlog->write('GML-Dateien aus Verzeichnis: ' . $this->get_file_path('uploaded_xplan_gml') . ' zur Zip-Datei hinzufügen.');
+		$this->gui->xlog->write('Files: ' . implode("\n", glob($this->get_file_path('uploaded_xplan_gml') . '*.gml')));
+		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
+			try {
+				$archive->close();
+			}
+			catch (Exception $e) {
+				return array(
+					'success' => false,
+					'msg' => "Fehler beim Hinzufügen der hochgeladenen Dateien aus Verzeichnis " . $this->get_file_path('uploaded_xplan_gml') . " in das Archiv."
+				);
+			}
+		}
+		$this->gui->xlog->write('ZIP-File closed');
+	}
 	/**
 	 *Anlegen einer Konvertierung
 	 */
@@ -605,7 +736,7 @@ class Konvertierung extends PgObject {
 	/**
 	 * Removes the directory determined which get_file_path() in which the uploaded and created documents are
 	 * located.
-	 * It only deletes if the id of the konvertierung is contained in the path. 
+	 * It only estroys if the id of the konvertierung is contained in the path. 
 	 */
 	function delete_upload_directory() {
 		$file_path = $this->get_file_path('');
@@ -861,7 +992,7 @@ class Konvertierung extends PgObject {
 								ST_GeometryType(position) = 'ST_MultiPolygon'
 						";
 						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-						echo $path . $class_name . '_poly.shp';
+						#echo $path . $class_name . '_poly.shp';
 						$export_class->ogr2ogr_export($sql_poly, '"ESRI Shapefile" -s_srs epsg:' . $src_srid . ' -t_srs epsg:' . $this->get('output_epsg') . ' -nlt MULTIPOLYGON', $path . $class_name . '_poly.shp', $this->database);
 					}
 				}
@@ -1189,7 +1320,11 @@ class Konvertierung extends PgObject {
 							ELSE NULL
 						END AS externereferenz,
 						NULLIF(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsenddatum,
-						ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde,
+						CASE
+							WHEN count_gemeinde > 0
+							THEN gemeindelink.gemeinde
+							ELSE NULL
+							END AS gemeinde,
 						(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
 						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
@@ -1222,8 +1357,22 @@ class Konvertierung extends PgObject {
 					FROM
 						" . $table_schema . "." . strtolower($plan_class) . " gmlas JOIN
 						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
-						" . $table_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
+						(
+							SELECT
+								COUNT(*) AS count_gemeinde,
+								gemeindelink_sub.parent_id,
+								array_agg((
+									g_sub.ags,
+									g_sub.rs,
+									g_sub.gemeindename,
+									g_sub.ortsteilname
+								)::xplan_gml.xp_gemeinde) AS gemeinde
+							FROM
+								" . $table_schema . "." . strtolower($plan_class) . "_gemeinde gemeindelink_sub LEFT JOIN
+								" . $table_schema . ".xp_gemeinde g_sub ON gemeindelink_sub.xp_gemeinde_pkid = g_sub.ogr_pkid
+							GROUP BY
+								gemeindelink_sub.parent_id
+						) gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
 						(
 							SElECT
 								COUNT(*) AS count_externeref,
@@ -1327,7 +1476,11 @@ class Konvertierung extends PgObject {
 							ELSE NULL
 						END AS externereferenz,
 						NULLIF(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsenddatum,
-						ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde,
+						CASE
+							WHEN count_gemeinde > 0
+							THEN gemeindelink.gemeinde
+							ELSE NULL
+							END AS gemeinde,
 						(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
 						gmlas.sachgebiet AS sachgebiet,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
@@ -1347,8 +1500,22 @@ class Konvertierung extends PgObject {
 					FROM
 						" . $table_schema . "." . strtolower($plan_class) . " gmlas JOIN
 						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
-						" . $table_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
+						(
+							SELECT
+								COUNT(*) AS count_gemeinde,
+								gemeindelink_sub.parent_id,
+								array_agg((
+									g_sub.ags,
+									g_sub.rs,
+									g_sub.gemeindename,
+									g_sub.ortsteilname
+								)::xplan_gml.xp_gemeinde) AS gemeinde
+							FROM
+								" . $table_schema . "." . strtolower($plan_class) . "_gemeinde gemeindelink_sub LEFT JOIN
+								" . $table_schema . ".xp_gemeinde g_sub ON gemeindelink_sub.xp_gemeinde_pkid = g_sub.ogr_pkid
+							GROUP BY
+								gemeindelink_sub.parent_id
+						) gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
 						(
 							SElECT
 								COUNT(*) AS count_externeref,
@@ -2504,18 +2671,30 @@ class Konvertierung extends PgObject {
 			$this->set_metadata_uuids($md->get('uuids'));
 		}
 
+		$current_time = time();
+
 		$md->set('stellendaten', $this->gui->Stelle->getstellendaten_full_contact());
-		$md->set('md_date', en_date($this->get_aktualitaetsdatum()));
+		// md_date muss immer auf das aktuelle Datum gesetzt werden,
+		// da das Harvesting von GDI-NI nur stattfindet, wenn hier ein unterschiedlicher Wert gesetzt wird
+		$md->set('md_date', date('Y-m-d', $current_time));
+		// $md->set('md_date', en_date($this->get_aktualitaetsdatum()));
+		// $md->set('md_date', en_date($this->get_letztes_aktualisierungsdatum_gebietstabelle()));
 		$md->set('date_de', $this->get_aktualitaetsdatum());
+		//$md->set('date_de', $this->plan->get('wirksamkeitsdatum'));
+		$md->set('date_title', 'Datum');
 		$md->set('id_cite_title', $plan->get('name'));
 		$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist der " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
 		$md->set('id_abstract', array(
 			'dataset' => ' des Plans ' . $plan->get('name') . $abstract_zusatz,
-			'viewservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
-			'downloadservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
+			//'viewservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
+			//'downloadservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
+			'viewservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
+			'downloadservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
 		));
 		$md->set('date_title', $this->get_plan_attribut_aktualitaet());
-		$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));
+		//$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));
+		// id_cite_date should be set to aktualisierungsdatum for metadataportal niedersachsen
+		$md->set('id_cite_date', en_date($this->get_letztes_aktualisierungsdatum_gebietstabelle()));
 		$md->set('version', $this->get_version_from_ns_uri(XPLAN_NS_URI));
 		$md->set('extents', $plan->extents);
 		$md->set('service_layer_name', umlaute_umwandeln($plan->get('name')));
@@ -2528,7 +2707,9 @@ class Konvertierung extends PgObject {
 		$md->set('viewservice_browsegraphic', $md->get('onlineresource') . "Service=WMS&amp;Request=GetMap&amp;Version=1.1.0&amp;Layers=" . $md->get('service_layer_name') . "&amp;FORMAT=image/png&amp;SRS=EPSG:" . $md->get('stellendaten')['epsg_code'] . "&amp;BBOX=" . implode(',', $md->get('extents')[$md->get('stellendaten')['epsg_code']]) . "&amp;WIDTH=300&amp;HEIGHT=300");
 		$md->set('downloadservice_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Downloadservice.png');
 		$md->set('geographicIdentifier', $plan->get_regionalschluessel());
+		$md->set('withRegionalKeyword', false);
 
+		// echo '<br>metadata: ' . print_r($md->data, true);
 		$metaDataCreator = new MetaDataCreator($md);
 		return array(
 			'metaDataGeodatensatz' => $metaDataCreator->createMetadataGeodatensatz(),
@@ -2608,6 +2789,96 @@ class Konvertierung extends PgObject {
 			);
 		}
 	}
-
+	
+	/*
+	* Die Funktion liefert das Aktualitätsdatum aus der Gemeindeverbandstabelle.
+	* Das Aktualitätsdatum wird beim Upload auf das Datum des Uploads gesetzt.
+	* Das Datum kann aber auch händisch über die Administration (z.b. von den ARLS) bearbeitet werden.
+	* Falls kein Datum gesetzt ist, wird das Aktualitätsdatum verwendet.
+	*/
+	function get_letztes_aktualisierungsdatum_gebietstabelle() {
+		$sql = "
+			SELECT
+				gv.letzte_aktualisierung,zs.konvertierung_id
+			FROM
+				gebietseinheiten.gemeindeverbaende AS gv
+			LEFT JOIN
+				xplankonverter.zusammenzeichnung_der_stellen zs ON gv.stelle_id = zs.stelle_id
+			WHERE
+				zs.konvertierung_id = " . $this->get_id() . ";";
+		#echo $sql;
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
+		$rs = pg_fetch_assoc($ret[1]);
+		if($rs['letzte_aktualisierung'] != '' AND $rs['letzte_aktualisierung'] != NULL) {
+			return $rs['letzte_aktualisierung'];
+		} else {
+			return get_aktualitaetsdatum();
+		}							
+	}
+	
+	function update_letztes_aktualisierungsdatum_gebietstabelle() {
+		$sql ="
+			UPDATE gebietseinheiten.gemeindeverbaende gemvb
+			SET letzte_aktualisierung = now()::date
+			FROM (
+				SELECT
+					gv.gvb_name,
+					gv.stelle_id AS idderstelle
+				FROM
+					gebietseinheiten.gemeindeverbaende AS gv
+					LEFT JOIN xplankonverter.zusammenzeichnung_der_stellen zs ON gv.stelle_id = zs.stelle_id
+				WHERE zs.konvertierung_id = " . $this->get_id() . "
+			) AS sub
+			WHERE sub.gvb_name = gemvb.gvb_name
+			AND sub.idderstelle = gemvb.stelle_id
+		";
+		#echo '<p>SQL zum Update der Gebietseinheiten-Tabelle Datum letzte_aktualisierung: ' . $sql;
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
+		return $ret;
+	}
+	
+	/*
+	* Checks if the geometry of the plan-geltungsbereich is similar to the geometry (95% area equality)
+	* in gebietseinheiten in the temporary_gmlas_table
+	* This check makes sure to disqualify geometries that only include just one small change (e.g. Berichtigung/Aenderung)
+	* i.e. if failed, the uploaded file is not a full but at best only a partial zusammenzeichnung
+	*/
+	function is_geltungsbereich_gebietseinheiten_area_similar($schema_tmp, $plan_class_tmp) {
+		$sql = "
+			SELECT
+				(ST_area(gv.geom_25832)/p.plan_area > 0.95 AND ST_area(gv.geom_25832)/p.plan_area < 1.15) AS is_95_equal
+			FROM
+				gebietseinheiten.gemeindeverbaende gv,
+				(
+					SELECT ST_Area(raeumlichergeltungsbereich) AS plan_area
+					FROM " . $schema_tmp . "." . strtolower($plan_class_tmp) . "
+					ORDER BY ST_Area(raeumlichergeltungsbereich) DESC LIMIT 1
+				) AS p
+			WHERE stelle_id = " . $this->get('stelle_id');
+		//$this->debug->show('Check if Geltungsbereich is 95% area-equivalent to gebietseinheit with sql: ' . $sql, Konvertierung::$write_debug);
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
+		$rs = pg_fetch_assoc($ret[1]);
+		if($rs['is_95_equal'] == '' OR $rs['is_95_equal'] == NULL OR $rs['is_95_equal'] == 'f') {
+			$rs['is_95_equal'] = false;
+		}
+		if($rs['is_95_equal'] == 't') {
+			$rs['is_95_equal'] = true;
+		}
+		return $rs['is_95_equal'];
+		
+		
+		/*
+		$plan_or_regel_assigned = $result['plan_or_regel_assigned'];
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
+		$rs = pg_fetch_assoc($ret[1]);
+		if($rs['is_95_equal'] != '' AND $rs['is_95_equal'] != NULL) {
+			return $rs['is_95_equal'];
+		} else {
+			return false;
+		}
+		*/
+	}
+	
+	
 }
 ?>

@@ -83,7 +83,7 @@ include(LAYOUTPATH.'languages/cronjobs_'.$this->user->rolle->language.'.php');
 <tr>
 	<td colspan="2" align="center">
 		<input type="hidden" name="go" value="cronjob_speichern">
-		<input type="button" name="cancle" value="<? echo $this->strCancel; ?>" onclick="document.location.href = 'index.php?go=cronjobs_anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">
+		<input type="button" name="cancel" value="<? echo $this->strCancel; ?>" onclick="document.location.href = 'index.php?go=cronjobs_anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">
 		<input type="submit" name="go_plus" value="<?php echo ($this->cronjob->get('id') > 0 ? $this->strSave : $this->strCreate); ?>">
 	</td>
 </tr>

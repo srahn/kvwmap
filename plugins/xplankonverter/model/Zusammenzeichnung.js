@@ -12,21 +12,22 @@ class Zusammenzeichnung {
       upload_zusammenzeichnung: {
         nr: 1,
         msg: `Hochladen und Validieren ${this.config.genitiv} auf den Server`,
-        description: 'Die Datei wird auf den Server hochgeladen und temporär abgelegt.<br>\
-        Die ZIP-Datei wird entpackt und geprüft ob die notwendigen Dateien enthalten sind.<br>\
-        Dann werden die Dateien an den XPlan-Validator der XPlanung-Leitstelle gesendet.<br>\
-        Wenn die Validierung keinen Fehler liefert, wird ein Konvertierungsobjekt in der Datenbank angelegt und es geht weiter mit dem nächsten Schritt.<br>\
-        Im Fehlerfall bekommen Sie eine Fehlermeldung und einen Link auf den Fehlerbericht.<br>\
-        Sie müssen in Folge Ihre Dateien entsprechend des Fehlerberichtes korrigieren und können einen erneuten Versuch zum Hochladen Ihrer Zusammenzeichnung starten.'
+        description: `Die Datei wird auf den Server hochgeladen und temporär abgelegt.<br>
+        Die ZIP-Datei wird entpackt und geprüft ob die notwendigen Dateien enthalten sind.<br>
+        Dann werden die Dateien an den XPlan-Validator der XPlanung-Leitstelle gesendet.<br>
+        Wenn die Validierung keinen Fehler liefert, wird ein Konvertierungsobjekt in der Datenbank angelegt und es geht weiter mit dem nächsten Schritt.<br>
+        Im Fehlerfall bekommen Sie eine Fehlermeldung und einen Link auf den Fehlerbericht.<br>
+        Sie müssen in Folge Ihre Dateien entsprechend des Fehlerberichtes korrigieren und können einen erneuten Versuch zum Hochladen ${this.config.genitiv} starten.`
       },
       import_zusammenzeichnung: {
         nr: 2,
         msg: 'Importieren der GML-Datei in die Portaldatenbank',
-        description: 'Die Zusammenzeichnung wird in die Postgres-Datenbank mit dem Programm ogr2ogr eingelesen.<br>\
-        Danach wird geprüft ob es in der Datenbank schon einen Plan mit der gleichen gml-id gibt.<br>\
-        Wenn ja, abbrechen und im nächsten Schritt die gml-ids in der Zusammenzeichnung ändern.<br>\
-        Wenn nicht, wird das temporär angelegte Schema umbenannt und der Plan und der Bereich angelegt sowie die Datei mit den Geltungsbereichen eingelesen.<br>\
-        War das erfolgreich, werden die Geometrien in die Tabelle der Geltungsbereiche für die Konvertierung übernommen.'
+        description: `${this.config.artikel} ${this.config.singular} wird in die Postgres-Datenbank mit dem Programm ogr2ogr eingelesen.<br>
+        Danach wird geprüft ob es in der Datenbank schon einen Plan mit der gleichen gml-id gibt.<br>
+        Wenn ja, abbrechen und im nächsten Schritt die gml-ids in der XPlanGML ${this.config.genitiv} ändern.<br>
+        Wenn nicht, wird überprüft, ob der Geltungsbereich des Plans mindestens 95% mit dem Geltungsbereich der Gebietseinheit übereinstimmt.<br>
+				Wenn ja, wird das temporär angelegte Schema umbenannt und der Plan und der Bereich angelegt sowie die Datei mit den Geltungsbereichen eingelesen.<br>
+        War das erfolgreich, werden die Geometrien in die Tabelle der Geltungsbereiche für die Konvertierung übernommen.`
       },
       create_plaene: {
         nr: 3,
@@ -39,8 +40,7 @@ class Zusammenzeichnung {
         msg: `Konvertierung der Plandaten in die Version ${this.xplan_version}`,
         description: `Die Fachdaten ${this.config.genitiv} werden nun in die entsprechenden Tabellen übernommen.<br>
         Dabei erfolgt das mapping zwischen dem Import-Datenmodell von ogr2ogr in das XPlanung-Datenmodell des xplankonverters.<br>
-        Bei der Konvertierung wird auch auf die Version ${this.xplan_version} gewechselt.
-        `
+        Bei der Konvertierung wird auch auf die Version ${this.xplan_version} gewechselt.`
       },
       gml_generieren: {
         nr: 5,
@@ -58,11 +58,10 @@ class Zusammenzeichnung {
       create_metadata: {
         nr: 7,
         msg: 'Anlegen der Metadatendokumente für den Geodatensatz und die Dienste',
-        description: 'Erzeugen des Metadatendokumentes zur Beschreibung des Geodatensatzes.<br>\
-        Erzeugen des Metadatendokumentes zur Beschreibung des WMS-Dienstes.<br>\
-        Erzeugen des Metadatendokumentes zur Beschreibung des WFS-Dienstes.<br>\
-        Hochladen der Metadatendokumente in das Metainformationssystem des Portals.\
-        '
+        description: `Erzeugen des Metadatendokumentes zur Beschreibung des Geodatensatzes.<br>
+        Erzeugen des Metadatendokumentes zur Beschreibung des WMS-Dienstes.<br>
+        Erzeugen des Metadatendokumentes zur Beschreibung des WFS-Dienstes.<br>
+        Hochladen der Metadatendokumente in das Metainformationssystem des Portals.`
       },
       update_full_geoweb_service: {
         nr: 8,
@@ -78,7 +77,7 @@ class Zusammenzeichnung {
         nr: 10,
         msg: 'Prüfen ob sich alle Objekte vorhandenen Planzeichenklassen zuordnen lassen.',
         description: `Es wird geprüft ob Objekte zu definierten Klassen gehören.<br>
-        Solche, die nicht zu definierten Klassen gehören, werden aufaddiert und die Summe derer angezeigt.<br>
+        Solche, die nicht zu definierten Klassen gehören, werden aufaddiert und deren Summe angezeigt.<br>
         Um welche Layer und Objekte sich handelt kann im Nachhinein in der Ansicht ${this.config.genitiv} evaluiert werden.<br>
         Des Weiteren wird der Support benachrichtigt um die fehlenden Klassen anzulegen.`
       },
@@ -117,7 +116,7 @@ class Zusammenzeichnung {
     this.planart = planart;
     this.csrf_token = csrf_token;
     this.lfdNrStep = 0;
-    this.numSteps = Object.keys(this.process).length - 2;
+    this.numSteps = this.config.upload_steps.length;
   }
 
   // MARK: upload_zusammenzeichnung
@@ -137,6 +136,7 @@ class Zusammenzeichnung {
       form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
       form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
+			form_data.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').val());
       var xhttp = new XMLHttpRequest();
       xhttp.open("POST", "index.php", true);
       xhttp.onload = (event) => {
@@ -159,7 +159,7 @@ class Zusammenzeichnung {
             if (event.target.responseText.indexOf('<input id="login_name"') > 0) {
               window.location = 'index.php';
             }
-            message([{ type: 'error', msg: 'Fehler beim Hochladen der Zusammenzeichnung ' + this.id + ' !<p>' + err + ' ' + event.target.responseText }]);
+            message([{ type: 'error', msg: `Fehler beim Hochladen ${this.config.genitiv} ${this.id}!<p>${err} ${event.target.responseText}` }]);
           }
         }
         else {
@@ -182,7 +182,7 @@ class Zusammenzeichnung {
             id="upload_zusammenzeichnung_finish_button"
             style="display: none"
             type="button"
-            value="Zur neuen Zusammenzeichnung"
+            value="Zur Anzeige ${this.config.genitiv}"
             onclick="window.location='index.php?go=xplankonverter_zusammenzeichnung&planart=${this.planart}&csrf_token=${this.csrf_token}'"
           >
         </div>
@@ -207,7 +207,8 @@ class Zusammenzeichnung {
         xplan_gml_path: 'uploaded_xplan_gml',
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
       },
       success: (result) => {
         // console.log('Response import_zusammenzeichnung: %o', result);
@@ -223,7 +224,7 @@ class Zusammenzeichnung {
           else {
             this.nextStep('import_zusammenzeichnung', 'error');
             console.error(result.msg);
-            message([{ type: 'error', msg: `Fehler beim Import ${$this.config.genitiv}!<br>${result.msg}` }]);
+            message([{ type: 'error', msg: `Fehler beim Import ${this.config.genitiv}!<br>${result.msg}` }]);
           }
         }
       },
@@ -245,7 +246,9 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val(),
+        simplify_fachdaten_geom: $('#simplify_fachdaten_geom').val()
       },
       success: (result) => {
         //console.log('Response create_plaene: %o', result);
@@ -281,6 +284,7 @@ class Zusammenzeichnung {
     formData.append('planart', this.planart);
     formData.append('mime_type', 'json');
     formData.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
+		formData.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').val());
     let response = fetch('index.php', {
       method: 'POST',
       body: formData
@@ -316,7 +320,8 @@ class Zusammenzeichnung {
         xplan_gml_path: 'reindexed_xplan_gml',
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
       },
       success: (result) => {
         //console.log('Response import_reindexed_zusammenzeichnung: %o', result);
@@ -347,7 +352,8 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
       },
       success: (result) => {
         //console.log('Response convert_zusammenzeichnung: %o', result);
@@ -377,7 +383,8 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
       },
       success: (result) => {
         //console.log('Response gml_generieren: %o', result);
@@ -407,7 +414,8 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
       },
       success: (result) => {
         //console.log('Response create_geoweb_service: %o', result);
@@ -437,7 +445,8 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
       },
       success: (result) => {
         //console.log('Response create_metadata: %o', result);
@@ -473,7 +482,8 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
       },
       success: (result) => {
         //console.log('Response update_full_geoweb_service: %o', result);
@@ -502,7 +512,8 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
       },
       success: (result) => {
         //console.log('Response update_full_metadata: %o', result);
@@ -532,7 +543,8 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
       },
       success: (result) => {
         //console.log('Response check_class_completeness: %o', result);
@@ -563,7 +575,11 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+      },
+      beforeSend : (request) => {
+        console.log('Request %o', request);
       },
       success: (response) => {
         //console.log('Response replace_zusammenzeichnung: %o', result);
@@ -608,12 +624,26 @@ class Zusammenzeichnung {
   }
 
   nextStep = (step, success, nextStep = '') => {
-    let nextFunction = (nextStep != '' ? nextStep : this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]);
+    let nextFunction = '';
+    if (nextStep != '') {
+      nextFunction = nextStep;
+    }
+    else {
+      let nextIndex = this.config.upload_steps.indexOf(step) + 1;
+      console.log(`index of step ${step}: ${this.config.upload_steps.indexOf(step)}`);
+      console.log(`index of nextStep: ${nextIndex}`);
+      console.log(`laufende Nummer Step: ${this.lfdNrStep}`);
+      console.log(`numSteps in total: ${this.numSteps}`);
+      if (this.lfdNrStep < this.numSteps) {
+        nextFunction = this.config.upload_steps[nextIndex];
+      }
+    }
+    // let nextFunction = (nextStep != '' ? nextStep : this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]);
     // confirm step
-    console.log('confirm_step: %o', this.process[step]);
+    // console.log('confirm_step: %o', this.process[step]);
     $('#upload_zusammenzeichnung_step_' + this.process[step].nr).addClass(this.confirm_class[success]);
     $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success] + '" aria-hidden="true" ></i>');
-    if (success == 'ok') {
+    if (success == 'ok' && nextFunction !== '') {
       console.log(`call next step function: ${this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]}()`);
       this[nextFunction]();
     }

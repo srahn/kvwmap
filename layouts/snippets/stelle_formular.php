@@ -894,9 +894,20 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				</td>
 			</tr>
 
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactUrl; ?>
+										<span data-tooltip="<?php echo $strOwsContactUrlHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contenturl" type="text" value="<?php echo $this->formvars['ows_contenturl']; ?>">
+				</td>
+			</tr>
+
 			<tr>
 				<th class="group-metadata" colspan="3" align="center"><? echo $strOwsContactContent; ?></th>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactOrganization; ?>*
@@ -906,6 +917,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentorganization" type="text" value="<?php echo $this->formvars['ows_contentorganization']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactEmailAddress; ?>*
@@ -915,6 +927,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentemailaddress" type="text" value="<?php echo $this->formvars['ows_contentemailaddress']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsGeographicDescription; ?>&nbsp;<span data-tooltip="<?php echo $strOwsGeographicDescriptionHint; ?>"></span>
@@ -923,6 +936,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_geographicdescription" type="text" value="<?php echo $this->formvars['ows_geographicdescription']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPerson; ?>
@@ -932,6 +946,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentperson" type="text" value="<?php echo $this->formvars['ows_contentperson']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPosition; ?>
@@ -941,6 +956,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentposition" type="text" value="<?php echo $this->formvars['ows_contentposition']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactVoicephone; ?>
@@ -950,6 +966,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentvoicephone" type="text" value="<?php echo $this->formvars['ows_contentvoicephone']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactFacsimile; ?>
@@ -959,6 +976,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentfacsimile" type="text" value="<?php echo $this->formvars['ows_contentfacsimile']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactAddress; ?>
@@ -968,6 +986,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentaddress" type="text" value="<?php echo $this->formvars['ows_contentaddress']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPostalcode; ?>
@@ -977,6 +996,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentpostalcode" type="text" value="<?php echo $this->formvars['ows_contentpostalcode']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactCity; ?>
@@ -986,6 +1006,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentcity" type="text" value="<?php echo $this->formvars['ows_contentcity']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactAdministrativeArea; ?>
@@ -996,9 +1017,20 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				</td>
 			</tr>
 
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactUrl; ?>
+										<span data-tooltip="<?php echo $strOwsContactUrlHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contacturl" type="text" value="<?php echo $this->formvars['ows_contacturl']; ?>">
+				</td>
+			</tr>
+
 			<tr>
 				<th class="group-metadata" colspan="3" align="center"><? echo $strOwsContactDistribution; ?></th>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactOrganization; ?>
@@ -1008,6 +1040,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionorganization" type="text" value="<?php echo $this->formvars['ows_distributionorganization']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactEmailAddress; ?>
@@ -1017,6 +1050,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionemailaddress" type="text" value="<?php echo $this->formvars['ows_distributionemailaddress']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPerson; ?>
@@ -1026,6 +1060,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionperson" type="text" value="<?php echo $this->formvars['ows_distributionperson']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPosition; ?>
@@ -1035,6 +1070,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionposition" type="text" value="<?php echo $this->formvars['ows_distributionposition']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactVoicephone; ?>
@@ -1044,6 +1080,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionvoicephone" type="text" value="<?php echo $this->formvars['ows_distributionvoicephone']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactFacsimile; ?>
@@ -1053,6 +1090,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionfacsimile" type="text" value="<?php echo $this->formvars['ows_distributionfacsimile']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactAddress; ?>
@@ -1062,6 +1100,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionaddress" type="text" value="<?php echo $this->formvars['ows_distributionaddress']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPostalcode; ?>
@@ -1071,6 +1110,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionpostalcode" type="text" value="<?php echo $this->formvars['ows_distributionpostalcode']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactCity; ?>
@@ -1080,6 +1120,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributioncity" type="text" value="<?php echo $this->formvars['ows_distributioncity']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactAdministrativeArea; ?>
@@ -1087,6 +1128,16 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				</th>
 				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 						<input name="ows_distributionadministrativearea" type="text" value="<?php echo $this->formvars['ows_distributionadministrativearea']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactUrl; ?>
+										<span data-tooltip="<?php echo $strOwsContactUrlHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionurl" type="text" value="<?php echo $this->formvars['ows_distributionurl']; ?>">
 				</td>
 			</tr><?
 			if ($this->formvars['go'] != 'Dienstmetadaten') {?>
