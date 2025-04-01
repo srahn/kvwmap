@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH . 'languages/notifications_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/notifications_' . rolle::$language . '.php');
 ?>
 <script>
 	function deleteNotification(id) {
@@ -22,7 +22,6 @@
 						let notification_id = id.toString().trim();
 						console.log('Lösche div mit id: notification_', notification_id);
 						$('#notification_' + notification_id).remove();
-						$('#notification_box_' + notification_id).remove();
 					}
 					else {
 						message([{ 'type': 'error', 'msg' : 'Fehler beim Löschen in der Datenbank: ' + data.err_msg}]);
@@ -50,7 +49,7 @@
 <?php
 	foreach ($this->notifications AS $notification) {
 ?>
-	<div id="nfc_formular_data">
+	<div id="notification_<? echo $notification->get('id'); ?>" class="nfc_formular_data">
 		<div><? echo $notification->get('id'); ?></div>
 		<div><? echo $notification->get('notification'); ?></div>
 		<div><? echo $notification->get('veroeffentlichungsdatum'); ?></div>

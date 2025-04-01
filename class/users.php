@@ -48,6 +48,7 @@ class account {
 	# Klasse für die Abrechnung und Statistik von Zugriffen
 
 	var $database;
+	var $debug;
 
 	function __construct($database) {
 		global $debug;
@@ -294,7 +295,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeCSV.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeCSV';
@@ -381,7 +383,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeShape.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeShape';
@@ -469,7 +472,8 @@ class account {
 		#echo $sql.'<br><br>';
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALB.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeALB';
@@ -566,7 +570,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM druckrahmen, user AS u, stelle AS s, u_consumeALK';
@@ -672,6 +677,8 @@ class user {
 	var $remote_addr;
 	var $has_logged_in;
 	var $language = 'german';
+	var $debug;
+	var $share_rollenlayer_allowed;
 
 	/**
 	 * Create a user object
@@ -687,6 +694,11 @@ class user {
 		$this->id = (int) $id;
 		$this->remote_addr = getenv('REMOTE_ADDR');
 		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
+	}
+
+	public static	function find($gui, $where, $order = '', $sort_direction = '') {
+		$user = new MyObject($gui, 'user');
+		return $user->find_where($where, $order, $sort_direction);
 	}
 
 	/*
@@ -746,7 +758,9 @@ class user {
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
         $ip=trim($ip);
-				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
+				if (!is_numeric(explode('.', $ip)[0])) {
+					$ip = gethostbyname($ip);			# für dyndns-Hosts
+				}
         if (in_subnet($remote_addr, $ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
@@ -767,7 +781,6 @@ class user {
 				id = ? AND
 				password = SHA1(?)
 		");
-		# echo '<br>SQL: ' . $sql;
 		$stmt->bind_param("is", $args1, $args2);
 		$args1 = $this->id;
 		$args2 = $password;
@@ -823,7 +836,6 @@ class user {
 		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
-		$this->font_size_factor = $rs['font_size_factor'];
 		$this->tokens = $rs['tokens'];
 		$this->num_login_failed = $rs['num_login_failed'];
 		$this->login_locked_until = $rs['login_locked_until'];
@@ -1032,6 +1044,11 @@ class user {
 		while ($rs = $this->database->result->fetch_array()) {
 			$userdaten[] = $rs;
 		}
+		if ($order == ' ORDER BY last_timestamp') {	# MySQL sortiert falsch
+			usort($userdaten, function($a, $b) {
+				return strcmp($a['last_timestamp'], $b['last_timestamp']);
+			});
+		}
 		return $userdaten;
 	}
 
@@ -1060,7 +1077,7 @@ class user {
 				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . 
 				(!$with_expired ? "
 				AND (
-					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
+					('" . date('Y-m-d h:i:s') . "' >= s.start AND ('" . date('Y-m-d h:i:s') . "' <= s.stop OR s.stop IS NULL))
 					OR
 					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
 				)" : "") . "
@@ -1183,7 +1200,7 @@ class user {
 					" . (value_of($formvars, 'redline_font_family') != '' ? ", `redline_font_family` = '" . $formvars['redline_font_family'] . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_size')   != '' ? ", `redline_font_size`   = '" . $formvars['redline_font_size']   . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_weight') != '' ? ", `redline_font_weight` = '" . $formvars['redline_font_weight'] . "'" : '') . "
-					, singlequery = '" . (value_of($formvars, 'singlequery') == '' ? '0' : '1') . "'
+					, singlequery = '" . value_of($formvars, 'singlequery') . "'
 					, instant_reload = '" . (value_of($formvars, 'instant_reload') == '' ? '0' : '1') . "'
 					, menu_auto_close = '" . (value_of($formvars, 'menu_auto_close') == '' ? '0' : '1') . "'
 					, visually_impaired = '" . (value_of($formvars, 'visually_impaired') == '' ? '0' : '1') . "'
@@ -1233,7 +1250,7 @@ class user {
 		# zugeordneten Stellen gehört. Die letzte Stellen_ID wird in beiden Fällen auf die erste von den
 		# dem Nutzer zugeordneten Stellen gesetzt.
 		$stellen= $this->getStellen(0);
-		if(@count($stellen['ID']) > 0){
+		if(count_or_0($stellen['ID']) > 0){
 			$stelle_id = $this->getLastStelle();
 			if($stelle_id != ''){
 				$valid = false;
@@ -1287,6 +1304,33 @@ class user {
 		return $ret;
 	}
 
+	/**
+	 * Function return a unique login_name for $vorname and $nachname
+	 * that not allready exists in tabel user.
+	 * The loginname will be composed on the first letter of $vorname and $nachname
+	 * If it exists a increasing nummer will be added until the loginname not exists in
+	 * database. This that first not exists will be returned as unique and valid login_name.
+	 * @param String $vorname,
+	 * @param String $nachname,
+	 * @return String The loginname
+	 */
+	function get_login_name($vorname, $nachname) {
+		$loginname_exists = true;
+		$postfix = '';
+		do {
+			$login_name = strtolower(substr($vorname, 0, 1)) . strtolower($nachname) . $postfix;
+			$ret = $this->loginname_exists($login_name);
+			if ($ret[1] == 1) {
+				$postfix = ($postfix == '' ? 2 : $postfix + 1);
+			}
+			if ($postfix > 10) {
+				$ret[1] = 0; // Abbruch
+				$login_name = strtolower(substr($vorname, 0, 1)) . strtolower($nachname) . rand(11, 9999);
+			}
+		} while ($ret[1] == 1);
+		return $login_name;
+	}
+
 	function loginname_exists($login, $id = NULL) {
 		$Meldung='';
 		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt und diesen dann zurückliefern
@@ -1331,7 +1375,7 @@ class user {
 		if ($userdaten['vorname'] == '') { $Meldung .= '<br>Vorname fehlt.'; }
 		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
 		else {
-			$ret=$this->loginname_exists($userdaten['loginname'], $userdaten['id']);
+			$ret = $this->loginname_exists($userdaten['loginname'], $userdaten['id']);
 			if ($ret[1] == 1) {
 				$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
 			}
@@ -1361,11 +1405,11 @@ class user {
 		}
 		$sql.=' Name="'.$userdaten['nachname'].'"';
 		$sql.=',Vorname="'.$userdaten['vorname'].'"';
-		$sql.=',login_name="'.$userdaten['loginname'].'"';
+		$sql.=',login_name="' . trim($userdaten['loginname']) . '"';
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
+		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . '")';
 		$sql.=',password_setting_time = CURRENT_TIMESTAMP()';
-		$sql.=',password_expired = false';
+		$sql.=',password_expired = ' . ($userdaten['password_expired'] ? '1' : '0');
 		if ($userdaten['phon']!='') {
 			$sql.=',phon="'.$userdaten['phon'].'"';
 		}
@@ -1390,9 +1434,9 @@ class user {
 		if($stellen[0] != ''){
 			$sql.=',stelle_id='.$stellen[0];
 		}
-		#echo '<p>SQL zum Eintragen eines neuen Nutzers: ' . $sql;
+		// echo '<p>SQL zum Eintragen eines neuen Nutzers: ' . $sql;
 		# Abfrage starten
-		$ret=$this->database->execSQL($sql,4, 0);
+		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
 			$ret[1].='<br>Die Benutzerdaten konnten nicht eingetragen werden.<br>'.$ret[1];
@@ -1436,7 +1480,7 @@ class user {
 		$password_columns = '';
 		if ($userdaten['changepasswd'] == 1) {
 			$password_columns = ",
-				`password` = SHA1('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "'),
+				`password` = SHA1('" . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . "'),
 				`password_setting_time` = CURRENT_TIMESTAMP(),
 				`password_expired` = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
 			";
@@ -1448,7 +1492,7 @@ class user {
 			SET
 				`Name` = '" . $userdaten['nachname'] . "',
 				`Vorname` = '" . $userdaten['vorname'] . "',
-				`login_name` = '" . $userdaten['loginname'] . "',
+				`login_name` = '" . trim($userdaten['loginname']) . "',
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . ($userdaten['start'] ?: '0000-00-00') . "',
 				`stop`= '" . ($userdaten['stop'] ?: '0000-00-00') . "',

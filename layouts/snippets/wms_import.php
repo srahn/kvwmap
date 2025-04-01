@@ -1,6 +1,6 @@
 <?php
  # 2008-01-20 pkvvm
-  include(LAYOUTPATH.'languages/wms_import_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/wms_import_'.rolle::$language.'.php');
 	
 	function print_layer_tree($layers){
 		for($i = 0; $i < count($layers); $i++){

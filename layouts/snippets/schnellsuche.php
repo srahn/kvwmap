@@ -36,7 +36,7 @@
 		}
 		attribute = attributes.split(',');
 		for(i = 0; i < attribute.length; i++){
-			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type=select-one", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
+			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type=select-one&auswahl=1", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
 		}
 	}
 	
@@ -47,7 +47,7 @@
 	
 	if(count($quicksearch_layer_ids) > 0){
 		$quicksearch_layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, NULL, $quicksearch_layer_ids);
-		if(@count($quicksearch_layerdaten['ID']) > 0){
+		if(count_or_0($quicksearch_layerdaten['ID']) > 0){
 ?>
 		<table>
 			<tr>
@@ -62,7 +62,7 @@
 							}
 							echo ' value="'.$quicksearch_layerdaten['ID'][$i].'">'.$quicksearch_layerdaten['Bezeichnung'][$i].'</option>';
 						}
-						$i = 0;		// $i wieder zurücksetzen
+						$i = 0;		// $i wieder zurï¿½cksetzen
 					?>
 					</select>
 				</td>

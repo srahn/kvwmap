@@ -1,21 +1,26 @@
+Dieses Snippet wird nicht mehr verwendet
+
 <?php
  # 2008-09-30 sr
-  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 
  # Variablensubstitution
  $layer = $this->qlayerset[$i];
  $attributes = $layer['attributes'];
  $size = 28;
  $select_width = 'width:190px;';
+ $this->subform_classname = 'subform_'.$layer['Layer_ID'];
 
   	$doit = false;
-	  $anzObj = count($this->qlayerset[$i]['shape']);
+	  $anzObj = count_or_0($this->qlayerset[$i]['shape']);
 	  if ($anzObj > 0) {
+			$k = 0;
 	  	$this->found = 'true';
 	  	$doit = true;
 	  }
 	  if($this->new_entry == true){
-	  	$anzObj = 1;
+	  	$anzObj = 0;
+			$k  = -1;
 	  	$doit = true;
 	  }
 	  if($doit == true){
@@ -28,7 +33,7 @@
 	$geomtype = '';
 	$dimension = '';
 	$privileg = '';
-	for ($k=0;$k<$anzObj;$k++) {
+	for ($k;$k<$anzObj;$k++) {
 		$checkbox_name .= 'check;'.$attributes['table_alias_name'][$attributes['name'][0]].';'.$attributes['table_name'][$attributes['name'][0]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'];
 ?>
 	<tr>
@@ -41,6 +46,17 @@
 				$lock[$k] = true;
 			}
 			for($j = 0; $j < count($attributes['name']); $j++){
+				$layer_id = $layer['Layer_ID'];
+				$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
+				$name = $attributes['name'][$j];																# der Name des Attributs
+				$alias = $attributes['alias'][$j];															# der Aliasname des Attributs
+				$value = $dataset[$name];																				# der Wert des Attributs
+				$tablename = $attributes['table_name'][$name];									# der Tabellenname des Attributs
+				$oid = $dataset[$layer['maintable'] . '_oid'];									# die oid des Datensatzes
+				$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
+
+				$fieldname = $layer_id . ';' . ($attributes['saveable'][$j]? $attributes['real_name'][$name] : '') . ';' . $tablename . ';' . $oid . ';' . $attributes['form_element_type'][$j] . ';' . $attributes['nullable'][$j] . ';' . $attributes['type'][$j] . ';' . $attributes['saveable'][$j];
+
 				if($attributes['name'][$j] == 'vorschau')continue;		# Vorschauattribut nicht nochmal anzeigen
 				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
 					$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
@@ -114,57 +130,13 @@
 									}break;
 
 									case 'Auswahlfeld' : {
-										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-										  if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-												$auswahlfeld_output = $attributes['enum'][$j][$k][$layer['shape'][$k][$attributes['name'][$j]]]['output'];
-											}
-											else{
-												$auswahlfeld_output = $attributes['enum'][$j][$layer['shape'][$k][$attributes['name'][$j]]]['output'];
-											}
-											$auswahlfeld_output_laenge = strlen($auswahlfeld_output) + 1;
-                      echo '<input readonly style="border:0px;background-color:transparent;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
-                      $auswahlfeld_output = '';
-                      $auswahlfeld_output_laenge = '';
+										if (is_array($attributes['dependent_options'][$j])) {
+											$enum = $attributes['enum'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 										}
 										else{
-											echo '<select title="'.$attributes['alias'][$j].'" style="'.$select_width.'"';
-											if($attributes['name'][$j] == 'gebietstyp_s'){
-												echo 'onchange="update_gebietstyp();update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', new Array(\''.implode("','", $attributes['name']).'\'));set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';												
-											}
-											if($attributes['req_by'][$j] != ''){
-												echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', new Array(\''.implode("','", $attributes['name']).'\'));set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';
-											}
-											else{
-												echo 'onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
-											}
-											echo 'id="'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
-											echo '<option value="">-- '.$this->strPleaseSelect.' --</option>';
-											if (is_array($attributes['dependent_options'][$j])) {		# mehrere DatensÃ¤tze und ein abhÃ¤ngiges Auswahlfeld --> verschiedene AuswahlmÃ¶glichkeiten
-												$enums = $attributes['enum'][$j][$k];
-											}
-											else {
-												$enums = $attributes['enum'][$j];
-											}
-											foreach ($enums as $enum_key => $enum){
-												echo '<option ';
-												if ($enum_key == $layer['shape'][$k][$attributes['name'][$j]] OR ($enum_key != '' AND $enum_key == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
-													echo 'selected ';
-												}
-												echo 'value="' . $enum_key . '">' . $enum['output'] . '</option>';
-											}
-											echo '</select>';
-											if($attributes['subform_layer_id'][$j] != ''){
-												if($attributes['subform_layer_privileg'][$j] > 0){
-													if($attributes['embedded'][$j] == true){
-														echo '<a href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;neu</a>';
-														echo '<div style="display:inline" id="subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
-													}
-													else{
-														echo '<a target="_blank" href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j].'">&nbsp;neu</a>';
-													}
-												}
-											}
+											$enum = $attributes['enum'][$j];
 										}
+										echo Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $select_width, $strPleaseSelect, $change_all, 'update_gebietstyp();', $this->subform_classname, $attributes['datatype_id'][$j]);
 									}break;
 
 									case 'SubFormPK' : {
@@ -426,7 +398,7 @@
 										if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
 											echo ' maxlength="'.$attributes['length'][$j].'"';
 										}
-										echo ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
+										echo ' size="'.$size.'" type="text" class="' . $this->subform_classname . '" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].';'.$attributes['saveable'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
 									}
 								}
 		  			}

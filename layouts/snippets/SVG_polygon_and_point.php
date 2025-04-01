@@ -39,7 +39,7 @@
 #
 # zusammenstellen der SVG ###
 #
-$fpsvg = fopen(IMAGEPATH.$svgfile,w) or die('fail: fopen('.$svgfile.')');
+$fpsvg = fopen(IMAGEPATH.$svgfile, 'w') or die('fail: fopen('.$svgfile.')');
 chmod(IMAGEPATH.$svgfile, 0666);
 $svg = $SVG_begin;
 $svg .= '<script id="pscript" type="text/ecmascript"><![CDATA['; 

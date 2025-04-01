@@ -55,7 +55,7 @@
 
 	$GUI->getFlurbezeichnung = function($epsgcode) use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
-    $Flurbezeichnung = '';
+    $Flurbezeichnung = [];
  	  $flur = new Flur('','','',$GUI->pgdatabase);
 		$bildmitte['rw']=($GUI->map->extent->maxx+$GUI->map->extent->minx)/2;
 		$bildmitte['hw']=($GUI->map->extent->maxy+$GUI->map->extent->miny)/2;
@@ -98,7 +98,7 @@
     $layer = new LayerObj($GUI->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $Gemkgschl."'";
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '" . rolle::$hist_timestamp . "' = '' THEN endet IS NULL ELSE beginnt::text <= '" . rolle::$hist_timestamp . "' and ('" . rolle::$hist_timestamp . "' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($Gemkgschl);
     $layer->data = $datastring;
@@ -109,10 +109,11 @@
     $layer->group = 'eigene Abfragen';
     $layer->metadata->set('off_requires',0);
     $layer->metadata->set('layer_has_classes',0);
-    $GUI->map->setMetaData('group_status_eigene Abfragen','0');
-    $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
-    $layer->setConnectionType(6);
-    $layer->set('connection', $GUI->pgdatabase->get_connection_string());
+    $GUI->map->web->metadata->set('group_status_eigene Abfragen','0');
+    $GUI->map->web->metadata->set('group_eigene Abfragen_has_active_layers','0');
+    $layer->setConnectionType(6, '');
+    $layer->updateFromString("LAYER COMPOSITE OPACITY 50 END END");
+    $layer->connection = $GUI->pgdatabase->get_connection_string();
     $layer->metadata->set('queryStatus','2');
     $layer->metadata->set('wms_queryable','0');
     $layer->metadata->set('layer_hidden','0'); #2005-11-30_pk
@@ -148,11 +149,11 @@
 		$GUI->map_scaledenom = $GUI->map->scaledenom;
     # zu 3)
     $GemkgObj=new Gemarkung($GemkgID,$GUI->pgdatabase);
-    $layer=ms_newLayerObj($GUI->map);
+    $layer = new LayerObj($GUI->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $GemkgID."'";
     $datastring.=" AND flurnummer = ".(int)$FlurID;
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '" . rolle::$hist_timestamp . "' = '' THEN endet IS NULL ELSE beginnt::text <= '" . rolle::$hist_timestamp . "' and ('" . rolle::$hist_timestamp . "' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($GemkgID);
     $legendentext .="<br>Flur: " . $FlurID;
@@ -164,15 +165,16 @@
     $layer->group = 'eigene Abfragen';
     $layer->metadata->set('off_requires',0);
     $layer->metadata->set('layer_has_classes',0);
-    $GUI->map->setMetaData('group_status_eigene Abfragen','0');
-    $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
-    $layer->setConnectionType(6);
-    $layer->set('connection', $GUI->pgdatabase->get_connection_string());
+    $GUI->map->web->metadata->set('group_status_eigene Abfragen','0');
+    $GUI->map->web->metadata->set('group_eigene Abfragen_has_active_layers','0');
+    $layer->setConnectionType(6, '');
+    $layer->updateFromString("LAYER COMPOSITE OPACITY 50 END END");
+    $layer->connection = $GUI->pgdatabase->get_connection_string();
     $layer->metadata->set('queryStatus','2');
     $layer->metadata->set('wms_queryable','0');
     $layer->metadata->set('layer_hidden','0');
     $klasse = new ClassObj($layer);
-    $klasse->set('status', MS_ON);
+    $klasse->status = MS_ON;
     $style = new StyleObj($klasse);
     $style->color->setRGB(255,255,128);
     $style->outlinecolor->setRGB(0,0,0);
@@ -201,28 +203,14 @@
 		$explosion = explode('using unique ', strtolower($data));
 		$end = $explosion[1];
 		$select = $dbmap->getSelectFromData($data);
-		$whereposition = strpos(strtolower($select), ' where ');
-		$withoutwhere = substr($select, 0, $whereposition);
-		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		#$alias = $GUI->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
 		else $select .= " AND ";
-		$datastring = $datageom." from (" . $select;
-		#$datastring.=" " . $alias.".flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-		$datastring.=" flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-    $legendentext="Flurstück";
-    if (@count($FlurstListe) > 1) {
-			$legendentext .= "e";
-		}
-    $legendentext .= " (".date('d.m. H:i',time())."): " . $FlurstListe[0];
-    for ($i=1; $i < @count($FlurstListe); $i++) {
-      $datastring.=",'" . $FlurstListe[$i]."'";
-      $legendentext.=" " . $FlurstListe[$i];
-    }
-   	$datastring.=") ";
-		$datastring.=") as foo using unique " . $end;
+		$select .= " flurstueckskennzeichen IN ('" . implode("','", $FlurstListe) . "')";
+    $legendentext = "Flurstück" . (count_or_0($FlurstListe) > 1 ? 'e' : '');
+    $legendentext .= " (".date('d.m. H:i',time())."): " . implode(" ", $FlurstListe);
+    $datastring = $datageom." from (" . $select . ") as foo using unique " . $end;
     $group = $dbmap->getGroupbyName('eigene Abfragen');
     if($group != ''){
       $groupid = $group['id'];
@@ -230,6 +218,7 @@
     else{
       $groupid = $dbmap->newGroup('eigene Abfragen', 0);
     }
+    $GUI->formvars['original_layer_id'] = $layerset[0]['Layer_ID'];
     $GUI->formvars['user_id'] = $GUI->user->id;
     $GUI->formvars['stelle_id'] = $GUI->Stelle->id;
     $GUI->formvars['aktivStatus'] = 1;
@@ -238,12 +227,15 @@
     $GUI->formvars['Typ'] = 'search';
     $GUI->formvars['Datentyp'] = 2;
     $GUI->formvars['Data'] = $datastring;
+    $GUI->formvars['query'] = $select;
     $GUI->formvars['connectiontype'] = 6;
     $GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
     $GUI->formvars['epsg_code'] = $epsg;
     $GUI->formvars['transparency'] = $GUI->user->rolle->result_transparency;
 
     $layer_id = $dbmap->newRollenLayer($GUI->formvars);
+    $attributes = $dbmap->load_attributes($GUI->pgdatabase, $select);
+		$dbmap->save_postgis_attributes($GUI->pgdatabase, -$layer_id, $attributes, '', '');
 		
 		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 		
@@ -393,7 +385,7 @@
 			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}		
 		# Wenn nur eine Gemeinde zur Auswahl steht, wird diese gewählt; Verhalten so, als würde die Gemeinde vorher gewählt worden sein.
-		if(@count($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
+		if(count_or_0($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -429,7 +421,7 @@
 		    }
         $HausNrListe=$Adresse->getHausNrListe($GemID,$StrID,'','','hausnr*1,ASCII(REVERSE(hausnr)),quelle');
         # Erzeugen des Formobjektes für die Flurstücksauswahl
-        if (@count($HausNrListe['HausID'])==1){
+        if (count_or_0($HausNrListe['HausID'])==1){
           $HausID=$HausNrListe['HausID'][0];
           $HausID = array($HausID);
         }
@@ -548,6 +540,9 @@
 			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
 			$bom = pack('H*','EFBBBF');
 			$importliste[0] = preg_replace("/^$bom/", '', $importliste[0]);
+      foreach ($importliste as &$zeile) {
+        $zeile = trim($zeile, ";, \t");
+      }
 			$importliste_string = implode(';', $importliste);
 			$importliste_string = formatFlurstkennzALKIS($importliste_string);
 			$importliste = explode(';', $importliste_string);
@@ -608,7 +603,7 @@
       $Flur=new Flur('','','',$GUI->pgdatabase);
     	$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], $GUI->formvars['history_mode']);
       # Erzeugen des Formobjektes für die Flurauswahl
-      if (@count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
+      if (count_or_0($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
       $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['Name'],"1","","",NULL);
       $FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
       $FlurFormObj->outputHTML();
@@ -679,7 +674,7 @@
 		else {
 			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, array($GemkgID));
 		}
-		if(@count($GemkgListe['GemkgID']) > 0){
+		if(count_or_0($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
       if ($FlurID === 0 OR $FlurID == '-1') {
 				if($GUI->formvars['ALK_Suche'] == 1){
@@ -989,8 +984,8 @@
 		$alkis = new ALKIS($GUI->pgdatabase);
 		$point = new PointObj();
 		$point->setXY($formvars['center_x'], $formvars['center_y']);
-		$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:".EPSGCODE_ALKIS);
+		$projFROM = new projectionObj("init=epsg:" . $GUI->user->rolle->epsg_code);
+		$projTO = new projectionObj("init=epsg:".EPSGCODE_ALKIS);
 		$point->project($projFROM, $projTO);
 		$print_params['coord'] = $point->x.' '.$point->y;
 		$print_params['printscale'] = $formvars['printscale'];
@@ -1083,7 +1078,7 @@
 
       $dateipfad=IMAGEPATH;
       $currenttime = date('Y-m-d_H-i-s',time());
-      $name = umlaute_umwandeln($GUI->user->Name);
+      $name = sonderzeichen_umwandeln($GUI->user->Name);
       $dateiname = $name.'-'.$currenttime.'.pdf';
       $GUI->outputfile = $dateiname;
       $fp=fopen($dateipfad.$dateiname,'wb');
@@ -1103,8 +1098,11 @@
 		$GUI->formvars['no_last_search'] = true;
 		$GUI->GenerischeSuche_Suchen();
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
-		$GUI->generischer_sachdaten_druck_drucken();
-	};
+		$result = $GUI->generischer_sachdaten_druck_createPDF();
+    $GUI->outputfile = basename($result['pdf_file']);
+    $GUI->mime_type='pdf';
+    $GUI->output();
+  };
 
 	$GUI->export_Adressaenderungen = function() use ($GUI){
     $GUI->titel='Adressänderungen der Eigentümer exportieren';
@@ -1197,7 +1195,7 @@
 		$GUI->main = PLUGINS.'alkis/view/grundbuchblattsuchform.php';
     $grundbuch = new grundbuch('', '', $GUI->pgdatabase);
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    if (!empty($GemeindenStelle)){   // Stelle ist auf Gemeinden eingeschränkt
+    if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])){   // Stelle ist auf Gemeinden eingeschränkt
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 			$ganze_gemarkungen = array_keys($GemeindenStelle['ganze_gemarkung']);
 			if (!empty($GemeindenStelle['ganze_gemeinde'])) {
@@ -1226,7 +1224,7 @@
 		##########################
     if($GUI->formvars['Bezirk'] != ''){
     	if($GUI->formvars['selBlatt'])$GUI->selblattliste = explode(', ',$GUI->formvars['selBlatt']);
-			if(!empty($GemeindenStelle)){   // Stelle ist auf Gemeinden eingeschränkt
+			if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])){   // Stelle ist auf Gemeinden eingeschränkt
 				$GUI->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($GUI->formvars['Bezirk'], $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
 			}
 			else{
@@ -1323,6 +1321,26 @@
     $GUI->FlurFormObj=new FormObject("FlurID","select",$FlurListe['FlurID'],$GUI->formvars['FlurID'],$FlurListe['Name'],"1","","",NULL);
     $GUI->FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
     $GUI->FlurFormObj->outputHTML();
+    if (value_of($GUI->formvars, 'map_flag') != '') {
+      ################# Map ###############################################
+      if (value_of($GUI->formvars, 'geom_from_layer') == '') {
+        $GUI->formvars['geom_from_layer'] = $GUI->formvars['selected_layer_id'];
+      }
+      $saved_scale = $GUI->reduce_mapwidth(10);
+      $GUI->loadMap('DataBase');
+      if (value_of($GUI->formvars, 'CMD') == '' AND $saved_scale != NULL) {
+        $GUI->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
+      }
+      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
+      if (in_array(value_of($GUI->formvars, 'CMD'), ['Full_Extent', 'recentre', 'zoomin', 'zoomout', 'previous', 'next'])) {
+        $GUI->navMap($GUI->formvars['CMD']);
+      }
+      $GUI->drawMap();
+      $GUI->saveMap('');
+      $currenttime=date('Y-m-d H:i:s',time());
+      $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+      ########################################################################
+    }
     $GUI->output();
   };
 
@@ -1336,15 +1354,16 @@
 			$GemeindenStelle['ganze_gemarkung'] = array_flip($GemkgListe['GemkgID']);
 		}
     $formvars = $GUI->formvars;
+    $formvars['user_epsg'] = $GUI->user->rolle->epsg_code;
     $flurstueck=new flurstueck('',$GUI->pgdatabase);
-		$ret=$flurstueck->getNamen($formvars,@array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
+		$ret=$flurstueck->getNamen($formvars, array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
     if ($ret[0]) {
       $GUI->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $GUI->namenWahl();
     }
     else {
       $GUI->namen=$ret[1];
-      if (@count($GUI->namen)==0) {
+      if (count_or_0($GUI->namen)==0) {
         $GUI->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
       }
       else {

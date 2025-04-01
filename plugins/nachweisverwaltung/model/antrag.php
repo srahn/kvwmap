@@ -78,7 +78,7 @@ class antrag {
       $msg = "Verzeichnis für Rechercheergebnisse erstmalig angelegt: ".RECHERCHEERGEBNIS_PATH."<br>";
     }    
     # Festlegen des Pfades für den Auftrag
-    $auftragspfad=RECHERCHEERGEBNIS_PATH.$this->nr;
+    $auftragspfad = RECHERCHEERGEBNIS_PATH . sonderzeichen_umwandeln($this->nr);
 		if($this->stelle_id != '')$auftragspfad.='~'.$this->stelle_id;
     #echo '<br>'.$auftragspfad;
     if (!is_dir($auftragspfad)) {
@@ -103,7 +103,7 @@ class antrag {
   }
 
   function DokumenteInOrdnerZusammenstellen($nachweis){
-		$antragsnr = $this->nr;
+    $antragsnr = sonderzeichen_umwandeln($this->nr);
 		if($this->stelle_id != '')$antragsnr.='~'.$this->stelle_id;
     $auftragspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise/';	# Erzeuge ein Unterverzeichnis für die Nachweisdokumente
     mkdir ($auftragspfad,0777);

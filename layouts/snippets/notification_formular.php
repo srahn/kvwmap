@@ -1,5 +1,5 @@
 <?php
-include(LAYOUTPATH . 'languages/notifications_' . $this->user->rolle->language . '.php');
+include(LAYOUTPATH . 'languages/notifications_' . rolle::$language . '.php');
 include_once(CLASSPATH . 'FormObject.php');
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>

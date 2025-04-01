@@ -120,9 +120,9 @@
 				$xp_plan->update();
 
 				$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
-				//$GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
+				// $GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
-				#echo '<script>console.log("' . print_r($GUI->formvars) . '")</script>';
+				// echo '<script>console.log("' . print_r($GUI->formvars, true) . '")</script>';
 				# layer_schemaname needs to be an empty textfield in the layer definition
 				# 03.11.21 change from ... layer_schemaname;;;Text;;unknown;0' to ... layer_schemaname;;;Text;;text;0'
 				#if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
@@ -516,7 +516,7 @@
 		# Setze globale Metadaten im MapObjekt des Dienstes der Adminstelle
 		#$GUI->xlog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
 		$bb = $admin_stelle->MaxGeorefExt;
-		$GUI->map->set('name', umlaute_umwandeln(PUBLISHERNAME));
+		$GUI->map->set('name', sonderzeichen_umwandeln(PUBLISHERNAME));
 		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		#$GUI->write_xlog('create_geoweb_service Landesdienst, set ows_extent: ' . $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
@@ -544,9 +544,16 @@
 			$layer->set('template', 'templates/' . $layer->name . '_body.html');
 			# Extent mit Ausdehnung von adminstelle überschreiben
 			$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+			$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 
-			$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
-
+			$layer_id = $layer->getMetadata('kvwmap_layer_id');
+			$layerObj = Layer::find_by_id($GUI, $layer_id);
+			if (!$layerObj) {
+				return array(
+					'success' => false,
+					'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+				);
+			}
 			if ($layerObj->get('write_mapserver_templates') == 'generic') {
 				# Set generic Data sql for layer
 				$result = $layerObj->get_generic_data_sql();
@@ -584,7 +591,7 @@
 
 		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
 		$bb = $admin_stelle->MaxGeorefExt;
-		$GUI->map->set('name', umlaute_umwandeln(PUBLISHERNAME));
+		$GUI->map->set('name', sonderzeichen_umwandeln(PUBLISHERNAME));
 		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		$GUI->write_xlog('create_geoweb_service Landesdienst, set ows_extent: ' . $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
@@ -626,7 +633,15 @@
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
 				# Extent mit Ausdehnung von adminstelle überschreiben
 				$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
-				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
+				$layer_id = $layer->getMetadata('kvwmap_layer_id');
+				$layerObj = Layer::find_by_id($GUI, $layer_id);
+				if (!$layerObj) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+					);
+				}
+
 				if ($layerObj->get('write_mapserver_templates') == 'generic') {
 					# Set generic Data sql for layer
 					$result = $layerObj->get_generic_data_sql();
@@ -709,7 +724,7 @@
 		));
 		$md->set('version', floatval(implode('.', array_slice(explode('/', XPLAN_NS_URI), -2))));
 		$md->set('extents', $plan_object->extents);
-		$md->set('service_layer_name', umlaute_umwandeln($admin_stelle->get('Bezeichnung')));
+		$md->set('service_layer_name', sonderzeichen_umwandeln($admin_stelle->get('Bezeichnung')));
 		$md->set('onlineresource', URL . 'ows/fplaene?');
 		$md->set('dataset_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Datensatz.png');
 		$md->set('viewservice_browsegraphic', $md->get('onlineresource') . "Service=WMS&amp;Request=GetMap&amp;Version=1.1.0&amp;Layers=" . $plan_object->tableName . "&amp;FORMAT=image/png&amp;SRS=EPSG:" . $md->get('stellendaten')['epsg_code'] . "&amp;BBOX=" . implode(',', $md->get('extents')[$md->get('stellendaten')['epsg_code']]) . "&amp;WIDTH=300&amp;HEIGHT=300");

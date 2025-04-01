@@ -1,5 +1,5 @@
 <?
-	$lang = $this->user->rolle->language;
+	$lang = rolle::$language;
 ?>
 <style>
 
@@ -127,7 +127,7 @@
 
 		if (elm.attr('class') == 'editable') {
 			console.log('makeEditable field: ' + name);
-			elm.html('<input type="' + (type == 'text' ? 'text' : 'password') + '" name="' + name + '" value="' + (type == 'password' ? value : elm.html()) + '" size="' + size + '">');
+			elm.html('<input type="' + (type == 'text' ? 'text' : 'password') + '" name="' + name + '" value="' + (type == 'password' ? value : elm.html().replace(/"/g, '&quot;')) + '" size="' + size + '">');
 		}
 	}
 

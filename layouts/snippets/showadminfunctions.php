@@ -1,5 +1,5 @@
 <?
-	include(LAYOUTPATH.'languages/showadminfunctions_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/showadminfunctions_'.rolle::$language.'.php');
 ?>
 
 <script type="text/javascript">
@@ -73,8 +73,8 @@ function toggleGroup(group, show){
 								echo ' Schemata aktuell';
 							}
 							else {
-								$title = @implode('&#10;', $this->administration->migrations_to_execute['mysql'][$component]).'&#10;';
-								$title.= @implode('&#10;', $this->administration->migrations_to_execute['postgresql'][$component]);
+								$title = @implode('&#10;', $this->administration->migrations_to_execute['mysql'][$component] ?: []).'&#10;';
+								$title.= @implode('&#10;', $this->administration->migrations_to_execute['postgresql'][$component] ?: []);
 								echo '<span class="fett red" title="'.$title.'">';
 								$update_necessary = true;
 								if($mysql_counter > 0)echo 'MySQL-Schema ';

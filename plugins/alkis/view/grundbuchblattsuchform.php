@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/grundbuchblatt_suche_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/grundbuchblatt_suche_'.rolle::$language.'.php');
  ?>
 
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
@@ -116,7 +116,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		<div>
 			<select name="Bezirk" onchange="updateBezirksschluessel();" tabindex="2">
 				<option value="">--- Auswahl ---</option>
-				<?for($i = 0; $i < count($this->gbliste['schluessel']); $i++){?>
+				<?for($i = 0; $i < count_or_0($this->gbliste['schluessel']); $i++){?>
 					<option 
 				<?if($this->formvars['Bezirk'] == $this->gbliste['schluessel'][$i]){?>
 				selected
@@ -150,7 +150,7 @@ Eingabeformate:
 				<tr>
 					<td>
 						<select size="12" style="width: 170px;" multiple="true" name="selectedBlatt">
-						<? for($i=0; $i < @count($this->selblattliste); $i++){ ?>
+						<? for($i=0; $i < count_or_0($this->selblattliste); $i++){ ?>
 							<option value=" <? echo $this->selblattliste[$i]; ?>"><? echo $this->selblattliste[$i]; ?></option>';
 						<? } ?>
 						</select>
@@ -161,7 +161,7 @@ Eingabeformate:
 					</td>
 					<td>
 						<select size="12" style="width: 100px;" multiple="true" name="Blatt" tabindex="3">
-						<? for($i = 0; $i < @count($this->blattliste['blatt']); $i++){ ?>
+						<? for($i = 0; $i < count_or_0($this->blattliste['blatt']); $i++){ ?>
 							<option <?if($this->formvars['Blatt'] == $this->blattliste['blatt'][$i]){ echo "selected"; } ?> 
 								value="<? echo $this->formvars['Bezirk'].'-'.$this->blattliste['blatt'][$i]; ?>"><? echo ltrim($this->blattliste['blatt'][$i], '0'); ?>
 							</option>

@@ -7,6 +7,8 @@
 
 class Debugger {
 	public $filename, $fp, $level;
+	var $mime_type;
+	var $user_funktion;
 
 	###################### Liste der Funktionen ####################################
 	#
@@ -16,15 +18,19 @@ class Debugger {
 	#
 	################################################################################
 
-	function __construct($filename, $mime_type = 'text/html') {
-		if ($_SESSION == null) {
+	function __construct($filename, $mime_type = 'text/html', $mode = 'w') {
+		if (!in_array($mode, array('w', 'a'))) {
+			$mode = 'w';
+		};
+		if (!isset($_SESSION) OR $_SESSION == null) {
 			$_SESSION = array();
 		}
 		$this->filename = LOGPATH . (dirname($filename) != '.' ? dirname($filename) . '/' : '') . (array_key_exists('login_name', $_SESSION) ? $_SESSION['login_name'] : '') . basename($filename);
-		$this->fp = fopen($this->filename,'w');
+		$this->fp = fopen($this->filename, $mode);
 		$this->mime_type = $mime_type;
 		$this->level;
 		$this->user_funktion = '';
+		$this->timestamp =  date('Y-m-d H:i:s', time());
 
 		if ($this->mime_type == 'text/html') {
 			fwrite($this->fp,"<html>\n<head>\n  <title>kvwmap Debug-Datei</title>\n<META http-equiv=Content-Type content='text/html; charset=UTF-8'>\n</head>\n<body>");
@@ -60,7 +66,8 @@ class Debugger {
 
 	function show($msg, $debug = false) {
 		if ($debug AND $this->user_funktion == 'admin') {
-			echo '<br>' . $msg;
+			$nl = ($this->mime_type == 'text/html' ? '<br>' : "\n" . date('Y-m-d H:i:s') . ': ');
+			echo $nl . $msg;
 		}
 	}
 
@@ -81,6 +88,8 @@ class LogFile {
 	var $filename; # Dateiname in der gelogt wird
 	var $fp; # filepointer
 	var $format; # Ausgabeformat
+	var $name; # Filename of logfile
+	var $with_timestamp; # Output with timestamp or not
 
 	###################### Liste der Funktionen ####################################
 	#

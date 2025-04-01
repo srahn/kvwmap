@@ -31,4 +31,5 @@
 			echo $response;
 		}
 	}
+	$this->found = 'true';
 ?>

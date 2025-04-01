@@ -5,12 +5,15 @@ $layerset = $this->layerset['list'];
 
 $SVGvars_querytooltipscript = '
 		var layernumber = new Array();';
-for($i = 0; $i < count($layerset); $i++){
+for($i = 0; $i < count_or_0($layerset); $i++){
 	if($layerset[$i]['Layer_ID'] != ''){
 		$SVGvars_querytooltipscript.= 'layernumber['.$i.'] = '.$layerset[$i]['Layer_ID'].';
 		';
 	}
 }
+
+$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
+
 $SVGvars_querytooltipscript .= '
 
 		var oldmousey, oldmousex, mousey, mousex, tooltipstate = "ready_for_request", counter = 0, prevent;
@@ -19,9 +22,7 @@ $SVGvars_querytooltipscript .= '
 		var ypos = 0;
 		
 		' . ($this->user->rolle->tooltipquery ? 'window.setInterval("tooltip_query()", 100);' : '') . '
-		
-		top.document.getElementById("svghelp").SVGshowtooltip = showtooltip;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-				
+						
 		function hidetooltip(evt){
 			if(evt == undefined){
 				cleartooltip();
@@ -42,7 +43,7 @@ $SVGvars_querytooltipscript .= '
 			var tooltipcontent = document.getElementById("tooltipcontent");
 			var obj = document.getElementById("highlight")
 			tooltipgroup.setAttribute(\'visibility\', \'hidden\');
-			top.document.GUI.result.value = "";				
+			//top.document.GUI.result.value = "";		
 			while(tooltipcontent.childNodes.length > 0){
 				tooltipcontent.removeChild(tooltipcontent.firstChild);
 			}
@@ -274,9 +275,9 @@ $SVGvars_querytooltipscript .= '
 				if(Math.abs(oldmousex-mousex) < 1 && Math.abs(oldmousey-mousey) < 1){		// Maus stillhalten
 					tooltipstate = "request_sent";
 					for(i = 0; i < layernumber.length; i++){
-						query_layer_field = top.document.getElementById("qLayer"+layernumber[i]);
+						query_layer_field = top.document.getElementById("' . $queryfield . '"+layernumber[i]);
 						if(query_layer_field != undefined && query_layer_field.checked){
-							querylayer += "&qLayer"+layernumber[i]+"=1";
+							querylayer += "&' . $queryfield . '"+layernumber[i]+"=1";
 						}
 					}
 					counter++;

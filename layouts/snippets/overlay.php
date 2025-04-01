@@ -3,7 +3,7 @@
 		<title><? echo $this->titel ?: TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
-	<body onload="activate_overlay();">
+	<body onload="activate_overlay();" style="background: url(<? echo BG_IMAGE; ?>);">
 		<script type="text/javascript">
 			root = window.opener;
 			if(typeof(root.stopwaiting) == "function"){
@@ -18,11 +18,11 @@
 				}
 		<? } ?>
 			}
-			document.addEventListener("scroll", (event) => {enclosingForm.gle_scrollposition.value = document.scrollingElement.scrollTop});
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 			<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
-			<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: fit-content;width: -moz-fit-content;position:relative;">
+			<div id="overlayheader" class="gle_tabs px17 fett" style="display: none"></div>
+			<div id="contentdiv">
 				<table border="0" height="100%" cellpadding="0" cellspacing="0" style="width: 100%">
 					<tr>
 						<td align="center" width="100%" valign="top" >
@@ -40,7 +40,7 @@
 					</tr>
 				</table>
 			</div>
-			<div id="overlayfooter" style="<? if ($this->noOverlayFooter OR $this->new_entry OR $this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: 100%; position:fixed; bottom: 0px">
+			<div id="overlayfooter" style="<? if ($this->noOverlayFooter OR $this->new_entry OR $this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>">
 				<table style="width:100%">
 					<tr>
 						<? if (is_array($selectable_limits)) { ?>
@@ -64,5 +64,10 @@
 			<input type="hidden" name="window_type" value="">
 			<input type="hidden" name="csrf_token" value="<? echo $_SESSION['csrf_token']; ?>">
 		</form>
+
+		<script type="text/javascript">
+			document.addEventListener("scroll", save_scrollposition);
+		</script>
+
 	</body>
 </html>

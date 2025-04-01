@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/data_import_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/data_import_'.rolle::$language.'.php');
  ?>
 <script type="text/javascript">
 <!--
@@ -26,7 +26,7 @@
     <td align="center" valign="top" style="height: 40px"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
 	<tr> 
-    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?><br>Shape (*.dbf, *.shp, *.shx), GeoPackage, GeoJSON, GML, KML, KMZ, DXF, GPX, UKO, OVL, GeoTiff</td>
+    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?><br>Shape (*.dbf, *.shp, *.shx), GeoPackage, GeoJSON, GML, KML, KMZ, DXF, GPX, UKO, OVL, GeoTiff, CSV</td>
   </tr>
 	<tr>
 		<td>

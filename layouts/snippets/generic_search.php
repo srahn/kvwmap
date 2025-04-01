@@ -1,5 +1,5 @@
 <? 
-include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/generic_search_'.rolle::$language.'.php');
 include(SNIPPETS.'/sachdatenanzeige_functions.php');
 ?>
 
@@ -71,7 +71,7 @@ function suche(){
 	var nogo = '';
 	
 	<?
-	for($i = 0; $i < @count($this->attributes['type']); $i++) {
+	for($i = 0; $i < count_or_0($this->attributes['type'] ?: []); $i++) {
 		if($this->attributes['mandatory'][$i] == '' or $this->attributes['mandatory'][$i] > -1){
 			if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK' AND $this->attributes['form_element_type'][$i] != 'dynamicLink') {
 				if($this->attributes['mandatory'][$i] == 1){
@@ -108,7 +108,7 @@ function suche(){
 				nogo = 'Geben Sie ein Polygon an oder schließen Sie die Karte';
 			}
 			else{
-				document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+				document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 			}
 		}
 	}
@@ -125,32 +125,6 @@ function suche(){
 	}
 }
 
-
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	var wkt = '';
-	if(svgpath != '' && svgpath != undefined){
-		wkt = "POLYGON((";
-		parts = svgpath.split("M");
-		for(j = 1; j < parts.length; j++){
-			if(j > 1){
-				wkt = wkt + "),("
-			}
-			koords = ""+parts[j];
-			coord = koords.split(" ");
-			wkt = wkt+coord[1]+" "+coord[2];
-			for(var i = 3; i < coord.length-1; i++){
-				if(coord[i] != ""){
-					wkt = wkt+","+coord[i]+" "+coord[i+1];
-				}
-				i++;
-			}
-		}
-		wkt = wkt+"))";
-	}
-	return wkt;
-}
-
 function update_require_attribute(attributes, layer_id, attributenamesarray, searchmask_number){
 	// attributes ist eine Liste von zu aktualisierenden Attributen und attributenamesarray ein Array aller Attribute im Formular
 	if(searchmask_number > 0){						// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
@@ -161,6 +135,7 @@ function update_require_attribute(attributes, layer_id, attributenamesarray, sea
 	var attributevalues = '';
 	var values = [];
 	for(i = 0; i < attributenamesarray.length; i++){
+		values = [];
 		if(document.getElementById(prefix+'value_'+attributenamesarray[i]) != undefined){
 			attributenames += attributenamesarray[i] + '|';
 			options = document.getElementById(prefix+'value_'+attributenamesarray[i]).selectedOptions;
@@ -241,10 +216,7 @@ $(document).on('click', function(e){
 });
 
 function clear(){
-	var fields = document.querySelectorAll('.gsm_tabelle_td_third select, .gsm_tabelle_td_third input');
-	[].forEach.call(fields, function (field){	// noch laufende getlegend-Requests abbrechen
-		field.value = '';
-	});
+	window.location.href='index.php?go=Layer-Suche&selected_layer_id=' + document.GUI.selected_layer_id.value;
 }
   
 </script>

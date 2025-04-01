@@ -1,21 +1,23 @@
 <?php
-	include(LAYOUTPATH . 'languages/layer_chart_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/layer_chart_' . rolle::$language . '.php');
 ?>
-<h2 style="margin: 20px"><? echo $strLayerChartTitle; ?></h2>
-<h3>Layer: <? echo (empty($this->layer->get('Name_' . $this->user->rolle->language)) ? $this->layer->get('Name') : $this->layer->get('Name_' . $this->user->rolle->language)); ?></h3><?
+<h2 style="margin: 20px"><? echo $strLayerChartTitle; ?></h2><?
+
 if ($this->formvars['layer_id'] == '' AND $this->formvars['selected_layer_id'] == '') {
 	$this->Fehlermeldung = $strLayerChartMissingLayerId;
 }
-elseif ($this->layer->get('Name') == '') {
+elseif (!$this->layer) {
 	$this->Fehlermeldung = $strLayerChartMissingLayer;
 }
 else {
 	$this->Fehlermeldung = '';
 }
+
 if ($this->Fehlermeldung != '') {
 	include('Fehlermeldung.php');
 }
 else { ?>
+	<h3>Layer: <? echo (empty($this->layer->get('Name_' . rolle::$language)) ? $this->layer->get('Name') : $this->layer->get('Name_' . rolle::$language)); ?></h3>
 	<script>
 		function show_layer_editor(event) {
 			event.preventDefault();

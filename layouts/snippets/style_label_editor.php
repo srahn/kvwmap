@@ -1,4 +1,4 @@
-<? include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
+<? include(LAYOUTPATH.'languages/layer_formular_'.rolle::$language.'.php');
 
 	global $selectable_scales;
 	$selectable_scales = array_reverse($selectable_scales);
@@ -179,16 +179,6 @@ function navigate(params) {
 	location.href = 'index.php?' + params + '&selected_layer_id=' + document.GUI.selected_layer_id.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 }
 
-function setScale(select){
-	if(select.value != ''){
-		document.GUI.nScale.value=select.value;
-		document.getElementById('scales').style.display='none';
-		document.GUI.legendtouched.value = 1;
-		neuLaden();
-	}
-}
-
-
 //-->
 </script>
 
@@ -254,16 +244,33 @@ function setScale(select){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="javascript:navigate('go=Layereditor');"><div><? echo $strCommonData; ?></div></a></th>
-					<th><a href="javascript:navigate('go=Klasseneditor');"><div><? echo $strClasses; ?></div></a></th>
-					<th class="navigation-selected"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
-					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="javascript:navigate('go=Attributeditor');"><div><? echo $strAttributes; ?></div></a></th>
-					<? } ?>
-					<th><a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div><? echo $strStellenAsignment; ?></div></a></th>
-					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div><? echo $strPrivileges; ?></div></a></th>
-					<? } ?>
+					<th>
+						<a href="javascript:navigate('go=Layereditor');"><div><? echo $strCommonData; ?></div></a>
+					</th>
+					<th>
+						<a href="javascript:navigate('go=Klasseneditor');"><div><? echo $strClasses; ?></div></a>
+					</th>
+					<th class="navigation-selected">
+						<a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a>
+					</th><?
+					if (in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="javascript:navigate('go=Attributeditor');"><div><? echo $strAttributes; ?></div></a>
+						</th><?
+					} ?>
+					<th>
+						<a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div><? echo $strStellenAsignment; ?></div></a>
+					</th><?
+					if (in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div><? echo $strPrivileges; ?></div></a>
+						</th><?
+					}
+					if (!in_array($this->layerdata['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
+						</th><?
+					} ?>
 				</tr>
 			</table>
 		</td>
@@ -501,7 +508,7 @@ function setScale(select){
 										</select>
 									</div>
 								</div>
-								&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+								&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" onkeyup="if (event.keyCode == 13) { setScale(this); }" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 							</div>
 						</div>
 					</td>

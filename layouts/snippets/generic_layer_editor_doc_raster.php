@@ -1,6 +1,6 @@
 <?php
  # 2008-09-30 sr
-  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
  
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -37,8 +37,6 @@
 		
 </script>
 
-<div id="layer" align="left" onclick="remove_calendar();">
-<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer').parentElement, '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
 <? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
@@ -64,8 +62,17 @@
 </table>
 <?
 		}
+
+		if ($this->formvars['overwrite_layer_name'] != '') {
+			$layer_name = $this->formvars['overwrite_layer_name']; ?>
+			<input type="hidden" value="<? echo $this->formvars['overwrite_layer_name']; ?>" name="overwrite_layer_name"><?
+		}
+		else {
+			$layer_name = $layer['Name_or_alias'];
+		}
+
   	$doit = false;
-	  $anzObj = @count($layer['shape']);
+	  $anzObj = count_or_0($layer['shape']);
 		if ($anzObj > 0) {
 			$this->found = 'true';
 			$k = 0;
@@ -78,10 +85,12 @@
 		}
 	  if($doit == true){
 ?>
-<table border="0" cellspacing="0" cellpadding="2">
-	<tr>
-		<td>
-			<div style="<? if($this->new_entry != true)echo 'max-width: 735px;'; ?> display: flex; flex-wrap: wrap; align-items: flex-start">
+<div id="layer" align="left" onclick="remove_calendar();">
+	<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer').parentElement, '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
+	<table border="0" cellspacing="0" cellpadding="2">
+		<tr>
+			<td>
+				<div style="<? if($this->new_entry != true)echo 'max-width: 735px;'; ?> display: flex; flex-wrap: wrap; align-items: flex-start">
 <?
 	$hover_preview = true;
 	$checkbox_names = '';
@@ -123,8 +132,9 @@
 									<input
 										id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
 										type="checkbox"
-										class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
+										class="check_<? echo $layer['Layer_ID']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
 										name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>"
+										onchange="count_selected(<? echo $layer['Layer_ID']; ?>);"
 									>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
 									if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>
 										<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">
@@ -507,7 +517,7 @@
 
 <?
 
-	for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
+	for($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++){
 		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 	}
 
@@ -519,6 +529,6 @@
 <?
   }
   else {
-  	# nix machen
+  	$this->noMatchLayers[$layer['Layer_ID']] = $layer_name;
   }
 ?>

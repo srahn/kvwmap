@@ -44,7 +44,8 @@
 		return $output;
 	}
 
-	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true) {
+	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true, $field_id = NULL) {
+		$field_id = $field_id ?: $layer_id.'_'.$attributes['name'][$j].'_'.$k;
 		$datapart = '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
@@ -73,10 +74,10 @@
 			else {
 				$title_link = 'href="javascript:void(0);"';
 			}
-			$datapart .= '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities($attributes['tooltip'][$j], ENT_QUOTES)) . '\'}])"></a></td>';
+			$datapart .= '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"></a></td>';
 		}
 		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
-			$datapart .= '<td align="right">'.calendar($attributes['type'][$j], $layer_id.'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]).'</td>';
+			$datapart .= '<td align="right" style="position: relative">'.calendar($attributes['type'][$j], $field_id, $attributes['privileg'][$j]).'</td>';
 		}
 		$datapart .= '</td></tr></table>';
 		return $datapart;
@@ -92,18 +93,23 @@
 		return $cal;
 	}
 
+	/**
+	 * @param int $k Counter for objects found in a layer or objects in an array of a specific data type
+	 * @param int $e Counter for array-elements
+	 */
 	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL, $e = NULL){
 		$datapart = '';
 		$after_attribute = '';
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
-		global $strShowAll;
 		global $strNewEmbeddedPK;
 		global $hover_preview;
 		$layer_id = $layer['Layer_ID'];
-		if($dataset == NULL)$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
-		if($attributes == NULL) {
+		if ($dataset === NULL) {
+			$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
+		}
+		if ($attributes == NULL) {
 			$attributes = $layer['attributes'];			# das Attribut-Array (wird nur beim Array- oder Nutzer-Datentyp übergeben)
 		}
 		$name = $attributes['name'][$j];																# der Name des Attributs
@@ -139,24 +145,36 @@
 
 		###### Array-Typ #####
 		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
-			if ($field_id != NULL) $id = $field_id.'_'.$name;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
-			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
+			$datapart .= '<input
+				type="hidden"
+				class="'.$field_class.'"
+				title="'.$alias.'"
+				name="'.$fieldname.'"
+				id="'.$id.'"
+				onchange="'.$onchange.'"
+				value="'.htmlspecialchars($value).'"
+			>';
 			$datapart .= '<div id="'.$id.'_elements" '.($attributes['form_element_type'][$j] == 'Dokument' ? 'style="max-width: 735px; display: flex; flex-wrap: wrap; align-items: flex-start"' : '').'>';
 			$elements = json_decode($value);		# diese Funktion decodiert immer den kommpletten String
 			$attributes2 = $attributes;
 			#$attributes2['name'][$j] = '';		// rausgenommen weil sonst in dynamischen Links nicht richtig ersetzt wird, aber es hatte wahrscheinlich einen Grund
 			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
-			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
-			$dataset2 = $dataset;
+			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);
+			$dataset2 = [];
 			$dataset2[$tablename.'_oid'] = $oid;
 			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
-			for($e = -1; $e < count_or_0($elements); $e++){
+			for ($e = -1; $e < count_or_0($elements); $e++) {
+				$field_id = $id . '_' . $e;
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
-				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="margin: 5px; display: '.($e==-1 ? 'none' : 'block').'"><table class="gle_arrayelement_table" cellpadding="0" cellspacing="0"><tr><td style="height: 22px">';
-				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id.' '.$old_field_class, $e);
+				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="margin: 5px; display: '.($e==-1 ? 'none' : 'block').'"><table class="gle_arrayelement_table" cellpadding="0" cellspacing="0"><tr><td style="height: 22px; position: relative">';
+				if (in_array($attributes2['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
+					$datapart .= calendar($attributes2['type'][$j], $field_id, $attributes['privileg'][$j]).'&nbsp;';
+				}
+				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $change_all, $onchange2, $id.'_'.$e, $field_id, $id.' '.$old_field_class, $e);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1'){
 					$datapart .= '
@@ -180,11 +198,18 @@
 
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
-			if($field_id != NULL)$id = $field_id.'_'.$name;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
-			$type_attributes = $attributes['type_attributes'][$j];
+			$type_attributes = $attributes['type_attributes'][$j][$k];
+			if ($e !== NULL AND $e >= 0) {
+				$k = $e;		# $e ist der Zähler im Array von Datentypen
+			}
+			else {
+				$k = 0;
+			}
 			$elements = json_decode($value);	# diese Funktion decodiert immer den kommpletten String
+			$dataset2 = [];
 			if($elements != NULL){
 				foreach($elements as $element => $elem_value){
 					if (is_array($elem_value) OR is_object($elem_value)) {
@@ -197,21 +222,22 @@
 			$tsize = 20;
 			$datapart .= '<table border="2" class="gle_datatype_table">';
 			$onchange2 = "buildJSONString('" . $id . "', false);";
-			for ($e = 0; $e < count($type_attributes['name']); $e++) {
-				if ($type_attributes['visible'][$e] != 0) {
-					$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
-					if ($type_attributes['alias'][$e] == '') $type_attributes['alias'][$e] = $type_attributes['name'][$e];
-					switch ($type_attributes['labeling'][$e]) {
+			for ($t = 0; $t < count_or_0($type_attributes['name']); $t++) {
+				if ($type_attributes['visible'][$t] != 0) {
+					$field_id = $id . '_' . $t . '_' . $type_attributes['name'][$t];
+					$type_attributes['privileg'][$t] = $attributes['privileg'][$j];
+					if ($type_attributes['alias'][$t] == '') $type_attributes['alias'][$t] = $type_attributes['name'][$t];
+					switch ($type_attributes['labeling'][$t]) {
 						case 1 : {
 							$datapart .= '
 								<tr>
-									<td id="name_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" valign="top" class="gle-attribute-name">
-										' . attribute_name($layer_id, $type_attributes, $e, $k, false) . '
+									<td id="name_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" colspan="2" valign="top" class="gle-attribute-name">
+										' . attribute_name($layer_id, $type_attributes, $t, $k, false, $field_id) . '
 									</td>
 								</tr>
 								<tr>
-									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" colspan="2" class="gle_attribute_value">
+										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id) . '
 									</td>
 								</tr>
 							';
@@ -219,20 +245,20 @@
 						case 2 : {
 							$datapart .= '
 								<tr>
-									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" colspan="2" class="gle_attribute_value">
+										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id) . '
 									</td>
 								</tr>
 							';
 						} break;
 						default : {
 							$datapart .= '
-								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="' . $attribute_class . '">
-									<td id="name_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" valign="top" class="gle_attribute_name">
-									' . attribute_name($layer_id, $type_attributes, $e, $k, false) . '
+								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" class="' . $attribute_class . '">
+									<td id="name_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" valign="top" class="gle_attribute_name">
+									' . attribute_name($layer_id, $type_attributes, $t, $k, false, $field_id) . '
 									</td>
-									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" class="gle_attribute_value">
+										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id) . '
 									</td>
 								</tr>';
 						}
@@ -399,7 +425,8 @@
 			case 'Radiobutton' : {
 				if($change_all){
 					$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
-				}						
+				}
+				$e = 0;					
 				foreach ($attributes['enum'][$j] as $enum_key => $enum) {
 					$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
 					$datapart .= ' onchange="'.$onchange.'" ';
@@ -407,8 +434,9 @@
 						$datapart .= 'checked ';
 					}
 					$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
-					$datapart .= 'value="' . $enum_key . '"><label for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">' . $enum['output'] . '</label>';
+					$datapart .= 'value="' . $enum_key . '"><label class="radio-label" for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">' . $enum['output'] . '</label>';
 					if(!$attributes['horizontal'][$j] OR (is_numeric($attributes['horizontal'][$j]) AND($e+1) % $attributes['horizontal'][$j] == 0))$datapart .= '<br>';
+					$e++;
 				}
 			}break;				
 			
@@ -511,12 +539,14 @@
 							else{
 								$enum = $attributes['enum'][$index];
 							}
-							if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
+							if ($attributes['nullable'][$index] != '0') {
+								$strPleaseSelect = $gui->strPleaseSelect;
+							}
 							$onchange = 'set_changed_flag(this, \'changed_'.$layer_id.'_'.$oid.'\');';
 							$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class);
 						}break;
 						default : {
-							$datapart .= '<input class="'.$field_class.'" style="';
+							$datapart .= '<input title="' . $attributes['alias'][$index] . '" class="'.$field_class.'" style="';
 							if($attributes['privileg'][$name_] == '0'){
 								$datapart .= ';background-color:transparent;border:0px;display:none;background-color:#e8e3da;" readonly ';
 							}
@@ -579,8 +609,13 @@
 				$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&targetlayer_id='.$layer_id;
-				$reloadParams .= '&targetattribute='.$name;
-				$reloadParams .= '&reload='.$attributes['reload'][$j];
+				$reloadParams .= '&targetattribute='.$name;				
+				if ($attributes['no_subform_reload'][$j] == true) {
+					$reloadParams .= '&reload=0';
+				}
+				else {
+					$reloadParams .= '&reload='.$attributes['reload'][$j];
+				}
 				$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$key].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 				$reloadParams .= '&tablename_mother='.$attributes['table_name'][$attributes['the_geom']];											# dito
 				$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
@@ -603,7 +638,7 @@
 
 			case 'Dokument': {
 				if ($value != '') {
-					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url']);
+					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url'], $attributes['type'][$j], $layer_id, $oid, $name);
 					if ($preview['doc_src'] != '') {
 						$datapart .= '<table border="0"><tr><td>';
 						if ($hover_preview) {
@@ -632,7 +667,7 @@
 							$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
 						}
 						$datapart .= '</td></tr>';
-						$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $preview['original_name'] . ' (' . $preview['filesize'] . ')</span></td></tr>';
+						$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $preview['original_name'] . ($preview['filesize'] ? ' (' . $preview['filesize'] . ')' : '') . '</span></td></tr>';
 						$datapart .= '</table>';
 					}
 					else {
@@ -779,21 +814,20 @@
 			} break;
 			
 			case 'mailto': {
-				if ($value!='') {
-					$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="_blank" href="mailto:' . htmlspecialchars($value) . '">';
-					if($attributes['options'][$j] != ''){
-						$datapart .= $attributes['options'][$j];
-					}
-					else{
-						$datapart .= htmlspecialchars(basename($value));
-					}
-					$datapart .= '</a><br>';
-				}
-				if($attribute_privileg != '0'){
+				if ($attribute_privileg != '0') {
 					$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
-				}else{
+				}
+				else {
 					$datapart .= '<input class="'.$field_class.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 				}
+				$datapart .= '<div class="formelement-link"><a class="link" target="_blank" href="mailto:' . htmlspecialchars($value) . '">';
+				if ($attributes['options'][$j] != '') {
+					$datapart .= $attributes['options'][$j];
+				}
+				else {
+					$datapart .= htmlspecialchars(basename($value));
+				}
+				$datapart .= '</a></div>';
 			} break;
 
 			case 'Fläche': {
@@ -879,7 +913,6 @@
 
 			default : {
 				if ($field_id != NULL AND in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
-					$datapart .= calendar($attributes['type'][$j], $id, $attributes['privileg'][$j]).'&nbsp;';
 					$value = ($value? de_date($value) : $value);
 				}
 				$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
@@ -958,6 +991,10 @@
 								autocomplete="off"
 								title="' . $alias . '"
 								onkeydown="
+									if(event.keyCode == 13){
+										document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked = true;
+										document.querySelector(\'#suggests_' . $element_id . ' select\').onchange();
+									}
 									if (this.backup_value == undefined) {
 										this.backup_value = this.value;
 										document.getElementById(\'' . $element_id . '\').backup_value = document.getElementById(\'' . $element_id . '\').value;
@@ -967,7 +1004,8 @@
 									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value);
 								"
 								onchange="
-									if(document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
+									if (!document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked && document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
+										// Abbrechen und Reset bei Danebenklicken
 										this.value = this.backup_value;
 										document.getElementById(\'' . $element_id . '\').value = document.getElementById(\'' . $element_id . '\').backup_value;
 										setTimeout(function(){
@@ -1061,6 +1099,10 @@
 								title="' . $alias . '"
 								autocomplete="off"
 								onkeydown="
+									if(event.keyCode == 13){
+										document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked = true;
+										document.querySelector(\'#suggests_' . $element_id . ' select\').onchange();
+									}
 									if (this.backup_value == undefined) {
 										this.backup_value = this.value;
 										document.getElementById(\'' . $element_id . '\').backup_value = document.getElementById(\'' . $element_id . '\').value;
@@ -1131,9 +1173,15 @@
 		}
 		if ($privileg == '0') {
 			$auswahlfeld_output = $enums[$value]['output'];
-			$auswahlfeld_output_laenge = (strlen($auswahlfeld_output) > 0 ? strlen($auswahlfeld_output) : 19) + 1;
-			$datapart = '<input readonly id="' . $layer_id . '_' . $name . '_' . $k . '" style="border:0px;background-color:transparent;" size="' . $auswahlfeld_output_laenge . '" type="text" value="' . htmlspecialchars($auswahlfeld_output) . '">';
-			$datapart .= '<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '">'; // falls das Attribut ein visibility-changer ist
+			$datapart  = '<div class="readonly_text">' . htmlspecialchars($auswahlfeld_output) . '</div>';
+			$datapart .= '<input
+				type="hidden"
+				id="' . $layer_id . '_' . $name . '_' . $k . '"
+				name="' . $fieldname . '"
+				class="' . $field_class . '"
+				onchange="' . $onchange . '"
+				value="' . htmlspecialchars($value) . '"
+			>'; // falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
 		}
@@ -1189,7 +1237,7 @@
 					<div class="placeholder" title="' . $alias . '" style="' . $select_width . '">
 						<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
 						<span>' . $auswahlfeld_output . '</span>
-						<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '"><!-- falls das Attribut ein visibility-changer ist>
+						<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '"><!-- falls das Attribut ein visibility-changer ist-->
 					</div>
 				</div>';
 			$auswahlfeld_output = '';
@@ -1319,6 +1367,9 @@
 		}
 		elseif ($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
 			$geomtype = 'Line';
+		}
+		elseif ($geomtype == 'MULTIPOINT') {
+			$geomtype = 'Multipoint';
 		}
 		return $geomtype;
 	}

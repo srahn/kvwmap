@@ -14,7 +14,7 @@
 <?
  	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
 		echo "var layernames = new Array();\n";
-		$layercount = @count($this->sorted_layerset);
+		$layercount = count_or_0($this->sorted_layerset);
 		for($j = 0; $j < $layercount; $j++){
 			echo 'layernames['.$j.'] = \''.str_replace('"', '', str_replace("'", '', $this->sorted_layerset[$j]['alias']))."';\n";
 		}

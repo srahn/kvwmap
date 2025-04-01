@@ -21,7 +21,7 @@ root.getlegend_requests = new Array();
 var current_date = new Date().toLocaleString().replace(',', '');;
 var new_hist_timestamp;
 var loc = window.location.href.toString().split('index.php')[0];
-var mapimg0, mapimg3, mapimg4;
+var mapimg, mapimg0, mapimg3, mapimg4;
 var compare_clipping = false;
 
 window.onbeforeunload = function(){
@@ -37,7 +37,7 @@ window.onbeforeunload = function(){
 * @param target array ['divname', ...]
 * @param action array ['sethtml'. ...]
 */
-function ahah(url, data, target, action, progress) {
+function ahah(url, data, target, action, progress, loading_img = true) {
 	if (csrf_token && csrf_token !== '') {
 		if (typeof data == 'string') {
 			data = data + '&csrf_token=' + csrf_token;
@@ -46,11 +46,13 @@ function ahah(url, data, target, action, progress) {
 			data.append('csrf_token', csrf_token);
 		}
 	}
-	for (k = 0; k < target.length; ++k) {
-		if (target[k] != null && target[k].tagName == "DIV") {
-			waiting_img = document.createElement("img");
-			waiting_img.src = "graphics/ajax-loader.gif";
-			target[k].appendChild(waiting_img);
+	if (loading_img) {
+		for (k = 0; k < target.length; ++k) {
+			if (target[k] != null && target[k].tagName == "DIV") {
+				waiting_img = document.createElement("img");
+				waiting_img.src = "graphics/ajax-loader.gif";
+				target[k].appendChild(waiting_img);
+			}
 		}
 	}
 	var req = new XMLHttpRequest();
@@ -72,14 +74,14 @@ function ahah(url, data, target, action, progress) {
 
 function ahahDone(url, targets, req, actions) {
 	if (req.readyState == 4) { // only if req is "loaded"
+		if (req.getResponseHeader('error') == 'true'){
+			message(req.responseText);
+		}
+		if (req.getResponseHeader('logout') == 'true') { // falls man zwischenzeitlich ausgeloggt wurde
+			window.location = url;
+			return;
+		}		
 		if (req.status == 200) { // only if "OK"
-			if (req.getResponseHeader('logout') == 'true') { // falls man zwischenzeitlich ausgeloggt wurde
-				window.location = url;
-				return;
-			}
-			if (req.getResponseHeader('error') == 'true'){
-				message(req.responseText);
-			}
 			if (req.getResponseHeader('warning') == 'true'){
 				message([{ type: 'warning', msg: req.responseText}]);
 			}
@@ -368,12 +370,13 @@ function printMap(){
 	document.GUI.submit();
 }
 
-function printMapFast(){
+function printMapFast(filetype = 'pdf'){
 	if(typeof addRedlining != 'undefined'){
 		addRedlining();
 	}
 	document.GUI.go.value = 'Schnelle_Druckausgabe';
 	document.GUI.target = '_blank';
+	document.GUI.output_filetype.value = filetype;
 	document.GUI.submit();
 	document.GUI.go.value = 'neu Laden';
 	document.GUI.target = '';
@@ -538,7 +541,7 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 		msg.type = (['notice', 'info', 'error', 'confirm'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
-			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
+			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();stopwaiting();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
 		}
 		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
 			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="' + confirm_button_value + '" style="margin: 10px 0px 0px 0px;">');
@@ -556,12 +559,12 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 	}
 	else {
 		clearTimeout(messageTimeoutID);
-		$('#message_box').stop().fadeIn();
+		$('#message_box').stop().fadeIn().show();
 	}
 }
 
-function dialog(divId, message, yesCallback, noCallback = () => {}, cancelCallback = () => {}) {
-
+function clearMessageBox(){
+	document.getElementById('message_box').innerHTML = '';
 }
 
 function onload_functions() {
@@ -677,7 +680,7 @@ function drag(event) {
 function auto_resize_overlay(){
 	if (root.resized < 2) {		// wenn resized > 1 hat der Nutzer von Hand die Groesse veraendert, dann keine automatische Anpassung
 		root.resized = 0;
-		var contentWidth = document.getElementById("contentdiv").offsetWidth;
+		var contentWidth = Math.max(document.getElementById("overlayheader").offsetWidth, document.getElementById("contentdiv").scrollWidth);
 		if (contentWidth < screen.width) {
 			window.resizeTo(contentWidth+35, 800);
 		}
@@ -735,12 +738,20 @@ function formdata2urlstring(formdata){
 	return url;
 }
 
+function setScale(select){
+	if(select.value != ''){
+		document.GUI.nScale.value=select.value;
+		document.getElementById('scales').style.display='none';
+		document.GUI.submit();
+	}
+}
+
 function add_split_mapimgs() {
 	svgdoc = document.SVG.getSVGDocument();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();	
 	svgdoc.getElementById("mapimg0")?.remove();
-	var mapimg = svgdoc.getElementById("mapimg");
+	mapimg = svgdoc.getElementById("mapimg");
 	var movegroup = svgdoc.getElementById("moveGroup");
 	var cartesian = svgdoc.getElementById("cartesian");
 	mapimg3 = mapimg.cloneNode();
@@ -757,6 +768,7 @@ function add_split_mapimgs() {
 
 function pass_preloaded_img(){
 	mapimg4.setAttribute('href', mapimg0.getAttribute('href'));
+	mapimg.setAttribute('href', mapimg0.getAttribute('href'));
 }
 
 function compare_view_for_layer(layer_id){
@@ -778,7 +790,7 @@ function set_hist_timestamp() {
 	}
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
 	get_map(mapimg3, 'no_postgis_layer=1&hist_timestamp=' + ts);
-	get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
+	//get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
 	document.GUI.hist_timestamp3.value = 0;
 	$('#hist_timestamp_form').show();
 	document.getElementById('hist_range_div').scrollLeft = scroll;
@@ -804,22 +816,29 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	svgdoc.getElementById("mapimg0")?.remove();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();
-	// nix
-	var mapimg = svgdoc.getElementById("mapimg2");
-	var scalebar = document.getElementById("scalebar");
-	var refmap = document.getElementById("refmap");
-	var scale = document.getElementById("scale");
-	var lagebezeichnung = document.getElementById("lagebezeichnung");
-	var minx = document.GUI.minx;
-	var miny = document.GUI.miny;
-	var maxx = document.GUI.maxx;
-	var maxy = document.GUI.maxy;
-	var pixelsize = document.GUI.pixelsize;
-	var polygon = svgdoc.getElementById("polygon");
-	// nix
+
+	var targets = new Array(
+		'',
+		svgdoc.getElementById("mapimg2"), 
+		document.getElementById("scalebar"),
+		document.getElementById("refmap"), 
+		document.getElementById("scale"),
+		document.getElementById("lagebezeichnung"),
+		document.GUI.minx,
+		document.GUI.miny,
+		document.GUI.maxx,
+		document.GUI.maxy,
+		document.GUI.pixelsize,
+		svgdoc.getElementById("polygon"),
+		''
+	);
+
+	var actions = new Array("execute_function", "href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function");
 	
 	var input_coord = document.GUI.INPUT_COORD.value;
 	var cmd = document.GUI.CMD.value;
+	var refmap_x = document.GUI.refmap_x.value;
+	var refmap_y = document.GUI.refmap_y.value;
 	var width_reduction = '';
 	var height_reduction = '';
 	var browserwidth = '';
@@ -835,7 +854,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
-	postdata = postdata+"&mime_type=map_ajax&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
+	postdata = postdata+"&mime_type=map_ajax&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
 	if (document.GUI.legendtouched.value == 1) {
 		// Legende benutzt -> gesamtes Formular mitschicken
@@ -854,26 +873,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 			formdata.append(key, value);			// hier muesste eigentlich set verwendet werden, kann der IE 11 aber nicht
 		});
 	
-	ahah(
-		"index.php",
-		formdata, 
-		new Array(
-			'',
-			mapimg, 
-			scalebar,
-			refmap, 
-			scale,
-			lagebezeichnung,
-			minx,
-			miny,
-			maxx,
-			maxy,
-			pixelsize,
-			polygon,
-			''
-		),
-		new Array("execute_function", "href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function")
-	);
+	ahah("index.php",	formdata, targets, actions);
 	document.GUI.INPUT_COORD.value = '';
 	document.GUI.CMD.value = '';
 }
@@ -999,8 +999,8 @@ function update_legend(layerhiddenstring){
 	for(j = 0; j < parts.length-1; j=j+2){
 		if (
 			(parts[j] == 'reload') ||																																																								// wenn Legenden-Reload erzwungen wird oder
-			(document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
-			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)) 	// oder andersrum
+			(document.getElementById('thema'+parts[j]) != undefined && document.getElementById('thema'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
+			(document.getElementById('thema'+parts[j]) != undefined && !document.getElementById('thema'+parts[j]).disabled && parts[j+1] == 1)) 	// oder andersrum
 		{
 			clearLegendRequests();
 			legende = document.getElementById('legend');
@@ -1010,38 +1010,36 @@ function update_legend(layerhiddenstring){
 	}
 }
 
+function get_layer_legend(layer_id, params, toggle_classes) {
+	var layer_tr = document.getElementById('legend_layer_' + layer_id);
+	if (toggle_classes) {
+		var classes_field = document.getElementById('classes_' + layer_id);
+		classes_field.value = 1 - classes_field.value;
+		params = params + '&show_classes=' + classes_field.value;
+	}
+	ahah("index.php",	"go=get_layer_legend&only_layer_id=" + layer_id + params, new Array(layer_tr), new Array("sethtml"));
+}
+
 /*
 * optional status to set values irrespective of current value and open all subgroups
 */
-function getlegend(groupid, layerid, fremde, status) {
+function getlegend(groupid, status) {
 	status = status || 0;
 	groupdiv = document.getElementById('groupdiv_' + groupid);
-	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
-		group = document.getElementById('group_' + groupid);
-		var open = status || !parseInt(group.value);
-		if (open) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
-			group.value = 1;
-			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde + '&status=' + status, new Array(groupdiv), ['setouterhtml']);
-		}
-		else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
-			group.value = 0;
-			layergroupdiv = document.getElementById('layergroupdiv_' + groupid);
-			groupimg = document.getElementById('groupimg_' + groupid);
-			layergroupdiv.style.display = 'none';
-			groupimg.src = 'graphics/plus.gif';
-			ahah('index.php', 'go=close_group_legend&' + group.name + '=' + group.value, '', '');
-		}
+	group = document.getElementById('group_' + groupid);
+	var open = status || !parseInt(group.value);
+	if (open) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+		group.value = 1;
+		ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&status=' + status, new Array(groupdiv), ['setouterhtml']);
 	}
-	else {																	// eine Klasse wurde auf- oder zugeklappt
-		layer = document.getElementById('classes_'+layerid);
-		if(layer.value == 0){
-			layer.value = 1;
-		}
-		else{
-			layer.value = 0;
-		}
-		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), ['setouterhtml']);
-	}
+	else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
+		group.value = 0;
+		layergroupdiv = document.getElementById('layergroupdiv_' + groupid);
+		groupimg = document.getElementById('groupimg_' + groupid);
+		layergroupdiv.style.display = 'none';
+		groupimg.src = 'graphics/plus.gif';
+		ahah('index.php', 'go=close_group_legend&' + group.name + '=' + group.value, '', '');
+	}	
 }
 
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
@@ -1064,9 +1062,9 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 		groupradiolayerstring = groupradiolayers.value+'';			// die Radiolayer innerhalb einer Gruppe
 		radiolayer = groupradiolayerstring.split('|');
 		for(i = 0; i < radiolayer.length-1; i++){
-			if(document.getElementById('thema_'+radiolayer[i]) != undefined){
-				if(document.getElementById('thema_'+radiolayer[i]) != thema){
-					document.getElementById('thema_'+radiolayer[i]).checked = false;
+			if(document.getElementById('thema'+radiolayer[i]) != undefined){
+				if(document.getElementById('thema'+radiolayer[i]) != thema){
+					document.getElementById('thema'+radiolayer[i]).checked = false;
 					if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
 						document.getElementById('qLayer'+radiolayer[i]).checked = false;
 					}
@@ -1090,8 +1088,8 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 		queryradiolayerstring = queryradiolayers.value+'';			// die Radiobuttons für die Abfrage, wenn singlequery-Modus aktiviert
 		radiolayer = queryradiolayerstring.split('|');
 		for(i = 0; i < radiolayer.length-1; i++){
-			if(document.getElementById('thema_'+radiolayer[i]) != undefined){
-				if(document.getElementById('thema_'+radiolayer[i]) != thema){
+			if(document.getElementById('thema'+radiolayer[i]) != undefined){
+				if(document.getElementById('thema'+radiolayer[i]) != thema){
 					if(document.getElementById('qLayer'+radiolayer[i]) != undefined)document.getElementById('qLayer'+radiolayer[i]).checked = false;
 				}
 				else{
@@ -1128,8 +1126,8 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   	radiolayerstring = radiolayers.value+'';
   	radiolayer = radiolayerstring.split('|');
   	for(i = 0; i < radiolayer.length-1; i++){
-  		if(document.getElementById('thema_'+radiolayer[i]) != thema){
-  			document.getElementById('thema_'+radiolayer[i]).checked = false;
+  		if(document.getElementById('thema'+radiolayer[i]) != thema){
+  			document.getElementById('thema'+radiolayer[i]).checked = false;
 				document.getElementById('thema'+radiolayer[i]).value = 0;		// damit nicht sichtbare Radiolayers ausgeschaltet werden
   		}
   		else{
@@ -1200,7 +1198,7 @@ function selectgroupquery(group, instantreload){
 			query = document.getElementById("qLayer"+layers[i]);
 			if(query){
 				query.checked = check;
-				thema = document.getElementById("thema_"+layers[i]);
+				thema = document.getElementById("thema"+layers[i]);
 				updateThema('', thema, query, '', '', 0);
 			}
 		}
@@ -1222,14 +1220,14 @@ function selectgroupthema(group, instantreload){
   var layers = value.split(",");
 	var check;
   for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
-    thema = document.getElementById("thema_"+layers[i]);
+    thema = document.getElementById("thema"+layers[i]);
 		if(thema && thema.type == 'checkbox' && !thema.disabled){
 			check = !thema.checked;
 			break;
     }
   }
 	for(i = 0; i < layers.length; i++){
-    thema = document.getElementById("thema_"+layers[i]);
+    thema = document.getElementById("thema"+layers[i]);
     if(thema && (!check || thema.type == 'checkbox')){		// entweder alle Layer sollen ausgeschaltet werden oder es ist ein checkbox-Layer
       thema.checked = check;
       query = document.getElementById("qLayer"+layers[i]);
@@ -1248,7 +1246,13 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 
 function getLayerOptions(layer_id){
 	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
-	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
+	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_content_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
+	document.GUI.layer_options_open.value = layer_id;
+}
+
+function getLayerParamsForm(layer_id){
+	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
+	ahah('index.php', 'go=getLayerParamsForm&layer_id=' + layer_id + '&open=1', new Array(document.getElementById('options_content_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
 	document.GUI.layer_options_open.value = layer_id;
 }
 
@@ -1287,7 +1291,7 @@ function getGroupOptions(group_id) {
 
 function closeLayerOptions(layer_id){
 	document.GUI.layer_options_open.value = '';
-	document.getElementById('options_'+layer_id).innerHTML=' ';
+	document.getElementById('options_content_'+layer_id).innerHTML=' ';
 }
 
 function closeGroupOptions(group_id) {
@@ -1296,8 +1300,17 @@ function closeGroupOptions(group_id) {
 }
 
 function saveLayerOptions(layer_id){	
-	document.GUI.go.value = 'saveLayerOptions';
-	document.GUI.submit();
+	var formdata = new FormData(document.GUI);
+	formdata.set('go', 'saveLayerOptions');
+	ahah("index.php",	formdata, [], []);
+	neuLaden();
+}
+
+function setLayerParam(name) {
+	var data = 'go=setLayerParams&prefix=options_&options_layer_parameter_' + name + '=' + document.getElementById('layer_parameter_' + name).value;
+	ahah('index.php', data, [], []);
+	document.GUI.legendtouched.value = 1;
+	neuLaden();
 }
 
 function resetLayerOptions(layer_id){	
@@ -1334,19 +1347,23 @@ function toggleDrawingOrderForm(){
 }
 
 
-// --- html5 Drag and Drop der Layer im drawingOrderForm --- //
+// --- html5 Drag and Drop --- //
  
-var dragSrcEl = null;
+var dragSrcEl, srcDropZone = null;
 
 function handleDragStart(e){
 	dragSrcEl = e.target;
-	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
-	[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
-    dropzone.classList.add('ready');
-  });
-  if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
-	dragSrcEl.classList.add('dragging');
-	setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
+	if (!dragSrcEl.classList.contains('dragging')) {
+		var dropzones = document.querySelectorAll('.DropZone');
+		[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
+			dropzone.classList.add('ready');
+		});
+		if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
+		dragSrcEl.classList.add('dragging');
+		setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
+		srcDropZone = dragSrcEl.nextElementSibling;
+		dragSrcEl.parentNode.removeChild(srcDropZone);
+	}
 }
 
 function handleDragOver(e){
@@ -1366,12 +1383,11 @@ function handleDragLeave(e){
 function handleDrop(e){
   if (e.stopPropagation)e.stopPropagation();
 	dstDropZone = e.target;
-	srcDropZone = dragSrcEl.nextElementSibling;
 	dstDropZone.classList.remove('over');
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
 	if(srcDropZone != dstDropZone){
-		dragSrcEl.parentNode.insertBefore(dragSrcEl, dstDropZone);		// layer verschieben
+		dstDropZone.parentNode.insertBefore(dragSrcEl, dstDropZone);		// dragSrcEl verschieben
 		dragSrcEl.parentNode.insertBefore(srcDropZone, dragSrcEl);		// dropzone verschieben
 	}
   return false;
@@ -1380,7 +1396,7 @@ function handleDrop(e){
 function handleDragEnd(e){
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
-	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
+	var dropzones = document.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones kleiner machen
     dropzone.classList.remove('ready');
   });
@@ -1535,6 +1551,7 @@ function mouseOutClassStatus(classid, imgsrc, width, height, type){
 }
 
 function showCopyrights(header){
+	clearMessageBox();
 	message([{
 			'type': 'info',
 			'msg': '<h2 style="padding: 4px 4px 10px 4px">' + header + '</h2><div id="copyrights_div"></div>'
@@ -1543,6 +1560,7 @@ function showCopyrights(header){
 }
 
 function showMapParameter(epsg_code, width, height, l) {
+	clearMessageBox();
 	var gui = document.GUI,
 			msg = " \
 				<div style=\"text-align: left\"> \
@@ -1562,12 +1580,24 @@ function showMapParameter(epsg_code, width, height, l) {
 }
 
 function showURL(params, headline) {
-	var msg = " \
-				<div style=\"text-align: left\"> \
-					<h2>" + headline + "</h2><br> \
-					<input id=\"url\" style=\"width: 350px\" type=\"text\" value=\"" + document.baseURI.match(/.*\//) + 'index.php?' + params + "\"><br> \
-				</div> \
-			";
+	let url = `${document.baseURI.match(/.*\//)}index.php?${params}`;
+	let msg = `
+		<div style="text-align: left;">
+			<h2 style="margin-top: 2px; margin-buttom: 2px">${headline}</h2>
+			<div style="display:flex; margin-top: 10px">
+				<div style="float: left;"><textarea id="url" style="min-width: 385px;">${url}</textarea></div>
+				<div style="float: left; margin-left: 5px"><a href="${url}"><i class="fa fa-hand-o-right" aria-hidden="true"></i></a></div>
+			</div>
+			<div style="clear: both"></div>
+		</div>
+	`;
+	// msg = `
+	// 	<div style="text-align: left">
+	// 		<h2 style="margin-top: 2px; margin-buttom: 2px">${headline}</h2>
+	// 		<input type="text" id="url" style="width: 93%; float: left" value="${url}">
+	// 		<a href="${url}"><i class="fa fa-hand-o-right" aria-hidden="true" style="float: right""></i></a>
+	// 	</div>
+	// `;
 	message([{
 			'type': 'info',
 			'msg': msg
@@ -1607,7 +1637,7 @@ function htmlspecialchars(value) {
 	return value.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
-function umlaute_umwandeln(value) {
+function sonderzeichen_umwandeln(value) {
 	var map = {
 		'ä' : 'ae',
 		'Ä' : 'Ae',
@@ -1695,7 +1725,7 @@ function getRandomPassword() {
 	var lower_chars = 'abcdefghijklmnopqrstuvwxyz';
 	var upper_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	var numbers = '0123456789';
-	var special_chars = '!@#$_+?%^&)';
+	var special_chars = '@#$_+?%^&)';
 	var length = Math.ceil(password_minlength / check_count);
 	var randomPassword;
 

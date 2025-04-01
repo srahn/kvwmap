@@ -38,7 +38,7 @@ class Konvertierung extends PgObject {
 	/**
 	 * Die Funktion setzt Einstellungen entsprechen der $planart.
 	 * Wenn $planart nicht übergeben wurde wird die Planart aus $this->data abgefragt.
-	 * @param String $planart (pptional) Planart der Konvertierung
+	 * @param string $planart (pptional) Planart der Konvertierung
 	 */
 	// MARK: Konfiguration
 	function set_config($planart = null) {
@@ -225,7 +225,7 @@ class Konvertierung extends PgObject {
 		$bb = $gui->Stelle->MaxGeorefExt;
 
 		# Setze Metadaten
-		$gui->map->set('name', umlaute_umwandeln($this->plan->get('name')));
+		$gui->map->set('name', sonderzeichen_umwandeln($this->plan->get('name')));
 		$gui->map->extent->setextent($this->plan->extent['minx'], $this->plan->extent['miny'], $this->plan->extent['maxx'], $this->plan->extent['maxy']);
 		$gui->map->setMetaData("ows_extent", implode(' ', $this->plan->extent));
 		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' Rechtskraft ' . $this->get_aktualitaetsdatum());
@@ -258,7 +258,14 @@ class Konvertierung extends PgObject {
 				# Hier eingeführt und nicht in GUI->loadlayer, weil führt dort beim WebAtlas-WMS zu einem Fehler
 				$layer->setMetaData('ows_extent', $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				# Set Data sql for layer
-				$layerObj = Layer::find_by_id($gui, $layer->getMetadata('kvwmap_layer_id'));
+				$layer_id = $layer->getMetadata('kvwmap_layer_id');
+				$layerObj = Layer::find_by_id($gui, $layer_id);
+				if (!$layerObj) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+					);
+				}
 				$result = $layerObj->get_generic_data_sql();
 				if ($result['success']) {
 					$layer->set('data', $result['data_sql']);
@@ -365,7 +372,7 @@ class Konvertierung extends PgObject {
 				$konvertierung->contenttype = 'application/pdf';
 				return $konvertierung;
 			case 'jpg' :
-				$filename = get_name_from_thump($path['basename']);
+				$filename = get_name_from_thumb($path['basename']);
 				$sql = "
 					SELECT
 						*
@@ -1005,14 +1012,10 @@ class Konvertierung extends PgObject {
 		include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
 		$typeInfo = new TypeInfo($this->database);
 		$uml_attribs = $typeInfo->getInfo($this->plan->tableName);
-		foreach ($uml_attribs as $uml_attrib) {
-			$select_string .= $uml_attrib['col_name'] . ',';
-		}
-		$select_string = rtrim($select_string, ',');
 
 		$sql = "
 			SELECT " . 
-				$select_string . " 
+				implode(', ', array_column($uml_attribs, 'col_name')) . " 
 			FROM
 				xplan_gml." . $this->plan->tableName . "
 			WHERE
@@ -2008,9 +2011,9 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-	* Erzeugt eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
-	* gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
-	*
+	 * Löscht eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
+	 * gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
+	 *
 	*/
 	function delete_layer_group($layer_type) {
 		$this->debug->show('delete_layer_group typ: ' . $layer_type, Konvertierung::$write_debug);
@@ -2697,7 +2700,7 @@ class Konvertierung extends PgObject {
 		$md->set('id_cite_date', en_date($this->get_letztes_aktualisierungsdatum_gebietstabelle()));
 		$md->set('version', $this->get_version_from_ns_uri(XPLAN_NS_URI));
 		$md->set('extents', $plan->extents);
-		$md->set('service_layer_name', umlaute_umwandeln($plan->get('name')));
+		$md->set('service_layer_name', sonderzeichen_umwandeln($plan->get('name')));
 		$md->set('onlineresource', URL . 'ows/' . $this->gui->Stelle->id . '/fplan?');
 		$md->set('download_name', 'Download der XPlan-GML Dateien');
 		$md->set('download_url', URL . APPLVERSION . 'index.php?go=xplankonverter_download_uploaded_xplan_gml&amp;konvertierung_id=' . $this->get_id());

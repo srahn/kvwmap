@@ -12,4 +12,4 @@ BEGIN;
 		NOT EXISTS (
 			SELECT error_id FROM xplankonverter.errors WHERE error_id = 9	
 		);
-COMMIT;
+	COMMIT;

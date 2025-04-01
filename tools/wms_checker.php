@@ -70,9 +70,10 @@ function checkStatus($request, $username, $password){
     }
 		elseif (strpos($header, '301 Moved Permanently') !== false OR strpos($header, '307 Temporary Redirect') !== false) {
 			$new_location = trim(get_first_word_after($header, 'Location:', ' ', chr(10)));
-			$info = '<p>' . substr($header, 0, strpos($header, 'Location:')) . '<br>Prüfe neue Location: <a href="' . $new_location . '" target="_blank">' . $new_location . '</a>';
+			$info = '<p>' . substr($header, 0, strpos($header, 'Location:'));
 			$result = checkStatus($new_location, $username, $password);
-			$result[1] = $info . ' ' . (string)$result[1];
+			$result[1] = $info . '<br>' . (string)$result[1];
+      $result[2] = '<br>neue Location: <a href="' . $new_location . '" target="_blank">' . $new_location . '</a>';
 			return $result;
 		}
     else{
@@ -91,7 +92,7 @@ function checkStatus($request, $username, $password){
       }
     }
   }
-  return array($status,$info);
+  return array($status, $info);
 }
 
 function getExceptionCode($data){
@@ -107,7 +108,6 @@ function getExceptionCode($data){
 		}
   }  
 }
-
 
 include($config);
 include($credentials);
@@ -140,56 +140,76 @@ $result = $userDb->result;
 
 $params = [];
 $sql = "
-  SELECT
-    `key`, 
-    `default_value`
-  FROM
-    layer_parameter";
+	SELECT
+		`key`, 
+		`default_value`
+	FROM
+		layer_parameter
+";
 $userDb->execSQL($sql);
 $ret = $userDb->result;
-while ($line = $ret->fetch_assoc()){
-  $params[$line['key']] = $line['default_value'];
+while ($line = $ret->fetch_assoc()) {
+	$params[$line['key']] = $line['default_value'];
 }
 
-while($line = $result->fetch_assoc()){
-  try{
-    $extent = ms_newRectObj();
-    $extent->setextent($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
+while ($line = $result->fetch_assoc()){
+	try {
+		$extent = ms_newRectObj();
+		$extent->setextent($bbox['left'], $bbox['bottom'], $bbox['right'], $bbox['top']);
   }
-  catch(Exception $e) {
-    $extent = new rectObj($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
+	catch(Exception $e) {
+		$extent = new rectObj($bbox['left'], $bbox['bottom'], $bbox['right'], $bbox['top']);
   }
-  foreach($params AS $key => $value){
-    $line["connection"] = str_replace('$'.$key, $value, $line["connection"]);
-  }
-  $wgsProjection = ms_newprojectionobj("init=epsg:4326");
-  $userProjection = ms_newprojectionobj("init=epsg:".$line["epsg_code"]);
-  $extent->project($wgsProjection, $userProjection);
-  $bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
-  
-  $url = $line["connection"]."&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:".$line["epsg_code"]."&WIDTH=400&HEIGHT=400&BBOX=".$bounding;
-	if(strpos(strtolower($line["connection"]), 'version=') === false)$url .= '&VERSION='.$line["wms_server_version"];
-	if(strpos(strtolower($line["connection"]), 'layers=') === false)$url .= '&LAYERS='.$line["wms_name"];
-	if(strpos(strtolower($line["connection"]), 'format=') === false)$url .= '&FORMAT='.$line["wms_format"];
-	if(strpos(strtolower($line["connection"]), 'styles=') === false)$url .= '&STYLES=';
+	foreach ($params AS $key => $value) {
+		$line["connection"] = str_replace('$' . $key, $value, $line["connection"]);
+	}
+	$wgsProjection = new projectionObj("init=epsg:4326");
+  $userProjection = new projectionObj("init=epsg:".$line["epsg_code"]);
+	$extent->project($wgsProjection, $userProjection);
+	$bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
+	$exceptions = 'application/vnd.ogc.se_xml';
+	$url = $line["connection"] . "&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=" . $exceptions .  "&SRS=EPSG:" . $line["epsg_code"] . "&WIDTH=400&HEIGHT=400&BBOX=" . $bounding;
+	if (strpos(strtolower($line["connection"]), 'version=') === false) $url .= '&VERSION=' . $line["wms_server_version"];
+	if (strpos(strtolower($line["connection"]), 'layers=' ) === false) $url .= '&LAYERS='  . $line["wms_name"];
+	if (strpos(strtolower($line["connection"]), 'format=' ) === false) $url .= '&FORMAT='  . $line["wms_format"];
+	if (strpos(strtolower($line["connection"]), 'styles=' ) === false) $url .= '&STYLES=';
   $status = checkStatus($url, $line['wms_auth_username'], $line['wms_auth_password']);
-	
-	if(!$status[0])$color = '#db5a5a';
-	else $color = '#36908a';
-	
-  echo '<div style="border: 1px solid black;width: 100%;padding: 10px;background-color: '.$color.'">';  
-	echo '<a href="'.$url.'"target="_blank">'.$line["Name"]."</a><br/>";
-  if(!$status[0]){
-    echo 'nicht ok<br>'.$status[1];
-		$query = "UPDATE `layer` SET status = '".$status[1]."' WHERE Layer_ID = ".$line["Layer_ID"];
-  }
-  else{
+	if (!$status[0] AND strpos($status[1], 'application/vnd.ogc.se_xml') !== false) {
+		$url = str_replace('application/vnd.ogc.se_xml', 'XML', $url);
+		$status = checkStatus($url, $line['wms_auth_username'], $line['wms_auth_password']);
+	}
+	if (!$status[0]) {
+		$color = '#db5a5a';
+	}
+	else {
+		$color = '#36908a';
+	}
+	echo '<div style="border: 1px solid black;width: 100%;padding: 10px;background-color: ' . $color . '">';
+	echo '<a href="' . $url . '"target="_blank">' . $line["Name"] . "</a><br/>";
+	if (!$status[0]) {
+		echo 'nicht ok<br>' . $status[1] . $status[2];
+		$query = "
+			UPDATE
+				`layer`
+			SET
+				`status` = '" . addslashes($status[1]) . "'
+			WHERE
+				`Layer_ID` = " . $line["Layer_ID"] . "
+		";
+	}
+	else {
 		echo ($status[0] != '' ? 'info: ' . $status[1] : '');
-    echo 'ok<br>';
-		$query = "UPDATE `layer` SET status = '' WHERE Layer_ID = ".$line["Layer_ID"];
-  }
+		echo 'ok<br>';
+		$query = "
+			UPDATE
+				`layer`
+			SET
+				`status` = ''
+			WHERE
+				`Layer_ID` = " . $line["Layer_ID"] . "
+		";
+	}
 	$result2 = $userDb->execSQL($query);
 	echo '</div>';
 }
-
 ?>

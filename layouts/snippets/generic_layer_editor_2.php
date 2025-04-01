@@ -1,5 +1,5 @@
 <?
-include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 $invisible_attributes = array();
 $checkbox_names = '';
 $columnname = '';
@@ -80,9 +80,18 @@ if ($doit == true) {
 							$this->formvars['subform_link'] == ''
 						) {
 							if ($this->formvars['backlink'] == '') {
+								# kein backlink angegeben -> zurück zur Suche im Hauptfenster
 								$this->formvars['backlink'] = 'javascript:currentform.go.value=\'get_last_search\';currentform.submit();';
+								$target = 'root';
 							}
-							echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']) . '" target="root" title="' . $strbackToSearch . '"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
+							else {
+								# es ist ein backlink angegeben -> zurück zum backlink im selben Fenster
+								$target = '_self';
+								if ($this->formvars['window_type'] == 'overlay') {
+									$this->formvars['backlink'] .= '&window_type=' . $this->formvars['window_type'];
+								}
+							}
+							echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']) . '" target="' . $target . '" title="' . $strbackToSearch . '"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 						} ?>
 					</td>
 					<td width="99%" align="center"><h2 id="layername"><? echo $layer_name; ?></h2></td><?
@@ -142,7 +151,10 @@ if ($doit == true) {
 								}
 								else {
 									array_push($layer['attributes']['tabs'], 'Geometrie');
-									$visibility_geom = 'style="visibility: collapse"';
+									if ($this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] != count($layer['attributes']['tabs']) - 1) {
+										# wenn Geometrie-Tab nicht aktiv war
+										$visibility_geom = 'collapsed';
+									}
 								}
 							}
 							$opentab = $layer['attributes']['tabs'][$this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] ?: $this->formvars['opentab'] ?: 0];
@@ -152,7 +164,7 @@ if ($doit == true) {
 									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
 										$z = 100;
 										foreach ($layer['attributes']['tabs'] as $t => $tab) {
-											$tabname = umlaute_umwandeln($tab);
+											$tabname = sonderzeichen_umwandeln($tab);
 											echo '<div style="z-index: ' . $z . '" class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', ' . $t . ', \'' . $tabname . '\');">' . $tab . '</div>';
 											$z--;
 										}
@@ -166,14 +178,14 @@ if ($doit == true) {
 						if ($sachdaten_tab) {
 							$tabname = 'Sachdaten';
 							if ($opentab != 'Sachdaten') {
-								$visibility = 'style="visibility: collapse"';
+								$visibility = 'collapsed';
 							}
 							if ($layer['attributes']['group'][0] == '') {
-								echo '<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_' .$tabname. '" ' . $visibility . '><td><table class="tgle"><tbody class="gle gledata">';
+								echo '<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_' .$tabname. ' ' . $visibility . '"><td><table class="tgle"><tbody class="gle gledata">';
 							}
 						}
 						
-						for($j = 0; $j < @count($layer['attributes']['name']); $j++) {
+						for($j = 0; $j < count_or_0($layer['attributes']['name']); $j++) {
 							$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 							// if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 								// $layer['attributes']['form_element_type'][$j] .= '_not_saveable';
@@ -193,12 +205,12 @@ if ($doit == true) {
 								$groupname_short = str_replace(' ', '_', $groupname_short[0]);
 								if ($layer['attributes']['tab'][$j] != '') {
 									$visibility = '';
-									$tabname = umlaute_umwandeln($layer['attributes']['tab'][$j]);
+									$tabname = sonderzeichen_umwandeln($layer['attributes']['tab'][$j]);
 									if ($opentab != $layer['attributes']['tab'][$j]) {
-										$visibility = 'style="visibility: collapse"';
+										$visibility = 'collapsed';
 									}
 								}
-								echo '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '" ' . $visibility . '>
+								echo '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . ' ' . $visibility . '">
 												<td colspan="2" width="100%">
 													<div>
 														<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
@@ -293,7 +305,13 @@ if ($doit == true) {
 								}
 							}
 							else{
-								$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '_' . $k . '" class="attr_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" readonly="true" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+								$vc_class = '';
+								$onchange = '';
+								if ($layer['attributes']['dependents'][$j] != NULL) {
+									$vc_class = ' visibility_changer';
+									$onchange = 'this.oninput();" oninput="check_visibility('.$layer['Layer_ID'].', this, [\''.implode('\',\'', $layer['attributes']['dependents'][$j]).'\'], '.$k.');';
+								}
+								$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '_' . $k . '" onchange="'.$onchange.'" class="attr_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . ' ' . $vc_class . '" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" readonly="true" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 								$this->form_field_names .= $layer['Layer_ID'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 							}
 							if (
@@ -316,10 +334,10 @@ if ($doit == true) {
 						}
 						if ($show_geom_editor) {
 							echo '
-							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie" ' . $visibility_geom . '>
+							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie ' . $visibility_geom . '">
 								<td colspan="2" align="center">';
 									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
-							echo'
+							echo '
 								</td>
 							</tr>';
 							if ($this->user->rolle->geom_edit_first) {
@@ -356,6 +374,17 @@ if ($doit == true) {
 																		<a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'false');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 																	<td>
 																		<a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+																	</td>
+																	<td style="position: relative">
+																		<a 
+																			title="QR-Code" 
+																			href="javascript:void(0);" 
+																			onmouseenter="get_position_qrcode(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"
+																			onmouseleave="remove_position_qrcode(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"
+																		>
+																			<div class="button qr_code"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div>
+																		</a>
+																		<img id="qr_<? echo $layer['Layer_ID']; ?>_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" src="<? echo GRAPHICSPATH.'leer.gif'; ?>" style="position: absolute; bottom: 0px; left: 40px; box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.4);">
 																	</td><?
 																}
 															} ?>
@@ -419,6 +448,6 @@ if ($doit == true) {
 		<input type="hidden" id="geom_privileg_<? echo $layer['Layer_ID']; ?>" value="<? echo $privileg; ?>">
 	</div><?
 }
-elseif ($layer['requires'] == '' AND $layer['required'] == '') {
+elseif ($layer['requires'] == '') {
 	$this->noMatchLayers[$layer['Layer_ID']] = $layer_name;
 } ?>

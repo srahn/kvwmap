@@ -40,6 +40,26 @@ class spatial_processor {
     $this->pgdatabase = $pgdatabase;
 		$this->rolle = $rolle;
   }
+
+	function getGeomFromGeoJSON($geojson, $epsg) {
+		$sql = "
+			SELECT 
+				ST_AsSVG(geom) as svg,
+				round(ST_Length(geom)) as length
+			FROM
+				(SELECT
+					ST_Transform(
+							ST_GeomFromGeoJSON('" . $geojson . "'),
+							" . $epsg . "
+					) as geom
+				) as foo
+		";
+		$ret = $this->pgdatabase->execSQL($sql,4, 0);
+		if (!$ret[0]) {
+      $rs = pg_fetch_assoc($ret[1]);
+			return json_encode($rs);
+    }
+	}
   
   function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg, $geomtype){
   	$sql = "select " . (substr($geomtype, 0, 5) == 'MULTI'? 'st_multi' : '') . "(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
@@ -57,7 +77,7 @@ class spatial_processor {
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_collect(geom) as geom from (select (st_dump(st_split(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')))).geom as geom) as foo) as fooo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -195,7 +215,7 @@ class spatial_processor {
   	$sql = "SELECT round(st_length_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -208,7 +228,20 @@ class spatial_processor {
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y.") as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
+    }
+  }
+
+	function rotate($geom, $angle){
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_rotate(st_geomfromtext('".$geom."'), RADIANS(".$angle."), st_centroid(st_geomfromtext('".$geom."'))) as geom) as foo";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -221,18 +254,31 @@ class spatial_processor {
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_reverse(st_geomfromtext('".$geom."')) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
 			$result = $rs['svg'] . '||' . $rs['wkt'];
 			return $result;
     }
-  }	
+  }
+	
+	function centroid($geom){
+  	$sql = "SELECT st_x(geom) as x, st_y(geom) as y FROM (SELECT st_centroid(st_geomfromtext('".$geom."')) as geom) as foo";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+			$result = $rs['x'] . ' ' . $rs['y'];
+			return $result;
+    }
+  }
   
   function process_query($formvars){
 		$formvars['fromwhere'] = str_replace("''", "'", $formvars['fromwhere']);
-		$formvars['fromwhere'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $formvars['fromwhere']);	
+		$formvars['fromwhere'] = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $formvars['fromwhere']);	
 		if($formvars['path2'] != ''){
       $this->debug->write("path2:".$formvars['path2']."\n",4);
 			if($formvars['geotype'] == 'line'){
@@ -281,8 +327,8 @@ class spatial_processor {
 				$user_epsg = $epsg_codes[$newSRID];
 				if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
 					if($curSRID != 4326){
-						$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
-						$projTO = ms_newprojectionobj("init=epsg:4326");
+						$projFROM = new projectionObj("init=epsg:".$curSRID);
+						$projTO = new projectionObj("init=epsg:4326");
 						$curExtent->project($projFROM, $projTO);			// $curExtent wird in 4326 transformiert
 					}
 					// Vergleich der Extents und ggfs. Anpassung
@@ -290,8 +336,8 @@ class spatial_processor {
 					if($user_epsg['miny'] > $curExtent->miny)$curExtent->miny = $user_epsg['miny'];
 					if($user_epsg['maxx'] < $curExtent->maxx)$curExtent->maxx = $user_epsg['maxx'];
 					if($user_epsg['maxy'] < $curExtent->maxy)$curExtent->maxy = $user_epsg['maxy'];
-					$projFROM = ms_newprojectionobj("init=epsg:4326");
-					$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+					$projFROM = new projectionObj("init=epsg:4326");
+					$projTO = new projectionObj("init=epsg:".$newSRID);
 					$curExtent->project($projFROM, $projTO);				// Transformation in das System des Nutzers
 					$result=$curExtent->minx.' '.$curExtent->miny.', '.$curExtent->maxx.' '.$curExtent->maxy;
 				}
@@ -310,9 +356,17 @@ class spatial_processor {
 			case 'translate':{
 				$result = $this->translate($polywkt1, $formvars['translate_x'], $formvars['translate_y']);
 			}break;
+
+			case 'rotate':{
+				$result = $this->rotate($polywkt1, $formvars['angle']);
+			}break;
 			
 			case 'reverse':{
 				$result = $this->reverse($polywkt1);
+			}break;
+
+			case 'centroid':{
+				$result = $this->centroid($polywkt1);
 			}break;
 			
 			case 'buffer':{
@@ -329,6 +383,10 @@ class spatial_processor {
 		
 			case 'add_buffered_line':{
 				$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['width'] ?: 50);
+			}break;
+
+			case 'add_buffered_vertices':{
+				$result = $this->add_buffered_vertices($polywkt1, $formvars);
 			}break;
 			
 			case 'add_parallel_polygon':{
@@ -398,7 +456,7 @@ class spatial_processor {
 			}break;
 			
 		}
-		if($result != '' AND !in_array($formvars['operation'], array('isvalid', 'area', 'length', 'transformPoint', 'transform'))){
+		if($result != '' AND !in_array($formvars['operation'], array('isvalid', 'area', 'length', 'transformPoint', 'transform', 'centroid'))){
 			if($formvars['resulttype'] != 'wkt'){
 				$result = $this->transformCoordsSVG($result);
 			}
@@ -410,7 +468,7 @@ class spatial_processor {
 		echo $result;
 	}
 	
-	function queryMap($input_coord, $pixsize, $layer_id, $singlegeom) {
+	function queryMap($input_coord, $pixsize, $layer_id, $singlegeom, $aggregate_function = 'st_union') {
 		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
 		# Abfragebereich berechnen
 		if ($input_coord) {
@@ -427,7 +485,7 @@ class spatial_processor {
 			$maxy = $miny + $height;
 			$rect = rectObj($minx, $miny, $maxx, $maxy);
 		}
-		$geom = $this->getgeometrybyquery($rect, $layer_id, $singlegeom);
+		$geom = $this->getgeometrybyquery($rect, $layer_id, $singlegeom, $aggregate_function);
 		return $geom;
 	}
  
@@ -467,7 +525,7 @@ class spatial_processor {
 		";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -487,7 +545,7 @@ class spatial_processor {
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT (st_union(st_geomfromtext('".$geom_1."'), st_intersection(st_geomfromtext('".$querygeometryWKT."'),  st_buffer(st_geomfromtext('".$formvars['path3']."'), (select st_distance(st_geomfromtext('".$formvars['path3']."'), st_geomfromtext('".$geom_2."'))), 16)))) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -495,6 +553,41 @@ class spatial_processor {
 			return $result;
     }
   }
+
+	function add_buffered_vertices($geom_1, $formvars) {
+		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], false, 'st_collect');
+		if($querygeometryWKT == '') {
+			header('warning: true');
+			echo 'Keine Geometrie zum Hinzufügen an der Kartenposition gefunden.';
+			return;
+		}
+		if($geom_1 == ''){
+			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
+		}
+		$sql = "
+			SELECT 
+				st_astext(geom) as wkt, 
+				st_assvg(geom, 0, 15) as svg 
+			FROM (
+				SELECT
+					st_union(st_geomfromtext('".$geom_1."'), st_buffer(st_union(geom), " . $formvars['width'] . ")) as geom
+				FROM (
+					SELECT
+						(st_dumppoints(st_geomfromtext('" . $querygeometryWKT . "'))).geom as geom					
+				) f
+			) ff
+		";
+		#echo $sql;
+		$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_assoc($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
+    }
+	}
 	
 	function add_buffered_line($geom_1, $geom_2, $width){
   	if(substr_count($geom_2, ',') == 0){			# wenn Linestring nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
@@ -512,7 +605,7 @@ class spatial_processor {
 		}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -560,7 +653,7 @@ class spatial_processor {
     }
   }
 
-	function getgeometrybyquery($rect, $layer_id, $singlegeom) {
+	function getgeometrybyquery($rect, $layer_id, $singlegeom, $aggregate_function) {
 		$dbmap = new db_mapObj($this->rolle->stelle_id, $this->rolle->user_id);
 		if ($layer_id != '') {
 			if ($layer_id < 0) { # Rollenlayer
@@ -588,15 +681,7 @@ class spatial_processor {
 				# EPSG-Code des Layers der Abgefragt werden soll
 				$layer_epsg = $layerset[0]['epsg_code'];
 
-				$data = replace_params(
-					$layerset[0]['Data'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->stelle_id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				);
-				$data = str_replace('$scale', 1000, $data);
+				$data = $layerset[0]['Data'];
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = $dbmap->getSelectFromData($data);
@@ -658,7 +743,7 @@ class spatial_processor {
 				
 	      # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 	      if($layerset[0]['Filter'] != ''){
-	      	$layerset[0]['Filter'] = str_replace('$userid', $this->rolle->user_id, $layerset[0]['Filter']);
+	      	$layerset[0]['Filter'] = str_replace('$USER_ID', $this->rolle->user_id, $layerset[0]['Filter']);
 	        $sql_where .= " AND ".$layerset[0]['Filter'];
 	      }
 
@@ -674,7 +759,7 @@ class spatial_processor {
 					}
 					if (!$punktuell) {
 						# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
-						$columnname = "st_union(".$columnname.")";
+						$columnname = $aggregate_function . "(".$columnname.")";
 					}
 					$columnname = 'ST_Force2D(' . $columnname . ')';
 					$sql = "
@@ -707,8 +792,8 @@ class spatial_processor {
     	
     	case 9 : {
     		# Abfrage eines WFS-Layers
-		    $projFROM = ms_newprojectionobj("init=epsg:".$this->rolle->epsg_code);
-        $projTO = ms_newprojectionobj("init=epsg:".$layerset[0]['epsg_code']);
+		    $projFROM = new projectionObj("init=epsg:".$this->rolle->epsg_code);
+        $projTO = new projectionObj("init=epsg:".$layerset[0]['epsg_code']);
     		$rect->project($projFROM, $projTO);
     		$searchbox_minx=strval($rect->minx-$rand);
 	      $searchbox_miny=strval($rect->miny-$rand);
@@ -967,6 +1052,22 @@ class spatial_processor {
     }
     return $WKT;
   }
+
+	function composeMultipointWKTStringFromSVGPath($svgpath) {
+		if ($svgpath != '') {
+			$wkt = "MULTIPOINT((";
+			$coord = explode(' ', $svgpath);
+			$wkt = $wkt . $coord[1] . " " . $coord[2];
+			for ($i = 3; $i < count($coord) - 1; $i++){
+				if ($coord[$i] != ""){
+					$wkt = $wkt . "),(" . $coord[$i] . " " . $coord[$i+1];
+				}
+				$i++;
+			}
+			$wkt = $wkt . "))";
+		}
+		return $wkt;
+	}
   
   function transformCoordsSVG($path){
 	if($path != ''){

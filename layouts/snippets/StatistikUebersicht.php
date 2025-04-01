@@ -76,7 +76,7 @@ function popup(id){
 	                  </tr>
 					          <?php
 										$accessarray=$this->account->NumbOfAccess;
-										if(@count($this->account->NumbOfAccess)==0){ ?>
+										if(count_or_0($this->account->NumbOfAccess)==0){ ?>
 	            			<tr>
 	                  	<td colspan="2">
 	                    	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
@@ -132,7 +132,7 @@ function popup(id){
 		                    </tr>
 		                    <?php
 												//$accessarray=$this->account->ALKNumbOfAccessUserStelleM;
-												if ( @count($this->account->ALKNumbOfAccess)==0 ) { ?>
+												if ( count_or_0($this->account->ALKNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
 		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
@@ -140,7 +140,7 @@ function popup(id){
 		                      <?php
 												}
 												else {
-		          						for ($i=0; $i < @count($this->account->ALKNumbOfAccess);$i++) {
+		          						for ($i=0; $i < count_or_0($this->account->ALKNumbOfAccess);$i++) {
 					  							?>
 		            					<tr bgcolor="<?php if ($i%2!=0) { echo 'FFFFFF'; } else { echo 'EBEBEB'; } ?>">
 		                					<td><a href="javascript:popup('alk<? echo $i; ?>');"><?php echo $this->account->ALKNumbOfAccess[$i]['druckrahmenname']; ?></a></td>
@@ -200,7 +200,7 @@ function popup(id){
 		                    </tr>
 		                    <?php
 												//$accessarray=$this->account->ALKNumbOfAccessUserStelleM;
-												if ( @count($this->account->ALBNumbOfAccess)==0 ) { ?>
+												if ( count_or_0($this->account->ALBNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
 		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
@@ -208,7 +208,7 @@ function popup(id){
 		                      <?php
 												}
 												else {
-		          						for ($i=0; $i < @count($this->account->ALBNumbOfAccess);$i++) {
+		          						for ($i=0; $i < count_or_0($this->account->ALBNumbOfAccess);$i++) {
 					  							?>
 		            					<tr bgcolor="<?php if ($i%2!=0) { echo 'FFFFFF'; } else { echo 'EBEBEB'; } ?>">
 		                					<td><a href="javascript:popup('alb<? echo $i; ?>');"><?php echo $this->account->ALBNumbOfAccess[$i]['format']; ?></a></td>
@@ -268,7 +268,7 @@ function popup(id){
 		                    </tr>
 		                    <?php
 												//$accessarray=$this->account->ALKNumbOfAccessUserStelleM;
-												if ( @count($this->account->CSVNumbOfAccess)==0 ) { ?>
+												if ( count_or_0($this->account->CSVNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
 		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
@@ -276,7 +276,7 @@ function popup(id){
 		                      <?php
 												}
 												else {
-		          						for ($i=0; $i < @count($this->account->CSVNumbOfAccess);$i++) {
+		          						for ($i=0; $i < count_or_0($this->account->CSVNumbOfAccess);$i++) {
 					  							?>
 		            					<tr bgcolor="<?php if ($i%2!=0) { echo 'FFFFFF'; } else { echo 'EBEBEB'; } ?>">
 		                					<td><a href="javascript:popup('csv<? echo $i; ?>');"><?php echo $this->account->CSVNumbOfAccess[$i]['art']; ?></a></td>
@@ -337,7 +337,7 @@ function popup(id){
 		                    </tr>
 		                    <?php
 												//$accessarray=$this->account->ALKNumbOfAccessUserStelleM;
-												if ( @count($this->account->ShapeNumbOfAccess)==0 ) { ?>
+												if ( count_or_0($this->account->ShapeNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
 		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
@@ -345,7 +345,7 @@ function popup(id){
 		                      <?php
 												}
 												else {
-		          						for ($i=0; $i < @count($this->account->ShapeNumbOfAccess);$i++) {
+		          						for ($i=0; $i < count_or_0($this->account->ShapeNumbOfAccess);$i++) {
 					  							?>
 		            					<tr bgcolor="<?php if ($i%2!=0) { echo 'FFFFFF'; } else { echo 'EBEBEB'; } ?>">
 		                					<td><a href="javascript:popup('Shape<? echo $i; ?>');"><?php echo $this->account->ShapeNumbOfAccess[$i]['layer_id']; ?></a></td>

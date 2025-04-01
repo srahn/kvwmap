@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH . 'languages/layergroups_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/layergroups_' . rolle::$language . '.php');
 	#$layers = array_map(function($group) { return $group->layers; }, $this->layergruppen);
 	#echo 'Layer: ' . print_r(arra$layers[15]->data, true); exit;
 	$has_shared_group = array_reduce(

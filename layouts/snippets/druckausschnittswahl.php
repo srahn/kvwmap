@@ -1,7 +1,7 @@
 <?php
  # 2008-01-22 pkvvm
-  include(LAYOUTPATH.'languages/druckausschnittswahl_'.$this->user->rolle->language.'.php');
-	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/druckausschnittswahl_'.rolle::$language.'.php');
+	include(LAYOUTPATH.'languages/map_'.rolle::$language.'.php');
  ?>
 <script type="text/javascript">
 <!--
@@ -260,7 +260,7 @@ function rotate_print_extent(angle){
 					<select name="druckausschnitt" style="width:200px">
 						<option value=""><?php echo $this->strPleaseSelect; ?></option>
 						<?
-							for($i = 0; $i < count($this->Document->ausschnitte); $i++){
+							for($i = 0; $i < count_or_0($this->Document->ausschnitte); $i++){
 								echo '<option value="'.$this->Document->ausschnitte[$i]['id'].'" '.($this->formvars['druckausschnitt'] == $this->Document->ausschnitte[$i]['id'] ? 'selected="true"' : '').'>'.$this->Document->ausschnitte[$i]['name'].'</option>';
 							}
 						?>
@@ -270,7 +270,7 @@ function rotate_print_extent(angle){
 				</div>
 			</div>
 
-<?		if(count($this->Document->activeframe[0]['texts']) > 0){ 	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber zu belegen  ?>
+<?		if(count_or_0($this->Document->activeframe[0]['texts']) > 0){ 	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber zu belegen  ?>
 			<div class="print_options_box" style="overflow: auto; max-height: 200px">
 <?			for($j = 0; $j < count($this->Document->activeframe[0]['texts']); $j++){
 					if($this->Document->activeframe[0]['texts'][$j]['text'] == ''){
@@ -286,7 +286,12 @@ function rotate_print_extent(angle){
 <?		}		?>
 
 			<div class="print_options_box" style="text-align: center; padding: 10px 5px 10px 5px">
-	      <input type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();"><br><br>
+				<? echo $strOutputFileType; ?>
+				<select name="output_filetype">
+					<option value="pdf" <? if (in_array($this->formvars['output_filetype'], ['', 'pdf'])){ echo 'selected'; } ?>>PDF</option>
+					<option value="image/jpeg" <? if ($this->formvars['output_filetype'] == 'image/jpeg'){ echo 'selected'; } ?>>JPG</option>
+				</select><br><br>
+	      <input type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">&nbsp;
 	      <input type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['Name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
 	    </div>
 			
@@ -306,11 +311,13 @@ function rotate_print_extent(angle){
 						<td>
 							<div id="legend_layer" style="display: inline-block">
 								<div id="legendcontrol">
+								<? if ($this->user->rolle->singlequery < 2) { ?>
 									<a href="index.php?go=reset_querys">
 										<div class="button_background" style="width: 26px; height: 26px">
 											<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
 										</div>
 									</a>
+								<? } ?>
 									<a href="index.php?go=reset_layers" style="padding: 0 0 0 6">
 										<div class="button_background" style="width: 26px; height: 26px">
 											<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>

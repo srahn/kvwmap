@@ -45,4 +45,6 @@
  $strBack="back";
  $strNext="next";
  $strCheckAll="select all";
+ $strSpatialFiltering="Add Spatial Filter";
+ $strSpatialFilteringClose="Close spatial filter";
 ?>

@@ -2,37 +2,52 @@
 	global $selectable_limits;
 	include_once(CLASSPATH.'FormObject.php');
 	include(SNIPPETS.'generic_form_parts.php');
-  include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/sachdatenanzeige_'.rolle::$language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php');
 ?>
-	<script>
-		keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
-	</script>
-	<a href="javascript:scrollbottom();" style="float: right;" title="<? echo $strToBottom; ?>">
-		<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
-	</a>
-	<a name="oben"></a><?
-	if ($this->formvars['window_type'] == 'overlay') { ?>
-		<script type="text/javascript">
-			if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
-			if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
-		</script><?
-	}
+<script>
+	keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
+</script>
+
+<div id="overlayheader2" class="gle_tabs px17 fett" style="display: none"></div>
+
+<a href="javascript:scrollbottom();" style="float: right; margin-top: 10;" title="<? echo $strToBottom; ?>">
+	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+</a>
+<a name="oben"></a><?
+if ($this->formvars['window_type'] == 'overlay') { ?>
+	<script type="text/javascript">
+		//if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
+		//if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
+	</script><?
+}
 $this->found = 'false';
 $anzLayer=count($this->qlayerset);
-if ($anzLayer==0) {
-	?>
-<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span><br/>
-	<?php	
-}
-	
+if ($anzLayer==0 AND $this->user->rolle->singlequery == 2) { ?>
+	<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoQueryableLayers; ?></span><br/><?
+} 
+
 if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
-<div id="contentdiv" onscroll="enclosingForm.gle_scrollposition.value = this.scrollTop;" style="scroll-behavior: smooth; width: 100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
+<div id="contentdiv" onscroll="save_scrollposition();" style="scroll-behavior: smooth; max-height:<? echo $this->user->rolle->nImageHeight; ?>px;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
 	<div style="margin-right: 10px">
 <? }
 
-for($i=0;$i<$anzLayer;$i++){
-	$this->queried_layers[] = $this->qlayerset[$i]['Name_or_alias'];
+$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
+$active_layer_tab = null;
+$layer_visibility = 'collapsed';
+$zindex = 100;
+
+for ($i = 0; $i < $anzLayer; $i++) {	
+	if ($this->qlayerset[$i]['count'] !== 0) {		# entweder größer 0 oder nicht gesetzt, da Template
+		$this->queried_layers[$this->qlayerset[$i]['Layer_ID']] = $this->qlayerset[$i]['Name_or_alias'];
+		if ($active_layer_tab == NULL OR $this->qlayerset[$i]['Layer_ID'] == $this->user->rolle->last_query_layer) {
+			# entweder der erste Layer mit Treffern oder der zuletzt angeguckte Layer
+			$active_layer_tab = $this->qlayerset[$i]['Layer_ID'];
+		}
+	}
+}
+
+for($i=0;$i<$anzLayer;$i++){	
 	$gesamt = $this->qlayerset[$i]['count'];
   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
 	   # Blätterfunktion
@@ -69,6 +84,23 @@ for($i=0;$i<$anzLayer;$i++){
 
 	   </table>';	 
   }
+
+	if (isset($this->queried_layers[$this->qlayerset[$i]['Layer_ID']])) {
+		if ($active_layer_tab == $this->qlayerset[$i]['Layer_ID']) {
+			$layer_visibility = '';
+			$active_tab = 'active_tab';
+		}
+		$layer_tabs .= '<div class="gle_layer_tab ' . $active_tab . '" style="z-index: ' . $zindex . '" onclick="toggle_layer(this, ' . $this->qlayerset[$i]['Layer_ID'] . ')">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
+		$zindex--;
+	}
+
+	echo '
+		<div class="layer_results ' . $layer_visibility . '" id="result_' . $this->qlayerset[$i]['Layer_ID'] . '">
+	';
+
+	$layer_visibility = 'collapsed';
+	$active_tab = '';
+
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
 		if ($template == '') {
@@ -109,9 +141,9 @@ for($i=0;$i<$anzLayer;$i++){
 	
 	echo value_of($this->qlayerset[$i], 'paging');
 	
-	if($gesamt > 0){
-		echo '<hr class="gle_hr">';
-	}
+	echo '
+		</div>
+	';
 }
 
 if(!empty($this->noMatchLayers)){
@@ -169,17 +201,25 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 <? } ?>
 
 <?
-	if($this->found != 'false' AND value_of($this->formvars, 'printversion') == ''){	?>		
+	if (value_of($this->formvars, 'printversion') == '') {	
+		if (count_or_0($this->queried_layers) > 1) { ?>
+			<script type="text/javascript">
+				document.getElementById('overlayheader2').style.display = '';
+				document.getElementById('overlayheader2').innerHTML = '<? echo $layer_tabs; ?>';
+			</script>
+<?	}	?>
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
 				<? if($this->formvars['window_type'] == 'overlay'){ ?>
 					<script type="text/javascript">
 						if(document.getElementById('overlayfooter') != undefined){
-							document.getElementById('overlayfooter').style.display = 'block';
-							document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
+							//document.getElementById('overlayfooter').style.display = 'block';
+							//document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
 						}
-						document.title = '<? echo implode(' - ', $this->queried_layers); ?>';
+						document.title = '<? echo implode(' - ', $this->queried_layers ?: []); ?>';
+						document.getElementById('overlayheader').style.display = document.getElementById('overlayheader2').style.display;
+						document.getElementById('overlayheader').innerHTML = document.getElementById('overlayheader2').innerHTML;
 					</script>
 				<? }else{
 							echo '&nbsp;'.$strLimit; ?>&nbsp;
@@ -229,17 +269,19 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 			echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">
 						<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[0]['sql']).'">
 						<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
+						<input type="hidden" name="gle_scrollposition_' . $this->formvars['selected_layer_id'] . '" value="' . $this->formvars['gle_scrollposition_' . $this->formvars['selected_layer_id']] . '">
 						<input name="search" type="hidden" value="true">';
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
 				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" target="root" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" style="margin: 5px" aria-hidden="true"></i></a>';
 	  	}
   	}
   	else{
-			for($i = 0; $i < $anzLayer; $i++){
-				if($this->formvars['qLayer'.$this->qlayerset[$i]['Layer_ID']] == 1){
-					echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
+			for ($i = 0; $i < $anzLayer; $i++) {
+				if ($this->formvars[$queryfield . $this->qlayerset[$i]['Layer_ID']] == 1) {
+					#echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
 					echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['Layer_ID']).'">';
 					echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[$i]['sql']).'">';
+					echo '<input type="hidden" name="gle_scrollposition_' . $this->qlayerset[$i]['Layer_ID'] . '" value="' . $this->formvars['gle_scrollposition_' . $this->qlayerset[$i]['Layer_ID']] . '">';
 				}
 			}
 			echo '<input name="go" type="hidden" value="Sachdaten">';
@@ -255,6 +297,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
   <input name="rectmaxy" type="hidden" value="<?php echo value_of($this->formvars, 'rectmaxy') ? $this->formvars['rectmaxy'] : $this->queryrect->maxy; ?>">
   <input name="form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
   <input type="hidden" name="chosen_layer_id" value="">
+	<input type="hidden" name="active_layer_id" value="<? echo $active_layer_tab; ?>">
   <input type="hidden" name="layer_tablename" value="">
   <input type="hidden" name="layer_columnname" value="">
   <input type="hidden" name="all" value="">
@@ -281,15 +324,9 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 <input type="hidden" name="within" value="<? echo value_of($this->formvars, 'within'); ?>">
 <input type="hidden" name="backlink" value="<? echo strip_pg_escape_string($this->formvars['backlink']); ?>">
-<input type="hidden" name="gle_scrollposition" value="<? echo $this->formvars['gle_scrollposition']; ?>">
 
 <script type="text/javascript">
-	if (enclosingForm.gle_scrollposition.value > 0) {
-		if (enclosingForm.name == 'GUI2') {
-			document.body.scrollTop = enclosingForm.gle_scrollposition.value;
-		}
-		else {
-			document.getElementById('contentdiv').scrollTop = enclosingForm.gle_scrollposition.value;
-		}
+	if (document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0]?.value > 0) {
+		scrollto_saved_position();
 	}
 </script>

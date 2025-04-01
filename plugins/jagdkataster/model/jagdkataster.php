@@ -318,7 +318,7 @@ class jagdkataster {
 	        $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 	        foreach($Eigentuemerliste as $eigentuemer){
 						if($eigentuemer->Nr != ''){
-							$rs['eigentuemer'][] = $eigentuemer->vorname.' '.$eigentuemer->nachnameoderfirma;						
+							$rs['eigentuemer'][] = $eigentuemer->nachnameoderfirma . ($eigentuemer->vorname != ''? ', ' . $eigentuemer->vorname : '');
 							$rs['eigentuemer_nr'][] = $eigentuemer->Nr;
 						}
 	        }
@@ -373,7 +373,7 @@ class jagdkataster {
 				ar.flaeche > 1 
 				" . $this->database->build_temporal_filter(array('g', 'f')) . "
 			ORDER BY 
-				jagdbezirke.name";
+				jagdbezirke.name, f.flurstueckskennzeichen";
 		return $this->database->execSQL($sql, 4, 0);
 	}
 	

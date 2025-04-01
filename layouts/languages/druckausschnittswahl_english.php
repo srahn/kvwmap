@@ -27,5 +27,6 @@ $strHelp="Help";
 $strRollenlayerLegend="If You activate this option, your searchresult-layers and imported layers will be shown in the legend as well.";
 $strLegendOptions="Legend-Options";
 $strLayers="Layers";
+$strOutputFileType = "Output as";
 
 ?>  
