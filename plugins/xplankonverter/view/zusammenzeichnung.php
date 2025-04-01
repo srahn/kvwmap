@@ -366,8 +366,7 @@
 
 		if ($zusammenzeichnung_exists) { ?>
 			<div id="zusammenzeichnung" class="centered_div">
-				Stand: <? echo $plandaten['aktualitaet']; ?>
-				<?// echo 'Stand: ' . $this->konvertierung->get_letztes_aktualisierungsdatum_gebietstabelle(); ?>
+				Stand: <? echo Konvertierung::find_by_id($this, 'id', $zusammenzeichnung->get_id())->get_letztes_aktualisierungsdatum_gebietstabelle(); ?>
 				<? if ($zusammenzeichnung->art == 'draft') {
 					?> <span class="red">Noch keine Dienste veröffentlicht!</a> <!--a href="#">jetzt veröffentlichen</a//--><?
 				} ?>
