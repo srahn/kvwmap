@@ -18815,7 +18815,7 @@ class db_mapObj{
 				connection_id,
 				" . ($layer_id < 0 ? "'" . CUSTOM_SHAPE_SCHEMA . "' AS " : "") . "schema
 			FROM
-				" . ($layer_id < 0 ? "rollenlayer" : "layer") . "
+				" . ($layer_id < 0 ? "kvwmap.rollenlayer" : "kvwmap.layer") . "
 			WHERE
 				" . ($layer_id < 0 ? "-id" : "layer_id") . " = " . $layer_id . " AND
 				connectiontype = 6
@@ -20935,8 +20935,8 @@ class db_mapObj{
 				privileg,
 				query_tooltip
 			FROM
-				layer_attributes as a LEFT JOIN
-				datatypes as d ON d.id::text = REPLACE(type, '_', '')
+				kvwmap.layer_attributes as a LEFT JOIN
+				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
 			WHERE
 				layer_id = " . $layer_id .
 				$einschr . "

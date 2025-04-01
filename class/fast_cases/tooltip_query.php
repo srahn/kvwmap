@@ -937,7 +937,7 @@ class user {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
-		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
+		if ($password != '') array_push($where, "password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string($password) . "')");
 		$sql = "
 			SELECT
 				*

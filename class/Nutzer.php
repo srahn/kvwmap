@@ -86,7 +86,7 @@ class Nutzer extends PgObject {
 				'name' => $gui->formvars['name'],
 				'Vorname' => $gui->formvars['Vorname'],
 				'Namenszusatz' => $gui->formvars['Namenszusatz'],
-				'password' => SHA1($gui->formvars['new_password']),
+				'password' => kvwmap.sha1($gui->formvars['new_password']),
 				'phon' => $gui->formvars['phon'],
 				'email' => $gui->formvars['email'],
 				'stelle_id' => $stelle_id

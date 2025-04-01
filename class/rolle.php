@@ -175,7 +175,7 @@ class rolle {
 				kvwmap.layer AS l JOIN
 				kvwmap.used_layer AS ul ON l.layer_id = ul.layer_id JOIN
 				kvwmap.u_rolle2used_layer as r2ul ON r2ul.stelle_id = ul.stelle_id AND r2ul.layer_id = ul.layer_id LEFT JOIN
-				connections as c ON l.connection_id = c.id
+				kvwmap.connections as c ON l.connection_id = c.id
 			WHERE
 				ul.stelle_id = " . $this->stelle_id . " AND
 				r2ul.user_id = " . $this->user_id .

@@ -2012,7 +2012,7 @@ class user {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
-		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
+		if ($password != '') array_push($where, "password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string($password) . "')");
 		$sql = "
 			SELECT
 				*
@@ -2834,12 +2834,12 @@ class db_mapObj {
 				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
 				" . ($this->GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
-				u_rolle2used_layer AS rl,
-				used_layer AS ul JOIN
-				layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
-				u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
-				u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
-				connections as c ON l.connection_id = c.id
+				kvwmap.u_rolle2used_layer AS rl,
+				kvwmap.used_layer AS ul JOIN
+				kvwmap.layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
+				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
+				kvwmap.connections as c ON l.connection_id = c.id
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
 				rl.layer_id = ul.Layer_ID AND
@@ -3094,9 +3094,9 @@ class db_mapObj {
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
 				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter
 			FROM
-				rollenlayer AS l JOIN
-				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
-				connections AS c ON l.connection_id = c.id
+				kvwmap.rollenlayer AS l JOIN
+				kvwmap.u_groups AS g ON l.Gruppe = g.id LEFT JOIN
+				kvwmap.connections AS c ON l.connection_id = c.id
 			WHERE
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .

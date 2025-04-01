@@ -363,7 +363,7 @@ function install() {
 				UPDATE
 					user
 				SET
-					password = SHA1('" . KVWMAP_INIT_PASSWORD . "')
+					password = kvwmap.sha1('" . KVWMAP_INIT_PASSWORD . "')
 				WHERE
 					login_name = 'kvwmap'
 			";

@@ -1639,7 +1639,7 @@ class user {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name = '" . $this->database->mysqli->real_escape_string($login_name) . "'");
-		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
+		if ($password != '') array_push($where, "password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string($password) . "')");
 		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
 			SELECT
@@ -2397,12 +2397,12 @@ class db_mapObj {
 				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
 				" . ($this->GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
-				u_rolle2used_layer AS rl,
-				used_layer AS ul JOIN
-				layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
-				u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
-				u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
-				connections as c ON l.connection_id = c.id
+				kvwmap.u_rolle2used_layer AS rl,
+				kvwmap.used_layer AS ul JOIN
+				kvwmap.layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
+				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
+				kvwmap.connections as c ON l.connection_id = c.id
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
 				rl.layer_id = ul.Layer_ID AND

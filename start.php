@@ -939,7 +939,7 @@ function prepare_sha1($login_name, $password) {
 		UPDATE
 			kvwmap.user
 		SET
-			password = SHA1('" . $password . "'),
+			password = kvwmap.sha1('" . $password . "'),
 			passwort = NULL
 		WHERE
 			passwort = MD5('" . $password . "') AND

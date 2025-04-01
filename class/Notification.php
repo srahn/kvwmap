@@ -114,8 +114,8 @@ class Notification extends PgObject {
 			array(
 				'select' => "m.*",
 				'from' => "
-					notifications m JOIN
-					user2notifications u2m ON m.id = u2m.notification_id
+					kvwmap.notifications m JOIN
+					kvwmap.user2notifications u2m ON m.id = u2m.notification_id
 				",
 				'where' => "
 					u2m.user_id = " . $gui->user->id . " AND

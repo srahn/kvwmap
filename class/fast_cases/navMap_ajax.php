@@ -2415,7 +2415,7 @@ class user {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name = '" . pg_escape_string($login_name) . "'");
-		if ($password != '') array_push($where, "password = SHA1('" . pg_escape_string($password) . "')");
+		if ($password != '') array_push($where, "password = kvwmap.sha1('" . pg_escape_string($password) . "')");
 		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
 			SELECT

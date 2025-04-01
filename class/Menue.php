@@ -77,9 +77,9 @@ class Menue extends PgObject {
 					".($type == 'button'? "m.button_class" : "'' as button_class")."
 				",
 				'from' => "
-					u_menue2rolle m2r JOIN
-					u_menue2stelle AS m2s ON (m2r.stelle_id = m2s.stelle_id AND m2r.menue_id = m2s.menue_id) JOIN
-					u_menues AS m ON (m2s.menue_id = m.id)
+					kvwmap.u_menue2rolle m2r JOIN
+					kvwmap.u_menue2stelle AS m2s ON (m2r.stelle_id = m2s.stelle_id AND m2r.menue_id = m2s.menue_id) JOIN
+					kvwmap.u_menues AS m ON (m2s.menue_id = m.id)
 				",
 				'where' => "
 					m2s.stelle_id = " . $gui->Stelle->id . " AND

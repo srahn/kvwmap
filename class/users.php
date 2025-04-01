@@ -779,7 +779,7 @@ class user {
 				user
 			WHERE
 				id = ? AND
-				password = SHA1(?)
+				password = kvwmap.sha1(?)
 		");
 		$stmt->bind_param("is", $args1, $args2);
 		$args1 = $this->id;
@@ -797,7 +797,7 @@ class user {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name = '" . pg_escape_string($login_name) . "'");
-		if ($password != '') array_push($where, "password = SHA1('" . pg_escape_string($password) . "')");
+		if ($password != '') array_push($where, "password = kvwmap.sha1('" . pg_escape_string($password) . "')");
 		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
 			SELECT
@@ -1027,7 +1027,7 @@ class user {
 
 		$sql = "
 			SELECT DISTINCT
-				u.*, (select max(r.last_time_id) from rolle r where u.ID = r.user_id ) as last_timestamp
+				u.*, (select max(r.last_time_id) from kvwmap.rolle r where u.id = r.user_id ) as last_timestamp
 			FROM
 				kvwmap.user u " .
 				$more_from .
@@ -1070,8 +1070,8 @@ class user {
 				s.id,
 				" . $name_column . "
 			FROM
-				stelle AS s,
-				rolle AS r
+				kvwmap.stelle AS s,
+				kvwmap.rolle AS r
 			WHERE
 				s.id = r.stelle_id AND
 				r.user_id = " . $this->id .
@@ -1407,7 +1407,7 @@ class user {
 		$sql.=',Vorname="'.$userdaten['vorname'].'"';
 		$sql.=',login_name="' . trim($userdaten['loginname']) . '"';
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . '")';
+		$sql.=',password = kvwmap.sha1("' . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . '")';
 		$sql.=',password_setting_time = CURRENT_TIMESTAMP()';
 		$sql.=',password_expired = ' . ($userdaten['password_expired'] ? '1' : '0');
 		if ($userdaten['phon']!='') {
@@ -1480,7 +1480,7 @@ class user {
 		$password_columns = '';
 		if ($userdaten['changepasswd'] == 1) {
 			$password_columns = ",
-				password = SHA1('" . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . "'),
+				password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . "'),
 				password_setting_time = CURRENT_TIMESTAMP(),
 				password_expired = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
 			";
@@ -1573,7 +1573,7 @@ class user {
 			UPDATE
 				user
 			SET
-				password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "'),
+				password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string($password) . "'),
 				password_setting_time = '" . $password_setting_time . "',
 				password_expired = false
 			WHERE
