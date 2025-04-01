@@ -88,11 +88,13 @@ function replace_params_rolle($str, $additional_params = NULL) {
 		$str = replace_params($str, $params);
 		$current_time = time();
 		$str = str_replace('$CURRENT_DATE', date('Y-m-d', $current_time), $str);
-		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);
+		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
 		$str = str_replace('$STELLE_ID', rolle::$stelle_ID, $str);
 		$str = str_replace('$STELLE', rolle::$stelle_bezeichnung, $str);
 		$str = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $str);
 		$str = str_replace('$LANGUAGE', rolle::$language, $str);
+		$str = str_replace('$EXPORT', rolle::$export, $str);
 	}
 	return $str;
 }
@@ -269,8 +271,9 @@ class GUI {
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
-			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN ('" . $attributevalues[$i] . "')", $sql);
-			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', "'" . $attributevalues[$i] . "'", $sql);	# fallback
+			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
+			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
+			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 		}
 		#echo $sql;
 		@$ret = $layerdb->execSQL($sql, 4, 0);
@@ -665,6 +668,7 @@ class rolle {
 	static $user_ID;
 	static $stelle_ID;
 	static $stelle_bezeichnung;
+	static $export;
 	var $minx;
 	var $newtime;
 	var $gui_object;
@@ -677,10 +681,11 @@ class rolle {
 		$this->debug = $debug;
 		$this->user_id = $user_id;
 		$this->stelle_id = $stelle_id;
-		$this->database=$database;
+		$this->database = $database;
 		rolle::$user_ID = $user_id;
 		rolle::$stelle_ID = $stelle_id;
 		rolle::$stelle_bezeichnung = $this->gui_object->Stelle->Bezeichnung;
+		rolle::$export = 'false';
 		$this->loglevel = 0;
 	}
 

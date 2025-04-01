@@ -42,7 +42,7 @@ $SVGvars_defs = '
 			opacity: 0.5;
 			transition: all 1s cubic-bezier(0.09, 0.93, 0.76, 0.84);
 		}
-		.active{
+		.active_navbutton{
 			fill: #b0d4f2 !important;
 			opacity: 1 !important;
 			filter: url(#innershadow);

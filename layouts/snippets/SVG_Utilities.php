@@ -113,7 +113,7 @@
 	#
 	# Positionsanzeigetext ausserhalb der Anzeigeflaeche bei Start
 	#
-	if($this->formvars['loc_y']==0) {
+	if($this->formvars['loc_y'] == '') {
 		$text_x=-1000000;
 		$text_y=-1000000;
 	}
@@ -3371,7 +3371,7 @@ function mouseup(evt){
 			circle[i].setAttribute("id", "vertex_"+i);
 			parent.appendChild(circle[i]);
 			// Start und Endpunkt
-			if(components[i+4] == "M" || components[i+4] == ""){
+			if(components[i+4] == "M" || components[i+4] == undefined){
 				circle[start].setAttribute("id", "vertex_"+start+"_"+parseInt(i+2));
 				start = i+5;
 				i = i + 3;

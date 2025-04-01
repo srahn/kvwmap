@@ -93,6 +93,12 @@ else {
 $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 $GUI->database->execSQL("SET CHARACTER SET ".MYSQL_CHARSET.";",0,0);
 
+$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
+if (!$GUI->pgdatabase->open(POSTGRES_CONNECTION_ID)) {
+	echo $GUI->pgdatabase->err_msg;
+	exit;
+}
+
 /*
 *	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
 */
@@ -278,7 +284,7 @@ else {
 							set_session_vars($GUI->formvars);
 							unset($GUI->formvars['Stelle_ID']);
 							unset($GUI->formvars['token']);
-							unset($GUI->fromvars['passwort']);
+							unset($GUI->formvars['passwort']);
 							unset($GUI->formvars['new_password']);
 							unset($GUI->formvars['new_password_2']);
 							unset($GUI->formvars['email']);
@@ -530,12 +536,6 @@ else {
 
 	if (defined('BEARBEITER') AND BEARBEITER == 'true') {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
-	}
-
-	$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
-	if (!$GUI->pgdatabase->open(POSTGRES_CONNECTION_ID)) {
-		echo $GUI->pgdatabase->err_msg;
-		exit;
 	}
 
 	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen

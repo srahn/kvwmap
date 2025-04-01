@@ -203,28 +203,14 @@
 		$explosion = explode('using unique ', strtolower($data));
 		$end = $explosion[1];
 		$select = $dbmap->getSelectFromData($data);
-		$whereposition = strpos(strtolower($select), ' where ');
-		$withoutwhere = substr($select, 0, $whereposition);
-		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		#$alias = $GUI->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
 		else $select .= " AND ";
-		$datastring = $datageom." from (" . $select;
-		#$datastring.=" " . $alias.".flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-		$datastring.=" flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-    $legendentext="Flurstück";
-    if (count_or_0($FlurstListe) > 1) {
-			$legendentext .= "e";
-		}
-    $legendentext .= " (".date('d.m. H:i',time())."): " . $FlurstListe[0];
-    for ($i=1; $i < count_or_0($FlurstListe); $i++) {
-      $datastring.=",'" . $FlurstListe[$i]."'";
-      $legendentext.=" " . $FlurstListe[$i];
-    }
-   	$datastring.=") ";
-		$datastring.=") as foo using unique " . $end;
+		$select .= " flurstueckskennzeichen IN ('" . implode("','", $FlurstListe) . "')";
+    $legendentext = "Flurstück" . (count_or_0($FlurstListe) > 1 ? 'e' : '');
+    $legendentext .= " (".date('d.m. H:i',time())."): " . implode(" ", $FlurstListe);
+    $datastring = $datageom." from (" . $select . ") as foo using unique " . $end;
     $group = $dbmap->getGroupbyName('eigene Abfragen');
     if($group != ''){
       $groupid = $group['id'];
@@ -241,12 +227,15 @@
     $GUI->formvars['Typ'] = 'search';
     $GUI->formvars['Datentyp'] = 2;
     $GUI->formvars['Data'] = $datastring;
+    $GUI->formvars['query'] = $select;
     $GUI->formvars['connectiontype'] = 6;
     $GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
     $GUI->formvars['epsg_code'] = $epsg;
     $GUI->formvars['transparency'] = $GUI->user->rolle->result_transparency;
 
     $layer_id = $dbmap->newRollenLayer($GUI->formvars);
+    $attributes = $dbmap->load_attributes($GUI->pgdatabase, $select);
+		$dbmap->save_postgis_attributes($GUI->pgdatabase, -$layer_id, $attributes, '', '');
 		
 		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 		
@@ -1109,7 +1098,7 @@
 		$GUI->formvars['no_last_search'] = true;
 		$GUI->GenerischeSuche_Suchen();
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
-		$result = $GUI->generischer_sachdaten_druck_drucken();
+		$result = $GUI->generischer_sachdaten_druck_createPDF();
     $GUI->outputfile = basename($result['pdf_file']);
     $GUI->mime_type='pdf';
     $GUI->output();

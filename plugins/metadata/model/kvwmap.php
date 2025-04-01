@@ -118,6 +118,12 @@
 
 	/**
 	 * Function create the package with id $package_id.
+	 *  - change pack_status to start packing
+	 *  - create export path if not exists
+	 *  - export the file with data_import_export method export_exportieren
+	 *  - exit with error and pack_status -1 in error case
+	 *  - if export format is not shape or csv, download the capabilities document, write it to a xml-file and pack all from export_path into the zip file
+	 *  - put metadata file into data package zip
 	 * @param int $package_id
 	 * @return array{ success: Boolean, msg: String, downloadUrl?: String}
 	 */
@@ -162,9 +168,15 @@
 			$GUI->formvars['selected_layer_id'] = $package->get('layer_id');
 			$GUI->formvars['epsg'] = $package->layer->get('epsg_code');
 			$export_path = $package->get_export_path();
-			if (!file_exists($export_path)) {
+			if (!is_dir($export_path)) {
 				$GUI->debug->show('Lege Verzeichnis ' . $export_path . ' an, weil es noch nicht existiert!', false);
-				mkdir($export_path, 0777, true);
+				$old_umask = umask(0);
+				$result = mkdir($export_path, 0774, true);
+				umask($old_umask);
+				chgrp($export_path, 'gisadmin');
+				if (!$result) {
+					$GUI->debug->show('Anlegen von ' . $export_path . ' hat nicht geklappt!', false);
+				}
 			}
 			$result = $package->get_export_format();
 			if (!$result['success']) {
@@ -180,7 +192,10 @@
 				include_once(CLASSPATH . 'data_import_export.php');
 				$data_import_export = new data_import_export();
 				$result = $data_import_export->export_exportieren($GUI->formvars, $GUI->Stelle, $GUI->user , $export_path, $exportfilename, true);
-				if (!$result['success']) {
+				if (strtolower(pathinfo($result['success'])['extension']) !== 'zip') {
+					$data_import_export->zip_export_path($export_path);
+				}
+				else {
 					// Fehler loggen
 					$result['msg'] = 'Fehler beim Exportieren des Layers ID: ' . $package->get('layer_id') . ' des Paket ID: ' . $package->get_id() . ' für Ressource ID: ' . $package->get('ressource_id') . "\n" . $result['msg'];
 					$package->log($result['msg']);
@@ -191,16 +206,14 @@
 			}
 			else {
 				// Text-Datei mit Links zum Dienst anlegen und Zip.
-				if (!is_dir($export_path)) {
-					mkdir($export_path);
-				}
-				file_put_contents($export_path . $exportfilename . '.txt', 'GetCapabilties: ' . $package->layer->get('connection') . 'Service=WMS&Request=GetCapabilities&Version=' . $package->layer->get('wms_server_version'));
-				exec(ZIP_PATH . ' -j ' . rtrim($export_path, '/') . ' ' . $export_path . '*');
+				file_put_contents($export_path . $exportfilename . '.xml', 'GetCapabilties: ' . $package->layer->get('connection') . 'Service=WMS&Request=GetCapabilities&Version=' . $package->layer->get('wms_server_version'));
+				$data_import_export->zip_export_path($export_path);
 			}
 
 			// Metadatendatei erzeugen und in ZIP packen
 			// von Ressource des Datenpaketes
 			$export_file = $package->get_export_file();
+			// Put the metadata document into the $xport_file.zip
 			$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf';
 			exec($command);
 			// An Ressourcen hängende Dokumente in ZIP packen
@@ -212,7 +225,9 @@
 			// Wenn ZIP-Datei existiert und etwas drin ist, chgrp www-data, chmod g+w und Verzeichnis löschen. (Aufräumen)
 			$package->delete_export_path();
 			chgrp($export_file, 'gisadmin');
-			chmod($export_file, 0664);
+			$old_umask = umask(0);
+			$result = chmod($export_file, 0664, true);
+			umask($old_umask);
 
 			$package->update_attr(array('pack_status_id = 4'));
 
@@ -250,6 +265,36 @@
 		return array(
 			'success' => false,
 			'msg' => 'Funktion noch nicht implementiert!'
+		);
+	};
+
+	$GUI->metadata_list_files = function($search_dir) use ($GUI) {
+		$GUI->main = PLUGINS . 'metadata/view/list_files.php';
+
+		if (strpos($seach_dir, '..') !== false) {
+			$msg = 'Das Verzeichnis ' . $search_dir . ' darf keine .. Zeichenkette beinhalten!';
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+
+		$GUI->metadata_data_dir = append_slash(METADATA_DATA_PATH) . 'ressourcen/';
+		$GUI->search_dir = $GUI->metadata_data_dir . $search_dir;
+
+		if (!is_dir($GUI->search_dir)) {
+			$msg = 'Das Verzeichnis ' . $GUI->seach_dir . ' existiert nicht!';
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+
+		$GUI->files = getAllFiles($GUI->search_dir);
+
+		return array(
+			'success' => false,
+			'msg' => $msg
 		);
 	};
 
@@ -610,13 +655,21 @@
 		$GUI->main = PLUGINS . 'metadata/view/data_packages.php';
 		$all_packages = DataPackage::find_by_stelle_id($GUI, $GUI->Stelle->id);
 		$GUI->metadata_data_packages = array();
-		foreach($all_packages AS $package) {
-			$pfad = replace_params(
-				$package->layer->get('pfad'),
-				'',
-				$GUI->user->id,
-				$GUI->Stelle->id
-			);
+		foreach ($all_packages AS $package) {
+			$pfad = replace_params_rolle($package->layer->get('pfad'));
+			$where = "";
+			if ($package->layer->get('Datentyp') != 5) {
+				$where = "
+					WHERE
+						ST_MakeEnvelope(
+							" . $GUI->Stelle->MaxGeorefExt->minx . ",
+							" . $GUI->Stelle->MaxGeorefExt->miny . ",
+							" . $GUI->Stelle->MaxGeorefExt->maxx . ",
+							" . $GUI->Stelle->MaxGeorefExt->maxy . ",
+							25832
+						) && query." . $package->layer->get('geom_column') . "
+				";
+			}
 			$sql = "
 				SET search_path = " . $package->layer->get('schema') . ", public;
 				SELECT
@@ -624,30 +677,30 @@
 				FROM
 					(
 						" . $pfad . "
-					) AS query
-				WHERE
-					ST_MakeEnvelope(
-						" . $GUI->Stelle->MaxGeorefExt->minx . ",
-						" . $GUI->Stelle->MaxGeorefExt->miny . ",
-						" . $GUI->Stelle->MaxGeorefExt->maxx . ",
-						" . $GUI->Stelle->MaxGeorefExt->maxy . ",
-						25832
-					) && query." . $package->layer->get('geom_column') . "
+					) AS query" .
+				$where . "
 			";
-			// echo print_r($this->Stelle, true);
+			// echo '<br>SQL zum Filtern der Daten ' . $package->get('bezeichnung') . ' im Datenpaket: ' . $sql;
 			$query = pg_query($sql);
 			$num_feature = pg_fetch_assoc($query)['anzahl'];
 			if ( $num_feature > 0) {
+				// echo '<br>Anzahl Datensätze: ' . $num_feature;
 				$package->num_feature = $num_feature;
 				$GUI->metadata_data_packages[] = $package;
 			}
+
 		}
 		$GUI->output();
 	};
 
 	$GUI->metadata_show_ressources_status = function($ressource_id) use ($GUI) {
-		$GUI->metadata_ressources = Ressource::find($GUI, "true", "auto_update, status_id");
+		$GUI->metadata_ressources = Ressource::find($GUI, "von_eneka OR use_for_datapackage", "auto_update, status_id");
 		$GUI->metadata_outdated_ressources = Ressource::find_outdated($GUI);
+		$command = "ps aux | grep -i 'ressources_cron.php' | grep -v grep";
+		$output = '';
+		$result_code = '';
+		exec($command, $outputs, $result_code);
+		$GUI->metadata_processes = $outputs;
 		$GUI->main = PLUGINS . 'metadata/view/ressources_status.php';
 		$GUI->output();
 	};
