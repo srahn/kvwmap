@@ -2685,7 +2685,8 @@ class Konvertierung extends PgObject {
 		$md->set('date_de', $this->get_aktualitaetsdatum());
 		//$md->set('date_de', $this->plan->get('wirksamkeitsdatum'));
 		$md->set('date_title', 'Datum');
-		$md->set('id_cite_title', $plan->get('name'));
+		$md->set('id_cite_title', $md->get('stellendaten')['ows_title'] . ' (Zusammenzeichnung)');
+		//$md->set('id_cite_title', $plan->get('name'));
 		$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist der " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
 		$md->set('id_abstract', array(
 			'dataset' => ' des Plans ' . $plan->get('name') . $abstract_zusatz,
@@ -2815,7 +2816,7 @@ class Konvertierung extends PgObject {
 		if($rs['letzte_aktualisierung'] != '' AND $rs['letzte_aktualisierung'] != NULL) {
 			return $rs['letzte_aktualisierung'];
 		} else {
-			return get_aktualitaetsdatum();
+			return $this->get_aktualitaetsdatum();
 		}							
 	}
 	
