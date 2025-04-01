@@ -2465,7 +2465,7 @@ class user {
 			SELECT
 				stelle_id
 			FROM
-				user
+				kvwmap.user
 			WHERE
 				ID= " . $this->id ."
 		";
@@ -2484,37 +2484,45 @@ class user {
 		return 0;
 	}
 
-	function getStellen($order, $user_id = 0) {
-		global $admin_stellen;
-
-		if ($order != '') {
-			$order = " ORDER BY `" . $order . "`";
+	function getStellen($stelle_ID, $with_expired = false) {
+		global $language;
+		if ($language != '' AND $language != 'german') {
+			$name_column = "
+			CASE
+				WHEN s.bezeichnung_" . $language . " != \"\" THEN s.bezeichnung_" . $language . "
+				ELSE s.bezeichnung
+			END AS bezeichnung";
 		}
-
-		if ($user_id > 0 AND !in_array($this->id, $admin_stellen)) {
-			$where = "
-				LEFT JOIN `rolle` AS r ON s.ID = r.stelle_id
-				WHERE r.user_id = ".$user_id." OR r.stelle_id IS NULL
-			";
+		else {
+			$name_column = "s.bezeichnung";
 		}
-
 		$sql = "
 			SELECT
-				s.ID,
-				s.Bezeichnung
+				s.id,
+				" . $name_column . "
 			FROM
-				`stelle` AS s" .
-				$where .
-				$order . "
+				kvwmap.stelle AS s,
+				kvwmap.rolle AS r
+			WHERE
+				s.id = r.stelle_id AND
+				r.user_id = " . $this->id .
+				($stelle_ID > 0 ? " AND s.id = " . $stelle_ID : "") . 
+				(!$with_expired ? "
+				AND (
+					('" . date('Y-m-d h:i:s') . "' >= s.start AND ('" . date('Y-m-d h:i:s') . "' <= s.stop OR s.stop IS NULL))
+					OR
+					(s.start IS NULL AND s.stop IS NULL)
+				)" : "") . "
+			ORDER BY
+				bezeichnung;
 		";
-		#echo '<br>sql: ' . $sql;
 
-		$this->debug->write("<p>file:stelle.php class:stelle->getStellen - Abfragen aller Stellen<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs = $this->database->result->fetch_array()) {
-			$stellen['ID'][]=$rs['ID'];
-			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
+		#debug_write('<br>sql: ', $sql, 1);
+		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$stellen['ID'][]=$rs['id'];
+			$stellen['Bezeichnung'][]=$rs['bezeichnung'];
 		}
 		return $stellen;
 	}
@@ -2568,23 +2576,6 @@ class stelle {
 		$this->database = $database;
 		$ret = $this->readDefaultValues();
 	}
-
-  function getName() {
-    $sql ='SELECT ';
-    if (rolle::$language != 'german' AND rolle::$language != ''){
-      $sql.='`Bezeichnung_'.rolle::$language.'` AS ';
-    }
-    $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
-    #echo $sql;
-    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
-		}
-		$rs = $this->database->result->fetch_array();
-    $this->Bezeichnung=$rs['Bezeichnung'];
-    return $rs['Bezeichnung'];
-  }
 
 	function readDefaultValues() {
 		global $language;
@@ -2766,7 +2757,7 @@ class rolle {
 		$nImageHeight = $teil[1];
 		$sql = "
 			UPDATE
-				rolle
+				kvwmap.rolle
 			SET
 				nImageWidth = " . $nImageWidth . ",
 				nImageHeight = " . $nImageHeight . "
@@ -2781,46 +2772,90 @@ class rolle {
 	}	
 	
   function getConsume($consumetime, $user_id = NULL) {
-		if($user_id == NULL)$user_id = $this->user_id;		# man kann auch eine user_id übergeben um den Kartenausschnitt eines anderen Users abzufragen
-    $sql ='SELECT * FROM u_consume';
-    $sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$this->stelle_id;
-    $sql.=' AND time_id="'.$consumetime.'"';
+		if ($user_id == NULL) {
+			# man kann auch eine user_id übergeben um den Kartenausschnitt eines anderen Users abzufragen
+			$user_id = $this->user_id;
+		}
+    $sql = "
+			SELECT 
+				* 
+			FROM 
+				kvwmap.u_consume
+			WHERE 
+				user_id = " . $user_id ." AND 
+				stelle_id = " . $this->stelle_id . " AND 
+				time_id = " . ($consumetime != ''? "'" . $consumetime . "'" : 'NULL');
     #echo '<br>'.$sql;
-    $queryret=$this->database->execSQL($sql,4, 0);
+    $queryret = $this->database->execSQL($sql, 4, 0, true);
     if ($queryret[0]) {
       # Fehler bei Datenbankanfrage
       $ret[0]=1;
       $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
     }
     else {
-      $rs = $this->database->result->fetch_assoc();
+			$rs = pg_fetch_assoc($queryret[1]);
       $ret[0]=0;
       $ret[1]=$rs;
     }
     return $ret;
   }
 	
-  function updateNextConsumeTime($time_id,$nexttime) {
-    $sql ='UPDATE u_consume SET next="'.$nexttime.'"';
-    $sql.=' WHERE time_id="'.$time_id.'"';
-    #echo '<br>'.$sql;
-    $queryret=$this->database->execSQL($sql,4, 1);
-    if ($queryret[0]) {
-      # Fehler bei Datenbankanfrage
-      $ret[0]=1;
-      $ret[1]='<br>Fehler bei der Aktualisierung des Zeitstempels des Nachfolgers Next.<br>'.$ret[1];
-    }
-    else {
-      $ret[0]=0;
-      $ret[1]=1;
-    }
-    return $ret;
-  }	
+	function updateNextConsumeTime($time_id,$nexttime) {
+		$sql = "
+			UPDATE
+				kvwmap.u_consume
+			SET
+				next = '" . $nexttime . "'
+			WHERE
+				time_id = '" . $time_id . "'
+		";
+		#echo '<br>'.$sql;
+		$queryret = $this->database->execSQL($sql, 4, 1);
+		if ($queryret[0]) {
+			# Fehler bei Datenbankanfrage
+			$ret[0] = 1;
+			$ret[1] = '<br>Fehler bei der Aktualisierung des Zeitstempels des Nachfolgers Next.<br>' . $ret[1];
+		}
+		else {
+			$ret[0] = 0;
+			$ret[1] = 1;
+		}
+		return $ret;
+	}
+
+	function updatePrevConsumeTime($time_id, $prevtime) {
+		$sql = "
+			UPDATE
+				kvwmap.u_consume
+			SET
+				prev = '" . $prevtime . "'
+			WHERE
+				time_id = '" . $time_id . "'
+		";
+		#echo '<br>' . $sql;
+		$queryret=$this->database->execSQL($sql,4, 1);
+		if ($queryret[0]) {
+			# Fehler bei Datenbankanfrage
+			$ret[0] = 1;
+			$ret[1] = '<br>Fehler bei der Aktualisierung des Zeitstempels des Vorgängers Prev.<br>' . $ret[1];
+		}
+		else {
+			$ret[0] = 0;
+			$ret[1] = 1;
+		}
+		return $ret;
+	}
 
 	function setScrollPosition($scrollposition){
 		if($scrollposition != ''){
-			$sql = 'UPDATE rolle SET scrollposition = '.$scrollposition;
-			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+			$sql = '
+				UPDATE 
+					kvwmap.rolle 
+				SET 
+					scrollposition = ' . $scrollposition . '
+				WHERE 
+					user_id = ' . $this->user_id . ' AND 
+					stelle_id = ' . $this->stelle_id;
 			$this->debug->write("<p>file:rolle.php class:rolle->setOneLayer - Setzen eines Layers:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
@@ -3044,7 +3079,7 @@ class rolle {
 				kvwmap.layer AS l JOIN
 				kvwmap.used_layer AS ul ON l.layer_id = ul.layer_id JOIN
 				kvwmap.u_rolle2used_layer as r2ul ON r2ul.stelle_id = ul.stelle_id AND r2ul.layer_id = ul.layer_id LEFT JOIN
-				connections as c ON l.connection_id = c.id
+				kvwmap.connections as c ON l.connection_id = c.id
 			WHERE
 				ul.stelle_id = " . $this->stelle_id . " AND
 				r2ul.user_id = " . $this->user_id .
@@ -3141,12 +3176,12 @@ class rolle {
 			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'layer_id'));
 			if($query_status !== ''){	
 				if($this->layerset[$i]['layer_id'] > 0){
-					$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';
+					$sql ='UPDATE kvwmap.u_rolle2used_layer set queryStatus="'.$query_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND layer_id='.$this->layerset[$i]['layer_id'];
 				}
 				else{		# Rollenlayer
-					$sql ='UPDATE rollenlayer set queryStatus="'.$query_status.'"';
+					$sql ='UPDATE kvwmap.rollenlayer set queryStatus="'.$query_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND id='.-$this->layerset[$i]['layer_id'];
 				}
@@ -3274,7 +3309,7 @@ class rolle {
   }
 
   function saveSettings($extent) {
-    $sql ='UPDATE rolle SET minx='.$extent->minx.',miny='.$extent->miny;
+    $sql ='UPDATE kvwmap.rolle SET minx='.$extent->minx.',miny='.$extent->miny;
     $sql.=',maxx='.$extent->maxx.',maxy='.$extent->maxy;
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     # echo $sql;
@@ -3298,7 +3333,7 @@ class rolle {
         # Eintragen der Consume Activity
         $sql ='
 					INSERT INTO 
-						u_consume 
+						kvwmap.u_consume 
 					VALUES (
 						' . $this->user_id . ', 
 						' . $this->stelle_id . ", 
@@ -3397,7 +3432,7 @@ class rolle {
 		# Eintragen der last_time_id
 		$sql = "
 			UPDATE
-				rolle
+				kvwmap.rolle
 			SET
 				last_time_id = '" . $time . "'
 			WHERE
@@ -3836,7 +3871,7 @@ class db_mapObj{
     return $filter;
   }		
 	
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
+	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value'), $attribute_values = []) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -3848,12 +3883,12 @@ class db_mapObj{
 			(!$all_languages AND $language != 'german') ?
 			"
 				CASE
-					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
-					ELSE `alias`
+					WHEN alias_" . $language. " != '' THEN alias_" . $language . "
+					ELSE alias
 				END AS alias
 			" :
 			"
-				`alias`
+				alias
 			"
 		);
 
@@ -3863,56 +3898,55 @@ class db_mapObj{
 
 		$sql = "
 			SELECT
-				`order`, " .
-				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
-				`layer_id`,
-				a.`name`,
-				`real_name`,
-				`tablename`,
-				`table_alias_name`,
-				a.`schema`,
-				`type`,
-				d.`name` as typename,
-				`geometrytype`,
-				`constraints`,
-				`saveable`,
-				`nullable`,
-				`length`,
-				`decimal_length`,
-				`default`,
-				`form_element_type`,
-				`options`,
-				`tooltip`,
-				`group`,
-				`tab`,
-				`arrangement`,
-				`labeling`,
-				`raster_visibility`,
-				`dont_use_for_new`,
-				`mandatory`,
-				`quicksearch`,
-				`visible`,
-				`vcheck_attribute`,
-				`vcheck_operator`,
-				`vcheck_value`,
-				`order`,
-				`privileg`,
-				`query_tooltip`
+				\"order\", " .
+				$alias_column . ", alias_low_german, alias_english, alias_polish, alias_vietnamese,
+				layer_id,
+				a.name,
+				real_name,
+				tablename,
+				table_alias_name,
+				a.schema,
+				type,
+				d.name as typename,
+				geometrytype,
+				constraints,
+				saveable,
+				nullable,
+				length,
+				decimal_length,
+				\"default\",
+				form_element_type,
+				options,
+				tooltip,
+				\"group\",
+				tab,
+				arrangement,
+				labeling,
+				raster_visibility,
+				dont_use_for_new,
+				mandatory,
+				quicksearch,
+				visible,
+				vcheck_attribute,
+				vcheck_operator,
+				vcheck_value,
+				\"order\",
+				privileg,
+				query_tooltip
 			FROM
-				`layer_attributes` as a LEFT JOIN
-				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+				kvwmap.layer_attributes as a LEFT JOIN
+				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
 			WHERE
-				`layer_id` = " . $layer_id .
+				layer_id = " . $layer_id .
 				$einschr . "
 			ORDER BY
-				`order`
+			\"order\"
 		";
-		#echo '<br>Sql read_layer_attributes: ' . $sql;
+		// echo '<br>Sql read_layer_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>",4);
 		$ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
-		while ($rs = $ret['result']->fetch_array()){
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$attributes['enum'][$i] = array();
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
@@ -3949,14 +3983,23 @@ class db_mapObj{
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];			
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
-						$attributes[$column][$i] = replace_params_rolle($attributes[$column][$i]);
+						$attributes[$column][$i] = 	replace_params_rolle(
+																					$attributes[$column][$i],
+																					((count($attribute_values) > 0 AND $replace_only == 'default') ? $attribute_values : NULL)
+																				);
 					}
 				}
 			}
+
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
@@ -3982,11 +4025,6 @@ class db_mapObj{
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
 			$attributes['visible'][$i] = $rs['visible'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
@@ -4030,21 +4068,24 @@ class db_mapObj{
 	* @return array with integer connection_id and string schema name, return an empty array if no connection for layer_id found
 	*/
 	function get_layer_connection($layer_id) {
+		sanitize($layer_id, 'int');
+		#echo 'Class db_map Method get_layer_connection';
 		# $layer_id < 0 Rollenlayer else normal layer
 		$sql = "
 			SELECT
-				`connection_id`,
-				" . ($layer_id < 0 ? "'" . CUSTOM_SHAPE_SCHEMA . "' AS " : "") . "`schema`
+				connection_id,
+				" . ($layer_id < 0 ? "'" . CUSTOM_SHAPE_SCHEMA . "' AS " : "") . "schema
 			FROM
-				" . ($layer_id < 0 ? "rollenlayer" : "layer") . "
+				" . ($layer_id < 0 ? "kvwmap.rollenlayer" : "kvwmap.layer") . "
 			WHERE
-				" . ($layer_id < 0 ? "-id" : "Layer_ID") . " = " . $layer_id . " AND
-				`connectiontype` = 6
+				" . ($layer_id < 0 ? "-id" : "layer_id") . " = " . $layer_id . " AND
+				connectiontype = 6
 		";
+		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_layer_connection - Lesen der connection Daten des Layers:<br>" . $sql, 4);
-		$this->db->execSQL($sql);
-		if ($this->db->success) {
-			return $this->db->result->fetch_assoc();
+		$ret = $this->db->execSQL($sql);
+		if (!$ret[0]) {
+			return pg_fetch_assoc($ret[1]);
 		}
 		else {
 			$this->debug->write("<br>Abbruch beim Lesen der Layer connection in get_layer_connection, Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);

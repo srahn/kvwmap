@@ -362,7 +362,7 @@ class rolle {
   }
 	
   function saveSettings($extent) {
-    $sql ='UPDATE rolle SET minx='.$extent->minx.',miny='.$extent->miny;
+    $sql ='UPDATE kvwmap.rolle SET minx='.$extent->minx.',miny='.$extent->miny;
     $sql.=',maxx='.$extent->maxx.',maxy='.$extent->maxy;
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     # echo $sql;
@@ -571,7 +571,7 @@ class rolle {
 	function set_layer_params($layer_params) {
 		$sql = "
 			UPDATE
-				rolle
+				kvwmap.rolle
 			SET
 				layer_params = '" . sanitize($layer_params, 'text') . "'
 			WHERE
@@ -588,7 +588,7 @@ class rolle {
 		# Eintragen der last_time_id
 		$sql = "
 			UPDATE
-				rolle
+				kvwmap.rolle
 			SET
 				last_time_id = '" . $time . "'
 			WHERE
@@ -661,7 +661,7 @@ class rolle {
 	function updateNextConsumeTime($time_id,$nexttime) {
 		$sql = "
 			UPDATE
-				u_consume
+				kvwmap.u_consume
 			SET
 				next = '" . $nexttime . "'
 			WHERE
@@ -684,7 +684,7 @@ class rolle {
 	function updatePrevConsumeTime($time_id, $prevtime) {
 		$sql = "
 			UPDATE
-				u_consume
+			kvwmap.u_consume
 			SET
 				prev = '" . $prevtime . "'
 			WHERE
@@ -746,7 +746,7 @@ class rolle {
         # Eintragen der Consume Activity
         $sql ='
 					INSERT INTO 
-						u_consume 
+						kvwmap.u_consume 
 					VALUES (
 						' . $this->user_id . ', 
 						' . $this->stelle_id . ", 
@@ -1112,8 +1112,14 @@ class rolle {
 
 	function setScrollPosition($scrollposition){
 		if($scrollposition != ''){
-			$sql = 'UPDATE rolle SET scrollposition = '.$scrollposition;
-			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+			$sql = '
+				UPDATE 
+					kvwmap.rolle 
+				SET 
+					scrollposition = ' . $scrollposition . '
+				WHERE 
+					user_id = ' . $this->user_id . ' AND 
+					stelle_id = ' . $this->stelle_id;
 			$this->debug->write("<p>file:rolle.php class:rolle->setOneLayer - Setzen eines Layers:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
@@ -1324,12 +1330,12 @@ class rolle {
 			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'layer_id'));
 			if($query_status !== ''){	
 				if($this->layerset[$i]['layer_id'] > 0){
-					$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';
+					$sql ='UPDATE kvwmap.u_rolle2used_layer set queryStatus="'.$query_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND layer_id='.$this->layerset[$i]['layer_id'];
 				}
 				else{		# Rollenlayer
-					$sql ='UPDATE rollenlayer set queryStatus="'.$query_status.'"';
+					$sql ='UPDATE kvwmap.rollenlayer set queryStatus="'.$query_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND id='.-$this->layerset[$i]['layer_id'];
 				}
