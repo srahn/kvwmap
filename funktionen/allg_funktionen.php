@@ -2569,6 +2569,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 	}
 
 	switch ($type) {
+		case 'integer' :
 		case 'int' :
 		case 'int4' :
 		case 'oid' :
