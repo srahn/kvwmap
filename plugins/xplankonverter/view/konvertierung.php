@@ -330,7 +330,7 @@
 				<input id="suppress_gvbtable_letzteaktualisierung_update" type="checkbox" name="suppress_gvbtable_letzteaktualisierung_update" value="1"> Beim Upload soll der Wert "Letzte Aktualisierung" nicht überschrieben werden<p><?
 			}
 
-			if ($zusammenzeichnung->get('planart') == 'RP-Plan') { ?>
+			if ($konvertierung->get('planart') == 'RP-Plan') { ?>
 				Geometrie der Fachdaten vereinfachen: <?
 				echo FormObject::createSelectField(
 					'simplify_fachdaten_geom',
@@ -342,7 +342,7 @@
 						array( 'value' => '1.00', 'output' => '1 m'),
 						array( 'value' => '2.00', 'output' => '2 m')
 					),
-					($zusammenzeichnung->get('planart') == 'RP-Plan' ? '1.00' : '0.02'),
+					($konvertierung->get('planart') == 'RP-Plan' ? '1.00' : '0.02'),
 					$size = 1
 				); ?> <span data-tooltip="Wenn ein Wert zwischen 2cm und 2m ausgewählt wird, wird die PostGIS-Funktion ST_SimplifyPreserveTopology mit der ausgewählten Toleranz auf alle Polygone und Linien der Fachdatengeometrien angewendet. Wird „-- Bitte Wählen --“ ausgewählt findet keine Vereinfachung statt. Der Default-Wert für Regionale Raumordnungsprogramme ist auf 1 m eingestellt." style="--left: -400px"><?
 			} ?>
@@ -422,7 +422,7 @@
 								<td>
 									<a
 										title="Details zum <? echo $this->konvertierung->config['singular']; ?> im Sachdatenformular anzeigen." 
-										href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->konvertierung->config['plan_layer_id']; ?>&operator_plan_gml_id==&value_plan_gml_id=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"
+										href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->konvertierung->config['plan_layer_id']; ?>&operator_plan_gml_id==&value_plan_gml_id=<? echo $konvertierung->plan->get('gml_id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"
 									><i class="fa fa-file-powerpoint-o" aria-hidden="true"></i> Plandetails anzeigen</a>
 								</td>
 							</tr>
@@ -431,18 +431,18 @@
 								<td>
 									<a
 										title="<? echo $this->konvertierung->config['singular']; ?> in der Karte anzeigen."
-										href="index.php?go=zoomto_dataset&oid=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&layer_columnname=raeumlichergeltungsbereich&layer_id=<? echo $this->konvertierung->config['plan_layer_id']; ?>&selektieren=0"
+										href="index.php?go=zoomto_dataset&oid=<? echo $konvertierung->plan->get('gml_id'); ?>&layer_columnname=raeumlichergeltungsbereich&layer_id=<? echo $this->konvertierung->config['plan_layer_id']; ?>&selektieren=0"
 									><i class="fa fa-map" aria-hidden="true"></i> In Karte anzeigen</a>
 								</td>
 							</tr><?
-							if($zusammenzeichnung->get('planart') == 'FP-Plan') { ?>
+							if ($konvertierung->get('planart') == 'FP-Plan') { ?>
 								<tr>
 									<td> </td>
 									<td>
 										<a
 											title="<? echo $this->konvertierung->config['singular']; ?> im UVP-Portal anzeigen."
 											target="uvp"
-											href="https://uvp.niedersachsen.de/kartendienste?layer=blp&N=<? echo $zusammenzeichnung->plan->center_coord['lat']; ?>&E=<? echo $zusammenzeichnung->plan->center_coord['lon']; ?>&zoom=13"
+											href="https://uvp.niedersachsen.de/kartendienste?layer=blp&N=<? echo $konvertierung->plan->center_coord['lat']; ?>&E=<? echo $konvertierung->plan->center_coord['lon']; ?>&zoom=13"
 										><i class="fa fa-globe" aria-hidden="true"></i> Im UVP-Portal Anzeigen</a>
 									</td>
 								</tr><?
@@ -480,7 +480,7 @@
 								&nbsp;
 							</td>
 							<td>
-								<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=2&value_konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&operator_konvertierung_id=="><i class="fa fa-upload" aria-hidden="true" style="color: gray !important"></i> Hochladen von weiteren Dokumenten</a>
+								<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=2&value_konvertierung_id=<? echo $konvertierung->get_id(); ?>&operator_konvertierung_id=="><i class="fa fa-upload" aria-hidden="true" style="color: gray !important"></i> Hochladen von weiteren Dokumenten</a>
 							<td>
 						</tr>
 					</table>
@@ -494,7 +494,7 @@
 							<td style="border-right: 0px solid gray">Metadaten über den Geodatensatz:</td>
               <td style="border-right: 0px solid gray"><?
 								if ($konvertierung->get('metadata_dataset_uuid') == '') { ?>
-									<a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
+									<a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $konvertierung->get('planart'); ?>&konvertierung_id=<? echo $konvertierung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
 								}
 								else { ?>
 									<a title="Metadaten über Geodatensatz runterladen" target="metadata" href="https://mis.testportal-plandigital.de/geonetwork/srv/api/records/<? echo $konvertierung->get('metadata_dataset_uuid'); ?>/formatters/xml"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
@@ -519,11 +519,11 @@
               <tr>
                 <td style="border-right: 0px solid gray">Metadaten über Downloaddienst (WFS):</td>
                 <td style="border-right: 0px solid gray"><?
-                  if ($zusammenzeichnung->get('metadata_downloadservice_uuid') == '') { ?>
-                    <a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
+                  if ($konvertierung->get('metadata_downloadservice_uuid') == '') { ?>
+                    <a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $konvertierung->get('planart'); ?>&konvertierung_id=<? echo $konvertierung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
                   }
                   else { ?>
-                    <a title="Metadaten über Downloaddienst runterladen" target="metadata"href="https://mis.testportal-plandigital.de/geonetwork/srv/api/records/<? echo $zusammenzeichnung->get('metadata_downloadservice_uuid'); ?>/formatters/xml"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
+                    <a title="Metadaten über Downloaddienst runterladen" target="metadata"href="https://mis.testportal-plandigital.de/geonetwork/srv/api/records/<? echo $konvertierung->get('metadata_downloadservice_uuid'); ?>/formatters/xml"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
                   } ?>
                 </td>
               </tr>
@@ -533,7 +533,7 @@
                 <td><?php
                   $capabilities_url = URL . 'ows/' . $this->Stelle->id . '/' . $this->plan_abk . '?Service=WMS&Request=GetCapabilities';
                   if (get_headers($capabilities_url, 1)[0] == 'HTTP/1.1 404 Not Found') { ?>
-                    <a title="Erzeuge GeoWeb-Dienst" target="metadata" href="index.php?go=xplankonverter_create_geoweb_service&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt anlegen</a><?
+                    <a title="Erzeuge GeoWeb-Dienst" target="metadata" href="index.php?go=xplankonverter_create_geoweb_service&planart=<?php echo $konvertierung->get('planart'); ?>&konvertierung_id=<? echo $konvertierung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt anlegen</a><?
                   }
                   else { ?>
                     <a title="Capabilities zum WMS runterladen" target="metadata" href="<?php echo $capabilities_url; ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
@@ -548,7 +548,7 @@
                 <td><?php
                   $capabilities_url = URL . 'ows/' . $this->Stelle->id . '/' . $this->plan_abk . '?Service=WFS&Request=GetCapabilities';
                   if (get_headers($capabilities_url, 1)[0] == 'HTTP/1.1 404 Not Found') { ?>
-                    <a title="Erzeuge GeoWeb-Dienst" target="metadata" href="index.php?go=xplankonverter_create_geoweb_service&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt anlegen</a><?
+                    <a title="Erzeuge GeoWeb-Dienst" target="metadata" href="index.php?go=xplankonverter_create_geoweb_service&planart=<?php echo $konvertierung->get('planart'); ?>&konvertierung_id=<? echo $konvertierung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt anlegen</a><?
                   }
                   else { ?>
                     <a title="Capabilities zum WFS runterladen" target="metadata" href="<? echo $capabilities_url; ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
