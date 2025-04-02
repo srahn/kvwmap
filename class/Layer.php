@@ -99,14 +99,14 @@ class Layer extends PgObject {
 		$duplicate_layer_ids = array();
 		$sql =	"
 			SELECT
-				`Layer_ID`
+				layer_id
 			FROM
-				`layer`
+				kvwmap.layer
 			WHERE
-				`duplicate_from_layer_id` = " . $duplicate_from_layer_id . "
-				AND `Layer_ID` != `duplicate_from_layer_id`
+				duplicate_from_layer_id = " . $duplicate_from_layer_id . "
+				AND layer_id != duplicate_from_layer_id
 		";
-		# letzte Where Bedinung, damit keine Entlosschleifen entstehen beim Aufruf von update_layer falls
+		# letzte Where Bedinung, damit keine Endlosschleifen entstehen beim Aufruf von update_layer falls
 		# Layer_ID fälschlicherweise identisch sein sollte mit duplicate_layer_id was nicht passieren sollte
 		# wenn das Layerformular genutzt wurde.
 		#echo	MyObject::$write_debug ? 'Layer find_by_duplicate_from_layer_id sql:<br> ' . $sql : '';
@@ -115,7 +115,7 @@ class Layer extends PgObject {
 			$database->gui->add_message('error', $ret[1]);
 		}
 		else {
-			while ($rs = $database->result->fetch_assoc()) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
 				$duplicate_layer_ids[] = $rs['layer_id'];
 			}
 		}

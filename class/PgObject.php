@@ -476,17 +476,17 @@ class PgObject {
 	} */
 
 	function update() {
-		$quote = ($this->identifier_type == 'text') ? "'" : "";
 		$sql = "
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
 			SET
 				" . implode(', ', $this->getKVP(true, true)) . "
 			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+				" . $this->get_identifier_expression() . "
 		";
 		$this->debug->show('update sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
+		if(!$query){echo $sql; exit;}
 	}
 
 	function update_attr($attributes, $set = false) {
@@ -562,6 +562,7 @@ class PgObject {
 		// echo '<br>PgObject->find_by_sql with sql: ' . $sql;
 		$this->debug->show('PgObject find_by_sql sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
+		if (!$query){echo $sql; exit;}
 		$results = array();
 		while ($this->data = pg_fetch_assoc($query)) {
 			if ($hierarchy_key == NULL) {

@@ -8475,19 +8475,21 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	*/
 	function update_layer_parameter_in_rollen($stelle_id = NULL) {
 		$default_params = array();
-		$layer_parameter = new MyObject(
+		$layer_parameter = new PgObject(
 			$this,
+			'kvwmap',
 			'layer_parameter'
 		);
 		$params = $layer_parameter->find_by_sql(array(
 			'select' => '*',
-			'where' => ($stelle_id != NULL? 'locate (layer_parameter.id, (select selectable_layer_params from stelle where id = ' . $stelle_id . '))' : '')
+			'where' => ($stelle_id != NULL? 'layer_parameter.id IN (select unnest(STRING_TO_ARRAY(selectable_layer_params, \',\'))::integer from kvwmap.stelle where id = ' . $stelle_id . ')' : '')
 		));
 		foreach ($params AS $param) {
 			$default_params[$param->get('key')] = $param->get('default_value');
 		}
-		$rolle = new MyObject(
+		$rolle = new PgObject(
 			$this,
+			'kvwmap',
 			'rolle',
 			array(
 				array(
@@ -9191,7 +9193,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	* @param array $formvars Die Werte des Layers, der dupliziert werden sollen
 	*/
 	function update_duplicate_layers($formvars) {
-		foreach (Layer::find_by_duplicate_from_layer_id($this->database, $formvars['selected_layer_id']) AS $duplicate_layer_id) {
+		foreach (Layer::find_by_duplicate_from_layer_id($this->pgdatabase, $formvars['selected_layer_id']) AS $duplicate_layer_id) {
 			$formvars['id'] = $formvars['selected_layer_id'] = $duplicate_layer_id;
 			$this->LayerAendern($formvars, true);
 		}

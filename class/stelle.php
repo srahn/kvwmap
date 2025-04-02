@@ -1701,7 +1701,7 @@ class stelle {
 				kvwmap.stelle
 			SET
 				selectable_layer_params = COALESCE((
-					SELECT string_agg(id, ',')
+					SELECT string_agg(id::text, ',')
 					FROM
 						(
 							SELECT DISTINCT
@@ -1719,8 +1719,8 @@ class stelle {
 										ul.stelle_id = " . $this->id . " AND
 										ul.layer_id = l.Layer_ID AND
 										(
-											locate(
-												concat('$', p.key),
+											position(
+												concat('$', p.key) IN
 												concat(l.name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 											) > 0
 										-- OR						-- aus Performancegründen rausgenommen
@@ -1736,8 +1736,8 @@ class stelle {
 										kvwmap.u_menues AS m JOIN
 										kvwmap.u_menue2stelle AS m2s ON (m.id = m2s.menue_id) JOIN
 										kvwmap.layer_parameter AS p ON (
-											locate(
-												concat('$', p.key),
+											position(
+												concat('$', p.key) IN
 												m.links
 											) > 0
 										)
