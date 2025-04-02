@@ -772,21 +772,17 @@ class user {
   }
 	
 	function wrong_password($password) {
-		$stmt = $this->database->mysqli->prepare("
+		$sql = "
 			SELECT
 				1
 			FROM
-				user
+				kvwmap.user
 			WHERE
-				id = ? AND
-				password = kvwmap.sha1(?)
-		");
-		$stmt->bind_param("is", $args1, $args2);
-		$args1 = $this->id;
-		$args2 = $password;
-		$stmt->execute();
-		$stmt->store_result();
-		return $stmt->num_rows == 0;
+				id = " . $this->id . " AND
+				password = kvwmap.sha1('" . $password . "')
+		";
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		return pg_num_rows($ret[1]) == 0;
 	}
 
 	function login_is_locked() {
@@ -1078,14 +1074,16 @@ class user {
 				($stelle_ID > 0 ? " AND s.id = " . $stelle_ID : "") . 
 				(!$with_expired ? "
 				AND (
-					('" . date('Y-m-d h:i:s') . "' >= s.start AND ('" . date('Y-m-d h:i:s') . "' <= s.stop OR s.stop IS NULL))
+					(
+						('" . date('Y-m-d h:i:s') . "' >= s.start OR s.start IS NULL) AND 
+						('" . date('Y-m-d h:i:s') . "' <= s.stop OR s.stop IS NULL)
+					)
 					OR
 					(s.start IS NULL AND s.stop IS NULL)
 				)" : "") . "
 			ORDER BY
 				bezeichnung;
 		";
-
 		#debug_write('<br>sql: ', $sql, 1);
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
 		$ret = $this->database->execSQL($sql, 4, 0, true);
@@ -1100,11 +1098,11 @@ class user {
 		# sezten der aktuell für den Nutzer eingestellten Stelle
 		$sql = "
 			UPDATE
-				user
+				kvwmap.user
 			SET
 				stelle_id = " . $stelle_id . "
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 		$this->debug->write("<p>file:users.php class:user->updateStelleID - Setzen der aktuellen Stellen-ID für den User<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -1115,11 +1113,11 @@ class user {
 	function update_agreement_accepted($accepted) {
 		$sql = "
 			UPDATE
-				user
+				kvwmap.user
 			SET
 				agreement_accepted = " . $accepted . "
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 		$this->debug->write("<p>file:users.php class:user->agreement_accepted - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
 		$this->database->execSQL($sql);
@@ -1129,11 +1127,11 @@ class user {
 	function update_tokens($token) {
 		$sql = "
 			UPDATE
-				user
+				kvwmap.user
 			SET
 				tokens = '" . implode(',', array_merge([$token], array_slice(array_filter(explode(',', $this->tokens, 5)), 0, 4))) . "'
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 		$this->debug->write("<p>file:users.php class:user->updateTokens - Speichern des Tokens.<br>" . $sql, 4);
 		$this->database->execSQL($sql);

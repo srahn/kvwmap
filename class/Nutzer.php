@@ -30,7 +30,7 @@ class Nutzer extends PgObject {
 	public static	function find_by_login_name($gui, $login_name) {
 		$gui->debug->show('Frage Nutzer mit login_name ab.', Nutzer::$write_debug);
 		$user = new Nutzer($gui);
-		return $user->find_by('login_name', $gui->database->mysqli->real_escape_string($login_name));
+		return $user->find_by('login_name', pg_escape_string($login_name));
 	}
 
 	public static	function find_by_id($gui, $id) {

@@ -107,7 +107,7 @@ if ($formvars['go'] == 'health_check') {
 if (is_logout($GUI->formvars)) {
 	$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
 	if (is_logged_in()) {
-		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
+		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->pgdatabase);
 		if (LOGOUT_ROUTINE != '' AND file_exists(LOGOUT_ROUTINE) AND is_file(LOGOUT_ROUTINE)) {
 			include(LOGOUT_ROUTINE);
 		}
@@ -163,7 +163,7 @@ else {
 			$gast = $userDb->create_new_gast($GUI->formvars['gast']);
 			$GUI->formvars['login_name'] = $gast['username'];
 			$GUI->formvars['passwort'] = $gast['passwort'];
-			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
+			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase, $GUI->formvars['passwort']);
 			$GUI->user->stelle_id = $GUI->formvars['gast']; # set new stelle
 			set_session_vars($GUI->formvars);
 			# login case 2
@@ -192,9 +192,9 @@ else {
 				if ($GUI->database->mysqli->affected_rows > 0) {
 					$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
 				}
-				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
+				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase);
 				$GUI->debug->write('Nutzer mit login_name ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);
-				if ($GUI->database->success) {
+				if ($GUI->pgdatabase->success) {
 					if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'], $GUI->formvars['passwort'])) {
 						$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
 						set_session_vars($GUI->formvars);
@@ -278,7 +278,7 @@ else {
 							$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
 							$invitation->set('completed', date("Y-m-d H:i:s"));
 							$invitation->update();
-							$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
+							$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase);
 							$GUI->add_message('info', 'Nutzer erfolgreich angelegt.<br>Willkommen im WebGIS kvwmap.');
 							$GUI->debug->write('Set Session', 4, $GUI->echo);
 							set_session_vars($GUI->formvars);

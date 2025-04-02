@@ -251,13 +251,13 @@ class GUI {
 		}
 
 		# check if the login is granted not yet
-		if ($user->start != '0000-00-00' AND date('Y-m-d') < $user->start) {
+		if ($user->start != '' AND date('Y-m-d') < $user->start) {
 			$this->login_failed_reason = 'not_yet_started';
 			return false;
 		}
 
 		# check if the login is not granted any more
-		if ($user->stop != '0000-00-00' AND date('Y-m-d') > $user->stop) {
+		if ($user->stop != '' AND date('Y-m-d') > $user->stop) {
 			$this->login_failed_reason = 'expired';
 			return false;
 		}
@@ -19790,7 +19790,7 @@ class db_mapObj{
 	function deleteRollenFilter(){
 		$sql = "
 			UPDATE
-				u_rolle2used_layer
+				kvwmap.u_rolle2used_layer
 			SET
 				rollenfilter = NULL
 			WHERE
@@ -19801,7 +19801,7 @@ class db_mapObj{
 		$ret = $this->db->execSQL($sql);
 		$sql = "
 			UPDATE
-				rollenlayer
+				kvwmap.rollenlayer
 			SET
 				rollenfilter = NULL
 			WHERE

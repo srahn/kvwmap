@@ -1627,10 +1627,10 @@ class rolle {
 		$nImageHeight = $teil[1];
 		$sql = "
 			UPDATE
-				rolle
+				kvwmap.rolle
 			SET
-				nImageWidth = " . $nImageWidth . ",
-				nImageHeight = " . $nImageHeight . "
+				nimagewidth = " . $nImageWidth . ",
+				nimageheight = " . $nImageHeight . "
 			WHERE
 				stelle_id = " . $this->stelle_id . "
 				AND user_id = " . $this->user_id . "

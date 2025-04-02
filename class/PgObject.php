@@ -255,6 +255,10 @@ class PgObject {
 		return array_keys($this->data);
 	}
 
+	function has_key($key) {
+		return ($key ? in_array($key, $this->getKeys()) : false);
+	}	
+
 	function getValues() {
 		return array_values($this->data);
 	}

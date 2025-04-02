@@ -248,7 +248,7 @@ class stelle {
 				ows_contentvoicephone,
 				ows_contentfacsimile,
 
-				protected, check_client_ip, check_password_age, allowed_password_age, use_layer_aliases, selectable_layer_params, hist_timestamp, default_user_id,
+				protected, check_client_ip::int, check_password_age, allowed_password_age, use_layer_aliases, selectable_layer_params, hist_timestamp, default_user_id,
 				style,
 				show_shared_layers,
 				reset_password_text,

@@ -756,6 +756,7 @@ FROM
 				header('error: true');	// damit ajax-Requests das auch mitkriegen
 			}
 		}
+		$this->success = $ret['success'];
 		return $ret;
 	}
 
