@@ -56,12 +56,7 @@ class PgObject {
 		$this->where = '';
 		$this->identifier = $identifier;
 		$this->identifier_type = $identifier_type;
-		$this->identifiers = array(
-			array(
-				'column' => 'id',
-				'type' => 'integer'
-			)
-		);
+		$this->identifiers = ($this->identifier_type == 'array' ? $identifier : array());
 		$this->show = false;
 		$this->attribute_types = array();
 		$this->geom_column = 'geom';
@@ -127,6 +122,38 @@ class PgObject {
 			$parts[] = "\"{$identifier['column']}\" = '{$ids[$key]}'"; 
 		}
 		return implode(' AND ', $parts);
+	}
+
+	/**
+	* Function return the expression to identify the unique dataset
+	* SQL-Statements
+	* It compose it from the identifier and its value or
+	* from more identifiers if these are defined in an array
+	* @return string The expression representing true or false in a sql statement
+	*/
+	function get_identifier_expression() {
+		$this->debug->show('<br>Class MyObject Method get_identifier_expression', MyObject::$write_debug);
+		$where = array();
+		if (count($this->identifiers) > 0) {
+			$where = array_map(
+				function($identifier) {
+					$quote = ($identifier['type'] == 'text' ? "'" : "");
+					return $identifier['key'] . " = " . $quote . $this->get($identifier['key']) . $quote;
+				},
+				$this->identifiers
+			);
+		}
+		else {
+			if (
+				in_array($this->identifier, $this->getKeys()) AND
+				$this->get($this->identifier) != null AND
+				$this->get($this->identifier) != ''
+			) {
+				$quote = ($this->identifier_type == 'text' ? "'" : "");
+				$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
+			}
+		}
+		return implode(' AND ', $where);
 	}
 
 	function find_by_ids(...$ids) {
@@ -495,14 +522,13 @@ class PgObject {
 		}
 	}
 
-	function delete() {
-		$quote = ($this->identifier_type == 'text') ? "'" : "";
+	function delete($where = NULL) {
 		$sql = "
 			DELETE
 			FROM
 				" . $this->qualifiedTableName . "
 			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+				" . ($where ?: $this->get_identifier_expression()) . "
 		";
 		$this->debug->show('delete sql: ' . $sql, $this->show);
 		$result = pg_query($this->database->dbConn, $sql);

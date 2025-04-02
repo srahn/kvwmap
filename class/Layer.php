@@ -130,7 +130,7 @@ class Layer extends PgObject {
 
 	function update_datasources($gui, $datasource_ids) {
 		$layer_datasource = new LayerDataSource($gui);
-		$layer_datasource->delete('`layer_id` = ' . $this->get_id());
+		$layer_datasource->delete('layer_id = ' . $this->get_id());
 		foreach($datasource_ids AS $datasource_id) {
 			$layer_datasource->create(array(
 				'layer_id' => $this->get_id(),
