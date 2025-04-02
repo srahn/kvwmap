@@ -21587,7 +21587,44 @@ class db_mapObj{
   }
 
 	function copyStyle($style_id){
-		$sql = "INSERT INTO styles (symbol,symbolname,size,color,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform) SELECT symbol,symbolname,size,color,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform FROM styles WHERE Style_ID = " . $style_id;
+		$columns = '
+			symbol,
+			symbolname,
+			size,
+			color,
+			outlinecolor,
+			colorrange,
+			datarange,
+			rangeitem,
+			opacity,
+			minsize,
+			maxsize,
+			minscale,
+			maxscale,
+			angle,
+			angleitem,
+			width,
+			minwidth,
+			maxwidth,
+			offsetx,
+			offsety,
+			polaroffset,
+			pattern,
+			geomtransform,
+			gap,
+			initialgap,
+			linecap,
+			linejoin,
+			linejoinmaxsize';
+		$sql = '
+			INSERT INTO styles 
+				(' . $columns . ') 
+			SELECT 
+				' . $columns . ' 
+			FROM 
+				styles 
+			WHERE 
+				Style_ID = ' . $style_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyStyle - Kopieren eines Styles:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
