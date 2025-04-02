@@ -4527,16 +4527,8 @@ echo '			</table>
     else {
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
-		// $attributes['options'][$this->formvars['attribute']] = str_replace('$userid', $this->user->id, $attributes['options'][$this->formvars['attribute']]);
-		// $attributes['options'][$this->formvars['attribute']] = str_replace('$stelleid', $this->Stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
-    if ($reqby_start > 0) {
-			$sql = substr($options, 0, $reqby_start);
-		}
-		else {
-			$sql = $options;
-		}
     if ($reqby_start > 0) {
 			$sql = substr($options, 0, $reqby_start);
 		}
@@ -13497,27 +13489,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
 		}
 
-    if ($this->formvars['geom_from_layer']){
-	    # Geometrie-Übernahme-Layer:
-	    # Spaltenname und from-where abfragen
-	    $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
-	    #echo $data;
-	    $data_explosion = explode(' ', $data);
-	    $this->formvars['columnname'] = $data_explosion[0];
-	    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
-	    # order by rausnehmen
-			$this->formvars['orderby'] = '';
-	  	$orderbyposition = strrpos(strtolower($select), 'order by');
-			$lastfromposition = strrpos(strtolower($select), 'from');
-			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-				$fromwhere = substr($select, 0, $orderbyposition);
-				$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-			}
-			$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-	      $this->formvars['fromwhere'] .= ' where (1=1)';
-	    }
-    }
     if ($this->formvars['stelle'] != '') {
       $stelle = new stelle($this->formvars['stelle'], $this->database);
       $this->layerdaten = $stelle->getLayers(NULL, 'Name');
@@ -21610,7 +21581,44 @@ class db_mapObj{
   }
 
 	function copyStyle($style_id){
-		$sql = "INSERT INTO styles (symbol,symbolname,size,color,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform) SELECT symbol,symbolname,size,color,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform FROM styles WHERE Style_ID = " . $style_id;
+		$columns = '
+			symbol,
+			symbolname,
+			size,
+			color,
+			outlinecolor,
+			colorrange,
+			datarange,
+			rangeitem,
+			opacity,
+			minsize,
+			maxsize,
+			minscale,
+			maxscale,
+			angle,
+			angleitem,
+			width,
+			minwidth,
+			maxwidth,
+			offsetx,
+			offsety,
+			polaroffset,
+			pattern,
+			geomtransform,
+			gap,
+			initialgap,
+			linecap,
+			linejoin,
+			linejoinmaxsize';
+		$sql = '
+			INSERT INTO styles 
+				(' . $columns . ') 
+			SELECT 
+				' . $columns . ' 
+			FROM 
+				styles 
+			WHERE 
+				Style_ID = ' . $style_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyStyle - Kopieren eines Styles:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }

@@ -183,7 +183,7 @@ class Zusammenzeichnung {
             style="display: none"
             type="button"
             value="Zur Anzeige ${this.config.genitiv}"
-            onclick="window.location='index.php?go=xplankonverter_zusammenzeichnung&planart=${this.planart}&csrf_token=${this.csrf_token}'"
+            onclick="window.location='index.php?go=xplankonverter_konvertierung_anzeigen&planart=${this.planart}&csrf_token=${this.csrf_token}'"
           >
         </div>
       `);
@@ -213,9 +213,10 @@ class Zusammenzeichnung {
       success: (result) => {
         // console.log('Response import_zusammenzeichnung: %o', result);
         if (result.success) {
-          this.nextStep('import_zusammenzeichnung', 'ok')
+          this.nextStep('import_zusammenzeichnung', 'ok');
         }
         else {
+          console.log('Response nicht erfolgreich');
           if (result.msg && result.msg.includes('Warnung')) {
             // Auch diese Warnung soll als ok dargestellt werden.
             this.numSteps = this.numSteps + 2;
@@ -640,7 +641,7 @@ class Zusammenzeichnung {
     }
     // let nextFunction = (nextStep != '' ? nextStep : this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]);
     // confirm step
-    // console.log('confirm_step: %o', this.process[step]);
+    console.log('confirm_step: %o', this.process[step]);
     $('#upload_zusammenzeichnung_step_' + this.process[step].nr).addClass(this.confirm_class[success]);
     $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success] + '" aria-hidden="true" ></i>');
     if (success == 'ok' && nextFunction !== '') {

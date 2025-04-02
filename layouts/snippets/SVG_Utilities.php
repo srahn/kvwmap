@@ -1220,12 +1220,12 @@ function mouseup(evt){
 
 	function highlightbyid(id){
 		if(id != ''){			
-			if(document.querySelector('.active')){
-				//document.querySelector('.active').classList.remove('active');		// kann der IE nicht
-				document.querySelector('.active').className.baseVal = 'navbutton_frame';	// deswegen dieser workaround
+			if(document.querySelector('.active_navbutton')){
+				//document.querySelector('.active_navbutton').classList.remove('active_navbutton');		// kann der IE nicht
+				document.querySelector('.active_navbutton').className.baseVal = 'navbutton_frame';	// deswegen dieser workaround
 			}
-			//document.getElementById(id).classList.add('active');						// kann der IE nicht
-			document.getElementById(id).className.baseVal += ' active';				// deswegen dieser workaround
+			//document.getElementById(id).classList.add('active_navbutton');						// kann der IE nicht
+			document.getElementById(id).className.baseVal += ' active_navbutton';				// deswegen dieser workaround
 		  if(polygonfunctions == true){
 				remove_vertices();
 				remove_in_between_vertices();

@@ -53,7 +53,7 @@ class Konvertierung extends PgObject {
 					'genitiv' => 'des B-Planes',
 					'genitiv_plural' => 'der B-Pläne',
 					'plural' => 'B-Pläne',
-					'keine_zusammenzeichnung' => 'keine veröffentlichte Version',
+					'keine_zusammenzeichnung' => 'keinen Plan mit der angegebenen Konvertierung-ID',
 					'plan_title' => 'Bebauungsplan',
 					'plan_short_title' => 'B-Plan',
 					'plan_class' => 'BP_Plan',
@@ -63,8 +63,27 @@ class Konvertierung extends PgObject {
 					'plan_attribut_aktualitaet' => 'inkrafttretensdatum, genehmigungsdatum',
 					'plan_file_name' => 'Bebauungsplan.gml',
 					'mapfile_name' => 'bplaene.map',
-					'upload_steps' => array()
+					'upload_steps' => array(
+						'upload_zusammenzeichnung',
+						'import_zusammenzeichnung',
+						'create_plaene',
+						'convert_zusammenzeichnung',
+						'gml_generieren',
+						'check_class_completeness',
+						'replace_zusammenzeichnung'
+					)
 				);
+				if (XPLANKONVERTER_CREATE_SERVICE) {
+					array_merge(
+						$config['upload_steps'],
+						array(
+							'create_geoweb_service',
+							'create_metadata',
+							'update_full_geoweb_service',
+							'update_full_metadata'
+						)
+					);
+				}
 				$config['upload_bedingungen'] = "
 					<li>{$config['artikel']} {$config['plan_title']} muss im Attribut {$config['plan_attribut_aktualitaet']} des Objektes {$config['plan_class']} ein gültiges Datum beinhalten.</li>
 				";
@@ -402,18 +421,29 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-	 * Fragt die Zusammenzeichnungen der Stelle und Planart ab und teilt sie ein in 
+	 * Fragt die Konvertierung der Stelle, Planart und/oder id ab und teilt sie ein in 
 	 * entwurf (draft), veröffentlicht (pubished), archiviert (archived) und fehlerhaft (faulty)
+	 * vormals hieß die Funktion find_zusammenzeichnung. Sie findet jetzt aber auch Konvertierungen,
+	 * die keine Zusammenzeichnungen sind.
 	 */
-	public static function find_zusammenzeichnungen($gui, $planart, $plan_class, $plan_attribut_aktualitaet) {
-		$zusammenzeichnungen = array(
+	public static function find_konvertierungen($gui, $planart, $plan_class, $plan_attribut_aktualitaet, $konvertierung_id = '') {
+		$konvertierungen = array(
 			'published' => array(),
 			'draft' => array(),
 			'archived' => array(),
 			'faulty' => array()
 		);
-		$konvertierung = new Konvertierung($gui, $planart);
-		$where_condition = ($planart == 'FP-Plan' ? '(p.zusammenzeichnung OR p.zusammenzeichnung IS NULL)' : 'true');
+		$konvertierung = new Konvertierung($gui);
+		$where_conditions = array();
+		$where_conditions[] = "k.stelle_id = " . $gui->Stelle->id;
+		$where_conditions[]	=	"k.planart = '" . $planart . "'";
+		if ($planart == 'FP-Plan') {
+			$where_conditions[] = "(p.zusammenzeichnung OR p.zusammenzeichnung IS NULL)";
+		}
+		if ($planart == 'BP-Plan') {
+			// Bei BP-Plan nur Konvertierung anzeigen wenn id angegeben.
+			$where_conditions[] = ($konvertierung_id != '' ? "k.id = " . $konvertierung_id : "false");
+		}
 		$sql = "
 			SELECT
 				k.*
@@ -421,17 +451,15 @@ class Konvertierung extends PgObject {
 				xplankonverter.konvertierungen k LEFT JOIN
 				xplan_gml." . strtolower($plan_class) . " p ON k.id = p.konvertierung_id
 			WHERE
-				" . $where_condition . " AND
-				k.stelle_id = " . $gui->Stelle->id . " AND
-				k.planart = '" . $planart . "'
+				" . implode(" AND ", $where_conditions) . "
 			ORDER BY 
 				COALESCE(p." . $plan_attribut_aktualitaet . ($plan_class == 'SO_Plan' ? ", p.genehmigungsdatum" : ", p.aenderungenbisdatum") . ") DESC
 		";
-		if ($gui->user->id == 3) {
-			# echo "<p>SQL zur Abfrage der Zusammenzeichnungen: " . $sql; exit;
-		}
+		// if ($gui->user->id == 41) {
+		// 	echo "<p>SQL zur Abfrage der Zusammenzeichnungen: " . $sql; exit;
+		// }
 
-		$konvertierung->debug->show('find_zusammenzeichnungen sql: ' . $sql, false);
+		$konvertierung->debug->show('find_konvertierungen sql: ' . $sql, false);
 		$query = pg_query($konvertierung->database->dbConn, $sql);
 		while ($konvertierung->data = pg_fetch_assoc($query)) {
 			$konvertierung->set_config();
@@ -451,17 +479,17 @@ class Konvertierung extends PgObject {
 			else {
 				$konvertierung->art = 'draft';
 			}
-			$zusammenzeichnungen[$konvertierung->art][] = clone $konvertierung;
+			$konvertierungen[$konvertierung->art][] = clone $konvertierung;
 		}
     $archiv_dir = XPLANKONVERTER_FILE_PATH . 'archiv/' . $gui->Stelle->id . '/' . $konvertierung->config['plan_abk_plural'] . '/';
 		if (file_exists($archiv_dir)) {
-			$zusammenzeichnungen['archived'] = glob($archiv_dir . '*');
-			rsort($zusammenzeichnungen['archived'],  SORT_STRING);
+			$konvertierungen['archived'] = glob($archiv_dir . '*');
+			rsort($konvertierungen['archived'],  SORT_STRING);
 		}
-		if (($gui->user->id == 2) || ($gui->user->id == 3)){
-			//echo 'z: ' . print_r(array_map(function($z) { return array_map(function($x) { return $x->data['id']; }, $z); }, $zusammenzeichnungen), true); exit;
-		}
-		return $zusammenzeichnungen;
+		// if ($gui->user->id == 41) {
+		// 	echo 'z: ' . print_r(array_map(function($z) { return array_map(function($x) { return $x->data['id']; }, $z); }, $konvertierungen), true); exit;
+		// }
+		return $konvertierungen;
 	}
 
 	// function archiv_old_zusammenzeichnung() {
@@ -2147,6 +2175,16 @@ class Konvertierung extends PgObject {
 		}
 	}
 
+	/**
+	 * Function validiert ob die hochgeladenen Dateien in Ordnung sind,
+	 * sucht die Plandatei, benennt sie ggf. um und liefert den Plandateinamen zurück.
+	 * @param String $upload_path
+	 * @return array[
+	 *	'success' => Boolean, Erfolgreich validiert oder nicht
+	 *  'plan_file_name' => String, Bei Erfolg: Datei des hochgeladenen Planes
+	 *	'msg' => String, Meldung im Fehler- oder Erfolgsfall.
+	 * ]
+	 */
 	function validate_uploaded_files($upload_path) {
 		$uploaded_files = getAllFiles($upload_path);
 
@@ -2165,14 +2203,24 @@ class Konvertierung extends PgObject {
 		}
 
 		if (!file_exists($upload_path . $this->config['plan_file_name'])) {
-			return array(
-				'success' => false,
-				'msg' => 'Die hochgeladene ZIP-Datei enthält keine Datei mit dem Namen: '. $this->config['plan_file_name']
-			);
+			// Suche eine GML-Datei im upload_path.
+			$gml_files = glob($upload_path . '*.gml');
+			if (count($gml_files) > 0) {
+				$plan_file_name = basename($gml_files[0]);
+			}
+			else {
+				// Weder $this->config['plan_file_name'] noch eine Datei mit .gml gefunden
+				$plan_file_name = $this->config['plan_file_name'];
+				return array(
+					'success' => false,
+					'msg' => 'Die hochgeladene ZIP-Datei enthält keine Datei mit dem Namen: '. $plan_file_name
+				);
+			}
 		}
 
 		return array(
 			'success' => true,
+			'plan_file_name' => $plan_file_name,
 			'msg' => 'Hochgeladene Datei wurde auf dem Server gefunden.'
 		);
 	}
@@ -2187,7 +2235,7 @@ class Konvertierung extends PgObject {
 		if (!is_file($gml_file)) {
 			return array(
 				'success' => false,
-				'msg' => 'GML-Datei ' . $pathinfo['basename'] . ' die validiert werden sollte, wurde nicht gefunden.'
+				'msg' => 'GML-Datei ' . $gml_file . ' die validiert werden sollte, wurde nicht gefunden.'
 			);
 		}
 
@@ -2661,16 +2709,16 @@ class Konvertierung extends PgObject {
 	 */
 	function create_metadata_documents($md) {
 		$plan = $this->plan;
-		$zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($this->gui, $this->get('planart'), $this->plan_class, $this->get_plan_attribut_aktualitaet());
+		$konvertierungen = Konvertierung::find_konvertierungen($this->gui, $this->get('planart'), $this->plan_class, $this->get_plan_attribut_aktualitaet());
 		#echo '<br>' . $plan->get('gemeinde');
 		# Setzen der Metadaten für die Metadatendokumente
-		if (count($zusammenzeichnungen['published']) == 0) {
+		if (count($konvertierungen['published']) == 0) {
 			# Noch keine Zusammenzeichnung vorhanden entnehme die uuids von der neuen Zusammenzeichnung
 			$md->set('uuids', $this->get_metadata_uuids());
 		}
 		else {
 			# Entnehme die uuids von der alten Zusammenzeichnung
-			$md->set('uuids', $zusammenzeichnungen['published'][0]->get_metadata_uuids());
+			$md->set('uuids', $konvertierungen['published'][0]->get_metadata_uuids());
 			$this->set_metadata_uuids($md->get('uuids'));
 		}
 
