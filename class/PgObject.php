@@ -423,6 +423,7 @@ class PgObject {
 		);
 		*/
 		$query = pg_query($this->database->dbConn, $sql);
+		if(!$query){echo $sql; exit;}
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
 			$ret_id = pg_fetch_assoc($query)[$this->identifier];

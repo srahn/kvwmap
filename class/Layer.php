@@ -140,7 +140,7 @@ class Layer extends PgObject {
 	}
 
 	function update_labelitems($gui, $names, $aliases) {
-		$layer_labelitems = new MyObject($gui, 'layer_labelitems');
+		$layer_labelitems = new PgObject($gui, 'kvwmap', 'layer_labelitems', '');
 		$layer_labelitems->delete('layer_id = ' . $this->get_id());
 		for ($i = 1; $i < count($names); $i++) {
 			# der erste ist ein Dummy und wird ausgelassen
@@ -149,7 +149,7 @@ class Layer extends PgObject {
 					'layer_id' => $this->get_id(),
 					'name' => $names[$i],
 					'alias' => $aliases[$i],
-					'order' => $i + 1
+					'"order"' => $i + 1
 				));
 			}
 		}

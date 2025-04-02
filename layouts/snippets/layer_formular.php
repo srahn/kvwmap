@@ -668,7 +668,7 @@ from
 							<?php echo $strData; ?>
 						</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['data'] ?></textarea>&nbsp;
+							<textarea name="data" cols="33" rows="4"><? echo $this->formvars['data'] ?></textarea>&nbsp;
 							<span data-tooltip="Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."></span>
 						</td>
 					</tr>
