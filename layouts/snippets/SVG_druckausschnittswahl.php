@@ -292,8 +292,8 @@ function recentre(){
 }
 
 function highlightbyid(id){
-	document.querySelector(".active").classList.remove("active");
-  document.getElementById(id).classList.add("active");
+	document.querySelector(".active").classList.remove("active_navbutton");
+  document.getElementById(id).classList.add("active_navbutton");
 }
 
 function focus_NAV(){
