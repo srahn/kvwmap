@@ -37,7 +37,7 @@ BEGIN;
     '' AS initialvalue_body
   WHERE
     NOT EXISTS (
-      SELECT uml_class_id FROM xplan_uml.uml_attributes WHERE uml_class_id = 'EAID_1403910D-CB7E-4C1E-9B41-2391FCCAFD9F'
+      SELECT xmi_id FROM xplan_uml.uml_attributes WHERE xmi_id = 'EAID_1403910D-CB7E-4C1E-9B41-2391FCCAFD9F'
     );
 
   -- Ergänze eine Regel im gmlas_to_gml Mapping
@@ -53,7 +53,7 @@ BEGIN;
     'gmlas.detailliertesondernutzung::xplan_gml.bp_detailsondernutzung[] AS detailliertesondernutzung' AS regel -- das geht nur, wenn detailliertesondernutzung im Schema gmlas auch schon ein array ist.
    WHERE
     NOT EXISTS (
-      SELECT feature_class FROM xplankonverter.mappingtable_gmlas_to_gml WHERE feature_class = 'bp_baugebietsteilflaeche'
+      SELECT o_table FROM xplankonverter.mappingtable_gmlas_to_gml WHERE o_table = 'bp_baugebietsteilflaeche' AND o_column = 'detailliertesondernutzung'
     );
  
   -- Zusätzliche Regeln für das Attribut detailliertesondernutzung für alle konvertierungen bei denen im gmlas.bp_baugebietsteilflaeche ein Attribut detailliertesondernutzung oder die Tabelle bp_baugebietsteilflaeche_detailliertesondernutzung gibt
@@ -73,7 +73,7 @@ BEGIN;
     'ARRAY[gmlas.dnmin,gmlas.dnmax,gmlas.dn,gmlas.dnzwingend,gmlas.dachform,gmlas.detailiertedachform]::xplan_gml.bp_dachgestaltung[] AS dachgestaltung' AS regel
   WHERE
     NOT EXISTS (
-      SELECT feature_class FROM xplankonverter.mappingtable_gmlas_to_gml WHERE feature_class = 'bp_baugebietsteilflaeche_dachgestaltung'
+      SELECT o_table FROM xplankonverter.mappingtable_gmlas_to_gml WHERE o_table = 'bp_baugebietsteilflaeche_dachgestaltung' AND o_column = 'ogc_fid' AND t_column = 'dachgestaltung'
     );
 
 COMMIT;

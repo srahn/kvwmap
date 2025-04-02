@@ -4517,13 +4517,14 @@ echo '			</table>
     $this->output();
   }
 
-	function get_select_list(){
+  function get_select_list() {
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $attributenames[0] = $this->formvars['attribute'];
-		if($this->formvars['datatype_id'] != '')
+		if ($this->formvars['datatype_id'] != '') {
 			$attributes = $mapDB->read_datatype_attributes($this->formvars['layer_id'], $this->formvars['datatype_id'], $layerdb, $attributenames);
-    else{
+		}
+    else {
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
@@ -13345,7 +13346,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       $this->formvars['ows_abstract'] = $this->stellendaten['ows_abstract'];
       $this->formvars['wms_accessconstraints'] = $this->stellendaten['wms_accessconstraints'];
       $this->formvars['ows_contactorganization'] = $this->stellendaten['ows_contactorganization'];
-      $this->formvars['ows_contactemailaddress'] = $this->stellendaten['ows_contactemailaddress'];
+      $this->formvars['ows_contacturl'] = $this->stellendaten['ows_contacturl'];
+			$this->formvars['ows_contactemailaddress'] = $this->stellendaten['ows_contactemailaddress'];
       $this->formvars['ows_contactperson'] = $this->stellendaten['ows_contactperson'];
       $this->formvars['ows_contactposition'] = $this->stellendaten['ows_contactposition'];
       $this->formvars['ows_contactvoicephone'] = $this->stellendaten['ows_contactvoicephone'];
@@ -13355,6 +13357,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['ows_contactcity'] = $this->stellendaten['ows_contactcity'];
 			$this->formvars['ows_contactadministrativearea'] = $this->stellendaten['ows_contactadministrativearea'];
 			$this->formvars['ows_contentorganization'] = $this->stellendaten['ows_contentorganization'];
+			$this->formvars['ows_contenturl'] = $this->stellendaten['ows_contenturl'];
 			$this->formvars['ows_contentemailaddress'] = $this->stellendaten['ows_contentemailaddress'];
 			$this->formvars['ows_contentperson'] = $this->stellendaten['ows_contentperson'];
 			$this->formvars['ows_contentposition'] = $this->stellendaten['ows_contentposition'];
@@ -13366,6 +13369,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['ows_contentadministrativearea'] = $this->stellendaten['ows_contentadministrativearea'];
 			$this->formvars['ows_geographicdescription'] = $this->stellendaten['ows_geographicdescription'];
 			$this->formvars['ows_distributionorganization'] = $this->stellendaten['ows_distributionorganization'];
+			$this->formvars['ows_distributionurl'] = $this->stellendaten['ows_distributionurl'];
 			$this->formvars['ows_distributionemailaddress'] = $this->stellendaten['ows_distributionemailaddress'];
 			$this->formvars['ows_distributionperson'] = $this->stellendaten['ows_distributionperson'];
 			$this->formvars['ows_distributionposition'] = $this->stellendaten['ows_distributionposition'];
@@ -21598,7 +21602,44 @@ class db_mapObj{
   }
 
 	function copyStyle($style_id){
-		$sql = "INSERT INTO styles (symbol,symbolname,size,color,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform) SELECT symbol,symbolname,size,color,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform FROM styles WHERE Style_ID = " . $style_id;
+		$columns = '
+			symbol,
+			symbolname,
+			size,
+			color,
+			outlinecolor,
+			colorrange,
+			datarange,
+			rangeitem,
+			opacity,
+			minsize,
+			maxsize,
+			minscale,
+			maxscale,
+			angle,
+			angleitem,
+			width,
+			minwidth,
+			maxwidth,
+			offsetx,
+			offsety,
+			polaroffset,
+			pattern,
+			geomtransform,
+			gap,
+			initialgap,
+			linecap,
+			linejoin,
+			linejoinmaxsize';
+		$sql = '
+			INSERT INTO styles 
+				(' . $columns . ') 
+			SELECT 
+				' . $columns . ' 
+			FROM 
+				styles 
+			WHERE 
+				Style_ID = ' . $style_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyStyle - Kopieren eines Styles:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
