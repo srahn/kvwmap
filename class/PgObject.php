@@ -362,9 +362,7 @@ class PgObject {
 					)
 				) . "'
 			)
-			RETURNING
-				" . $this->identifier . ";
-		";
+			" . ($this->identifier != ''? "RETURNING " . $this->identifier : '');
 		/*
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (

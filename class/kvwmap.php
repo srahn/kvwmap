@@ -20059,7 +20059,7 @@ class db_mapObj{
 		$formvars['maintable'] = trim($formvars['maintable']);
 		$formvars['schema'] = trim($formvars['schema']);
 		foreach (array('pfad', 'data', 'metalink', 'terms_of_use_link', 'duplicate_criterion', 'comment') AS $var_name) {
-			$formvars[$var_name] = $this->db->mysqli->real_escape_string($formvars[$var_name]);
+			$formvars[$var_name] = pg_escape_string($formvars[$var_name]);
 		}
 		if ($formvars['id'] == '') {
 			$formvars['selected_layer_id'] = $formvars['id'];		// falls man aus Versehen auf Speichern gedrückt hat, obwohl man einen neuen Layer anlegen wollte
@@ -20241,11 +20241,11 @@ class db_mapObj{
 
 		$sql = "
 			UPDATE
-				layer
+				kvwmap.layer
 			SET
 				" . implode(', ', $attribute_sets) . "
 			WHERE
-				Layer_ID = " . $formvars['selected_layer_id'] . "
+				layer_id = " . $formvars['selected_layer_id'] . "
 		";
 		#echo '<br>SQL zum update eines Layers: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>" . $sql, 4);
@@ -21350,26 +21350,26 @@ class db_mapObj{
   function get_stellen_from_layer($layer_id){
     $sql = "
 			SELECT
-				ID,
-				Bezeichnung
+				id,
+				bezeichnung
 			FROM
-				stelle,
-				used_layer
+				kvwmap.stelle,
+				kvwmap.used_layer
 			WHERE
-				used_layer.Stelle_ID = stelle.ID AND
-				used_layer.Layer_ID = " . $layer_id . "
+				used_layer.stelle_id = stelle.id AND
+				used_layer.layer_id = " . $layer_id . "
 			ORDER BY
 				Bezeichnung
 		";
 		#echo '<br>Sql: ' . $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_stellen_from_layer - Lesen der Stellen eines Layers:<br>" . $sql, 4);
-    $this->db->execSQL($sql);
+    $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
     $stellen['ID'] = array();
     $stellen['Bezeichnung'] = array();
-    while ($rs = $this->db->result->fetch_array()) {
-      $stellen['ID'][] = $rs['ID'];
-      $stellen['Bezeichnung'][] = $rs['Bezeichnung'];
+    while ($rs = pg_fetch_assoc($ret[1])) {
+      $stellen['ID'][] = $rs['id'];
+      $stellen['Bezeichnung'][] = $rs['bezeichnung'];
     }
     return $stellen;
   }
@@ -21475,12 +21475,18 @@ class db_mapObj{
 	}
 
 	function get_layersfromgroup($group_id ) {
-    $sql ='SELECT * FROM layer';
-		if($group_id != '')$sql.=' WHERE Gruppe = '.$group_id;
+    $sql = '
+			SELECT 
+				* 
+			FROM 
+				kvwmap.layer';
+		if ($group_id != '') {
+			$sql.=' WHERE gruppe = ' . $group_id;
+		}
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layerfromgroup - Lesen der Layer einer Gruppe:<br>" . $sql,4);
-		$this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		while ($rs = $this->db->result->fetch_array()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$layer['ID'][]=$rs['layer_id'];
 			$layer['Bezeichnung'][]=$rs['name'];
 		}

@@ -507,7 +507,7 @@ from
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="Name" type="text" value="<?php echo $this->formvars['name']; ?>" size="50" maxlength="100">
+							<input name="name" type="text" value="<?php echo $this->formvars['name']; ?>" size="50" maxlength="100">
 						</td>
 					</tr><?
 					foreach($supportedLanguages as $language){
@@ -515,7 +515,7 @@ from
 							<tr>
 								<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName.' '.$language; ?></th>
 								<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-										<input name="Name_<? echo $language; ?>" type="text" value="<?php echo $this->formvars['Name_'.$language]; ?>" size="50" maxlength="100">
+										<input name="name_<? echo $language; ?>" type="text" value="<?php echo $this->formvars['Name_'.$language]; ?>" size="50" maxlength="100">
 								</td>
 							</tr><?
 						}
@@ -565,7 +565,7 @@ from
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<select name="Datentyp">
+								<select name="datentyp">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
 									<option <? if($this->formvars['datentyp'] == '0'){echo 'selected ';} ?>value="0">MS_LAYER_POINT</option>
 									<option <? if($this->formvars['datentyp'] == 1){echo 'selected ';} ?>value="1">MS_LAYER_LINE</option>

@@ -182,7 +182,7 @@ class Layer extends PgObject {
 		$obj = new LayerAttribute($this->gui);
 		$layer_attributes = $obj->find_where(
 			$this->has_many['attributes']['fk'] . ' = ' . $this->get_id(),
-			'order'
+			'"order"'
 		);
 		return $layer_attributes;
 	}
