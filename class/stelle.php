@@ -1697,10 +1697,11 @@ class stelle {
 	 */
 	function updateLayerParams() {
 		$sql = "
-			UPDATE stelle
+			UPDATE 
+				kvwmap.stelle
 			SET
 				selectable_layer_params = COALESCE((
-					SELECT GROUP_CONCAT(id)
+					SELECT string_agg(id, ',')
 					FROM
 						(
 							SELECT DISTINCT
@@ -1709,18 +1710,18 @@ class stelle {
 								(
 									SELECT
 										id
-										FROM
-										layer_parameter as p,
-										used_layer as ul,
-										layer as l
+									FROM
+										kvwmap.layer_parameter as p,
+										kvwmap.used_layer as ul,
+										kvwmap.layer as l
 									--	LEFT JOIN layer_attributes la ON la.layer_id = l.Layer_ID
 									WHERE
-										ul.Stelle_ID = " . $this->id . " AND
-										ul.Layer_ID = l.Layer_ID AND
+										ul.stelle_id = " . $this->id . " AND
+										ul.layer_id = l.Layer_ID AND
 										(
 											locate(
 												concat('$', p.key),
-												concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+												concat(l.name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 											) > 0
 										-- OR						-- aus Performancegründen rausgenommen
 										-- 	locate(
@@ -1732,9 +1733,9 @@ class stelle {
 									SELECT
 										p.id
 									FROM
-										u_menues AS m JOIN
-										u_menue2stelle AS m2s ON (m.id = m2s.menue_id) JOIN
-										layer_parameter AS p ON (
+										kvwmap.u_menues AS m JOIN
+										kvwmap.u_menue2stelle AS m2s ON (m.id = m2s.menue_id) JOIN
+										kvwmap.layer_parameter AS p ON (
 											locate(
 												concat('$', p.key),
 												m.links
@@ -1747,7 +1748,7 @@ class stelle {
 					),
 					''
 				)
-			WHERE stelle.ID = " . $this->id . "
+			WHERE stelle.id = " . $this->id . "
 		";
 		// echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);

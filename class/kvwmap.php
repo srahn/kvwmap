@@ -9178,7 +9178,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     }
 
 		for ($i = 0; $i < count($stellen_ids); $i++) {
-			$stelle = new stelle($stellen_ids[$i], $this->database);
+			$stelle = new stelle($stellen_ids[$i], $this->pgdatabase);
 			$stelle->updateLayerParams();
 			$this->update_layer_parameter_in_rollen($stellen_ids[$i]);
 		}
@@ -19422,7 +19422,11 @@ class db_mapObj{
 	}
 
   function delete_old_attributes($layer_id, $attributes){
-  	$sql = "DELETE FROM layer_attributes WHERE layer_id = " . $layer_id;
+  	$sql = "
+			DELETE FROM 
+				kvwmap.layer_attributes 
+			WHERE 
+				layer_id = " . $layer_id;
   	if($attributes){
   		$sql.= " AND name NOT IN (";
 	  	for($i = 0; $i < count($attributes); $i++){
@@ -21330,16 +21334,16 @@ class db_mapObj{
 		$layer_params = array();
 		$sql = "
 			SELECT
-				GROUP_CONCAT(concat('\"', key, '\":\"', default_value, '\"')) AS params
+				string_agg(concat('\"', key, '\":\"', default_value, '\"'), ',') AS params
 			FROM
-				layer_parameter p
+				kvwmap.layer_parameter p
 		";
-		$this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) {
 			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 		}
 		else {
-			$rs = $this->db->result->fetch_assoc();
+			$rs = pg_fetch_assoc($ret[1]);
 		}
 		$params = $rs['params'];
 		$params = str_replace('$USER_ID', $this->User_ID, $params);
