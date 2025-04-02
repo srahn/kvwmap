@@ -183,7 +183,7 @@ class MetaDataCreator {
 		" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 	</gmd:contact>
 	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
-		<gco:DateTime>" . $this->md->get('md_date') . "T00:00:00Z</gco:DateTime>
+		<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
 	</gmd:dateStamp>
 	" . $this->getReferenzSysteme() . "
 	<gmd:identificationInfo xmlns:ows=\"http://www.opengis.net/ows/1.1\">
