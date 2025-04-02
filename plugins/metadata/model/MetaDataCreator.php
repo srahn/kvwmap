@@ -205,10 +205,8 @@ class MetaDataCreator {
 					</gmd:date>
 					<gmd:identifier>
 						<gmd:MD_Identifier>
-							<gmd:code>" . /*
-								<gco:CharacterString>" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_downloadservice_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
-								Auf Wunsch von ArL's wurde der Identifier auf den Namespace Plandigital angepasst
-							*/"<gco:CharacterString>https://registry.gdi-de.org/id/de.ni.plandigital/" . $this->md->get('uuids')['metadata_downloadservice_uuid'] . "</gco:CharacterString>
+							<gmd:code>
+								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
 							</gmd:code>
 						</gmd:MD_Identifier>
 					</gmd:identifier>
@@ -280,7 +278,7 @@ class MetaDataCreator {
 					<gmd:keyword>
 						<gco:CharacterString>PlanDigital</gco:CharacterString>
 					</gmd:keyword>
-					</gmd:MD_Keywords>
+				</gmd:MD_Keywords>
 			</gmd:descriptiveKeywords>
 			<gmd:descriptiveKeywords>
 				<gmd:MD_Keywords>
@@ -504,10 +502,8 @@ class MetaDataCreator {
 					</gmd:date>
 					<gmd:identifier>
 						<gmd:MD_Identifier>
-							<gmd:code>" . /*
-								<gco:CharacterString>" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_viewservice_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
-								Auf Wunsch von ArL's wurde der Identifier auf den Namespace Plandigital angepasst
-							*/"<gco:CharacterString>https://registry.gdi-de.org/id/de.ni.plandigital/" . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
+							<gmd:code>
+								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
 							</gmd:code>
 						</gmd:MD_Identifier>
 					</gmd:identifier>
@@ -808,10 +804,8 @@ class MetaDataCreator {
 						</gmd:date>
 						<gmd:identifier>
 							<gmd:MD_Identifier>
-								<gmd:code>" . /*
-								<gco:CharacterString>" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
-								Auf Wunsch von ArL's wurde der Identifier auf den Namespace Plandigital angepasst
-								*/"<gco:CharacterString>https://registry.gdi-de.org/id/de.ni.plandigital/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "</gco:CharacterString>
+								<gmd:code>
+								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
 								</gmd:code>
 							</gmd:MD_Identifier>
 						</gmd:identifier>
