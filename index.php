@@ -1295,14 +1295,6 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Export_Exportieren' : {
-				//TODO hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
-				$GUI->sanitize([
-					'selected_layer_id' => 'int',
-					'layer_name' => 'text',
-					'epsg' => 'int',
-					'newpathwkt' => 'text',
-					'precision' => 'int'
-				]);
 				if (!$GUI->Stelle->is_gast_stelle()) {
 					$GUI->checkCaseAllowed('Daten_Export');
 				};

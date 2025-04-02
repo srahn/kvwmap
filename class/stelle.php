@@ -41,6 +41,7 @@ class stelle {
 	var $ows_srs;
 
 	var $ows_contactorganization;
+	var $ows_contacturl;
 	var $ows_contactaddress;
 	var $ows_contactpostalcode;
 	var $ows_contactcity;
@@ -50,7 +51,9 @@ class stelle {
 	var $ows_contactposition;
 	var $ows_contactvoicephone;
 	var $ows_contactfacsimile;
+
 	var $ows_distributionorganization;
+	var $ows_distributionurl;
 	var $ows_distributionaddress;
 	var $ows_distributionpostalcode;
 	var $ows_distributioncity;
@@ -62,6 +65,7 @@ class stelle {
 	var $ows_distributionfacsimile;
 
 	var $ows_contentorganization;
+	var $ows_contenturl;
 	var $ows_contentaddress;
 	var $ows_contentpostalcode;
 	var $ows_contentcity;
@@ -198,7 +202,7 @@ class stelle {
 				id," .
 				$name_column . ",
 				start,
-				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, authentifizierung, alb_status, wappen, wappen_link, logconsume,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, Referenzkarte_ID, Authentifizierung, ALB_status, wappen, wappen_link, logconsume,
 				ows_namespace,
 				ows_title,
 				wms_accessconstraints,
@@ -209,6 +213,7 @@ class stelle {
 				ows_srs,
 
 				ows_contactorganization,
+				ows_contacturl,
 				ows_contactaddress,
 				ows_contactpostalcode,
 				ows_contactcity,
@@ -220,6 +225,7 @@ class stelle {
 				ows_contactfacsimile,
 
 				ows_distributionorganization,
+				ows_distributionurl,
 				ows_distributionaddress,
 				ows_distributionpostalcode,
 				ows_distributioncity,
@@ -231,6 +237,7 @@ class stelle {
 				ows_distributionfacsimile,
 
 				ows_contentorganization,
+				ows_contenturl,
 				ows_contentaddress,
 				ows_contentpostalcode,
 				ows_contentcity,
@@ -272,6 +279,7 @@ class stelle {
 		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
 
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contacturl = $rs['ows_contacturl'];
 		$this->ows_contactaddress = $rs['ows_contactaddress'];
 		$this->ows_contactpostalcode = $rs['ows_contactpostalcode'];
 		$this->ows_contactcity = $rs['ows_contactcity'];
@@ -283,6 +291,7 @@ class stelle {
 		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
 
 		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionurl = $rs['ows_distributionurl'];
 		$this->ows_distributionaddress = $rs['ows_distributionaddress'];
 		$this->ows_distributionpostalcode = $rs['ows_distributionpostalcode'];
 		$this->ows_distributioncity = $rs['ows_distributioncity'];
@@ -294,6 +303,7 @@ class stelle {
 		$this->ows_distributionfacsimile = $rs['ows_distributionfacsimile'];
 
 		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contenturl = $rs['ows_contenturl'];
 		$this->ows_contentaddress = $rs['ows_contentaddress'];
 		$this->ows_contentpostalcode = $rs['ows_contentpostalcode'];
 		$this->ows_contentcity = $rs['ows_contentcity'];
@@ -479,7 +489,9 @@ class stelle {
 		if (empty($stellendaten['ows_distributionorganization'])) {
 			$stellendaten['ows_distributionorganization'] = $stellendaten['ows_contactorganization'];
 		}
-
+		if (empty($stellendaten['ows_distributionurl'])) {
+			$stellendaten['ows_distributionurl'] = $stellendaten['ows_contacturl'];
+		}
 		if (empty($stellendaten['ows_contentperson'])) {
 			$stellendaten['ows_contentperson'] = $stellendaten['ows_contactperson'];
 		}
@@ -516,6 +528,7 @@ class stelle {
 				ows_abstract = '" . $stellendaten['ows_abstract'] . "',
 				wms_accessconstraints = '" . $stellendaten['wms_accessconstraints'] . "',
 				ows_contactorganization = '" . $stellendaten['ows_contactorganization'] . "',
+				ows_contacturl = '" . $stellendaten['ows_contacturl'] . "',
 				ows_contactemailaddress = '" . $stellendaten['ows_contactemailaddress'] . "',
 				ows_contactperson = '" . $stellendaten['ows_contactperson'] . "',
 				ows_contactposition = '" . $stellendaten['ows_contactposition'] . "',
@@ -526,6 +539,7 @@ class stelle {
 				ows_contactcity = '" . $stellendaten['ows_contactcity'] . "',
 				ows_contactadministrativearea = '" . $stellendaten['ows_contactadministrativearea'] . "',
 				ows_contentorganization = '" . $stellendaten['ows_contentorganization'] . "',
+				ows_contenturl = '" . $stellendaten['ows_contenturl'] . "',
 				ows_contentemailaddress = '" . $stellendaten['ows_contentemailaddress'] . "',
 				ows_contentperson = '" . $stellendaten['ows_contentperson'] . "',
 				ows_contentposition = '" . $stellendaten['ows_contentposition'] . "',
@@ -537,6 +551,7 @@ class stelle {
 				ows_contentadministrativearea = '" . $stellendaten['ows_contentadministrativearea'] . "',
 				ows_geographicdescription = '" . $stellendaten['ows_geographicdescription'] . "',
 				ows_distributionorganization = '" . $stellendaten['ows_distributionorganization'] . "',
+				ows_distributionurl = '" . $stellendaten['ows_distributionurl'] . "',
 				ows_distributionemailaddress = '" . $stellendaten['ows_distributionemailaddress'] . "',
 				ows_distributionperson = '" . $stellendaten['ows_distributionperson'] . "',
 				ows_distributionposition = '" . $stellendaten['ows_distributionposition'] . "',
@@ -616,6 +631,7 @@ class stelle {
  				ows_abstract = '" . $stellendaten['ows_abstract'] . "',
 				wms_accessconstraints = '" . $stellendaten['wms_accessconstraints'] . "',
 				ows_contactorganization = '" . $stellendaten['ows_contactorganization'] . "',
+				ows_contacturl = '" . $stellendaten['ows_contacturl'] . "',
 				ows_contactemailaddress = '" . $stellendaten['ows_contactemailaddress'] . "',
 				ows_contactperson = '" . $stellendaten['ows_contactperson'] . "',
 				ows_contactposition = '" . $stellendaten['ows_contactposition'] . "',
@@ -626,6 +642,7 @@ class stelle {
 				ows_contactcity = '" . $stellendaten['ows_contactcity'] . "',
 				ows_contactadministrativearea = '" . $stellendaten['ows_contactadministrativearea'] . "',
 				ows_contentorganization = '" . $stellendaten['ows_contentorganization'] . "',
+				ows_contenturl = '" . $stellendaten['ows_contenturl'] . "',
 				ows_contentemailaddress = '" . $stellendaten['ows_contentemailaddress'] . "',
 				ows_contentperson = '" . $stellendaten['ows_contentperson'] . "',
 				ows_contentposition = '" . $stellendaten['ows_contentposition'] . "',
@@ -637,6 +654,7 @@ class stelle {
 				ows_contentadministrativearea = '" . $stellendaten['ows_contentadministrativearea'] . "',
 				ows_geographicdescription = '" . $stellendaten['ows_geographicdescription'] . "',
 				ows_distributionorganization = '" . $stellendaten['ows_distributionorganization'] . "',
+				ows_distributionurl = '" . $stellendaten['ows_distributionurl'] . "',
 				ows_distributionemailaddress = '" . $stellendaten['ows_distributionemailaddress'] . "',
 				ows_distributionperson = '" . $stellendaten['ows_distributionperson'] . "',
 				ows_distributionposition = '" . $stellendaten['ows_distributionposition'] . "',
@@ -684,6 +702,7 @@ class stelle {
 				ows_abstract = '" . $stellendaten['ows_abstract'] . "',
 				wms_accessconstraints = '" . $stellendaten['wms_accessconstraints'] . "',
 				ows_contactorganization = '" . $stellendaten['ows_contactorganization'] . "',
+				ows_contacturl = '" . $stellendaten['ows_contacturl'] . "',
 				ows_contactemailaddress = '" . $stellendaten['ows_contactemailaddress'] . "',
 				ows_contactperson = '" . $stellendaten['ows_contactperson'] . "',
 				ows_contactposition = '" . $stellendaten['ows_contactposition'] . "',
@@ -694,6 +713,7 @@ class stelle {
 				ows_contactcity = '" . $stellendaten['ows_contactcity'] . "',
 				ows_contactadministrativearea = '" . $stellendaten['ows_contactadministrativearea'] . "',
 				ows_contentorganization = '" . $stellendaten['ows_contentorganization'] . "',
+				ows_contenturl = '" . $stellendaten['ows_contenturl'] . "',
 				ows_contentemailaddress = '" . $stellendaten['ows_contentemailaddress'] . "',
 				ows_contentperson = '" . $stellendaten['ows_contentperson'] . "',
 				ows_contentposition = '" . $stellendaten['ows_contentposition'] . "',
@@ -705,6 +725,7 @@ class stelle {
 				ows_contentadministrativearea = '" . $stellendaten['ows_contentadministrativearea'] . "',
 				ows_geographicdescription = '" . $stellendaten['ows_geographicdescription'] . "',
 				ows_distributionorganization = '" . $stellendaten['ows_distributionorganization'] . "',
+				ows_distributionurl = '" . $stellendaten['ows_distributionurl'] . "',
 				ows_distributionemailaddress = '" . $stellendaten['ows_distributionemailaddress'] . "',
 				ows_distributionperson = '" . $stellendaten['ows_distributionperson'] . "',
 				ows_distributionposition = '" . $stellendaten['ows_distributionposition'] . "',

@@ -1124,6 +1124,7 @@ class stelle {
 				`ows_srs`,
 
 				`ows_contactorganization`,
+				`ows_contacturl`,
 				`ows_contactaddress`,
 				`ows_contactpostalcode`,
 				`ows_contactcity`,
@@ -1135,6 +1136,7 @@ class stelle {
 				`ows_contactfacsimile`,
 
 				`ows_distributionorganization`,
+				`ows_distributionurl`,
 				`ows_distributionaddress`,
 				`ows_distributionpostalcode`,
 				`ows_distributioncity`,
@@ -1146,6 +1148,7 @@ class stelle {
 				`ows_distributionfacsimile`,
 
 				`ows_contentorganization`,
+				`ows_contenturl`,
 				`ows_contentaddress`,
 				`ows_contentpostalcode`,
 				`ows_contentcity`,
@@ -1184,6 +1187,7 @@ class stelle {
 		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
 
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contacturl = $rs['ows_contacturl'];
 		$this->ows_contactaddress = $rs['ows_contactaddress'];
 		$this->ows_contactpostalcode = $rs['ows_contactpostalcode'];
 		$this->ows_contactcity = $rs['ows_contactcity'];
@@ -1195,6 +1199,7 @@ class stelle {
 		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
 
 		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionurl = $rs['ows_distributionurl'];
 		$this->ows_distributionaddress = $rs['ows_distributionaddress'];
 		$this->ows_distributionpostalcode = $rs['ows_distributionpostalcode'];
 		$this->ows_distributioncity = $rs['ows_distributioncity'];
@@ -1206,6 +1211,7 @@ class stelle {
 		$this->ows_distributionfacsimile = $rs['ows_distributionfacsimile'];
 
 		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contenturl = $rs['ows_contenturl'];
 		$this->ows_contentaddress = $rs['ows_contentaddress'];
 		$this->ows_contentpostalcode = $rs['ows_contentpostalcode'];
 		$this->ows_contentcity = $rs['ows_contentcity'];
@@ -2125,12 +2131,11 @@ class db_mapObj{
 		return $attributes;
 	}
 
-	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false, $with_requires_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < count_or_0($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
-			$requires_options = '';
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();
 				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
@@ -2208,13 +2213,18 @@ class db_mapObj{
 								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
 									if ($all_options) {
 										# alle Auswahlmöglichkeiten -> where abschneiden
+										foreach ($attributes['name'] as $attributename) {
+											if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
+												$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
+											}
+										}
 										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
 									}
 									else {
 										if ($query_result != NULL) {
 											$attributes['options'][$i] = str_replace('=<requires>', '= <requires>', $attributes['options'][$i]);
 											foreach ($attributes['name'] as $attributename) {
-												if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
+												if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
 													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 												}
 											}
@@ -2266,6 +2276,7 @@ class db_mapObj{
 											$attributes['enum'][$i][$k] = array();
 											while ($rs = pg_fetch_array($ret[1])) {
 												$attributes['enum'][$i][$k][$rs['value']] = [
+													'value' 	=> $rs['value'],
 													'output' 	=> $rs['output'],
 													'oid'			=> $rs['oid'],
 													'image'		=> value_of($rs, 'image')
@@ -2285,14 +2296,19 @@ class db_mapObj{
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while ($rs = pg_fetch_array($ret[1])) {
 										$attributes['enum'][$i][$rs['value']] = [
+											'value' 	=> $rs['value'],
 											'output' 	=> $rs['output'],
 											'oid'			=> $rs['oid'],
 											'image'		=> value_of($rs, 'image')
 										];
-										if ($requires_options != '') {
-											$attributes['enum_requires_value'][$i][] = $rs['requires'];
+										if ($rs['requires']) {
+											$attributes['enum'][$i][$rs['value']]['requires_value'] = $rs['requires'];
 										}
+										// if ($requires_options != '') {
+										// 	$attributes['enum_requires_value'][$i][] = $rs['requires'];
+										// }
 									}
+									#echo '<br>attr: ' . print_r($attributes['enum'], true);
 								}
 							}
 						}
