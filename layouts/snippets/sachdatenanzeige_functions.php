@@ -795,9 +795,15 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	}
 	
 	switch_gle_view1 = function(layer_id){
-		enclosingForm.chosen_layer_id.value = layer_id;
-		enclosingForm.go.value='toggle_gle_view';
-		overlay_submit(enclosingForm, false);
+		var div = enclosingForm.querySelector('#result_' + layer_id + '>#layer>div');
+		if (true) {
+			div.style.display = (div.style.display == 'flex'? '' : 'flex');
+		}
+		else {
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.go.value='toggle_gle_view';
+			overlay_submit(enclosingForm, false);
+		}
 	}
 	
 	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp) {
