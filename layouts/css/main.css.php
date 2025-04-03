@@ -1836,7 +1836,7 @@ a:hover .preview_image{
 	border:1px solid #999;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
-	margin: 0 5px 5px 0;
+	margin: 7px 5px 11px 0;
 }
 
 #nds_edit .datensatz {
