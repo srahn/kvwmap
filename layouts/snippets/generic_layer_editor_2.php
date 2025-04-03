@@ -106,19 +106,17 @@ if ($doit == true) {
 			</table><?
 		}
 		$table_id = rand(0, 100000);
-		echo value_of($layer, 'paging'); ?>
-		<table id="<? echo $table_id; ?>" style="width: 100%" border="0" cellspacing="0" cellpadding="2"><?
-			if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
-				include('dataset_operations.php');
-			}
+		echo value_of($layer, 'paging'); 
+
+		if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
+			include('dataset_operations.php');
+		}		?>
+		<div id="<? echo $table_id; ?>" style="width: 100%; padding:2"><?
 			for ($k; $k<$anzObj; $k++) {
 				$table = array();
 				$nl = false;
 				$next_row = array();
 				$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID'].'|'; ?>
-				<tr>
-					<td>
-						<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 						<div id="datensatz_<? echo $layer['Layer_ID'].'_'.$k; ?>" class="datensatz"
 							<?
 							if ($this->new_entry != true AND $this->user->rolle->tooltipquery == 1 AND $this->user->rolle->querymode == 1 AND $layer['attributes']['the_geom'] != '') { ?>
@@ -416,25 +414,23 @@ if ($doit == true) {
 							<? if ($this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
 						</table>
 						</div>
-						<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
-					</td>
-				</tr><?
+						<?
 					$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 					$privileg = $layer['attributes']['privileg'][$index];
 				}
-				if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {
-					include('dataset_operations.php');
-				} ?>
-			<tr style="display: none">
-				<td><?
+				?>
+			<div style="display: none">
+				<?
 					if (value_of($invisible_attributes, $layer['Layer_ID'])){
 						for ($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
 							echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 						}
 					} ?>
-				</td>
-			</tr>
-		</table><?
+			</div>
+		</div><?
+		if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {
+			include('dataset_operations.php');
+		}
 		if (array_key_exists('charts', $layer) AND count($layer['charts']) > 0) {
 			include(SNIPPETS . 'layer_charts.php');
 		} ?>

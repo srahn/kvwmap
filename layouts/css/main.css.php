@@ -1836,6 +1836,7 @@ a:hover .preview_image{
 	border:1px solid #999;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
+	margin: 0 5px 5px 0;
 }
 
 #nds_edit .datensatz {
@@ -2922,6 +2923,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nds_submit span {
 	margin: auto;
 	margin-left: 3px;
+}
+
+#dataset_operations {
+	text-align: left;
+  padding: 2;
 }
 
 #nds_edit #dataset_operations {
