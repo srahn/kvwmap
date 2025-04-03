@@ -1307,7 +1307,7 @@ function saveLayerOptions(layer_id){
 }
 
 function setLayerParam(name) {
-	var data = 'go=setLayerParams&prefix=options_&options_layer_parameter_' + name + '=' + document.getElementById('layer_parameter_' + name).value;
+	var data = 'go=setLayerParams&prefix=options_&options_layer_parameter_' + name + '=' + document.getElementsByName('options_layer_parameter_' + name)[0].value;
 	ahah('index.php', data, [], []);
 	document.GUI.legendtouched.value = 1;
 	neuLaden();
