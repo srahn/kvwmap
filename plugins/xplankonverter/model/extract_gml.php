@@ -375,7 +375,7 @@ class Gml_extractor {
 				# to also match formatted multiline XPlanAuszug
 				$xml_bracket_is_opened = true;
 				if (strpos($line, '>') !== false) {
-					echo '<br>Enthält > setze xml bracket is open wieder auf false';
+					//echo '<br>Enthält > setze xml bracket is open wieder auf false';
 					$xml_bracket_is_opened = false;
 				}
 				$pattern = '/xmlns:xplan=["\'].*?\/(\d+)[\/\.](\d+)/';
@@ -1348,7 +1348,7 @@ class Gml_extractor {
 	function build_basic_tables() {
 		# Prepare schema 
 		if ($this->pgdatabase->schema_exists($this->gmlas_schema)) {
-			$this->pgdatabase->drop_schema($this->gmlas_schema);
+			$this->pgdatabase->drop_schema($this->gmlas_schema, TRUE);
 		}
 		$this->pgdatabase->create_schema($this->gmlas_schema);
 
@@ -2342,22 +2342,22 @@ class Gml_extractor {
 		// echo '<br>Loop over bereiche_ids: ' . print_r($bereiche_ids, true);
 
 		$gmlas_feature_tables = $this->get_gmlas_feature_tables_for_regeln($this->gmlas_schema);
-		echo '<br>classes: ' . print_r($gmlas_feature_tables, true);
+		//echo '<br>classes: ' . print_r($gmlas_feature_tables, true);
 		# Loop over relevant bereiche -> gmlas_feature_tables -> geom
 		$bereich_index = 0;
 		foreach ($bereiche_ids as $bereich_gml_id) {
-			echo '<br>bereich_gml_id: ' . $bereich_gml_id;
+			//echo '<br>bereich_gml_id: ' . $bereich_gml_id;
 			# index is used for modifying regel by name
 			$bereich_index++;
 			foreach ($gmlas_feature_tables as $gmlas_feature_table) {
-				echo '<br>handle gmlas_feature_table: ' . $gmlas_feature_table;
+				//echo '<br>handle gmlas_feature_table: ' . $gmlas_feature_table;
 				if ($this->check_if_table_has_entries_for_bereich($this->gmlas_schema, $gmlas_feature_table, $bereich_gml_id)) {
 					# Loop over all geom-types to get a rule for each
 					# use only ST_Point, ST_MultiPoint, ST_LineString, ST_MultiLineString, ST_Polygon and ST_MultiPolygon
 					$geometry_types = $this->get_geometry_types($gmlas_feature_table, $this->gmlas_schema);
 					// echo '<br>Geometrie-Types: ' . print_r($geometry_types, true);
 					foreach ($geometry_types as $geometry_type) {
-						echo '<br>handle geometry_type: ' . $geometry_type;
+						//echo '<br>handle geometry_type: ' . $geometry_type;
 						$sql_regel = $this->get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_gml_id, $geometry_type, $simplify_fachdaten_geom);
 						$sql_regel = str_replace("'", "''", $sql_regel); # Replaces all single commas with 2x single commas to escape them in SQL
 						# TODO: pk Hier vorher existierende Regeln der konvertierung des Bereiches löschen damit sie nicht mehrfach drin sind.
@@ -2402,7 +2402,7 @@ class Gml_extractor {
 		$simplify_fachdaten_geom = floatval($simplify_fachdaten_geom);
 		$gml_class = $gmlas_feature_table; # Is this always the case?
 		$gmlas_attributes = $this->get_gmlas_attributes_with_content($this->gmlas_schema, $gmlas_feature_table);
-		echo '<br>gmlas_attribute with content: <pre>' . print_r($gmlas_attributes, true) . '</pre>';
+		//echo '<br>gmlas_attribute with content: <pre>' . print_r($gmlas_attributes, true) . '</pre>';
 		$mappings = $this->get_gmlas_to_gml_mappings($gmlas_feature_table);
 
 		$select_sql = [];
@@ -2410,17 +2410,17 @@ class Gml_extractor {
 
 		# Loops through all gmlas_attributes, comparing them with the original column (and table)
 		# If matches are found, the target attributes are taken and the associated regel is added to the SQL
-		echo '<br>Loop through gmlas_attributes:';
+		//echo '<br>Loop through gmlas_attributes:';
 		foreach ($gmlas_attributes AS $a) {
-			echo '<br>gmlas_attribute: ' . $a;
+			//echo '<br>gmlas_attribute: ' . $a;
 			if(!in_array($a, array_column($mappings, 'o_column'))) {
 				continue;
 			}
-			echo '<br>Loop through mappings:';
+			//echo '<br>Loop through mappings:';
 			foreach ($mappings as $mapping) {
-				echo '<br>Mapping for o_column: ' . $mapping['o_column'];
+				//echo '<br>Mapping for o_column: ' . $mapping['o_column'];
 				if (($mapping['o_column'] == $a) and ($mapping['o_table'] == $gml_class)) {
-					echo '<br>gmlas_attribute is o_column and gml_class is o_table';
+					//echo '<br>gmlas_attribute is o_column and gml_class is o_table';
 					# gehoertzubereich wird automatisiert bei der Konvertierung in die Regel eingearbeitet 
 					# muss deswegen für Attribute nicht verwendet werden, ggf aber für WHERE filter
 					if ($mapping['t_column'] == 'gehoertzubereich') {
@@ -2462,8 +2462,8 @@ class Gml_extractor {
 				}
 			}
 		}
-		echo '<br>GML-Attributes für die Regel: ' . implode(', ', $gml_attributes);
-		echo '<br>Select part of regel SQL nach Anpassung der Geometrietypen: ' . $select_sql;
+		//echo '<br>GML-Attributes für die Regel: ' . implode(', ', $gml_attributes);
+		//echo '<br>Select part of regel SQL nach Anpassung der Geometrietypen: ' . $select_sql;
 
 		// rules that representing the many to many relationship
 		$many_to_many_attributes = $this->get_many_to_many_attributes();
@@ -2488,8 +2488,7 @@ class Gml_extractor {
 
 		// Add INSERT INTO and FROM
 		// Filters only by relevant bereich (in case 2 rules target the same class with different bereich)
-		$sql  = "
-			INSERT INTO " . XPLANKONVERTER_CONTENT_SCHEMA . "." . $gml_class . " (" . implode(", ", $gml_attributes) . ")
+		$sql  = "INSERT INTO " . XPLANKONVERTER_CONTENT_SCHEMA . "." . $gml_class . " (" . implode(", ", $gml_attributes) . ")
 			SELECT
 				" . implode(", ", $select_sql) . "
 			FROM
@@ -2498,7 +2497,7 @@ class Gml_extractor {
 				gmlas.gehoertzubereich_href ILIKE '%" . $bereich_id . "' AND
 				ST_GeometryType(position) = '" . $geom_type . "'
 		";
-		echo '<br>SQL für Regel zur Konvertierung von gmlas table ' . $gmlas_feature_table . ' to gml class ' . $gml_class . ': '. $sql;
+		//echo '<br>SQL für Regel zur Konvertierung von gmlas table ' . $gmlas_feature_table . ' to gml class ' . $gml_class . ': '. $sql;
 		return $sql;
 	}
 
@@ -2511,10 +2510,10 @@ class Gml_extractor {
 
 	/**
 	 * Function to get rule for gmlas to gml conversion for many to many $attribute of $gml_class in step $i
-	 * currently it only consider the attributes:
+	 * currently it only considers the attributes:
 	 * "wirddargestelltdurch", "dientzurdarstellungvon", "reftextinhalt", "detailliertezweckbestimmung", "zweckbestimmung"
 	 * 
-	 * It considers that many to many relation tables in gmlas schemas are not direct related to bereich
+	 * It considers that many to many relation tables in gmlas schemas are not directly related to bereich
 	 * How to find out if the table is a n:m relation or not?
 	 * a) from uml schema and the multiplicity
 	 * b) from n:m-relation-table-names, In gmlas relations can be identified by the extension of tablenames
@@ -2576,7 +2575,7 @@ class Gml_extractor {
 						" . $this->gmlas_schema . "." . $class_and_attr . " ". $norm_1 . "
 					WHERE
 						gmlas.id = " .$norm_1 . ".parent_id
-				) AS " . $attribute . ",";
+				) AS " . $attribute;
 			}
 			if ($attribute == "detailliertezweckbestimmung" OR $attribute == "zweckbestimmung") {
 				$special_datatype = "";
@@ -2637,8 +2636,7 @@ class Gml_extractor {
 								)
 							]::xplan_gml." . $special_datatype . "[]
 							ELSE NULL
-						END AS " . $attribute . ",
-					";
+						END AS " . $attribute;
 				}
 			}
 		}
@@ -2733,8 +2731,8 @@ class Gml_extractor {
 				FROM
 					information_schema.tables t
 				WHERE
-					c.table_schema = '" . $this->gmlas_schema . "' AND
-					c.table_name = LIKE " . $gml_class . "_" . $attribute['name'] . "%
+					t.table_schema = '" . $this->gmlas_schema . "' AND
+					t.table_name LIKE '" . $gml_class . "_" . $attribute['name'] . "%'
 			";
 			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 			if (pg_num_rows($ret[1]) > 0) {
