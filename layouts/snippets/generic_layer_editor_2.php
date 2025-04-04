@@ -97,7 +97,7 @@ if ($doit == true) {
 					<td width="99%" align="center"><h2 id="layername"><? echo $layer_name; ?></h2></td><?
 						if (!$this->user->rolle->visually_impaired AND $anzObj > 0 AND value_of($this->formvars, 'printversion') == '') { ?>
 						<td valign="top" style="padding: 0 10 0 0" class="layer_header">
-							<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer switch-gle-view-columns" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
+							<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>, 0);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer switch-gle-view-columns" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
 						</td>
 						<td>
 						</td><?

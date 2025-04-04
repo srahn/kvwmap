@@ -424,9 +424,10 @@ function go_switch($go, $exit = false) {
 				$GUI->resetLegendOptions();
 			} break;
 
-			case 'toggle_gle_view' : {
+			case 'switch_gle_view' : {
 				$GUI->sanitize([
-					'chosen_layer_id' => 'int'
+					'chosen_layer_id' => 'int',
+					'mode' => 'int'
 				]);
 				$GUI->switch_gle_view();
 			} break;
