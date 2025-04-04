@@ -106,7 +106,7 @@ for($i=0;$i<$anzLayer;$i++){
 		if ($template == '') {
 			$template = 'generic_layer_editor_2.php';
 		}
-		if ($this->qlayerset[$i]['gle_view'] == '1') {
+		if ($this->qlayerset[$i]['gle_view'] > 0) {
 			include(SNIPPETS . $template);			# Attribute zeilenweise bzw. Raster-Template
 		}
 		else {

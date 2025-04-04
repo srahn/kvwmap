@@ -801,15 +801,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			case 0 : {
 				overlay_link(req);
 			} break;
-			case 1 : case 2 : {
-				ahah('index.php', req, [], []);
-			}
 			case 1 : {
 				div.style.display = '';
 			} break;
 			case 2 : {
 				div.style.display = 'flex';
 			} break;
+		}
+		if (mode > 0) {
+			auto_resize_overlay();
+			ahah('index.php', req, [], []);
 		}
 	}
 	
