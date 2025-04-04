@@ -1837,6 +1837,7 @@ a:hover .preview_image{
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
 	margin: 7px 5px 11px 0;
+	width: fit-content;
 }
 
 #nds_edit .datensatz {
@@ -1931,7 +1932,7 @@ a:hover .preview_image{
 
 #contentdiv {
 	background: url(<? echo BG_IMAGE; ?>);
-	width: 100%;
+	width: fit-content;
 	position:relative;
 }
 
