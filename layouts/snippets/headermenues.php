@@ -3,6 +3,12 @@
 	$result = Notification::find_for_user($this);
 ?>
 
+<style>
+	#search_div {
+		display: none;
+	}
+</style>
+
 <div title="Benachrichtigungen" style="float: right; display: block;">
 	<div id="user_notifications" style="display: none; position: absolute;right: 30px; z-index: 9999;padding: 5px;top: 30px;"><?
 		if ($result['success']) {
@@ -121,7 +127,7 @@
 					if ($result['success'] AND count($result['notifications']) > 0) { ?>
 						<g transform="translate(21 20)">
 							<circle cx="4" cy="-4" r="7" style="fill:orange; stroke-width: 2px"/>
-							<text style="stroke: none; fill: white; font-size:14px;"><?	echo count($result['notifications']); ?></text>
+							<text id="num_notification_div" style="stroke: none; fill: white; font-size:14px;"><?	echo count($result['notifications']); ?></text>
 						</g><?
 					} ?>
 			</a>

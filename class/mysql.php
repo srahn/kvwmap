@@ -147,7 +147,7 @@ class database {
 		include_once(CLASSPATH . 'stelle.php');
 		include_once(CLASSPATH . 'rolle.php');
 		$stelle = new stelle($gast_stelle, $this);
-		$rolle = new rolle(NULL, $gast_stelle, $this);
+		$rolle = new rolle($new_user_id, $gast_stelle, $this);
 		$layers = $stelle->getLayers(NULL);
 		$rolle->setRolle($new_user_id, $gast_stelle, $stelle->default_user_id);
 		$rolle->setMenue($new_user_id, $gast_stelle, $stelle->default_user_id);

@@ -640,8 +640,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			fieldstring = form_fields[i] + '';
 			field = fieldstring.split(';');
 			var element = document.getElementsByName(fieldstring)[0];
-			if (element != undefined && element.type != 'hidden' && field[4] != 'SubFormFK' && field[7] != '0' && (element.readOnly != true) && field[5] == '0' && element.value == ''){
-			  message('Das Feld '+element.title+' erfordert eine Eingabe.');
+			if (
+				element != undefined &&
+				element.type != 'hidden' &&
+				// field[4] != 'SubFormFK' &&
+				field[7] != '0' &&
+				element.readOnly != true &&
+				field[5] == '0' &&
+				element.value == ''
+			) {
+			  message('Das Feld ' + element.title +' erfordert eine Eingabe.');
 				return;
 			}
 			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)){
@@ -787,9 +795,15 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	}
 	
 	switch_gle_view1 = function(layer_id){
-		enclosingForm.chosen_layer_id.value = layer_id;
-		enclosingForm.go.value='toggle_gle_view';
-		overlay_submit(enclosingForm, false);
+		var div = enclosingForm.querySelector('#result_' + layer_id + '>#layer>div');
+		if (true) {
+			div.style.display = (div.style.display == 'flex'? '' : 'flex');
+		}
+		else {
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.go.value='toggle_gle_view';
+			overlay_submit(enclosingForm, false);
+		}
 	}
 	
 	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp) {
@@ -1004,7 +1018,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	}
 
 	daten_export = function(layer_id, anzahl, format){
-		enclosingForm.all.value = document.getElementsByName('all_' + layer_id)[0].value;
+		enclosingForm.all.value = (document.getElementById('all_' + layer_id + '_2').checked? '1' : '');
 		if(enclosingForm.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
 			var option = document.createElement("option");
 			option.text = anzahl;
