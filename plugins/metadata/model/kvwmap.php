@@ -213,12 +213,21 @@
 			// Metadatendatei erzeugen und in ZIP packen
 			// von Ressource des Datenpaketes
 			$export_file = $package->get_export_file();
-			// Put the metadata document into the $xport_file.zip
+			// Put the metadata document into the $export_file.zip
 			$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf';
 			exec($command);
+
 			// An Ressourcen hängende Dokumente in ZIP packen
 			$ressource = Ressource::find_by_id($GUI, 'id', $package->get('ressource_id'));
-			#echo '<br>ressources documents: ' . print_r($ressource->get('documents'), true);
+			$documents = arrStrToArr($ressource->get('documents'), ',', '{}');
+			foreach ($documents AS $document) {
+				$doc_file = explode('&original_name=' , $document)[0];
+				if (file_exists($doc_file)) {
+					// Put the document file into the $export_file.zip
+					$command = ZIP_PATH . ' -j ' . $export_file . ' ' . $doc_file;
+					exec($command);
+				}
+			}
 
 			// Metadaten und Dokumente von an Ressourcen hängenden Quellen
 
@@ -658,9 +667,9 @@
 		foreach ($all_packages AS $package) {
 			$pfad = replace_params_rolle($package->layer->get('pfad'));
 			$where = "";
-			if ($package->layer->get('Datentyp') != 5) {
-				$where = "
-					WHERE
+			if (!in_array($package->layer->get('Datentyp'), array(3, 5))) {
+				// Nur für Vektorlayer
+				$where = "WHERE
 						ST_MakeEnvelope(
 							" . $GUI->Stelle->MaxGeorefExt->minx . ",
 							" . $GUI->Stelle->MaxGeorefExt->miny . ",
@@ -669,26 +678,28 @@
 							25832
 						) && query." . $package->layer->get('geom_column') . "
 				";
+				$sql = "
+					SET search_path = " . $package->layer->get('schema') . ", public;
+					SELECT
+						count(*) AS anzahl
+					FROM
+						(
+							" . $pfad . "
+						) AS query
+					" . $where . "
+				";
+				// echo '<br>SQL zum Filtern der Daten ' . $package->get('bezeichnung') . ' im Datenpaket: ' . $sql;
+				$query = pg_query($sql);
+				$num_feature = pg_fetch_assoc($query)['anzahl'];
+				if ( $num_feature > 0) {
+					// echo '<br>Anzahl Datensätze: ' . $num_feature;
+					$package->num_feature = $num_feature;
+					$GUI->metadata_data_packages[] = $package;
+				}
+				// else {
+				// 	echo '<br>Ressource: ' . $package->get('ressource_id') . ' Paket: ' . $package->get('id') . ' ' . $package->get('bezeichnung') . ' Layer-ID: ' . $package->get('layer_id') . ' Datentyp: ' . $package->layer->get('Datentyp') . ' geom_column: ' . $package->layer->get('geom_column') . ' hat keine Daten in dieser Stelle Abfrage:<br><textarea cols="60" rows="10">' . $sql . '</textarea>';
+				// }
 			}
-			$sql = "
-				SET search_path = " . $package->layer->get('schema') . ", public;
-				SELECT
-					count(*) AS anzahl
-				FROM
-					(
-						" . $pfad . "
-					) AS query" .
-				$where . "
-			";
-			// echo '<br>SQL zum Filtern der Daten ' . $package->get('bezeichnung') . ' im Datenpaket: ' . $sql;
-			$query = pg_query($sql);
-			$num_feature = pg_fetch_assoc($query)['anzahl'];
-			if ( $num_feature > 0) {
-				// echo '<br>Anzahl Datensätze: ' . $num_feature;
-				$package->num_feature = $num_feature;
-				$GUI->metadata_data_packages[] = $package;
-			}
-
 		}
 		$GUI->output();
 	};
