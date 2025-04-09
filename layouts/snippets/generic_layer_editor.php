@@ -198,13 +198,11 @@ if ($doit == true) {
 					}	?>
 				</div>
 			</div>
-		</div>
-		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%"> <?
-
-			if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
-				include('dataset_operations.php');
-			} ?>
-
+		</div>	<?
+		if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
+			include('dataset_operations.php');
+		} ?>
+		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%">
 			<tr>
 				<td width="100%">   
 					<table class="gle1_table" cellspacing="0" cellpadding="0" width="100%">
@@ -562,11 +560,11 @@ if ($doit == true) {
 				</td>
 			</tr>
 		</table>
-		<table style="margin-right: auto"><?
+		<?
 			if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {
 				include('dataset_operations.php');
 			} ?>
-		</table> <?
+		<?
 		for ($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++) {
 			echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 		} ?>
