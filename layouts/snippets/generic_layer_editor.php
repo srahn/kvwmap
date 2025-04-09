@@ -166,13 +166,11 @@ if ($doit == true) {
 					<td align="right" valign="top" style="padding: 0 10 0 0">
 					</td>
 					<td valign="top" style="padding: 0 0 0 0">
-						<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
 					</td>
 					<? } ?>
 					<td height="30" width="99%" align="center"><h2><? echo $layer_name; ?></h2></td>
 					<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 					<td valign="top" style="padding: 0 10 0 0">
-						<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
 					</td>
 					<td align="right" valign="top">
 					</td>
@@ -181,16 +179,24 @@ if ($doit == true) {
 			</table><?
 		} 
 		$table_id = rand(0, 100000); ?>
-		<div style="display: flex; justify-content: end;"> 
+		<div style="display: flex; justify-content: space-between;">
+			<div style="width: 140px;"></div>
 			<? echo $layer['paging']; ?>
-			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" style="cursor: pointer; margin: 12px" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
-			<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">
-				<input type="checkbox" onclick="toggleAll(this, <? echo $layer['Layer_ID']; ?>, 'alle');" checked> --alle--<br>
-<? 			for ($j = 0; $j < count($layer['attributes']['name']); $j++) {
-					if ($layer['attributes']['visible'][$j]) { ?>					
-						<input type="checkbox" onclick="toggleColumn(this, <? echo $layer['Layer_ID']; ?>, '<? echo $layer['attributes']['name'][$j]; ?>');" checked> <? echo ($layer['attributes']['alias'][$j] ?: $layer['attributes']['name'][$j]) . '<br>'; 
-					}
-				}	?>
+			<div style="position: sticky; display: flex; right: 5px;  z-index: 1000;">
+				<div class="gle-view">	<?
+					for ($g = 0; $g < 3; $g++) {
+						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['Layer_ID'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+					}	?>
+				</div>
+				<i id="column_options_button" class="fa fa-columns" aria-hidden="true" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
+				<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">
+					<input type="checkbox" onclick="toggleAll(this, <? echo $layer['Layer_ID']; ?>, 'alle');" checked> --alle--<br>
+	<? 			for ($j = 0; $j < count($layer['attributes']['name']); $j++) {
+						if ($layer['attributes']['visible'][$j]) { ?>					
+							<input type="checkbox" onclick="toggleColumn(this, <? echo $layer['Layer_ID']; ?>, '<? echo $layer['attributes']['name'][$j]; ?>');" checked> <? echo ($layer['attributes']['alias'][$j] ?: $layer['attributes']['name'][$j]) . '<br>'; 
+						}
+					}	?>
+				</div>
 			</div>
 		</div>
 		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%"> <?

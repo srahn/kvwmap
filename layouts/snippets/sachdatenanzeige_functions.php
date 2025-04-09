@@ -796,7 +796,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	
 	switch_gle_view1 = function(layer_id, mode, button){
 		var active_button = enclosingForm.querySelector('.gle-view-button.active');
-		var div = enclosingForm.querySelector('#result_' + layer_id + '>#layer>div');
+		var div = enclosingForm.querySelector('#result_' + layer_id + '>#layer>div.records');
 		var req = 'go=switch_gle_view&chosen_layer_id=' + layer_id + '&mode=' + mode;
 		active_button.classList.remove('active');
 		button.classList.add('active');

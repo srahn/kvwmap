@@ -1975,9 +1975,8 @@ thead.gle th {
 
 .gle-view {
 	display: flex;
-	position: absolute;
+	position: sticky;
   right: 18px;
-  overflow: hidden;
   height: 18px;
 	clip-path: rect(0px 54px 18px 36px);
 	transition: clip-path 0.2s ease;
@@ -1991,8 +1990,13 @@ thead.gle th {
 	order: 2;
 }
 
+#column_options_button{
+	cursor: pointer;
+  margin: 1px 8px 0 8px;
+}
+
 #gle_column_options_div {
-	position: absolute;
+	position: fixed;
 	right: 2px;
 	margin-right: 35px;
 	text-align: left;
