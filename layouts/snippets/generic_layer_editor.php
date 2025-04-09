@@ -185,7 +185,7 @@ if ($doit == true) {
 			<div style="position: sticky; display: flex; right: 5px;  z-index: 1000;">
 				<div class="gle-view">	<?
 					for ($g = 0; $g < 3; $g++) {
-						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['Layer_ID'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['Layer_ID'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
 					}	?>
 				</div>
 				<i id="column_options_button" class="fa fa-columns" aria-hidden="true" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>

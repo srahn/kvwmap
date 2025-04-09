@@ -427,7 +427,8 @@ function go_switch($go, $exit = false) {
 			case 'switch_gle_view' : {
 				$GUI->sanitize([
 					'chosen_layer_id' => 'int',
-					'mode' => 'int'
+					'mode' => 'int',
+					'reload' => 'int'
 				]);
 				$GUI->switch_gle_view();
 			} break;

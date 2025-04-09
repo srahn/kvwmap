@@ -980,7 +980,7 @@ echo '			</table>
 
 	function switch_gle_view(){
 		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id'], $this->formvars['mode']);
-		if ($this->formvars['mode'] == 0) {
+		if ($this->formvars['reload'] == 1) {
 			$this->last_query = $this->user->rolle->get_last_query();
 			$this->formvars['go'] = $this->last_query['go'];
 			if ($this->formvars['go'] == 'Layer-Suche_Suchen') {

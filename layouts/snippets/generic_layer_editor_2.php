@@ -111,7 +111,7 @@ if ($doit == true) {
 			echo value_of($layer, 'paging'); ?>
 			<div class="gle-view">	<?
 				for ($g = 0; $g < 3; $g++) {
-					echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['Layer_ID'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+					echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['Layer_ID'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
 				}	?>
 			</div>
 		</div> <?
