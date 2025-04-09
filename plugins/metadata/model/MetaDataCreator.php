@@ -183,7 +183,7 @@ class MetaDataCreator {
 		" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 	</gmd:contact>
 	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
-		<gco:DateTime>" . $this->md->get('md_date') . "T00:00:00Z</gco:DateTime>
+		<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
 	</gmd:dateStamp>
 	" . $this->getReferenzSysteme() . "
 	<gmd:identificationInfo xmlns:ows=\"http://www.opengis.net/ows/1.1\">
@@ -205,10 +205,8 @@ class MetaDataCreator {
 					</gmd:date>
 					<gmd:identifier>
 						<gmd:MD_Identifier>
-							<gmd:code>" . /*
-								<gco:CharacterString>" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_downloadservice_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
-								Auf Wunsch von ArL's wurde der Identifier auf den Namespace Plandigital angepasst
-							*/"<gco:CharacterString>https://registry.gdi-de.org/id/de.ni.plandigital/" . $this->md->get('uuids')['metadata_downloadservice_uuid'] . "</gco:CharacterString>
+							<gmd:code>
+								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
 							</gmd:code>
 						</gmd:MD_Identifier>
 					</gmd:identifier>
@@ -239,54 +237,8 @@ class MetaDataCreator {
 			<gmd:descriptiveKeywords>
 				<gmd:MD_Keywords>
 					<gmd:keyword>
-						<gco:CharacterString>Downloaddienst</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>DownloadService</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>Flächennutzungsplan</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>Flächennutzungspläne</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>F-Plan</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>F-Pläne</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>X-Planung</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>XPlanung</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>xplanGML</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>FPläne</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>FPlan</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>opendata</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>infoFeatureAccessService</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>PlanDigital</gco:CharacterString>
-					</gmd:keyword>
-					</gmd:MD_Keywords>
-			</gmd:descriptiveKeywords>
-			<gmd:descriptiveKeywords>
-				<gmd:MD_Keywords>
-					<gmd:keyword>
 						<gco:CharacterString>Bodennutzung</gco:CharacterString>
-				  </gmd:keyword>
+					</gmd:keyword>
 					<gmd:type>
 						<gmd:MD_KeywordTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
 					</gmd:type>
@@ -295,10 +247,10 @@ class MetaDataCreator {
 							<gmd:title>
 								<gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
 							</gmd:title>
-							<gmd:date gco:nilReason=\"unknown\">
+							<gmd:date>
 								<gmd:CI_Date>
 									<gmd:date>
-										<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
+										<gco:Date>2008-06-01</gco:Date>
 									</gmd:date>
 									<gmd:dateType>
 										<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
@@ -312,10 +264,70 @@ class MetaDataCreator {
 			<gmd:descriptiveKeywords>
 				<gmd:MD_Keywords>
 					<gmd:keyword>
+						<gco:CharacterString>Flächennutzungsplan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Flächennutzungsplanung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Flächennutzung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:type>
+						<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\"
+						                        codeListValue=\"theme\"/>
+					</gmd:type>
+					<gmd:thesaurusName>
+						<gmd:CI_Citation>
+							<gmd:title>
+								<gco:CharacterString>GEMET - Concepts, version 4.2.3</gco:CharacterString>
+							</gmd:title>
+							<gmd:date>
+								<gmd:CI_Date>
+									<gmd:date>
+										<gco:Date>2021-12-06</gco:Date>
+									</gmd:date>
+									<gmd:dateType>
+										<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\"
+										                     codeListValue=\"publication\"/>
+									</gmd:dateType>
+								</gmd:CI_Date>
+							</gmd:date>
+						</gmd:CI_Citation>
+					</gmd:thesaurusName>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
 						<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
 					</gmd:keyword>
 					<gmd:keyword>
-						<gco:CharacterString>landuse</gco:CharacterString>
+						<gco:CharacterString>FNP</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>F-Plan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>opendata</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>vorbereitender Bauleitplan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>PlanDigital</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>XPlanung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Zusammenzeichnung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Downloaddienst</gco:CharacterString>
+					</gmd:keyword>
+					". /*Keyword infoFeatureAccessService nur für DownloadService*/"
+					<gmd:keyword>
+						<gco:CharacterString>infoFeatureAccessService</gco:CharacterString>
 					</gmd:keyword>
 					<gmd:type>
 						<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
@@ -504,10 +516,8 @@ class MetaDataCreator {
 					</gmd:date>
 					<gmd:identifier>
 						<gmd:MD_Identifier>
-							<gmd:code>" . /*
-								<gco:CharacterString>" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_viewservice_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
-								Auf Wunsch von ArL's wurde der Identifier auf den Namespace Plandigital angepasst
-							*/"<gco:CharacterString>https://registry.gdi-de.org/id/de.ni.plandigital/" . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
+							<gmd:code>
+								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
 							</gmd:code>
 						</gmd:MD_Identifier>
 					</gmd:identifier>
@@ -538,46 +548,6 @@ class MetaDataCreator {
 			<gmd:descriptiveKeywords>
 				<gmd:MD_Keywords>
 					<gmd:keyword>
-						<gco:CharacterString>Flächennutzungsplan</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>Flächennutzungspläne</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>F-Plan</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>F-Pläne</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>X-Planung</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>XPlanung</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>xplanGML</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>FPläne</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-					<gco:CharacterString>FPlan</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>opendata</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>infoMapAccessService</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>PlanDigital</gco:CharacterString>
-					</gmd:keyword>
-				</gmd:MD_Keywords>
-			</gmd:descriptiveKeywords>
-			<gmd:descriptiveKeywords>
-				<gmd:MD_Keywords>
-					<gmd:keyword>
 						<gco:CharacterString>Bodennutzung</gco:CharacterString>
 					</gmd:keyword>
 					<gmd:type>
@@ -591,7 +561,7 @@ class MetaDataCreator {
 							<gmd:date gco:nilReason=\"unknown\">
 								<gmd:CI_Date>
 									<gmd:date>
-										<gco:Date>" . $this->md->get('id_cite_date') . "</gco:Date>
+										<gco:Date>2008-06-01</gco:Date>
 									</gmd:date>
 									<gmd:dateType>
 										<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
@@ -605,10 +575,73 @@ class MetaDataCreator {
 			<gmd:descriptiveKeywords>
 				<gmd:MD_Keywords>
 					<gmd:keyword>
+						<gco:CharacterString>Flächennutzungsplan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Flächennutzungsplanung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Flächennutzung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:type>
+						<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\"
+						                        codeListValue=\"theme\"/>
+					</gmd:type>
+					<gmd:thesaurusName>
+						<gmd:CI_Citation>
+							<gmd:title>
+								<gco:CharacterString>GEMET - Concepts, version 4.2.3</gco:CharacterString>
+							</gmd:title>
+							<gmd:date>
+								<gmd:CI_Date>
+									<gmd:date>
+										<gco:Date>2021-12-06</gco:Date>
+									</gmd:date>
+									<gmd:dateType>
+										<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\"
+										                     codeListValue=\"publication\"/>
+									</gmd:dateType>
+								</gmd:CI_Date>
+							</gmd:date>
+						</gmd:CI_Citation>
+					</gmd:thesaurusName>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
 						<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
 					</gmd:keyword>
 					<gmd:keyword>
-						<gco:CharacterString>landuse</gco:CharacterString>
+						<gco:CharacterString>FNP</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>F-Plan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>opendata</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>vorbereitender Bauleitplan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>PlanDigital</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>XPlanung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Zusammenzeichnung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Darstellungsdienst</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Darstellungsdienst</gco:CharacterString>
+					</gmd:keyword>
+					". /*Keyword infoMapAccessService nur für ViewService*/"
+					<gmd:keyword>
+						<gco:CharacterString>infoMapAccessService</gco:CharacterString>
 					</gmd:keyword>
 					<gmd:type>
 						<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
@@ -808,10 +841,8 @@ class MetaDataCreator {
 						</gmd:date>
 						<gmd:identifier>
 							<gmd:MD_Identifier>
-								<gmd:code>" . /*
-								<gco:CharacterString>" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
-								Auf Wunsch von ArL's wurde der Identifier auf den Namespace Plandigital angepasst
-								*/"<gco:CharacterString>https://registry.gdi-de.org/id/de.ni.plandigital/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "</gco:CharacterString>
+								<gmd:code>
+								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
 								</gmd:code>
 							</gmd:MD_Identifier>
 						</gmd:identifier>
@@ -849,73 +880,100 @@ class MetaDataCreator {
 						</gmd:fileName>
 					</gmd:MD_BrowseGraphic>
 				</gmd:graphicOverview>
-				<gmd:descriptiveKeywords>
-					<gmd:MD_Keywords>
-						<gmd:keyword>
-							<gco:CharacterString>Flächennutzungsplan</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>Flächennutzungspläne</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>F-Plan</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>F-Pläne</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>X-Planung</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>XPlanung</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>xplanGML</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>FPläne</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>FPlan</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>opendata</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:keyword>
-							<gco:CharacterString>PlanDigital</gco:CharacterString>
-						</gmd:keyword>
-					</gmd:MD_Keywords>
-				</gmd:descriptiveKeywords>
-				<gmd:descriptiveKeywords>
-					<gmd:MD_Keywords>
-						<gmd:keyword>
-							<gco:CharacterString>Bodennutzung</gco:CharacterString>
-						</gmd:keyword>
-						<gmd:type>
-							<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
-						</gmd:type>
-						<gmd:thesaurusName>
-							<gmd:CI_Citation>
-								<gmd:title>
-									<gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
-								</gmd:title>
-								<gmd:date>
-									<gmd:CI_Date>
-										<gmd:date>
-											<gco:Date>2008-06-01</gco:Date>
-										</gmd:date>
-										<gmd:dateType>
-											<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</gmd:CI_DateTypeCode>
-										</gmd:dateType>
-									</gmd:CI_Date>
-								</gmd:date>
-							</gmd:CI_Citation>
-						</gmd:thesaurusName>
-					</gmd:MD_Keywords>
-				</gmd:descriptiveKeywords>
+<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>Bodennutzung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:type>
+						<gmd:MD_KeywordTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
+					</gmd:type>
+					<gmd:thesaurusName>
+						<gmd:CI_Citation>
+							<gmd:title>
+								<gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
+							</gmd:title>
+							<gmd:date gco:nilReason=\"unknown\">
+								<gmd:CI_Date>
+									<gmd:date>
+										" . /*<gco:Date>" . $this->md->get('id_cite_date') . "</gco:Date>*/"
+										<gco:Date>2008-06-01</gco:Date>
+									</gmd:date>
+									<gmd:dateType>
+										<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+									</gmd:dateType>
+								</gmd:CI_Date>
+							</gmd:date>
+						</gmd:CI_Citation>
+					</gmd:thesaurusName>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>Flächennutzungsplan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Flächennutzungsplanung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Flächennutzung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:type>
+						<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\"
+						                        codeListValue=\"theme\"/>
+					</gmd:type>
+					<gmd:thesaurusName>
+						<gmd:CI_Citation>
+							<gmd:title>
+								<gco:CharacterString>GEMET - Concepts, version 4.2.3</gco:CharacterString>
+							</gmd:title>
+							<gmd:date>
+								<gmd:CI_Date>
+									<gmd:date>
+										<gco:Date>2021-12-06</gco:Date>
+									</gmd:date>
+									<gmd:dateType>
+										<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\"
+										                     codeListValue=\"publication\"/>
+									</gmd:dateType>
+								</gmd:CI_Date>
+							</gmd:date>
+						</gmd:CI_Citation>
+					</gmd:thesaurusName>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>FNP</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>F-Plan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>opendata</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>vorbereitender Bauleitplan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>PlanDigital</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>XPlanung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Zusammenzeichnung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:type>
+						<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
+					</gmd:type>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
 			" . ($this->md->get('withRegionalKeyword') ? $this->getRegionalKeyword() : ''). "
 				<gmd:resourceConstraints>
           <gmd:MD_LegalConstraints>

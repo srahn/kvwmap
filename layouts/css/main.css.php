@@ -1836,6 +1836,8 @@ a:hover .preview_image{
 	border:1px solid #999;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
+	margin: 7px 5px 11px 0;
+	width: fit-content;
 }
 
 #nds_edit .datensatz {
@@ -1930,7 +1932,7 @@ a:hover .preview_image{
 
 #contentdiv {
 	background: url(<? echo BG_IMAGE; ?>);
-	width: 100%;
+	width: fit-content;
 	position:relative;
 }
 
@@ -1971,8 +1973,30 @@ thead.gle th {
  text-align:left;
 }
 
+.gle-view {
+	display: flex;
+	position: sticky;
+  right: 18px;
+  height: 18px;
+	clip-path: rect(0px 54px 18px 36px);
+	transition: clip-path 0.2s ease;
+}
+
+.gle-view:hover {
+	clip-path: rect(0px 54px 18px 0px);
+}
+
+.gle-view-button.active {
+	order: 2;
+}
+
+#column_options_button{
+	cursor: pointer;
+  margin: 1px 8px 0 8px;
+}
+
 #gle_column_options_div {
-	position: absolute;
+	position: fixed;
 	right: 2px;
 	margin-right: 35px;
 	text-align: left;
@@ -2922,6 +2946,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nds_submit span {
 	margin: auto;
 	margin-left: 3px;
+}
+
+#dataset_operations {
+	text-align: left;
+  padding: 2;
 }
 
 #nds_edit #dataset_operations {

@@ -33,8 +33,9 @@
  $strRemember="merken";
  $strDontRememberDataset="Datensatz nicht mehr merken";
  $strPrintDataset="Datensatz drucken";
- $strSwitchGLEViewColumns="zur spaltenweisen Darstellung wechseln";
- $strSwitchGLEViewRows="zur zeilenweisen Darstellung wechseln";
+ $strSwitchGLEView0="tabellarische Darstellung";
+ $strSwitchGLEView1="Datensätze untereinander";
+ $strSwitchGLEView2="Datensätze nebeneinander";
  $strEditAll="mehrere bearbeiten";
  $strCopyDataset="Datensatz kopieren";
  $strNewDataset="neuen Datensatz anlegen";

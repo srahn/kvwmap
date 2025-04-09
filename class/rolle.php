@@ -323,13 +323,13 @@ class rolle {
 		return 1;
 	}
 
-	function switch_gle_view($layer_id) {
+	function switch_gle_view($layer_id, $mode) {
 		if ($layer_id > 0) {
 			$sql = "
 				UPDATE
 					u_rolle2used_layer
 				SET
-					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+					gle_view = " . $mode . "
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
@@ -341,7 +341,7 @@ class rolle {
 				UPDATE
 					rollenlayer
 				SET
-					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+					gle_view = " . $mode . "
 				WHERE
 					id = " . (-$layer_id) . "
 			";

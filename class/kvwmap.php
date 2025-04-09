@@ -979,14 +979,16 @@ echo '			</table>
 	}
 
 	function switch_gle_view(){
-		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id']);
-		$this->last_query = $this->user->rolle->get_last_query();
-		$this->formvars['go'] = $this->last_query['go'];
-		if ($this->formvars['go'] == 'Layer-Suche_Suchen') {
-			$this->GenerischeSuche_Suchen();
-		}
-		else {
-			$this->queryMap();
+		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id'], $this->formvars['mode']);
+		if ($this->formvars['reload'] == 1) {
+			$this->last_query = $this->user->rolle->get_last_query();
+			$this->formvars['go'] = $this->last_query['go'];
+			if ($this->formvars['go'] == 'Layer-Suche_Suchen') {
+				$this->GenerischeSuche_Suchen();
+			}
+			else {
+				$this->queryMap();
+			}
 		}
 	}
 
@@ -11736,7 +11738,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'y' => 0
 		);
 		
-		if ($this->qlayerset[0]['shape'] != null) {
+		if ($this->qlayerset[0]['shape'] !== null) {
 			# entweder gibt es schon ein Result
 			$result = $this->qlayerset[0]['shape'];
 		}

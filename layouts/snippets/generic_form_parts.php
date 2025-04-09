@@ -19,7 +19,7 @@
 				for($i = 0; $i < $cell_count; $i++) {
 					$cell = $row['cells'][$i];
 					if ($row['contains_attribute_names']) {
-						if ($cell['properties'] == 'class="gle-attribute-name"') {
+						if ($cell_count > 1 AND $cell['properties'] == 'class="gle-attribute-name"') {
 							$width = 'width="' . ($i == 0 ? '10%' : '1%') . '"';
 						}
 						else {
