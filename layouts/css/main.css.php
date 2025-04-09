@@ -1973,6 +1973,24 @@ thead.gle th {
  text-align:left;
 }
 
+.gle-view {
+	display: flex;
+	position: absolute;
+  right: 18px;
+  overflow: hidden;
+  height: 18px;
+	clip-path: rect(0px 54px 18px 36px);
+	transition: clip-path 0.2s ease;
+}
+
+.gle-view:hover {
+	clip-path: rect(0px 54px 18px 0px);
+}
+
+.gle-view-button.active {
+	order: 2;
+}
+
 #gle_column_options_div {
 	position: absolute;
 	right: 2px;
