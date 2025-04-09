@@ -2293,6 +2293,8 @@ class Konvertierung extends PgObject {
 	 */
 	function validate_uploaded_files($upload_path) {
 		$uploaded_files = getAllFiles($upload_path);
+		$plan_file_name =  $this->config['plan_file_name'];
+
 
 		if (count($uploaded_files) == 0) {
 			return array(
@@ -3004,6 +3006,7 @@ class Konvertierung extends PgObject {
 	* in gebietseinheiten in the temporary_gmlas_table
 	* This check makes sure to disqualify geometries that only include just one small change (e.g. Berichtigung/Aenderung)
 	* i.e. if failed, the uploaded file is not a full but at best only a partial zusammenzeichnung
+	* this also prevents uploads to the wrong stelle/administration
 	*/
 	function is_geltungsbereich_gebietseinheiten_area_similar($schema_tmp, $plan_class_tmp) {
 		$sql = "
