@@ -97,7 +97,6 @@ if ($doit == true) {
 					<td width="99%" align="center"><h2 id="layername"><? echo $layer_name; ?></h2></td><?
 						if (!$this->user->rolle->visually_impaired AND $anzObj > 0 AND value_of($this->formvars, 'printversion') == '') { ?>
 						<td valign="top" style="padding: 0 10 0 0" class="layer_header">
-							<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer switch-gle-view-columns" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
 						</td>
 						<td>
 						</td><?
@@ -105,13 +104,23 @@ if ($doit == true) {
 				</tr>
 			</table><?
 		}
-		$table_id = rand(0, 100000);
-		echo value_of($layer, 'paging'); 
+		$table_id = rand(0, 100000); ?>
+
+		<div style="display: flex; justify-content: space-between;">
+			<div style="width: 80px;"></div> <?
+			echo value_of($layer, 'paging'); ?>
+			<div class="gle-view">	<?
+				$s = ($layer['template'] == ''? 0 : 1);
+				for ($g = $s; $g < 3; $g++) {
+					echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['Layer_ID'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+				}	?>
+			</div>
+		</div> <?
 
 		if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
 			include('dataset_operations.php');
 		}		?>
-		<div id="<? echo $table_id; ?>" style="width: 100%; padding:2"><?
+		<div id="<? echo $table_id; ?>" class="records" style="width: 100%; padding:2; <? if ($layer['gle_view'] == 2){echo 'display: flex;';} ?>"><?
 			for ($k; $k<$anzObj; $k++) {
 				$table = array();
 				$nl = false;

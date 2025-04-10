@@ -106,7 +106,7 @@ for($i=0;$i<$anzLayer;$i++){
 		if ($template == '') {
 			$template = 'generic_layer_editor_2.php';
 		}
-		if ($this->qlayerset[$i]['gle_view'] == '1') {
+		if ($this->qlayerset[$i]['gle_view'] > 0) {
 			include(SNIPPETS . $template);			# Attribute zeilenweise bzw. Raster-Template
 		}
 		else {
@@ -176,13 +176,6 @@ if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != '
 <table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
 	<tr>
 		<td align="right">
-    <? if ($this->user->rolle->visually_impaired) { ?>
-				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
-				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
-				<? }else{ ?>
-				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
-				<? } ?>
-		<? } ?>
 		</td>
 	</tr>
 </table>
