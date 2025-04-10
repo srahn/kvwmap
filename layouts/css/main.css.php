@@ -1978,12 +1978,12 @@ thead.gle th {
 	position: sticky;
   right: 18px;
   height: 18px;
-	clip-path: rect(0px 54px 18px 36px);
+	clip-path: polygon(100% 0px, 100% 18px, calc(100% - 18px) 18px, calc(100% - 18px) 0px);
 	transition: clip-path 0.2s ease;
 }
 
 .gle-view:hover {
-	clip-path: rect(0px 54px 18px 0px);
+	clip-path: polygon(100% 0px, 100% 18px, 0px 18px, 0px 0px);
 }
 
 .gle-view-button.active {

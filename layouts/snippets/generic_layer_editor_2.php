@@ -94,7 +94,7 @@ if ($doit == true) {
 							echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']) . '" target="' . $target . '" title="' . $strbackToSearch . '"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 						} ?>
 					</td>
-					<td width="99%" align="center"><h2 id="layername"><? echo $layer_name; ?></h2></td><?
+					<td width="99%" align="center"></td><?
 						if (!$this->user->rolle->visually_impaired AND $anzObj > 0 AND value_of($this->formvars, 'printversion') == '') { ?>
 						<td valign="top" style="padding: 0 10 0 0" class="layer_header">
 						</td>
@@ -107,10 +107,13 @@ if ($doit == true) {
 		$table_id = rand(0, 100000); ?>
 
 		<div style="display: flex; justify-content: space-between;">
-			<div style="width: 80px;"></div> <?
-			echo value_of($layer, 'paging'); ?>
+			<div style="position: sticky; left: calc(50% - 225px); min-width: 450px"> 
+				<h2 id="layername"><? echo $layer_name; ?></h2><?
+				echo value_of($layer, 'paging'); ?>
+			</div>
 			<div class="gle-view">	<?
-				for ($g = 0; $g < 3; $g++) {
+				$s = ($layer['template'] == ''? 0 : 1);
+				for ($g = $s; $g < 3; $g++) {
 					echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
 				}	?>
 			</div>

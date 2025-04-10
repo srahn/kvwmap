@@ -168,7 +168,7 @@ if ($doit == true) {
 					<td valign="top" style="padding: 0 0 0 0">
 					</td>
 					<? } ?>
-					<td height="30" width="99%" align="center"><h2><? echo $layer_name; ?></h2></td>
+					<td height="30" width="99%" align="center">
 					<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 					<td valign="top" style="padding: 0 10 0 0">
 					</td>
@@ -180,12 +180,16 @@ if ($doit == true) {
 		} 
 		$table_id = rand(0, 100000); ?>
 		<div style="display: flex; justify-content: space-between;">
-			<div style="width: 140px;"></div>
-			<? echo $layer['paging']; ?>
+			<div style="position: sticky; left: calc(50% - 225px); min-width: 450px">
+				<h2 id="layername"><? echo $layer_name; ?></h2><?
+				echo $layer['paging']; ?>
+			</div>
 			<div style="position: sticky; display: flex; right: 5px;  z-index: 1000;">
 				<div class="gle-view">	<?
-					for ($g = 0; $g < 3; $g++) {
-						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+					if ($layer['template'] == '') {
+						for ($g = 0; $g < 3; $g++) {
+							echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+						}
 					}	?>
 				</div>
 				<i id="column_options_button" class="fa fa-columns" aria-hidden="true" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
@@ -198,13 +202,11 @@ if ($doit == true) {
 					}	?>
 				</div>
 			</div>
-		</div>
-		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%"> <?
-
-			if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
-				include('dataset_operations.php');
-			} ?>
-
+		</div>	<?
+		if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
+			include('dataset_operations.php');
+		} ?>
+		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%">
 			<tr>
 				<td width="100%">   
 					<table class="gle1_table" cellspacing="0" cellpadding="0" width="100%">
@@ -562,11 +564,11 @@ if ($doit == true) {
 				</td>
 			</tr>
 		</table>
-		<table style="margin-right: auto"><?
+		<?
 			if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {
 				include('dataset_operations.php');
 			} ?>
-		</table> <?
+		<?
 		for ($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++) {
 			echo $invisible_attributes[$layer['layer_id']][$l]."\n";
 		} ?>
