@@ -168,7 +168,7 @@ if ($doit == true) {
 					<td valign="top" style="padding: 0 0 0 0">
 					</td>
 					<? } ?>
-					<td height="30" width="99%" align="center"><h2><? echo $layer_name; ?></h2></td>
+					<td height="30" width="99%" align="center">
 					<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 					<td valign="top" style="padding: 0 10 0 0">
 					</td>
@@ -180,8 +180,10 @@ if ($doit == true) {
 		} 
 		$table_id = rand(0, 100000); ?>
 		<div style="display: flex; justify-content: space-between;">
-			<div style="width: 140px;"></div>
-			<? echo $layer['paging']; ?>
+			<div style="position: sticky; left: calc(50% - 225px); min-width: 450px">
+				<h2 id="layername"><? echo $layer_name; ?></h2><?
+				echo $layer['paging']; ?>
+			</div>
 			<div style="position: sticky; display: flex; right: 5px;  z-index: 1000;">
 				<div class="gle-view">	<?
 					if ($layer['template'] == '') {
