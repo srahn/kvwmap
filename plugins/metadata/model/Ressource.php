@@ -13,7 +13,8 @@ class Ressource extends PgObject {
 	public $has_subressources = false;
 	public $has_ressource_ranges = false;
 	public $sub_ressources = array();
-	public $layer_id = 8;
+	public $layer_id = METADATA_RESSOURCES_LAYER_ID;
+	public $unlogged = true;
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->$write_debug);
@@ -25,6 +26,23 @@ class Ressource extends PgObject {
 		// 	'Linien',
 		// 	'Flächen'
 		// );
+	}
+
+	/**
+	 * Function append document files to $zip_file
+	 * @param Ressource $ressource
+	 * @param String $zip_file, The name of the ZIP-File on which the documents to be append.
+	 */
+	function append_docs($zip_file) {
+		$documents = arrStrToArr($this->get('documents'), ',', '{}');
+		foreach ($documents AS $document) {
+			$doc_file = explode('&original_name=' , $document)[0];
+			if (file_exists($doc_file)) {
+				// Put the document file into the $export_file.zip
+				$command = ZIP_PATH . ' -j ' . $zip_file . ' ' . $doc_file;
+				exec($command);
+			}
+		}
 	}
 
 	public static	function find($gui, $where, $order = '') {
@@ -131,7 +149,15 @@ class Ressource extends PgObject {
 			return $next_update_at;
 		}
 	}
-		
+	
+	function get_sources() {
+		return Lineage::find_sources($this->gui, $this->get('id'));
+	}
+
+	function get_targets() {
+		return Lineage::find_targets($this->gui, $this->get('id'));
+	}
+
 	function get_subressources() {
 		$subresource = new SubRessource($this->gui);
 		$subressources = $subresource->find_by_ressource_id($this->get_id());
@@ -291,7 +317,7 @@ class Ressource extends PgObject {
 		if ($method_only == '') {
 			$this->update_status(0, ' Datum der letzten Aktualisierung gesetzt.');
 		}
-		$last_updated_at = date("Y-m-d");
+		$last_updated_at = date("Y-m-d H:i:s");
 		$this->update_status(0, '', $last_updated_at);
 		return array(
 			'success' => true,
@@ -356,7 +382,7 @@ class Ressource extends PgObject {
 	 * Download dataset or its subsets to download_path
 	 */
 	function download_urls() {
-		$this->debug->show('Starte Funktion download_urls', true);
+		// $this->debug->show('Starte Funktion download_urls', true);
 		$download_urls = array();
 		try {
 			if ($this->get('download_url') != '') {
@@ -754,30 +780,31 @@ class Ressource extends PgObject {
 			$this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
 			mkdir($dest_path, 0777, true);
 		}
+		else {
+			array_map('unlink', glob("$dest_path/*.*"));
+		}
 
 		$download_path = $this->get_full_path($this->get('download_path'));;
 
-		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
 		$err_msg = array();
-		foreach (glob($download_path . '*') as $filename) {
-			if (finfo_file($finfo, $filename) == 'application/zip') {
-				$cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
-				$this->debug->show('Packe ' . $filename . ' aus', true);
-				$descriptorspec = [
-					0 => ["pipe", "r"],  // stdin
-					1 => ["pipe", "w"],  // stdout
-					2 => ["pipe", "w"],  // stderr
-				];
-				$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
-				$line = __LINE__;
-				$stdout = stream_get_contents($pipes[1]);
-				fclose($pipes[1]);
-				$stderr = stream_get_contents($pipes[2]);
-				fclose($pipes[2]);
-				#    exec($cmd, $output, $return_var);
-				if ($stderr != '') {
-					$err_msg[] = 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr;
-				}
+		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+		$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
+		$this->debug->show('Packe ZIP-Dateien ' . implode(', ', $zip_files) . ' aus nach ' . $dest_path, true);
+		foreach ($zip_files as $zip_file) {
+			$cmd = 'unzip -j -o "' . $zip_file . '" -d ' . $dest_path;
+			$descriptorspec = [
+				0 => ["pipe", "r"],  // stdin
+				1 => ["pipe", "w"],  // stdout
+				2 => ["pipe", "w"],  // stderr
+			];
+			$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+			$line = __LINE__;
+			$stdout = stream_get_contents($pipes[1]);
+			fclose($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[2]);
+			if ($stderr != '') {
+				$err_msg[] = 'Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ' . $this->get_id() . ' Fehler: ' . $stderr;
 			}
 		}
 		finfo_close($finfo);
@@ -794,7 +821,8 @@ class Ressource extends PgObject {
 	}
 
 	/**
-	 * Function unzip specific or all files of a directory to a destination directory,
+	 * Function create a new destination folder if not exists or remove all files if exists,
+	 * and than unzip specific or all files of a directory to a destination directory,
 	 * unzip the extracted files in destination directory when they are zip files
 	 * and remove the original zip files in destination directory
 	 */
@@ -817,33 +845,57 @@ class Ressource extends PgObject {
 			$this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
 			mkdir($dest_path, 0777, true);
 		}
+		else {
+			array_map('unlink', glob("$dest_path/*.*"));
+		}
 		$download_path = $this->get_full_path($this->get('download_path'));;
 
-		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
 		$err_msg = array();
-		foreach (glob($download_path . '*') as $filename) {
-			if (finfo_file($finfo, $filename) == 'application/zip') {
-				echo '<br>filename: ' . $filename;
-				$cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
-				$this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
-				$descriptorspec = [
-					0 => ["pipe", "r"],  // stdin
-					1 => ["pipe", "w"],  // stdout
-					2 => ["pipe", "w"],  // stderr
-				];
-				$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
-				$line = __LINE__;
-				$stdout = stream_get_contents($pipes[1]);
-				fclose($pipes[1]);
-				$stderr = stream_get_contents($pipes[2]);
-				fclose($pipes[2]);
-				#    exec($cmd, $output, $return_var);
-				if ($stderr != '') {
-					$err_msg[] = 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr;
-				}
+		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+		$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
+		$this->debug->show('Packe ZIP-Dateien aus: ' . implode(', ', $zip_files), true);
+		foreach ($zip_files as $zip_file) {
+			$cmd = 'unzip -j -o "' . $zip_file . '" -d ' . $dest_path;
+			$descriptorspec = [
+				0 => ["pipe", "r"],  // stdin
+				1 => ["pipe", "w"],  // stdout
+				2 => ["pipe", "w"],  // stderr
+			];
+			$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+			$line = __LINE__;
+			$stdout = stream_get_contents($pipes[1]);
+			fclose($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[2]);
+			if ($stderr != '') {
+				$err_msg[] = 'Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ' . $this->get_id() . ' Fehler: ' . $stderr;
 			}
 		}
 		finfo_close($finfo);
+
+		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+		$zip_files = array_filter(glob($dest_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
+		$this->debug->show('Packe ' . count($zip_files) . 'ZIP-Dateien in Verzeichnis ' . $dest_path . ' aus.', true);
+		foreach ($zip_files as $zip_file) {
+			$cmd = 'unzip -j -o "' . $zip_file . '" -d ' . $dest_path;
+			$descriptorspec = [
+				0 => ["pipe", "r"],  // stdin
+				1 => ["pipe", "w"],  // stdout
+				2 => ["pipe", "w"],  // stderr
+			];
+			$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+			$line = __LINE__;
+			$stdout = stream_get_contents($pipes[1]);
+			fclose($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[2]);
+			if ($stderr != '') {
+				$err_msg[] = 'Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ' . $this->get_id() . ' Fehler: ' . $stderr;
+			}
+			unlink($zip_file);
+		}
+		finfo_close($finfo);
+
 		if (count($err_msg) > 0) {
 			return array(
 				'success' => false,
@@ -1275,7 +1327,8 @@ class Ressource extends PgObject {
 			NULL,
 			'--config OGR_TRUNCATE YES',
 			'UTF-8',
-			false
+			false,
+			$this->unlogged
 		);
 
 		if ($result != 0) {
@@ -1296,7 +1349,7 @@ class Ressource extends PgObject {
 		$pathinfo = pathinfo($shape_file);
 		$result = required_shape_files_exists(glob($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.*'));
 		if (!$result['success']) { return $result; }
-		$import_table = strtolower(sonderzeichen_umwandeln($pathinfo['filename']));
+		$import_table = ($this->get('import_table') != '' ? $this->get('import_table') : strtolower(sonderzeichen_umwandeln($pathinfo['filename'])));
 		$this->debug->show('Importiere in Tabelle ' . ($this->get('import_schema') != '' ? $this->get('import_schema') : $import_table) . '.' . $import_table, true);
 		$result = $this->gui->data_import_export->ogr2ogr_import(
 			$this->get('import_schema') != '' ? $this->get('import_schema') : $import_table,
@@ -1308,7 +1361,8 @@ class Ressource extends PgObject {
 			NULL,
 			'-overwrite',
 			'UTF-8',
-			true
+			true,
+			$this->unlogged
 		);
 		return array(
 			'success' => ($result == 0),
@@ -1356,9 +1410,17 @@ class Ressource extends PgObject {
 		$err_msg = array();
 		$first = true;
 		$this->database->create_schema($this->get('import_schema'));
+		$result = $this->drop_import_table($this->get('import_schema'), $this->get('import_table'));
+		if (!$result['success']) {
+			return array(
+				'success' => false,
+				'msg' => $result['msg']
+			);
+		}
+		$this->debug->show('Importiere ' . count($gml_files) . ' GML-Dateien aus Verzeichnis: ' . $dest_path . ' in Tabelle: ' . $this->get('import_schema') . '.' . $this->get('import_table'), true);
 		foreach ($gml_files as $gml_file) {
-			$this->debug->show('Importiere Datei: ' . $dest_path . $gml_file, true);
-			// $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $gml_file, $this->database, $this->get('import_layer'), NULL, ($first ? '-overwrite' : '-append'), 'UTF-8', true);
+			// $this->debug->show('Importiere Datei: ' . $dest_path . $gml_file, true);
+			// $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $gml_file, $this->database, $this->get('import_layer'), NULL, ($first ? '-overwrite' : '-append'), 'UTF-8', true, $this->unlogged);
 			$result = $this->gui->data_import_export->ogr2ogr_import(
 				$this->get('import_schema'),
 				$this->get('import_table'),
@@ -1369,7 +1431,8 @@ class Ressource extends PgObject {
 				NULL,
 				($first ? '-overwrite' : '-append'),
 				'UTF-8',
-				false
+				false,
+				$this->unlogged
 			);
 			$first = false;
 			if ($result != '') {
@@ -1385,6 +1448,32 @@ class Ressource extends PgObject {
 		return array(
 			'success' => true,
 			'msg' => 'Anzahl erfolgreich gelesener GML-Dateien: ' . count($gml_files) . '.'
+		);
+	}
+
+	/**
+	 * Function drop the import table if it exists and all its dependencies.
+	 * @param string $table_schema, Name of the database schema containing the table.
+	 * @param string $table_name, Name of the table that shall be droped.
+	 * @return array (
+	 * 	boolean $success, True if table has been droped successfully.
+	 *  string $msg, Error or success message.
+	 * )
+	 */
+	function drop_import_table($table_schema, $table_name) {
+		$this->debug->show('Lösche Tabelle: ' . $table_schema . "." . $table_name, true);
+		$sql = "DROP TABLE IF EXISTS " . $table_schema . "." . $table_name . ' CASCADE';
+		// $this->debug->show('SQL zum löschen der Tabelle: ' . $sql, true);
+		$query = $this->execSQL($sql);
+		if (!$query) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Löschen der Tabelle ' . $table_schema . '.' . $table_name . ' Meldung; ' . pg_last_error($this->database->dbConn)
+			);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Tabelle ' . $table_schema . '.' . $table_name . ' erfolgreich gelöscht'
 		);
 	}
 

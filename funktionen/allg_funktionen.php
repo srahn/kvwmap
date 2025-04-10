@@ -2049,12 +2049,12 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 * and return the elements of the string as array separated by the delimmiter.
 * The elements of the string will be replaced by slashes and timed from white spaces and ".
 */
-function arrStrToArr($str, $delimiter) {
+function arrStrToArr($str, $delimiter, $brackets = '[]') {
 #	if(is_string($delimiter) and in_array())
 #	echo gettype($delimiter);
-	$arr = explode($delimiter, trim($str, '[]'));
+	$arr = explode($delimiter, trim($str, $brackets));
 	foreach ($arr as &$value) {
-		$value = trim(stripslashes($value), '"[]"');
+		$value = trim(stripslashes($value), '"' . $brackets . '"');
 	}
 	return $arr;
 }
