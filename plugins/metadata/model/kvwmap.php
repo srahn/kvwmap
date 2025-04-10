@@ -219,17 +219,10 @@
 
 			// An Ressourcen hängende Dokumente in ZIP packen
 			$ressource = Ressource::find_by_id($GUI, 'id', $package->get('ressource_id'));
-			$documents = arrStrToArr($ressource->get('documents'), ',', '{}');
-			foreach ($documents AS $document) {
-				$doc_file = explode('&original_name=' , $document)[0];
-				if (file_exists($doc_file)) {
-					// Put the document file into the $export_file.zip
-					$command = ZIP_PATH . ' -j ' . $export_file . ' ' . $doc_file;
-					exec($command);
-				}
-			}
-
+			$ressource->append_docs($export_file);
 			// Metadaten und Dokumente von an Ressourcen hängenden Quellen
+			
+
 
 			// Wenn ZIP-Datei existiert und etwas drin ist, chgrp www-data, chmod g+w und Verzeichnis löschen. (Aufräumen)
 			$package->delete_export_path();
