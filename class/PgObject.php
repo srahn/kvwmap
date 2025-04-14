@@ -229,6 +229,21 @@ class PgObject {
 		return $this->extent;
 	}
 
+	function exists($where) {
+		$sql = "
+			SELECT
+				count(*) num_rows
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				" . $where . "
+		";
+		$this->debug->show('find_by_id sql: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		$result = pg_fetch_assoc($query);
+		return ($result['num_rows'] > 0);
+	}
+
 	function delete_by($attribute, $value) {
 		#echo '<br>delete by attribute ' . $attribute . ' with value ' . $value;
 		$sql = "
