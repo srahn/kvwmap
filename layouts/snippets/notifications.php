@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH . 'languages/notifications_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/notifications_' . rolle::$language . '.php');
 ?>
 <script>
 	function deleteNotification(id) {

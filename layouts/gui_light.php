@@ -47,7 +47,7 @@
 				</div>
 				<div id="header_menue"><?
 					global $supportedLanguages;
-					include(LAYOUTPATH . 'languages/header_' . $this->user->rolle->language . '.php'); 
+					include(LAYOUTPATH . 'languages/header_' . rolle::$language . '.php'); 
 					include(LAYOUTPATH . 'snippets/headermenues.php'); ?>
 				</div>
 				<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">

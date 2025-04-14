@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/SVG_map_' . rolle::$language . '.php');
 #
 ###################################################################
 #                                                                 #
@@ -379,8 +379,8 @@ function startup() {
 	}
 	set_suchkreis();
 	eval(doing+"()");	
-  //document.getElementById(doing+"0").classList.add("active");				// das kann der IE nicht
-	document.getElementById(doing+"0").className.baseVal += " active";	// deswegen dieser workaround
+  //document.getElementById(doing+"0").classList.add("active_navbutton");				// das kann der IE nicht
+	document.getElementById(doing+"0").className.baseVal += " active_navbutton";	// deswegen dieser workaround
 	pinching = false;
 }
 
@@ -1879,10 +1879,10 @@ function redraw()
 
 // ----------------------ausgewaehlten button highlighten---------------------------
 function highlightbyid(id){
-	//document.querySelector(".active").classList.remove("active");		// kann der IE nicht
-	document.querySelector(".active").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
-  //document.getElementById(id).classList.add("active");						// kann der IE nicht
-	document.getElementById(id).className.baseVal += " active";				// deswegen dieser workaround
+	//document.querySelector(".active_navbutton").classList.remove("active_navbutton");		// kann der IE nicht
+	document.querySelector(".active_navbutton").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
+  //document.getElementById(id).classList.add("active_navbutton");						// kann der IE nicht
+	document.getElementById(id).className.baseVal += " active_navbutton";				// deswegen dieser workaround
   document.getElementById("suchkreis").setAttribute("cx", -10000);
 	if(top.document.GUI.orthofang != undefined){
 		options1 = top.document.getElementById("options").innerHTML="";

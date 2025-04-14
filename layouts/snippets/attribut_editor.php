@@ -2,8 +2,8 @@
 	include_once(CLASSPATH.'FormObject.php');
 	global $supportedLanguages;
 	global $quicksearch_layer_ids;
-	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
-	include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/layer_formular_'.rolle::$language.'.php');
+	include(LAYOUTPATH.'languages/attribut_editor_'.rolle::$language.'.php');
 	$form_element_options = array(
 		array(
 			'value' => 'Text',

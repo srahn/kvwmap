@@ -69,7 +69,7 @@ class Menue extends MyObject {
 					m.links,
 					m.onclick,
 					name as name_german," .
-					($gui->user->rolle->language != 'german' ? "`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
+					(rolle::$language != 'german' ? "`name_" . rolle::$language . "` AS" : "") . " name,
 					m.menueebene,
 					m.obermenue,
 					m.target,
@@ -114,7 +114,7 @@ class Menue extends MyObject {
 			array(
 				'select' => " DISTINCT
 					m.id,".
-					($gui->user->rolle->language != 'german' ? "m.`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
+					(rolle::$language != 'german' ? "m.`name_" . rolle::$language . "` AS" : "") . " name,
 					m.`order`,
 					m.menueebene
 				",
@@ -155,7 +155,7 @@ class Menue extends MyObject {
 			array(
 				'select' => " DISTINCT
 					m.id,
-					m.`name" . ($gui->user->rolle->language != 'german' ? "_" . $gui->user->rolle->language : "") . "` AS name,
+					m.`name" . (rolle::$language != 'german' ? "_" . rolle::$language : "") . "` AS name,
 					m.`order`,
 					m.menueebene
 				",
@@ -180,14 +180,7 @@ class Menue extends MyObject {
 		$is_selected = true;
 		$formvars = $_REQUEST;
 		$link = parse_url(
-			replace_params(
-				$this->get('links'),
-				rolle::$layer_params,
-				$this->gui->user->id,
-				$this->gui->stelle_id,
-				rolle::$hist_timestamp,
-				$this->gui->user->rolle->language
-			)
+			replace_params_rolle($this->get('links'))
 		);
 		if (value_of($link, 'query') == '') {
 			$is_selected = false;
@@ -237,27 +230,13 @@ class Menue extends MyObject {
 	}
 
 	function get_onclick(){
-		$onclick = replace_params(
-			$this->get('onclick'),
-			rolle::$layer_params,
-			$this->gui->user->id,
-			$this->gui->Stelle->id,
-			rolle::$hist_timestamp,
-			$this->gui->user->rolle->language
-		);
+		$onclick = replace_params_rolle($this->get('onclick'));
 		return $onclick;
 	}
 
-	function get_href($class, $target) {
+	function get_href() {
 		$href = '';
-		$link = replace_params(
-			$this->get('links'),
-			rolle::$layer_params,
-			$this->gui->user->id,
-			$this->gui->Stelle->id,
-			rolle::$hist_timestamp,
-			$this->gui->user->rolle->language
-		);
+		$link = replace_params_rolle($this->get('links'));
 		$link = add_csrf($link);
 		# define click events
 		if ($this->obermenue){
@@ -291,7 +270,7 @@ class Menue extends MyObject {
 		$html = '';
 		$class  = $this->get_class();
 		$target = $this->get_target();
-		$href = $this->get_href($class, $target);
+		$href = $this->get_href();
 		$onclick = $this->get_onclick();
 		if(!$this->obermenue)$onclick = 'checkForUnsavedChanges(event);'.$onclick;
 		$style = $this->get_style();

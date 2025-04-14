@@ -82,6 +82,7 @@ class DataPackage extends PgObject {
 
 	public static	function find_by_stelle_id($gui, $stelle_id) {
 		$package = new DataPackage($gui);
+		// $package->show = true;
 		$params = array(
 			'select' => $package->select,
 			'from' => "
@@ -191,6 +192,10 @@ class DataPackage extends PgObject {
 		return $this->export_path;
 	}
 
+	/**
+	 * Function return the name of file that contains the content of the data package
+	 * It consists on the path, file name and file extension .zip
+	 */
 	function get_export_file() {
 		$export_path = $this->get_export_path();
 		$this->export_file = (substr($export_path, -1, 1) == '/' ? substr($export_path, 0, -1) : $export_path) . '.zip';

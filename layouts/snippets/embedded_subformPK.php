@@ -1,6 +1,6 @@
 <?
 	include(SNIPPETS . 'generic_form_parts.php');
-	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links bzw. editierbaren Datensätzen untereinander oder im Rasterlayout dargestellt
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];

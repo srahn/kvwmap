@@ -74,21 +74,36 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+/**
+* Funktion ersetzt in $str die Schlüsselwörter, die in rolle::$layer_params als key enthalten sind durch deren values.
+* Zusätzlich werden die vordefinierten Parameter ($USER_ID usw.) ersetzt
+* Im optionalen Array $additional_params können weitere zu ersetzende key-value-Paare übergeben werden
+*/
+function replace_params_rolle($str, $additional_params = NULL) {
 	if (strpos($str, '$') !== false) {
-		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
-		if (is_array($params)) {
-			foreach($params AS $key => $value){
-				$str = str_replace('$'.$key, $value, $str);
-			}
+		$params = rolle::$layer_params;
+		if (is_array($additional_params)) {
+			$params = array_merge($params, $additional_params);
 		}
-		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
-		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
-		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
-		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
-		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
-		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
-		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
+		$str = replace_params($str, $params);
+		$current_time = time();
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d', $current_time), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);
+		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
+		$str = str_replace('$STELLE_ID', rolle::$stelle_ID, $str);
+		$str = str_replace('$STELLE', rolle::$stelle_bezeichnung, $str);
+		$str = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $str);
+		$str = str_replace('$LANGUAGE', rolle::$language, $str);
+		$str = str_replace('$EXPORT', rolle::$export, $str);
+	}
+	return $str;
+}
+
+function replace_params($str, $params) {
+	if (is_array($params)) {
+		foreach ($params AS $key => $value) {
+			$str = str_replace('$'.$key, $value, $str);
+		}
 	}
 	return $str;
 }
@@ -230,19 +245,19 @@ class GUI {
 	}
 
 	function loadMultiLingualText($language) {
-    #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
+    #echo 'In der Rolle eingestellte Sprache: '.rolle::$language;
     $this->Stelle->language=$language;
-    $this->Stelle->getName();
-    include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
+    include(LAYOUTPATH.'languages/'.$language.'.php');
   }
 
-	function get_select_list(){
+  function get_select_list() {
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $attributenames[0] = $this->formvars['attribute'];
-		if($this->formvars['datatype_id'] != '')
+		if ($this->formvars['datatype_id'] != '') {
 			$attributes = $mapDB->read_datatype_attributes($this->formvars['layer_id'], $this->formvars['datatype_id'], $layerdb, $attributenames);
-    else{
+		}
+    else {
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
@@ -257,8 +272,9 @@ class GUI {
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
-			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN ('" . $attributevalues[$i] . "')", $sql);
-			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', "'" . $attributevalues[$i] . "'", $sql);	# fallback
+			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
+			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
+			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 		}
 		#echo $sql;
 		@$ret = $layerdb->execSQL($sql, 4, 0);
@@ -579,8 +595,8 @@ class stelle {
 
   function getName() {
     $sql ='SELECT ';
-    if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    if (rolle::$language != 'german' AND rolle::$language != ''){
+      $sql.='`Bezeichnung_'.rolle::$language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;
@@ -647,22 +663,30 @@ class rolle {
 	var $database;
 	var $loglevel;
 	var $hist_timestamp_de;
+	static $language;
 	static $hist_timestamp;
 	static $layer_params;
+	static $user_ID;
+	static $stelle_ID;
+	static $stelle_bezeichnung;
+	static $export;
 	var $minx;
-	var $language;
 	var $newtime;
+	var $gui_object;
+	var $layerset;
 
 	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
 		global $GUI;
 		$this->gui_object = $GUI;
-		$this->debug=$debug;
-		$this->user_id=$user_id;
-		$this->stelle_id=$stelle_id;
-		$this->database=$database;
-		#$this->layerset=$this->getLayer('');
-		#$this->groupset=$this->getGroups('');
+		$this->debug = $debug;
+		$this->user_id = $user_id;
+		$this->stelle_id = $stelle_id;
+		$this->database = $database;
+		rolle::$user_ID = $user_id;
+		rolle::$stelle_ID = $stelle_id;
+		rolle::$stelle_bezeichnung = $this->gui_object->Stelle->Bezeichnung;
+		rolle::$export = 'false';
 		$this->loglevel = 0;
 	}
 
@@ -701,8 +725,8 @@ class rolle {
 			$this->coordtype=$rs['coordtype'];
 			$this->last_time_id=$rs['last_time_id'];
 			$this->gui=$rs['gui'];
-			$this->language=$rs['language'];
-			$language = $this->language;
+			rolle::$language=$rs['language'];
+			$language = rolle::$language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->tooltipquery=$rs['tooltipquery'];
@@ -953,27 +977,13 @@ class db_mapObj{
 
 			if ($replace) {
 				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$replaced_default = replace_params(
-						$attributes['default'][$i],
-						rolle::$layer_params,
-						$this->GUI->user->id,
-						$this->GUI->Stelle_ID,
-						rolle::$hist_timestamp,
-						$this->GUI->rolle->language
-					);
+					$replaced_default = replace_params_rolle($attributes['default'][$i]);
 					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
 					if ($ret1[0] == 0) {
 						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 					}
 				}
-				$rs['options'] = replace_params(
-					$rs['options'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$language
-				);
+				$rs['options'] = replace_params_rolle($rs['options']);
 			}
 
 			$attributes['form_element_type'][$i]= $rs['form_element_type'];
@@ -1007,7 +1017,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value'), $attribute_values = []) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -1078,7 +1088,7 @@ class db_mapObj{
 			ORDER BY
 				`order`
 		";
-		#echo '<br>Sql read_layer_attributes: ' . $sql;
+		// echo '<br>Sql read_layer_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>",4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -1120,21 +1130,23 @@ class db_mapObj{
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];			
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
-						$attributes[$column][$i] = replace_params(
-							$attributes[$column][$i],
-							rolle::$layer_params,
-							$this->User_ID,
-							$this->Stelle_ID,
-							rolle::$hist_timestamp,
-							$this->rolle->language
-						);
+						$attributes[$column][$i] = 	replace_params_rolle(
+																					$attributes[$column][$i],
+																					((count($attribute_values) > 0 AND $replace_only == 'default') ? $attribute_values : NULL)
+																				);
 					}
 				}
 			}
+
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
@@ -1160,11 +1172,6 @@ class db_mapObj{
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
 			$attributes['visible'][$i] = $rs['visible'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {

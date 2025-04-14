@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH . 'languages/rolesdaten_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/rolesdaten_' . rolle::$language . '.php');
 ?>
 <script>
 

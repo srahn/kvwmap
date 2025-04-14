@@ -496,7 +496,7 @@ class ddl {
 										$this->gui->getSubFormResultSet($this->attributes, $j, $this->layerset['maintable'], $this->result[$i]);
 										$this->gui->formvars['aktivesLayout'] = $sublayout;
 										$page_id_before_sublayout = $this->pdf->currentContents;
-										$result = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy, false);
+										$result = $this->gui->generischer_sachdaten_druck_createPDF($this->pdf, $offx, $offy, false);
 										$y = $result['y'];
 										$page_id_after_sublayout = $this->pdf->currentContents;
 										if ($page_id_before_sublayout != $page_id_after_sublayout) {
@@ -1733,8 +1733,8 @@ class ddl {
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
-			$sql .= ", `no_record_splitting` = ".(int)$formvars['use_previews'];
-			$sql .= ", `use_previews` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `use_previews` = ".(int)$formvars['use_previews'];
 			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			

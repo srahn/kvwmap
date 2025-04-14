@@ -44,7 +44,7 @@ class Invitation extends MyObject {
 	}
 
 	function mailto_text() {
-		include(LAYOUTPATH . 'languages/Invitation_' . $this->gui->user->rolle->language . '.php');
+		include(LAYOUTPATH . 'languages/Invitation_' . rolle::$language . '.php');
 
 		$link = URL . (substr(URL, -1) != '/' ? '/' : '') . APPLVERSION .
 			'index.php?go=logout&token=' . $this->get('token') .
@@ -53,7 +53,7 @@ class Invitation extends MyObject {
 			'&Name=' . urlencode($this->get('name')) .
 			'&Vorname=' . urlencode($this->get('vorname')) .
 			'&login_name=' . urlencode($this->get('loginname')) .
-			'&language=' . $this->gui->user->rolle->language;
+			'&language=' . rolle::$language;
 
 		$text = str_replace('$link', $link, $this->stelle->get('invitation_text')) ?: $strInvitationText . '
 

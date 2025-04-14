@@ -1,5 +1,5 @@
 <?php
-	$language_file_name = 'map_' . $this->user->rolle->language . '.php';
+	$language_file_name = 'map_' . rolle::$language . '.php';
 
 	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
 	include(LAYOUTPATH . 'languages/_include_language_files.php');
@@ -75,6 +75,8 @@ function showMapImage(){
 function addRedlining(){
 	svgdoc = document.SVG.getSVGDocument();
 	var redlining = svgdoc.getElementById("redlining");
+	document.GUI.free_polygons.value = '';
+	document.GUI.free_texts.value = '';
 	for(var i = 0; i < redlining.childNodes.length; i++){
 		child = redlining.childNodes[i];
 		switch(child.id){
@@ -103,15 +105,6 @@ function addRedlining(){
 				document.GUI.free_texts.value += '||';
 			break;
 		}
-	}
-}
-
-function setScale(select){
-	if(select.value != ''){
-		document.GUI.nScale.value=select.value;
-		document.getElementById('scales').style.display='none';
-		document.GUI.go.value='neu Laden';
-		document.GUI.submit();
 	}
 }
 

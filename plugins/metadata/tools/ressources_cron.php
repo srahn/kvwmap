@@ -20,6 +20,7 @@
     include(CLASSPATH . 'postgresql.php');
 
     define('DBWRITE', DEFAULTDBWRITE);
+    $language = 'german';
     $debug = new Debugger(DEBUGFILE, 'text/plain');
     $debug->user_funktion = 'admin';
 
@@ -75,18 +76,10 @@
           break;
         }
 
-        $GUI->debug->write('<p><hr>Start: ' . $GUI->debug->timestamp, 4);
         $GUI->Stelle = new stelle($GUI->formvars['stelle_id'], $GUI->database);
         $GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
         $GUI->user->setRolle($GUI->formvars['stelle_id']);
-        if ($GUI->formvars['ressource_id'] == '') {
-          $GUI->debug->show('Start', true);
-        }
-        else {
-          $GUI->debug->show('Update Ressource id: ' . $GUI->formvars['ressource_id'], true);
-        }
         $response = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id'], $GUI->formvars['method_only']);
-
         if (!$response['success']) {
           $GUI->debug->show($response['msg'], true);
           break;

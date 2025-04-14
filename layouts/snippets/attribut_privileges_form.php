@@ -1,6 +1,6 @@
 <? 
-	include(LAYOUTPATH.'languages/attribut_privileges_form_'.$this->user->rolle->language.'.php');
-	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/attribut_privileges_form_'.rolle::$language.'.php');
+	include(LAYOUTPATH.'languages/layer_formular_'.rolle::$language.'.php');
 ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">

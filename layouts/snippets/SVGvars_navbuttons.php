@@ -1,5 +1,5 @@
 <?
-  include(LAYOUTPATH.'languages/SVGvars_navbuttons_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/SVGvars_navbuttons_'.rolle::$language.'.php');
 
 $SVGvars_navbuttons .= previous($prev_disabled, $strPreviousView, $prevmouseupfunction);
 $SVGvars_navbuttons .= forward($next_disabled, $strNextView, $mouseupfunction);

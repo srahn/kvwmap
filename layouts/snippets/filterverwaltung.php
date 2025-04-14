@@ -1,5 +1,5 @@
 <?php
-	include_once(LAYOUTPATH.'languages/filterverwaltung_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/filterverwaltung_'.rolle::$language.'.php');
 	include_once(CLASSPATH . 'FormObject.php');
 ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
@@ -245,9 +245,6 @@ function showmap(){
 			;
     }
 ?>
-<INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
-<INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
-<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 <input type="hidden" name="go" value="Filterverwaltung">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="selected_layers" value="<? echo $this->formvars['selected_layers'] ?>">

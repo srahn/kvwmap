@@ -1,6 +1,6 @@
 <?php
  # 2008-01-24 pkvvm
-  include(LAYOUTPATH.'languages/SVG_Utilities_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/SVG_Utilities_'.rolle::$language.'.php');
 
 	$map_width = $this->user->rolle->nImageWidth;
 	$map_height = $this->user->rolle->nImageHeight;
@@ -113,7 +113,7 @@
 	#
 	# Positionsanzeigetext ausserhalb der Anzeigeflaeche bei Start
 	#
-	if($this->formvars['loc_y']==0) {
+	if($this->formvars['loc_y'] == '') {
 		$text_x=-1000000;
 		$text_y=-1000000;
 	}
@@ -1220,12 +1220,12 @@ function mouseup(evt){
 
 	function highlightbyid(id){
 		if(id != ''){			
-			if(document.querySelector('.active')){
-				//document.querySelector('.active').classList.remove('active');		// kann der IE nicht
-				document.querySelector('.active').className.baseVal = 'navbutton_frame';	// deswegen dieser workaround
+			if(document.querySelector('.active_navbutton')){
+				//document.querySelector('.active_navbutton').classList.remove('active_navbutton');		// kann der IE nicht
+				document.querySelector('.active_navbutton').className.baseVal = 'navbutton_frame';	// deswegen dieser workaround
 			}
-			//document.getElementById(id).classList.add('active');						// kann der IE nicht
-			document.getElementById(id).className.baseVal += ' active';				// deswegen dieser workaround
+			//document.getElementById(id).classList.add('active_navbutton');						// kann der IE nicht
+			document.getElementById(id).className.baseVal += ' active_navbutton';				// deswegen dieser workaround
 		  if(polygonfunctions == true){
 				remove_vertices();
 				remove_in_between_vertices();
@@ -3371,7 +3371,7 @@ function mouseup(evt){
 			circle[i].setAttribute("id", "vertex_"+i);
 			parent.appendChild(circle[i]);
 			// Start und Endpunkt
-			if(components[i+4] == "M" || components[i+4] == ""){
+			if(components[i+4] == "M" || components[i+4] == undefined){
 				circle[start].setAttribute("id", "vertex_"+start+"_"+parseInt(i+2));
 				start = i+5;
 				i = i + 3;

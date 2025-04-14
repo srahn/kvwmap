@@ -14,7 +14,7 @@
 	$strClass = "Klasse";
 	$strClasses = "Klassen";
 	$strClassification = "Klassifizierung";
-	$strClassificationHelp = "Hier kann der Name der Klassifizierung eingetragen werden, die verwendet werden soll. Eine Klassifizierung ist eine Sammlung zusammengehöriger Klassen.&#xa;Der hier einetragene Klassifizierungsname kann auch einen Themen-Parameter enthalten und dadurch dynamisch sein.";
+	$strClassificationHelp = "Hier kann der Name der Klassifizierung eingetragen werden, die verwendet werden soll. Eine Klassifizierung ist eine Sammlung zusammengehöriger Klassen.&#xa;Der hier eingetragene Klassifizierungsname kann auch einen Themen-Parameter enthalten und dadurch dynamisch sein.";
 	$strClassItem = "Classitem";
 	$strClusterMaxdistance = "Cluster_Maxdistance";
 	$strCommonData = "Allgemeine Angaben";
@@ -48,6 +48,7 @@
 	$strImagefile = "Grafikdatei";
 	$strLabelAngleItem = "Labelangleitem";
 	$strLabelItem = "Labelitem";
+	$strLabelItemHelp = "Hier können die Attribute festgelegt werden, die in der Beschriftungsauswahl in den Layer-Optionen zur Verfügung stehen sollen. Vorausgewählt ist standardmäßig das erste Attribut. Wenn im Data-Feld eine Unterabfrage verwendet wird, müssen die Attribute dort abgefragt werden.";
 	$strLabelMaxScale = "Labelmaxscale";
 	$strLabelMinScale = "Labelminscale";
 	$strLabelRequires = "Labelrequires";

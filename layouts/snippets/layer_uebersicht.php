@@ -1,6 +1,6 @@
 <?php
 	$GUI = $this;
-	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php'); 
+	include(LAYOUTPATH . 'languages/layer_formular_' . rolle::$language . '.php'); 
 	
 	$this->keywords = [];
 	for ($i = 0; $i < count($GUI->layers['wms_keywordlist']); $i++) {
@@ -84,7 +84,7 @@
 		return ['output' => $output, 'keywords' => $keywords];
 	};
 
-	include(LAYOUTPATH.'languages/userdaten_' . $this->user->rolle->language . '.php'); ?>
+	include(LAYOUTPATH.'languages/userdaten_' . rolle::$language . '.php'); ?>
 <script type="text/javascript">
 
 	function Bestaetigung(link,text) {
@@ -171,7 +171,7 @@
 	}
 
 	#column_options_div {
-		position: absolute;
+		position: fixed;
 		display: none;
 		right: 2px;
 		margin-right: 30px;

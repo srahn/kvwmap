@@ -4,7 +4,7 @@ if (value_of($this->formvars, 'anzahl') == '') {
 }
 
 include('funktionen/input_check_functions.php');
-include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 ?>
 
 <script type="text/javascript">
@@ -640,8 +640,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			fieldstring = form_fields[i] + '';
 			field = fieldstring.split(';');
 			var element = document.getElementsByName(fieldstring)[0];
-			if (element != undefined && element.type != 'hidden' && field[4] != 'SubFormFK' && field[7] != '0' && (element.readOnly != true) && field[5] == '0' && element.value == ''){
-			  message('Das Feld '+element.title+' erfordert eine Eingabe.');
+			if (
+				element != undefined &&
+				element.type != 'hidden' &&
+				// field[4] != 'SubFormFK' &&
+				field[7] != '0' &&
+				element.readOnly != true &&
+				field[5] == '0' &&
+				element.value == ''
+			) {
+			  message('Das Feld ' + element.title +' erfordert eine Eingabe.');
 				return;
 			}
 			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)){
@@ -724,7 +732,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
-		ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
+		ahah('index.php', formData, new Array(''), new Array('execute_function'));
 	}
 
 	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, list_edit){
@@ -786,10 +794,22 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		auto_resize_overlay();
 	}
 	
-	switch_gle_view1 = function(layer_id){
-		enclosingForm.chosen_layer_id.value = layer_id;
-		enclosingForm.go.value='toggle_gle_view';
-		overlay_submit(enclosingForm, false);
+	switch_gle_view1 = function(layer_id, from_mode, to_mode, button){
+		var active_button = enclosingForm.querySelector('.gle-view-button.active');
+		var div = enclosingForm.querySelector('#result_' + layer_id + '>#layer>div.records');
+		var req = 'go=switch_gle_view&chosen_layer_id=' + layer_id + '&mode=' + to_mode;
+		var reload = false;
+
+		if (from_mode == 0 && to_mode > 0 || from_mode > 0 && to_mode == 0){		// Wechsel zwischen 0 und 1/2
+			overlay_link(req + '&reload=1');
+		}
+		else {																																	// Wechsel zwischen 1 und 2
+			active_button.classList.remove('active');
+			button.classList.add('active');
+			div.style.display = (to_mode == 1? '' : 'flex');
+			auto_resize_overlay();
+			ahah('index.php', req, [], []);
+		}		
 	}
 	
 	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp) {
@@ -922,23 +942,23 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 
 	zoom2object = function(layer_id, columnname, oid, selektieren){
 		params = 'go=zoomto_dataset&oid='+oid+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
-		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+		if (root.document.getElementById('mapimage') != null) {					// aus overlay und Hauptkarte im root Fenster heraus --> Kartenzoom per Ajax machen
 			startwaiting();
 			root.get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
 		}
-		else{
-			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+		else {
+			root.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}
 	
 	zoom2wkt = function(wkt, epsg){
 		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
-		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+		if (root.document.getElementById('mapimage') != null) {					// aus overlay und Hauptkarte im root Fenster heraus --> Kartenzoom per Ajax machen
 			startwaiting();
 			root.get_map_ajax(params, '', '');
 		}
 		else{
-			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+			root.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}	
 
@@ -1004,7 +1024,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 
 	daten_export = function(layer_id, anzahl, format){
-		enclosingForm.all.value = document.getElementsByName('all_' + layer_id)[0].value;
+		enclosingForm.all.value = (document.getElementById('all_' + layer_id + '_2').checked? '1' : '');
 		if(enclosingForm.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
 			var option = document.createElement("option");
 			option.text = anzahl;

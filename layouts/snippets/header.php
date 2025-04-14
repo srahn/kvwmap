@@ -1,6 +1,10 @@
  <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH . 'languages/header_' . $this->user->rolle->language . '.php'); 
+	# rolle::$language wurde in Version 3.10 eingeführt
+	# Damit beim Update auf diese Version kein Fehler wegen unbekannter Variable erscheint:
+	# Später wenn alle auf mind. dieser Version sind, kann das wieder entfernt werden
+	$language = (isset(rolle::$language) ? rolle::$language : 'german');
+	include(LAYOUTPATH . 'languages/header_' . $language . '.php'); 
 ?>
 
 <style>

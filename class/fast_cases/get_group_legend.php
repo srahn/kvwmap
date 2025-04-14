@@ -130,21 +130,36 @@ function compare_legendorder($a, $b){
 	else return 0;
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+/**
+* Funktion ersetzt in $str die Schlüsselwörter, die in rolle::$layer_params als key enthalten sind durch deren values.
+* Zusätzlich werden die vordefinierten Parameter ($USER_ID usw.) ersetzt
+* Im optionalen Array $additional_params können weitere zu ersetzende key-value-Paare übergeben werden
+*/
+function replace_params_rolle($str, $additional_params = NULL) {
 	if (strpos($str, '$') !== false) {
-		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
-		if (is_array($params)) {
-			foreach($params AS $key => $value){
-				$str = str_replace('$'.$key, $value, $str);
-			}
+		$params = rolle::$layer_params;
+		if (is_array($additional_params)) {
+			$params = array_merge($params, $additional_params);
 		}
-		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
-		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
-		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
-		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
-		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
-		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
-		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
+		$str = replace_params($str, $params);
+		$current_time = time();
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d', $current_time), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);
+		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
+		$str = str_replace('$STELLE_ID', rolle::$stelle_ID, $str);
+		$str = str_replace('$STELLE', rolle::$stelle_bezeichnung, $str);
+		$str = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $str);
+		$str = str_replace('$LANGUAGE', rolle::$language, $str);
+		$str = str_replace('$EXPORT', rolle::$export, $str);
+	}
+	return $str;
+}
+
+function replace_params($str, $params) {
+	if (is_array($params)) {
+		foreach ($params AS $key => $value) {
+			$str = str_replace('$'.$key, $value, $str);
+		}
 	}
 	return $str;
 }
@@ -152,7 +167,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 function replace_params_link($str, $params, $layer_id) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerParamsForm(' . $layer_id .  ')">' . $value . '</a>', $str);
 		}
 	}
 	return $str;
@@ -278,10 +293,9 @@ class GUI {
 	}
 
 	function loadMultiLingualText($language) {
-    #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
+    #echo 'In der Rolle eingestellte Sprache: '.rolle::$language;
     $this->Stelle->language=$language;
-    $this->Stelle->getName();
-    include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
+    include(LAYOUTPATH.'languages/'.$language.'.php');
   }
 
 	function get_group_legend() {
@@ -403,7 +417,6 @@ class GUI {
 					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
 					#echo '<br>Name: '.$layerset[$i][name];
 					$layer->set('connection',	$layerset[$i][connection]);
-					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
 					if (MAPSERVERVERSION < 540) {
 						$layer->set('connectiontype', 7);
 					}
@@ -818,14 +831,7 @@ class GUI {
 
 		if ($layerset['processing'] != "") {
 			$processings = explode(";",
-				replace_params(
-					$layerset['processing'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->Stelle->id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				)
+				replace_params_rolle($layerset['processing'])
 			);
 			foreach ($processings as $processing) {
 				if (MAPSERVERVERSION >= 800) {
@@ -905,16 +911,7 @@ class GUI {
 			}
 			# Setzen des Filters
 			if ($layerset['Filter'] != '') {
-				# 2024-07-28 pk Replace all params in Filter
-				// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
-				$layerset['Filter'] = replace_params(
-					$layerset['Filter'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
+				$layerset['Filter'] = replace_params_rolle($layerset['Filter']);
 				if (substr($layerset['Filter'], 0, 1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {
@@ -1476,7 +1473,7 @@ class GUI {
 		if ($visible) {
 			$legend = '<tr><td valign="top">';
 
-			$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
+			$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"><div class="layerOptions" id="options_content_'.$layer['Layer_ID'].'"></div></div>';
 
 			if (!empty($layer['shared_from'])) {
 				$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
@@ -2135,8 +2132,8 @@ class stelle {
 
   function getName() {
     $sql ='SELECT ';
-    if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    if (rolle::$language != 'german' AND rolle::$language != ''){
+      $sql.='`Bezeichnung_'.rolle::$language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;
@@ -2197,33 +2194,40 @@ class stelle {
 }
 
 class rolle {
-
-  var $user_id;
-  var $stelle_id;
-  var $debug;
-  var $database;
-  var $loglevel;
-  var $hist_timestamp_de;
-  static $hist_timestamp;
-  static $layer_params;
-  var $minx;
-  var $language;
-  var $newtime;
+	var $user_id;
+	var $stelle_id;
+	var $debug;
+	var $database;
+	var $loglevel;
+	var $hist_timestamp_de;
+	static $language;
+	static $hist_timestamp;
+	static $layer_params;
+	static $user_ID;
+	static $stelle_ID;
+	static $stelle_bezeichnung;
+	static $export;
+	var $minx;
+	var $newtime;
+	var $gui_object;
+	var $layerset;
 
 	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
 		global $GUI;
 		$this->gui_object = $GUI;
-		$this->debug=$debug;
-		$this->user_id=$user_id;
-		$this->stelle_id=$stelle_id;
-		$this->database=$database;
-		#$this->layerset=$this->getLayer('');
-		#$this->groupset=$this->getGroups('');
+		$this->debug = $debug;
+		$this->user_id = $user_id;
+		$this->stelle_id = $stelle_id;
+		$this->database = $database;
+		rolle::$user_ID = $user_id;
+		rolle::$stelle_ID = $stelle_id;
+		rolle::$stelle_bezeichnung = $this->gui_object->Stelle->Bezeichnung;
+		rolle::$export = 'false';
 		$this->loglevel = 0;
 	}
 
-  function readSettings() {
+	function readSettings() {
 		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql = "
@@ -2258,8 +2262,8 @@ class rolle {
 			$this->coordtype=$rs['coordtype'];
 			$this->last_time_id=$rs['last_time_id'];
 			$this->gui=$rs['gui'];
-			$this->language=$rs['language'];
-			$language = $this->language;
+			rolle::$language=$rs['language'];
+			$language = rolle::$language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->tooltipquery=$rs['tooltipquery'];
@@ -2887,14 +2891,9 @@ class db_mapObj {
 				$rs['Layer_ID']
 			);
 			foreach (array('Name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
-				$rs[$key] = replace_params(
+				$rs[$key] = replace_params_rolle(
 					$rs[$key],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language,
-					$rs['duplicate_criterion']
+					['duplicate_criterion' => $rs['duplicate_criterion']]
 				);
 			}
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
@@ -3112,14 +3111,9 @@ class db_mapObj {
     while ($rs = $ret['result']->fetch_array()) {
       $rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
 			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
-				$rs[$key] = replace_params(
+				$rs[$key] = replace_params_rolle(
 					$rs[$key],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language,
-					$rs['duplicate_criterion']
+					['duplicate_criterion' => $rs['duplicate_criterion']]
 				);
 			}
 			$rs['alias_link'] = $rs['alias'];
