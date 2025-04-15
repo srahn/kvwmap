@@ -150,16 +150,17 @@ class PgObject {
 	 * @param string $limit?
 	 * @return array PgObject An array with all found object
 	 */
-	function find_where($where, $order = NULL, $select = '*', $limit = NULL) {
+	function find_where($where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
 		$select = (empty($select) ? $this->select : $select);
-		$where = (empty($where) ? "true" : $where);
-		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
-		$limit = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
+		$from   = (empty($from) ? $this->schema . ".\"" . $this->tableName . "\"" : $from);
+		$where  = (empty($where) ? "true" : $where);
+		$order  = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
+		$limit  = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
 		$sql = "
 			SELECT
 				" . $select . "
 			FROM
-				" . $this->schema . ".\"" . $this->tableName . "\"
+				" . $from . "
 			WHERE
 				" . $where . "
 			" . $order . "
@@ -168,7 +169,7 @@ class PgObject {
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$results = array();
-		while($this->data = pg_fetch_assoc($query)) {
+		while ($this->data = pg_fetch_assoc($query)) {
 			$results[] = clone $this;
 		}
 		return $results;

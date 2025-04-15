@@ -50,9 +50,10 @@ class Ressource extends PgObject {
 		$select = "ampel_id, r.gruppe_id, r.bezeichnung, r.hinweise_auf, r.beschreibung, r.dateninhaber_id, r.ansprechperson, r.format_id, r.aktualitaet, r.url, r.datenguete_id, r.quelle, r.github, r.download_url, r.dest_path, r.download_method, r.id, r.download_path, r.last_updated_at, r.auto_update, r.update_interval, r.import_epsg, r.error_msg, r.relevanz, r.digital, r.flaechendeckend, r.bemerkung_prioritaet, r.inquiries_required, r.inquiries, r.inquiries_responses, r.inquiries_responsible, r.inquiries_to, r.check_required, r.created_at, r.created_from, r.updated_at, r.updated_from, r.use_for_datapackage, r.transform_command, r.unpack_method, r.import_method, r.transform_method, r.status_id, r.von_eneka, r.documents, r.import_layer, r.import_schema, r.import_table, r.layer_id, r.update_time, r.import_filter, r.import_file, r.metadata_document, r.gebietseinheit_id, r.next_update_at,
 		DATE(r.last_updated_at) + r.update_time + r.update_interval AS next_interval_date,
 		s.status,
+		(status_id IS NULL OR status_id = 0) AND
 		auto_update AND
 		(
-			last_updated_at IS NULL OR
+			last_updated_at IS NULL OR 
 			(
 				(
 					next_update_at IS NOT NULL AND
@@ -65,7 +66,6 @@ class Ressource extends PgObject {
 				)
 			)
 		) AS outdated";
-		$ressource->show = true;
 		return $ressource->find_where($where, $order, $select, NULL, 'metadata.ressources r JOIN metadata.update_status AS s ON r.status_id = s.id');
 	}
 
