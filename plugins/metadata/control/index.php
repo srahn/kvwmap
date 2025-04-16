@@ -194,7 +194,12 @@ function go_switch_metadata($go){
 				'ressource_id' => 'integer'
 			]);
 			$GUI->checkCaseAllowed($go);
-			$result = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id'], $GUI->formvars['method_only']);
+			$result = Ressource::update_outdated(
+				$GUI,
+				$GUI->formvars['ressource_id'],
+				$GUI->formvars['method_only'],
+				(array_key_exists('force', $GUI->formvars) AND $GUI->formvars['force'] != '')
+			);
 			// header('Content-Type: application/json; charset=utf-8');
 			// echo json_encode($result);
 			echo $result['msg'];
