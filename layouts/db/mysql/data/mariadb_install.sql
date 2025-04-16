@@ -3,9 +3,10 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql
--- Erstellungszeit: 03. Apr 2025 um 11:23
+-- Erstellungszeit: 16. Apr 2025 um 13:11
 -- Server-Version: 10.7.1-MariaDB-1:10.7.1+maria~focal
 -- PHP-Version: 8.2.28
+
 
 START TRANSACTION;
 
@@ -1534,7 +1535,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `tooltipquery`, `buttons`, `geom_buttons`, `scrollposition`, `result_color`, `result_hatching`, `result_transparency`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `showrollenfilter`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `legendtype`, `visually_impaired`, `font_size_factor`, `print_legend_separate`, `print_scale`, `immer_weiter_erfassen`, `upload_only_file_metadata`, `redline_text_color`, `redline_font_family`, `redline_font_size`, `redline_font_weight`, `dataset_operations_position`, `last_query_layer`) VALUES
-(1, 1, 1402, 820, 1, -534651.29127055, 5281911.3104564, 897402.29127055, 6119064.6895436, 2, 'zoomin', '25833', '4326', 'dec', 49, '2025-02-18 13:45:48', 'layouts/gui.php', 'german', '0', '0', 1, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,freepolygon,freearrow,freetext,', 'delete,polygon,flurstquery,polygon2,buffer,transform,vertex_edit,coord_input,ortho_point,measure', 2, 6, 0, 60, 0, 1, 1, 1, 0, 0, 0, 0, 400, 150, NULL, 1, 1, '\"jahr\":\"15\",\"geschlecht\":\"g\",\"datenreihe\":\"summe\",\"umzuege\":\"bw_zu\"', 0, 0, 0, 1, 0, 'auto', NULL, NULL, '#ff0000', 'Arial', 16, 'bold', 'unten', NULL);
+(1, 1, 1402, 792, 1, -534651.29127055, 5281911.3104564, 897402.29127055, 6119064.6895436, 2, 'zoomin', '25833', '4326', 'dec', 49, '2025-04-16 15:07:42', 'layouts/gui.php', 'german', '0', '0', 1, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,freepolygon,freearrow,freetext,', 'delete,polygon,flurstquery,polygon2,buffer,transform,vertex_edit,coord_input,ortho_point,measure', 2, 6, 0, 60, 0, 1, 1, 1, 0, 0, 0, 0, 400, 150, NULL, 1, 1, '\"jahr\":\"15\",\"geschlecht\":\"g\",\"datenreihe\":\"summe\",\"umzuege\":\"bw_zu\"', 0, 0, 0, 1, 0, 'auto', NULL, NULL, '#ff0000', 'Arial', 16, 'bold', 'unten', NULL);
 
 -- --------------------------------------------------------
 
@@ -1918,7 +1919,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`ID`, `login_name`, `Name`, `Vorname`, `Namenszusatz`, `passwort`, `password`, `password_expired`, `password_setting_time`, `userdata_checking_time`, `start`, `stop`, `ips`, `tokens`, `Funktion`, `stelle_id`, `phon`, `email`, `agreement_accepted`, `num_login_failed`, `login_locked_until`, `organisation`, `position`, `share_rollenlayer_allowed`, `layer_data_import_allowed`, `archived`) VALUES
-(1, 'pkorduan', 'Korduan', 'Peter', '', '', 'f17050aeb2010f75818043c68a0837935443f1ba', 0, '2024-12-14 13:55:14', NULL, '0000-00-00', '0000-00-00', '', '6bc695c80b700a178e39ab2ffd7f3c45,4b4b83bf7d1c92309fcb9d9f651ae486,cd147cef213b6fc012729495daedeb53,5f02d50272873449af670b222d9ce376,0606e54b76e29f441de3950675ac12d8', 'admin', 1, '038140344445', 'peter.korduan@gdi-service.de', 1, 0, '2025-04-03 11:21:19', 'GDI-Service', 'Web-GIS Admin', 0, 0, NULL);
+(1, 'pkorduan', 'Korduan', 'Peter', '', '', 'f17050aeb2010f75818043c68a0837935443f1ba', 0, '2024-12-14 13:55:14', NULL, '0000-00-00', '0000-00-00', '', '763d0eda8725fd86e1cd4e004b4a0a26,6bc695c80b700a178e39ab2ffd7f3c45,4b4b83bf7d1c92309fcb9d9f651ae486,cd147cef213b6fc012729495daedeb53,5f02d50272873449af670b222d9ce376', 'admin', 1, '038140344445', 'peter.korduan@gdi-service.de', 1, 0, '2025-04-16 13:07:40', 'GDI-Service', 'Web-GIS Admin', 0, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -1992,7 +1993,8 @@ INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagew
 (1, 1, '2025-02-18 13:36:52', 'getMap', 1402, 834, '25833', -608574.90216086, 5230803, 971325.90216086, 6170173, '2025-01-29 14:56:46', NULL),
 (1, 1, '2025-02-18 13:37:50', 'getMap', 1320, 920, '25833', -492742.57943417, 5230803, 855493.57943417, 6170173, '2025-02-18 13:36:52', NULL),
 (1, 1, '2025-02-18 13:45:07', 'getMap', 1402, 834, '25833', -534651.29127053, 5274756.1533702, 897402.29127053, 6126219.8466298, '2025-02-18 13:37:50', NULL),
-(1, 1, '2025-02-18 13:45:48', 'getMap', 1402, 820, '25833', -534651.29127055, 5281911.3104564, 897402.29127055, 6119064.6895436, '2025-02-18 13:45:07', NULL);
+(1, 1, '2025-02-18 13:45:48', 'getMap', 1402, 820, '25833', -534651.29127055, 5281911.3104564, 897402.29127055, 6119064.6895436, '2025-02-18 13:45:07', NULL),
+(1, 1, '2025-04-16 15:07:42', 'getMap', 1402, 820, '25833', -534651.29127055, 5281911.3104564, 897402.29127055, 6119064.6895436, '2025-02-18 13:45:48', NULL);
 
 -- --------------------------------------------------------
 
@@ -2272,7 +2274,7 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 46, 0),
 (1, 1, 47, 0),
 (1, 1, 49, 0),
-(1, 1, 50, 0),
+(1, 1, 50, 1),
 (1, 1, 51, 0),
 (1, 1, 63, 0),
 (1, 1, 64, 0),
@@ -2555,8 +2557,8 @@ CREATE TABLE `u_rolle2used_layer` (
 --
 
 INSERT INTO `u_rolle2used_layer` (`user_id`, `stelle_id`, `layer_id`, `aktivStatus`, `queryStatus`, `gle_view`, `showclasses`, `logconsume`, `transparency`, `drawingorder`, `labelitem`, `geom_from_layer`, `rollenfilter`) VALUES
-(1, 1, 1, '1', '0', 1, 1, '', NULL, NULL, NULL, 0, NULL),
-(1, 1, 2, '0', '0', 1, 1, '', NULL, NULL, NULL, 0, NULL);
+(1, 1, 1, '1', '0', 1, 1, '0', NULL, NULL, NULL, 0, NULL),
+(1, 1, 2, '0', '0', 1, 1, '0', NULL, NULL, NULL, 0, NULL);
 
 -- --------------------------------------------------------
 
