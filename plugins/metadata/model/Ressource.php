@@ -50,10 +50,10 @@ class Ressource extends PgObject {
 		$select = "ampel_id, r.gruppe_id, r.bezeichnung, r.hinweise_auf, r.beschreibung, r.dateninhaber_id, r.ansprechperson, r.format_id, r.aktualitaet, r.url, r.datenguete_id, r.quelle, r.github, r.download_url, r.dest_path, r.download_method, r.id, r.download_path, r.last_updated_at, r.auto_update, r.update_interval, r.import_epsg, r.error_msg, r.relevanz, r.digital, r.flaechendeckend, r.bemerkung_prioritaet, r.inquiries_required, r.inquiries, r.inquiries_responses, r.inquiries_responsible, r.inquiries_to, r.check_required, r.created_at, r.created_from, r.updated_at, r.updated_from, r.use_for_datapackage, r.transform_command, r.unpack_method, r.import_method, r.transform_method, r.status_id, r.von_eneka, r.documents, r.import_layer, r.import_schema, r.import_table, r.layer_id, r.update_time, r.import_filter, r.import_file, r.metadata_document, r.gebietseinheit_id, r.next_update_at,
 		DATE(r.last_updated_at) + r.update_time + r.update_interval AS next_interval_date,
 		s.status,
-		status_id > -1 AND
+		(status_id IS NULL OR status_id = 0) AND
 		auto_update AND
 		(
-			last_updated_at IS NULL OR
+			last_updated_at IS NULL OR 
 			(
 				(
 					next_update_at IS NOT NULL AND
@@ -90,14 +90,22 @@ class Ressource extends PgObject {
 	 * @param integer $limit If limit is given only the amount of ressources will be replied
 	 * @return Ressource[] An Array of Ressources that are outdated
 	 */
-	public static function find_outdated($gui, $ressource_id = NULL, $limit = NULL) {
+	public static function find_outdated($gui, $ressource_id = NULL, $limit = NULL, $force = false) {
 		$ressources = array();
 		$ressource = new Ressource($gui);
-		// $ressource->show = true;
+		if ($force) {
+			// all with status > -1 find to be outdated
+			$status_condition = "> -1";
+		}
+		else {
+			// only ressouces with state Uptodate will be find as outdated
+			$status_condition = "= 0";
+		}
+		$ressource->show = true;
 		$ressources = $ressource->find_where(
 			"
 				(von_eneka OR use_for_datapackage) AND
-				(status_id IS NULL OR status_id > -1) AND
+				(status_id IS NULL OR status_id " . $status_condition . ") AND
 				auto_update AND
 				(
 					last_updated_at IS NULL OR
@@ -189,6 +197,10 @@ class Ressource extends PgObject {
 	 *   )
 	 * )
 	 * if $ressource_id is given force to update it also if it is not outdated!
+	 * @param GUI $gui
+	 * @param int $ressource_id
+	 * @param string $method_only
+	 * @param boolean $force Update not only ressources with update_state_id = 0, but also with > 0 and < 11
 	 * Status of ressources during update:
 	 * -1 - Abbruch wegen Fehler
 	 *  0 - Uptodate
@@ -202,7 +214,7 @@ class Ressource extends PgObject {
 	 *  8 - Transformation gestartet
 	 *  9 - Transformation fertig
 	 */
-	public static function update_outdated($gui, $ressource_id = null, $method_only = '') {
+	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $force = false) {
 		// $gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
 
 		$ressource = new Ressource($gui);
@@ -214,7 +226,7 @@ class Ressource extends PgObject {
 				SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0 AND status_id < 11;
 			");
 			if ($results[0]['num_running'] < 10) {
-				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running']); // liefert nur die erste gefundene zurück
+				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running'], $force); // liefert nur die ersten 1 - 10 gefundenen zurück
 			}
 		}
 

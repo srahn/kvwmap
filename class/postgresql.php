@@ -1193,9 +1193,10 @@ FROM
 	
 	function writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
+		$attribute_names = [];
 		for($i = 1; $i < count($attr_info)+1; $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
-			$fields[$i]['name'] = $attr_info[$i]['name'];
+			$attribute_names[] = $fields[$i]['name'] = $attr_info[$i]['name'];
 			$fieldtype = $attr_info[$i]['type_name'];
 			$fields[$i]['nullable'] = $attr_info[$i]['nullable']; 
 			$fields[$i]['length'] = $attr_info[$i]['length'];
@@ -1246,6 +1247,16 @@ FROM
 			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
+		$sql = "
+			DELETE FROM
+				datatype_attributes
+			WHERE
+				layer_id = " . $layer_id . " AND
+				datatype_id = " . $datatype_id . " AND
+				name NOT IN ('" . implode("', '", $attribute_names) . "')";
+		#echo "<br>Löschen der alten Datentyp-Attribute: " . $sql;
+		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 	}
 
 	/*

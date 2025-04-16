@@ -33,8 +33,11 @@
       <div class="odr-cell odr-head-cell odr-next_update_at">
         nächster Update
       </div>
+      <div class="odr-cell odr-head-cell odr-update_interval">
+        Interval
+      </div>
       <div class="odr-cell-right odr-head-cell odr-action">
-        outdated
+        to Update
       </div>
     </div>
   </div>
@@ -65,8 +68,11 @@
         <div class="odr-cell odr-next_update_at">
           <span id="next_update_at_span_<? echo $ressource->get_id(); ?>"><?php echo ($ressource->get_next_update_at() ?: '') ; ?></span>
         </div>
+        <div class="odr-cell odr-update_interval">
+          <span id="update_inverval_span_<? echo $ressource->get_id(); ?>"><?php echo $ressource->get('update_interval'); ?></span>
+        </div>
         <div class="odr-cell-right odr-action">
-          <? echo ($ressource->get('outdated') == 't' ? 'ja' : '-'); ?>
+          <? echo ($ressource->get('outdated') == 't' ? 'ja' : 'nein'); ?>
           <!--input id="button_-1_<? echo $ressource->get_id(); ?>" type="button" value="Abbrechen" data-ressource_id="<? echo $ressource->get_id(); ?>" class="odr-button cancle_ressource_button" title="Das Aktualisieren dieser Ressource abbrechen."//-->
           <input id="button_0_<? echo $ressource->get_id(); ?>" type="button" value="Uptodate" data-ressource_id="<? echo $ressource->get_id(); ?>" class="odr-button set_uptodate_ressource_button" title="Diese Ressource auf uptodate setzen.">
           <!--input id="button_1_<? echo $ressource->get_id(); ?>" type="button" value="Neu erstellen" data-ressource_id="<? echo $ressource->get_id(); ?>" class="odr-button order_ressource_button" title="Diese Ressource zum Aktualisieren beauftragen.">
@@ -100,7 +106,7 @@
     </div>
   </div>
 </div>
-<div><?php
+<div style="margin-bottom: 20px"><?php
   if (count($this->metadata_processes) > 0) { ?>
     <h2 style="margin-top: 20px; margin-bottom: 20px">Laufende Prozesse</h2><?
     echo implode('<br>', $this->metadata_processes);

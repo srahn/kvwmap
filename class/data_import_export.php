@@ -980,6 +980,17 @@ class data_import_export {
 			$command .= $options;
 		}
 		// $command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		// $command .= ' -oo ENCODING=' . $encoding
+		// 	. ' -f PostgreSQL'
+		// 	. ' -dim XY'
+		// 	. ' -lco GEOMETRY_NAME=the_geom'
+		// 	. ' -lco launder=NO'
+		// 	. ' -lco FID=' . $this->unique_column
+		// 	. ' -lco precision=NO '
+		// 	. ($multi? '-nlt PROMOTE_TO_MULTI' : '')
+		// 	. ' -nln ' . $tablename
+		// // 	. ($unlogged ? ' -lco UNLOGGED=ON' : '')
+		// 	. ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		$command .= ' -oo ENCODING=' . $encoding
 			. ' -f PostgreSQL'
 			. ' -dim XY'
@@ -988,8 +999,8 @@ class data_import_export {
 			. ' -lco precision=NO '
 			. ' -lco FID=' . $this->unique_column
 			. ' -nln ' . $tablename
-			. ($unlogged ? '-lco UNLOGGED=ON' : '')
-			. ($multi ? '-nlt PROMOTE_TO_MULTI' : '')
+			. ($unlogged ? ' -lco UNLOGGED=ON' : '')
+			. ($multi ? ' -nlt PROMOTE_TO_MULTI' : '')
 			. ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
