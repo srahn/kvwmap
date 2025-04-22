@@ -8617,6 +8617,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$attrib['legendorder'] = ($legendorder[$i] == '' ? 'NULL' : $legendorder[$i]);
 			$attrib['class_id'] = $this->classes[$i]['Class_ID'];
 			$mapDB->update_Class($attrib);
+			if ($attrib['class_id'] != $attrib['new_class_id']) {
+				$mapDB->updateStyle2Class_ClassID($attrib['class_id'], $attrib['new_class_id']);
+				$mapDB->updateLabel2Class_ClassID($attrib['class_id'], $attrib['new_class_id']);				
+			}
 		}
 		$this->Klasseneditor();
 	}
@@ -22111,6 +22115,20 @@ class db_mapObj{
     if ($ret[0]) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
   }
 
+  function updateStyle2Class_ClassID($old_class_id, $new_class_id){
+    $sql = '
+			UPDATE 
+				u_styles2classes 
+			SET
+				class_id = ' . $new_class_id . '
+			WHERE 
+				class_id = ' . $old_class_id;
+    #echo $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->updateStyle2Class_ClassID:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+  }	
+
   function save_Style($formvars){
   	# wenn der Style nicht der Klasse zugeordnet ist, zuordnen
   	$classes = $this->get_classes2style($formvars["style_id"]);
@@ -22318,6 +22336,20 @@ class db_mapObj{
     $ret = $this->db->execSQL($sql);
     if ($ret[0]) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
   }
+
+	function updateLabel2Class_ClassID($old_class_id, $new_class_id){
+    $sql = '
+			UPDATE 
+				u_labels2classes 
+			SET
+				class_id = ' . $new_class_id . '
+			WHERE 
+				class_id = ' . $old_class_id;
+    #echo $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLabel2Class_ClassID:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+  }	
 
   function getShapeByAttribute($layer,$attribut,$value) {
     $layer->queryByAttributes($attribut,$value,0);
