@@ -294,6 +294,20 @@ class PgObject {
 		return $query;
 	}
 
+	function getAttributes() {
+		$attributes = [];
+		foreach ($this->data AS $key => $value) {
+			$attribute_validations  = array_filter(
+				$this->validations,
+				function ($validation) use ($key) {
+					return $validation['attribute'] == $key;
+				}
+			);
+			$attributes[] = new MyAttribute($this->debug, $key, $this->columns[$key]['Type'], $value, $attribute_validations, $this->identifier);
+		}
+		return $attributes;
+	}
+
 	function getKeys() {
 		return array_keys($this->data);
 	}
@@ -301,6 +315,14 @@ class PgObject {
 	function has_key($key) {
 		return ($key ? in_array($key, $this->getKeys()) : false);
 	}	
+
+	function setData($formvars) {
+		foreach ($this->data AS $key => $value) {
+			if (array_key_exists($key, $formvars)) {
+				$this->set($key, $formvars[$key]);
+			}
+		}
+	}
 
 	function getValues() {
 		return array_values($this->data);
@@ -493,6 +515,7 @@ class PgObject {
 	} */
 
 	function update() {
+		$results = [];
 		$sql = "
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
@@ -504,6 +527,13 @@ class PgObject {
 		$this->debug->show('update sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		if(!$query){echo $sql; exit;}
+		$err_msg = $this->database->errormessage;
+		$results[] = array(
+			'success' => ($err_msg == ''),
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
+			'msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+		);
+		return $results;
 	}
 
 	function update_attr($attributes, $set = false) {
@@ -722,7 +752,172 @@ class PgObject {
 		return $this->childs[$child_table];
 	}
 
-	function validate_date($key, $format) {
+	public function validate($on = '') {
+		$results = array();
+		foreach ($this->validations AS $key => $validation) {
+			$result = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option'], $on);
+			$this->validations[$key]['validated'] = true;
+			if (empty($result)) {
+				$this->validations[$key]['valid'] = true;
+			}
+			else {
+				$this->validations[$key]['valid'] = false;
+				$this->validations[$key]['result'] = $result['msg'];
+			}
+			$results[] = $result;
+		}
+
+		$messages = array();
+		foreach ($results AS $result) {
+			if (!empty($result)) {
+				$messages[] = $result;
+			}
+		}
+		return $messages;
+	}
+
+	public function validates($key, $condition, $msg = '', $option = '', $on = '') {
+		$this->debug->show('MyObject validates key: ' . $key . ' condition: ' . $condition . ' msg: ' . $msg . ' option: ' . print_r($option, true), MyObject::$write_debug);
+		switch ($condition) {
+
+			case 'date' :
+				$result = $this->validate_date($key, $msg);
+				break;
+
+			case 'format' :
+				$result = $this->validate_format($key, $msg, $option);
+				break;
+
+			case 'greater_or_equal' :
+				$result = $this->validate_greater_or_equal($key, $msg, $option);
+				break;
+
+			case 'not_null' :
+				$result = $this->validate_not_null($key, $msg);
+				break;
+
+			case 'pending_value' :
+				$result = $this->validate_pending_value($key, $option, $msg);
+				break;
+
+			case 'presence' :
+				$result = $this->validate_presence($key, $msg);
+				break;
+
+			case 'presence_one_of' :
+				$result = $this->validate_presence_one_of($key, $msg);
+				break;
+
+			case 'unique' :
+				$result = ($this->get($key) == '' ? '' : $this->validate_unique($key, $msg, $option, $on));
+				break;
+
+			case 'validate_value_is_one_off' :
+				$result = $this->validate_value_is_one_off($key, $option, $msg);
+				break;
+		}
+		$this->debug->show('MyObject validates result: ' . print_r($result, true), MyObject::$write_debug);
+		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result, 'attribute' => $key, 'condition' => $condition, 'option' => $option));
+	}
+
+	function validate_greater_or_equal($key, $msg, $option) {
+		$this->debug->show('MyObject validate if ' . $key . ' = ' . $this->get($key) . ' is grater than ' . $option['other_key'] . '=' . $this->data[$option['other_key']], MyObject::$write_debug);
+		if ($this->get($key) >= $this->get($option['other_key'])) {
+			return '';
+		}
+		return $msg;
+	}
+
+	function validate_presence($key, $msg = '') {
+		if (empty($msg)) {
+			$msg = "Der Parameter <i>{$key}</i> wurde nicht an den Server übermittelt.";
+		}
+
+		return (array_key_exists($key, $this->data) ? '' : $msg);
+	}
+
+  /*
+  * Validates the presence of a value in $key that is dependent on an $pending_key
+  * Returns an error msg if keys not exists or its value is empty even though pending_key exists and its value is not empty
+  */
+  function validate_pending_value($key, $pending_key, $msg = '') {
+    if (
+      array_key_exists($pending_key, $this->data) AND
+      !empty($this->data->get($pending_key)) AND (
+        !array_key_exists($key, $this->data) OR
+        empty($this->data->get($key))
+      )
+    ) {
+      $msg = "Wenn im Attribut ${pending_key} ein Wert angegeben ist, muss im Attribut ${key} auch einer angegeben sein!";
+    }
+    return $msg;
+	}
+
+	function validate_not_null($key, $msg = '') {
+		if ($msg == '') {
+			$msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+		}
+
+		return ($this->get($key) != '' ? '' : $msg);
+	}
+
+	function validate_presence_one_of($keys, $msg = '') {
+		if ($msg == '') $msg = 'Einer der Parameter <i>' . implode(', ', $keys) . '</i> muss angegeben und darf nicht leer sein.';
+
+		$one_present = false;
+		foreach($keys AS $key) {
+			if (array_key_exists($key, $this->data) AND $this->get($key) != '') {
+				$one_present = true;
+			}
+		}
+		return ($one_present ? '' : $msg);
+	}
+
+	function validate_value_is_one_off($key, $allowed_values, $msg = '') {
+		if ($msg == '') $msg = 'Der im Attribut <i>' . $key . '</i> angegebene Wert <i>' . $this->get($key) . '</i> muss einer von diesen sein: <i>(' . implode(', ', $allowed_values) . '</i>)';
+		return (in_array($this->get($key), $allowed_values) ? '' : $msg);
+	}
+
+	/*
+	* Prüft ob der Wert im Attribut key innerhalb der vorhandenen Datensätze schon vorkommt
+	* Wenn ja, ist die Validierung nicht bestanden
+	*/
+	function validate_unique($key, $msg = '', $option = '', $on = '') {
+		$msg = $msg . ' Der Wert ' . $this->get($key) . ' im Attribut ' . $key . ' existiert schon.';
+		if ($option == $on) {
+			return ($this->exists($key) ? $msg : '');
+		}
+		else {
+			return ''; # nicht validieren
+		}
+	}
+
+	function validate_format($key, $msg, $format) {
+		$invalid_msg = '';
+		# ToDo validate again regex pattern in format
+
+		# This validates only the amount of parts separated by single spaces.
+		$format_parts = explode(' ', $format);
+		$value_parts = explode(' ', $this->get($key));
+
+		if (count($format_parts) != count($value_parts)) {
+			$invalid_msg = 'Der angegebene Wert <i>' . $this->get($key) . ' enthält nur ' . count($value_parts) . ' Bestandteile, muss aber ' . count($format_parts) . ' haben.';
+		}
+
+		return ($invalid_msg == '' ? '' : $msg . '<br>' . $invalid_msg);
+	}
+
+	function validate_date($key, $msg) {
+		if ($this->get('key') != '') {
+			$date_arr = explode('-', $this->get($key));
+			if (!checkdate($date_arr[1], $date_arr[2], $date_arr[0])) {
+				return $msg;
+			}
+		}
+		return '';
+	}
+
+	function validate_date_format($key, $format) {
 		$invalid_msg = array();
 		DateTime::createFromFormat($format, $this->get($key));
 		$last_errors = DateTime::getLastErrors();
@@ -795,6 +990,28 @@ VALUES (" . implode(
 		) . ");
 ";
 		return $sql;
+	}
+
+	function as_form_html() {
+		$attributes_html = array_map(
+			function ($attribute) {
+				return $attribute->as_form_html();
+			},
+			$this->getAttributes()
+		);
+
+		if (!empty($this->has_many) AND is_array($this->has_many)) {
+			foreach ($this->has_many AS $key => $relation) {
+				$many_attribut = new MyAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
+				array_push($attributes_html, $many_attribut->as_form_html());
+			}
+		}
+
+		$html = implode(
+			"<div class=\"clear\"></div>",
+			$attributes_html
+		);
+		return $html;
 	}
 }
 ?>

@@ -21,7 +21,7 @@ class LayerGroup extends PgObject {
 
 		$this->validations = array(
 			array(
-				'attribute' => 'Gruppenname',
+				'attribute' => 'gruppenname',
 				'condition' => 'not_null',
 				'description' => 'Es muss ein Gruppenname angegeben werden.',
 				'options' => null
