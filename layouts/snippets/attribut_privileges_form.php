@@ -364,7 +364,7 @@ function update_stellen_visibility(){
 							<?
 								for($s = 0; $s < count($this->stellen['ID']); $s++){
 									$template_div = '';
-									$this->stelle = new stelle($this->stellen['ID'][$s], $this->database);
+									$this->stelle = new stelle($this->stellen['ID'][$s], $this->pgdatabase);
 									$this->layer = $this->stelle->getLayer($this->formvars['selected_layer_id']);
 									$this->attributes_privileges = $this->stelle->get_attributes_privileges($this->formvars['selected_layer_id'], true);
 									include(LAYOUTPATH.'snippets/attribute_privileges_template.php');

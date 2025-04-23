@@ -4743,17 +4743,17 @@ echo '			</table>
 				for ($i = 0; $i < count($this->classdaten[0]['Style']); $i++) { ?>
 					<tr><?
 						$td_id = 'td1_style_' . $this->classdaten[0]['Style'][$i]['Style_ID'];
-						$td_style = ($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID'] ? 'background-color:lightsteelblue;' : '');
-						$td_onclick = 'get_style(' . $this->classdaten[0]['Style'][$i]['Style_ID'] . ')'; ?>
+						$td_style = ($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['style_id'] ? 'background-color:lightsteelblue;' : '');
+						$td_onclick = 'get_style(' . $this->classdaten[0]['Style'][$i]['style_id'] . ')'; ?>
 						<td id="<? echo $td_id; ?>" style="<? echo $td_style; ?> cursor: pointer; border-top: 1px solid #aaa;" onclick="<? echo $td_onclick; ?>">
-							<img src="<? echo IMAGEURL . $this->getlegendimage($this->layer, NULL, $this->classdaten[0]['Style'][$i]['Style_ID']); ?>">
+							<img src="<? echo IMAGEURL . $this->getlegendimage($this->layer, NULL, $this->classdaten[0]['Style'][$i]['style_id']); ?>">
 						</td><?
-						$td_id = 'td2_style_' . $this->classdaten[0]['Style'][$i]['Style_ID']; ?>
+						$td_id = 'td2_style_' . $this->classdaten[0]['Style'][$i]['style_id']; ?>
 						<td id="<? echo $td_id; ?>" align="right" style="<? echo $td_style; ?> border-top: 1px solid #aaa;"><?
 							if ($this->layer['editable']) {
 								if ($i < count($this->classdaten[0]['Style']) - 1) { ?>
 									<a
-										href="javascript:movedown_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);"
+										href="javascript:movedown_style(<? echo $this->classdaten[0]['Style'][$i]['style_id']; ?>);"
 										title="in der Zeichenreihenfolge nach unten verschieben"
 									>
 										<img src="<? echo GRAPHICSPATH; ?>pfeil.gif" border="0">
@@ -4761,13 +4761,13 @@ echo '			</table>
 								}
 								if ($i > 0) { ?>
 									&nbsp;<a
-										href="javascript:moveup_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);"
+										href="javascript:moveup_style(<? echo $this->classdaten[0]['Style'][$i]['style_id']; ?>);"
 										title="in der Zeichenreihenfolge nach oben verschieben"
 									>
 										<img src="<? echo GRAPHICSPATH; ?>pfeil2.gif" border="0">
 									</a><?
 								}
-								echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style(' . $this->classdaten[0]['Style'][$i]['Style_ID'] . ');" title="löschen"><i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i></a>');
+								echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style(' . $this->classdaten[0]['Style'][$i]['style_id'] . ');" title="löschen"><i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i></a>');
 							} ?>
 						</td>
 					</tr><?
@@ -4793,13 +4793,13 @@ echo '			</table>
           echo'
             <tr>
               <td style="';
-								if($this->formvars['label_id'] == $this->classdaten[0]['Label'][$i]['Label_ID']){echo 'background-color:lightsteelblue; ';}
-								echo 'cursor: pointer" id="td1_label_'.$this->classdaten[0]['Label'][$i]['Label_ID'].'" onclick="get_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');">';
-                echo 'Label '.$this->classdaten[0]['Label'][$i]['Label_ID'].'</td>';
-                echo '<td align="right" id="td2_label_'.$this->classdaten[0]['Label'][$i]['Label_ID'].'" ';
-                if($this->formvars['label_id'] == $this->classdaten[0]['Label'][$i]['Label_ID']){echo 'style="background-color:lightsteelblue;" ';}
+								if($this->formvars['label_id'] == $this->classdaten[0]['Label'][$i]['label_id']){echo 'background-color:lightsteelblue; ';}
+								echo 'cursor: pointer" id="td1_label_'.$this->classdaten[0]['Label'][$i]['label_id'].'" onclick="get_label('.$this->classdaten[0]['Label'][$i]['label_id'].');">';
+                echo 'Label '.$this->classdaten[0]['Label'][$i]['label_id'].'</td>';
+                echo '<td align="right" id="td2_label_'.$this->classdaten[0]['Label'][$i]['label_id'].'" ';
+                if($this->formvars['label_id'] == $this->classdaten[0]['Label'][$i]['label_id']){echo 'style="background-color:lightsteelblue;" ';}
 								if($this->layer['editable']){
-									echo html_umlaute('><a href="javascript:delete_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');" title="löschen"><i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i></a>');
+									echo html_umlaute('><a href="javascript:delete_label('.$this->classdaten[0]['Label'][$i]['label_id'].');" title="löschen"><i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i></a>');
 								}
           echo'
               </td>
@@ -4916,7 +4916,7 @@ echo '			</table>
 						</td>
 						<td class="style-value-column"><?
 							switch (key($this->styledaten)) {
-								case 'Style_ID' : {
+								case 'style_id' : {
 									$onkeyup = "if (event.keyCode != 8) { get_style(this.value); }";
 								} break;
 								
@@ -5000,7 +5000,7 @@ echo '			</table>
 								type="button"
 								name="style_save"
 								value="Speichern"
-								onclick="save_style(<? echo $this->styledaten['Style_ID']; ?>)"
+								onclick="save_style(<? echo $this->styledaten['style_id']; ?>)"
 							>
 						</td>
 					</tr>
@@ -5092,7 +5092,7 @@ echo '			</table>
 			if($this->layer['editable']){
 				echo'
           <tr>
-            <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
+            <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['label_id'].')"></td>
           </tr>
         </table>';
 			}
@@ -12659,7 +12659,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	*/
 	function save_layers_attributes($formvars) {
 		$this->save_layer_attributes($formvars);
-		foreach (Layer::find_by_duplicate_from_layer_id($this->database, $formvars['selected_layer_id']) AS $formvars['selected_layer_id']) {
+		foreach (Layer::find_by_duplicate_from_layer_id($this->pgdatabase, $formvars['selected_layer_id']) AS $formvars['selected_layer_id']) {
 			$this->save_layer_attributes($formvars);
 		}
 	}
@@ -12672,13 +12672,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, true, false, false, false);
-		$mapdb->save_layer_attributes($this->attributes, $this->database, $formvars);
+		$mapdb->save_layer_attributes($this->attributes, $this->pgdatabase, $formvars);
 	}
 
 	function Datentypattribute_speichern() {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_layer_id'], $this->formvars['selected_datatype_id'], NULL, NULL, true, false, false);
-		$mapdb->save_datatype_attributes($this->attributes, $this->database, $this->formvars);
+		$mapdb->save_datatype_attributes($this->attributes, $this->pgdatabase, $this->formvars);
 	}
 
 	/**
@@ -18270,38 +18270,38 @@ class db_mapObj{
 		global $language;
 
 		$sql = "
-			SELECT" .
+			SELECT " .
 				((!$all_languages AND $language != 'german') ? "
 					CASE
 						WHEN Name_" . $language . " IS NOT NULL THEN Name_" . $language . "
 						ELSE Name
 					END" : "Name"
 				) . " AS Name,
-				Class_ID,
-				Layer_ID,
-				Expression,
+				class_id,
+				layer_id,
+				expression,
 				classification,
 				legendgraphic,
 				drawingorder,
 				legendorder,
 				text
 			FROM
-				classes
+				kvwmap.classes
 			WHERE
-				Class_ID = " . $class_id . "
+			class_id = " . $class_id . "
 			ORDER BY
 				classification,
 				drawingorder,
-				Class_ID
+				class_id
 		";
 
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		while ($rs = $ret['result']->fetch_assoc()) {
-			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
-			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['Style'] = $this->read_Styles($rs['class_id']);
+			$rs['Label'] = $this->read_Label($rs['class_id']);
 			$Classes[] = $rs;
 		}
 		return $Classes;
@@ -20645,10 +20645,10 @@ class db_mapObj{
 
 		for ($i = 0; $i < count($attributes['name']); $i++) {
 			if ($formvars['attribute_' . $attributes['name'][$i]] != '') {
-				$alias_rows = "alias = '" . $formvars['alias_' . $attributes['name'][$i]] . "',";
+				$alias_rows = ["alias" => "'" . $formvars['alias_' . $attributes['name'][$i]] . "'"];
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') {
-						$alias_rows .= "alias_" . $language . " = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "',";
+						$alias_rows["alias_" . $language] = "'" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
 					}
 				}
 				if ($formvars['visible_' . $attributes['name'][$i]] != 2){
@@ -20664,36 +20664,36 @@ class db_mapObj{
 					$formvars['tab_' . $attributes['name'][$i]] = $last_tab;
 				}
 				$last_tab = $formvars['tab_' . $attributes['name'][$i]];
-				$rows = "
-					order = " . ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]) . ",
-					name = '" . $attributes['name'][$i] . "', " .
-					$alias_rows . "
-					form_element_type = '" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "',
-					options = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
-					default = '" . pg_escape_string($formvars['default_' . $attributes['name'][$i]]) . "',
-					tooltip = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
-					group = '" . $formvars['group_' . $attributes['name'][$i]] . "',
-					tab = '" . $formvars['tab_' . $attributes['name'][$i]] . "',
-					arrangement = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
-					labeling = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]) . ",
-					raster_visibility = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
-					dont_use_for_new= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
-					mandatory = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
-					quicksearch= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
-					visible= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]).",
-					vcheck_attribute= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
-					vcheck_operator= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
-					vcheck_value= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."'
-				";
+				$rows = [
+					'layer_id' => $formvars['selected_layer_id'],
+					'"order"' => ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]),
+					'name' => "'" . $attributes['name'][$i] . "'",
+					'form_element_type' => "'" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "'",
+					'options' => "'" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "'",
+					'"default"' => "'" . pg_escape_string($formvars['default_' . $attributes['name'][$i]]) . "'",
+					'tooltip' => "'" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "'",
+					'"group"' => "'" . $formvars['group_' . $attributes['name'][$i]] . "'",
+					'tab' => "'" . $formvars['tab_' . $attributes['name'][$i]] . "'",
+					'arrangement' => ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]),
+					'labeling' => ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]),
+					'raster_visibility' => ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]),
+					'dont_use_for_new' => ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]),
+					'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
+					'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
+					'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
+					'vcheck_attribute' => "'" . $formvars['vcheck_attribute_'.$attributes['name'][$i]] . "'",
+					'vcheck_operator' => "'" . $formvars['vcheck_operator_'.$attributes['name'][$i]] . "'",
+					'vcheck_value' => "'" . $formvars['vcheck_value_'.$attributes['name'][$i]] . "'"
+				] + $alias_rows;
 				$sql = "
 					INSERT INTO
-						layer_attributes
-					SET
-						layer_id = " . $formvars['selected_layer_id'] . ", " .
-						$rows . "
-					ON DUPLICATE KEY UPDATE " .
-						$rows . "
-				";
+						kvwmap.layer_attributes
+						(" . implode(', ', array_keys($rows)) . ")
+					VALUES	
+						(" . implode(', ', $rows) . ")
+					ON CONFLICT (layer_id, name) DO	UPDATE 
+						SET " .
+							implode(', ',	array_map(function($key) {return $key . ' = EXCLUDED.' . $key;}, array_keys($rows)));
 				#echo '<br>Sql: ' . $sql;
 				$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
 				$database->execSQL($sql, 4, 1);
@@ -21059,8 +21059,8 @@ class db_mapObj{
 			SELECT DISTINCT
 				dt.*
 			FROM
-				layer_attributes la JOIN
-				datatypes dt ON replace(la.type,'_', '') = dt.id
+				kvwmap.layer_attributes la JOIN
+				kvwmap.datatypes dt ON replace(la.type,'_', '') = dt.id::text
 			WHERE
 				la.layer_id IN (" . implode(', ', $layer_ids) . ")
 		";
@@ -21070,7 +21070,7 @@ class db_mapObj{
 			$this->GUI->add_message('error', err_msg($this->script_name, __LINE__, $sql));
 			return $datatypes;
 		}
-		while ($rs = $this->db->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$datatypes[] = $rs;
 		}
 		return $datatypes;
@@ -21391,28 +21391,28 @@ class db_mapObj{
 		if($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN Name_" . $language . " != \"\" THEN Name_" . $language . "
-				ELSE Name
-			END AS Name";
+				WHEN name_" . $language . " != \"\" THEN name_" . $language . "
+				ELSE name
+			END AS name";
 		}
 		else {
-			$name_column = "Name";
+			$name_column = "name";
 		}
     $sql = "
 			SELECT
-				Layer_ID,
+				layer_id,
 				" . $name_column . ",
 				alias
 			FROM
-				layer
+				kvwmap.layer
 			WHERE
 				connectiontype IN (" . $types . ")
 			" . ($order != '' ? "ORDER BY " . replace_semicolon($order) : "") . "
 		";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>" . $sql,4);
-		$this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		while ($rs = $this->db->result->fetch_array()) {
+		while ($rs = pg_fetch_array($ret[1])) {
 			$layer['ID'][] = $rs['layer_id'];
 			$layer['Bezeichnung'][] = $rs['name'];
 			$layer['alias'][] = $rs['alias'];
@@ -22133,7 +22133,7 @@ class db_mapObj{
   	# wenn der Style nicht der Klasse zugeordnet ist, zuordnen
   	$classes = $this->get_classes2style($formvars["style_id"]);
   	if(!in_array($formvars["class_id"], $classes))$this->addStyle2Class($formvars["class_id"], $formvars["style_id"], NULL);
-    $sql ="UPDATE styles SET ";
+    $sql ="UPDATE kvwmap.styles SET ";
     if($formvars["style_symbol"]){$sql.="symbol = '" . $formvars["style_symbol"]."',";}else{$sql.="symbol = NULL,";}
     $sql.="symbolname = '" . $formvars["style_symbolname"]."',";
     if($formvars["style_size"] != ''){$sql.="size = '" . $formvars["style_size"]."',";}else{$sql.="size = NULL,";}
@@ -22162,8 +22162,8 @@ class db_mapObj{
 		if($formvars["style_linecap"] != ''){$sql.="linecap = '" . $formvars["style_linecap"]."',";}else{$sql.="linecap = NULL,";}
 		if($formvars["style_linejoin"] != ''){$sql.="linejoin = '" . $formvars["style_linejoin"]."',";}else{$sql.="linejoin = NULL,";}
 		if($formvars["style_linejoinmaxsize"] != ''){$sql.="linejoinmaxsize = " . $formvars["style_linejoinmaxsize"].",";}else{$sql.="linejoinmaxsize = NULL,";}
-    $sql.="Style_ID = " . $formvars["style_Style_ID"];
-    $sql.=" WHERE Style_ID = " . $formvars["style_id"];
+    $sql.="style_id = " . $formvars["style_style_id"];
+    $sql.=" WHERE style_id = " . $formvars["style_id"];
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Style - Speichern der Styledaten:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
@@ -22172,18 +22172,18 @@ class db_mapObj{
 
   function get_Style($style_id){
   	if($style_id){
-	    $sql ='SELECT * FROM styles AS s';
-	    $sql.=' WHERE s.Style_ID = '.$style_id;
+	    $sql ='SELECT * FROM kvwmap.styles AS s';
+	    $sql.=' WHERE s.style_id = '.$style_id;
 	    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Style - Lesen der Styledaten:<br>" . $sql,4);
-	    $this->db->execSQL($sql);
+	    $ret = $this->db->execSQL($sql);
 	    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
-	    $rs = $this->db->result->fetch_assoc();
+	    $rs = pg_fetch_assoc($ret[1]);
 	    return $rs;
   	}
   }
 
   function save_Label($formvars){
-    $sql ="UPDATE labels SET ";
+    $sql ="UPDATE kvwmap.labels SET ";
     if($formvars["label_font"]){$sql.="font = '" . $formvars["label_font"]."',";}
     if($formvars["label_type"]){$sql.="type = '" . $formvars["label_type"]."',";}
 		if($formvars["label_type"]){$sql.="type = '".$formvars["label_type"]."',";}else{$sql.="type = NULL,";}
@@ -22215,20 +22215,20 @@ class db_mapObj{
     if($formvars["label_wrap"] != ''){$sql.="wrap = '" . $formvars["label_wrap"]."',";}else{$sql .= "wrap = NULL,";}
 		if($formvars["label_text"] != ''){$sql.="text = '" . $formvars["label_text"]."',";}else{$sql .= "text = NULL,";}
     if($formvars["label_the_force"] != ''){$sql.="the_force = '" . $formvars["label_the_force"]."',";}else{$sql.="the_force = NULL,";}
-    $sql.="Label_ID = " . $formvars["label_Label_ID"];
-    $sql.=" WHERE Label_ID = " . $formvars["label_id"];
+    $sql.="label_id = " . $formvars["label_label_id"];
+    $sql.=" WHERE label_id = " . $formvars["label_id"];
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Label - Speichern der Labeldaten:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
   }
 
   function get_Label($label_id) {
-    $sql ='SELECT * FROM labels AS l';
-    $sql.=' WHERE l.Label_ID = '.$label_id;
+    $sql ='SELECT * FROM kvwmap.labels AS l';
+    $sql.=' WHERE l.label_id = '.$label_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Label - Lesen der Labeldaten:<br>" . $sql,4);
-    $this->db->execSQL($sql);
+    $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
-    $rs = $this->db->result->fetch_assoc();
+    $rs = pg_fetch_assoc($ret[1]);
     return $rs;
   }
 

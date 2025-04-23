@@ -291,10 +291,10 @@ function navigate(params) {
 			        <?
 			    		for($i = 0; $i < count($this->allclassdaten ?: []); $i++){
 			    			echo '<option';
-			    			if($this->allclassdaten[$i]['Class_ID'] == $this->formvars['selected_class_id']){
+			    			if($this->allclassdaten[$i]['class_id'] == $this->formvars['selected_class_id']){
 			    				echo ' selected';
 			    			}
-			    			echo ' value="'.$this->allclassdaten[$i]['Class_ID'].'">'.$this->allclassdaten[$i]['name'].'</option>';
+			    			echo ' value="'.$this->allclassdaten[$i]['class_id'].'">'.$this->allclassdaten[$i]['name'].'</option>';
 			    		}
 			    		?>
 			      </select>
