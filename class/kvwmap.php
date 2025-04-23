@@ -18688,11 +18688,11 @@ class db_mapObj{
 	}
 
 	function getFilter($layer_id, $stelle_id){
-    $sql ='SELECT Filter FROM used_layer WHERE Layer_ID = '.$layer_id.' AND Stelle_ID = '.$stelle_id;
+    $sql ='SELECT filter FROM kvwmap.used_layer WHERE layer_id = '.$layer_id.' AND stelle_id = '.$stelle_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getFilter - Lesen des Filter-Statements des Layers:<br>" . $sql,4);
-    $this->db->execSQL($sql);
+    $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $rs = $this->db->result->fetch_row();
+    $rs = pg_fetch_row($ret[1]);
     $filter = $rs[0];
     return $filter;
   }

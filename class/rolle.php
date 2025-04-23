@@ -327,7 +327,7 @@ class rolle {
 		if ($layer_id > 0) {
 			$sql = "
 				UPDATE
-					u_rolle2used_layer
+					kvwmap.u_rolle2used_layer
 				SET
 					gle_view = " . $mode . "
 				WHERE
@@ -339,7 +339,7 @@ class rolle {
 		else {
 			$sql = "
 				UPDATE
-					rollenlayer
+					kvwmap.rollenlayer
 				SET
 					gle_view = " . $mode . "
 				WHERE
@@ -843,7 +843,7 @@ class rolle {
 	
 	function save_last_query($go, $layer_id, $query, $sql_order, $limit, $offset) {
 		$sql = "
-			INSERT INTO rolle_last_query (
+			INSERT INTO kvwmap.rolle_last_query (
 				user_id,
 				stelle_id,
 				go,
@@ -869,18 +869,18 @@ class rolle {
 	}
 	
 	function delete_last_query(){
-		$sql = "DELETE FROM rolle_last_query WHERE user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
+		$sql = "DELETE FROM kvwmap.rolle_last_query WHERE user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->delete_last_query - Löschen der letzten Abfrage:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 	
 	function get_last_query($layer_id = NULL){
-		$sql = "SELECT * FROM rolle_last_query WHERE user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
+		$sql = "SELECT * FROM kvwmap.rolle_last_query WHERE user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
 		if($layer_id != NULL)$sql .= " AND layer_id = ".$layer_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->get_last_query - Abfragen der letzten Abfrage:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$last_query['go'] = $rs['go'];
 			$last_query['layer_ids'][] = $rs['layer_id'];
 			$last_query[$rs['layer_id']] = $rs;
@@ -961,7 +961,7 @@ class rolle {
 					$search_params_set = true;
 					$sql = "
 						INSERT INTO 
-							search_attributes2rolle 
+							kvwmap.search_attributes2rolle 
 						VALUES (
 							'".$formvars['search_name']."', 
 							".$this->user_id.", 
@@ -969,7 +969,7 @@ class rolle {
 							".$formvars['selected_layer_id'].", 
 							'".$attributes['name'][$i]."', 
 							'".value_of($formvars, $prefix.'operator_'.$attributes['name'][$i])."', 
-							'" . $this->database->mysqli->real_escape_string($formvars[$prefix.'value_'.$attributes['name'][$i]]) . "', 
+							'" . pg_escape_string($formvars[$prefix.'value_'.$attributes['name'][$i]]) . "', 
 							'".$formvars[$prefix.'value2_'.$attributes['name'][$i]]."', 
 							".$m.", 
 							" . (value_of($formvars, 'boolean_operator_'.$m) != '' ? "'" . value_of($formvars, 'boolean_operator_' . $m) . "'" : "NULL") . ");";
@@ -978,7 +978,20 @@ class rolle {
 				}
 			}
 			if(!$search_params_set){		# keine Suchparameter gesetzt -> erstes Attribut speichern, damit Suche mit der Auswahl des Layers trotzdem gespeichert ist
-				$sql = 'INSERT INTO search_attributes2rolle VALUES ("'.$formvars['search_name'].'", '.$this->user_id.', '.$this->stelle_id.', '.$formvars['selected_layer_id'].', "'.$attributes['name'][0].'", "'.$formvars[$prefix.'operator_'.$attributes['name'][0]].'", NULL, NULL, 0, NULL);';
+				$sql = "
+					INSERT INTO 
+						kvwmap.search_attributes2rolle 
+					VALUES (
+						'".$formvars['search_name']."', 
+						".$this->user_id.", 
+						".$this->stelle_id.", 
+						".$formvars['selected_layer_id'].", 
+						'".$attributes['name'][0]."', 
+						'".$formvars[$prefix.'operator_'.$attributes['name'][0]]."', 
+						NULL, 
+						NULL, 
+						0, 
+						NULL);";
 				$this->debug->write("<p>file:rolle.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
 				$this->database->execSQL($sql,4, $this->loglevel);
 			}
@@ -987,8 +1000,14 @@ class rolle {
 
 	function delete_search($search, $layer_id = NULL){
 		if($search != ''){
-			$sql = 'DELETE FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND name = "'.$search.'"';
-			if($layer_id != NULL)$sql.=' AND layer_id='.$layer_id;
+			$sql = '
+				DELETE FROM 
+					kvwmap.search_attributes2rolle 
+				WHERE 
+					user_id = ' . $this->user_id . ' AND 
+					stelle_id = ' . $this->stelle_id . " AND 
+					name = '" . $search . "'";
+			if($layer_id != NULL)$sql.=' AND layer_id = ' . $layer_id;
 			$this->debug->write("<p>file:rolle.php class:rolle->delete_search - Loeschen einer Suchabfrage:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
@@ -996,13 +1015,25 @@ class rolle {
 
 	function getsearches($layer_id){
 		$searches = array();
-		$sql = 'SELECT distinct a.name, a.layer_id, b.Name as layername FROM search_attributes2rolle as a, layer as b WHERE a.name != \'<last_search>\' AND a.layer_id = b.Layer_ID AND user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-		if($layer_id != '') $sql.= ' AND a.layer_id='.$layer_id;
-		$sql .= ' ORDER BY b.Name, a.name';
+		$sql = '
+			SELECT distinct 
+				a.name, 
+				a.layer_id, 
+				b.name as layername 
+			FROM 
+				kvwmap.search_attributes2rolle as a, 
+				kvwmap.layer as b 
+			WHERE 
+				a.name != \'<last_search>\' AND 
+				a.layer_id = b.layer_id AND 
+				user_id = ' . $this->user_id . ' AND 
+				stelle_id = ' . $this->stelle_id;
+		if($layer_id != '') $sql.= ' AND a.layer_id = '.$layer_id;
+		$sql .= ' ORDER BY b.name, a.name';
 		$this->debug->write("<p>file:rolle.php class:rolle->getsearches - Abfragen der gespeicherten Suchabfragen der Rolle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$searches[]=$rs;
 		}
 		return $searches;
@@ -1186,9 +1217,9 @@ class rolle {
 		if($layer_id > 0 OR $layer_id == NULL){
 			$sql = "
 				UPDATE
-					u_rolle2used_layer
+					kvwmap.u_rolle2used_layer
 				SET
-					aktivStatus = '" . $status . "'
+					aktivstatus = '" . $status . "'
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id .
@@ -1200,9 +1231,9 @@ class rolle {
 		if($layer_id < 0 OR $layer_id == NULL){
 			$sql = "
 				UPDATE
-					rollenlayer
+					kvwmap.rollenlayer
 				SET
-					aktivStatus = '" . $status . "'
+					aktivstatus = '" . $status . "'
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id .
@@ -1218,9 +1249,9 @@ class rolle {
 		if($layer_id > 0 OR $layer_id == NULL){
 			$sql ="
 				UPDATE 
-					u_rolle2used_layer 
+					kvwmap.u_rolle2used_layer 
 				SET 
-					queryStatus = '0'
+					querystatus = '0'
 				WHERE 
 					user_id=".$this->user_id." AND 
 					stelle_id=".$this->stelle_id.
@@ -1231,9 +1262,9 @@ class rolle {
 		if($layer_id < 0 OR $layer_id == NULL){
 			$sql ="
 				UPDATE 
-					rollenlayer 
+					kvwmap.rollenlayer 
 				SET 
-					queryStatus = '0'
+					querystatus = '0'
 				WHERE 
 					user_id=".$this->user_id." AND 
 					stelle_id=".$this->stelle_id.

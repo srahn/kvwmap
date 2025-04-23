@@ -1,5 +1,28 @@
 <?
 
+function sql_err_msg($title, $sql, $msg, $div_id) {
+	$err_msg = "
+		<div style=\"text-align: left;\">" .
+		$title . "<br>" .
+		$msg . "
+		<div style=\"text-align: center\">
+			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
+		</div>
+		<div id=\"error_details_" . $div_id . "\" style=\"display: none\">
+			Aufgetreten bei SQL-Anweisung:<br>
+			<textarea id=\"sql_statement_" . $div_id . "\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px; max-height: 600px\">
+				" . $sql . "
+			</textarea><br>
+			<button type=\"button\" onclick=\"
+				copyText = document.getElementById('sql_statement_" . $div_id . "');
+				copyText.select();
+				document.execCommand('copy');
+			\">In Zwischenablage kopieren</button>
+		</div>
+	</div>";
+	return $err_msg;
+}
+
 function count_or_0($val) {
 	if (is_null($val) OR !is_array($val)) {
 		return 0;
@@ -208,7 +231,6 @@ class GUI {
   var $FormObject;
   var $StellenForm;
   var $Fehlermeldung;
-  var $messages;
   var $Hinweis;
   var $Stelle;
   var $ALB;
@@ -233,6 +255,7 @@ class GUI {
   var $PasswordError;
   var $Meldung;
   var $radiolayers;
+	static $messages = array();
 
 	function __construct($main, $style, $mime_type) {
 		# Debugdatei setzen
@@ -297,6 +320,28 @@ class GUI {
     $this->Stelle->language=$language;
     include(LAYOUTPATH.'languages/'.$language.'.php');
   }
+
+	function add_message($type, $msg) {
+		GUI::add_message_($type, $msg);
+	}
+
+	public static function add_message_($type, $msg) {
+		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
+			$type = 'notice';
+			$msg = $msg['msg'];
+		}
+		if ($type == 'array' or is_array($msg)) {
+			foreach($msg AS $m) {
+				GUI::add_message_($m['type'], $m['msg']);
+			}
+		}
+		else {
+			GUI::$messages[] = array(
+				'type' => $type,
+				'msg' => $msg
+			);
+		}
+	}	
 
 	function get_group_legend() {
     # Änderungen in den Gruppen werden gesetzt
@@ -1979,93 +2024,112 @@ class database {
 }
 
 class user {
+	# // TODO: Beim Anlegen eines neuen Benutzers müssen die Einstellungen für die Karte aus der Stellenbeschreibung als Anfangswerte übernommen werden
 
-  var $id;
-  var $Name;
-  var $Vorname;
-  var $login_name;
-  var $funktion;
-  var $dbConn;
-  var $Stellen;
-  var $nZoomFactor;
-  var $nImageWidth;
-  var $nImageHeight;
-  var $database;
-  var $remote_addr;
+	var $id;
+	var $Name;
+	var $Vorname;
+	var $login_name;
+	var $funktion;
+	var $dbConn; # Datenbankverbindungskennung
+	var $Stellen;
+	var $nZoomFactor;
+	var $nImageWidth;
+	var $nImageHeight;
+	var $database;
+	var $remote_addr;
+	var $has_logged_in;
+	var $language = 'german';
+	var $debug;
+	var $share_rollenlayer_allowed;
 
-	function __construct($login_name, $id, $database, $passwort = '') {
+	/**
+	 * Create a user object
+	 * if only login_name is defined, find_by login_name only
+	 * if login_name and password is defined, find_by login_name and password
+	*/
+	function __construct($login_name, $id, $database, $password = '', $archived = false) {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
-		if ($login_name) {
-			$this->login_name = $login_name;
-			$this->readUserDaten(0, $login_name, $passwort);
-			$this->remote_addr = getenv('REMOTE_ADDR');
-		}
-		else {
-			$this->id = $id;
-			$this->readUserDaten($id, 0);
-		}
+		$this->has_logged_in = false;
+		$this->login_name = $login_name;
+		$this->id = (int) $id;
+		$this->remote_addr = getenv('REMOTE_ADDR');
+		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
 	}
 
-	function readUserDaten($id, $login_name, $password = '') {
+	function readUserDaten($id, $login_name = '', $password = '', $archived) {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
-		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
-		if ($password != '') array_push($where, "password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string($password) . "')");
+		if ($login_name != '') array_push($where, "login_name = '" . pg_escape_string($login_name) . "'");
+		if ($password != '') array_push($where, "password = kvwmap.sha1('" . pg_escape_string($password) . "')");
+		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
 			SELECT
 				*
 			FROM
-				user
+				kvwmap.user
 			WHERE
-				" . implode(" AND ", $where) . "
-		";
+				" . implode(" AND ", $where);
 		#echo '<br>SQL to read user data: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
-		$this->database->execSQL($sql, 4, 0, true);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
-		$this->id = $rs['ID'];
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if(!$ret[0]) {
+      $rs = pg_fetch_assoc($ret[1]);
+    }
+		$this->id = $rs['id'];
 		$this->login_name = $rs['login_name'];
-		$this->Namenszusatz = $rs['Namenszusatz'];
+		$this->Namenszusatz = $rs['namenszusatz'];
 		$this->Name = $rs['name'];
-		$this->Vorname = $rs['Vorname'];
+		$this->Vorname = $rs['vorname'];
 		$this->stelle_id = $rs['stelle_id'];
 		$this->phon = $rs['phon'];
 		$this->email = $rs['email'];
+		$this->organisation = $rs['organisation'];
+		$this->position = $rs['position'];
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
 		$this->funktion = $rs['Funktion'];
+		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
+		$this->password_expired = $rs['password_expired'];
+		$this->userdata_checking_time = $rs['userdata_checking_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
+		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
 		$this->tokens = $rs['tokens'];
+		$this->num_login_failed = $rs['num_login_failed'];
+		$this->login_locked_until = $rs['login_locked_until'];
 	}
 
-	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0) {
+	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0, $archived = false) {
 		global $admin_stellen;
 		$where = array();
 
+		if (!$archived) {
+			$where[] = 'u.archived IS NULL';
+		}
+
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
-				LEFT JOIN rolle rall ON u.ID = rall.user_id
-				LEFT JOIN rolle radm ON radm.stelle_id = rall.stelle_id
+				LEFT JOIN kvwmap.rolle rall ON u.id = rall.user_id
+				LEFT JOIN kvwmap.rolle radm ON radm.stelle_id = rall.stelle_id
 			";
 			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
 		}
 
 		if ($id > 0) {
-			$where[] = 'u.ID = ' . $id;
+			$where[] = 'u.id = ' . $id;
 		}
 
 		if ($login_name != '') {
-			$where[] = 'login_name LIKE "' . $login_name . '"';
+			$where[] = 'login_name = "' . $login_name . '"';
 		}
 
 		if ($order != '') {
@@ -2074,9 +2138,9 @@ class user {
 
 		$sql = "
 			SELECT DISTINCT
-				u.*, (select max(c.time_id) from u_consume c where u.ID = c.user_id ) as last_timestamp
+				u.*, (select max(r.last_time_id) from kvwmap.rolle r where u.id = r.user_id ) as last_timestamp
 			FROM
-				user u " .
+				kvwmap.user u " .
 				$more_from .
 			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
 			$order . "
@@ -2084,16 +2148,21 @@ class user {
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
 			return 0;
 		}
-		while ($rs = $this->database->result->fetch_array()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$userdaten[] = $rs;
 		}
+		// if ($order == ' ORDER BY last_timestamp') {	# MySQL sortiert falsch
+		// 	usort($userdaten, function($a, $b) {
+		// 		return strcmp($a['last_timestamp'], $b['last_timestamp']);
+		// 	});
+		// }
 		return $userdaten;
-	}	
+	}
 
 	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle
@@ -2133,55 +2202,151 @@ class stelle {
   function getName() {
     $sql ='SELECT ';
     if (rolle::$language != 'german' AND rolle::$language != ''){
-      $sql.='`Bezeichnung_'.rolle::$language.'` AS ';
+      $sql.='bezeichnung_'.rolle::$language.' AS ';
     }
-    $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
+    $sql.='bezeichnung FROM kvwmap.stelle WHERE id = '.$this->id;
     #echo $sql;
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
-		$rs = $this->database->result->fetch_array();
-    $this->Bezeichnung=$rs['Bezeichnung'];
-    return $rs['Bezeichnung'];
+		$rs = pg_fetch_array($ret[1]);
+    $this->Bezeichnung = $rs['bezeichnung'];
+    return $rs['bezeichnung'];
   }
 
 	function readDefaultValues() {
+		global $language;
+		if ($language != '' AND $language != 'german') {
+			$name_column = "
+			CASE
+				WHEN s.bezeichnung_" . $language . " != \"\" THEN s.bezeichnung_" . $language . "
+				ELSE s.bezeichnung
+			END AS bezeichnung";
+		}
+		else {
+			$name_column = "s.bezeichnung";
+		}
+
 		$sql = "
 			SELECT
-				*
+				id," .
+				$name_column . ",
+				start,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, Referenzkarte_ID, Authentifizierung, ALB_status, wappen, wappen_link, logconsume,
+				ows_namespace,
+				ows_title,
+				wms_accessconstraints,
+				ows_abstract,
+				ows_updatesequence,
+				ows_geographicdescription,
+				ows_fees,
+				ows_srs,
+
+				ows_contactorganization,
+				ows_contacturl,
+				ows_contactaddress,
+				ows_contactpostalcode,
+				ows_contactcity,
+				ows_contactadministrativearea,
+				ows_contactemailaddress,
+				ows_contactperson,
+				ows_contactposition,
+				ows_contactvoicephone,
+				ows_contactfacsimile,
+
+				ows_distributionorganization,
+				ows_distributionurl,
+				ows_distributionaddress,
+				ows_distributionpostalcode,
+				ows_distributioncity,
+				ows_distributionadministrativearea,
+				ows_distributionemailaddress,
+				ows_distributionperson,
+				ows_distributionposition,
+				ows_distributionvoicephone,
+				ows_distributionfacsimile,
+
+				ows_contentorganization,
+				ows_contenturl,
+				ows_contentaddress,
+				ows_contentpostalcode,
+				ows_contentcity,
+				ows_contentadministrativearea,
+				ows_contentemailaddress,
+				ows_contentperson,
+				ows_contentposition,
+				ows_contentvoicephone,
+				ows_contentfacsimile,
+
+				protected, check_client_ip::int, check_password_age, allowed_password_age, use_layer_aliases, selectable_layer_params, hist_timestamp, default_user_id,
+				style,
+				show_shared_layers,
+				reset_password_text,
+				invitation_text
 			FROM
-				stelle
+				kvwmap.stelle s
 			WHERE
 				ID = " . $this->id . "
 		";
-		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
-		}
-		$rs = $this->database->result->fetch_array();
+		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if(!$ret[0]) {
+      $rs = pg_fetch_assoc($ret[1]);
+    }
+		$this->data = $rs;
+		$this->Bezeichnung = $rs['bezeichnung'];
 		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->postgres_connection_id = $rs['postgres_connection_id'];
-		# ---> deprecated
-			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-			$this->pgdbname = $rs['pgdbname'];
-			$this->pgdbuser = $rs['pgdbuser'];
-			$this->pgdbpasswd = $rs['pgdbpasswd'];
-		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
 		$this->ows_abstract = $rs['ows_abstract'];
-		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
-		$this->ows_contactperson = $rs['ows_contactperson'];
-		$this->ows_contactorganization = $rs['ows_contactorganization'];
-		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
-		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_namespace = $rs['ows_namespace'];
+		$this->ows_updatesequence = $rs['ows_updatesequence'];
+		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
 		$this->ows_fees = $rs['ows_fees'];
-		$this->ows_srs = $rs['ows_srs'];
+		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
+
+		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contacturl = $rs['ows_contacturl'];
+		$this->ows_contactaddress = $rs['ows_contactaddress'];
+		$this->ows_contactpostalcode = $rs['ows_contactpostalcode'];
+		$this->ows_contactcity = $rs['ows_contactcity'];
+		$this->ows_contactadministrativearea = $rs['ows_contactadministrativearea'];
+		$this->ows_contactemailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactperson = $rs['ows_contactperson'];
+		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_contactvoicephone = $rs['ows_contactvoicephone'];
+		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
+
+		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionurl = $rs['ows_distributionurl'];
+		$this->ows_distributionaddress = $rs['ows_distributionaddress'];
+		$this->ows_distributionpostalcode = $rs['ows_distributionpostalcode'];
+		$this->ows_distributioncity = $rs['ows_distributioncity'];
+		$this->ows_distributionadministrativearea = $rs['ows_distributionadministrativearea'];
+		$this->ows_distributionemailaddress = $rs['ows_distributionemailaddress'];
+		$this->ows_distributionperson = $rs['ows_distributionperson'];
+		$this->ows_distributionposition = $rs['ows_distributionposition'];
+		$this->ows_distributionvoicephone = $rs['ows_distributionvoicephone'];
+		$this->ows_distributionfacsimile = $rs['ows_distributionfacsimile'];
+
+		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contenturl = $rs['ows_contenturl'];
+		$this->ows_contentaddress = $rs['ows_contentaddress'];
+		$this->ows_contentpostalcode = $rs['ows_contentpostalcode'];
+		$this->ows_contentcity = $rs['ows_contentcity'];
+		$this->ows_contentadministrativearea = $rs['ows_contentadministrativearea'];
+		$this->ows_contentemailaddress = $rs['ows_contentemailaddress'];
+		$this->ows_contentperson = $rs['ows_contentperson'];
+		$this->ows_contentposition = $rs['ows_contentposition'];
+		$this->ows_contentvoicephone = $rs['ows_contentvoicephone'];
+		$this->ows_contentfacsimile = $rs['ows_contentfacsimile'];
+
+		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
 		$this->check_client_ip = $rs['check_client_ip'];
 		$this->checkPasswordAge = $rs['check_password_age'];
 		$this->allowedPasswordAge = $rs['allowed_password_age'];
@@ -2189,7 +2354,10 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
+		$this->show_shared_layers = $rs['show_shared_layers'];
 		$this->style = $rs['style'];
+		$this->reset_password_text = $rs['reset_password_text'];
+		$this->invitation_text = $rs['invitation_text'];
 	}
 }
 
@@ -2228,44 +2396,37 @@ class rolle {
 	}
 
 	function readSettings() {
-		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql = "
 			SELECT
 				*
 			FROM
-				rolle
+				kvwmap.rolle
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo 'Read rolle settings mit sql: ' . $sql;
-    $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) {
-      $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
-      return 0;
-    }
-		if ($this->database->result->num_rows > 0){
-			$rs = $this->database->result->fetch_assoc();
+		#echo '<br>Read rolle settings mit sql: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if (pg_num_rows($ret[1]) > 0){
+			$rs = pg_fetch_assoc($ret[1]);
 			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
-			$this->nImageWidth=$rs['nImageWidth'];
-			$this->nImageHeight=$rs['nImageHeight'];			
+			$this->nImageWidth=$rs['nimagewidth'];
+			$this->nImageHeight=$rs['nimageheight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
 			$this->auto_map_resize=$rs['auto_map_resize'];
-			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
-			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
+			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nimagewidth'];
+			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nimageheight'];
 			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
-			$this->nZoomFactor=$rs['nZoomFactor'];
+			$this->nZoomFactor=$rs['nzoomfactor'];
 			$this->epsg_code=$rs['epsg_code'];
 			$this->epsg_code2=$rs['epsg_code2'];
 			$this->coordtype=$rs['coordtype'];
 			$this->last_time_id=$rs['last_time_id'];
 			$this->gui=$rs['gui'];
-			rolle::$language=$rs['language'];
-			$language = rolle::$language;
-			$this->hideMenue=$rs['hidemenue'];
-			$this->hideLegend=$rs['hidelegend'];
+			rolle::$language = $rs['language'];
+			$this->hideMenue = ($rs['hidemenue'] == 'f'? false : true);
+			$this->hideLegend = ($rs['hidelegend'] == 'f'? false : true);
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -2285,6 +2446,7 @@ class rolle {
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
+			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
@@ -2301,7 +2463,7 @@ class rolle {
 				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
 				#rolle::$hist_timestamp = '';
 			}
-			$this->selectedButton=$rs['selectedButton'];
+			$this->selectedButton = $rs['selectedbutton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);
@@ -2316,11 +2478,16 @@ class rolle {
 			$this->polyquery = in_array('polyquery', $buttons);
 			$this->touchquery = in_array('touchquery', $buttons);
 			$this->measure = in_array('measure', $buttons);
+			$this->punktfang = in_array('punktfang', $buttons);
 			$this->freepolygon = in_array('freepolygon', $buttons);
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
 			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
+			$this->redline_text_color = $rs['redline_text_color'];
+			$this->redline_font_family = $rs['redline_font_family'];
+			$this->redline_font_size = $rs['redline_font_size'];
+			$this->redline_font_weight = $rs['redline_font_weight'];
 			return 1;
 		}
 		else {
@@ -2336,13 +2503,13 @@ class rolle {
 				$group_status = (value_of($formvars, 'group_'.$this->groupset[$i]['id']) == 1 ? 1 : 0);
 				$sql = "
 					UPDATE
-						`u_groups2rolle`
+						kvwmap.u_groups2rolle
 					SET
-						`status` = '" . $group_status . "'
+						status = '" . $group_status . "'
 					WHERE
-						`user_id` = " . $this->user_id . " AND
-						`stelle_id` = " . $this->stelle_id . " AND
-						`id` = " . $this->groupset[$i]['id'] . "
+						user_id = " . $this->user_id . " AND
+						stelle_id = " . $this->stelle_id . " AND
+						id = " . $this->groupset[$i]['id'] . "
 				";
 				#echo '<br>Sql: ' . $sql;
 				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:", 4);
@@ -2352,23 +2519,26 @@ class rolle {
 		return $formvars;
 	}
 
-  function getGroups($GroupName) {
-		global $language;
+	function getGroups($GroupName) {
     # Abfragen der Gruppen in der Rolle
-    $sql ='SELECT g2r.*, ';
-		if($language != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
-		}
-		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
-    $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
-    $sql.=' AND g2r.id = g.id';
-    if ($GroupName!='') {
-      $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
+    $sql = '
+			SELECT 
+				g2r.*, ' .
+				(rolle::$language != 'german'? 'CASE WHEN gruppenname_' . rolle::$language . ' != "" THEN gruppenname_' . rolle::$language . ' ELSE gruppenname END AS ' : '') . '
+				gruppenname 
+			FROM 
+				kvwmap.u_groups AS g, 
+				kvwmap.u_groups2rolle AS g2r 
+			WHERE 
+				g2r.stelle_id = ' . $this->stelle_id . ' AND 
+				g2r.user_id = '.$this->user_id . ' AND 
+				g2r.id = g.id';
+    if ($GroupName != '') {
+      $sql.=' AND gruppenname = "' . $GroupName . '"';
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-    while ($rs = $this->database->result->fetch_assoc()) {
+    $ret = $this->database->execSQL($sql);
+    while ($rs = pg_fetch_assoc($ret[1])) {
       $groups[]=$rs;
     }
     return $groups;
@@ -2497,11 +2667,11 @@ class pgdatabase {
 	*/
 	function get_object_credentials() {
 		return array(
-			'host'     => $this->host,
-			'port'     => $this->port,
-			'dbname'   => $this->dbName,
-			'user'     => $this->user,
-			'password' => $this->passwd
+			'host'     => $this->host ?: POSTGRES_HOST,
+			'port'     => $this->port ?: 5432,
+			'dbname'   => $this->dbName ?: POSTGRES_DBNAME,
+			'user'     => $this->user ?: POSTGRES_USER,
+			'password' => $this->passwd ?: POSTGRES_PASSWORD
 		);
 	}
 
@@ -2515,8 +2685,12 @@ class pgdatabase {
     return $ret[1];
   }
 
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
+	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
+		if (!$this->dbConn) {
+			echo '<p>pgconn: ' . $this->dbConn;
+		}
 		$ret = array(); // Array with results to return
+		$ret['msg'] = '';
 		$strip_context = true;
 
 		switch ($this->loglevel) {
@@ -2533,17 +2707,25 @@ class pgdatabase {
 		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
 		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
-		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+		if (DBWRITE OR (!stristr($sql, 'INSERT') AND !stristr($sql, 'UPDATE') AND !stristr($sql, 'DELETE'))) {
 			#echo "<br>SQL in execSQL: " . $sql;
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
-			#echo "<br>SQL in execSQL: " . $sql;
-			$query = @pg_query($this->dbConn, $sql);
+			if (count($prepared_params) > 0) {
+				$query_id = 'query_' . rand();
+				$query = pg_prepare($this->dbConn, $query_id, $sql);
+				$query = pg_execute($this->dbConn, $query_id, $prepared_params);
+			}
+			else {
+				#echo "<br>SQL in execSQL: " . $sql;
+				$query = @pg_query($this->dbConn, $sql);
+			}
 			//$query=0;
-			if ($query == 0) {
+			if ($query === false) {
+				$this->error = true;
 				$ret['success'] = false;
-				# erzeuge eine Fehlermeldung;
+				$ret['sql'] = $sql;
 				$last_error = pg_last_error($this->dbConn);
 				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
 					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
@@ -2555,11 +2737,13 @@ class pgdatabase {
 				if (strpos($last_error, '{') !== false AND strpos($last_error, '}') !== false) {
 					# Parse als JSON String;
 					$error_obj = json_decode(substr($last_error, strpos($last_error, '{'), strpos($last_error, '}') - strpos($last_error, '{') + 1), true);
-					if (array_key_exists('msg_type', $error_obj)) {
-						$ret['type'] = $error_obj['msg_type'];
-					}
-					if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
-						$ret['msg'] = $error_obj['msg'];
+					if ($error_obj) {
+						if (array_key_exists('msg_type', $error_obj)) {
+							$ret['type'] = $error_obj['msg_type'];
+						}
+						if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
+							$ret['msg'] = $error_obj['msg'];
+						}
 					}
 				}
 				else {
@@ -2577,31 +2761,38 @@ class pgdatabase {
 				$ret[1] = $ret['query'] = $query;
 
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
-				$last_notice = pg_last_notice($this->dbConn);
-				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
-					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+				if (PHPVERSION >= 710) {
+					$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
 				}
-				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
-					$this->gui->notices[] = $last_notice;
-					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
-						# Parse als JSON String
-						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-						if (array_key_exists('success', $notice_obj)) {
-							if (!$notice_obj['success']) {
-								$ret['success'] = false;
-							}
-							if (array_key_exists('msg_type', $notice_obj)) {
-								$ret['type'] = $notice_obj['msg_type'];
-							}
-							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-								$ret['msg'] = $notice_obj['msg'];
+				else {
+					$last_notices = array(pg_last_notice($this->dbConn));
+				}
+				foreach ($last_notices as $last_notice) {
+					if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+						$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+					}
+					# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
+					if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+						$this->gui->notices[] = $last_notice;
+						if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
+							# Parse als JSON String
+							$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
+							if ($notice_obj AND array_key_exists('success', $notice_obj)) {
+								if (!$notice_obj['success']) {
+									$ret['success'] = false;
+								}
+								if (array_key_exists('msg_type', $notice_obj)) {
+									$ret['type'] = $notice_obj['msg_type'];
+								}
+								if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+									$ret['msg'] .= $notice_obj['msg'];
+								}
 							}
 						}
-					}
-					else {
-						# Gebe Noticetext wie er ist zurück
-						$ret['msg'] = $last_notice;
+						else {
+							# Gebe Noticetext wie er ist zurück
+							$ret['msg'] .= $last_notice.chr(10).chr(10);
+						}
 					}
 				}
 
@@ -2633,19 +2824,25 @@ class pgdatabase {
 			# alles ok mach nichts weiter
 		}
 		else {
-			# Fehler setze entsprechende Fags und Fehlermeldung
+			# Fehler setze entsprechende Flags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
-				# mache nichts, den die Fehlermeldung wird unterdrückt
+				# mache nichts, denn die Fehlermeldung wird unterdrückt
 			}
 			else {
+				if (strpos(strtolower($this->gui->formvars['export_format']), 'json') !== false) {
+					header('Content-Type: application/json; charset=utf-8');
+					echo utf8_decode(json_encode($ret));
+					exit;
+				}
 				# gebe Fehlermeldung aus.
-				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
+				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:' . $sql, $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
 				header('error: true');	// damit ajax-Requests das auch mitkriegen
 			}
 		}
+		$this->success = $ret['success'];
 		return $ret;
 	}
 
@@ -2698,7 +2895,7 @@ class db_mapObj {
 		$this->script_name = 'db_MapObj.php';
 		$this->debug = $debug;
 		$this->GUI = $GUI;
-		$this->db = $GUI->database;
+		$this->db = $GUI->pgdatabase;
 		$this->Stelle_ID = $Stelle_ID;
 		$this->User_ID = $User_ID;
 		$this->rolle = new rolle($User_ID, $Stelle_ID, $this->db);
@@ -2709,52 +2906,66 @@ class db_mapObj {
 			SELECT
 				r.*
 			FROM
-				referenzkarten AS r,
-				stelle AS s
+				kvwmap.referenzkarten AS r,
+				kvwmap.stelle AS s
 			WHERE
-				r.ID = s.Referenzkarte_ID
-    		AND s.ID = " . $this->Stelle_ID . "
+				r.id = s.referenzkarte_id
+    		AND s.id = " . $this->Stelle_ID . "
 		";
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>" . $sql,4);
-		$this->db->execSQL($sql);
-		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-		$rs = $this->db->result->fetch_array();
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>",4);
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+		$rs = pg_fetch_assoc($ret[1]);
     $this->referenceMap = $rs;
 #		echo '<br>sql: ' . print_r($sql, true);
 #		echo '<br>ref: ' . print_r($this->referenceMap, true);
     return $rs;
   }
 
-  function read_Groups($all = false, $order = '') {
+	function read_Groups($all = false, $order = '', $where = 'true') {
 		global $language;
-		$sql = 'SELECT ';
-		if($all == false) $sql .= 'g2r.status, ';
-		if($language != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
+		if ($language != 'german') {
+			$gruppenname_column = "
+			CASE
+				WHEN g.gruppenname_" . $language . " != \"\" THEN g.gruppenname_" . $language . "
+				ELSE g.gruppenname
+			END";
 		}
-		$sql.='Gruppenname, obergruppe, g.id FROM u_groups AS g';
-		if($all == false){
-			$sql.=', u_groups2rolle AS g2r ';
-			$sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
-			$sql.=' AND g2r.id = g.id';
+		else {
+			$gruppenname_column = "g.gruppenname";
 		}
-		if($order != '')$sql.=' ORDER BY '. replace_semicolon($order);
-		else $sql.=' ORDER BY `order`';
-		#echo $sql;
 
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>" . $sql,4);
-    $this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    while ($rs = $this->db->result->fetch_array()) {
+		$sql = "
+			SELECT
+				g.id,
+				" . $gruppenname_column . " AS gruppenname,
+				g.obergruppe,
+				g.selectable_for_shared_layers " .
+				(!$all ? ", g2r.status" : "") . "
+			FROM
+				kvwmap.u_groups AS g" . ($all ? "" : "
+				JOIN kvwmap.u_groups2rolle AS g2r ON g.id = g2r.id") . "
+			WHERE
+				" . $where . ($all ? "" : " AND
+				g2r.stelle_id = " . $this->Stelle_ID . " AND
+				g2r.user_id = " . $this->User_ID) . "
+			ORDER BY " .
+				($order != '' ? replace_semicolon($order) : "g.order") . "
+		";
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+		$groups = array();
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$groups[$rs['id']]['status'] = value_of($rs, 'status');
-      $groups[$rs['id']]['Gruppenname'] = $rs['Gruppenname'];
+			$groups[$rs['id']]['Gruppenname'] = $rs['gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
-			if($rs['obergruppe'])$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
-    }
-    $this->anzGroups=count($groups);
-    return $groups;
-  }
+			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];
+			if ($rs['obergruppe']) {
+				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
+			}
+		}
+		$this->anzGroups = count($groups);
+		return $groups;
+	}
 
 	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL) {
 		global $language;
@@ -2762,50 +2973,50 @@ class db_mapObj {
 		if ($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
-				ELSE l.`Name`
-			END AS Name";
+				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "
+				ELSE l.name
+			END AS name";
 			$group_column = '
 			CASE
-				WHEN `Gruppenname_' . $language . '` IS NOT NULL THEN `Gruppenname_' . $language . '`
-				ELSE `Gruppenname`
-			END AS Gruppenname';
+				WHEN gruppenname_' . $language . ' IS NOT NULL THEN gruppenname_' . $language . '
+				ELSE gruppenname
+			END AS gruppenname';
 		}
 		else {
-			$name_column = "l.Name";
-			$group_column = 'Gruppenname';
+			$name_column = "l.name";
+			$group_column = 'gruppenname';
 		}
 
 		$sql = "
 			SELECT DISTINCT
 				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency,
-				rl.`aktivStatus`,
-				rl.`queryStatus`,
-				rl.`gle_view`,
-				rl.`showclasses`,
-				rl.`logconsume`,
-				rl.`rollenfilter`,
-				ul.`queryable`,
+				rl.aktivstatus,
+				rl.querystatus,
+				rl.gle_view,
+				rl.showclasses,
+				rl.logconsume,
+				rl.rollenfilter,
+				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
 				ul.legendorder,
-				ul.`minscale`, ul.`maxscale`,
-				ul.`offsite`,
-				ul.`postlabelcache`,
-				ul.`Filter`,
-				ul.`template`,
-				ul.`header`,
-				ul.`footer`,
-				ul.`symbolscale`,
-				ul.`logconsume`,
-				ul.`requires`,
-				ul.`privileg`,
-				ul.`export_privileg`,
-				ul.`group_id`,
-				l.Layer_ID," .
+				ul.minscale, ul.maxscale,
+				ul.offsite,
+				ul.postlabelcache,
+				ul.filter,
+				ul.template,
+				ul.header,
+				ul.footer,
+				ul.symbolscale,
+				ul.logconsume,
+				ul.requires,
+				ul.privileg,
+				ul.export_privileg,
+				ul.group_id,
+				l.layer_id," .
 				$name_column . ",
 				l.alias,
-				l.Datentyp, COALESCE(ul.group_id, l.Gruppe) AS Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
+				l.datentyp, COALESCE(ul.group_id, l.Gruppe) AS Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires,
 				l.connection_id,
 				CASE
@@ -2830,9 +3041,9 @@ class db_mapObj {
 				" . $group_column . ",
 				g.obergruppe,
 				g.order
-				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
-				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
-				" . ($this->GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.sync' : '') . "
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.vector_tile_url' : '') . "
+				" . ($this->GUI->plugin_loaded('portal') ? ', l.cluster_option' : '') . "
 			FROM
 				kvwmap.u_rolle2used_layer AS rl,
 				kvwmap.used_layer AS ul JOIN
@@ -2841,45 +3052,41 @@ class db_mapObj {
 				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				kvwmap.connections as c ON l.connection_id = c.id
 			WHERE
-				rl.stelle_id = ul.Stelle_ID AND
-				rl.layer_id = ul.Layer_ID AND
+				rl.stelle_id = ul.stelle_id AND
+				rl.layer_id = ul.layer_id AND
 				(ul.minscale != -1 OR ul.minscale IS NULL) AND
-				l.Datentyp != 5 AND 
-				rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
+				l.datentyp != 5 AND 
+				rl.stelle_id = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
 				gr.stelle_id = " . $this->Stelle_ID . " AND
 				gr.user_id = " . $this->User_ID .
 				($groups != NULL ? " AND g.id IN (" . $groups . ")" : '') .
-				($this->nurAufgeklappteLayer ? " AND (rl.aktivStatus != '0' OR gr.status != '0' OR ul.requires != '')" : '') .
-				($this->nurAktiveLayer ? " AND (rl.aktivStatus != '0')" : '') .
+				($this->nurAufgeklappteLayer ? " AND (rl.aktivstatus != '0' OR gr.status != '0' OR ul.requires IS NOT NULL)" : '') .
+				($this->nurAktiveLayer ? " AND (rl.aktivstatus != '0')" : '') .
 				($this->OhneRequires ? " AND (ul.requires IS NULL)" : '') .
-				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') .
-				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . 
+				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivstatus != '0')" : '') .
+				($this->nurNameLike ? " AND l.name LIKE '" . $this->nurNameLike . "'" : '') . 
 				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
 				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . 
-				($this->nurLayerID ? " AND l.Layer_ID = " . $this->nurLayerID : '') .
-				($this->nurLayerIDs ? " AND l.Layer_ID IN (" . $this->nurLayerIDs . ")" : '') .
-				($this->nichtLayerID ? " AND l.Layer_ID != " . $this->nichtLayerID : '') . "
+				($this->nurLayerID ? " AND l.layer_id = " . $this->nurLayerID : '') .
+				($this->nurLayerIDs ? " AND l.layer_id IN (" . $this->nurLayerIDs . ")" : '') .
+				($this->nichtLayerID ? " AND l.layer_id != " . $this->nichtLayerID : '') . "
 			ORDER BY
 				drawingorder
 		";
 		# echo '<br>SQL zur Abfrage der Layer: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>", 4);
-		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { 
-			echo err_msg($this->script_name, __LINE__, $sql); 
-			return 0;
-		}
+		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$layer = array();
 		$layer['list'] = array();
 		$this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
-		while ($rs = $ret['result']->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
-				if ($rs['Filter'] == '') {
-					$rs['Filter'] = '('.$rs['rollenfilter'].')';
+				if ($rs['filter'] == '') {
+					$rs['filter'] = '('.$rs['rollenfilter'].')';
 				}
 				else {
-					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+					$rs['filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['filter']);
 				}
 			}
 
@@ -2930,17 +3137,18 @@ class db_mapObj {
 				class_id,
 				status
 			FROM
-				u_rolle2used_class
+				kvwmap.u_rolle2used_class
 			WHERE
 				user_id = " . $this->User_ID . "
 				AND stelle_id = " . $this->Stelle_ID . "
 		";
 		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
-		$this->db->execSQL($sql);
-    while ($row = $this->db->result->fetch_assoc()) {
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+    while ($row = pg_fetch_assoc($ret[1])) {
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
+		#return $classarray ?? NULL;
 		return $classarray;
   }
 
@@ -2952,29 +3160,29 @@ class db_mapObj {
 			SELECT " .
 				((!$all_languages AND $language != 'german') ? "
 					CASE
-						WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
-						ELSE `Name`
+						WHEN name_" . $language . "IS NOT NULL THEN name_" . $language . "
+						ELSE name
 					END" : "
-					`Name`"
-				) . " AS Name,
-				`Name_low-german`,
-				`Name_english`,
-				`Name_polish`,
-				`Name_vietnamese`,
-				`Class_ID`,
-				`Layer_ID`,
-				`Expression`,
-				`classification`,
-				`legendgraphic`,
-				`legendimagewidth`,
-				`legendimageheight`,
-				`drawingorder`,
-				`legendorder`,
-				`text`
+					name"
+				) . " AS name,
+				name_low_german,
+				name_english,
+				name_polish,
+				name_vietnamese,
+				class_id,
+				layer_id,
+				expression,
+				classification,
+				legendgraphic,
+				legendimagewidth,
+				legendimageheight,
+				drawingorder,
+				legendorder,
+				text
 			FROM
-				`classes`
+				kvwmap.classes
 			WHERE
-				`Layer_ID` = " . $Layer_ID .
+				layer_id = " . $Layer_ID .
 				(
 					(!empty($classification)) ? " AND
 						(
@@ -2986,21 +3194,20 @@ class db_mapObj {
 				NULLIF(classification, '') IS NULL,
 				classification,
 				drawingorder,
-				Class_ID
+				class_id
 		";
 		#echo $sql.'<br>';
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
-		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>", 4);
+		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$index = 0;
-		while ($rs = $ret['result']->fetch_assoc()) {
-			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
-			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['Style'] = $this->read_Styles($rs['class_id']);
+			$rs['Label'] = $this->read_Label($rs['class_id']);
 			$rs['index'] = $index;
 			#Anne
 			if($disabled_classes){
-				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
-					$rs['Status'] = 1;
+				if($disabled_classes['status'][$rs['class_id']] == 2) {
+					$rs['status'] = 1;
 					for($i = 0; $i < count($rs['Style']); $i++) {
 						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
@@ -3012,12 +3219,12 @@ class db_mapObj {
 						}
 					}
 				}
-				elseif ($disabled_classes['status'][$rs['Class_ID']] == '0') {
+				elseif ($disabled_classes['status'][$rs['class_id']] == '0') {
 					$rs['Status'] = 0;
 				}
-				else $rs['Status'] = 1;
+				else $rs['status'] = 1;
 			}
-			else $rs['Status'] = 1;
+			else $rs['status'] = 1;
 
 			$Classes[] = $rs;
 			$index++;
@@ -3059,40 +3266,48 @@ class db_mapObj {
 		return $Labels;
 	}
 
-	function read_RollenLayer($id = NULL, $typ = NULL){
+	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
 			SELECT DISTINCT
-				l.`id`,
-				l.`user_id`,
-				l.`stelle_id`,
-				l.`aktivStatus`,
-				l.`queryStatus`,
-				l.`Name`,
-				l.`Name` as alias,
-				l.`Gruppe`,
-				l.`Typ`,
-				l.`Datentyp`,
-				l.`Data`,
-				l.`query`,
-				l.`connectiontype`,
+				l.id,
+				l.user_id,
+				l.stelle_id,
+				l.aktivstatus,
+				l.querystatus,
+				l.name,
+				l.name as alias,
+				l.gruppe,
+				l.typ,
+				l.datentyp,
+				l.data,
+				l.query,
+				l.connectiontype,
 				l.connection_id,
+				l.wms_auth_username,
+				l.wms_auth_password,
 				CASE
-					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password)
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', l.user_id)
 					ELSE l.connection
 				END as connection,
-				l.`epsg_code`,
-				l.`transparency`,
-				l.`labelitem`,
-				l.`classitem`,
-				l.`gle_view`,
-				l.`rollenfilter`,
-				l.`duplicate_from_layer_id`,
-				l.`duplicate_criterion`,
-				g.Gruppenname,
-				-l.id AS Layer_ID,
+				l.epsg_code,
+				l.transparency,
+				l.buffer,
+				l.labelitem,
+				l.classitem,
+				l.gle_view,
+				l.rollenfilter,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
+				g.gruppenname,
+				-l.id AS layer_id,
 				1 as showclasses,
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
-				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter
+				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter,
+				'' as wms_name,
+				'' as wms_format,
+				'' as wms_server_version,
+				'' as wms_connectiontimeout,
+				'' as oid
 			FROM
 				kvwmap.rollenlayer AS l JOIN
 				kvwmap.u_groups AS g ON l.Gruppe = g.id LEFT JOIN
@@ -3101,25 +3316,26 @@ class db_mapObj {
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
-				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . "
+				($typ != NULL ? " AND l.typ = '" . $typ . "'" : '') . 
+				($autodelete != NULL ? " AND l.autodelete = '" . $autodelete . "'" : '') . "
 		";
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
-		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
-		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    $Layer = array();
-    while ($rs = $ret['result']->fetch_array()) {
-      $rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
-			foreach (array('name', 'alias', 'connection', 'classification', 'pfad', 'data') AS $key) {
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
+		#echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+		$Layer = array();
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
+			foreach (array('name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'data') AS $key) {
 				$rs[$key] = replace_params_rolle(
 					$rs[$key],
 					['duplicate_criterion' => $rs['duplicate_criterion']]
 				);
 			}
 			$rs['alias_link'] = $rs['alias'];
-      $Layer[] = $rs;
-    }
-    return $Layer;
-  }
+			$rs['Name_or_alias'] = $rs['alias'];
+			$Layer[] = $rs;
+		}
+		return $Layer;
+	}
 }
 ?>

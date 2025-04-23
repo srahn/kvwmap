@@ -167,21 +167,20 @@ class stelle {
 	}
 	
   function getName() {
-		global $language;
     $sql ='SELECT ';
-    if ($language != 'german' AND $language != ''){
-      $sql.='Bezeichnung_'.$language.' AS ';
+    if (rolle::$language != 'german' AND rolle::$language != ''){
+      $sql.='bezeichnung_'.rolle::$language.' AS ';
     }
-    $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
-    #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
-    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>",4);
-		$this->database->execSQL($sql);
+    $sql.='bezeichnung FROM kvwmap.stelle WHERE id = '.$this->id;
+    #echo $sql;
+    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
-		$rs = $this->database->result->fetch_array();
-    $this->Bezeichnung=$rs['Bezeichnung'];
-    return $rs['Bezeichnung'];
+		$rs = pg_fetch_array($ret[1]);
+    $this->Bezeichnung = $rs['bezeichnung'];
+    return $rs['bezeichnung'];
   }
 
 	function readDefaultValues() {
@@ -1860,17 +1859,17 @@ class stelle {
 		global $language;
 		$sql = 'SELECT DISTINCT';
 		if($language != 'german') {
-			$sql.=' CASE WHEN Gruppenname_'.$language.' IS NOT NULL THEN Gruppenname_'.$language.' ELSE Gruppenname END AS';
+			$sql.=' CASE WHEN gruppenname_'.$language.' IS NOT NULL THEN gruppenname_'.$language.' ELSE gruppenname END AS';
 		}
-		$sql.=' Gruppenname, obergruppe, g.id FROM u_groups AS g, u_groups2rolle AS g2r';
+		$sql.=' gruppenname, obergruppe, g.id, "order" FROM kvwmap.u_groups AS g, kvwmap.u_groups2rolle AS g2r';
 		$sql.=' WHERE g2r.stelle_ID='.$this->id;
 		$sql.=' AND g2r.id = g.id';
-		$sql.=' ORDER BY order';
+		$sql.=' ORDER BY "order"';
 		#echo $sql; exit;
     $this->debug->write("<p>file:kvwmap class:stelle->getGroups - Lesen der Gruppen der Stelle:<br>".$sql,4);
-    $this->database->execSQL($sql);
+    $ret = $this->database->execSQL($sql);
     if (!$this->database->success) { echo "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    while ($rs=$this->database->result->fetch_assoc()) {
+    while ($rs = pg_fetch_assoc($ret[1])) {
       $groups[$rs['id']] = array_merge($groups[$rs['id']] ?: [], $rs);
 			if($rs['obergruppe'])$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
     }
@@ -1901,21 +1900,21 @@ class stelle {
 				l.drawingorder,
 				ul.legendorder
 			FROM
-				used_layer ul JOIN
-				layer l ON ul.Layer_ID = l.Layer_ID 
+				kvwmap.used_layer ul JOIN
+				kvwmap.layer l ON ul.Layer_ID = l.Layer_ID 
 			WHERE" .
 				$condition .
 				$order . "
 		";
 		#echo '<br>stelle.php getLayers Sql:<br>' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayers - Lesen der Layer zur Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
 			return 0;
 		} else {
 			$i = 0;
-			while ($rs = $this->database->result->fetch_assoc()) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
 				$layer['ID'][] 						= $rs['layer_id'];
 				$layer['name'][]					= $rs['name'];
 				$layer['alias'][]					= $rs['alias'];
@@ -2025,30 +2024,30 @@ class stelle {
 	function getqueryablePostgisLayers($privileg, $export_privileg = NULL, $no_subform_layers = false, $layer_id = NULL){
 		global $language;
 		$language_postfix = ($language == 'german' ? "" : "_" . $language);
-		$language_layer_name = "Name" . $language_postfix;
+		$language_layer_name = "name" . $language_postfix;
 		# nicht editierbare SubformFKs ausschliessen
 		$condition = (($privileg > 0 AND $no_subform_layers) ? "subformfk IS NULL OR privilegfk = 1" : "true");
 		$sql = "
 			SELECT DISTINCT
-				Layer_ID,
-				Name,
+				layer_id,
+				name,
 				alias,
 				export_privileg
 			FROM
 				(
 					SELECT
-						l.Layer_ID,
-						CASE WHEN l." . $language_layer_name . " != '' THEN l." . $language_layer_name . " ELSE l.Name END AS Name,
+						l.layer_id,
+						CASE WHEN l." . $language_layer_name . " != '' THEN l." . $language_layer_name . " ELSE l.name END AS name,
 						l.alias,
 						ul.export_privileg,
 						form_element_type as subformfk,
 						las.privileg as privilegfk
 					FROM
-						layer l LEFT JOIN
-						used_layer ul ON l.Layer_ID = ul.Layer_ID LEFT JOIN
-						u_groups g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
-						layer_attributes AS la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' LEFT JOIN
-						layer_attributes2stelle AS las ON las.stelle_id = ul.Stelle_ID AND ul.Layer_ID = las.layer_id AND las.attributename = split_part(split_part(la.options, ';', 1) , ',',  -1)
+						kvwmap.layer l LEFT JOIN
+						kvwmap.used_layer ul ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+						kvwmap.u_groups g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
+						kvwmap.layer_attributes AS la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' LEFT JOIN
+						kvwmap.layer_attributes2stelle AS las ON las.stelle_id = ul.Stelle_ID AND ul.Layer_ID = las.layer_id AND las.attributename = split_part(split_part(la.options, ';', 1) , ',',  -1)
 					WHERE
 						ul.stelle_id = " . $this->id . " AND
 						l.connectiontype = 6 AND
@@ -2057,7 +2056,7 @@ class stelle {
 						. ($export_privileg != NULL ? " AND ul.export_privileg > 0" : "")
 						. ($layer_id != NULL ? " AND l.Layer_ID = " . $layer_id : "") . "
 					ORDER BY
-						Name
+						name
 				) as foo
 			WHERE
 				" . $condition . "
@@ -2097,21 +2096,22 @@ class stelle {
 	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $no_query_layers = false,  $export_privileg = NULL){
 		global $language;
 		$language_postfix = ($language == 'german' ? "" : "_" . $language);
-		$language_layer_name = "Name" . $language_postfix;
-		$language_group_name = "Gruppenname" . $language_postfix;
+		$language_layer_name = "name" . $language_postfix;
+		$language_group_name = "gruppenname" . $language_postfix;
 		$sql = "
 			SELECT
-				l.Layer_ID,
+				l.layer_id,
 				CASE WHEN l." . $language_layer_name . " != '' THEN l." . $language_layer_name . " ELSE l.Name END AS Name,
 				l.alias,
 				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
 				CASE WHEN g." . $language_group_name . " != '' THEN g." . $language_group_name . " ELSE g.Gruppenname END AS Gruppenname,
 				l.connection,
-				ul.export_privileg
+				ul.export_privileg,
+				COALESCE(NULLIF(alias, ''), name) as alias_or_name
 			FROM
-				layer l LEFT JOIN
-				used_layer ul ON l.Layer_ID = ul.layer_id LEFT JOIN
-				u_groups g ON COALESCE(ul.group_id, l.Gruppe) = g.id
+				kvwmap.layer l LEFT JOIN
+				kvwmap.used_layer ul ON l.layer_id = ul.layer_id LEFT JOIN
+				kvwmap.u_groups g ON COALESCE(ul.group_id, l.gruppe) = g.id
 			WHERE
 				stelle_id = " . $this->id . " AND
 				(
@@ -2119,47 +2119,49 @@ class stelle {
 					l.connectiontype = 9
 				) AND "
 				. ($use_geom != NULL ? "ul.use_geom = 1" : "ul.queryable = '1'")
-				. ($no_query_layers ? " AND l.Datentyp != 5" : "")
+				. ($no_query_layers ? " AND l.datentyp != 5" : "")
 				. ($privileg != NULL ? " AND ul.privileg >= '" . $privileg . "'" : "")
 				. ($export_privileg != NULL ? " AND ul.export_privileg > 0" : "")
 				. ($group_id != NULL ? " AND COALESCE(ul.group_id, l.Gruppe) = " . $group_id : "")
-				. ($layer_ids != NULL ? " AND l.Layer_ID IN (" . implode(',', $layer_ids) . ")" : "") . "
+				. ($layer_ids != NULL ? " AND l.layer_id IN (" . implode(',', $layer_ids) . ")" : "") . "
 		";
 		if ($user_id != NULL) {
 			$sql .= "
 				UNION
 				SELECT
-					-id AS Layer_ID,
-					concat(Name, CASE WHEN Typ = 'search' THEN ' -eigene Abfrage-' ELSE ' -eigener Import-' END) AS Name,
+					-id AS layer_id,
+					new_name AS name,
 					'' AS alias,
-					Gruppe,
-					' ' AS Gruppenname,
+					gruppe,
+					' ' AS gruppenname,
 					connection,
-					1 AS export_privileg
+					1 AS export_privileg, 
+					new_name as alias_or_name
 				FROM
-					rollenlayer
+					kvwmap.rollenlayer,
+					concat(name, CASE WHEN typ = 'search' THEN ' -eigene Abfrage-' ELSE ' -eigener Import-' END) AS new_name
 				WHERE
 					stelle_id = " . $this->id . " AND
 					user_id = " . $user_id . " AND
 					connectiontype = 6"
-					. ($rollenlayer_type != NULL ? " AND Typ = '" . $rollenlayer_type . "'" : "")
-					. ($group_id != NULL ? " AND Gruppe = " . $group_id : "") . "
+					. ($rollenlayer_type != NULL ? " AND typ = '" . $rollenlayer_type . "'" : "")
+					. ($group_id != NULL ? " AND gruppe = " . $group_id : "") . "
 			";
 		}
 		if ($this->useLayerAliases) {
-			$sql .= " ORDER BY COALESCE(NULLIF(alias, ''), Name)";
+			$sql .= " ORDER BY alias_or_name";
 		}
 		else {
-			$sql .= " ORDER BY Name";
+			$sql .= " ORDER BY name";
 		}
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);		
+		$ret = $this->database->execSQL($sql);		
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		else {
-			while ($rs=$this->database->result->fetch_assoc()){
+			while ($rs = pg_fetch_assoc($ret[1])){
 				$rs['name'] = replace_params_rolle($rs['name']);
 				$rs['alias'] = replace_params_rolle($rs['alias']);
 				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'name'];
@@ -2230,9 +2232,9 @@ class stelle {
 		$layer = array();
 		$sql = "
 			SELECT
-				l.Layer_ID,
-				l.Name,
-				l.Gruppe,
+				l.layer_id,
+				l.name,
+				l.gruppe,
 				l.document_path,
 				ul.use_parent_privileges,
 				ul.privileg,
@@ -2254,21 +2256,21 @@ class stelle {
 				ul.use_geom,
 				ul.group_id,
 				parent_id,
-				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
-				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
+				string_agg(ul2.stelle_id::text, ',') as used_layer_parent_id,
+				string_agg(s.bezeichnung, ',') as used_layer_parent_bezeichnung
 			FROM
-				layer AS l 
-				JOIN used_layer AS ul ON l.Layer_ID = ul.Layer_ID
-				LEFT JOIN stellen_hierarchie ON child_id = " . $this->id . "
-				LEFT JOIN used_layer AS ul2 ON 
-					l.Layer_ID = ul2.Layer_ID AND	
-					ul2.Stelle_ID = parent_id
-				LEFT JOIN stelle AS s ON s.ID = ul2.Stelle_ID
+				kvwmap.layer AS l 
+				JOIN kvwmap.used_layer AS ul ON l.Layer_ID = ul.Layer_ID
+				LEFT JOIN kvwmap.stellen_hierarchie ON child_id = " . $this->id . "
+				LEFT JOIN kvwmap.used_layer AS ul2 ON 
+					l.layer_id = ul2.layer_id AND	
+					ul2.stelle_id = parent_id
+				LEFT JOIN kvwmap.stelle AS s ON s.ID = ul2.stelle_id
 			WHERE
-				ul.Stelle_ID = " . $this->id .
-				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
+				ul.stelle_id = " . $this->id .
+				($Layer_id != '' ? " AND l.layer_id = " . $Layer_id : '') . "
 			GROUP BY 
-				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
+				l.layer_id, l.name, l.gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
 				ul.queryable, 
 				l.drawingorder, 
 				ul.legendorder, 
@@ -2282,13 +2284,16 @@ class stelle {
 				ul.symbolscale, 
 				ul.logconsume, 
 				ul.start_aktiv, 
-				ul.use_geom
+				ul.use_geom,
+				ul.requires,
+				ul.group_id,
+				stellen_hierarchie.parent_id
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		while ($rs=$this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$layer[] = ($result == 'only_ids' ? $rs['layer_id'] : $rs);
 		}
 		return $layer;

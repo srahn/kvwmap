@@ -1,7 +1,7 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'Layer.php');
-class LayerGroup extends MyObject {
+class LayerGroup extends PgObject {
 
 	static $write_debug = false;
 
@@ -17,7 +17,7 @@ class LayerGroup extends MyObject {
 				"fk" => 'gruppe'
 			)
 		);
-		parent::__construct($gui, 'u_groups');
+		parent::__construct($gui, 'kvwmap', 'u_groups');
 
 		$this->validations = array(
 			array(
@@ -43,7 +43,7 @@ class LayerGroup extends MyObject {
 				$group->layers = $group->get_Layer();
 				return $group;
 			},
-			$group->find_where($where, $order, 'ASC')
+			$group->find_where($where, $order)
 		);
 	}
 

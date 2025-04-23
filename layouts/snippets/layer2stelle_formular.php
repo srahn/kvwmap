@@ -28,11 +28,11 @@ include_once(CLASSPATH . 'LayerGroup.php');
 					<th align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLayerGroup; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 						<?
-						$used_layer_groups = LayerGroup::find($this, 'true', 'Gruppenname');
+						$used_layer_groups = LayerGroup::find($this, 'true', 'gruppenname');
 						$used_layer_groups_options = array_map(function ($group) {
 							return array(
 								'value' => $group->get_id(),
-								'output' => $group->get('Gruppenname') . ' (id: ' . $group->get_id() . ')'
+								'output' => $group->get('gruppenname') . ' (id: ' . $group->get_id() . ')'
 							);
 						}, $used_layer_groups);
 						echo FormObject::createSelectField(
