@@ -633,13 +633,13 @@ class GUI {
 								echo '</a></li>';
 							}
 							for($c = 0; $c < count($layer[0]['Class']); $c++){
-								$class_ids[] = $layer[0]['Class'][$c]['Class_ID'];
+								$class_ids[] = $layer[0]['Class'][$c]['class_id'];
 							}
-							if ($layer[0]['Class'][0]['Status'] == '1' || $layer[0]['Class'][1]['Status'] == '1') {
+							if ($layer[0]['Class'][0]['status'] == '1' || $layer[0]['Class'][1]['status'] == '1') {
 								$function = "deactivateAllClasses('" . implode(",", $class_ids) . "')";
 								$link_text = ucfirst($this->deactivateAllClasses);
 							}
-							if ($layer[0]['Class'][0]['Status'] == '0' || $layer[0]['Class'][1]['Status'] == '0') {
+							if ($layer[0]['Class'][0]['Status'] == '0' || $layer[0]['Class'][1]['status'] == '0') {
 								$function = "activateAllClasses('" . implode(",", $class_ids) . "')";
 								$link_text = ucfirst($this->activateAllClasses);
 							}

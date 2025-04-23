@@ -2063,7 +2063,7 @@ class stelle {
 		";
 		#echo 'SQL zur Abfrage der abfragbaren Layer in der Stelle: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryablePostgisLayers - Lesen der abfragbaren PostgisLayer zur Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
@@ -2073,7 +2073,7 @@ class stelle {
 				'Bezeichnung' => array(),
 				'export_privileg' => array()
 			);
-			while($rs=$this->database->result->fetch_array()) {
+			while($rs = pg_fetch_array($ret[1])) {
 				$rs['name'] = replace_params_rolle($rs['name']);
 				$rs['alias'] = replace_params_rolle($rs['alias']);
 				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'name'];
