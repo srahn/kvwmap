@@ -40,9 +40,9 @@ show_details = function(oid){
 
 go_back = function(){
 	currentform.details.value = '';
-	currentform.go.value = 'Layer-Suche_Suchen';
+	currentform.go.value = 'get_last_query';
 	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
-	//currentform.value_b_plan_stammdaten_oid.value = '';
+	currentform.value_b_plan_stammdaten_oid.value = '';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = currentform._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
 	overlay_submit(currentform, false);
 }
@@ -50,7 +50,7 @@ go_back = function(){
 copy_dataset = function(plan_id){
 	currentform.plan_id.value = plan_id;
 	currentform.go.value = 'copy_bplan';
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
 update_bplan_from_rok = function(plan_id){
@@ -58,14 +58,14 @@ update_bplan_from_rok = function(plan_id){
 	if(really){
 		currentform.plan_id.value = plan_id;
 		currentform.go.value = 'update_bplan_from_rok';
-		currentform.submit();
+		overlay_submit(currentform, false);
 	}
 }
 
 delete_dataset = function(plan_id){
 	really = confirm('Wollen Sie diesen Datensatz wirklich löschen?');
 	if(really){
-		if((currentform.details.value != 'true' && currentform.value_b_plan_stammdaten_oid.value == '') || (currentform.details.value == 'true' && currentform.value_b_plan_stammdaten_oid.value != '')){		// Trefferliste vorhanden -> wieder zurück zur Trefferliste
+		if((currentform.details.value != 'true' && currentform.value_b_plan_stammdaten_oid?.value == '') || (currentform.details.value == 'true' && currentform.value_b_plan_stammdaten_oid?.value != '')){		// Trefferliste vorhanden -> wieder zurück zur Trefferliste
 			currentform.details.value = '';
 			currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
 			currentform.value_b_plan_stammdaten_oid.value = '';
@@ -73,7 +73,7 @@ delete_dataset = function(plan_id){
 		}
 		currentform.plan_id.value = plan_id;
 		currentform.go.value = 'delete_bplan';
-		currentform.submit();
+		overlay_submit(currentform, false);
 	}
 }
 
@@ -505,7 +505,8 @@ if($this->new_entry != true AND $this->formvars['details'] == 'true'){ ?>
 <br>
 <?php   
 		#  zusätzliches Hiddenfeld zum Merken des Offsets der Trefferliste, solange man in der Detailansicht ist 
-		echo '<input name="_offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['_offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
+		echo '<input name="_offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['_offset_'.$this->qlayerset[$i]['Layer_ID']].'">
+		<input type="hidden" name="value_b_plan_stammdaten_oid" value="">';
 	}				# details == true
 	else{ ?>
 		<table border="1" cellpadding="2" style="border-collapse: collapse;">
