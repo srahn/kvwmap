@@ -8214,6 +8214,12 @@ echo '			</table>
 		]);
     $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
     $Stelle->updateLayer($this->formvars);
+		$users = $Stelle->getUser();
+		for ($j = 0; $j < count_or_0($users['ID']); $j++) {
+			$this->user->rolle->setGroups($users['ID'][$j], $Stelle->id, 0, array($this->formvars['selected_layer_id']));
+		}
+		# u_groups2rolle aufräumen
+		rolle::clear_groups2rolle($this->database);
     $this->Layer2Stelle_Editor();
   }
 
@@ -8268,6 +8274,7 @@ echo '			</table>
 			$result = $this->layergruppe->update();
 		}
 		rolle::setGroupsForAll($this->database);
+		rolle::clear_groups2rolle($this->database);
 	}
 
 	function Layer2Stelle_Reihenfolge() {
@@ -9182,6 +9189,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
       }
       # /Löschen der in der Selectbox entfernten Stellen
+			# u_groups2rolle aufräumen
+			rolle::clear_groups2rolle($this->database);
     }
 
 		for ($i = 0; $i < count($stellen_ids); $i++) {
@@ -9238,7 +9247,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$users = $stelle->getUser();
 			for($j = 0; $j < count($users['ID']); $j++){
 				$this->user->rolle->deleteLayer($users['ID'][$j], array($deletestellen[$i]), array($layer_id));
-				$this->user->rolle->updateGroups($users['ID'][$j],$deletestellen[$i], $layer_id);
 			}
 			# Kindstellen
 			$children = $stelle->getChildren($deletestellen[$i], " ORDER BY Bezeichnung", 'only_ids', false);
@@ -12965,7 +12973,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layer_id = explode(',',$layerid);
 				for($j = 0; $j < count($users['ID']); $j++){
 					$this->user->rolle->deleteLayer($users['ID'][$j], array($Stelle->id), $layer_id);
-					$this->user->rolle->updateGroups($users['ID'][$j],$Stelle->id, $layerid);
 				}
 			}
 		}
@@ -13151,6 +13158,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
 			}
     }
+		# u_groups2rolle aufräumen
+		rolle::clear_groups2rolle($this->database);
+
     $this->Stelleneditor();
   }
 
