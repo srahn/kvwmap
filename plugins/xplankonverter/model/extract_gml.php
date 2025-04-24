@@ -1062,7 +1062,7 @@ class Gml_extractor {
 			};
 		}
 		// string needs to be lowered both to simplify cutting #gml_ in all forms and
-		// because uuid (e.g. in gml_id of the associated plan) is always lowercase when cast to text
+		// because uuid (e.g. in gml_id of the associated plan) is always lowercase when cast to text in postgres
 		// will take first plan encountered in gmlas-schema if bereich id is not set (or could not be read by ogr)
 		$sql .= "
 				CASE
@@ -2647,7 +2647,7 @@ class Gml_extractor {
 	 * Function return the attributes of $gml_class that have a special datatype
 	 * It returns only rules for attributes that fullfill the following conditions
 	 * - Attribute belongs to the $gml_class table in xplan_gml schema
-	 * - Attribute have a stereotype of datatype in xplan_uml.uml_class
+	 * - Attribute has a stereotype of datatype in xplan_uml.uml_class
 	 * - $gml_class table exists in $gmlas_schema
 	 * - A table with the name of attributes datatype exists in $gmlas_schema
 	 * @param string $gmlas_schema The name of the gmlas_schema.
@@ -2675,7 +2675,6 @@ class Gml_extractor {
 		";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$datatype_attributes = pg_fetch_all($ret[1], PGSQL_ASSOC);
-		return $datatype_attributes;
 	}
 
 	/**
@@ -2747,7 +2746,7 @@ class Gml_extractor {
   				xplan_gmlas_5007.bp_dachgestaltung data_tab ON rel_tab.bp_dachgestaltung_pkid = data_tab.ogr_pkid
 				*/
 				$regel = "(
-					SELECT array_agg(SELECT * FROM " . $this->gmlas_schema . "." . $rs['table_name'] . " AS rel_tab JOIN " . $this->gmlas_schema . "." . $attribute['datatype'] . " AS data_tab ON rel_tab." . $attribute['datatype'] . "_pkid = data_tab.ogr_pkid WHERE rel_tab.parent_id = gmlas.ogc_fid)
+					SELECT array_agg((SELECT * FROM " . $this->gmlas_schema . "." . $rs['table_name'] . " AS rel_tab JOIN " . $this->gmlas_schema . "." . $attribute['datatype'] . " AS data_tab ON rel_tab." . $attribute['datatype'] . "_pkid = data_tab.ogr_pkid WHERE rel_tab.parent_id::text = gmlas.ogc_fid::text))
 				)";
 			}
 
