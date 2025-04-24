@@ -455,7 +455,7 @@
 	};
 
 	$GUI->xplankonverter_get_new_gml_id = function($gml_id) use ($GUI) {
-		if (! array_key_exists(strtolower($gml_id), strtolower($GUI->xplan_gml_ids))) {
+		if (! array_key_exists(strtolower($gml_id), $GUI->xplan_gml_ids)) {
 			$GUI->xplan_gml_ids[$gml_id] = 'GML_' . uuid();
 		}
 		return $GUI->xplan_gml_ids[$gml_id];
