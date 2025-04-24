@@ -144,14 +144,14 @@ update_gebietstyp = function(){
 			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 				<tr>
 					<td>Gemeinde:</td>
-					<td width="240px"><?  $j = 1;
+					<td width="240px"><?  $j = $layer['attributes']['indizes']['gkz'];
 									echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 									$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 									$j = 0;?>
 					</td>
 					<td>Gemeindekennzahl:</td>
 					<td>
-						<?  $j = 24;
+						<?  $j = $layer['attributes']['indizes']['gemkz'];
 							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2); 
 					 ?>
 					</td>
@@ -160,13 +160,13 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Amt:</td>
 					<td>
-					<?  $j = 26;
+					<?  $j = $layer['attributes']['indizes']['amt'];
 							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2); 
 					 ?>
 					</td>
 					<td>Zentrale Orte:</td>
 					<td>
-						<?  $j = 27;
+						<?  $j = $layer['attributes']['indizes']['zentrort'];
 							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2); 
 					 ?>
 					</td>
@@ -174,13 +174,13 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Kreis:</td>
 					<td>
-					<?  $j = 28;
+					<?  $j = $layer['attributes']['indizes']['kreis'];
 							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2); 
 					 ?>
 					</td>
 					<td>Stadt-Umland-Raum:</td>
 					<td>
-					<?  $j = 29;
+					<?  $j = $layer['attributes']['indizes']['sur'];
 							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 					 ?>
 					</td>
@@ -188,7 +188,7 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Planungsregion:</td>
 					<td>
-						<?  $j = 30;
+						<?  $j = $layer['attributes']['indizes']['pr'];
 							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 					 ?>
 					</td>
@@ -210,8 +210,7 @@ update_gebietstyp = function(){
   			<tr>
   				<td width="130px">Planbezeichnung:</td>
   				<?
-  					$j = 6;
-  					$this->qlayerset[$i]['attributes']['name'][$j] = 'bezeichnung'; 
+  					$j = $layer['attributes']['indizes']['bezeichnung'];
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|'; 
   				?>
 					<td colspan="3" width="530px" ><input style="width: 443px" <? echo ' type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
@@ -219,15 +218,13 @@ update_gebietstyp = function(){
   			<tr>
   				<td>Plannummer:</td>
   				<?
-  					$j = 3;
-  					$this->qlayerset[$i]['attributes']['name'][$j] = 'pl_nr';
+  					$j = $layer['attributes']['indizes']['pl_nr'];
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
 					<td width="190px"><input <? echo ' type="text" style="width: 170px" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
 					<td width="75px">Aktenzeichen</td>
 					<?
-						$j = 9;
-  					$this->qlayerset[$i]['attributes']['name'][$j] = 'aktenzeichen';
+						$j = $layer['attributes']['indizes']['aktenzeichen'];
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
 					<td><input <? echo ' type="text" style="width: 170px" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
@@ -235,8 +232,7 @@ update_gebietstyp = function(){
   			<tr>
   				<td>Planart:</td>
   				<?
-  					$j = 2;
-  					$this->qlayerset[$i]['attributes']['name'][$j] = 'art';
+  					$j = $layer['attributes']['indizes']['art'];
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
 					<td><?  
@@ -245,8 +241,7 @@ update_gebietstyp = function(){
 					</td>
 					<td>Plan-ID:</td>
   				<?
-  					$j = 0;
-  					$this->qlayerset[$i]['attributes']['name'][$j] = 'plan_id';
+  					$j = $layer['attributes']['indizes']['plan_id'];
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
 					<td><input readonly="true" <? echo ' style="width: 170px" type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
@@ -254,15 +249,13 @@ update_gebietstyp = function(){
   			<tr>
   				<td>ROK-Nr.</td>
   				<?
-  					$j = 8;
-  					$this->qlayerset[$i]['attributes']['name'][$j] = 'lfd_rok_nr';
+  					$j = $layer['attributes']['indizes']['lfd_rok_nr'];
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
 					<td><input <? echo ' type="text" style="width: 170px" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
 					<td>aktuell:</td>
   				<?
-  					$j = 7; 
-  					$this->qlayerset[$i]['attributes']['name'][$j] = 'aktuell';
+  					$j = $layer['attributes']['indizes']['aktuell']; 
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
 					<td><?  
@@ -273,8 +266,7 @@ update_gebietstyp = function(){
   			<tr>
   				<td>Gemeindename alt:</td>
   				<?
-  					$j = 4;
-  					$this->qlayerset[$i]['attributes']['name'][$j] = 'gemeinde_alt';
+  					$j = $layer['attributes']['indizes']['gemeinde_alt'];
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
 					<td colspan="1"><input style="width: 170px" <? echo ' type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
@@ -283,17 +275,15 @@ update_gebietstyp = function(){
   			<tr>
   				<td>Geltungsbereich [ha]:</td>
   				<?
-  					$j = 5;
+  					$j = $layer['attributes']['indizes']['geltungsbereich'];
 						$value = str_replace('.', ',', $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]);
-  					$this->qlayerset[$i]['attributes']['name'][$j] = 'geltungsbereich';
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
 					<td>
 						<input <? echo ' type="text" style="width: 54px" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">'; ?>
 						<?
-							$j = 31;
+							$j = $layer['attributes']['indizes']['flaechensumme'];
 							$value = str_replace('.', ',', $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]);
-							$this->qlayerset[$i]['attributes']['name'][$j] = 'flaechensumme';
 							$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 						?>
 						&nbsp;Summe:
@@ -304,15 +294,13 @@ update_gebietstyp = function(){
 							<tr id="kap" <? if($layer['shape'][$k]['art'] != 'Innenbereichssatzung' && $layer['shape'][$k]['art'] != 'Außenbereichssatzung')echo ' style="display: none"'; ?>>
 								<td>Gemeindeziel:&nbsp;</td>
 			  				<?
-			  					$j = 10;
-			  					$this->qlayerset[$i]['attributes']['name'][$j] = 'kap_gemziel';
+			  					$j = $layer['attributes']['indizes']['kap_gemziel'];
 			  					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 			  				?>
 								<td width="60px"><input <? echo ' type="text" style="width: 40px" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="kap_value1" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
 								<td>nach Stell.:&nbsp;</td>
 			  				<?
-			  					$j = 11;
-			  					$this->qlayerset[$i]['attributes']['name'][$j] = 'kap_nachstell';
+			  					$j = $layer['attributes']['indizes']['kap_nachstell'];
 			  					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 			  				?>
 								<td><input <? echo ' type="text" style="width: 40px" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="kap_value2" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
@@ -335,7 +323,7 @@ update_gebietstyp = function(){
   						<tr>
   							<td>
   								<?
-  									$j = 21;
+  									$j = $layer['attributes']['indizes']['gebiete'];
 										echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
   								?>
   							</td>
@@ -350,7 +338,7 @@ update_gebietstyp = function(){
   						<tr>
   							<td>
   								<?
-  									$j = 22;
+  									$j = $layer['attributes']['indizes']['sondergebiete'];
 										echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
   								?>
   							</td>
@@ -369,8 +357,7 @@ update_gebietstyp = function(){
   			<tr>
 					<td>Datum Eingang:</td>
 					<?
-						$j = 12;
-						$this->qlayerset[$i]['attributes']['name'][$j] = 'datumeing';
+						$j = $layer['attributes']['indizes']['datumeing'];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					?>
 					<td align="right"><input size="10" <? echo ' type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?>
@@ -383,8 +370,7 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Datum Zustimmung:</td>
 					<?
-						$j = 13;
-						$this->qlayerset[$i]['attributes']['name'][$j] = 'datumzust';
+						$j = $layer['attributes']['indizes']['datumzust'];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					?>
 					<td align="right"><input size="10" <? echo ' type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?>
@@ -397,8 +383,7 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Datum Ablehnung:</td>
 					<?
-						$j = 14;
-						$this->qlayerset[$i]['attributes']['name'][$j] = 'datumabl';
+						$j = $layer['attributes']['indizes']['datumabl'];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					?>
 					<td align="right"><input size="10" <? echo ' type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?>
@@ -411,8 +396,7 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Datum Genehmigung:</td>
 					<?
-						$j = 15;
-						$this->qlayerset[$i]['attributes']['name'][$j] = 'datumgenehm';
+						$j = $layer['attributes']['indizes']['datumgenehm'];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					?>
 					<td align="right"><input size="10" <? echo ' type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?>
@@ -425,8 +409,7 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Datum Bekanntmachung:</td>
 					<?
-						$j = 16;
-						$this->qlayerset[$i]['attributes']['name'][$j] = 'datumbeka';
+						$j = $layer['attributes']['indizes']['datumbeka'];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					?>
 					<td align="right"><input size="10" <? echo ' type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?>
@@ -439,8 +422,7 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Datum Aufhebung:</td>
 					<?
-						$j = 17;
-						$this->qlayerset[$i]['attributes']['name'][$j] = 'datumaufh';
+						$j = $layer['attributes']['indizes']['datumaufh'];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					?>
 					<td align="right"><input size="10" <? echo ' type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?>
@@ -456,8 +438,7 @@ update_gebietstyp = function(){
   			<tr>
 					<td>Maßgaben:
 					<?
-						$j = 18;
-						$this->qlayerset[$i]['attributes']['name'][$j] = 'erteilteaufl';
+						$j = $layer['attributes']['indizes']['erteilteaufl'];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					 echo '<textarea style="width: 300px;font-size: '.$this->user->rolle->fontsize_gle.'px" style="font-family: Arial, Verdana, Helvetica, sans-serif;"';
 										echo ' rows="4" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'">'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'</textarea>'; ?>
@@ -466,8 +447,7 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Hinweise:
 					<?
-						$j = 19;
-						$this->qlayerset[$i]['attributes']['name'][$j] = 'ert_hinweis';
+						$j = $layer['attributes']['indizes']['ert_hinweis'];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					 echo '<textarea style="width: 300px;font-size: '.$this->user->rolle->fontsize_gle.'px" style="font-family: Arial, Verdana, Helvetica, sans-serif;"';
 										echo ' rows="3" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'">'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'</textarea>'; ?>
@@ -476,8 +456,7 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Bemerkungen:
 					<?
-						$j = 20;
-						$this->qlayerset[$i]['attributes']['name'][$j] = 'ert_bemerkungen';
+						$j = $layer['attributes']['indizes']['ert_bemerkungen'];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					 echo '<textarea style="width: 300px;font-size: '.$this->user->rolle->fontsize_gle.'px" style="font-family: Arial, Verdana, Helvetica, sans-serif;"';
 										echo ' rows="3" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'">'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'</textarea>'; ?>

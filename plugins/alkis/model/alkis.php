@@ -205,38 +205,38 @@ class ALKIS {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlüssel;');}
+    if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
+    if($formvars['finanzamt']){ $csv .= 'Finanzamtschlüssel;';}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
+    if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
+    if($formvars['flaeche']){ $csv .= 'amtliche Fläche;';}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= utf8_encode('Fortführung;');}
+    if($formvars['letzff']){ $csv .= 'Fortführung;';}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-    $csv .= utf8_encode('Klassifizierung;Klass-Fläche;EMZ;gesamt;');
+    $csv .= 'Klassifizierung;Klass-Fläche;EMZ;gesamt;';
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausführende Stelle;');}
+    if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
-    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentümer;');}
-		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
-		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
+    if($formvars['eigentuemer']){ $csv .= 'Namensnummer;Eigentümer;';}
+		if($formvars['abweichenderrechtszustand']){ $csv .= 'abweichender Rechtszustand;';}
+		if($formvars['baubodenrecht']){ $csv .= 'Bauraum/Bodenordnungsrecht;';}
     
     $csv .= chr(10);
     for($i = 0; $i < count_or_0($flurstuecke); $i++) {
@@ -338,7 +338,7 @@ class ALKIS {
 				
 				if($kl == $limit-2){
 					if($nichtgeschaetzt>0){
-						$csv .= utf8_encode('nicht geschätzt: ;'.$nichtgeschaetzt.';');
+						$csv .= 'nicht geschätzt: ;'.$nichtgeschaetzt.';';
 					}
 					else{
 						$csv .= ';;';
@@ -352,15 +352,15 @@ class ALKIS {
 					}
 					if($emzges_gr > 0){
 						$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-						$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr);
+						$csv .= ' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr;
 					}
 					if($emzges_agr > 0){
 						$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-						$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr);
+						$csv .= ' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr;
 					}
 					if($emzges_gra > 0){
 						$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-						$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra);
+						$csv .= ' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra;
 					}					
 				}
 				$csv .= ';';
@@ -498,19 +498,19 @@ class ALKIS {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlüssel;');}
+    if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
+    if($formvars['finanzamt']){ $csv .= 'Finanzamtschlüssel;';}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
+    if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
+    if($formvars['flaeche']){ $csv .= 'amtliche Fläche;';}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= utf8_encode('Fortführung;');}
+    if($formvars['letzff']){ $csv .= 'Fortführung;';}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
@@ -519,18 +519,18 @@ class ALKIS {
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausführende Stelle;');}
+    if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
-		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
-		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
+		if($formvars['abweichenderrechtszustand']){ $csv .= 'abweichender Rechtszustand;';}
+		if($formvars['baubodenrecht']){ $csv .= 'Bauraum/Bodenordnungsrecht;';}
     $csv .= 'Namensnummer;'; 
-    $csv .= utf8_encode('Vorname;Name;Zusatz;Adresse;Ort;');
+    $csv .= 'Vorname;Name;Zusatz;Adresse;Ort;';
     
     $csv .= chr(10);
     for($i = 0; $i < count_or_0($flurstuecke); $i++) {
@@ -622,14 +622,14 @@ class ALKIS {
 										$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
 									}
 									
-									$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
+									$csv .= $flst->Klassifizierung[$j]['flaeche'].' m² ';
 									$csv .= $flst->Klassifizierung[$j]['label'];
 									$csv .= ' EMZ: '.$emz." \n";
 								}
 							}
 							$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 							if($nichtgeschaetzt > 0){
-								$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+								$csv .= 'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
 							}
 							if($emzges_a > 0){
 								$BWZ_a = round($emzges_a/$flaeche_a*100);
@@ -637,15 +637,15 @@ class ALKIS {
 							}
 							if($emzges_gr > 0){
 								$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-								$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
+								$csv .= ' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n";
 							}
 							if($emzges_agr > 0){
 								$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-								$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
+								$csv .= ' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n";
 							}
 							if($emzges_gra > 0){
 								$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-								$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
+								$csv .= ' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n";
 							}	
 							$csv .= '";';
 						}      
@@ -769,19 +769,19 @@ class ALKIS {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlüssel;');}
+    if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
+    if($formvars['finanzamt']){ $csv .= 'Finanzamtschlüssel;';}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
+    if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
+    if($formvars['flaeche']){ $csv .= 'amtliche Fläche;';}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= utf8_encode('Fortführung;');}
+    if($formvars['letzff']){ $csv .= 'Fortführung;';}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
@@ -790,17 +790,17 @@ class ALKIS {
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausführende Stelle;');}
+    if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
    	if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
-		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
-		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
-    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentümer;');}
-    $csv .= utf8_encode('Nutzung - Fläche;');
+		if($formvars['abweichenderrechtszustand']){ $csv .= 'abweichender Rechtszustand;';}
+		if($formvars['baubodenrecht']){ $csv .= 'Bauraum/Bodenordnungsrecht;';}
+    if($formvars['eigentuemer']){ $csv .= 'Namensnummer;Eigentümer;';}
+    $csv .= 'Nutzung - Fläche;';
     $csv .= 'Nutzung - Kennzeichen;';
     $csv .= 'Nutzung - Bezeichnung;';
     
@@ -889,14 +889,14 @@ class ALKIS {
 							$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
 						}						
 						
-						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
+						$csv .= $flst->Klassifizierung[$j]['flaeche'].' m² ';
 						$csv .= $flst->Klassifizierung[$j]['label'];
 						$csv .= ' EMZ: '.$emz." \n";
 					}
 				}
 				$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 				if($nichtgeschaetzt > 0){
-					$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+					$csv .= 'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
 				}
 				if($emzges_a > 0){
 					$BWZ_a = round($emzges_a/$flaeche_a*100);
@@ -904,15 +904,15 @@ class ALKIS {
 				}
 				if($emzges_gr > 0){
 					$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-					$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
+					$csv .= ' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n";
 				}
 				if($emzges_agr > 0){
 					$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-					$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
+					$csv .= ' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n";
 				}
 				if($emzges_gra > 0){
 					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-					$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
+					$csv .= ' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n";
 				}
         $csv .= '";';
       }      
@@ -1047,19 +1047,19 @@ class ALKIS {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlüssel;');}
+    if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
+    if($formvars['finanzamt']){ $csv .= 'Finanzamtschlüssel;';}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
+    if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
+    if($formvars['flaeche']){ $csv .= 'amtliche Fläche;';}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= utf8_encode('Fortführung;');}
+    if($formvars['letzff']){ $csv .= 'Fortführung;';}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
@@ -1068,17 +1068,17 @@ class ALKIS {
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausführende Stelle;');}
+    if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
-		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
-		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
-    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentümer;');}
+		if($formvars['abweichenderrechtszustand']){ $csv .= 'abweichender Rechtszustand;';}
+		if($formvars['baubodenrecht']){ $csv .= 'Bauraum/Bodenordnungsrecht;';}
+    if($formvars['eigentuemer']){ $csv .= 'Namensnummer;Eigentümer;';}
     
     $csv .= chr(10);
     for($i = 0; $i < count_or_0($flurstuecke); $i++) {
@@ -1163,14 +1163,14 @@ class ALKIS {
 							$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
 						}						
 						
-						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
+						$csv .= $flst->Klassifizierung[$j]['flaeche'].' m² ';
 						$csv .= $flst->Klassifizierung[$j]['label'];
 						$csv .= ' EMZ: '.$emz." \n";
 					}
 				}
 				$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 				if($nichtgeschaetzt > 0){
-					$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+					$csv .= 'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
 				}
 				if($emzges_a > 0){
 					$BWZ_a = round($emzges_a/$flaeche_a*100);
@@ -1178,15 +1178,15 @@ class ALKIS {
 				}
 				if($emzges_gr > 0){
 					$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-					$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
+					$csv .= ' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n";
 				}
 				if($emzges_agr > 0){
 					$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-					$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
+					$csv .= ' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n";
 				}
 				if($emzges_gra > 0){
 					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-					$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
+					$csv .= ' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n";
 				}
         $csv .= '";';
       }      
@@ -1591,7 +1591,7 @@ class ALKIS {
   	          	$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($art[$j]));
   	          }
   	          if($flst->BauBodenrecht[$i]['stelle'] != ''){
-  	          	$AusfStelleName=zeilenumbruch(utf8_encode('Ausführende Stelle: ').$flst->BauBodenrecht[$i]['stelle'],60);
+  	          	$AusfStelleName=zeilenumbruch('Ausführende Stelle: ' . $flst->BauBodenrecht[$i]['stelle'],60);
   	          	$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($AusfStelleName[0]));
   	          	for ($j=1;$j<count($AusfStelleName);$j++) {
   	          		$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($AusfStelleName[$j]));

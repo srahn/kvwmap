@@ -171,7 +171,7 @@
 	}
 
 	#column_options_div {
-		position: absolute;
+		position: fixed;
 		display: none;
 		right: 2px;
 		margin-right: 30px;

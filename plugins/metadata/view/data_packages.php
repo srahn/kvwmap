@@ -162,13 +162,13 @@
     });
 
     document.getElementById('order_data_packages_button').addEventListener('click', function() {
-      console.log('Click on order_data_packages_button');
+      // console.log('Click on order_data_packages_button');
       document.querySelectorAll("input[type='checkbox'].data_package_checkbox").forEach((chk) => {
         if (chk.checked) {
-          console.log('Checkbox %o is checked', chk);
+          // console.log('Checkbox %o is checked', chk);
           const ressource_id = parseInt(chk.dataset.ressource_id);
           const package = dataPackages.get(ressource_id);
-          console.log(`Pack_status_id of ressouce_id ${ressource_id}: ${package.get('pack_status_id')}`);
+          // console.log(`Pack_status_id of ressouce_id ${ressource_id}: ${package.get('pack_status_id')}`);
           if (package.get('pack_status_id') == 1) {
             orderDataPackage(ressource_id);
           }

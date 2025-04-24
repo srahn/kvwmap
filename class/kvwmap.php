@@ -979,14 +979,16 @@ echo '			</table>
 	}
 
 	function switch_gle_view(){
-		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id']);
-		$this->last_query = $this->user->rolle->get_last_query();
-		$this->formvars['go'] = $this->last_query['go'];
-		if ($this->formvars['go'] == 'Layer-Suche_Suchen') {
-			$this->GenerischeSuche_Suchen();
-		}
-		else {
-			$this->queryMap();
+		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id'], $this->formvars['mode']);
+		if ($this->formvars['reload'] == 1) {
+			$this->last_query = $this->user->rolle->get_last_query();
+			$this->formvars['go'] = $this->last_query['go'];
+			if ($this->formvars['go'] == 'Layer-Suche_Suchen') {
+				$this->GenerischeSuche_Suchen();
+			}
+			else {
+				$this->queryMap();
+			}
 		}
 	}
 
@@ -8614,6 +8616,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$attrib['legendorder'] = ($legendorder[$i] == '' ? 'NULL' : $legendorder[$i]);
 			$attrib['class_id'] = $this->classes[$i]['Class_ID'];
 			$mapDB->update_Class($attrib);
+			if ($attrib['class_id'] != $attrib['new_class_id']) {
+				$mapDB->updateStyle2Class_ClassID($attrib['class_id'], $attrib['new_class_id']);
+				$mapDB->updateLabel2Class_ClassID($attrib['class_id'], $attrib['new_class_id']);				
+			}
 		}
 		$this->Klasseneditor();
 	}
@@ -11735,7 +11741,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'y' => 0
 		);
 		
-		if ($this->qlayerset[0]['shape'] != null) {
+		if ($this->qlayerset[0]['shape'] !== null) {
 			# entweder gibt es schon ein Result
 			$result = $this->qlayerset[0]['shape'];
 		}
@@ -19476,7 +19482,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `privileg`, `trigger_function`, `geom_column`
+				'SELECT `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `identifier_text`, `maintable_is_view`, `Data`, `schema`, `geom_column`, `document_path`, `document_url`, `ddl_attribute`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `max_query_rows`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `icon`, `privileg`, `export_privileg`, `status`, `trigger_function`, `sync`, `editable`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`, `version`, `comment`, `vector_tile_url`, `cluster_option`
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . '
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . '
@@ -21997,6 +22003,20 @@ class db_mapObj{
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
   }
 
+  function updateStyle2Class_ClassID($old_class_id, $new_class_id){
+    $sql = '
+			UPDATE 
+				u_styles2classes 
+			SET
+				class_id = ' . $new_class_id . '
+			WHERE 
+				class_id = ' . $old_class_id;
+    #echo $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->updateStyle2Class_ClassID:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+  }	
+
   function save_Style($formvars){
   	# wenn der Style nicht der Klasse zugeordnet ist, zuordnen
   	$classes = $this->get_classes2style($formvars["style_id"]);
@@ -22193,6 +22213,20 @@ class db_mapObj{
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
   }
+
+	function updateLabel2Class_ClassID($old_class_id, $new_class_id){
+    $sql = '
+			UPDATE 
+				u_labels2classes 
+			SET
+				class_id = ' . $new_class_id . '
+			WHERE 
+				class_id = ' . $old_class_id;
+    #echo $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLabel2Class_ClassID:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+  }	
 
   function getShapeByAttribute($layer,$attribut,$value) {
     $layer->queryByAttributes($attribut,$value,0);

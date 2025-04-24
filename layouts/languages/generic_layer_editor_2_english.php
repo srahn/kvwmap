@@ -32,8 +32,9 @@
  $strRemember="bookmark";
  $strDontRememberDataset="bookmark record no longer";
  $strPrintDataset="print record";
- $strSwitchGLEViewColumns="switch to column-based view";
- $strSwitchGLEViewRows="switch to row-based view";
+ $strSwitchGLEView0="tabular representation";
+ $strSwitchGLEView1="records vertical";
+ $strSwitchGLEView2="records horizontal";
  $strEditAll="edit multiple";
  $strCopyDataset="copy record";
  $strNewDataset="Create a new dataset";

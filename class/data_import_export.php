@@ -973,14 +973,35 @@ class data_import_export {
 	 *  2.1) exitCode of output of curl_exec or
 	 *  2.2) echo exitCode of output of curl_exec and exit
 	 */
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false, $unlogged = false) {
 		// echo '<br>Function ogr2ogr_import';
 		$command = '';
 		if ($options != NULL) {
 			$command .= $options;
 		}
 		// $command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
-		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		// $command .= ' -oo ENCODING=' . $encoding
+		// 	. ' -f PostgreSQL'
+		// 	. ' -dim XY'
+		// 	. ' -lco GEOMETRY_NAME=the_geom'
+		// 	. ' -lco launder=NO'
+		// 	. ' -lco FID=' . $this->unique_column
+		// 	. ' -lco precision=NO '
+		// 	. ($multi? '-nlt PROMOTE_TO_MULTI' : '')
+		// 	. ' -nln ' . $tablename
+		// // 	. ($unlogged ? ' -lco UNLOGGED=ON' : '')
+		// 	. ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		$command .= ' -oo ENCODING=' . $encoding
+			. ' -f PostgreSQL'
+			. ' -dim XY'
+			. ' -lco GEOMETRY_NAME=the_geom'
+			. ' -lco launder=NO'
+			. ' -lco precision=NO '
+			. ' -lco FID=' . $this->unique_column
+			. ' -nln ' . $tablename
+			. ($unlogged ? ' -lco UNLOGGED=ON' : '')
+			. ($multi ? ' -nlt PROMOTE_TO_MULTI' : '')
+			. ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
 		}
