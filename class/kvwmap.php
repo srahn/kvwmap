@@ -1678,7 +1678,7 @@ echo '			</table>
 				# alle Obermenüpunkte schliessen
 				$sql = "
 					UPDATE
-						u_menue2rolle
+						kvwmap.u_menue2rolle
 					SET
 						status = 0
 					WHERE
@@ -1686,12 +1686,12 @@ echo '			</table>
 						AND stelle_id = " . $this->Stelle->id . "
 				";
 				$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>" . $sql, 4);
-				$ret = $this->database->execSQL($sql);
+				$ret = $this->pgdatabase->execSQL($sql);
 				if (!$ret['success']) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
 			}
 			$sql = "
 				UPDATE
-					u_menue2rolle
+					kvwmap.u_menue2rolle
 				SET
 					status = 1
 				WHERE
@@ -1700,13 +1700,13 @@ echo '			</table>
 					AND menue_id = " . $id . "
 			";
 			$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>" . $sql, 4);
-			$ret = $this->database->execSQL($sql);
+			$ret = $this->pgdatabase->execSQL($sql);
 			if (!$ret['success']) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
 		}
 		elseif ($status == 'off') {
 			$sql = "
 				UPDATE
-					u_menue2rolle
+					kvwmap.u_menue2rolle
 				SET
 					status = 0
 				WHERE
@@ -1715,7 +1715,7 @@ echo '			</table>
 					" . ($id != '' ? "AND menue_id = " . $id : "") . "
 			";
 			$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>" . $sql, 4);
-			$ret = $this->database->execSQL($sql);
+			$ret = $this->pgdatabase->execSQL($sql);
 			if (!$ret['success']) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
 		}
 	}
@@ -8218,7 +8218,7 @@ echo '			</table>
 			$this->user->rolle->setGroups($users['ID'][$j], $Stelle->id, 0, array($this->formvars['selected_layer_id']));
 		}
 		# u_groups2rolle aufräumen
-		rolle::clear_groups2rolle($this->database);
+		rolle::clear_groups2rolle($this->pgdatabase);
     $this->Layer2Stelle_Editor();
   }
 
@@ -8272,8 +8272,8 @@ echo '			</table>
 			];
 			$result = $this->layergruppe->update();
 		}
-		rolle::setGroupsForAll($this->database);
-		rolle::clear_groups2rolle($this->database);
+		rolle::setGroupsForAll($this->pgdatabase);
+		rolle::clear_groups2rolle($this->pgdatabase);
 	}
 
 	function Layer2Stelle_Reihenfolge() {
@@ -9191,7 +9191,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       }
       # /Löschen der in der Selectbox entfernten Stellen
 			# u_groups2rolle aufräumen
-			rolle::clear_groups2rolle($this->database);
+			rolle::clear_groups2rolle($this->pgdatabase);
     }
 
 		for ($i = 0; $i < count($stellen_ids); $i++) {
@@ -9225,7 +9225,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function addLayersToStellen($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		for ($i = 0; $i < count($stellen_ids); $i++) {
 			if (!isset($this->already_assigned_stellen[$stellen_ids[$i]])) {
-				$stelle = new stelle($stellen_ids[$i], $this->database);
+				$stelle = new stelle($stellen_ids[$i], $this->pgdatabase);
 				$stelle->addLayer($layer_ids, $filter, $assign_default_values, (($privileg == 'editable_only_in_this_stelle' AND $stellen_ids[$i] == $this->Stelle->id )? 'editable' : $privileg));
 				$users = $stelle->getUser();
 				for ($j = 0; $j < count_or_0($users['ID']); $j++) {
@@ -13160,7 +13160,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
     }
 		# u_groups2rolle aufräumen
-		rolle::clear_groups2rolle($this->database);
+		rolle::clear_groups2rolle($this->pgdatabase);
 
     $this->Stelleneditor();
   }
