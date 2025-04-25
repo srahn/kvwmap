@@ -37,6 +37,7 @@ class PgObject {
 	* $this->gui->database MySQL Datenbank
 	*
 	*/
+	static $write_debug = false;
 	public $children_ids;
 	public $select;
 	public $from;
@@ -132,7 +133,7 @@ class PgObject {
 	* @return string The expression representing true or false in a sql statement
 	*/
 	function get_identifier_expression() {
-		$this->debug->show('<br>Class MyObject Method get_identifier_expression', MyObject::$write_debug);
+		$this->debug->show('<br>Class MyObject Method get_identifier_expression', PgObject::$write_debug);
 		$where = array();
 		if (count($this->identifiers) > 0) {
 			$where = array_map(

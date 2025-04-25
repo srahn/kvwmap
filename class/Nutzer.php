@@ -5,7 +5,7 @@ class Nutzer extends PgObject {
 
 	function __construct($gui) {
 		parent::__construct($gui, 'kvwmap', 'user');
-		$this->identifier = 'ID';
+		$this->identifier = 'id';
 		$this->validations = array(
 			array(
 				'attribute' => 'ID',
@@ -66,7 +66,7 @@ class Nutzer extends PgObject {
 		if ($nutzer->has_key('num_login_failed')) {
 			$nutzer->update(
 				array(
-					'ID' => $nutzer->get('ID'),
+					'id' => $nutzer->get('id'),
 					'num_login_failed' => 0,
 					'login_locked_until' => ''
 				),
