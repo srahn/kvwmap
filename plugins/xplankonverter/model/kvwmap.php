@@ -455,7 +455,7 @@
 	};
 
 	$GUI->xplankonverter_get_new_gml_id = function($gml_id) use ($GUI) {
-		if (! array_key_exists($gml_id, $GUI->xplan_gml_ids)) {
+		if (! array_key_exists(strtolower($gml_id), $GUI->xplan_gml_ids)) {
 			$GUI->xplan_gml_ids[$gml_id] = 'GML_' . uuid();
 		}
 		return $GUI->xplan_gml_ids[$gml_id];
@@ -740,7 +740,7 @@
 	};
 
   $GUI->xplankonverter_remove_failed_konvertierungen = function() use ($GUI) {
-    $konvertierungen = Konvertierung::find_zusammenzeichnungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
+    $konvertierungen = Konvertierung::find_konvertierungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
     foreach($konvertierungen['faulty'] AS $faulty_zusammenzeichnung) {
 			$GUI->debug->write('Lösche zuvor fehlgeschlagene Konvertierung id: ', $faulty_zusammenzeichnung->get('id'));
       $faulty_zusammenzeichnung->destroy();
@@ -753,7 +753,7 @@
   };
 	
 	$GUI->xplankonverter_remove_old_konvertierungen = function() use ($GUI) {
-    $zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
+    $zusammenzeichnungen = Konvertierung::find_konvertierungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
     foreach($zusammenzeichnungen['draft'] AS $draft_zusammenzeichnung) {
 			$GUI->debug->write('Lösche alte (draft) Konvertierung id: ', $draft_zusammenzeichnung->get('id'));
       $draft_zusammenzeichnung->destroy();

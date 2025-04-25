@@ -2,6 +2,7 @@
 #############################
 # Klasse SubRessource #
 #############################
+include_once(PLUGINS . 'metadata/model/SubRessourceRange.php');
 
 class SubRessource extends PgObject {
 	

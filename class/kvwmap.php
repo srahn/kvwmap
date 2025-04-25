@@ -979,14 +979,16 @@ echo '			</table>
 	}
 
 	function switch_gle_view(){
-		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id']);
-		$this->last_query = $this->user->rolle->get_last_query();
-		$this->formvars['go'] = $this->last_query['go'];
-		if ($this->formvars['go'] == 'Layer-Suche_Suchen') {
-			$this->GenerischeSuche_Suchen();
-		}
-		else {
-			$this->queryMap();
+		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id'], $this->formvars['mode']);
+		if ($this->formvars['reload'] == 1) {
+			$this->last_query = $this->user->rolle->get_last_query();
+			$this->formvars['go'] = $this->last_query['go'];
+			if ($this->formvars['go'] == 'Layer-Suche_Suchen') {
+				$this->GenerischeSuche_Suchen();
+			}
+			else {
+				$this->queryMap();
+			}
 		}
 	}
 
@@ -8212,6 +8214,12 @@ echo '			</table>
 		]);
     $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
     $Stelle->updateLayer($this->formvars);
+		$users = $Stelle->getUser();
+		for ($j = 0; $j < count_or_0($users['ID']); $j++) {
+			$this->user->rolle->setGroups($users['ID'][$j], $Stelle->id, 0, array($this->formvars['selected_layer_id']));
+		}
+		# u_groups2rolle aufräumen
+		rolle::clear_groups2rolle($this->database);
     $this->Layer2Stelle_Editor();
   }
 
@@ -8266,6 +8274,7 @@ echo '			</table>
 			$result = $this->layergruppe->update();
 		}
 		rolle::setGroupsForAll($this->database);
+		rolle::clear_groups2rolle($this->database);
 	}
 
 	function Layer2Stelle_Reihenfolge() {
@@ -8614,6 +8623,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$attrib['legendorder'] = ($legendorder[$i] == '' ? 'NULL' : $legendorder[$i]);
 			$attrib['class_id'] = $this->classes[$i]['Class_ID'];
 			$mapDB->update_Class($attrib);
+			if ($attrib['class_id'] != $attrib['new_class_id']) {
+				$mapDB->updateStyle2Class_ClassID($attrib['class_id'], $attrib['new_class_id']);
+				$mapDB->updateLabel2Class_ClassID($attrib['class_id'], $attrib['new_class_id']);				
+			}
 		}
 		$this->Klasseneditor();
 	}
@@ -9176,6 +9189,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
       }
       # /Löschen der in der Selectbox entfernten Stellen
+			# u_groups2rolle aufräumen
+			rolle::clear_groups2rolle($this->database);
     }
 
 		for ($i = 0; $i < count($stellen_ids); $i++) {
@@ -9232,7 +9247,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$users = $stelle->getUser();
 			for($j = 0; $j < count($users['ID']); $j++){
 				$this->user->rolle->deleteLayer($users['ID'][$j], array($deletestellen[$i]), array($layer_id));
-				$this->user->rolle->updateGroups($users['ID'][$j],$deletestellen[$i], $layer_id);
 			}
 			# Kindstellen
 			$children = $stelle->getChildren($deletestellen[$i], " ORDER BY Bezeichnung", 'only_ids', false);
@@ -11118,11 +11132,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         } break;
 
         case 'SubFormEmbeddedPK' : {
-					if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-						echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
-					}
-					else{
-						echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+					if ($this->success) {
+						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+							echo 'currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+						}
+						else{
+							echo 'reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+						}
 					}
 					if(!empty(GUI::$messages)){
 						echo 'message('.json_encode(GUI::$messages).');';
@@ -11735,7 +11751,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'y' => 0
 		);
 		
-		if ($this->qlayerset[0]['shape'] != null) {
+		if ($this->qlayerset[0]['shape'] !== null) {
 			# entweder gibt es schon ein Result
 			$result = $this->qlayerset[0]['shape'];
 		}
@@ -12959,7 +12975,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layer_id = explode(',',$layerid);
 				for($j = 0; $j < count($users['ID']); $j++){
 					$this->user->rolle->deleteLayer($users['ID'][$j], array($Stelle->id), $layer_id);
-					$this->user->rolle->updateGroups($users['ID'][$j],$Stelle->id, $layerid);
 				}
 			}
 		}
@@ -13145,6 +13160,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
 			}
     }
+		# u_groups2rolle aufräumen
+		rolle::clear_groups2rolle($this->database);
+
     $this->Stelleneditor();
   }
 
@@ -13489,27 +13507,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
 		}
 
-    if ($this->formvars['geom_from_layer']){
-	    # Geometrie-Übernahme-Layer:
-	    # Spaltenname und from-where abfragen
-	    $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
-	    #echo $data;
-	    $data_explosion = explode(' ', $data);
-	    $this->formvars['columnname'] = $data_explosion[0];
-	    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
-	    # order by rausnehmen
-			$this->formvars['orderby'] = '';
-	  	$orderbyposition = strrpos(strtolower($select), 'order by');
-			$lastfromposition = strrpos(strtolower($select), 'from');
-			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-				$fromwhere = substr($select, 0, $orderbyposition);
-				$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-			}
-			$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-	      $this->formvars['fromwhere'] .= ' where (1=1)';
-	    }
-    }
     if ($this->formvars['stelle'] != '') {
       $stelle = new stelle($this->formvars['stelle'], $this->database);
       $this->layerdaten = $stelle->getLayers(NULL, 'Name');
@@ -13695,9 +13692,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$formvars['stelle'],
 				$this->selected_layers[$i]
 			);
-			if ($result AND $this->filterstring != '') {
-				$this->add_message('info', 'Folgenden Filter für Layer ' . $this->selected_layers[$i] . ' in Stelle ' . $formvars['stelle'] . ' geschrieben:<br>' . $this->filterstring);
-			}
+			// if ($result AND $this->filterstring != '') {
+			// 	$this->add_message('info', 'Folgenden Filter für Layer ' . $this->selected_layers[$i] . ' in Stelle ' . $formvars['stelle'] . ' geschrieben:<br>' . $this->filterstring);
+			// }
 		}
 		$this->filterverwaltung();
 	}
@@ -15814,18 +15811,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			if ($this->formvars['embedded'] != '') {
 				# es wurde ein Datensatz aus einem embedded-Formular gespeichert
-				if ($this->formvars['reload'] == '1') {
-					# in diesem Fall wird die komplette Seite neu geladen
-					echo 'currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
+				if ($this->success) {
+					if ($this->formvars['reload'] == '1') {
+						# in diesem Fall wird die komplette Seite neu geladen
+						echo 'currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
+					}
+					else {
+						if ($this->formvars['reload'] !== '0') {		# 0 heißt: no_subform_reload - Subform-Liste wird nicht neu geladen
+							# ansonsten wird das Listen-DIV neu geladen
+							echo 'reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+						}
+					}
 				}
-				else {
-					if ($this->formvars['reload'] !== '0') {		# 0 heißt: no_subform_reload - Subform-Liste wird nicht neu geladen
-						# ansonsten wird das Listen-DIV neu geladen
-						echo 'reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
-					}
-					if (!empty(GUI::$messages)){
-						echo 'message('.json_encode(GUI::$messages).');';
-					}
+				if (!empty(GUI::$messages)){
+					echo 'message('.json_encode(GUI::$messages).');';
 				}
 			}
 			else {
@@ -19497,7 +19496,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `privileg`, `trigger_function`, `geom_column`
+				'SELECT `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `identifier_text`, `maintable_is_view`, `Data`, `schema`, `geom_column`, `document_path`, `document_url`, `ddl_attribute`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `max_query_rows`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `icon`, `privileg`, `export_privileg`, `status`, `trigger_function`, `sync`, `editable`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`, `version`, `comment`, `vector_tile_url`, `cluster_option`
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . '
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . '
@@ -22018,6 +22017,20 @@ class db_mapObj{
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
   }
 
+  function updateStyle2Class_ClassID($old_class_id, $new_class_id){
+    $sql = '
+			UPDATE 
+				u_styles2classes 
+			SET
+				class_id = ' . $new_class_id . '
+			WHERE 
+				class_id = ' . $old_class_id;
+    #echo $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->updateStyle2Class_ClassID:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+  }	
+
   function save_Style($formvars){
   	# wenn der Style nicht der Klasse zugeordnet ist, zuordnen
   	$classes = $this->get_classes2style($formvars["style_id"]);
@@ -22214,6 +22227,20 @@ class db_mapObj{
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
   }
+
+	function updateLabel2Class_ClassID($old_class_id, $new_class_id){
+    $sql = '
+			UPDATE 
+				u_labels2classes 
+			SET
+				class_id = ' . $new_class_id . '
+			WHERE 
+				class_id = ' . $old_class_id;
+    #echo $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLabel2Class_ClassID:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+  }	
 
   function getShapeByAttribute($layer,$attribut,$value) {
     $layer->queryByAttributes($attribut,$value,0);

@@ -47,7 +47,8 @@
 // xplankonverter_xplanvalidator
 // xplankonverter_zusammenzeichnung
 
-if (strpos($go, '_') !== false AND substr($go, 0, strpos($go, '_')) === 'xplankonverter') {
+// neuer_Layer_Datensatz must be included for after-triggers in model/kvwmap (which itself includes other classes)
+if (strpos($go, '_') !== false AND (strpos($go, 'xplankonverter') !== false || strpos($go, 'neuer_Layer_Datensatz') !== false)) {
 	include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 	include_once(CLASSPATH . 'PgObject.php');
 	include_once(CLASSPATH . 'MyObject.php');
@@ -303,7 +304,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	/*
 		ToDo 1 pk:
 		Die nachfolgenden Variablen von GUI wurden schon in der konvertierung config gesetzt.
-		Diese im nachfolgenden Quellecode durch $GUI->konvertierung->config ersetzten.
+		Diese im nachfolgenden Quellcode durch $GUI->konvertierung->config ersetzten.
 		siehe auch ToDo 2 pk in konvertierung.php
 	*/
 	if (!in_array($GUI->formvars['planart'], array('BP-Plan', 'FP-Plan', 'SO-Plan', 'RP-Plan'))) {
@@ -318,6 +319,19 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	$GUI->plan_attribut_aktualitaet = $GUI->konvertierung->config['plan_attribut_aktualitaet'];
 	$GUI->plan_table_name = $GUI->konvertierung->config['plan_table_name'];
 	$GUI->plan_oid_name = $GUI->konvertierung->config['plan_oid_name'];
+	
+	//TEMP
+	$GUI->title = 'Flächennutzungsplan';
+	$GUI->plan_short_title = 'F-Plan';
+	$GUI->plan_class = 'FP_Plan';
+	$GUI->plan_abk = 'fplan';
+	$GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
+	$GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
+	$GUI->plan_table_name = 'fp_plan';
+	
+	$GUI->plan_table_name = strtolower($GUI->plan_class);
+	$GUI->plan_oid_name = $GUI->plan_table_name . '_oid';
+	// TEMP END
 }
 
 function go_switch_xplankonverter($go) {
@@ -1751,7 +1765,7 @@ function go_switch_xplankonverter($go) {
 			}
 			
 			// muss nochmal Konvertierung finden, um published korrekt abzufragen, da veröffentlicht attribut inzwischen geändert wurde
-			$konvertierungen = Konvertierung::find_zusammenzeichnungen(
+			$konvertierungen = Konvertierung::find_konvertierungen(
 				$GUI,
 				$GUI->konvertierung->get('planart'),
 				$GUI->konvertierung->plan_class,
@@ -2276,7 +2290,7 @@ function go_switch_xplankonverter($go) {
 			if ($GUI->konvertierung->plan_exists('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class)) {
 				$GUI->konvertierung->set('error_id', 2);
 				$GUI->konvertierung->update();
-				send_error('Warnung: Der Plan in der hochgeladene Datei ' . $file_zusammenzeichnung . ' enthält eine gml_id, die schon im System vorhanden ist.', false, false);
+				send_error('Warnung: Der Plan in der hochgeladenen Datei ' . $file_zusammenzeichnung . ' enthält eine gml_id, die schon im System vorhanden ist.', false, false);
 				break;
 			}
 			
@@ -2286,7 +2300,7 @@ function go_switch_xplankonverter($go) {
 				$GUI->konvertierung->set('error_id', 9);
 				$GUI->konvertierung->update();
 				//send_error('Fehler: Der Plan in der hochgeladene Datei ' . $file_zusammenzeichnung . ' enthält einen räumlichen Geltungsbereich, der mindestens 5% von der Fläche der Gebietseinheit abweicht.');
-				send_error('Fehler: Sie habe versucht, eine XPlanGML in der Datei' . $file_zusammenzeichnung . ' hochzuladen, welche räumlich nicht die gesamte Fläche der Stadt, Gemeinde oder Samtgemeinde umfasst. Möglicherweise handelt es sich um eine XPlanGML, die nur einen kleineren Änderungsbereich umfasst. Zur Fortschreibung der Daten ist der Upload von Einzeländerungen nicht vorgesehen. Es ist notwendig, den Änderungsplan in eine XPlanGML des Flächennutzungsplans zu integrieren, die den gesamten Kommunalbereich umfasst. Mithilfe der Änderung ist der gesamte Flächennutzungsplan fortzuschreiben. Die XPlanGML des geänderten Gesamt-Flächennutzungsplans ist hochzuladen; sie ersetzt dann die vormals veröffentlichten Daten. Weitere Hinweise zur Fortführung der Daten erhalten Sie in der Handreichung für die Kommunen unter plandigital.niedersachsen.de.');
+				send_error('Fehler: Sie haben versucht, eine XPlanGML in der Datei' . $file_zusammenzeichnung . ' hochzuladen, welche räumlich nicht die gesamte Fläche der Stadt, Gemeinde oder Samtgemeinde umfasst. Möglicherweise handelt es sich um eine XPlanGML, die nur einen kleineren Änderungsbereich umfasst. Zur Fortschreibung der Daten ist der Upload von Einzeländerungen nicht vorgesehen. Es ist notwendig, den Änderungsplan in eine XPlanGML des Flächennutzungsplans zu integrieren, die den gesamten Kommunalbereich umfasst. Mithilfe der Änderung ist der gesamte Flächennutzungsplan fortzuschreiben. Die XPlanGML des geänderten Gesamt-Flächennutzungsplans ist hochzuladen; sie ersetzt dann die vormals veröffentlichten Daten. Weitere Hinweise zur Fortführung der Daten erhalten Sie in der Handreichung für die Kommunen unter plandigital.niedersachsen.de.');
 				break;
 			}
 
@@ -2447,7 +2461,7 @@ function go_switch_xplankonverter($go) {
 
 			$num_plane = $gml_extractor->get_num_plaene('xplan_gmlas_tmp_' . $GUI->user->id, strtolower($GUI->plan_class));
 			if ($num_plane > 1) {
-				$GUI->add_message('waring', 'Im hochgeladenen GML-Dokument befinden sich ' . $num_plane . ' Pläne.<p>Sollen alle Pläne automatisch zur Planliste der Stelle hinzugefügt werden klicken Sie <a href="index.php?go=xplankonverter_create_plaene_from_gmlas&planart=' . $GUI->formvars['planart'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">hier</a>.<p>Soll nur der erste im GML-Dokument enthaltene Plan übernommen werden klicken Sie "ok" und speichern das Formular.');
+				$GUI->add_message('warning', 'Im hochgeladenen GML-Dokument befinden sich ' . $num_plane . ' Pläne.<p>Sollen alle Pläne automatisch zur Planliste der Stelle hinzugefügt werden klicken Sie <a href="index.php?go=xplankonverter_create_plaene_from_gmlas&planart=' . $GUI->formvars['planart'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">hier</a>.<p>Soll nur der erste im GML-Dokument enthaltene Plan übernommen werden klicken Sie "ok" und speichern das Formular.');
 			}
 			$GUI->neuer_Layer_Datensatz();
 		} break;
