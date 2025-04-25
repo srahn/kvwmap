@@ -774,7 +774,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
 		formData.append('list_edit', list_edit);
-		ahah('index.php', formData, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
+		ahah('index.php', formData, new Array(''), new Array('execute_function'));
 	}
 
 	clearsubforms = function(layer_id){

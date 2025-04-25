@@ -11132,11 +11132,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         } break;
 
         case 'SubFormEmbeddedPK' : {
-					if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-						echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
-					}
-					else{
-						echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+					if ($this->success) {
+						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+							echo 'currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+						}
+						else{
+							echo 'reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+						}
 					}
 					if(!empty(GUI::$messages)){
 						echo 'message('.json_encode(GUI::$messages).');';
@@ -13690,9 +13692,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$formvars['stelle'],
 				$this->selected_layers[$i]
 			);
-			if ($result AND $this->filterstring != '') {
-				$this->add_message('info', 'Folgenden Filter für Layer ' . $this->selected_layers[$i] . ' in Stelle ' . $formvars['stelle'] . ' geschrieben:<br>' . $this->filterstring);
-			}
+			// if ($result AND $this->filterstring != '') {
+			// 	$this->add_message('info', 'Folgenden Filter für Layer ' . $this->selected_layers[$i] . ' in Stelle ' . $formvars['stelle'] . ' geschrieben:<br>' . $this->filterstring);
+			// }
 		}
 		$this->filterverwaltung();
 	}
@@ -15809,18 +15811,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			if ($this->formvars['embedded'] != '') {
 				# es wurde ein Datensatz aus einem embedded-Formular gespeichert
-				if ($this->formvars['reload'] == '1') {
-					# in diesem Fall wird die komplette Seite neu geladen
-					echo 'currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
+				if ($this->success) {
+					if ($this->formvars['reload'] == '1') {
+						# in diesem Fall wird die komplette Seite neu geladen
+						echo 'currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
+					}
+					else {
+						if ($this->formvars['reload'] !== '0') {		# 0 heißt: no_subform_reload - Subform-Liste wird nicht neu geladen
+							# ansonsten wird das Listen-DIV neu geladen
+							echo 'reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+						}
+					}
 				}
-				else {
-					if ($this->formvars['reload'] !== '0') {		# 0 heißt: no_subform_reload - Subform-Liste wird nicht neu geladen
-						# ansonsten wird das Listen-DIV neu geladen
-						echo 'reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
-					}
-					if (!empty(GUI::$messages)){
-						echo 'message('.json_encode(GUI::$messages).');';
-					}
+				if (!empty(GUI::$messages)){
+					echo 'message('.json_encode(GUI::$messages).');';
 				}
 			}
 			else {
