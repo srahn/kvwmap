@@ -300,7 +300,7 @@ class Zusammenzeichnung {
           }
           else {
             this.nextStep('reindex_gml_ids', 'error');
-            message([{ type: 'error', msg: 'Fehler beim Umenennen der GML-ID\'s.<br>' + result.msg }]);
+            message([{ type: 'error', msg: 'Fehler beim Umbenennen der GML-ID\'s.<br>' + result.msg }]);
           }
         } catch (err) {
           this.nextStep('reindex_gml_ids', 'error');
@@ -332,7 +332,7 @@ class Zusammenzeichnung {
         else {
           this.nextStep('import_reindexed_zusammenzeichnung', 'error');
           console.error(result.msg);
-          message([{ type: 'error', msg: `Fehler beim Import der ${this.config.genitiv} (reindiziert).<br>${result.msg}` }]);
+          message([{ type: 'error', msg: `Fehler beim Import ${this.config.genitiv} (reindiziert).<br>${result.msg}` }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {

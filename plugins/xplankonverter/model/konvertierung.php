@@ -1647,6 +1647,112 @@ class Konvertierung extends PgObject {
 				";
 			} break;
 
+			case ('SO-Plan') : {
+				$sql .= "
+					INSERT INTO xplan_gml." . strtolower($plan_class) . " (
+						gml_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
+						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz,
+						plangeber,planart,gemeinde,versionbaugbdatum,versionbaugbtext,versionsonstrechtsgrundlagedatum,
+						versionsonstrechtsgrundlagetext
+					)
+					SELECT
+						trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid AS gml_id,
+						k.id AS konvertierung_id,
+						COALESCE(gmlas.xplan_name, 'F-Plan') AS name,
+						COALESCE(gmlas.nummer, '') AS nummer,
+						gmlas.internalid AS internalid,
+						gmlas.beschreibung AS beschreibung,
+						gmlas.kommentar AS kommentar,
+						to_char(gmlas.technherstelldatum, 'DD.MM.YYYY')::date AS technherstelldatum,
+						to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY')::date AS genehmigungsdatum,
+						to_char(gmlas.untergangsdatum, 'DD.MM.YYYY')::date AS untergangsdatum,
+						CASE
+							WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
+								ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
+							ELSE NULL
+						END AS aendert,
+						CASE
+							WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
+								ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
+							ELSE NULL
+						END AS wurdegeaendertvon,
+						gmlas.erstellungsmassstab AS erstellungsmassstab,
+						gmlas.bezugshoehe AS bezugshoehe,
+						ST_Multi(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS raeumlichergeltungsbereich,
+						CASE
+							WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
+								ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[]
+							ELSE NULL
+						END AS verfahrensmerkmale,
+						CASE
+							WHEN count_externeref > 0
+							THEN externeref.externereferenz
+							ELSE NULL
+						END AS externereferenz,
+						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
+						gmlas.planart::xplan_gml." . strtolower($plan_class) . "art AS planart,
+						NULLIF(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsenddatum,
+						CASE
+							WHEN count_gemeinde > 0
+							THEN gemeindelink.gemeinde
+							ELSE NULL
+							END AS gemeinde,
+						b.versionbaugbdatum AS versionbaugbdatum,
+						b.versionbaugbtext AS versionbaugbtext,
+						b.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
+						b.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
+					FROM
+						" . $table_schema . "." . strtolower($plan_class) . " gmlas JOIN
+						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
+						(
+							SELECT
+								COUNT(*) AS count_gemeinde,
+								gemeindelink_sub.parent_id,
+								array_agg((
+									g_sub.ags,
+									g_sub.rs,
+									g_sub.gemeindename,
+									g_sub.ortsteilname
+								)::xplan_gml.xp_gemeinde) AS gemeinde
+							FROM
+								" . $table_schema . "." . strtolower($plan_class) . "_gemeinde gemeindelink_sub LEFT JOIN
+								" . $table_schema . ".xp_gemeinde g_sub ON gemeindelink_sub.xp_gemeinde_pkid = g_sub.ogr_pkid
+							GROUP BY
+								gemeindelink_sub.parent_id
+						) gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
+						(
+							SElECT
+								COUNT(*) AS count_externeref,
+								externereferenzlink_sub.parent_id,
+								array_agg((e_sub.georefurl,
+										(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+										e_sub.art::xplan_gml.xp_externereferenzart,
+										e_sub.informationssystemurl,
+										e_sub.referenzname,
+										e_sub.referenzurl,
+										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+										e_sub.beschreibung,
+										to_char(e_sub.datum, 'DD.MM.YYYY'),
+										e_sub.typ::xplan_gml.xp_externereferenztyp
+									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+							FROM
+								" . $table_schema . "." . strtolower($plan_class) . "_externereferenz externereferenzlink_sub LEFT JOIN
+								" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+							GROUP BY
+								externereferenzlink_sub.parent_id
+						) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
+						" . $table_schema . "." . strtolower($plan_class) . "_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
+						" . $table_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
+						" . $table_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
+						" . $table_schema . "." . strtolower($plan_class) . "_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
+						" . $table_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
+						" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
+						" . $table_schema . "." . strtolower($plan_class) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
+						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
+						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid;
+				";
+			} break;
+
 			case ('RP-Plan') : {
 				$sql .= "
 					INSERT INTO xplan_gml." . strtolower($plan_class) . " (
@@ -2250,6 +2356,8 @@ class Konvertierung extends PgObject {
 	 */
 	function validate_uploaded_files($upload_path) {
 		$uploaded_files = getAllFiles($upload_path);
+		$plan_file_name =  $this->config['plan_file_name'];
+
 
 		if (count($uploaded_files) == 0) {
 			return array(
@@ -2814,6 +2922,10 @@ class Konvertierung extends PgObject {
 		//$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));
 		// id_cite_date should be set to aktualisierungsdatum for metadataportal niedersachsen
 		$md->set('id_cite_date', en_date($this->get_letztes_aktualisierungsdatum_gebietstabelle()));
+		
+		//Auf Wunsch von ArL's/GDI-NI wurde der Identifier für alle Pläne auf den Namespace Plandigital angepasst
+		$md->set('namespace', 'https://registry.gdi-de.org/id/de.ni.plandigital/');
+		
 		$md->set('version', $this->get_version_from_ns_uri(XPLAN_NS_URI));
 		$md->set('extents', $plan->extents);
 		$md->set('service_layer_name', sonderzeichen_umwandeln($plan->get('name')));
@@ -2968,6 +3080,7 @@ class Konvertierung extends PgObject {
 	* in gebietseinheiten in the temporary_gmlas_table
 	* This check makes sure to disqualify geometries that only include just one small change (e.g. Berichtigung/Aenderung)
 	* i.e. if failed, the uploaded file is not a full but at best only a partial zusammenzeichnung
+	* this also prevents uploads to the wrong stelle/administration
 	*/
 	function is_geltungsbereich_gebietseinheiten_area_similar($schema_tmp, $plan_class_tmp) {
 		$sql = "

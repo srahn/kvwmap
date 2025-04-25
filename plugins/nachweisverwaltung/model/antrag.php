@@ -287,7 +287,7 @@ class antrag {
   	    
   function getAntraege($id,$nr,$richtung,$order,$current_stelle_id) {
 		global $admin_stellen;
-    $sql ="SELECT a.*,a.vermstelle,va.art AS vermart,vs.name AS vermst";
+    $sql ="SELECT a.*,a.vermstelle,va.art AS vermart, a.vermart as verm_art, vs.name AS vermst";
     $sql.=" ,SUBSTRING(a.antr_nr from 1 for 2) AS antr_nr_a";
     $sql.=" ,SUBSTRING(a.antr_nr from 4 for 4) AS antr_nr_b";
     $sql.=" FROM nachweisverwaltung.n_antraege AS a";

@@ -11,6 +11,7 @@ function go_switch_bauleitplanung($go){
 			$rok = new rok($layerdb);
 			$rok->delete_bplan($GUI->formvars['plan_id']);
 			if($GUI->formvars['value_b_plan_stammdaten_oid'] == ''){
+				$GUI->last_query = $GUI->user->rolle->get_last_query();
 				$GUI->GenerischeSuche_Suchen();		# Trefferliste wieder anzeigen
 			}
 			else{
