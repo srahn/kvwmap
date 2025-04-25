@@ -102,7 +102,6 @@
 			return '';
 		} ?>
 		<script>
-			console.log('<?echo json_encode($konvertierung->config); ?>');
 			let zz = new Zusammenzeichnung(
 				<? echo ($konvertierung_exists ? $konvertierung->get_id() : 0); ?>,
 				'<? echo $this->formvars['planart']; ?>',
@@ -323,7 +322,7 @@
 				<span id="upload_zusammenzeichnung_msg"></span>
 			</div><p><?
 			if ($this->user->id == 3 || $this->user->id == 41) { ?>
-				<input id="suppress_ticket_and_notification" type="checkbox" name="suppress_ticket_and_notification" value="1"> im Fehlerfall kein Ticket anlegen und keine Benachrichtigung senden<p><?
+				<input id="suppress_ticket_and_notification" type="checkbox" name="suppress_ticket_and_notification" value="1" <? echo ($this->user->id == 41 ? ' checked' : ''); ?>> im Fehlerfall kein Ticket anlegen und keine Benachrichtigung senden<p><?
 			}
 			/* User-IDs = Krätschmer,Korduan, arlweserems,arlleinewser,arllueneburg,arlbraunschweig*/
 			if ($this->user->id == 3 || $this->user->id == 2  || $this->user->id == 6  || $this->user->id == 7  || $this->user->id == 8  || $this->user->id == 9) { ?>

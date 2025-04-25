@@ -306,6 +306,7 @@ class PgObject {
 	}
 
 	function get($attribute) {
+		// return (array_key_exists($attriubte, $this->data) ? $this->data[$attribute] : NULL);
 		return $this->data[$attribute];
 	}
 

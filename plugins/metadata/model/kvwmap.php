@@ -688,7 +688,6 @@
 				$package->num_feature = $num_feature;
 				$GUI->metadata_data_packages[] = $package;
 			}
-
 		}
 		$GUI->output();
 	};
