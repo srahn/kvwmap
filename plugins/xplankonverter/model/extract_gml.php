@@ -302,7 +302,7 @@ class Gml_extractor {
 		$epsg = $this->input_epsg;
 		$lines = file($this->gml_location);
 		foreach ($lines as $lineNumber => $line) {
-			if(strpos($line, 'Envelope') === false) {
+			if (strpos($line, 'Envelope') === false) {
 				continue;
 			}
 			# needs to check for both single and double quotes as both are permitted by XML spec
@@ -312,16 +312,16 @@ class Gml_extractor {
 			if (preg_match('/srsName=\'([^"]+)\'/', $line, $matched_epsg_str)) {
 				break; #found it
 			}
-			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
+			// echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>matched_epsg_str: ' . print_r($matched_epsg_str, true);
 		}
 
-		# echo $matched_epsg_str[1] . '<br>';
+		// echo $matched_epsg_str[1] . '<br>';
 
 		if (isset($matched_epsg_str[1])) {
 			// e.g. for EPSG:25832
 			$epsg_elements_array = explode(':',$matched_epsg_str[1]);
 			$matched_epsg = array_values(array_slice($epsg_elements_array, -1))[0];
-			if(is_numeric($matched_epsg)) {
+			if (is_numeric($matched_epsg)) {
 				# TODO should still be checked if it is a valid EPSG within the konverter or POSTGIS limit, e.g. through a check against the POSTGIS EPSG info
 				$epsg = $matched_epsg;
 			}
@@ -2339,34 +2339,36 @@ class Gml_extractor {
 		$bereiche_ids = $this->get_all_bereiche_ids_of_konvertierung($konvertierung_id);
 		# TODO Check for each regel if bereich = bereich, and enter it accordingly in rule
 		#$bereich_gml_id = 'd48608a2-6f3c-11e8-8ca0-1f2b7a47118e'; #Placeholder
-		// echo '<br>Loop over bereiche_ids: ' . print_r($bereiche_ids, true);
+		$log = '<br>Loop over bereiche_ids: ' . print_r($bereiche_ids, true);
 
 		$gmlas_feature_tables = $this->get_gmlas_feature_tables_for_regeln($this->gmlas_schema);
-		//echo '<br>classes: ' . print_r($gmlas_feature_tables, true);
+		$log .= '<br>classes: ' . print_r($gmlas_feature_tables, true);
 		# Loop over relevant bereiche -> gmlas_feature_tables -> geom
 		$bereich_index = 0;
 		foreach ($bereiche_ids as $bereich_gml_id) {
-			//echo '<br>bereich_gml_id: ' . $bereich_gml_id;
+			$log .= '<br>bereich_gml_id: -' . $bereich_gml_id . '-';
 			# index is used for modifying regel by name
 			$bereich_index++;
 			foreach ($gmlas_feature_tables as $gmlas_feature_table) {
-				//echo '<br>handle gmlas_feature_table: ' . $gmlas_feature_table;
+				$log .= '<br>handle gmlas_feature_table: ' . $gmlas_feature_table;
 				if ($this->check_if_table_has_entries_for_bereich($this->gmlas_schema, $gmlas_feature_table, $bereich_gml_id)) {
 					# Loop over all geom-types to get a rule for each
 					# use only ST_Point, ST_MultiPoint, ST_LineString, ST_MultiLineString, ST_Polygon and ST_MultiPolygon
 					$geometry_types = $this->get_geometry_types($gmlas_feature_table, $this->gmlas_schema);
-					// echo '<br>Geometrie-Types: ' . print_r($geometry_types, true);
+					$log .= '<br>Geometrie-Types: ' . print_r($geometry_types, true);
 					foreach ($geometry_types as $geometry_type) {
-						//echo '<br>handle geometry_type: ' . $geometry_type;
-						$sql_regel = $this->get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_gml_id, $geometry_type, $simplify_fachdaten_geom);
-						$sql_regel = str_replace("'", "''", $sql_regel); # Replaces all single commas with 2x single commas to escape them in SQL
+						$log .= '<br>handle geometry_type: ' . $geometry_type;
+						$result = $this->get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_gml_id, $geometry_type, $simplify_fachdaten_geom);
+						$log .= $result['log'];
+						$sql_regel = str_replace("'", "''", $result['sql']); # Replaces all single commas with 2x single commas to escape them in SQL
 						# TODO: pk Hier vorher existierende Regeln der konvertierung des Bereiches löschen damit sie nicht mehrfach drin sind.
-						// echo '<br>gmlas_to_geml_regel: ' . $sql_regel;
+						$log .= '<br>gmlas_to_geml_regel: ' . $sql_regel;
 						$this->insert_regel_into_db($gmlas_feature_table, $sql_regel, $geometry_type, $konvertierung_id, $stelle_id, $bereich_gml_id, $bereich_index);
 					}
 				}
 			}
 		}
+		return $log;
 	}
 
 	/*
@@ -2398,11 +2400,11 @@ class Gml_extractor {
 	 */
 	function get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_id, $geom_type,$simplify_fachdaten_geom = null) {
 		#echo '<p>Erzeuge Regel SQL für gmlas feature table: ' . $gmlas_feature_table . ' in Bereich: ' . $bereich_id . ' für Geometrietyp: '. $geom_type, $simplify_fachdaten_geom = null;
-
+		$log = '';
 		$simplify_fachdaten_geom = floatval($simplify_fachdaten_geom);
 		$gml_class = $gmlas_feature_table; # Is this always the case?
 		$gmlas_attributes = $this->get_gmlas_attributes_with_content($this->gmlas_schema, $gmlas_feature_table);
-		//echo '<br>gmlas_attribute with content: <pre>' . print_r($gmlas_attributes, true) . '</pre>';
+		$log .= '<br>gmlas_attribute with content: <pre>' . print_r($gmlas_attributes, true) . '</pre>';
 		$mappings = $this->get_gmlas_to_gml_mappings($gmlas_feature_table);
 
 		$select_sql = [];
@@ -2410,17 +2412,17 @@ class Gml_extractor {
 
 		# Loops through all gmlas_attributes, comparing them with the original column (and table)
 		# If matches are found, the target attributes are taken and the associated regel is added to the SQL
-		//echo '<br>Loop through gmlas_attributes:';
+		$log .= '<br>Loop through gmlas_attributes:';
 		foreach ($gmlas_attributes AS $a) {
-			//echo '<br>gmlas_attribute: ' . $a;
+			$log .= '<br>gmlas_attribute: ' . $a;
 			if(!in_array($a, array_column($mappings, 'o_column'))) {
 				continue;
 			}
-			//echo '<br>Loop through mappings:';
+			$log .= '<br>Loop through mappings:';
 			foreach ($mappings as $mapping) {
-				//echo '<br>Mapping for o_column: ' . $mapping['o_column'];
+				$log .= '<br>Mapping for o_column: ' . $mapping['o_column'];
 				if (($mapping['o_column'] == $a) and ($mapping['o_table'] == $gml_class)) {
-					//echo '<br>gmlas_attribute is o_column and gml_class is o_table';
+					$log .= '<br>gmlas_attribute is o_column and gml_class is o_table';
 					# gehoertzubereich wird automatisiert bei der Konvertierung in die Regel eingearbeitet 
 					# muss deswegen für Attribute nicht verwendet werden, ggf aber für WHERE filter
 					if ($mapping['t_column'] == 'gehoertzubereich') {
@@ -2462,8 +2464,8 @@ class Gml_extractor {
 				}
 			}
 		}
-		//echo '<br>GML-Attributes für die Regel: ' . implode(', ', $gml_attributes);
-		//echo '<br>Select part of regel SQL nach Anpassung der Geometrietypen: ' . $select_sql;
+		$log .= '<br>GML-Attributes für die Regel: ' . implode(', ', $gml_attributes);
+		$log .= '<br>Select part of regel SQL nach Anpassung der Geometrietypen: ' . $select_sql;
 
 		// rules that representing the many to many relationship
 		$many_to_many_attributes = $this->get_many_to_many_attributes();
@@ -2497,8 +2499,12 @@ class Gml_extractor {
 				gmlas.gehoertzubereich_href ILIKE '%" . $bereich_id . "' AND
 				ST_GeometryType(position) = '" . $geom_type . "'
 		";
-		//echo '<br>SQL für Regel zur Konvertierung von gmlas table ' . $gmlas_feature_table . ' to gml class ' . $gml_class . ': '. $sql;
-		return $sql;
+		$log .= '<br>SQL für Regel zur Konvertierung von gmlas table ' . $gmlas_feature_table . ' to gml class ' . $gml_class . ': '. $sql;
+		return array(
+			'success' => true,
+			'sql' => $sql,
+			'log' => $log
+		);
 	}
 
 	/**
@@ -2636,7 +2642,8 @@ class Gml_extractor {
 								)
 							]::xplan_gml." . $special_datatype . "[]
 							ELSE NULL
-						END AS " . $attribute;
+						END AS " . $attribute . "
+					";
 				}
 			}
 		}
