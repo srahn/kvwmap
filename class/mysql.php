@@ -466,32 +466,38 @@ INSERT INTO u_styles2classes (
 		#echo '<br>Anzahl Felder: ' . $feld_anzahl;
 		for ($i = 0; $i < $feld_anzahl; $i++) {
 			$meta = $this->result->fetch_field_direct($i);
+			// if ($table == 'u_rolle2used_layer'){
+			// 	print_r($meta);
+			// }
 			$fields[$i] = $meta;
-			echo $fields[$i]->type.'<br>';
 			#echo '<br>Meta name: ' . $meta->name;
 			# array mit feldnamen
 			$felder[$i] = $meta->name;
-			if ($meta->name == 'connectiontype'){
-				$connectiontype = $i;
-			}
-			if($meta->name == 'connection'){
-				$connection_field_index = $i;
-			}
-			if($meta->name == 'connection_id'){
-				$connection_id_field_index = $i;
-			}
+			// if ($meta->name == 'connectiontype'){
+			// 	$connectiontype = $i;
+			// }
+			// if($meta->name == 'connection'){
+			// 	$connection_field_index = $i;
+			// }
+			// if($meta->name == 'connection_id'){
+			// 	$connection_id_field_index = $i;
+			// }
 		}
 
 		while ($rs = $this->result->fetch_array()) {
 			$insert = '';
-			if ($rs[$connectiontype] == 6) {
-				$rs[$connection_field_index] = '@connection';
-				$rs[$connection_id_field_index] = '@connection_id';
-			}
+			// if ($rs[$connectiontype] == 6) {
+			// 	$rs[$connection_field_index] = '@connection';
+			// 	$rs[$connection_id_field_index] = '@connection_id';
+			// }
 			$insert .= 'INSERT INTO "'.strtolower($table).'" (';
 			for ($i = 0; $i < $feld_anzahl; $i++) {
 				if($felder[$i] != $extra) {
-					$feld = str_replace(['xmin', 'ymin', 'xmax', 'ymax', 'low-german'], ['minx', 'miny', 'maxx', 'maxy', 'low_german'], $felder[$i]);
+					$feld = $felder[$i];
+					if (in_array($feld, ['xmin', 'ymin', 'xmax', 'ymax'])) {
+						$feld = str_replace(['xmin', 'ymin', 'xmax', 'ymax'], ['minx', 'miny', 'maxx', 'maxy'], $feld);
+					}
+					$feld = str_replace('low-german', 'low_german', $feld);
 					$insert .= '"'.strtolower($feld).'"';
 					if ($feld_anzahl-1 > $i){$insert .= ', ';}
 				}
@@ -503,16 +509,29 @@ INSERT INTO u_styles2classes (
 						$insert .= pg_escape_string($rs[$i]);
 					}
 					else {
-						if ($fields[$i]->type == 'tinyint(1)' AND $rs[$i] == '') {
-							$insert .= "false";
-						}
-						else {
-							if ($rs[$i] === null OR $rs[$i] == '0000-00-00 00:00:00' OR $rs[$i] == '0000-00-00') {
-								$insert .= "NULL";
-							} else {
-								$insert .= "'".pg_escape_string($rs[$i])."'";
+						$value = '';
+						if ($rs[$i] == '') {
+							if (in_array($felder[$i], ['aktivStatus', 'queryStatus'])) {
+								$value = "0";
+							}
+							if ($value == '') {
+								switch ($fields[$i]->type) { 
+									case 1 : { 	# tinyint
+										$value = "0";
+									} break;
+									case 254 : {	# enum
+										$value = "false";
+									}break;
+								}
 							}
 						}
+						if ($rs[$i] === null OR $rs[$i] == '0000-00-00 00:00:00' OR $rs[$i] == '0000-00-00') {
+							$value = "NULL";
+						}
+						if ($value == '') {
+							$value = "'".pg_escape_string($rs[$i])."'";
+						}
+						$insert .= $value;
 					}
 					if ($feld_anzahl - 1 > $i) { $insert .= ', '; }
 				}
