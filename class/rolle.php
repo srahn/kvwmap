@@ -1970,7 +1970,7 @@ class rolle {
 					menue_id,
 					status
 				FROM
-					u_menue2rolle
+					kvwmap.u_menue2rolle
 				WHERE
 					stelle_id = " . $stelle_id . " AND
 					user_id = " . $default_user_id . "
@@ -1985,13 +1985,13 @@ class rolle {
 					menue_id,
 					0
 				FROM
-					u_menue2stelle
+					kvwmap.u_menue2stelle
 				WHERE
 					stelle_id = " . $stelle_id . "
 			";
 		}
 		$sql = "
-			INSERT IGNORE INTO u_menue2rolle (
+			INSERT IGNORE INTO kvwmap.u_menue2rolle (
 				user_id,
 				stelle_id,
 				menue_id,
@@ -2013,7 +2013,7 @@ class rolle {
 				# löscht alle Menuepunkte der Stelle
 				$sql = "
 					DELETE FROM
-						u_menue2rolle
+						kvwmap.u_menue2rolle
 					WHERE
 						user_id = " . $user_id . " AND
 						stelle_id = " . $stellen[$i] . "
@@ -2029,7 +2029,7 @@ class rolle {
 				for ($j=0; $j < count($menues); $j++) {
 					$sql = "
 						DELETE FROM
-							u_menue2rolle
+							kvwmap.u_menue2rolle
 						WHERE
 							user_id = " . $user_id . " AND
 							stelle_id = " . $stellen[$i] . " AND
@@ -2049,7 +2049,7 @@ class rolle {
 	function set_one_Group($user_id, $stelle_id, $group_id, $open) {
 		$sql = '
 			INSERT INTO 
-				u_groups2rolle 
+				kvwmap.u_groups2rolle 
 			VALUES (
 				' . $user_id . ', 
 				' . $stelle_id . ', 
@@ -2068,7 +2068,7 @@ class rolle {
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			$sql = "
 				INSERT IGNORE INTO 
-					u_groups2rolle
+					kvwmap.u_groups2rolle
 				SELECT 
 					".$user_id.",
 					stelle_id,
@@ -2087,18 +2087,18 @@ class rolle {
 		else {
 			for($j = 0; $j < count_or_0($layerids); $j++){
 				$sql = "
-					INSERT IGNORE INTO u_groups2rolle 
+					INSERT IGNORE INTO kvwmap.u_groups2rolle 
 					WITH RECURSIVE cte (group_id) AS (
 						SELECT 
-            	coalesce(ul.group_id, l.Gruppe) AS group_id
+            	coalesce(ul.group_id, l.gruppe) AS group_id
 						FROM
           		used_layer ul JOIN
-            	layer l ON ul.Layer_ID = l.Layer_ID
+            	layer l ON ul.layer_id = l.layer_id
             WHERE 
-            	l.Layer_ID = " . $layerids[$j] . " AND
-            	ul.Stelle_ID = " . $stelle_id . "
+            	l.layer_id = " . $layerids[$j] . " AND
+            	ul.stelle_id = " . $stelle_id . "
 						UNION ALL
-						SELECT obergruppe FROM u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
+						SELECT obergruppe FROM kvwmap.u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
 					)
 					SELECT 
 						" . $user_id . ", 
@@ -2129,7 +2129,7 @@ class rolle {
 
 	static function setGroupsForAll($database) {
 		$sql = "
-			INSERT INTO u_groups2rolle 				
+			INSERT INTO kvwmap.u_groups2rolle 				
 			WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
 				SELECT DISTINCT
 						ul.Stelle_ID AS stelle_id,
