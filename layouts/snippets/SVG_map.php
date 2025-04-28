@@ -1566,7 +1566,7 @@ function add_vertex(evt){
   	polypathx.push(parseFloat(worldx));
   	polypathy.push(parseFloat(worldy));
 		redrawPolygon();
-		if(doing == "polygonquery")polygonarea();
+		if(doing == "measurearea")polygonarea();
 		vertex.setAttribute("opacity", "0.8");
 	}
 	if(doing == "pquery" || doing == "ppquery"){
