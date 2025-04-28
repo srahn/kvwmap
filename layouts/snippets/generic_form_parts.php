@@ -1202,7 +1202,8 @@
 				if ($value != NULL AND $enum_key == $value) {
 					$datapart .= 'selected ';
 				}
-				$datapart .= 'value="' . $enum_key . '">' . $enum['output'] . '</option>';
+				$title = $enum['output'] . ($enum['output'] != $enum_key ? ' (' . $enum_key . ')' : '');
+				$datapart .= 'value="' . $enum_key . '" title="' . $title . '">' . $enum['output'] . '</option>';
 			}
 			$datapart .= '</select>';
 			if($subform_layer_id != ''){

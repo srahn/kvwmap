@@ -428,10 +428,16 @@
 			$GUI->user->rolle->epsg_code,
 			$GUI->formvars['planart'],
 			$GUI->Stelle->id,
-			$GUI->user->id
+			$GUI->user->id,
+			$upload_validation_result['plan_file_name']
 		);
+		if ($konvertierung_id === -1) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Anlegen der Konvertierung. ' . pg_last_error()
+			);
+		}
 		$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
-
 		$konvertierung->create_directories();
 
 		# move files from tmp to upload folder from konvertierung
@@ -467,8 +473,8 @@
 		if (! file_exists($reindexed_xplan_gml_path)) {
 			mkdir($reindexed_xplan_gml_path, 0777);
 		}
-		$read_handle = fopen($uploaded_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "r");
-		$write_handle = fopen($reindexed_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "w");
+		$read_handle = fopen($uploaded_xplan_gml_path . $GUI->konvertierung->get_plan_file_name(), "r");
+		$write_handle = fopen($reindexed_xplan_gml_path . $GUI->konvertierung->get_plan_file_name(), "w");
 		$GUI->xplan_gml_ids = array();
 		if ($read_handle) {
 			while (($line = fgets($read_handle)) !== false) {
@@ -484,12 +490,12 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}${$GUI->konvertierung->config['plan_file_name']} zum Umbenennen der gml_id's."
+				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}${$GUI->konvertierung->get_plan_file_name()} zum Umbenennen der gml_id's."
 			);
 		}
 		return array(
 			'success' => true,
-			'msg' => "GML-ID's in GML-Datei erfolgreich umbennannt."
+			'msg' => 'GML-IDs in GML-Datei ' . $reindexed_xplan_gml_path . $GUI->konvertierung->get_plan_file_name() . 'erfolgreich umbennannt.'
 		);
 	};
 

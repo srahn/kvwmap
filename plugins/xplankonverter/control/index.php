@@ -94,7 +94,10 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	$GUI->formvars['konvertierung_id'] = trim($GUI->formvars['konvertierung_id']);
 	$xplankonverter_file_path = XPLANKONVERTER_FILE_PATH . ($GUI->formvars['konvertierung_id'] != '' ? $GUI->formvars['konvertierung_id'] . '/' : '');
 	$konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
-	if ($konvertierung->data != NULL) {
+	if ($konvertierung->data == NULL) {
+		$GUI->konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']);
+	}
+	else {
 		if ($konvertierung->get('stelle_id') != Rolle::$stelle_ID) {
 			$GUI->add_message('warning', 'Die Konvertierung mit der id ' . $GUI->formvars['konvertierung_id'] . ' gehört nicht zu dieser Stelle!');
 			$GUI->formvars['konvertierung_id'] = '';
@@ -104,6 +107,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->add_message('warning', 'Der Dateipfad ' . $xplankonverter_file_path . ' für die Konvertierung ' . $GUI->formvars['konvertierung_id'] . ' fehlte und musste neu angelegt werden.');
 			// return false;
 		}
+		$GUI->konvertierung = $konvertierung;
 	}
 	$xplankonverter_logfile = $xplankonverter_file_path . 'xplankonverter.log';
 	$GUI->xlog = new LogFile(
@@ -299,8 +303,6 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		return $ticket;
 	}
 
-	$GUI->konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']);
-
 	/*
 		ToDo 1 pk:
 		Die nachfolgenden Variablen von GUI wurden schon in der konvertierung config gesetzt.
@@ -392,6 +394,9 @@ function go_switch_xplankonverter($go) {
 						break;
 					}
 					$num_unclassified += $result['num_unclassified'];
+				}
+				if (!$result['success']) {
+					break;
 				}
 				if ($num_unclassified == 0) {
 					$msg = 'Alle Objekte konnten bekannten Planzeichen zugeordnet werden!';
@@ -2260,7 +2265,8 @@ function go_switch_xplankonverter($go) {
 			}
 
 			# Importiert die Datei der zuletzt hochgeladenen Zusammenzeichnung
-			$file_zusammenzeichnung = $GUI->konvertierung->get_file_path($GUI->formvars['xplan_gml_path'] == 'reindexed_xplan_gml' ? 'reindexed_xplan_gml' : 'uploaded_xplan_gml') . $GUI->konvertierung->config['plan_file_name'];
+			$file_zusammenzeichnung = $GUI->konvertierung->get_file_path($GUI->formvars['xplan_gml_path'] == 'reindexed_xplan_gml' ? 'reindexed_xplan_gml' : 'uploaded_xplan_gml') . $GUI->konvertierung->get_plan_file_name();
+
 			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $file_zusammenzeichnung, 'xplan_gmlas_tmp_' . $GUI->user->id);
 
 			$import_result = $gml_extractor->import_gml_to_db();
@@ -2296,7 +2302,10 @@ function go_switch_xplankonverter($go) {
 			
 			// Check if zusammenzeichnung has at least 95% area overlap with gebietseinheit_flaeche
 			// to validate that it is actually a zusammenzeichnung of the entire area and not e.g. just of one aenderung/berichtigung
-			if ($GUI->konvertierung->is_geltungsbereich_gebietseinheiten_area_similar('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class) == false) {
+			if (
+				$GUI->konvertierung->get('planart') == 'FP-Plan' AND
+				$GUI->konvertierung->is_geltungsbereich_gebietseinheiten_area_similar('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class) == false
+			) {
 				$GUI->konvertierung->set('error_id', 9);
 				$GUI->konvertierung->update();
 				//send_error('Fehler: Der Plan in der hochgeladene Datei ' . $file_zusammenzeichnung . ' enthält einen räumlichen Geltungsbereich, der mindestens 5% von der Fläche der Gebietseinheit abweicht.');
@@ -2314,12 +2323,12 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_test' : {
-			$old_konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
-			$result = $old_konvertierung->archiv_old_plan_test();
-			if (!$result['success']) {
-				send_error($result['msg']);
-				break;
-			}
+			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+			$plan_file = $GUI->konvertierung->get_file_path($GUI->formvars['xplan_gml_path'] == 'reindexed_xplan_gml' ? 'reindexed_xplan_gml' : 'uploaded_xplan_gml') . $GUI->konvertierung->get_plan_file_name();
+			echo '<br>plan_file: ' . $plan_file;
+			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $plan_file, 'xplan_gmlas_tmp_' . $GUI->user->id);
+			$import_result = $gml_extractor->import_gml_to_db();
+			echo 'Fertig';
 		} break;
 
 		case 'xplankonverter_create_plaene' : {
@@ -2395,7 +2404,7 @@ function go_switch_xplankonverter($go) {
 			$gml_extractor = new Gml_extractor($GUI->pgdatabase, '', 'xplan_gmlas_tmp_' . $GUI->user->id);
 			$gml_extractor->gmlas_schema = 'xplan_gmlas_' . $GUI->konvertierung->get_id();
 			$GUI->konvertierung->insert_textabschnitte($gml_extractor);
-			$gml_extractor->insert_all_regeln_into_db(
+			$debug_log = $gml_extractor->insert_all_regeln_into_db(
 				$konvertierung_id,
 				$GUI->Stelle->id,
 				(array_key_exists('simplify_fachdaten_geom', $GUI->formvars) ? floatval($GUI->formvars['simplify_fachdaten_geom']) : null)
@@ -2420,7 +2429,7 @@ function go_switch_xplankonverter($go) {
 
 			$response = array(
 				'success' => true,
-				'msg' => 'Einlesen der ' . $msg . ' erfolgreich abgeschlossen.',
+				'msg' => 'Einlesen der ' . $msg . ' erfolgreich abgeschlossen.' . $debug_log,
 				'konvertierung_id' => $konvertierung_id
 			);
 
