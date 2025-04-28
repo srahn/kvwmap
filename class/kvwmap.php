@@ -6319,7 +6319,7 @@ echo '			</table>
 
 			# Fonts auslesen
 			include_(CLASSPATH . 'datendrucklayout.php');
-			$ddl = new ddl($this->database);
+			$ddl = new ddl($this->pgdatabase);
 			$this->Document->fonts = $ddl->get_fonts();
 			$this->Document->din_formats = get_din_formats();
 
@@ -6363,7 +6363,7 @@ echo '			</table>
       # Fonts auslesen
 
 			include_(CLASSPATH . 'datendrucklayout.php');
-			$ddl = new ddl($this->database);
+			$ddl = new ddl($this->pgdatabase);
 			$this->Document->fonts = $ddl->get_fonts();
 			$this->Document->din_formats = get_din_formats();
 
@@ -10386,7 +10386,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function Zwischenablage(){
 		global $language;
 		include_(CLASSPATH.'datendrucklayout.php');
-		$ddl = new ddl($this->database);
+		$ddl = new ddl($this->pgdatabase);
 		if($language != 'german') {
 			$name_column = "
 			CASE
@@ -10477,7 +10477,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['archivieren'] = null;
 			$this->formvars['go'] = 'generischer_sachdaten_druck_Drucken';
 
-			$ddl = new ddl($this->database, $this);
+			$ddl = new ddl($this->pgdatabase, $this);
 			$ddl->selectedlayout = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, [], 'only_ids');
 			# folgendes wird nur ausgeführt, wenn der letzte Layer kein Drucklayout hatte und nicht gedruckt wurde
 			if ($this->formvars['aktivesLayout'] = $ddl->selectedlayout[0]) {
@@ -11403,7 +11403,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function sachdaten_druck_editor_autogenerate(){
 		include_(CLASSPATH.'datendrucklayout.php');
-		$ddl=new ddl($this->database);
+		$ddl=new ddl($this->pgdatabase);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -11415,7 +11415,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function sachdaten_druck_editor(){
 		global $admin_stellen;
 		include_once(CLASSPATH . 'datendrucklayout.php');
-		$ddl=new ddl($this->database, $this);
+		$ddl=new ddl($this->pgdatabase, $this);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     if(in_array($this->Stelle->id, $admin_stellen)){										# eine Admin-Stelle darf alle Layer und Stellen sehen
@@ -11450,7 +11450,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function sachdaten_druck_editor_speichern(){
 		$_files = $_FILES;
 		include_(CLASSPATH.'datendrucklayout.php');
-		$ddl=new ddl($this->database);
+		$ddl=new ddl($this->pgdatabase);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl = $ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -11462,7 +11462,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function sachdaten_druck_editor_aendern(){
 		$_files = $_FILES;
 		include_(CLASSPATH.'datendrucklayout.php');
-		$ddl=new ddl($this->database);
+		$ddl=new ddl($this->pgdatabase);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -11472,7 +11472,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function sachdaten_druck_editor_loeschen(){
 		include_(CLASSPATH.'datendrucklayout.php');
-		$ddl = new ddl($this->database);
+		$ddl = new ddl($this->pgdatabase);
 		$this->ddl = $ddl;
 		$this->ddl->delete_layout($this->formvars);
 		$this->sachdaten_druck_editor();
@@ -11480,7 +11480,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function sachdaten_druck_editor_add2stelle(){
 		include_(CLASSPATH . 'datendrucklayout.php');
-		$ddl=new ddl($this->database);
+		$ddl=new ddl($this->pgdatabase);
     $this->ddl=$ddl;
     $this->ddl->add_layout2stelle($this->formvars['aktivesLayout'], $this->formvars['stelle']);
 		$this->sachdaten_druck_editor();
@@ -11488,7 +11488,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function sachdaten_druck_editor_Freitexthinzufuegen(){
 		include_once(CLASSPATH.'datendrucklayout.php');
-		$this->ddl = new ddl($this->database, $this);
+		$this->ddl = new ddl($this->pgdatabase, $this);
 		$this->ddl->fonts = $this->ddl->get_fonts();
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -11561,7 +11561,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function sachdaten_druck_editor_preview($selectedlayout, $pdfobject = NULL, $offsetx = NULL, $offsety = NULL){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		include_once (CLASSPATH.'datendrucklayout.php');
-		$ddl=new ddl($this->database, $this);
+		$ddl=new ddl($this->pgdatabase, $this);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
@@ -11604,7 +11604,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_(CLASSPATH . 'datendrucklayout.php');
 		$result = array();
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$this->ddl = new ddl($this->database, $this);
+		$this->ddl = new ddl($this->pgdatabase, $this);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
 		$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL, false, true);
@@ -11739,7 +11739,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function generischer_sachdaten_druck_createPDF($pdfobject = NULL, $offsetx = NULL, $offsety = NULL, $output = true, $append = false) {
 		include_(CLASSPATH . 'datendrucklayout.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$ddl = new ddl($this->database, $this);
+		$ddl = new ddl($this->pgdatabase, $this);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
 		$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL, false, true);
@@ -13031,7 +13031,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   function stelle_aendern() {
   	$_files = $_FILES;
 		include_(CLASSPATH . 'datendrucklayout.php');
-		$this->ddl = new ddl($this->database, $this);
+		$this->ddl = new ddl($this->pgdatabase, $this);
 		$this->document = new Document($this->database);
 		$results = array();
 		$deleteuser = array();
@@ -13323,7 +13323,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_(CLASSPATH . 'Funktion.php');
 		include_(CLASSPATH . 'FormObject.php');
 		$document = new Document($this->database);
-		$ddl = new ddl($this->database, $this);
+		$ddl = new ddl($this->pgdatabase, $this);
 		$stelle = new MyObject($this, 'stelle');
 		$where = '';
 		$this->formvars['selmenues'] = array();
@@ -19974,7 +19974,7 @@ class db_mapObj{
 		$formvars['data'] = str_replace ( "'", "''", $formvars['data']);
 		$formvars['query'] = str_replace ( "'", "''", value_of($formvars, 'query'));
 		$sql = "
-			INSERT INTO rollenlayer (
+			INSERT INTO kvwmap.rollenlayer (
 				original_layer_id,
 				user_id,
 				stelle_id,
