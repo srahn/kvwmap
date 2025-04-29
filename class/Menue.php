@@ -102,9 +102,9 @@ class Menue extends PgObject {
 		if ($gui->user->id > 0 AND !in_array($gui->Stelle->id, $admin_stellen)) {
 			# Frage nur die Nutzer ab, die der aktuellen Stelle zugeordnet sind
 			$more_from = "
-				JOIN u_menue2stelle ms ON m.id = ms.menue_id
-				JOIN rolle ra ON ms.stelle_id = ra.stelle_id
-				JOIN rolle rb ON ra.stelle_id = rb.stelle_id
+				JOIN kvwmap.u_menue2stelle ms ON m.id = ms.menue_id
+				JOIN kvwmap.rolle ra ON ms.stelle_id = ra.stelle_id
+				JOIN kvwmap.rolle rb ON ra.stelle_id = rb.stelle_id
 			";
 			$more_where = " AND rb.user_id = " . $gui->user->id;
 		}
@@ -119,7 +119,7 @@ class Menue extends PgObject {
 					m.menueebene
 				",
 				'from' => "
-					u_menues m" .
+					kvwmap.u_menues m" .
 					$more_from . "
 				",
 				'where' => "
@@ -142,9 +142,9 @@ class Menue extends PgObject {
 		if ($gui->user->id > 0 AND !in_array($gui->Stelle->id, $admin_stellen)) {
 			# Frage nur die Nutzer ab, die der aktuellen Stelle zugeordnet sind
 			$more_from = "
-				JOIN u_menue2stelle ms ON m.id = ms.menue_id
-				JOIN rolle rall ON ms.stelle_id = rall.stelle_id
-				JOIN rolle radm ON rall.stelle_id = radm.stelle_id
+				JOIN kvwmap.u_menue2stelle ms ON m.id = ms.menue_id
+				JOIN kvwmap.rolle rall ON ms.stelle_id = rall.stelle_id
+				JOIN kvwmap.rolle radm ON rall.stelle_id = radm.stelle_id
 			";
 			$more_where = " AND radm.user_id = " . $gui->user->id;
 		}

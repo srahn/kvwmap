@@ -1709,7 +1709,7 @@ CREATE TABLE `stelle` (
   `maxymax` double DEFAULT NULL,
   `minzoom` int(11) NOT NULL DEFAULT 8,
   `epsg_code` int(5) NOT NULL DEFAULT 2398,
-  `Referenzkarte_ID` int(11) DEFAULT NULL,
+  `referenzkarte_id` int(11) DEFAULT NULL,
   `Authentifizierung` enum('0','1') NOT NULL DEFAULT '1',
   `ALB_status` enum('30','35') NOT NULL DEFAULT '30',
   `wappen` varchar(255) DEFAULT NULL,

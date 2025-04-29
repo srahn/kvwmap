@@ -4669,16 +4669,16 @@ echo '			</table>
 	function getRefMapImage($id) {
 		include_once(CLASSPATH . 'Referenzkarte.php');
 		$referenzkarte = Referenzkarte::find_by_id($this, $id);
-		if ($referenzkarte->get('Dateiname') != '' AND file_exists(REFERENCEMAPPATH . $referenzkarte->get('Dateiname'))) {
-			$path_parts = pathinfo(REFERENCEMAPPATH . $referenzkarte->get('Dateiname'));
+		if ($referenzkarte->get('dateiname') != '' AND file_exists(REFERENCEMAPPATH . $referenzkarte->get('dateiname'))) {
+			$path_parts = pathinfo(REFERENCEMAPPATH . $referenzkarte->get('dateiname'));
 			header('Content-type: image/' . $path_parts['extension']);
 			header("Pragma: public");
 			header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-			header('Content-Disposition: filename=' . $referenzkarte->get('Dateiname'));
-			echo file_get_contents(REFERENCEMAPPATH . $referenzkarte->get('Dateiname'));
+			header('Content-Disposition: filename=' . $referenzkarte->get('dateiname'));
+			echo file_get_contents(REFERENCEMAPPATH . $referenzkarte->get('dateiname'));
 		}
 		else {
-			send_image_not_found(REFERENCEMAPPATH . $referenzkarte->get('Dateiname'));
+			send_image_not_found(REFERENCEMAPPATH . $referenzkarte->get('dateiname'));
 		}
 	}
 
@@ -6291,7 +6291,7 @@ echo '			</table>
   }
 
   function druckrahmen_init() {
-    $Document=new Document($this->database);
+    $Document=new Document($this->pgdatabase);
     $this->Document=$Document;
   }
 
@@ -6546,7 +6546,7 @@ echo '			</table>
 		$this->selectable_scales = array_reverse($selectable_scales);
 		$saved_scale = $this->reduce_mapwidth(10);
 		$this->main = "druckausschnittswahl.php";
-		$this->Document = new Document($this->database);
+		$this->Document = new Document($this->pgdatabase);
 		# aktuellen Kartenausschnitt laden + zeichnen!
 		$this->noMinMaxScaling = $this->formvars['no_minmax_scaling'];
 		if ($this->formvars['neuladen']) {
@@ -6659,7 +6659,7 @@ echo '			</table>
   }
 
   function druckausschnitt_löschen($loadmapsource){
-    $this->Document = new Document($this->database);
+    $this->Document = new Document($this->pgdatabase);
     $this->Document->delete_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['druckausschnitt']);
     $this->formvars['druckausschnitt'] = '';
     $this->druckausschnittswahl($loadmapsource);
@@ -6667,7 +6667,7 @@ echo '			</table>
 
 	function druckausschnitt_speichern($loadmapsource) {
 		$this->loadMap($loadmapsource);
-		$this->Document = new Document($this->database);
+		$this->Document = new Document($this->pgdatabase);
 		$this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->user->rolle->epsg_code, $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
 		$this->druckausschnittswahl($loadmapsource);
 	}
@@ -7367,7 +7367,7 @@ echo '			</table>
     # Einbinden der PDF Klassenbibliotheken
     include (CLASSPATH.'class.ezpdf.php');
     # Erzeugen neue Dokument-Klasse
-    $Document=new Document($this->database);
+    $Document=new Document($this->pgdatabase);
     $this->Docu=$Document;
 
     # Erzeugen neue pdf-Klasse
@@ -7412,7 +7412,7 @@ echo '			</table>
 			'legend_extra' => 'int',
 			'selected_layer_ids' => 'int_csv',
 		]);
-		$Document = new Document($this->database);
+		$Document = new Document($this->pgdatabase);
 		$this->Docu = $Document;
 		$this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
 		if ($this->Docu->activeframe[0]['dhk_call'] != ''){
@@ -13032,11 +13032,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   	$_files = $_FILES;
 		include_(CLASSPATH . 'datendrucklayout.php');
 		$this->ddl = new ddl($this->pgdatabase, $this);
-		$this->document = new Document($this->database);
+		$this->document = new Document($this->pgdatabase);
 		$results = array();
 		$deleteuser = array();
 
-    if (!$this->formvars['bezeichnung'] or !$this->formvars['Referenzkarte_ID']) {
+    if (!$this->formvars['bezeichnung'] or !$this->formvars['referenzkarte_id']) {
       # Fehler bei der Formulareingabe
       $this->Meldung=$ret[1];
     }
@@ -13170,7 +13170,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function StelleAnlegen() {
 		include_once(CLASSPATH . 'Referenzkarte.php');
 		$_files = $_FILES;
-		if (!$this->formvars['bezeichnung'] or !$this->formvars['Referenzkarte_ID']) {
+		if (!$this->formvars['bezeichnung'] or !$this->formvars['referenzkarte_id']) {
 			# Fehler bei der Formulareingabe
 			showAlert('Füllen Sie alle mit * gekennzeichneten Formularfelder aus.');
 		}
@@ -13216,7 +13216,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				if ($result[0]['success']) {
-					$this->formvars['Referenzkarte_ID'] = $refmap_id;
+					$this->formvars['referenzkarte_id'] = $refmap_id;
 				}
 				else {
 					$this->add_message('error', $result[0]['msg']);
@@ -13265,7 +13265,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($layer[0] != NULL) {
 					$Stelle->addLayer($layer);
 				}
-				$document = new Document($this->database);
+				$document = new Document($this->pgdatabase);
 				if ($frames[0] != NULL) {
 					for ($i = 0; $i < count($frames); $i++) {
 						$document->add_frame2stelle($frames[$i], $neue_stelle_id); # Hinzufügen der Druckrahmen zur Stelle
@@ -13322,9 +13322,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_(CLASSPATH . 'datendrucklayout.php');
 		include_(CLASSPATH . 'Funktion.php');
 		include_(CLASSPATH . 'FormObject.php');
-		$document = new Document($this->database);
+		$document = new Document($this->pgdatabase);
 		$ddl = new ddl($this->pgdatabase, $this);
-		$stelle = new MyObject($this, 'stelle');
+		$stelle = new PgObject($this, 'kvwmap', 'stelle');
 		$where = '';
 		$this->formvars['selmenues'] = array();
 		$this->formvars['selfunctions'] = array();
@@ -13343,16 +13343,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       $Stelle->language = $this->Stelle->language;
       $this->stellendaten = $Stelle->getstellendaten();
 			$this->allstellendaten = $this->Stelle->getStellen('');
-      $this->formvars['bezeichnung'] = $this->stellendaten['Bezeichnung'];
+      $this->formvars['bezeichnung'] = $this->stellendaten['bezeichnung'];
 			if ($language != 'german') {
-				$this->formvars['Bezeichnung_' . $language] = $this->stellendaten['Bezeichnung_' . $language];
+				$this->formvars['bezeichnung_' . $language] = $this->stellendaten['bezeichnung_' . $language];
 			}
       $this->formvars['minxmax'] = $this->stellendaten['minxmax'];
       $this->formvars['minymax'] = $this->stellendaten['minymax'];
       $this->formvars['maxxmax'] = $this->stellendaten['maxxmax'];
       $this->formvars['maxymax'] = $this->stellendaten['maxymax'];
       $this->formvars['epsg_code'] = $this->stellendaten['epsg_code'];
-      $this->formvars['Referenzkarte_ID'] = $this->stellendaten['Referenzkarte_ID'];
+      $this->formvars['referenzkarte_id'] = $this->stellendaten['referenzkarte_id'];
       $this->formvars['start'] = $this->stellendaten['start'];
       $this->formvars['stop'] = $this->stellendaten['stop'];
 			$this->formvars['postgres_connection_id'] = $this->stellendaten['postgres_connection_id'];
@@ -13422,24 +13422,24 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['reset_password_text'] = $this->stellendaten['reset_password_text'];
 			$this->formvars['invitation_text'] = $this->stellendaten['invitation_text'];
 			$this->formvars['comment'] = $this->stellendaten['comment'];
-			$where = 'ID != '.$this->formvars['selected_stelle_id'];
+			$where = 'id != '.$this->formvars['selected_stelle_id'];
 
 			$children_ids = array_map(function($child) {return $child['ID'];}, $this->formvars['selchildren']);
 			$parent_ids = array_map(function($parent) {return $parent['ID'];}, $this->formvars['selparents']);
     }
 
-		$alle_anderen_stellen = $stelle->find_where($where, 'Bezeichnung');
+		$alle_anderen_stellen = $stelle->find_where($where, 'bezeichnung');
 
 		# Abfragen aller möglichen Oberstellen. Kindstellen der ausgewählten Stelle werden ausgenommen;
 		$this->formvars['parents'] = array();
 		foreach ($alle_anderen_stellen AS $parent) {
-			if (!in_array($parent->get('ID'), $children_ids)) $this->formvars['parents'][] = $parent;
+			if (!in_array($parent->get('id'), $children_ids)) $this->formvars['parents'][] = $parent;
 		}
 
 		# Abfragen aller möglichen Kindstellen. Oberstellen der ausgewählten Stelle werden ausgenommen;
 		$this->formvars['children'] = array();
 		foreach ($alle_anderen_stellen AS $child) {
-			if (!in_array($parent->get('ID'), $parent_ids)) $this->formvars['children'][] = $child;
+			if (!in_array($parent->get('id'), $parent_ids)) $this->formvars['children'][] = $child;
 		}
 
     # Abfragen aller möglichen Menuepunkte
@@ -13969,7 +13969,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       $georg->ALKA3 = $this->formvars['anzahlA3'];
       $georg->ALKA4 = $this->formvars['anzahlA4'];
       $georg->ALB = $this->formvars['anzahlALB'];
-      $document = new Document($this->database);
+      $document = new Document($this->pgdatabase);
       $georg->preisALKA4 = $document->get_price('A4hoch');
       $georg->preisALKA3 = $document->get_price('A3hoch');
       $georg->betragALK = ($georg->preisALKA4 * $georg->ALKA4 + $georg->preisALKA3 * $georg->ALKA3)/100;
@@ -22486,23 +22486,22 @@ class Document {
 
   function load_frames($stelle_id, $frameid, $return = '') {
 		$frames = array();
-    $sql = 'SELECT DISTINCT druckrahmen.* FROM druckrahmen';
+    $sql = 'SELECT DISTINCT druckrahmen.* FROM kvwmap.druckrahmen';
     if($frameid AND !$stelle_id){$sql .= ' WHERE druckrahmen.id ='.$frameid;}
     if($stelle_id AND !$frameid){
-    	$sql.= ', druckrahmen2stelle WHERE druckrahmen2stelle.druckrahmen_id = druckrahmen.id';
+    	$sql.= ', kvwmap.druckrahmen2stelle WHERE druckrahmen2stelle.druckrahmen_id = druckrahmen.id';
     	$sql .= ' AND druckrahmen2stelle.stelle_id = '.$stelle_id;
     }
     if($frameid AND $stelle_id){
-    	$sql.= ', druckrahmen2stelle WHERE druckrahmen2stelle.druckrahmen_id = druckrahmen.id';
+    	$sql.= ', kvwmap.druckrahmen2stelle WHERE druckrahmen2stelle.druckrahmen_id = druckrahmen.id';
     	$sql .= ' AND druckrahmen2stelle.stelle_id = '.$stelle_id;
     	$sql .= ' AND druckrahmen.id ='.$frameid;
     }
-    $sql .= ' ORDER BY Name';
+    $sql .= ' ORDER BY name';
     #echo $sql.'<br>';
 		$ret1 = $this->database->execSQL($sql, 4, 1);
   	if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $result = $this->database->result;
-    while($rs = $result->fetch_assoc()){
+    while($rs = pg_fetch_assoc($ret1[1])){
 			if ($return == 'only_ids') {
 				$frames[] = $rs['id'];
 			}
@@ -22517,7 +22516,7 @@ class Document {
 
   function load_texts($frame_id){
 		$texts = array();
-    $sql = 'SELECT druckfreitexte.* FROM druckrahmen, druckfreitexte, druckrahmen2freitexte';
+    $sql = 'SELECT druckfreitexte.* FROM kvwmap.druckrahmen, kvwmap.druckfreitexte, kvwmap.druckrahmen2freitexte';
     $sql.= ' WHERE druckrahmen2freitexte.druckrahmen_id = '.$frame_id;
     $sql.= ' AND druckrahmen2freitexte.druckrahmen_id = druckrahmen.id';
     $sql.= ' AND druckrahmen2freitexte.freitext_id = druckfreitexte.id';
@@ -22525,7 +22524,7 @@ class Document {
     $this->debug->write("<p>file:kvwmap class:Document->load_texts :<br>" . $sql,4);
     $ret1 = $this->database->execSQL($sql, 4, 1);
     if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = $this->database->result->fetch_assoc()){
+		while($rs = pg_fetch_assoc($ret1[1])){
       $texts[] = $rs;
     }
     return $texts;
@@ -22534,14 +22533,14 @@ class Document {
   function load_bilder($frame_id){
 		$bilder = array();
     $sql = 'SELECT b.src,r2b.posx,r2b.posy,r2b.width,r2b.height,r2b.angle';
-    $sql.= ' FROM druckrahmen AS r, druckfreibilder AS b, druckrahmen2freibilder AS r2b';
+    $sql.= ' FROM kvwmap.druckrahmen AS r, kvwmap.druckfreibilder AS b, kvwmap.druckrahmen2freibilder AS r2b';
     $sql.= ' WHERE r.id = r2b.druckrahmen_id';
     $sql.= ' AND b.id = r2b.freibild_id';
     $sql.= ' AND r.id = '.$frame_id;
     $this->debug->write("<p>file:kvwmap class:Document->load_bilder :<br>" . $sql,4);
 		$ret1 = $this->database->execSQL($sql, 4, 1);
     if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = $this->database->result->fetch_assoc()){
+    while($rs = pg_fetch_assoc($ret1[1])){
       $bilder[] = $rs;
     }
     return $bilder;

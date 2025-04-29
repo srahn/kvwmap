@@ -882,8 +882,8 @@ class user {
 		#echo '<br>getall_Users für Stelle: ' . $stelle_id . ' und User: ' . $admin_id;
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
-					JOIN rolle rall ON u.ID = rall.user_id
-					JOIN rolle radm ON rall.stelle_id = radm.stelle_id
+					JOIN kvwmap.rolle rall ON u.id = rall.user_id
+					JOIN kvwmap.rolle radm ON rall.stelle_id = radm.stelle_id
 			";
 			$where .= " AND radm.user_id = " . $admin_id;
 		}
@@ -896,7 +896,7 @@ class user {
 			SELECT DISTINCT
 				u.*
 			FROM
-				user u " .
+				kvwmap.user u " .
 				$more_from . "
 			WHERE " .
 				$where .
@@ -905,11 +905,11 @@ class user {
 		#echo '<br>getall_Users sql: ' . $sql;
 
 		$this->debug->write("<p>file:kvwmap class:user->getall_Users - Lesen aller User:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . $sql . '<p>' . INFO1 . '<p>' . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
-			$user['ID'][] = $rs['ID'];
-			$user['Bezeichnung'][] = $rs['name'] . ', ' . $rs['Vorname'];
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$user['ID'][] = $rs['id'];
+			$user['Bezeichnung'][] = $rs['name'] . ', ' . $rs['vorname'];
 		}
 		// Sortieren der User unter Berücksichtigung von Umlauten
 		$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
@@ -924,29 +924,29 @@ class user {
 			SELECT 
 				* 
 			FROM 
-				user 
+				kvwmap.user 
 			WHERE 
 				archived IS NULL AND 
 				ID NOT IN (
 					SELECT DISTINCT 
-						user.ID 
+						user.id
 					FROM 
-						user, 
-						rolle 
+						kvwmap.user, 
+						kvwmap.rolle 
 					WHERE 
-						rolle.user_id = user.ID
+						rolle.user_id = user.id
 				) 
 			ORDER BY Name';
 		$this->debug->write("<p>file:users.php class:user->get_Unassigned_Users - Lesen der User zur Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
 			return 0;
 		}
 		else {
-			while ($rs = $this->database->result->fetch_array()) {
-				$user['ID'][]=$rs['ID'];
-				$user['Bezeichnung'][]=$rs['name'].', '.$rs['Vorname'];
+			while ($rs = pg_fetch_assoc($ret[1])) {
+				$user['ID'][] = $rs['id'];
+				$user['Bezeichnung'][] = $rs['name'].', '.$rs['vorname'];
 				$user['email'][]=$rs['email'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
@@ -965,23 +965,23 @@ class user {
 			SELECT 
 				* 
 			FROM 
-				user 
+				kvwmap.user 
 			WHERE 
 				archived IS NULL AND 
 				stop != "0000-00-00 00:00:00" AND 
 				"'.date('Y-m-d h:i:s').'" > stop 
 			ORDER BY Name';
 		$this->debug->write("<p>file:users.php class:user->get_Expired_Users - Lesen der User zur Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
 			return 0;
 		}
 		else {
-			while ($rs = $this->database->result->fetch_array()) {
-				$user['ID'][]=$rs['ID'];
-				$user['Bezeichnung'][]=$rs['name'].', '.$rs['Vorname'];
-				$user['email'][]=$rs['email'];
+			while ($rs = pg_fetch_assoc($ret[1])) {
+				$user['ID'][] = $rs['id'];
+				$user['Bezeichnung'][] = $rs['name'].', '.$rs['vorname'];
+				$user['email'][] = $rs['email'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
 			$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);

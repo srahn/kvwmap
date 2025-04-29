@@ -1,11 +1,11 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class Referenzkarte extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class Referenzkarte extends PgObject {
 
 	static $write_debug = true;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'referenzkarten', 'ID');
+		parent::__construct($gui, 'kvwmap', 'referenzkarten');
 		$this->validations = array();
 	}
 

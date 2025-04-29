@@ -1731,7 +1731,7 @@ class stelle {
 				`ID`," .
 				$name_column . ",
 				`start`,
-				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`,
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `referenzkarte_id`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`,
 				`ows_title`,
 				`wms_accessconstraints`,
 				`ows_abstract`,
@@ -2258,7 +2258,7 @@ class db_mapObj {
 				referenzkarten AS r,
 				stelle AS s
 			WHERE
-				r.ID = s.Referenzkarte_ID
+				r.ID = s.referenzkarte_id
     		AND s.ID = " . $this->Stelle_ID . "
 		";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>",4);

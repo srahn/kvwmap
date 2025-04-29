@@ -101,7 +101,7 @@ class stelle {
 	}
 
 	public static	function find($gui, $where, $order = '', $sort_direction = '') {
-		$stelle = new MyObject($gui, 'stelle');
+		$stelle = new PgObject($gui, 'kvwmap', 'stelle');
 		return $stelle->find_where($where, $order, $sort_direction);
 	}
 
@@ -119,19 +119,19 @@ class stelle {
 		if ($language != 'german') {
 			$sql.='name_'.$language.' AS ';
 		}
-		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
+		$sql .=' name, target, links FROM kvwmap.u_menue2stelle, kvwmap.u_menues';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND obermenue = '.$id;
 		$sql .=' AND menueebene = 2';
 		$sql .=' AND u_menue2stelle.menue_id = u_menues.id';
 		$sql .= ' ORDER BY menue_order';
 		$this->debug->write("<p>file:stelle.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines Menüpunktes:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		else {
-			while ($rs = $this->database->result->fetch_array()) {
+			while ($rs = pg_fetch_array($ret[1])) {
 				$menue['name'][]=$rs['name'];
 				$menue['target'][]=$rs['target'];
 				$menue['links'][]=$rs['links'];
@@ -201,7 +201,7 @@ class stelle {
 				id," .
 				$name_column . ",
 				start,
-				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, Referenzkarte_ID, Authentifizierung, ALB_status, wappen, wappen_link, logconsume,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, Authentifizierung, ALB_status, wappen, wappen_link, logconsume,
 				ows_namespace,
 				ows_title,
 				wms_accessconstraints,
@@ -329,9 +329,9 @@ class stelle {
 
 	function delete() {
 		$sql = "
-			DELETE FROM stelle
+			DELETE FROM kvwmap.stelle
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
@@ -345,7 +345,7 @@ class stelle {
 		# Löschen der Zuordnung der Menüs zu der Stelle
 		$sql = "
 			DELETE FROM
-				u_menue2stelle
+				kvwmap.u_menue2stelle
 			WHERE
 				stelle_id = " . $this->id .
 				$where_menue_id . "
@@ -376,24 +376,24 @@ class stelle {
 		#echo 'stelle.php deleteLayer ids: ' . implode(', ', $layer);
 		if($layer == 0){
 			# löscht alle Layer der Stelle
-			$sql ='DELETE FROM used_layer WHERE Stelle_ID = '.$this->id;
+			$sql ='DELETE FROM kvwmap.used_layer WHERE stelle_id = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			$sql ='DELETE FROM layer_attributes2stelle WHERE stelle_id = '.$this->id;
+			$sql ='DELETE FROM kvwmap.layer_attributes2stelle WHERE stelle_id = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 			# Filter löschen
-			$sql ='SELECT attributvalue FROM u_attributfilter2used_layer WHERE type = \'geometry\' AND Stelle_ID = '.$this->id;
+			$sql ='SELECT attributvalue FROM kvwmap.u_attributfilter2used_layer WHERE type = \'geometry\' AND stelle_id = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-			$this->database->execSQL($sql);
+			$ret = $this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			while ($rs = $this->database->result->fetch_row()) {
+			while ($rs = pg_fetch_row($ret[1])) {
 				$poly_id = $rs[0];
 				if($poly_id != '')$pgdatabase->deletepolygon($poly_id);
 			}
-			$sql ='DELETE FROM u_attributfilter2used_layer WHERE Stelle_ID = '.$this->id;
+			$sql ='DELETE FROM kvwmap.u_attributfilter2used_layer WHERE stelle_id = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -401,23 +401,23 @@ class stelle {
 		else{
 			# löscht die übergebenen Layer der Stelle
 			for ($i=0;$i<count($layer);$i++) {
-				$sql ='DELETE FROM used_layer WHERE Stelle_ID = '.$this->id.' AND Layer_ID = '.$layer[$i];
+				$sql ='DELETE FROM kvwmap.used_layer WHERE stelle_id = '.$this->id.' AND layer_id = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-				$sql ='DELETE FROM layer_attributes2stelle WHERE stelle_id = '.$this->id.' AND layer_id = '.$layer[$i];
+				$sql ='DELETE FROM kvwmap.layer_attributes2stelle WHERE stelle_id = '.$this->id.' AND layer_id = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; 	}			
 				# Filter löschen
-				$sql ='SELECT attributvalue FROM u_attributfilter2used_layer WHERE type = \'geometry\' AND Stelle_ID = '.$this->id.' AND Layer_ID = '.$layer[$i];
+				$sql ='SELECT attributvalue FROM kvwmap.u_attributfilter2used_layer WHERE type = \'geometry\' AND stelle_id = '.$this->id.' AND layer_id = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-				$this->database->execSQL($sql);
+				$ret = $this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-				$rs = $this->database->result->fetch_array();
+				$rs = pg_fetch_array($ret[1]);
 				$poly_id = $rs[0];
 				if($poly_id != '')$pgdatabase->deletepolygon($poly_id);
-				$sql ='DELETE FROM u_attributfilter2used_layer WHERE Stelle_ID = '.$this->id.' AND Layer_ID = '.$layer[$i];
+				$sql ='DELETE FROM kvwmap.u_attributfilter2used_layer WHERE stelle_id = '.$this->id.' AND layer_id = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -428,7 +428,7 @@ class stelle {
 	
 	function deleteDruckrahmen() {
 		# löscht alle Druckrahmenzuordnungen der Stelle
-		$sql ='DELETE FROM druckrahmen2stelle WHERE stelle_id = '.$this->id;
+		$sql ='DELETE FROM kvwmap.druckrahmen2stelle WHERE stelle_id = '.$this->id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteDruckrahmen - Löschen der Druckrahmen der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -438,7 +438,7 @@ class stelle {
 	
 	function deleteStelleGemeinden() {
 		# löscht alle StelleGemeinden der Stelle
-		$sql ='DELETE FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
+		$sql ='DELETE FROM kvwmap.stelle_gemeinden WHERE stelle_id = '.$this->id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteStelleGemeinden - Löschen der StelleGemeinden der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -448,7 +448,7 @@ class stelle {
 	
 	function deleteFunktionen() {
 		# löscht alle StelleGemeinden der Stelle
-		$sql ='DELETE FROM u_funktion2stelle WHERE stelle_id = '.$this->id;
+		$sql ='DELETE FROM kvwmap.u_funktion2stelle WHERE stelle_id = '.$this->id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteFunktionen - Löschen der Funktionen der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -461,15 +461,15 @@ class stelle {
 			SELECT
 				*
 			FROM
-				stelle
+				kvwmap.stelle
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 		#echo '<p>SQL zum Abfragen der Stellendaten: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getstellendaten - Abfragen der Stellendaten<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs = $this->database->result->fetch_array();
+		$rs = pg_fetch_array($ret[1]);
 		$this->data = $rs;
 		return $rs;
 	}
@@ -510,72 +510,25 @@ class stelle {
 	function NeueStelleAnlegen($stellendaten) {
 		$_files = $_FILES;
 		# Neue Stelle anlegen
+		$rows = array_intersect_key(
+			[]
+			$stellendaten
+		);
+		$rows['ows_srs'] = preg_replace(array('/: +/', '/ +:/'), ':', $rows['ows_srs']);
+		$rows['wappen'] = ($rows['wappen'] ? $_files['wappen']['name'] : $rows['wappen_save']);
+		$rows['check_client_ip'] = ($rows['checkClientIP'] == '1'	? "1" : "0");
+		$rows['check_password_age'] = ($rows['checkPasswordAge'] == '1' ? "1" : "0");
+		$rows['allowed_password_age'] = ($rows['allowedPasswordAge'] ?: "6");
+		$rows['use_layer_aliases'] = ($rows['use_layer_aliases'] == '1'	? "1" : "0");
+		$rows['hist_timestamp'] = ($rows['hist_timestamp'] == '1' ? 1 : 0);
+		$rows['show_shared_layers'] = ($rows['show_shared_layers'] ? 1 : 0);
+		$rows['version'] = ($rows['version'] ?: "1.0.0");		
 		$sql = "
-			INSERT INTO stelle
-			SET
-				" . ($stellendaten['id'] != '' ? "ID = " . $stellendaten['id'] . ", " : "") . "
-				Bezeichnung = '" . $stellendaten['bezeichnung'] . "',
-				Referenzkarte_ID = " . $stellendaten['Referenzkarte_ID'] . ",
-				minxmax = " . $stellendaten['minxmax'] . ",
-				minymax = " . $stellendaten['minymax'] . ",
-				maxxmax = " . $stellendaten['maxxmax'] . ",
-				maxymax = " . $stellendaten['maxymax'] . ",
-				epsg_code = " . $stellendaten['epsg_code'] . ",
-				start = '" . ($stellendaten['start'] == '' ? '0000-00-00' : $stellendaten['start']) . "',
-				stop = '" . ($stellendaten['stop'] == '' ? '0000-00-00' : $stellendaten['stop']). "',
-				ows_title = '" . $stellendaten['ows_title'] . "',
-				ows_abstract = '" . $stellendaten['ows_abstract'] . "',
-				wms_accessconstraints = '" . $stellendaten['wms_accessconstraints'] . "',
-				ows_contactorganization = '" . $stellendaten['ows_contactorganization'] . "',
-				ows_contacturl = '" . $stellendaten['ows_contacturl'] . "',
-				ows_contactemailaddress = '" . $stellendaten['ows_contactemailaddress'] . "',
-				ows_contactperson = '" . $stellendaten['ows_contactperson'] . "',
-				ows_contactposition = '" . $stellendaten['ows_contactposition'] . "',
-				ows_contactvoicephone = '" . $stellendaten['ows_contactvoicephone'] . "',
-				ows_contactfacsimile = '" . $stellendaten['ows_contactfacsimile'] . "',
-				ows_contactaddress = '" . $stellendaten['ows_contactaddress'] . "',
-				ows_contactpostalcode = '" . $stellendaten['ows_contactpostalcode'] . "',
-				ows_contactcity = '" . $stellendaten['ows_contactcity'] . "',
-				ows_contactadministrativearea = '" . $stellendaten['ows_contactadministrativearea'] . "',
-				ows_contentorganization = '" . $stellendaten['ows_contentorganization'] . "',
-				ows_contenturl = '" . $stellendaten['ows_contenturl'] . "',
-				ows_contentemailaddress = '" . $stellendaten['ows_contentemailaddress'] . "',
-				ows_contentperson = '" . $stellendaten['ows_contentperson'] . "',
-				ows_contentposition = '" . $stellendaten['ows_contentposition'] . "',
-				ows_contentvoicephone = '" . $stellendaten['ows_contentvoicephone'] . "',
-				ows_contentfacsimile = '" . $stellendaten['ows_contentfacsimile'] . "',
-				ows_contentaddress = '" . $stellendaten['ows_contentaddress'] . "',
-				ows_contentpostalcode = '" . $stellendaten['ows_contentpostalcode'] . "',
-				ows_contentcity = '" . $stellendaten['ows_contentcity'] . "',
-				ows_contentadministrativearea = '" . $stellendaten['ows_contentadministrativearea'] . "',
-				ows_geographicdescription = '" . $stellendaten['ows_geographicdescription'] . "',
-				ows_distributionorganization = '" . $stellendaten['ows_distributionorganization'] . "',
-				ows_distributionurl = '" . $stellendaten['ows_distributionurl'] . "',
-				ows_distributionemailaddress = '" . $stellendaten['ows_distributionemailaddress'] . "',
-				ows_distributionperson = '" . $stellendaten['ows_distributionperson'] . "',
-				ows_distributionposition = '" . $stellendaten['ows_distributionposition'] . "',
-				ows_distributionvoicephone = '" . $stellendaten['ows_distributionvoicephone'] . "',
-				ows_distributionfacsimile = '" . $stellendaten['ows_distributionfacsimile'] . "',
-				ows_distributionaddress = '" . $stellendaten['ows_distributionaddress'] . "',
-				ows_distributionpostalcode = '" . $stellendaten['ows_distributionpostalcode'] . "',
-				ows_distributioncity = '" . $stellendaten['ows_distributioncity'] . "',
-				ows_distributionadministrativearea = '" . $stellendaten['ows_distributionadministrativearea'] . "',
-				ows_fees = '" . $stellendaten['ows_fees'] . "',
-				ows_srs = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
-				wappen_link = '" . $stellendaten['wappen_link'] . "',
-				wappen = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
-				default_user_id = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
-				check_client_ip = '" . ($stellendaten['checkClientIP'] == '1'	? "1" : "0") . "',
-				check_password_age = '" . ($stellendaten['checkPasswordAge'] == '1' ? "1" : "0") . "',
-				allowed_password_age = " . ($stellendaten['allowedPasswordAge'] != '' ? $stellendaten['allowedPasswordAge'] : "6") . ",
-				use_layer_aliases = '" . (value_of($stellendaten, 'use_layer_aliases') == '1'	? "1" : "0") . "',
-				hist_timestamp = '" . (value_of($stellendaten, 'hist_timestamp') == '1' ? 1 : 0) . "',
-				show_shared_layers = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
-				version = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
-				reset_password_text = '" . $stellendaten['reset_password_text'] . "',
-				invitation_text = '" . $stellendaten['invitation_text'] . "',				
-				comment = '" . $stellendaten['comment'] . "'				
-		";
+			INSERT INTO
+				kvwmap.stelle
+				(" . implode(', ', array_keys($rows)) . ")
+			VALUES	
+				(" . implode(', ', array_map(function($row) {return quote_or_null($row);}, $rows)) . ")";
 		#echo '<br>SQL zum Ändern der Stelle: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
@@ -585,10 +538,15 @@ class stelle {
 		else {
 			# Stelle Erfolgreich angelegt
 			# Abfragen der stelle_id des neu eingetragenen Benutzers
-			$sql ='SELECT ID FROM stelle WHERE';
-			$sql.=' Bezeichnung="'.$stellendaten['bezeichnung'].'"';
+			$sql = "
+				SELECT 
+					id 
+				FROM 
+					kvwmap.stelle 
+				WHERE 
+					bezeichnung = '" . $stellendaten['bezeichnung'] . "'";
 			# Starten der Anfrage
-			$this->database->execSQL($sql,4, 0);
+			$ret = $this->database->execSQL($sql,4, 0);
 			#echo $sql;
 			if (!$this->database->success) {
 				# Fehler bei der Datenbankanfrage
@@ -596,8 +554,8 @@ class stelle {
 			}
 			else {
 				# Abfrage erfolgreich durchgeführt, übergeben der stelle_id zur Rückgabe der Funktion
-				$rs = $this->database->result->fetch_array();
-				$ret[1] = $rs['ID'];
+				$rs = pg_fetch_array($ret[1]);
+				$ret[1] = $rs['id'];
 			}
 		}
 		return $ret;
@@ -617,7 +575,7 @@ class stelle {
 				Bezeichnung = '" . $stellendaten['bezeichnung'] . "'," .
 				(array_key_exists('Bezeichnung_' . $language, $stellendaten) ? "
 				Bezeichnung_" . $language . " = '" . $stellendaten['Bezeichnung_' . $language] . "'," : "") . "
-				Referenzkarte_ID = " . $stellendaten['Referenzkarte_ID'] . ",
+				referenzkarte_id = " . $stellendaten['referenzkarte_id'] . ",
 				minxmax = '" . $stellendaten['minxmax'] . "',
 				minymax = '" . $stellendaten['minymax'] . "',
 				maxxmax = '" . $stellendaten['maxxmax'] . "',
@@ -919,20 +877,20 @@ class stelle {
 		$parents = array();
 		$sql = "
 			SELECT
-				s.ID,
-				s.Bezeichnung
+				s.id,
+				s.bezeichnung
 			FROM
-				stelle AS s JOIN
-				stellen_hierarchie AS h ON (s.ID = h.parent_id)
+				kvwmap.stelle AS s JOIN
+				kvwmap.stellen_hierarchie AS h ON (s.id = h.parent_id)
 			WHERE
 				h.child_id= ".$this->id." "
 			.$order;
 		#echo '<br>stelle.php getParents sql:<br>' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:stelle->getParents - Abfragen aller Elternstellen<br>" . $sql, 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
-		while($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$parents[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
 		};
 		return $parents;
@@ -942,21 +900,20 @@ class stelle {
 		$children = array();
 		$sql = "
 			SELECT
-				s.ID,
-				s.Bezeichnung
+				s.id,
+				s.bezeichnung
 			FROM
-				stelle AS s JOIN
-				stellen_hierarchie AS h ON (s.ID = h.child_id)
+				kvwmap.stelle AS s JOIN
+				kvwmap.stellen_hierarchie AS h ON (s.id = h.child_id)
 			WHERE
 				h.parent_id= ".$parent_id." "
 			.$order;
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:getChildren - Abfragen aller Kindstellen<br>" . $sql, 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
-		$result = $this->database->result;
-		while($rs = $result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($loop_counter == 1000) {
 				if ($loop_test) {
 					GUI::add_message_('error', 'Achtung! Es gibt einen Zirkelbezug in der Stellenhierarchie!');
@@ -1308,10 +1265,10 @@ class stelle {
 				menue_id," .
 				$name_column . ",
 				menueebene,
-				order
+				\"order\"
 			FROM
-				u_menues m JOIN
-				u_menue2stelle m2s ON m.id = m2s.menue_id
+				kvwmap.u_menues m JOIN
+				kvwmap.u_menue2stelle m2s ON m.id = m2s.menue_id
 			WHERE
 				m2s.stelle_id = " . $this->id .
 				($ebene != 0 ? " AND menueebene = " . $ebene : "") . "
@@ -1320,12 +1277,12 @@ class stelle {
 		";
 		#echo '<br>stelle.php getMenue(' . $ebene . ') Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getMenue - Lesen der Menuepunkte zur Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
-			while($rs=$this->database->result->fetch_array()) {
+			while ($rs = pg_fetch_array($ret[1])) {
 				$menue['ID'][]=$rs['menue_id'];
 				$menue['ORDER'][]=$rs['order'];
 				$menue['menueebene'][]=$rs['menueebene'];
@@ -2551,27 +2508,27 @@ class stelle {
 		# Lesen der User zur Stelle
 		$sql = "
 			SELECT
-				user.*
+				u.*
 			FROM
-				user JOIN
-				rolle ON user.ID = rolle.user_id JOIN 
-				stelle ON stelle.ID = rolle.stelle_id
+				kvwmap.user u JOIN
+				kvwmap.rolle ON u.id = rolle.user_id JOIN 
+				kvwmap.stelle ON stelle.id = rolle.stelle_id
 			WHERE
 				archived IS NULL AND 
 				rolle.stelle_id = " . $this->id . "
 			ORDER BY 
-				user.ID = stelle.default_user_id desc, user.Name
+				u.id = stelle.default_user_id desc, u.name
 		";
 		#debug_write('Abfrage der Nutzer der Stelle mit getUser', $sql, 1);
 		$this->debug->write("<p>file:stelle.php class:stelle->getUser - Lesen der User zur Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
-			while($rs=$this->database->result->fetch_array()) {
-				$user['ID'][] = $rs['ID'];
-				$user['Bezeichnung'][] = $rs['name'].', '.$rs['Vorname'];
+			while ($rs = pg_fetch_array($ret[1])) {
+				$user['ID'][] = $rs['id'];
+				$user['Bezeichnung'][] = $rs['name'].', '.$rs['norname'];
 				$user['position'][] = $rs['position'];
 				$user['email'][] = $rs['email'];
 			}
@@ -2589,9 +2546,9 @@ class stelle {
 			SELECT
 				wappen, wappen_link
 			FROM
-				stelle
+				kvwmap.stelle
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);

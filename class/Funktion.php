@@ -1,11 +1,11 @@
 <?php
-include_once(CLASSPATH . 'Funktion.php');
-class Funktion extends MyObject {
+
+class Funktion extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'u_funktionen');
+		parent::__construct($gui, 'kvwmap', 'u_funktionen');
 	}
 
 	public static	function find($gui, $where) {
@@ -20,8 +20,8 @@ class Funktion extends MyObject {
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
-				JOIN u_funktion2stelle f2s ON f.id = f2s.funktion_id
-				JOIN rolle r ON r.stelle_id = f2s.stelle_id
+				JOIN kvwmap.u_funktion2stelle f2s ON f.id = f2s.funktion_id
+				JOIN kvwmap.rolle r ON r.stelle_id = f2s.stelle_id
 			";
 			$where[] = "r.user_id = " . $admin_id;
 		}
@@ -38,7 +38,7 @@ class Funktion extends MyObject {
 			SELECT DISTINCT
 				f.*
 			FROM
-				u_funktionen f" .
+				kvwmap.u_funktionen f" .
 				$more_from .
 				(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
 			$order . "
@@ -57,7 +57,7 @@ class Funktion extends MyObject {
 		$this->debug->write("<p>file:users.php class:funktion->getFunktionen - Abfragen einer oder aller Funktionen:<br>".$sql,4);
     $ret1 = $this->database->execSQL($sql, 4, 1);
     if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = $this->database->result->fetch_assoc()){
+    while ($rs = pg_fetch_assoc($ret1[1])){
 			$funktionen[]=$rs;
 		}
 		return $funktionen;
@@ -67,7 +67,7 @@ class Funktion extends MyObject {
 	 * ToDo: Use MyObject functions for CRUD
 	 */
 	function NeuAnlegen($formvars){
-		$sql = "INSERT INTO u_funktionen SET ";
+		$sql = "INSERT INTO kvwmap.u_funktionen SET ";
 		if($formvars['id']){
 			$sql.= "id = ".(int)$formvars['id']."," ;
 		}

@@ -246,7 +246,7 @@ else {
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel . ' ' . ucfirst(rolle::$language); ?></th>
 						<td colspan="2" style="border-bottom:1px solid #C3C7C3">
-							<input name="Bezeichnung_<? echo rolle::$language; ?>" type="text" value="<?php echo $this->formvars['Bezeichnung_' . rolle::$language]; ?>" size="25" maxlength="100">
+							<input name="bezeichnung_<? echo rolle::$language; ?>" type="text" value="<?php echo $this->formvars['bezeichnung_' . rolle::$language]; ?>" size="25" maxlength="100">
 						</td>
 					</tr><?
 				} ?>
@@ -261,23 +261,23 @@ else {
 						$referenzkarten = array_map(
 							function($referenzkarte) {
 								return array(
-									'value' => $referenzkarte->get('ID'),
+									'value' => $referenzkarte->get('id'),
 									'output' => $referenzkarte->get('name')
 								);
 							},
 							Referenzkarte::find($this, '', 'name')
 						);
 						echo FormObject::createSelectField(
-							'Referenzkarte_ID',
+							'referenzkarte_id',
 							$referenzkarten,
-							$this->formvars['Referenzkarte_ID'],
+							$this->formvars['referenzkarte_id'],
 							1,
 							'width: auto',
 							'$(\'#ref_map_img_prev\').attr(\'src\', \'index.php?go=showRefMapImage&ID=\' + this.value + \'&csrf_token=' . $_SESSION['csrf_token'] . '\')'
 						);
-						if($this->formvars['Referenzkarte_ID']){
-							$referenzkarte = Referenzkarte::find_by_id($this, $this->formvars['Referenzkarte_ID']); ?>
-							<img id="ref_map_img_prev" src="index.php?go=showRefMapImage&ID=<? echo $referenzkarte->get('ID'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" style="vertical-align: middle" onchange="this.src=">
+						if($this->formvars['referenzkarte_id']){
+							$referenzkarte = Referenzkarte::find_by_id($this, $this->formvars['referenzkarte_id']); ?>
+							<img id="ref_map_img_prev" src="index.php?go=showRefMapImage&ID=<? echo $referenzkarte->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" style="vertical-align: middle" onchange="this.src=">
 						<? } ?>
 					</td>
 				</tr>
@@ -647,9 +647,9 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 									$options = array_map(
 										function($parent) {
 											return array(
-												'value' => $parent['ID'],
-												'title' => str_replace(' ', '&nbsp;', $parent["Bezeichnung"]),
-												'output' => $parent['Bezeichnung']
+												'value' => $parent['id'],
+												'title' => str_replace(' ', '&nbsp;', $parent["bezeichnung"]),
+												'output' => $parent['bezeichnung']
 											);
 										},
 										$this->formvars['selparents']
@@ -674,9 +674,9 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 									$options = array_map(
 										function($parent) {
 											return array(
-												'value' => $parent->get('ID'),
-												'title' => str_replace(' ', '&nbsp;', $parent->get("Bezeichnung")),
-												'output' => $parent->get('Bezeichnung')
+												'value' => $parent->get('id'),
+												'title' => str_replace(' ', '&nbsp;', $parent->get("bezeichnung")),
+												'output' => $parent->get('bezeichnung')
 											);
 										},
 										$this->formvars['parents']
@@ -706,9 +706,9 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 									$options = array_map(
 										function($child) {
 											return array(
-												'value' => $child['ID'],
-												'title' => str_replace(' ', '&nbsp;', $child["Bezeichnung"]),
-												'output' => $child['Bezeichnung']
+												'value' => $child['id'],
+												'title' => str_replace(' ', '&nbsp;', $child["bezeichnung"]),
+												'output' => $child['bezeichnung']
 											);
 										},
 										$this->formvars['selchildren']
@@ -733,9 +733,9 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 									$options = array_map(
 										function($child) {
 											return array(
-												'value' => $child->get('ID'),
-												'title' => str_replace(' ', '&nbsp;', $child->get("Bezeichnung")),
-												'output' => $child->get('Bezeichnung')
+												'value' => $child->get('id'),
+												'title' => str_replace(' ', '&nbsp;', $child->get("bezeichnung")),
+												'output' => $child->get('bezeichnung')
 											);
 										},
 										$this->formvars['children']
