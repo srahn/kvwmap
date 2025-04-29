@@ -511,17 +511,80 @@ class stelle {
 		$_files = $_FILES;
 		# Neue Stelle anlegen
 		$rows = array_intersect_key(
-			[]
-			$stellendaten
+			$stellendaten,
+			array_flip([
+				'id',
+				'bezeichnung',
+				'referenzkarte_id',
+				'minxmax',
+				'minymax',
+				'maxxmax',
+				'maxymax',
+				'epsg_code',
+				'start',
+				'stop',
+				'ows_title',
+				'ows_abstract',
+				'wms_accessconstraints',
+				'ows_contactorganization',
+				'ows_contacturl',
+				'ows_contactemailaddress',
+				'ows_contactperson',
+				'ows_contactposition',
+				'ows_contactvoicephone',
+				'ows_contactfacsimile',
+				'ows_contactaddress',
+				'ows_contactpostalcode',
+				'ows_contactcity',
+				'ows_contactadministrativearea',
+				'ows_contentorganization',
+				'ows_contenturl',
+				'ows_contentemailaddress',
+				'ows_contentperson',
+				'ows_contentposition',
+				'ows_contentvoicephone',
+				'ows_contentfacsimile',
+				'ows_contentaddress',
+				'ows_contentpostalcode',
+				'ows_contentcity',
+				'ows_contentadministrativearea',
+				'ows_geographicdescription',
+				'ows_distributionorganization',
+				'ows_distributionurl',
+				'ows_distributionemailaddress',
+				'ows_distributionperson',
+				'ows_distributionposition',
+				'ows_distributionvoicephone',
+				'ows_distributionfacsimile',
+				'ows_distributionaddress',
+				'ows_distributionpostalcode',
+				'ows_distributioncity',
+				'ows_distributionadministrativearea',
+				'ows_fees',
+				'ows_srs',
+				'wappen_link',
+				'wappen',
+				'default_user_id',
+				'check_client_ip',
+				'check_password_age',
+				'allowed_password_age',
+				'use_layer_aliases',
+				'hist_timestamp',
+				'show_shared_layers',
+				'version',
+				'reset_password_text',
+				'invitation_text',
+				'comment'
+			])
 		);
 		$rows['ows_srs'] = preg_replace(array('/: +/', '/ +:/'), ':', $rows['ows_srs']);
 		$rows['wappen'] = ($rows['wappen'] ? $_files['wappen']['name'] : $rows['wappen_save']);
-		$rows['check_client_ip'] = ($rows['checkClientIP'] == '1'	? "1" : "0");
-		$rows['check_password_age'] = ($rows['checkPasswordAge'] == '1' ? "1" : "0");
+		$rows['check_client_ip'] = ($rows['checkClientIP'] == '1'	? "true" : "false");
+		$rows['check_password_age'] = ($rows['checkPasswordAge'] == '1' ? "true" : "false");
 		$rows['allowed_password_age'] = ($rows['allowedPasswordAge'] ?: "6");
-		$rows['use_layer_aliases'] = ($rows['use_layer_aliases'] == '1'	? "1" : "0");
-		$rows['hist_timestamp'] = ($rows['hist_timestamp'] == '1' ? 1 : 0);
-		$rows['show_shared_layers'] = ($rows['show_shared_layers'] ? 1 : 0);
+		$rows['use_layer_aliases'] = ($rows['use_layer_aliases'] == '1'	? "true" : "false");
+		$rows['hist_timestamp'] = ($rows['hist_timestamp'] == '1' ? 'true' : 'false');
+		$rows['show_shared_layers'] = ($rows['show_shared_layers'] ? 'true' : 'false');
 		$rows['version'] = ($rows['version'] ?: "1.0.0");		
 		$sql = "
 			INSERT INTO
