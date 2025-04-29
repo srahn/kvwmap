@@ -935,7 +935,7 @@ FROM
 					$fields[$i]['nullable'] = $attr_info['nullable']; 
 					$fields[$i]['length'] = $attr_info['length'];
 					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
-					$fields[$i]['default'] = $attr_info['default'];
+					$fields[$i]['default'] = ($attr_info['generated'] == '' ? $attr_info['default'] : '');
 					$fields[$i]['type_type'] = $attr_info['type_type'];
 					$fields[$i]['type_schema'] = $attr_info['type_schema'];
 					$fields[$i]['is_array'] = $attr_info['is_array'];
@@ -971,7 +971,7 @@ FROM
 						}
 					}
 					$fields[$i]['constraints'] = $constraintstring;
-					$fields[$i]['saveable'] = 1;
+					$fields[$i]['saveable'] = ($attr_info['generated'] == '' ? 1 : 0);
 				}
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
 					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
@@ -1023,6 +1023,7 @@ FROM
 				c.relkind,
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
+				" . (POSTGRESVERSION >= 1300 ? 'a.attgenerated as generated' : 'NULL as generated') . ",
 				a.attnum AS ordinal_position,
 				pg_get_expr(ad.adbin, ad.adrelid) as default,
 				t.typname AS type_name,
@@ -1092,12 +1093,6 @@ FROM
 				if ($attr_info['decimal_length'] == '') {
 					$attr_info['decimal_length'] = 'NULL';
 				}
-				/*
-				if (strpos($attr_info['type_name'], 'xp_spezexternereferenzauslegung') !== false) {
-					$attr_info['type_name'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type_name']);
-					$attr_info['type'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type']);
-				}
-				*/
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
