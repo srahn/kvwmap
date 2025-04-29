@@ -1187,9 +1187,9 @@ class rolle {
 				l.user_id = " . $this->user_id . "
 		";
 		if ($LayerName != '') {
-			$sql .=' AND (l.name LIKE "'.$LayerName.'" ';
+			$sql .= " AND (l.name LIKE '" . $LayerName . "' ";
 			if (is_numeric($LayerName)) {
-				$sql .= 'OR l.id = "' . $LayerName . '")';
+				$sql .= 'OR l.id = ' . $LayerName . ')';
 			}
 			else {
 				$sql .= ')';
@@ -1607,10 +1607,13 @@ class rolle {
 		if ($formvars['layer_options_open'] > 0) { # normaler Layer
 			$sql = "
 				UPDATE
-					u_rolle2used_layer INNER JOIN layer ON layer.Layer_ID = u_rolle2used_layer.layer_id
+					kvwmap.u_rolle2used_layer
 				SET
-					u_rolle2used_layer.transparency = " . $formvars['layer_options_transparency'] . "
+					transparency = " . $formvars['layer_options_transparency'] . "
+				FROM 
+					kvwmap.layer
 				WHERE
+					layer.layer_id = u_rolle2used_layer.layer_id AND 
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND (
 						u_rolle2used_layer.layer_id = " . $formvars['layer_options_open'] . " OR
@@ -1623,7 +1626,7 @@ class rolle {
 		elseif ($formvars['layer_options_open'] < 0) { # Rollenlayer
 			$sql = "
 				UPDATE
-					rollenlayer
+					kvwmap.rollenlayer
 				SET
 					transparency = " . $formvars['layer_options_transparency'] . "
 				WHERE

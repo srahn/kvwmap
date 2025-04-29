@@ -78,17 +78,9 @@ class pgdatabase {
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
   function open($connection_id = 0, $flag = NULL) {
-		if ($connection_id == 0) {
-			# get credentials from object variables
-			#echo '<br>connection_id ist 0, hole von object credentials';
-			$connection_string = $this->format_pg_connection_string($this->get_object_credentials());
-		}
-		else {
-			#echo '<br>Öffne Datenbank mit connection_id: ' . $connection_id;
-			$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
-			$this->connection_id = $connection_id;
-			$connection_string = $this->get_connection_string();
-		}
+		$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
+		$this->connection_id = $connection_id;
+		$connection_string = $this->get_connection_string();
 		try {
 			$this->dbConn = pg_connect($connection_string . ' connect_timeout=5', $flag);
 		}
@@ -106,7 +98,7 @@ class pgdatabase {
 		else {
 			$this->debug->write("Database connection successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
-			$this->connection_id = $connection_id;
+			$this->connection_id = $connection_id ?: POSTGRES_CONNECTION_ID;
 			return true;
 		}
 	}
@@ -119,16 +111,21 @@ class pgdatabase {
 	*/
 	function get_credentials($connection_id) {
 		#echo '<p>get_credentials with connection_id: ' . $connection_id;
-		include_once(CLASSPATH . 'Connection.php');
-		$conn = Connection::find_by_id($this->gui, $connection_id);
-		$this->host = $conn->get('host');
-		return array(
-			'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
-			'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
-			'dbname' => 	($conn->get('dbname')   != '' ? $conn->get('dbname')   : 'kvwmapsp'),
-			'user' => 		($conn->get('user')     != '' ? $conn->get('user')     : 'kvwmap'),
-			'password' => ($conn->get('password') != '' ? $conn->get('password') : KVWMAP_INIT_PASSWORD)
-		);
+		if ($connection_id == 0) {
+			return $this->get_object_credentials();
+		}
+		else {
+			include_once(CLASSPATH . 'Connection.php');
+			$conn = Connection::find_by_id($this->gui, $connection_id);
+			$this->host = $conn->get('host');
+			return array(
+				'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
+				'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
+				'dbname' => 	($conn->get('dbname')   != '' ? $conn->get('dbname')   : 'kvwmapsp'),
+				'user' => 		($conn->get('user')     != '' ? $conn->get('user')     : 'kvwmap'),
+				'password' => ($conn->get('password') != '' ? $conn->get('password') : KVWMAP_INIT_PASSWORD)
+			);
+		}
 	}
 
 	/**
@@ -753,6 +750,7 @@ FROM
 				# gebe Fehlermeldung aus.
 				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:' . $sql, $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
+				echo $sql; exit;
 				header('error: true');	// damit ajax-Requests das auch mitkriegen
 			}
 		}

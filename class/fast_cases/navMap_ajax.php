@@ -3148,9 +3148,9 @@ class rolle {
 				l.user_id = " . $this->user_id . "
 		";
 		if ($LayerName != '') {
-			$sql .=' AND (l.name LIKE "'.$LayerName.'" ';
+			$sql .= " AND (l.name LIKE '" . $LayerName . "' ";
 			if (is_numeric($LayerName)) {
-				$sql .= 'OR l.id = "' . $LayerName . '")';
+				$sql .= 'OR l.id = ' . $LayerName . ')';
 			}
 			else {
 				$sql .= ')';
