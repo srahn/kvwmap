@@ -8,7 +8,7 @@ class Nutzer extends PgObject {
 		$this->identifier = 'id';
 		$this->validations = array(
 			array(
-				'attribute' => 'ID',
+				'attribute' => 'id',
 				'condition' => 'unique',
 				'description' => 'Die id darf nur ein Mal vorkommen.',
 				'option' => 'on Insert'
@@ -36,7 +36,7 @@ class Nutzer extends PgObject {
 	public static	function find_by_id($gui, $id) {
 		$gui->debug->show('Frage Nutzer mit id ab.', Nutzer::$write_debug);
 		$user = new Nutzer($gui);
-		return $user->find_by('ID', $gui->database->mysqli->real_escape_string($id));
+		return $user->find_by('id', pg_escape_string($id));
 	}
 
 	function get_name() {
@@ -117,8 +117,9 @@ class Nutzer extends PgObject {
 	function get_rolle() {
 		$this->rolle = null;
 		if ($this->get('stelle_id') != '') {
-			$db_object = new MyObject(
+			$db_object = new PgObject(
 				$this->gui,
+				'kvwmap',
 				'rolle',
 				array(
 					array(
@@ -133,7 +134,7 @@ class Nutzer extends PgObject {
 				'array'
 			);
 			$db_object->data = array(
-				'user_id' 	=> $this->get('ID'),
+				'user_id' 	=> $this->get('id'),
 				'stelle_id' => $this->get('stelle_id')
 			);
 			$this->rolle = $db_object->find_by_ids(array('user_id' => $db_object->get('user_id'), 'stelle_id' => $db_object->get('stelle_id')));

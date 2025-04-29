@@ -22881,28 +22881,34 @@ class Document {
   }
 
   function add_frame2stelle($id, $stelleid){
-    $sql ="INSERT IGNORE INTO druckrahmen2stelle VALUES (" . $stelleid.", " . $id.")";
+    $sql = "
+			INSERT INTO 
+				kvwmap.druckrahmen2stelle 
+			VALUES (
+				" . $stelleid . ", 
+				" . $id . ")
+			ON CONFLICT (stelle_id, druckrahmen_id) DO NOTHING";
     $this->debug->write("<p>file:kvwmap class:Document->add_frame2stelle :",4);
     $this->database->execSQL($sql,4, 1);
   }
 
   function removeFrames($stelleid){
-    $sql ="DELETE FROM druckrahmen2stelle WHERE stelle_id = " . $stelleid;
+    $sql ="DELETE FROM kvwmap.druckrahmen2stelle WHERE stelle_id = " . $stelleid;
     $this->debug->write("<p>file:kvwmap class:Document->removeFrames :",4);
     $this->database->execSQL($sql,4, 1);
   }
 
   function save_active_frame($id, $userid, $stelleid){
-    $sql ="UPDATE rolle SET active_frame = '" . $id."' WHERE user_id =" . $userid." AND stelle_id =" . $stelleid;
+    $sql ="UPDATE kvwmap.rolle SET active_frame = '" . $id."' WHERE user_id =" . $userid." AND stelle_id =" . $stelleid;
     $this->debug->write("<p>file:kvwmap class:Document->save_active_frame :",4);
     $this->database->execSQL($sql,4, 1);
   }
 
   function get_active_frameid($userid, $stelleid){
-    $sql ='SELECT active_frame from rolle WHERE user_id ='.$userid.' AND stelle_id ='.$stelleid;
+    $sql ='SELECT active_frame from kvwmap.rolle WHERE user_id ='.$userid.' AND stelle_id ='.$stelleid;
     $this->debug->write("<p>file:kvwmap class:GUI->get_active_frameid :<br>" . $sql,4);
-    $this->database->execSQL($sql,4, 1);
-		$rs = $this->database->result->fetch_row();
+    $ret = $this->database->execSQL($sql,4, 1);
+		$rs = pg_fetch_row($ret[1]);
     return $rs[0];
   }
 }

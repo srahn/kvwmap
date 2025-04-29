@@ -1,12 +1,13 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class Role extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class Role extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
 		parent::__construct(
 			$gui,
+			'kvwmap',
 			'rolle',
 			array(
 				array(
@@ -40,8 +41,8 @@ class Role extends MyObject {
 			'stelle_id' => $stelle_id
 		));
 		$role->user = Nutzer::find_by_id($gui, $user_id);
-		$stelle = new MyObject($gui, 'stelle', 'ID');
-		$role->stelle = $stelle->find_by('ID', $stelle_id);
+		$stelle = new PgObject($gui, 'kvwmap', 'stelle', 'id');
+		$role->stelle = $stelle->find_by('id', $stelle_id);
 		return $role;
 	}
 

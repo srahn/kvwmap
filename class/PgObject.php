@@ -133,7 +133,7 @@ class PgObject {
 	* @return string The expression representing true or false in a sql statement
 	*/
 	function get_identifier_expression() {
-		$this->debug->show('<br>Class MyObject Method get_identifier_expression', PgObject::$write_debug);
+		$this->debug->show('<br>Class PgObject Method get_identifier_expression', PgObject::$write_debug);
 		$where = array();
 		if (count($this->identifiers) > 0) {
 			$where = array_map(
@@ -157,20 +157,39 @@ class PgObject {
 		return implode(' AND ', $where);
 	}
 
-	function find_by_ids(...$ids) {
-		$where_condition = $this->get_id_condition($ids);
-		$this->debug->show('find by ids: ' . $where_condition, $this->show);
+	/**
+	* Search for a unique record in the database by identifier of the table
+	* if $id is empty use the values from data array
+	* else set the identifier from given value or array
+	* @param $id string, text or associative array with id keys and values
+	* @return an object with this record
+	*/
+	function find_by_ids($id) {
+		if ($id) {
+			if (getType($id) == 'array') {
+				$this->data = $id;
+			}
+			else {
+				$this->set($this->identifier, $id);
+			}
+		}
 		$sql = "
 			SELECT
-				{$this->select}
+				*
 			FROM
-				\"{$this->schema}\".\"{$this->tableName}\"
+				`" . $this->tableName . "`
 			WHERE
-				" . $where_condition . "
+				" . $this->get_identifier_expression() . "
 		";
-		$this->debug->show('find_by_id sql: ' . $sql, $this->show);
-		$query = pg_query($this->database->dbConn, $sql);
-		$this->data = pg_fetch_assoc($query);
+		$this->debug->show('<p>sql: ' . $sql, PgObject::$write_debug);
+		$ret = $this->database->execSQL($sql);
+		if (!$ret['success']) {
+			return $this;
+		}
+		$rs = $this->database->result->fetch_assoc();
+		if ($rs !== false) {
+			$this->data = $rs;
+		}
 		return $this;
 	}
 
