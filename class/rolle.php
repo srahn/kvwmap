@@ -310,7 +310,7 @@ class rolle {
 	function set_print_legend_separate($separate){
 		$sql = "
 			UPDATE
-				rolle
+				kvwmap.rolle
 			SET
 				print_legend_separate = " . ($separate == '' ? 0 : 1 ) . "
 			WHERE
@@ -353,7 +353,7 @@ class rolle {
 	}
 
 	function setLanguage($language) {
-    $sql ='UPDATE rolle SET language="'.$language.'"';
+    $sql ='UPDATE kvwmap.rolle SET language="'.$language.'"';
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     # echo $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:setLanguage - Speichern der Einstellungen zur Rolle:",4);
@@ -373,7 +373,7 @@ class rolle {
   
 	function saveDrawmode($always_draw){
 		if($always_draw == '')$always_draw = 'false';
-    $sql ='UPDATE rolle SET always_draw = '.$always_draw;
+    $sql ='UPDATE kvwmap.rolle SET always_draw = '.$always_draw;
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:saveDrawmode - Speichern der Einstellungen zur Rolle:",4);
@@ -382,7 +382,7 @@ class rolle {
   }
 	
 	function savePrintScale($print_scale){
-    $sql ='UPDATE rolle SET print_scale = "'.$print_scale.'"';
+    $sql ='UPDATE kvwmap.rolle SET print_scale = "'.$print_scale.'"';
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:savePrintScale - Speichern der Einstellungen zur Rolle:",4);
@@ -392,8 +392,10 @@ class rolle {
 
 	function saveGeomFromLayer($layer_id, $geom_from_layer_id) {
 		$sql = "
-			UPDATE u_rolle2used_layer
-			SET geom_from_layer = " . $geom_from_layer_id . "
+			UPDATE 
+				kvwmap.u_rolle2used_layer
+			SET 
+				geom_from_layer = " . $geom_from_layer_id . "
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . " AND
@@ -406,7 +408,7 @@ class rolle {
 	}
 
 	function setHistTimestamp($timestamp, $go_next = '') {
-		$sql ='UPDATE rolle SET ';
+		$sql ='UPDATE kvwmap.rolle SET ';
 		if($timestamp != ''){
 			$time = new DateTime(DateTime::createFromFormat('d.m.Y H:i:s', $timestamp)->format('Y-m-d H:i:s'));
 			$sql.='hist_timestamp="'.$time->format('Y-m-d H:i:s').'"';
@@ -606,7 +608,7 @@ class rolle {
 				time_id,
 				prev
 			FROM
-				u_consume
+				kvwmap.u_consume
 			WHERE
 				stelle_id = " . $this->stelle_id . " AND
 				user_id = " . $this->user_id . "
@@ -615,14 +617,14 @@ class rolle {
 			LIMIT 1
 		";
 		#echo '<br>'.$sql;
-		$queryret=$this->database->execSQL($sql, 4, 0);
+		$queryret = $this->database->execSQL($sql, 4, 0);
 		if ($queryret[0]) {
 			# Fehler bei Datenbankanfrage
 			$ret[0]=1;
 			$ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
 		}
 		else {
-			$rs = $this->database->result->fetch_assoc();
+			$rs = pg_fetch_assoc($queryret[1]);
 			$ret[0]=0;
 			$ret[1]=$rs;
 		}
@@ -684,7 +686,7 @@ class rolle {
 	function updatePrevConsumeTime($time_id, $prevtime) {
 		$sql = "
 			UPDATE
-			kvwmap.u_consume
+				kvwmap.u_consume
 			SET
 				prev = '" . $prevtime . "'
 			WHERE
@@ -709,7 +711,7 @@ class rolle {
 			# function setzt eine ALK-PDF-EXportaktivität
 			$sql = "
 				INSERT INTO
-					u_consumeALK
+					kvwmap.u_consumeALK
 				SET
 					user_id = " . $this->user_id . ",
 					stelle_id = " . $this->stelle_id . ",
@@ -889,20 +891,20 @@ class rolle {
 	}
 	
 	function get_last_search_layer_id(){
-		$sql = "SELECT layer_id FROM search_attributes2rolle WHERE name = '<last_search>' AND user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
+		$sql = "SELECT layer_id FROM kvwmap.search_attributes2rolle WHERE name = '<last_search>' AND user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->get_last_search_layer_id - Abfragen der letzten Suche:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		$rs = $this->database->result->fetch_assoc();
+		$rs = pg_fetch_assoc($ret[1]);
 		return $rs['layer_id'];
 	}
 	
 	function get_csv_attribute_selections(){
-		$sql = 'SELECT name FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' ORDER BY name';
+		$sql = 'SELECT name FROM kvwmap.rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' ORDER BY name';
 		$this->debug->write("<p>file:rolle.php class:rolle->get_csv_attribute_selections - Abfragen der gespeicherten CSV-Attributlisten der Rolle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$attribute_selections[]=$rs;
 		}
 		return $attribute_selections;
@@ -914,29 +916,42 @@ class rolle {
 				name, 
 				attributes 
 			FROM 
-				rolle_csv_attributes 
+				kvwmap.rolle_csv_attributes 
 			WHERE 
 				user_id = " . $this->user_id . " AND 
 				stelle_id = " . $this->stelle_id . " AND 
 				name = '" . $name . "'";
 		$this->debug->write("<p>file:rolle.php class:rolle->get_csv_attribute_selection - Abfragen einer CSV-Attributliste der Rolle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		$rs = $this->database->result->fetch_assoc();
+		$rs = pg_fetch_assoc($ret[1]);
 		return $rs;
 	}
 
 	function save_csv_attribute_selection($name, $attributes){
 		# alle anderen Listen unter dem Namen löschen
 		$this->delete_csv_attribute_selection($name);
-		$sql = 'INSERT INTO rolle_csv_attributes (user_id, stelle_id, name, attributes) VALUES ('.$this->user_id.', '.$this->stelle_id.', "'.$name.'", "'.$attributes.'");';
+		$sql = "
+			INSERT INTO kvwmap.rolle_csv_attributes 
+				(user_id, stelle_id, name, attributes) 
+			VALUES (
+				" . $this->user_id . ", 
+				" . $this->stelle_id . ", 
+				'" . $name . "', 
+				'" . $attributes . "');";
 		$this->debug->write("<p>file:rolle.php class:rolle->save_search - Speichern einer Attributauswahl:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
 	function delete_csv_attribute_selection($name){
 		if($name != ''){
-			$sql = 'DELETE FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND name = "'.$name.'"';
+			$sql = "
+				DELETE FROM 
+					kvwmap.rolle_csv_attributes 
+				WHERE 
+					user_id = " . $this->user_id . " AND 
+					stelle_id = " . $this->stelle_id . " AND 
+					name = '" . $name . "'";
 			$this->debug->write("<p>file:rolle.php class:rolle->delete_search - Loeschen einer Suchabfrage:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
@@ -1040,11 +1055,22 @@ class rolle {
 	}
 
 	function getsearch($layer_id, $name){
-		$sql = 'SELECT * FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id.' AND name = "'.$name.'" ORDER BY searchmask_number DESC';
+		$sql = "
+			SELECT 
+				* 
+			FROM 
+				kvwmap.search_attributes2rolle 
+			WHERE 
+				user_id = " . $this->user_id . " AND 
+				stelle_id = " . $this->stelle_id . " AND 
+				layer_id = " . $layer_id . " AND 
+				name = '" . $name . "' 
+			ORDER BY 
+				searchmask_number DESC";
 		$this->debug->write("<p>file:rolle.php class:rolle->getsearch - Abfragen der gespeicherten Suchabfrage:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$json_test = json_decode($rs['value1']);
 			if(is_array($json_test))$rs['value1'] = $json_test;
 			$search[]=$rs;
@@ -1053,7 +1079,6 @@ class rolle {
 	}
 
 	function saveExportSettings($formvars) {
-		$layerset = $this->getLayer($formvars['selected_layer_id']);
 		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
 		$layerdb = $mapdb->getlayerdatabase($formvars['selected_layer_id'], $stelle->pgdbhost);
 		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL);
@@ -1063,29 +1088,37 @@ class rolle {
 				$selected_attributes[] = $this->attributes['name'][$i];
 			}
 		}
+		$rows = [
+			'stelle_id' => $this->stelle_id,
+			'user_id' => $this->user_id,
+			'layer_id' => $formvars['selected_layer_id'],
+			'name' => "'" . $formvars['setting_name'] . "'",
+			'format' => "'" . $formvars['export_format'] . "'",
+			'epsg' => ($formvars['epsg'] ?: 'NULL'),
+			'attributes' => "'" . implode(',', $selected_attributes) . "'",
+			'metadata' => ($formvars['with_metadata_document'] ?: '0'),
+			'groupnames' => ($formvars['export_groupnames'] ? '1': '0'),
+			'documents' => ($formvars['download_documents'] ? '1' : '0'),
+			'geom' => "'" . $formvars['newpathwkt'] . "'",
+			'within' => ($formvars['within'] ?: '0'),
+			'singlegeom' => ($formvars['singlegeom'] ?: '0')
+		];
 		$sql = "
-			REPLACE INTO rolle_export_settings SET
-				stelle_id = " . $this->stelle_id . ",
-				user_id = " . $this->user_id . ",
-				layer_id = " . $formvars['selected_layer_id'] . ",
-				name = '" . $formvars['setting_name'] . "',
-				format = '" . $formvars['export_format'] . "',
-				epsg = " . ($formvars['epsg'] ?: 'NULL') . ",
-				attributes = '" . implode(',', $selected_attributes) . "',
-				metadata = " . ($formvars['with_metadata_document'] ?: '0'). ",
-				groupnames = " . ($formvars['export_groupnames'] ? '1': '0'). ",
-				documents = " . ($formvars['download_documents'] ? '1' : '0') . ",
-				geom = '" . $formvars['newpathwkt'] . "',
-				within = " . ($formvars['within'] ?: '0'). ",
-				singlegeom = " . ($formvars['singlegeom'] ?: '0'). "
-		";
+			INSERT INTO
+				kvwmap.rolle_export_settings
+				(" . implode(', ', array_keys($rows)) . ")
+			VALUES	
+				(" . implode(', ', $rows) . ")
+			ON CONFLICT (stelle_id, user_id, layer_id, name) DO	UPDATE 
+				SET " .
+					implode(', ',	array_map(function($key) {return $key . ' = EXCLUDED.' . $key;}, array_keys($rows)));
 		$this->database->execSQL($sql, 4, 1);
 	}
 	
 	function deleteExportSettings($formvars){
 		$sql = "
 			DELETE FROM 
-				rolle_export_settings 
+				kvwmap.rolle_export_settings 
 			WHERE
 				stelle_id = " . $this->stelle_id . " AND 
 				user_id = " . $this->user_id . " AND 
@@ -1101,7 +1134,7 @@ class rolle {
 			SELECT 
 				* 
 			FROM 
-				rolle_export_settings 
+				kvwmap.rolle_export_settings 
 			WHERE 
 				layer_id = " . $layer_id . " AND
 				user_id = " . $this->user_id . " AND 
@@ -1109,32 +1142,32 @@ class rolle {
 				($name ? " AND name = '" . $name . "'": '') . "
 			ORDER BY name";
 		$this->debug->write("<p>file:rolle.php class:rolle->getsettings - Abfragen der gespeicherten Export-Einstellungen der Rolle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$settings[]=$rs;
 		}
 		return $settings;
 	}
 
 	function read_Group($id) {
-		$sql ='SELECT g2r.*, g.Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r';
-		$sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id.' AND g2r.id = g.id AND g.id='.$id;
+		$sql ='SELECT g2r.*, g.gruppenname FROM kvwmap.u_groups AS g, u_groups2rolle AS g2r';
+		$sql.=' WHERE g2r.stelle_id='.$this->stelle_id.' AND g2r.user_id='.$this->user_id.' AND g2r.id = g.id AND g.id='.$id;
 		$this->debug->write("<p>file:kvwmap class:rolle->read_Group - Lesen einer Gruppe der Rolle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { echo "<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		$rs = $this->database->result->fetch_assoc();
+		$rs = pg_fetch_assoc($ret[1]);
 		return $rs;
 	}
 
 	function setOneLayer($layer_id, $status){
-		$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$status.'"';
+		$sql ='UPDATE kvwmap.u_rolle2used_layer SET aktivstatus='.$status;
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		$sql.=' AND layer_id='.$layer_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->setOneLayer - Setzen eines Layers:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 
-		$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$status.'"';
+		$sql ='UPDATE kvwmap.u_rolle2used_layer set querystatus='.$status;
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		$sql.=' AND layer_id='.$layer_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->setOneLayer - Setzen eines Layers:",4);
@@ -1275,7 +1308,7 @@ class rolle {
 	}
 
 	function resetClasses(){
-		$sql = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$sql = 'DELETE FROM kvwmap.u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
@@ -1361,12 +1394,12 @@ class rolle {
 			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'layer_id'));
 			if($query_status !== ''){	
 				if($this->layerset[$i]['layer_id'] > 0){
-					$sql ='UPDATE kvwmap.u_rolle2used_layer set queryStatus="'.$query_status.'"';
+					$sql ='UPDATE kvwmap.u_rolle2used_layer set queryStatus='.$query_status;
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND layer_id='.$this->layerset[$i]['layer_id'];
 				}
 				else{		# Rollenlayer
-					$sql ='UPDATE kvwmap.rollenlayer set queryStatus="'.$query_status.'"';
+					$sql ='UPDATE kvwmap.rollenlayer set queryStatus='.$query_status;
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND id='.-$this->layerset[$i]['layer_id'];
 				}
@@ -1382,7 +1415,7 @@ class rolle {
 			# Eintragen des showclasses=1 für Klassen, die angezeigt werden sollen
 			$sql ='
 				UPDATE 
-					u_rolle2used_layer 
+					kvwmap.u_rolle2used_layer 
 				SET 
 					showclasses = "' . $formvars['show_classes'] . '"
 				WHERE 
@@ -1397,7 +1430,7 @@ class rolle {
 	function saveLegendOptions($layerset, $formvars){
 		$sql ="
 			UPDATE
-				rolle
+				kvwmap.rolle
 			SET 
 				legendtype = " . $formvars['legendtype'] . "
 			WHERE
@@ -1434,7 +1467,7 @@ class rolle {
 				foreach ($layers_changed as $id => $value) {
 					$sql = "
 						UPDATE
-							u_rolle2used_layer
+							kvwmap.u_rolle2used_layer
 						SET
 							drawingorder = " . $layerset['list'][$id]['drawingorder'] . "
 						WHERE
@@ -1452,7 +1485,7 @@ class rolle {
 	function removeDrawingOrders() {
 		$sql = "
 			UPDATE
-				u_rolle2used_layer
+				kvwmap.u_rolle2used_layer
 			SET
 				drawingorder = NULL
 			WHERE
@@ -1466,9 +1499,9 @@ class rolle {
 	function setRollenLayerName($formvars){
 		$sql = "
 			UPDATE
-				rollenlayer
+				kvwmap.rollenlayer
 			SET
-				Name = '" . $formvars['layer_options_name'] . "'
+				name = '" . $formvars['layer_options_name'] . "'
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . " AND
@@ -1481,7 +1514,7 @@ class rolle {
 	function setRollenLayerAutoDelete($formvars){
 		$sql = "
 			UPDATE
-				rollenlayer
+				kvwmap.rollenlayer
 			SET
 				autodelete = '" . ($formvars['layer_options_autodelete'] ?: '0') . "'
 			WHERE
@@ -1498,7 +1531,7 @@ class rolle {
 			if ($formvars['layer_options_open'] > 0) { # normaler Layer
 				$sql = "
 					UPDATE
-						u_rolle2used_layer
+						kvwmap.u_rolle2used_layer
 					SET
 						labelitem = '" . $formvars['layer_options_labelitem'] . "'
 					WHERE
@@ -1512,7 +1545,7 @@ class rolle {
 			elseif ($formvars['layer_options_open'] < 0) { # Rollenlayer
 				$sql = "
 					UPDATE
-						rollenlayer
+						kvwmap.rollenlayer
 					SET
 						labelitem = '" . $formvars['layer_options_labelitem'] . "'
 					WHERE
@@ -1529,7 +1562,7 @@ class rolle {
 	function removeLabelitem($formvars) {
 		$sql = "
 			UPDATE
-				u_rolle2used_layer
+				kvwmap.u_rolle2used_layer
 			SET
 				labelitem = NULL
 			WHERE
@@ -1555,7 +1588,7 @@ class rolle {
 			}
 			$sql = "
 				UPDATE
-					" . $table_name . "
+					kvwmap." . $table_name . "
 				SET
 					rollenfilter = '" . pg_escape_string($formvars['layer_options_rollenfilter']) . "'
 				WHERE
@@ -1570,15 +1603,15 @@ class rolle {
 	}
 
 	function setStyle($style_id, $formvars) {
-		$sql ='
+		$sql = "
 			UPDATE 
-				styles 
+				kvwmap.styles 
 			SET 
-				color = "'.$formvars['layer_options_color'].'",
-				' . ($formvars['layer_options_hatching']? 'size = 11, width = 5, angle = 45, ' : 'size = 8, width = NULL, angle = NULL, ') . '
-				symbolname = CASE WHEN symbolname IS NULL OR symbolname = "hatch" OR symbolname = "" THEN "'.$formvars['layer_options_hatching'].'" ELSE symbolname END
+				color = '" . $formvars['layer_options_color'] . "',
+				" . ($formvars['layer_options_hatching']? 'size = 11, width = 5, angle = 45, ' : 'size = 8, width = NULL, angle = NULL, ') . "
+				symbolname = CASE WHEN symbolname IS NULL OR symbolname = 'hatch' OR symbolname = '' THEN '" . $formvars['layer_options_hatching'] . "' ELSE symbolname END
 			WHERE 
-				Style_ID = '.$style_id;
+				style_id = " . $style_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
@@ -2566,13 +2599,16 @@ class rolle {
 	}
 
 	function setConsumeShape($time,$layerid,$numdatasets) {
-		if (LOG_CONSUME_ACTIVITY==1) {
-			$sql ='INSERT INTO u_consumeShape SET';
-			$sql.=' user_id='.$this->user_id;
-			$sql.=', stelle_id='.$this->stelle_id;
-			$sql.=', time_id="'.$time.'"';
-			$sql.=', layer_id="'.$layerid.'"';
-			$sql .= ', numdatasets = "'.$numdatasets.'"';
+		if (LOG_CONSUME_ACTIVITY == 1) {
+			$sql = "
+				INSERT INTO 
+					kvwmap.u_consumeShape 
+				VALUES (
+					" . $this->user_id . ", 
+					" . $this->stelle_id . ",
+					'" . $time . "',
+					" . $layerid . ",
+					" . $numdatasets . ")";
 			#echo $sql;
 			$ret=$this->database->execSQL($sql,4, 1);
 			if ($ret[0]) {
