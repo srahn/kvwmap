@@ -763,7 +763,7 @@ class rolle {
 						' . $this->oGeorefExt->maxy . ",
 						'" . ($prevtime ?: $time) . "'
 					) 
-					ON CONFLICT DO NOTHING";
+					ON CONFLICT (user_id, stelle_id, time_id) DO NOTHING";
 				#echo '<p>SQL zum Eintragen von consume-Aktivitäten in der Karte: ' . $sql;
         $ret=$this->database->execSQL($sql,4, 1);
         
@@ -1620,7 +1620,7 @@ class rolle {
 		if ($formvars['layer_options_open'] < 0) { # Rollenlayer
 			$sql = "
 				UPDATE
-					rollenlayer
+					kvwmap.rollenlayer
 				SET
 					buffer = " . ($formvars['layer_options_buffer'] ?: 'NULL') . "
 				WHERE
@@ -1675,7 +1675,7 @@ class rolle {
 	function removeTransparency($formvars) {
 		$sql = "
 			UPDATE
-				u_rolle2used_layer
+				kvwmap.u_rolle2used_layer
 			SET
 				transparency = NULL
 			WHERE
@@ -1719,7 +1719,7 @@ class rolle {
 		# Gespeicherte Themeneinstellungen von default user übernehmen
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			$sql = "
-				INSERT INTO rolle_saved_layers (
+				INSERT INTO kvwmap.rolle_saved_layers (
 					user_id,
 					stelle_id,
 					name,
@@ -1733,7 +1733,7 @@ class rolle {
 					layers,
 					query
 				FROM
-					rolle_saved_layers
+					kvwmap.rolle_saved_layers
 				WHERE
 					user_id = " . $default_user_id . " AND
 					stelle_id = " . $stelle_id . "
@@ -1754,14 +1754,14 @@ class rolle {
 		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
 			# Rolleneinstellungen vom Defaultnutzer verwenden
 			$sql = "
-				INSERT IGNORE INTO rolle (
+				INSERT INTO kvwmap.rolle (
 					user_id,
 					stelle_id,
-					nImageWidth, nImageHeight,
+					nimageWidth, nimageHeight,
 					auto_map_resize,
 					minx, miny, maxx, maxy,
-					nZoomFactor,
-					selectedButton,
+					nzoomfactor,
+					selectedbutton,
 					epsg_code,
 					epsg_code2,
 					coordtype,
@@ -1844,28 +1844,30 @@ class rolle {
 					redline_font_size,
 					redline_font_weight
 				FROM
-					rolle
+					kvwmap.rolle
 				WHERE
 					user_id = " . $default_user_id . " AND
 					stelle_id = " . ($parent_stelle_id ?? $stelle_id) . "
+				ON CONFLICT (user_id, stelle_id) DO NOTHING
 			";
 		}
 		else {
 			# Default - Rolleneinstellungen verwenden
 			$sql = "
-				INSERT IGNORE INTO rolle (user_id, stelle_id, epsg_code, minx, miny, maxx, maxy)
+				INSERT INTO kvwmap.rolle (user_id, stelle_id, epsg_code, minx, miny, maxx, maxy)
 				SELECT " .
 					$user_id . ",
-					ID,
+					id,
 					epsg_code,
 					minxmax,
 					minymax,
 					maxxmax,
 					maxymax
 				FROM
-					stelle
+					kvwmap.stelle
 				WHERE
-					ID = " . $stelle_id . "
+					id = " . $stelle_id . "
+				ON CONFLICT (user_id, stelle_id) DO NOTHING
 			";
 		}
 		#debug_write('Rolle eintragen', $sql, 1);
@@ -1944,7 +1946,8 @@ class rolle {
 		# löscht die übergebenen Stellen für einen Benutzer.
 		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			$sql = "
-				DELETE FROM rolle
+				DELETE FROM 
+					kvwmap.rolle
 				WHERE
 					user_id = " . $user_id . ' AND
 					stelle_id = ' . $stellen[$i] . "
@@ -1959,12 +1962,12 @@ class rolle {
 			# default_user_id
 			$sql = "
 				UPDATE
-					stelle 
+					kvwmap.stelle 
 				SET	
 					default_user_id = NULL
 				WHERE 
 					default_user_id = " . $user_id . " AND 
-					ID = " . $stellen[$i];
+					id = " . $stellen[$i];
 			$ret = $this->database->execSQL($sql, 4, 0);
 			if (!$ret['success']) {
 				$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . $ret[1], 4);
@@ -1978,7 +1981,8 @@ class rolle {
 			# rolle_nachweise
 			if ($this->gui_object->plugin_loaded('nachweisverwaltung')) {
 				$sql = "
-					DELETE FROM rolle_nachweise
+					DELETE FROM 
+						kvwmap.rolle_nachweise
 					WHERE
 						user_id = " . $user_id . " AND
 						stelle_id = " . $stellen[$i] . "
@@ -2027,13 +2031,14 @@ class rolle {
 			";
 		}
 		$sql = "
-			INSERT IGNORE INTO kvwmap.u_menue2rolle (
+			INSERT INTO kvwmap.u_menue2rolle (
 				user_id,
 				stelle_id,
 				menue_id,
 				status
 			) " .
 			$menue2rolle_select_sql . "
+			ON CONFLICT (user_id,	stelle_id, menue_id) DO NOTHING
 		";
 		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:setMenue - Setzen der Menuepunkte der Rolle:<br>".$sql,4);
@@ -2246,7 +2251,18 @@ class rolle {
 	}
 
 	function set_one_Layer($user_id, $stelle_id, $layer_id,  $active) {
-		$sql ='INSERT IGNORE INTO u_rolle2used_layer VALUES ('.$user_id.', '.$stelle_id.', '.$layer_id.', "'.$active.'", "0", "1", "0")';
+		$sql = "
+			INSERT INTO kvwmap.u_rolle2used_layer 
+			VALUES (
+				" . $user_id . ", 
+				" . $stelle_id . ", 
+				" . $layer_id . ", 
+				" . $active . ", 
+				0,
+				1,
+				false
+			)
+			ON CONFLICT (user_id, stelle_id, layer_id) DO NOTHING";
 		$this->debug->write("<p>file:rolle.php class:rolle function:set_one_Layer - Setzen eines Layers der Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -2264,13 +2280,13 @@ class rolle {
 					$user_id . ", " .
 					$stelle_id . ",
 					layer_id,
-					aktivStatus,
-					queryStatus,
+					aktivstatus,
+					querystatus,
 					gle_view,
 					showclasses,
 					logconsume
 				FROM
-					u_rolle2used_layer
+					kvwmap.u_rolle2used_layer
 				WHERE
 					user_id = " . $default_user_id . " AND
 					stelle_id = " . $stelle_id . "
@@ -2282,31 +2298,32 @@ class rolle {
 				SELECT " .
 					$user_id . ", " .
 					$stelle_id . ",
-					Layer_ID,
+					layer_id,
 					start_aktiv,
 					start_aktiv,
 					1,
 					1,
 					0
 				FROM
-					used_layer
+					kvwmap.used_layer
 				WHERE
-					Stelle_ID = " . (int)$stelle_id . "
+					stelle_id = " . (int)$stelle_id . "
 			";
 		}
 		# Layereinstellungen der Rolle eintragen
 		$sql = "
-			INSERT IGNORE INTO u_rolle2used_layer (
+			INSERT INTO kvwmap.u_rolle2used_layer (
 				user_id,
 				stelle_id,
 				layer_id,
-				aktivStatus,
-				queryStatus,
+				aktivstatus,
+				querystatus,
 				gle_view,
 				showclasses,
 				logconsume
 			) " .
 			$rolle2used_layer_select_sql . "
+			ON CONFLICT (user_id, stelle_id, layer_id) DO NOTHING
 		";
 		// echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>" . $sql, 4);
@@ -2323,9 +2340,8 @@ class rolle {
 			}
 			for ($j = 0; $j < count($layer); $j++) {
 				$sql = "
-					DELETE
-					FROM
-						u_rolle2used_layer
+					DELETE FROM
+						kvwmap.u_rolle2used_layer
 					WHERE
 						stelle_id = " . $stellen[$i] .
 						($user_id != 0 ? " AND user_id = " . $user_id : "") .
@@ -2349,7 +2365,7 @@ class rolle {
 		# hide=0 Menü ist zu sehen
 		# hide=1 Menü wird nicht angezeigt
 		$this->hideMenue = $hide;
-		$sql ="UPDATE rolle SET hidemenue='".$hide."'";
+		$sql ="UPDATE kvwmap.rolle SET hidemenue = " . $hide;
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:hideMenue - :",4);
@@ -2361,7 +2377,7 @@ class rolle {
 		# speichern des Zustandes der Legende
 		# hide=0 Legende ist zu sehen
 		# hide=1 Legende wird nicht angezeigt
-		$sql ="UPDATE rolle SET hidelegend='".$hide."'";
+		$sql ="UPDATE kvwmap.rolle SET hidelegend = " . $hide;
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:hideMenue - :",4);
@@ -2370,7 +2386,7 @@ class rolle {
 	}	
 	
 	function saveOverlayPosition($x, $y){
-		$sql ="UPDATE rolle SET overlayx = ".$x.", overlayy=".abs($y);
+		$sql ="UPDATE kvwmap.rolle SET overlayx = ".$x.", overlayy=".abs($y);
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:saveOverlayPosition - :",4);
@@ -2381,7 +2397,7 @@ class rolle {
 	function set_last_query_layer($layer_id){
 		$sql = '
 			UPDATE 
-				rolle 
+				kvwmap.rolle 
 			SET 
 				last_query_layer = ' . $layer_id . '
 			WHERE 
@@ -2394,7 +2410,7 @@ class rolle {
 	}	
 
 	function getMapComments($consumetime, $public = false, $order) {
-		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.Name, u.Vorname FROM u_consume2comments as c, user as u WHERE c.user_id = u.ID AND (';
+		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.name, u.vorname FROM kvwmap.u_consume2comments as c, user as u WHERE c.user_id = u.id AND (';
 		if($public)$sql.=' c.public OR';
 		$sql.=' c.user_id='.$this->user_id;
 		$sql.=') AND c.stelle_id='.$this->stelle_id;
@@ -2410,7 +2426,7 @@ class rolle {
 			$ret[1]='<br>Fehler beim Laden des Kommentares zum Kartenausschnitt.<br>'.$ret[1];
 		}
 		else {
-			while ($rs = $this->database->result->fetch_assoc()) {
+			while ($rs = pg_fetch_assoc($queryret[1])) {
 				$mapComments[]=$rs;
 			}
 			$ret[0]=0;
@@ -2428,7 +2444,7 @@ class rolle {
 				layers,
 				query
 			FROM
-				rolle_saved_layers
+				kvwmap.rolle_saved_layers
 			WHERE
 				user_id = " . $user_id . " AND
 				stelle_id = " . $this->stelle_id .
@@ -2438,14 +2454,14 @@ class rolle {
 		";
 		#echo '<br>Sql: ' . $sql;
 
-		$this->database->execSQL($sql, 4, 0);
+		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$this->database->success) {
 			# Fehler bei Datenbankanfrage
 			$ret[0] = 1;
 			$ret[1] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
 		}
 		else {
-			while ($rs = $this->database->result->fetch_assoc()) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
 				$layerComments[] = $rs;
 			}
 			$ret[0] = 0;
@@ -2456,15 +2472,22 @@ class rolle {
 
 	function insertMapComment($consumetime,$comment,$public) {
 		if($public == '')$public = 0;
+		$rows = [
+			'user_id' => $this->user_id, 
+			'stelle_id' => $this->stelle_id, 
+			'time_id' => "'" . $consumetime . "'",
+			'comment' => "'" . $comment . "'",
+			'public' => $public
+		];
 		$sql = "
-			REPLACE INTO 
-				u_consume2comments 
-			SET
-				user_id = " . $this->user_id . ", 
-				stelle_id = " . $this->stelle_id . ", 
-				time_id = '" . $consumetime . "',
-				comment = '" . $comment . "',
-				public = " . $public;
+			INSERT INTO
+				kvwmap.u_consume2comments
+				(" . implode(', ', array_keys($rows)) . ")
+			VALUES	
+				(" . implode(', ', $rows) . ")
+			ON CONFLICT (user_id, stelle_id, time_id) DO	UPDATE 
+				SET " .
+					implode(', ',	array_map(function($key) {return $key . ' = EXCLUDED.' . $key;}, array_keys($rows)));
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
@@ -2488,15 +2511,19 @@ class rolle {
 				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
 			}
 		}
+		$rows = [
+			'user_id' => $this->user_id,
+			'stelle_id' => $this->stelle_id,
+			'name' => "'" . $comment . "'",
+			'layers' => "'" . implode(',', $layers) . "'",
+			'query' => "'" . implode(',', $query) . "'"
+		];
 		$sql = "
-			REPLACE INTO 
-				rolle_saved_layers 
-			SET
-				user_id = ".$this->user_id . ",
-				stelle_id = " . $this->stelle_id . ",
-				name = '" . $comment . "',
-				layers = '" . implode(',', $layers) . "',
-				query = '" . implode(',', $query) . "'";
+			INSERT INTO
+				kvwmap.rolle_saved_layers
+				(" . implode(', ', array_keys($rows)) . ")
+			VALUES	
+				(" . implode(', ', $rows) . ")";
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
@@ -2514,7 +2541,7 @@ class rolle {
 	function deleteMapComment($storetime){
 		$sql = "
 			DELETE FROM 
-				u_consume2comments 
+				kvwmap.u_consume2comments 
 			WHERE 
 				user_id = " . $this->user_id . " AND 
 				stelle_id = " . $this->stelle_id . " 
@@ -2531,11 +2558,11 @@ class rolle {
 	function deleteLayerComment($id){
 		$sql = "
 			DELETE FROM 
-				rolle_saved_layers 
+				kvwmap.rolle_saved_layers 
 			WHERE 
 				user_id = " . $this->user_id . " AND 
 				stelle_id = " . $this->stelle_id . " AND 
-				id = '" . $id . "'";
+				id = " . $id;
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
@@ -2560,7 +2587,7 @@ class rolle {
 						'" . $log_number[$i] . "',
 						'" . $wz . "'
 					)
-					ON CONFLICT DO NOTHING";
+					ON CONFLICT (user_id, stelle_id, time_id) DO NOTHING";
 				#echo $sql.'<br>';
 				$ret=$this->database->execSQL($sql,4, 1);
 				if ($ret[0]) {
@@ -2578,12 +2605,15 @@ class rolle {
 
 	function setConsumeCSV($time,$art,$numdatasets) {
 		if (LOG_CONSUME_ACTIVITY==1) {
-			$sql ='INSERT INTO u_consumeCSV SET';
-			$sql.=' user_id='.$this->user_id;
-			$sql.=', stelle_id='.$this->stelle_id;
-			$sql.=', time_id="'.$time.'"';
-			$sql.=', art="'.$art.'"';
-			$sql .= ', numdatasets = "'.$numdatasets.'"';
+			$sql = "
+				INSERT INTO 
+					kvwmap.u_consumeCSV
+				VALUES (
+					" . $this->user_id . ",
+					" . $this->stelle_id . ",
+					'" . $time . "',
+					'" . $art . "',
+					" . $numdatasets;
 			#echo $sql;
 			$ret=$this->database->execSQL($sql,4, 1);
 			if ($ret[0]) {
@@ -2602,7 +2632,7 @@ class rolle {
 		if (LOG_CONSUME_ACTIVITY == 1) {
 			$sql = "
 				INSERT INTO 
-					kvwmap.u_consumeShape 
+					kvwmap.u_consumeshape 
 				VALUES (
 					" . $this->user_id . ", 
 					" . $this->stelle_id . ",
