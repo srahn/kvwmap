@@ -998,8 +998,8 @@ CREATE TABLE used_layer (
   logconsume boolean DEFAULT NULL,
   requires integer DEFAULT NULL,
   privileg smallint NOT NULL DEFAULT 0,
-  export_privileg  smallint NOT NULL DEFAULT 1,
-  use_parent_privileges  smallint NOT NULL DEFAULT 1,
+  export_privileg smallint NOT NULL DEFAULT 1,
+  use_parent_privileges boolean NOT NULL DEFAULT true,
   start_aktiv boolean NOT NULL DEFAULT false,
   use_geom  smallint NOT NULL DEFAULT 1
 )   ;
