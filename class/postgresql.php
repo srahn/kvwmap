@@ -204,6 +204,16 @@ class pgdatabase {
     return pg_close($this->dbConn);
   }
 
+	function getRow($select,$from,$where) {
+		$sql = "SELECT ".$select;
+    $sql.= " FROM ".$from;
+    $sql.= " WHERE ".$where;
+    $ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $ret[1] = pg_fetch_assoc($ret[1]);
+    return $ret;
+  }
+
 	function read_colors() {
 		$sql = "
 			SELECT

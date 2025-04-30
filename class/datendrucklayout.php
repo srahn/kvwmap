@@ -1514,60 +1514,62 @@ class ddl {
     	if ($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
 			$sql = "
 				INSERT INTO
-					`datendrucklayouts`
+					kvwmap.datendrucklayouts
 				SET
-					`name` = '" . $formvars['name'] . "',
-					`layer_id` = " . (int)$formvars['selected_layer_id'] . ",
-					`format` = '" . $formvars['format'] . "'";
-			if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
-  		else $sql .= ", `bgposx` = NULL";
-      if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
-      else $sql .= ", `bgposy` = NULL";
-      if($formvars['bgwidth'])$sql .= ", `bgwidth` = ".(int)$formvars['bgwidth'];
-      else $sql .= ", `bgwidth` = NULL";
-      if($formvars['bgheight'])$sql .= ", `bgheight` = ".(int)$formvars['bgheight'];
-      else $sql .= ", `bgheight` = NULL";
-      if($formvars['dateposx'])$sql .= ", `dateposx` = ".(int)$formvars['dateposx'];
-      else $sql .= ", `dateposx` = NULL";
-      if($formvars['dateposy'])$sql .= ", `dateposy` = ".(int)$formvars['dateposy'];
-      else $sql .= ", `dateposy` = NULL";
-      if($formvars['datesize'])$sql .= ", `datesize` = ".(int)$formvars['datesize'];
-      else $sql .= ", `datesize` = NULL";
-      if($formvars['userposx'])$sql .= ", `userposx` = ".(int)$formvars['userposx'];
-      else $sql .= ", `userposx` = NULL";
-      if($formvars['userposy'])$sql .= ", `userposy` = ".(int)$formvars['userposy'];
-      else $sql .= ", `userposy` = NULL";
-      if($formvars['usersize'])$sql .= ", `usersize` = ".(int)$formvars['usersize'];
-      else $sql .= ", `usersize` = NULL";
-      $sql .= ", `font_date` = '".$formvars['font_date']."'";
-      $sql .= ", `font_user` = '".$formvars['font_user']."'";
-			if($formvars['gap'] != '')$sql .= ", `gap` = ".(int)$formvars['gap'];
-      if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
-      else $sql .= ", `type` = NULL";
-			$sql .= ", `margin_top` = ".(int)$formvars['margin_top'];
-			$sql .= ", `margin_bottom` = ".(int)$formvars['margin_bottom'];
-			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
-			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
-			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
-			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
-			$sql .= ", `use_previews` = " . (int)$formvars['use_previews'];
-			$sql .= ", `columns` = ".(int)$formvars['columns'];
-			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
-      else $sql .= ", `filename` = NULL";			
+					name = '" . $formvars['name'] . "',
+					layer_id = " . (int)$formvars['selected_layer_id'] . ",
+					format = '" . $formvars['format'] . "'";
+			if($formvars['bgposx'])$sql .= ", bgposx = ".(int)$formvars['bgposx'];
+  		else $sql .= ", bgposx = NULL";
+      if($formvars['bgposy'])$sql .= ", bgposy = ".(int)$formvars['bgposy'];
+      else $sql .= ", bgposy = NULL";
+      if($formvars['bgwidth'])$sql .= ", bgwidth = ".(int)$formvars['bgwidth'];
+      else $sql .= ", bgwidth = NULL";
+      if($formvars['bgheight'])$sql .= ", bgheight = ".(int)$formvars['bgheight'];
+      else $sql .= ", bgheight = NULL";
+      if($formvars['dateposx'])$sql .= ", dateposx = ".(int)$formvars['dateposx'];
+      else $sql .= ", dateposx = NULL";
+      if($formvars['dateposy'])$sql .= ", dateposy = ".(int)$formvars['dateposy'];
+      else $sql .= ", dateposy = NULL";
+      if($formvars['datesize'])$sql .= ", datesize = ".(int)$formvars['datesize'];
+      else $sql .= ", datesize = NULL";
+      if($formvars['userposx'])$sql .= ", userposx = ".(int)$formvars['userposx'];
+      else $sql .= ", userposx = NULL";
+      if($formvars['userposy'])$sql .= ", userposy = ".(int)$formvars['userposy'];
+      else $sql .= ", userposy = NULL";
+      if($formvars['usersize'])$sql .= ", usersize = ".(int)$formvars['usersize'];
+      else $sql .= ", usersize = NULL";
+      $sql .= ", font_date = '".$formvars['font_date']."'";
+      $sql .= ", font_user = '".$formvars['font_user']."'";
+			if($formvars['gap'] != '')$sql .= ", gap = ".(int)$formvars['gap'];
+      if($formvars['type'] != '')$sql .= ", type = ".(int)$formvars['type'];
+      else $sql .= ", type = NULL";
+			$sql .= ", margin_top = ".(int)$formvars['margin_top'];
+			$sql .= ", margin_bottom = ".(int)$formvars['margin_bottom'];
+			$sql .= ", margin_left = ".(int)$formvars['margin_left'];
+			$sql .= ", margin_right = ".(int)$formvars['margin_right'];
+			$sql .= ", dont_print_empty = " . (int)$formvars['dont_print_empty'];
+			$sql .= ", no_record_splitting = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", use_previews = " . (int)$formvars['use_previews'];
+			$sql .= ", columns = ".(int)$formvars['columns'];
+			if($formvars['filename'])$sql .= ", filename = '".$formvars['filename']."'";
+      else $sql .= ", filename = NULL";			
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
-          $sql .= ", `bgsrc` = '".$_files['bgsrc']['name']."'";
+          $sql .= ", bgsrc = '".$_files['bgsrc']['name']."'";
         }
       }
       else{
-        $sql .= ", `bgsrc` = '".$formvars['bgsrc_save']."'";
+        $sql .= ", bgsrc = '".$formvars['bgsrc_save']."'";
       }
+			$sql .= "RETURNING id";
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
-      $this->database->execSQL($sql,4, 1);
-      $lastddl_id = $this->database->mysqli->insert_id;
+      $ret = $this->database->execSQL($sql,4, 1);
+			$rs = pg_fetch_assoc($ret[1]);
+      $lastddl_id = $rs['id'];
 
-      $sql = 'INSERT INTO ddl2stelle (stelle_id, ddl_id) VALUES('.$stelle_id.', '.$lastddl_id.')';
+      $sql = 'INSERT INTO kvwmap.ddl2stelle (stelle_id, ddl_id) VALUES('.$stelle_id.', '.$lastddl_id.')';
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
@@ -1575,28 +1577,34 @@ class ddl {
 				if ($formvars['font_'.$attributes['name'][$i]] == 'NULL') {
 					$formvars['font_'.$attributes['name'][$i]] = NULL;
 				}
+				$columns = [
+					'ddl_id' =>	$lastddl_id,
+					'name' => "'" . $attributes['name'][$i] . "'",
+					'xpos' => (float)$formvars['posx_'. $attributes['name'][$i]],
+					'ypos' => (float)$formvars['posy_'. $attributes['name'][$i]],
+					'label' => ($formvars['label_'			. $attributes['name'][$i]] ? "'" . $formvars['label_'			. $attributes['name'][$i]] . "'" : 'NULL'),
+					'margin' => ($formvars['margin_'		. $attributes['name'][$i]] ? $formvars['margin_'		. $attributes['name'][$i]] : 'NULL'),
+					'offset_attribute' => ($formvars['offset_attribute_' . $attributes['name'][$i]] ? "'" . $formvars['offset_attribute_' . $attributes['name'][$i]] . "'" : 'NULL'),
+					'width' => ($formvars['width_'			. $attributes['name'][$i]] ? $formvars['width_'			. $attributes['name'][$i]] : 'NULL'),
+					'border' => ($formvars['border_'		. $attributes['name'][$i]] ? $formvars['border_'		. $attributes['name'][$i]] : 'NULL'),
+					'font' => ($formvars['font_'			. $attributes['name'][$i]] ? "'" . $formvars['font_'			. $attributes['name'][$i]] . "'" : 'NULL'),
+					'fontsize' => ($formvars['fontsize_'	. $attributes['name'][$i]] ? $formvars['fontsize_'	. $attributes['name'][$i]] : 'NULL')
+				];
 				$sql = "
-					REPLACE INTO
-						ddl_elemente
-					SET
-						ddl_id = "						. $lastddl_id . ",
-						name = '"							. $attributes['name'][$i] . "',
-						xpos = "							. (float)$formvars['posx_'. $attributes['name'][$i]] . ",
-						ypos = "							. (float)$formvars['posy_'. $attributes['name'][$i]] . ",
-						label = "							. ($formvars['label_'			. $attributes['name'][$i]] ? "'" . $formvars['label_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
-						margin = "						. ($formvars['margin_'		. $attributes['name'][$i]] ? $formvars['margin_'		. $attributes['name'][$i]] : 'NULL') . ",
-						offset_attribute = "	. ($formvars['offset_attribute_' . $attributes['name'][$i]] ? "'" . $formvars['offset_attribute_' . $attributes['name'][$i]] . "'" : 'NULL') . ",
-						width = "							. ($formvars['width_'			. $attributes['name'][$i]] ? $formvars['width_'			. $attributes['name'][$i]] : 'NULL') . ",
-						border = "						. ($formvars['border_'		. $attributes['name'][$i]] ? $formvars['border_'		. $attributes['name'][$i]] : 'NULL') . ",
-						font = "							. ($formvars['font_'			. $attributes['name'][$i]] ? "'" . $formvars['font_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
-						fontsize = "					. ($formvars['fontsize_'	. $attributes['name'][$i]] ? $formvars['fontsize_'	. $attributes['name'][$i]] : 'NULL') . "
-				";
+					INSERT INTO
+						kvwmap.ddl_elemente
+						(" . implode(', ', array_keys($columns)) . ")
+					VALUES	
+						(" . implode(', ', $columns) . ")
+					ON CONFLICT (ddl_id, name) DO	UPDATE 
+						SET " .
+							implode(', ',	array_map(function($key) {return $key . ' = EXCLUDED.' . $key;}, array_keys($columns)));
 				#echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
         $this->database->execSQL($sql,4, 1);
 			}
 			
-			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0)) AND ddl_id = ".$lastddl_id;
+			$sql = "DELETE FROM kvwmap.ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0)) AND ddl_id = ".$lastddl_id;
 			#echo $sql;
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
@@ -1606,83 +1614,89 @@ class ddl {
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
         if($formvars['textfont'][$i] == 'NULL')$formvars['textfont'][$i] = NULL;
-        $sql = "INSERT INTO druckfreitexte SET `text` = '".$formvars['text'][$i]."'";
-        if($formvars['textposx'][$i] !== NULL)$sql .= ", `posx` = ".(int)$formvars['textposx'][$i];
-        else $sql .= ", `posx` = 0";
-        if($formvars['textposy'][$i] !== NULL)$sql .= ", `posy` = ".(int)$formvars['textposy'][$i];
-        else $sql .= ", `posy` = 0";
-				if($formvars['textoffset_attribute'][$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'][$i]."'";
-        else $sql .= ", `offset_attribute` = NULL";
-        if($formvars['textsize'][$i] !== NULL)$sql .= ", `size` = ".(int)$formvars['textsize'][$i];
-        else $sql .= ", `size` = 0";
+        $sql = "INSERT INTO kvwmap.druckfreitexte SET text = '".$formvars['text'][$i]."'";
+        if($formvars['textposx'][$i] !== NULL)$sql .= ", posx = ".(int)$formvars['textposx'][$i];
+        else $sql .= ", posx = 0";
+        if($formvars['textposy'][$i] !== NULL)$sql .= ", posy = ".(int)$formvars['textposy'][$i];
+        else $sql .= ", posy = 0";
+				if($formvars['textoffset_attribute'][$i])$sql .= ", offset_attribute = '".$formvars['textoffset_attribute'][$i]."'";
+        else $sql .= ", offset_attribute = NULL";
+        if($formvars['textsize'][$i] !== NULL)$sql .= ", size = ".(int)$formvars['textsize'][$i];
+        else $sql .= ", size = 0";
 				if($formvars['textwidth'][$i] != NULL)$sql.= " ,width = ".(int)$formvars['textwidth'][$i];
 				else $sql.= " ,width = NULL";
 				if($formvars['textborder'][$i] != NULL)$sql.= " ,border = ".(int)$formvars['textborder'][$i];
 				else $sql.= " ,border = NULL";
-        if($formvars['textangle'][$i])$sql .= ", `angle` = ".(int)$formvars['textangle'][$i];
-        else $sql .= ", `angle` = NULL";
-        $sql .= ", `font` = '".$formvars['textfont'][$i]."'";
-        $sql .= ", `type` = '".$formvars['texttype'][$i]."'";
+        if($formvars['textangle'][$i])$sql .= ", angle = ".(int)$formvars['textangle'][$i];
+        else $sql .= ", angle = NULL";
+        $sql .= ", font = '".$formvars['textfont'][$i]."'";
+        $sql .= ", type = '".$formvars['texttype'][$i]."'
+				RETURNING id";
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
-        $this->database->execSQL($sql,4, 1);
-        $lastfreitext_id = $this->database->mysqli->insert_id;
+				$ret = $this->database->execSQL($sql,4, 1);
+				$rs = pg_fetch_assoc($ret[1]);
+      	$lastfreitext_id = $rs['id'];
 
-        $sql = 'INSERT INTO ddl2freitexte (ddl_id, freitext_id) VALUES('.$lastddl_id.', '.$lastfreitext_id.')';
+        $sql = 'INSERT INTO kvwmap.ddl2freitexte (ddl_id, freitext_id) VALUES('.$lastddl_id.', '.$lastfreitext_id.')';
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
         $this->database->execSQL($sql,4, 1);
       }
 			
 			for($i = 0; $i < $formvars['linecount']; $i++){
-        $sql = "INSERT INTO druckfreilinien SET `breite` = '".$formvars['breite'.$i]."'";
-        if($formvars['lineposx'.$i] !== NULL)$sql .= ", `posx` = ".(int)$formvars['lineposx'.$i];
-        else $sql .= ", `posx` = NULL";
-        if($formvars['lineposy'.$i] !== NULL)$sql .= ", `posy` = ".(int)$formvars['lineposy'.$i];
-        else $sql .= ", `posy` = NULL";
-				if($formvars['lineendposx'.$i] !== NULL)$sql .= ", `endposx` = ".(int)$formvars['lineendposx'.$i];
-        else $sql .= ", `endposx` = NULL";
-        if($formvars['lineendposy'.$i] !== NULL)$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
-        else $sql .= ", `endposy` = NULL";
-				if($formvars['lineoffset_attribute_start'.$i] !== NULL)$sql .= ", `offset_attribute_start` = '".$formvars['lineoffset_attribute_start'.$i]."'";
-        else $sql .= ", `offset_attribute_start` = NULL";
-				if($formvars['lineoffset_attribute_end'.$i] !== NULL)$sql .= ", `offset_attribute_end` = '".$formvars['lineoffset_attribute_end'.$i]."'";
-        else $sql .= ", `offset_attribute_end` = NULL";
+        $sql = "INSERT INTO kvwmap.druckfreilinien SET breite = '".$formvars['breite'.$i]."'";
+        if($formvars['lineposx'.$i] !== NULL)$sql .= ", posx = ".(int)$formvars['lineposx'.$i];
+        else $sql .= ", posx = NULL";
+        if($formvars['lineposy'.$i] !== NULL)$sql .= ", posy = ".(int)$formvars['lineposy'.$i];
+        else $sql .= ", posy = NULL";
+				if($formvars['lineendposx'.$i] !== NULL)$sql .= ", endposx = ".(int)$formvars['lineendposx'.$i];
+        else $sql .= ", endposx = NULL";
+        if($formvars['lineendposy'.$i] !== NULL)$sql .= ", endposy = ".(int)$formvars['lineendposy'.$i];
+        else $sql .= ", endposy = NULL";
+				if($formvars['lineoffset_attribute_start'.$i] !== NULL)$sql .= ", offset_attribute_start = '".$formvars['lineoffset_attribute_start'.$i]."'";
+        else $sql .= ", offset_attribute_start = NULL";
+				if($formvars['lineoffset_attribute_end'.$i] !== NULL)$sql .= ", offset_attribute_end = '".$formvars['lineoffset_attribute_end'.$i]."'";
+        else $sql .= ", offset_attribute_end = NULL";
         if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
-        $sql .= ", `type` = '".$formvars['linetype'.$i]."'";
+        $sql .= ", type = '".$formvars['linetype'.$i]."'
+				RETURNING id";
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
-        $this->database->execSQL($sql,4, 1);
-        $lastline_id = $this->database->mysqli->insert_id;
+        $ret = $this->database->execSQL($sql,4, 1);
+				$rs = pg_fetch_assoc($ret[1]);
+      	$lastline_id = $rs['id'];
 				
-				$sql = 'INSERT INTO ddl2freilinien (ddl_id, line_id) VALUES('.$lastddl_id.', '.$lastline_id.')';
+				$sql = 'INSERT INTO kvwmap.ddl2freilinien (ddl_id, line_id) VALUES('.$lastddl_id.', '.$lastline_id.')';
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
         $this->database->execSQL($sql,4, 1);
       }
 			
 			for($i = 0; $i < $formvars['rectcount']; $i++){
-        $sql = "INSERT INTO druckfreirechtecke SET `breite` = '".$formvars['rectbreite'.$i]."'";
-        if($formvars['rectposx'.$i] !== NULL)$sql .= ", `posx` = ".(int)$formvars['rectposx'.$i];
-        else $sql .= ", `posx` = NULL";
-        if($formvars['rectposy'.$i] !== NULL)$sql .= ", `posy` = ".(int)$formvars['rectposy'.$i];
-        else $sql .= ", `posy` = NULL";
-				if($formvars['rectendposx'.$i] !== NULL)$sql .= ", `endposx` = ".(int)$formvars['rectendposx'.$i];
-        else $sql .= ", `endposx` = NULL";
-        if($formvars['rectendposy'.$i] !== NULL)$sql .= ", `endposy` = ".(int)$formvars['rectendposy'.$i];
-        else $sql .= ", `endposy` = NULL";
-				if($formvars['rectoffset_attribute_start'.$i] !== NULL)$sql .= ", `offset_attribute_start` = '".$formvars['rectoffset_attribute_start'.$i]."'";
-        else $sql .= ", `offset_attribute_start` = NULL";
-				if($formvars['rectoffset_attribute_end'.$i] !== NULL)$sql .= ", `offset_attribute_end` = '".$formvars['rectoffset_attribute_end'.$i]."'";
-        else $sql .= ", `offset_attribute_end` = NULL";
+        $sql = "INSERT INTO kvwmap.druckfreirechtecke SET breite = '".$formvars['rectbreite'.$i]."'";
+        if($formvars['rectposx'.$i] !== NULL)$sql .= ", posx = ".(int)$formvars['rectposx'.$i];
+        else $sql .= ", posx = NULL";
+        if($formvars['rectposy'.$i] !== NULL)$sql .= ", posy = ".(int)$formvars['rectposy'.$i];
+        else $sql .= ", posy = NULL";
+				if($formvars['rectendposx'.$i] !== NULL)$sql .= ", endposx = ".(int)$formvars['rectendposx'.$i];
+        else $sql .= ", endposx = NULL";
+        if($formvars['rectendposy'.$i] !== NULL)$sql .= ", endposy = ".(int)$formvars['rectendposy'.$i];
+        else $sql .= ", endposy = NULL";
+				if($formvars['rectoffset_attribute_start'.$i] !== NULL)$sql .= ", offset_attribute_start = '".$formvars['rectoffset_attribute_start'.$i]."'";
+        else $sql .= ", offset_attribute_start = NULL";
+				if($formvars['rectoffset_attribute_end'.$i] !== NULL)$sql .= ", offset_attribute_end = '".$formvars['rectoffset_attribute_end'.$i]."'";
+        else $sql .= ", offset_attribute_end = NULL";
         if($formvars['recttype'.$i] == '')$formvars['recttype'.$i] = 0;
-				if($formvars['rectcolor'.$i])$sql .= ", `color` = '".$formvars['rectcolor'.$i]."'";
-				else $sql .= ", `color` = NULL";
-				$sql .= ", `type` = '".$formvars['recttype'.$i]."'";
+				if($formvars['rectcolor'.$i])$sql .= ", color = '".$formvars['rectcolor'.$i]."'";
+				else $sql .= ", color = NULL";
+				$sql .= ", type = '".$formvars['recttype'.$i]."'
+				RETURNING id";
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
-        $this->database->execSQL($sql,4, 1);
-        $lastrect_id = $this->database->mysqli->insert_id;
+        $ret = $this->database->execSQL($sql,4, 1);
+				$rs = pg_fetch_assoc($ret[1]);
+      	$lastrect_id = $rs['id'];
 				
-				$sql = 'INSERT INTO ddl2freirechtecke (ddl_id, rect_id) VALUES('.$lastddl_id.', '.$lastrect_id.')';
+				$sql = 'INSERT INTO kvwmap.ddl2freirechtecke (ddl_id, rect_id) VALUES('.$lastddl_id.', '.$lastrect_id.')';
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
         $this->database->execSQL($sql,4, 1);
       }			
@@ -1696,83 +1710,88 @@ class ddl {
     	if ($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
 				$sql = "
 					UPDATE
-						`datendrucklayouts`
+						kvwmap.datendrucklayouts
 					SET
-						`name` = '".$formvars['name'] . "',
-						`layer_id` = " . (int)$formvars['selected_layer_id'] . ",
-						`format` = '" . $formvars['format'] . "'
+						name = '".$formvars['name'] . "',
+						layer_id = " . (int)$formvars['selected_layer_id'] . ",
+						format = '" . $formvars['format'] . "'
 				";
-  		if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
-  		else $sql .= ", `bgposx` = NULL";
-      if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
-      else $sql .= ", `bgposy` = NULL";
-      if($formvars['bgwidth'])$sql .= ", `bgwidth` = ".(int)$formvars['bgwidth'];
-      else $sql .= ", `bgwidth` = NULL";
-      if($formvars['bgheight'])$sql .= ", `bgheight` = ".(int)$formvars['bgheight'];
-      else $sql .= ", `bgheight` = NULL";
-      if($formvars['dateposx'])$sql .= ", `dateposx` = ".(int)$formvars['dateposx'];
-      else $sql .= ", `dateposx` = NULL";
-      if($formvars['dateposy'])$sql .= ", `dateposy` = ".(int)$formvars['dateposy'];
-      else $sql .= ", `dateposy` = NULL";
-      if($formvars['datesize'])$sql .= ", `datesize` = ".(int)$formvars['datesize'];
-      else $sql .= ", `datesize` = NULL";
-      if($formvars['userposx'])$sql .= ", `userposx` = ".(int)$formvars['userposx'];
-      else $sql .= ", `userposx` = NULL";
-      if($formvars['userposy'])$sql .= ", `userposy` = ".(int)$formvars['userposy'];
-      else $sql .= ", `userposy` = NULL";
-      if($formvars['usersize'])$sql .= ", `usersize` = ".(int)$formvars['usersize'];
-      else $sql .= ", `usersize` = NULL";
-      $sql .= ", `font_date` = '".$formvars['font_date']."'";
-      $sql .= ", `font_user` = '".$formvars['font_user']."'";
-			$sql .= ", `gap` = ".(int)$formvars['gap'];
-      if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
-      else $sql .= ", `type` = NULL";
-			$sql .= ", `margin_top` = ".(int)$formvars['margin_top'];
-			$sql .= ", `margin_bottom` = ".(int)$formvars['margin_bottom'];
-			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
-			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
-			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
-			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
-			$sql .= ", `use_previews` = ".(int)$formvars['use_previews'];
-			$sql .= ", `columns` = ".(int)$formvars['columns'];
-			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
-      else $sql .= ", `filename` = NULL";			
+  		if($formvars['bgposx'])$sql .= ", bgposx = ".(int)$formvars['bgposx'];
+  		else $sql .= ", bgposx = NULL";
+      if($formvars['bgposy'])$sql .= ", bgposy = ".(int)$formvars['bgposy'];
+      else $sql .= ", bgposy = NULL";
+      if($formvars['bgwidth'])$sql .= ", bgwidth = ".(int)$formvars['bgwidth'];
+      else $sql .= ", bgwidth = NULL";
+      if($formvars['bgheight'])$sql .= ", bgheight = ".(int)$formvars['bgheight'];
+      else $sql .= ", bgheight = NULL";
+      if($formvars['dateposx'])$sql .= ", dateposx = ".(int)$formvars['dateposx'];
+      else $sql .= ", dateposx = NULL";
+      if($formvars['dateposy'])$sql .= ", dateposy = ".(int)$formvars['dateposy'];
+      else $sql .= ", dateposy = NULL";
+      if($formvars['datesize'])$sql .= ", datesize = ".(int)$formvars['datesize'];
+      else $sql .= ", datesize = NULL";
+      if($formvars['userposx'])$sql .= ", userposx = ".(int)$formvars['userposx'];
+      else $sql .= ", userposx = NULL";
+      if($formvars['userposy'])$sql .= ", userposy = ".(int)$formvars['userposy'];
+      else $sql .= ", userposy = NULL";
+      if($formvars['usersize'])$sql .= ", usersize = ".(int)$formvars['usersize'];
+      else $sql .= ", usersize = NULL";
+      $sql .= ", font_date = '".$formvars['font_date']."'";
+      $sql .= ", font_user = '".$formvars['font_user']."'";
+			$sql .= ", gap = ".(int)$formvars['gap'];
+      if($formvars['type'] != '')$sql .= ", type = ".(int)$formvars['type'];
+      else $sql .= ", type = NULL";
+			$sql .= ", margin_top = ".(int)$formvars['margin_top'];
+			$sql .= ", margin_bottom = ".(int)$formvars['margin_bottom'];
+			$sql .= ", margin_left = ".(int)$formvars['margin_left'];
+			$sql .= ", margin_right = ".(int)$formvars['margin_right'];
+			$sql .= ", dont_print_empty = " . (int)$formvars['dont_print_empty'];
+			$sql .= ", no_record_splitting = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", use_previews = ".(int)$formvars['use_previews'];
+			$sql .= ", columns = ".(int)$formvars['columns'];
+			if($formvars['filename'])$sql .= ", filename = '".$formvars['filename']."'";
+      else $sql .= ", filename = NULL";			
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
-          $sql .= ", `bgsrc` = '".$_files['bgsrc']['name']."'";
+          $sql .= ", bgsrc = '".$_files['bgsrc']['name']."'";
         }
       }
       else{
-        $sql .= ", `bgsrc` = '".$formvars['bgsrc_save']."'";
+        $sql .= ", bgsrc = '".$formvars['bgsrc_save']."'";
       }
       $sql .= " WHERE id = ".(int)$formvars['aktivesLayout'];
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
-      $lastddl_id = $this->database->mysqli->insert_id;
 
 			for($i = 0; $i < count($attributes['name']); $i++){
+				$columns = [
+					'ddl_id' =>	(int)$formvars['aktivesLayout'],
+					'name' => "'" . $attributes['name'][$i] . "'",
+					'xpos' => (float)$formvars['posx_'. $attributes['name'][$i]],
+					'ypos' => (float)$formvars['posy_'. $attributes['name'][$i]],
+					'label' => ($formvars['label_'			. $attributes['name'][$i]] ? "'" . $formvars['label_'			. $attributes['name'][$i]] . "'" : 'NULL'),
+					'margin' => ($formvars['margin_'		. $attributes['name'][$i]] ? $formvars['margin_'		. $attributes['name'][$i]] : 'NULL'),
+					'offset_attribute' => ($formvars['offset_attribute_' . $attributes['name'][$i]] ? "'" . $formvars['offset_attribute_' . $attributes['name'][$i]] . "'" : 'NULL'),
+					'width' => ($formvars['width_'			. $attributes['name'][$i]] ? $formvars['width_'			. $attributes['name'][$i]] : 'NULL'),
+					'border' => ($formvars['border_'		. $attributes['name'][$i]] ? $formvars['border_'		. $attributes['name'][$i]] : 'NULL'),
+					'font' => ($formvars['font_'			. $attributes['name'][$i]] ? "'" . $formvars['font_'			. $attributes['name'][$i]] . "'" : 'NULL'),
+					'fontsize' => ($formvars['fontsize_'	. $attributes['name'][$i]] ? $formvars['fontsize_'	. $attributes['name'][$i]] : 'NULL')
+				];
 				$sql = "
-					REPLACE INTO
-						ddl_elemente
-					SET
-						ddl_id = "						. (int)$formvars['aktivesLayout'] . ",
-						name = '"							. $attributes['name'][$i] . "',
-						xpos = "							. (float)$formvars['posx_'. $attributes['name'][$i]] . ",
-						ypos = "							. (float)$formvars['posy_'. $attributes['name'][$i]] . ",
-						label = "							. ($formvars['label_'			. $attributes['name'][$i]] ? "'" . $formvars['label_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
-						margin = "						. ($formvars['margin_'		. $attributes['name'][$i]] ? $formvars['margin_'		. $attributes['name'][$i]] : 'NULL') . ",
-						offset_attribute = "	. ($formvars['offset_attribute_' . $attributes['name'][$i]] ? "'" . $formvars['offset_attribute_' . $attributes['name'][$i]] . "'" : 'NULL') . ",
-						width = "							. ($formvars['width_'			. $attributes['name'][$i]] ? $formvars['width_'			. $attributes['name'][$i]] : 'NULL') . ",
-						border = "						. ($formvars['border_'		. $attributes['name'][$i]] ? $formvars['border_'		. $attributes['name'][$i]] : 'NULL') . ",
-						font = "							. ($formvars['font_'			. $attributes['name'][$i]] ? "'" . $formvars['font_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
-						fontsize = "					. ($formvars['fontsize_'	. $attributes['name'][$i]] ? $formvars['fontsize_'	. $attributes['name'][$i]] : 'NULL') . "
-				";
+					INSERT INTO
+						kvwmap.ddl_elemente
+						(" . implode(', ', array_keys($columns)) . ")
+					VALUES	
+						(" . implode(', ', $columns) . ")
+					ON CONFLICT (ddl_id, name) DO	UPDATE 
+						SET " .
+							implode(', ',	array_map(function($key) {return $key . ' = EXCLUDED.' . $key;}, array_keys($columns)));
 				#echo $sql;
 				$this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
 				$this->database->execSQL($sql,4, 1);
 			}
-			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0)) AND ddl_id = ".(int)$formvars['aktivesLayout'];
+			$sql = "DELETE FROM kvwmap.ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0)) AND ddl_id = ".(int)$formvars['aktivesLayout'];
 			#echo $sql;
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
@@ -1782,77 +1801,74 @@ class ddl {
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
         if($formvars['textfont'][$i] == 'NULL')$formvars['textfont'][$i] = NULL;
-        $sql = "UPDATE druckfreitexte SET `text` = '".$formvars['text'][$i]."'";
-        if($formvars['textposx'][$i])$sql .= ", `posx` = ".(int)$formvars['textposx'][$i];
-        else $sql .= ", `posx` = NULL";
-        if($formvars['textposy'][$i])$sql .= ", `posy` = ".(int)$formvars['textposy'][$i];
-        else $sql .= ", `posy` = NULL";
-				if($formvars['textoffset_attribute'][$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'][$i]."'";
-        else $sql .= ", `offset_attribute` = NULL";
-        if($formvars['textsize'][$i])$sql .= ", `size` = ".(int)$formvars['textsize'][$i];
-        else $sql .= ", `size` = NULL";
+        $sql = "UPDATE kvwmap.druckfreitexte SET text = '".$formvars['text'][$i]."'";
+        if($formvars['textposx'][$i])$sql .= ", posx = ".(int)$formvars['textposx'][$i];
+        else $sql .= ", posx = NULL";
+        if($formvars['textposy'][$i])$sql .= ", posy = ".(int)$formvars['textposy'][$i];
+        else $sql .= ", posy = NULL";
+				if($formvars['textoffset_attribute'][$i])$sql .= ", offset_attribute = '".$formvars['textoffset_attribute'][$i]."'";
+        else $sql .= ", offset_attribute = NULL";
+        if($formvars['textsize'][$i])$sql .= ", size = ".(int)$formvars['textsize'][$i];
+        else $sql .= ", size = NULL";
 				if($formvars['textwidth'][$i] != NULL)$sql.= " ,width = ".(int)$formvars['textwidth'][$i];
 				else $sql.= " ,width = NULL";
 				if($formvars['textborder'][$i] != NULL)$sql.= " ,border = ".(int)$formvars['textborder'][$i];
 				else $sql.= " ,border = NULL";
-        if($formvars['textangle'][$i])$sql .= ", `angle` = ".(int)$formvars['textangle'][$i];
-        else $sql .= ", `angle` = NULL";
-        $sql .= ", `font` = '".$formvars['textfont'][$i]."'";
+        if($formvars['textangle'][$i])$sql .= ", angle = ".(int)$formvars['textangle'][$i];
+        else $sql .= ", angle = NULL";
+        $sql .= ", font = '".$formvars['textfont'][$i]."'";
         if($formvars['texttype'][$i] == '')$formvars['texttype'][$i] = 0;
-        $sql .= ", `type` = '".$formvars['texttype'][$i]."'";
+        $sql .= ", type = '".$formvars['texttype'][$i]."'";
         $sql .= " WHERE id = ".(int)$formvars['text_id'][$i];
         #echo $sql.'<br>';
         $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
         $this->database->execSQL($sql,4, 1);
-        $lastfreitext_id = $this->database->mysqli->insert_id;
       }
 			
       for($i = 0; $i < $formvars['linecount']; $i++){
-        $sql = "UPDATE druckfreilinien SET `breite` = '".$formvars['breite'.$i]."'";
-        if($formvars['lineposx'.$i])$sql .= ", `posx` = ".(int)$formvars['lineposx'.$i];
-        else $sql .= ", `posx` = NULL";
-        if($formvars['lineposy'.$i])$sql .= ", `posy` = ".(int)$formvars['lineposy'.$i];
-        else $sql .= ", `posy` = NULL";
-				if($formvars['lineendposx'.$i])$sql .= ", `endposx` = ".(int)$formvars['lineendposx'.$i];
-        else $sql .= ", `endposx` = NULL";
-        if($formvars['lineendposy'.$i])$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
-        else $sql .= ", `endposy` = NULL";
-				if($formvars['lineoffset_attribute_start'.$i])$sql .= ", `offset_attribute_start` = '".$formvars['lineoffset_attribute_start'.$i]."'";
-        else $sql .= ", `offset_attribute_start` = NULL";
-				if($formvars['lineoffset_attribute_end'.$i])$sql .= ", `offset_attribute_end` = '".$formvars['lineoffset_attribute_end'.$i]."'";
-        else $sql .= ", `offset_attribute_end` = NULL";
+        $sql = "UPDATE kvwmap.druckfreilinien SET breite = '".$formvars['breite'.$i]."'";
+        if($formvars['lineposx'.$i])$sql .= ", posx = ".(int)$formvars['lineposx'.$i];
+        else $sql .= ", posx = NULL";
+        if($formvars['lineposy'.$i])$sql .= ", posy = ".(int)$formvars['lineposy'.$i];
+        else $sql .= ", posy = NULL";
+				if($formvars['lineendposx'.$i])$sql .= ", endposx = ".(int)$formvars['lineendposx'.$i];
+        else $sql .= ", endposx = NULL";
+        if($formvars['lineendposy'.$i])$sql .= ", endposy = ".(int)$formvars['lineendposy'.$i];
+        else $sql .= ", endposy = NULL";
+				if($formvars['lineoffset_attribute_start'.$i])$sql .= ", offset_attribute_start = '".$formvars['lineoffset_attribute_start'.$i]."'";
+        else $sql .= ", offset_attribute_start = NULL";
+				if($formvars['lineoffset_attribute_end'.$i])$sql .= ", offset_attribute_end = '".$formvars['lineoffset_attribute_end'.$i]."'";
+        else $sql .= ", offset_attribute_end = NULL";
         if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
-        $sql .= ", `type` = '".$formvars['linetype'.$i]."'";
+        $sql .= ", type = '".$formvars['linetype'.$i]."'";
         $sql .= " WHERE id = ".(int)$formvars['line_id'.$i];
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
         $this->database->execSQL($sql,4, 1);
-        $lastline_id = $this->database->mysqli->insert_id;
       }
 			
       for($i = 0; $i < $formvars['rectcount']; $i++){
-        $sql = "UPDATE druckfreirechtecke SET `breite` = '".$formvars['rectbreite'.$i]."'";
-        if($formvars['rectposx'.$i])$sql .= ", `posx` = ".(int)$formvars['rectposx'.$i];
-        else $sql .= ", `posx` = NULL";
-        if($formvars['rectposy'.$i])$sql .= ", `posy` = ".(int)$formvars['rectposy'.$i];
-        else $sql .= ", `posy` = NULL";
-				if($formvars['rectendposx'.$i])$sql .= ", `endposx` = ".(int)$formvars['rectendposx'.$i];
-        else $sql .= ", `endposx` = NULL";
-        if($formvars['rectendposy'.$i])$sql .= ", `endposy` = ".(int)$formvars['rectendposy'.$i];
-        else $sql .= ", `endposy` = NULL";
-				if($formvars['rectoffset_attribute_start'.$i])$sql .= ", `offset_attribute_start` = '".$formvars['rectoffset_attribute_start'.$i]."'";
-        else $sql .= ", `offset_attribute_start` = NULL";
-				if($formvars['rectoffset_attribute_end'.$i])$sql .= ", `offset_attribute_end` = '".$formvars['rectoffset_attribute_end'.$i]."'";
-        else $sql .= ", `offset_attribute_end` = NULL";
+        $sql = "UPDATE kvwmap.druckfreirechtecke SET breite = '".$formvars['rectbreite'.$i]."'";
+        if($formvars['rectposx'.$i])$sql .= ", posx = ".(int)$formvars['rectposx'.$i];
+        else $sql .= ", posx = NULL";
+        if($formvars['rectposy'.$i])$sql .= ", posy = ".(int)$formvars['rectposy'.$i];
+        else $sql .= ", posy = NULL";
+				if($formvars['rectendposx'.$i])$sql .= ", endposx = ".(int)$formvars['rectendposx'.$i];
+        else $sql .= ", endposx = NULL";
+        if($formvars['rectendposy'.$i])$sql .= ", endposy = ".(int)$formvars['rectendposy'.$i];
+        else $sql .= ", endposy = NULL";
+				if($formvars['rectoffset_attribute_start'.$i])$sql .= ", offset_attribute_start = '".$formvars['rectoffset_attribute_start'.$i]."'";
+        else $sql .= ", offset_attribute_start = NULL";
+				if($formvars['rectoffset_attribute_end'.$i])$sql .= ", offset_attribute_end = '".$formvars['rectoffset_attribute_end'.$i]."'";
+        else $sql .= ", offset_attribute_end = NULL";
         if($formvars['recttype'.$i] == '')$formvars['recttype'.$i] = 0;
-				if($formvars['rectcolor'.$i])$sql .= ", `color` = '".$formvars['rectcolor'.$i]."'";
-				else $sql .= ", `color` = NULL";
-        $sql .= ", `type` = '".$formvars['recttype'.$i]."'";
+				if($formvars['rectcolor'.$i])$sql .= ", color = '".$formvars['rectcolor'.$i]."'";
+				else $sql .= ", color = NULL";
+        $sql .= ", type = '".$formvars['recttype'.$i]."'";
         $sql .= " WHERE id = ".(int)$formvars['rect_id'.$i];
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
         $this->database->execSQL($sql,4, 1);
-        $lastrect_id = $this->database->mysqli->insert_id;
       }			
     }
   }
@@ -1993,19 +2009,19 @@ class ddl {
 	}
 
   function delete_layout($formvars){
-    $sql = "DELETE FROM `datendrucklayouts` WHERE id = ".(int)$formvars['selected_layout_id'];
+    $sql = "DELETE FROM kvwmap.datendrucklayouts WHERE id = ".(int)$formvars['selected_layout_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->delete_layout :",4);
     $this->database->execSQL($sql,4, 1);
 
-		$sql = "DELETE FROM ddl_elemente WHERE ddl_id = ".(int)$formvars['selected_layout_id'];					
+		$sql = "DELETE FROM kvwmap.ddl_elemente WHERE ddl_id = ".(int)$formvars['selected_layout_id'];					
     $this->debug->write("<p>file:kvwmap class:ddl->delete_layout :",4);
     $this->database->execSQL($sql,4, 1);
 
-    $sql = "DELETE FROM druckfreitexte, ddl2freitexte USING druckfreitexte, ddl2freitexte WHERE ddl2freitexte.freitext_id = druckfreitexte.id AND ddl2freitexte.ddl_id = ".(int)$formvars['selected_layout_id'];
+    $sql = "DELETE FROM kvwmap.druckfreitexte, kvwmap.ddl2freitexte USING druckfreitexte, ddl2freitexte WHERE ddl2freitexte.freitext_id = druckfreitexte.id AND ddl2freitexte.ddl_id = ".(int)$formvars['selected_layout_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->delete_layout :",4);
     $this->database->execSQL($sql,4, 1);
     
-    $sql = "DELETE FROM ddl2stelle WHERE ddl_id = ".(int)$formvars['selected_layout_id'];
+    $sql = "DELETE FROM kvwmap.ddl2stelle WHERE ddl_id = ".(int)$formvars['selected_layout_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->delete_layout :",4);
     $this->database->execSQL($sql,4, 1);
   }
@@ -2149,33 +2165,34 @@ class ddl {
   }		
   
   function addfreetext($ddl_id, $text, $posx, $posy, $size, $font, $offset_attribute){		
-    $sql = 'INSERT INTO druckfreitexte SET';
-    $sql .= ' text = "'.$text.'",';
-    $sql .= ' posx = '.$posx.',';
-    $sql .= ' posy = '.$posy.',';
-    $sql .= ' size = '.$size.',';
-    $sql .= ' font = "'.$font.'",';
-    $sql .= ' angle = 0';
-		if($offset_attribute){
-			$sql .= ", `offset_attribute` = '".$offset_attribute."'";
-		}
-    else{
-			$sql .= ", `offset_attribute` = NULL";
-		}
+    $sql = "
+			INSERT INTO kvwmap.druckfreitexte 
+				(text, posx, posy, offset_attribute, size, font, angle)
+			VALUES (
+    		'" . $text . "',
+    		" . $posx . ",
+    		" . $posy . ",
+				" . ($offset_attribute ? "'" . $offset_attribute . "'" : 'NULL') . ",
+    		" . $size . ",
+    		'" . $font . "',
+    		0)
+			RETURNING id";
     $this->debug->write("<p>file:kvwmap class:ddl->addfreetext :",4);
-    $this->database->execSQL($sql,4, 1);
-    $lastinsert_id = $this->database->mysqli->insert_id;
-    $sql = 'INSERT INTO ddl2freitexte (ddl_id, freitext_id) VALUES ('.$ddl_id.', '.$lastinsert_id.')';
+		$ret = $this->database->execSQL($sql,4, 1);
+		$rs = pg_fetch_assoc($ret[1]);
+		$lastinsert_id = $rs['id'];
+
+    $sql = 'INSERT INTO kvwmap.ddl2freitexte (ddl_id, freitext_id) VALUES ('.$ddl_id.', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:ddl->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
 		return $lastinsert_id;
   }
   
   function removefreetext($formvars){
-    $sql = 'DELETE FROM druckfreitexte WHERE id = '.$formvars['freitext_id'];
+    $sql = 'DELETE FROM kvwmap.druckfreitexte WHERE id = '.$formvars['freitext_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->removefreetext :",4);
     $this->database->execSQL($sql,4, 1);
-    $sql = 'DELETE FROM ddl2freitexte WHERE freitext_id = '.$formvars['freitext_id'];
+    $sql = 'DELETE FROM kvwmap.ddl2freitexte WHERE freitext_id = '.$formvars['freitext_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->removefreetext :",4);
     $this->database->execSQL($sql,4, 1);
   }
@@ -2187,74 +2204,83 @@ class ddl {
 		if($formvars['lineposy'.$i] != '')$posy = $formvars['lineposy'.$i]-20; else $posy = 0;
 		if($formvars['lineendposx'.$i] != '')$endposx = $formvars['lineendposx'.$i]; else $endposx = 520;
 		if($formvars['lineendposy'.$i] != '')$endposy = $formvars['lineendposy'.$i]-20; else $endposy = 0;
-    $sql = 'INSERT INTO druckfreilinien SET';
-    $sql .= ' posx = '.$posx.',';
-    $sql .= ' posy = '.$posy.',';
-		$sql .= ' endposx = '.$endposx.',';
-    $sql .= ' endposy = '.$endposy.',';
-    $sql .= ' breite = '.$breite;
+    $sql = "
+			INSERT INTO kvwmap.druckfreilinien 
+				(posx, posy, endposx, endposy, breite)
+			VALUES (
+    		" . $posx . ",
+    		" . $posy . ",
+				" . $endposx . ",
+    		" . $endposy . ",
+    		" . $breite . ")
+			RETURNING id";
     $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
-    $this->database->execSQL($sql,4, 1);
-    $lastinsert_id = $this->database->mysqli->insert_id;
-    $sql = 'INSERT INTO ddl2freilinien (ddl_id, line_id) VALUES ('.$formvars['aktivesLayout'].', '.$lastinsert_id.')';
+    $ret = $this->database->execSQL($sql,4, 1);
+		$rs = pg_fetch_assoc($ret[1]);
+		$lastinsert_id = $rs['id'];
+
+    $sql = 'INSERT INTO kvwmap.ddl2freilinien (ddl_id, line_id) VALUES ('.$formvars['aktivesLayout'].', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
     $this->database->execSQL($sql,4, 1);
   }
   
   function removeline($formvars){
-    $sql = 'DELETE FROM druckfreilinien WHERE id = '.$formvars['line_id'];
+    $sql = 'DELETE FROM kvwmap.druckfreilinien WHERE id = '.$formvars['line_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->removeline :",4);
     $this->database->execSQL($sql,4, 1);
-    $sql = 'DELETE FROM ddl2freilinien WHERE line_id = '.$formvars['line_id'];
+    $sql = 'DELETE FROM kvwmap.ddl2freilinien WHERE line_id = '.$formvars['line_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->removeline :",4);
     $this->database->execSQL($sql,4, 1);
   }
 	
   function addrectangle($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end){
-    $sql = 'INSERT INTO druckfreirechtecke SET';
-    $sql .= ' posx = '.$posx.',';
-    $sql .= ' posy = '.$posy.',';
-		$sql .= ' endposx = '.$endposx.',';
-    $sql .= ' endposy = '.$endposy.',';
-    $sql .= ' breite = '.$breite;
-		if($offset_attribute_start){
-			$sql .= ", `offset_attribute_start` = '".$offset_attribute_start."'";
-		}
-    else{
-			$sql .= ", `offset_attribute_start` = NULL";
-		}
-		if($offset_attribute_end){
-			$sql .= ", `offset_attribute_end` = '".$offset_attribute_end."'";
-		}
-    else{
-			$sql .= ", `offset_attribute_end` = NULL";
-		}		
+    $sql = "
+			INSERT INTO kvwmap.druckfreirechtecke 
+				(posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end)
+			VALUES (
+    		" . $posx . ",
+    		" . $posy . ",
+				" . $endposx . ",
+    		" . $endposy . ",
+    		" . $breite . ",
+				" . ($offset_attribute_start ? "'" . $offset_attribute_start . "'" : 'NULL') . "),
+				" . ($offset_attribute_end ? "'" . $offset_attribute_end . "'" : 'NULL') . ")
+			RETURNING id";
+	
 		#echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:ddl->addrectangle :",4);
-    $this->database->execSQL($sql,4, 1);
-    $lastinsert_id = $this->database->mysqli->insert_id;
-    $sql = 'INSERT INTO ddl2freirechtecke (ddl_id, rect_id) VALUES ('.$ddl_id.', '.$lastinsert_id.')';
+		$ret = $this->database->execSQL($sql,4, 1);
+		$rs = pg_fetch_assoc($ret[1]);
+		$lastinsert_id = $rs['id'];
+
+    $sql = 'INSERT INTO kvwmap.ddl2freirechtecke (ddl_id, rect_id) VALUES ('.$ddl_id.', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
     $this->database->execSQL($sql,4, 1);
   }
   
   function removerectangle($formvars){
-    $sql = 'DELETE FROM druckfreirechtecke WHERE id = '.$formvars['rect_id'];
+    $sql = 'DELETE FROM kvwmap.druckfreirechtecke WHERE id = '.$formvars['rect_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->removerectangle :",4);
     $this->database->execSQL($sql,4, 1);
-    $sql = 'DELETE FROM ddl2freirechtecke WHERE rect_id = '.$formvars['rect_id'];
+    $sql = 'DELETE FROM kvwmap.ddl2freirechtecke WHERE rect_id = '.$formvars['rect_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->removerectangle :",4);
     $this->database->execSQL($sql,4, 1);
   }	
   
   function add_layout2stelle($id, $stelleid){
-    $sql ="INSERT IGNORE INTO ddl2stelle VALUES (".$stelleid.", ".$id.")";
+    $sql = "
+			INSERT INTO 
+				kvwmap.ddl2stelle 
+			VALUES (
+				" . $stelleid . ", 
+				" . $id . ")
+			ON CONFLICT (stelle_id, ddl_id) DO NOTHING";
     $this->debug->write("<p>file:kvwmap class:ddl->add_layout2stelle :",4);
     $this->database->execSQL($sql,4, 1);
   }
 	
 	function removelayouts($stelleid){
-		$sql ="DELETE FROM ddl2stelle WHERE stelle_id = ".$stelleid;
+		$sql ="DELETE FROM kvwmap.ddl2stelle WHERE stelle_id = ".$stelleid;
     $this->debug->write("<p>file:kvwmap class:ddl->removelayouts :",4);
     $this->database->execSQL($sql,4, 1);
 	}

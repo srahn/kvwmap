@@ -15342,8 +15342,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select =  "nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
-    $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
-    $from = "rolle";
+    $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, hist_timestamp";
+    $from = "kvwmap.rolle";
     $where = "stelle_id='+this.form.stelle_id.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
@@ -16750,7 +16750,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   function getRow() {
 		$this->formvars['select'] = str_replace("''", "'", $this->formvars['select']);
 		$this->formvars['where'] = str_replace("''", "'", $this->formvars['where']);
-    $ret = $this->database->getRow($this->formvars['select'],$this->formvars['from'],$this->formvars['where']);
+    $ret = $this->pgdatabase->getRow($this->formvars['select'],$this->formvars['from'],$this->formvars['where']);
 		$delim = '';
 		foreach ($ret[1] as $key => $value) {
 			$result .= $delim . $value;

@@ -1170,7 +1170,7 @@ class user {
 		if ($formvars['gui'] != '' AND $formvars['mapsize'] != '') {
 			$sql = "
 				UPDATE
-					rolle
+					kvwmap.rolle
 				SET
 					nZoomFactor = " . $formvars['nZoomFactor'] . "
 					" . ($nImageWidth != '' ? ", nImageWidth = " . $nImageWidth : "") . "
@@ -1209,8 +1209,8 @@ class user {
 					, immer_weiter_erfassen = " . quote_or_null($formvars['immer_weiter_erfassen']) . "
 					, upload_only_file_metadata = " . quote_or_null($formvars['upload_only_file_metadata']) . "
 			";
-			$sql.=',print_scale = CASE WHEN print_scale = "auto" OR "'.$formvars['print_scale'].'" = "auto" THEN "'.$formvars['print_scale'].'" ELSE print_scale END';
-			if($formvars['hist_timestamp'] != '') $sql.=',hist_timestamp="'.DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s').'"';
+			$sql.=",print_scale = CASE WHEN print_scale = 'auto' OR '" . $formvars['print_scale'] . "' = 'auto' THEN '" . $formvars['print_scale'] ."' ELSE print_scale END";
+			if($formvars['hist_timestamp'] != '') $sql.=",hist_timestamp='" . DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s') . "'";
 			else $sql.=',hist_timestamp = NULL';
 			if($formvars['back']) { $buttons .= 'back,';}
 			if($formvars['forward']){$buttons .= 'forward,';}

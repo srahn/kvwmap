@@ -883,7 +883,7 @@ function go_switch($go, $exit = false) {
 			# Beliebige Tabelle, Einschränkung über c1,c2,c3 und v1,v2,v3 (Werte beliebig)
 			case 'getRow' : {
 				# Derzeit nur für die Tabelle Rolle
-				if ($GUI->formvars['from'] == 'rolle') {
+				if ($GUI->formvars['from'] == 'kvwmap.rolle') {
 					$GUI->getRow();
 				}
 			} break;
