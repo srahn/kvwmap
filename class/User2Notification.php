@@ -1,11 +1,12 @@
 <?php
-class User2Notification extends MyObject {
+class User2Notification extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
 		parent::__construct(
 			$gui,
+			'kvwmap',
 			'user2notifications',
 			array(
 				array('key' => 'user_id', 'type' => 'int'),
@@ -36,7 +37,7 @@ class User2Notification extends MyObject {
 		$user2notification = new User2Notification($gui);
 		$sql = "
 			DELETE FROM
-				user2notifications
+				kvwmap.user2notifications
 			WHERE
 				notification_id = " . $notification->get_id() . "
 		";
@@ -59,12 +60,12 @@ class User2Notification extends MyObject {
 	public static function create_user2notifications($gui, $notification) {
 		$user2notification = new User2Notification($gui);
 		$sql = "
-			INSERT INTO user2notifications (user_id, notification_id)
+			INSERT INTO kvwmap.user2notifications (user_id, notification_id)
 			SELECT DISTINCT
 				user_id,
 				" . $notification->get_id() . " AS notification_id
 			FROM
-				rolle r
+				kvwmap.rolle r
 			WHERE
 				true
 				" . (empty($notification->get('user_filter')) ? '' : 'AND user_id IN (' . $notification->get('user_filter') . ')') . "

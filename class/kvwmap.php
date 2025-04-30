@@ -8984,7 +8984,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if ($this->formvars['old_id'] != ''){
 				$classes = $mapDB->read_Classes($this->formvars['old_id']);
 				for($i = 0; $i < count($classes); $i++){
-					$mapDB->copyClass($classes[$i]['Class_ID'], $this->formvars['selected_layer_id']);
+					$mapDB->copyClass($classes[$i]['class_id'], $this->formvars['selected_layer_id']);
 				}
 			}
 		}
@@ -13201,7 +13201,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					'width' => $refmap_width,
 					'height' => $refmap_height
 				);
-				$refmaps = Referenzkarte::find($this, "Dateiname LIKE '" . $refmap_file_name . "'");
+				$refmaps = Referenzkarte::find($this, "dateiname LIKE '" . $refmap_file_name . "'");
 				if (count($refmaps) > 0) {
 					// reference map exists already, update it
 					$refmap = $refmaps[0];
@@ -18287,10 +18287,10 @@ class db_mapObj{
 			SELECT " .
 				((!$all_languages AND $language != 'german') ? "
 					CASE
-						WHEN Name_" . $language . " IS NOT NULL THEN Name_" . $language . "
-						ELSE Name
-					END" : "Name"
-				) . " AS Name,
+						WHEN name_" . $language . " IS NOT NULL THEN name_" . $language . "
+						ELSE name
+					END" : "name"
+				) . " AS name,
 				class_id,
 				layer_id,
 				expression,
@@ -18302,7 +18302,7 @@ class db_mapObj{
 			FROM
 				kvwmap.classes
 			WHERE
-			class_id = " . $class_id . "
+				class_id = " . $class_id . "
 			ORDER BY
 				classification,
 				drawingorder,
@@ -18663,13 +18663,13 @@ class db_mapObj{
 				u_attributfilter2used_layer 
 			SET
 				attributname = '" . $formvars['attributname'] . "',
-				attributvalue = '" . $this->db->mysqli->real_escape_string($formvars['attributvalue']) . "',
+				attributvalue = '" . pg_escape_string($formvars['attributvalue']) . "',
 				operator = '" . $formvars['operator']. "',
 				type = '" . $formvars['type'] . "',
 				Stelle_ID = " . $formvars['stelle'] . ",
 				Layer_ID = " . $formvars['layer'] . "
 			ON DUPLICATE KEY UPDATE  
-				attributvalue = '" . $this->db->mysqli->real_escape_string($formvars['attributvalue']) . "', 
+				attributvalue = '" . pg_escape_string($formvars['attributvalue']) . "', 
 				operator = '" . $formvars['operator'] . "'";
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->saveAttributeFilter - Speichern der Attribute-Filter-Parameter:<br>" . $sql,4);
@@ -20327,18 +20327,18 @@ class db_mapObj{
 			}
 
 			$sql = "
-				INSERT INTO layer (
-					" . ($formvars['id'] != '' ? "Layer_ID," : '') . "
-					Name,
+				INSERT INTO kvwmap.layer (
+					" . ($formvars['id'] != '' ? "layer_id," : '') . "
+					name,
 					" . $name_columns . "
 					alias,
-					Datentyp,
-					Gruppe,
+					datentyp,
+					gruppe,
 					pfad,
 					maintable,
 					oid,
 					identifier_text,
-					Data,
+					data,
 					schema,
 					document_path,
 					document_url,
@@ -20413,11 +20413,11 @@ class db_mapObj{
 					" . quote($formvars['alias']) . ",
 					" . quote_or_null($formvars['datentyp']) . ",
 					" . quote_or_null($formvars['gruppe']) . ",
-					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['pfad'])) . ",
+					" . quote_or_null(pg_escape_string($formvars['pfad'])) . ",
 					" . quote_or_null(trim($formvars['maintable'])) . ",
 					" . quote_or_null($formvars['oid']) . ",
 					" . quote_or_null($formvars['identifier_text']) . ",
-					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['data'])) . ",
+					" . quote_or_null(pg_escape_string($formvars['data'])) . ",
 					" . quote_or_null(trim($formvars['schema'])) . ",
 					" . quote_or_null(append_slash($formvars['document_path'])) . ",
 					" . quote_or_null($formvars['document_url']) . ",
@@ -20465,26 +20465,27 @@ class db_mapObj{
 					" . quote($formvars['selectiontype']) . ", -- selectiontype
 					" . quote(($formvars['querymap'] == '' ? '0' : $formvars['querymap']), 'text') . ", -- querymap
 					" . quote($formvars['processing']) . ",
-					" . quote($this->db->mysqli->real_escape_string($formvars['kurzbeschreibung'])) . ",
+					" . quote(pg_escape_string($formvars['kurzbeschreibung'])) . ",
 					" . quote($formvars['dataowner_name']) . ",
 					" . quote($formvars['dataowner_email']) . ",
 					" . quote($formvars['dataowner_tel']) . ",
 					" . quote($formvars['uptodateness']) . ",
 					" . quote($formvars['updatecycle']) . ",
-					" . quote($this->db->mysqli->real_escape_string($formvars['metalink'])) . ",
-					" . quote($this->db->mysqli->real_escape_string($formvars['terms_of_use_link'])) . ",
+					" . quote(pg_escape_string($formvars['metalink'])) . ",
+					" . quote(pg_escape_string($formvars['terms_of_use_link'])) . ",
 					" . quote($formvars['status']) . ",
 					" . quote($formvars['trigger_function']) . ",
 			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
 					" . quote_or_null($formvars['duplicate_from_layer_id']) . ",
-					" . quote($this->db->mysqli->real_escape_string($formvars['duplicate_criterion'])) . ",
+					" . quote(pg_escape_string($formvars['duplicate_criterion'])) . ",
 					" . quote_or_null($formvars['shared_from']) . ",
 					'" . ($formvars['version'] == '' ? '1.0.0' : $formvars['version']) . "',
-					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['comment'])) . "
+					" . quote_or_null(pg_escape_string($formvars['comment'])) . "
 					" . ($this->GUI->plugin_loaded('mobile') ? ", " . quote(($formvars['sync'] == '' ? '0' : $formvars['sync']), 'text') : '') . "
 					" . ($this->GUI->plugin_loaded('mobile') ? ", " . quote($formvars['vector_tile_url']) : '') . "
 					" . ($this->GUI->plugin_loaded('portal') ? ", " . quote(($formvars['cluster_option'] == '' ? '0' : $formvars['cluster_option']), 'text') : '') . "
 				)
+				RETURNING layer_id
 			";
     }
 		else {
@@ -20492,12 +20493,12 @@ class db_mapObj{
 			$layer = $layerdata;
 			$projection = explode('epsg:', $layer->getProjection());
 			$sql = "
-				INSERT INTO layer (
-					Name,
-					Datentyp,
-					Gruppe,
+				INSERT INTO kvwmap.layer (
+					name,
+					datentyp,
+					gruppe,
 					pfad,
-					Data,
+					data,
 					tileindex,
 					tileitem,
 					labelangleitem,
@@ -20554,6 +20555,7 @@ class db_mapObj{
 					" . ($this->GUI->plugin_loaded('mobile') ? ', ' . quote($layer->vector_tile_url) : '') . "
 					" . ($this->GUI->plugin_loaded('portal') ? ', ' . quote($layer->cluster_option) : '') . "
 				)
+				RETURNING layer_id
 			";
 		}
 
@@ -20563,20 +20565,22 @@ class db_mapObj{
 		if (!$this->db->success) {
 			return 0;
 		}
+		else {
+			$rs = pg_fetch_assoc($ret[1]);
 
-		if (count($datasource_ids) > 0) {
-			$layer_datasource = new LayerDataSource($this->GUI);
-			foreach($datasource_ids AS $datasource_id) {
-				$layer_datasource->create(
-					array(
-						'layer_id' => $this->db->mysqli->insert_id,
-						'datasource_id' => $datasource_id
-					)
-				);
+			if (count($datasource_ids) > 0) {
+				$layer_datasource = new LayerDataSource($this->GUI);
+				foreach($datasource_ids AS $datasource_id) {
+					$layer_datasource->create(
+						array(
+							'layer_id' => $rs['layer_id'],
+							'datasource_id' => $datasource_id
+						)
+					);
+				}
 			}
+			return $rs['layer_id'];
 		}
-
-		return $this->db->mysqli->insert_id;
 	}
 
 	function save_datatype_attributes($attributes, $database, $formvars){
@@ -21340,8 +21344,8 @@ class db_mapObj{
 					" . $formvars['id'][$i] . ",
 					'" . $formvars['key'][$i] . "',
 					'" . $formvars['alias'][$i] . "',
-					'" . $this->db->mysqli->real_escape_string($formvars['default_value'][$i]) . "',
-					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "'
+					'" . pg_escape_string($formvars['default_value'][$i]) . "',
+					'" . pg_escape_string($formvars['options_sql'][$i]) . "'
 				)";
 				$komma = true;
 			}
@@ -21685,17 +21689,25 @@ class db_mapObj{
 			SELECT 
 				' . $columns . ' 
 			FROM 
-				styles 
+				kvwmap.styles 
 			WHERE 
-				Style_ID = ' . $style_id;
+				style_id = ' . $style_id . "
+			RETURNING style_id";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyStyle - Kopieren eines Styles:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		return $this->db->mysqli->insert_id;
+    if (!$this->db->success) {
+			echo err_msg($this->script_name, __LINE__, $sql); return 0; 
+		}
+		else {
+			$rs = pg_fetch_assoc($ret[1]);
+		}
+		return $rs['style_id'];
 	}
 
 	function copyLabel($label_id){
-		$sql = "INSERT INTO labels (font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force) SELECT font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels WHERE Label_ID = " . $label_id;
+		$sql = "
+			INSERT INTO labels 
+				(font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force) SELECT font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels WHERE Label_ID = " . $label_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyLabel - Kopieren eines Labels:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -21705,17 +21717,46 @@ class db_mapObj{
   function copyClass($class_id, $layer_id){
     # diese Funktion kopiert eine Klasse mit Styles und Labels und gibt die ID der neuen Klasse zurück
     $class = $this->read_ClassesbyClassid($class_id);
-    $sql = "INSERT INTO classes (Name, Name_low-german, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,classification,drawingorder,legendorder,text) SELECT Name, Name_low-german, Name_english, Name_polish, Name_vietnamese, " . $layer_id.",Expression,classification,drawingorder,legendorder,text FROM classes WHERE Class_ID = " . $class_id;
+		$rows = "
+			name, 
+			name_low_german, 
+			name_english, 
+			name_polish, 
+			name_vietnamese, 
+			expression, 
+			classification, 
+			drawingorder, 
+			legendorder, 
+			text
+		";
+    $sql = "
+			INSERT INTO kvwmap.classes (
+				layer_id, 
+				" . $rows . "
+			) 
+			SELECT 
+				" . $layer_id . ",
+				" . $rows . " 
+			FROM 
+				kvwmap.classes 
+			WHERE 
+				class_id = " . $class_id . "
+			RETURNING class_id";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->copyClass - Kopieren einer Klasse:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    $new_class_id = $this->db->mysqli->insert_id;
+    if (!$this->db->success) { 
+			echo err_msg($this->script_name, __LINE__, $sql); return 0; 
+		}
+		else {
+			$rs = pg_fetch_assoc($ret[1]);
+		}
+    $new_class_id = $rs['class_id'];
     for($i = 0; $i < count($class[0]['Style']); $i++){
-      $new_style_id = $this->copyStyle($class[0]['Style'][$i]['Style_ID']);
+      $new_style_id = $this->copyStyle($class[0]['Style'][$i]['style_id']);
       $this->addStyle2Class($new_class_id, $new_style_id, $class[0]['Style'][$i]['drawingorder']);
     }
     for($i = 0; $i < count($class[0]['Label']); $i++){
-			$new_label_id = $this->copyLabel($class[0]['Label'][$i]['Label_ID']);
+			$new_label_id = $this->copyLabel($class[0]['Label'][$i]['label_id']);
       $this->addLabel2Class($new_class_id, $new_label_id);
     }
     return $new_class_id;
