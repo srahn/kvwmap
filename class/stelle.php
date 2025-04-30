@@ -1747,10 +1747,10 @@ class stelle {
 										kvwmap.layer_parameter as p,
 										kvwmap.used_layer as ul,
 										kvwmap.layer as l
-									--	LEFT JOIN layer_attributes la ON la.layer_id = l.Layer_ID
+									--	LEFT JOIN layer_attributes la ON la.layer_id = l.layer_id
 									WHERE
 										ul.stelle_id = " . $this->id . " AND
-										ul.layer_id = l.Layer_ID AND
+										ul.layer_id = l.layer_id AND
 										(
 											position(
 												concat('$', p.key) IN
@@ -1794,9 +1794,9 @@ class stelle {
 		# Aktualisieren der LayerzuStelle-Eigenschaften
 		$sql = "
 			UPDATE
-				used_layer
+				kvwmap.used_layer
 			SET
-				Layer_ID 				= "  . $formvars['selected_layer_id'] . ",
+				layer_id 				= "  . $formvars['selected_layer_id'] . ",
 				use_geom				= "  . $formvars['use_geom'] 					. ",
 				postlabelcache 	= "  . $formvars['postlabelcache'] 		. ",
 				offsite 				= '" . $formvars['offsite'] 					. "',
@@ -1815,7 +1815,7 @@ class stelle {
 				requires 				= "  . ($formvars['requires'] 		!= '' ? "'" . $formvars['requires'] . "'" : "NULL") . "
 			WHERE
 				Stelle_ID = " . $formvars['selected_stelle_id'] .  " AND
-				Layer_ID = " . $formvars['selected_layer_id'] . "
+				layer_id = " . $formvars['selected_layer_id'] . "
 		";
 		//  echo $sql . '<br>';
 		//  exit;
@@ -1829,7 +1829,7 @@ class stelle {
 
 	// function updateLayer($formvars){
 	// 	# Aktualisieren der LayerzuStelle-Eigenschaften
-	// 	$sql = 'UPDATE used_layer SET Layer_ID = '.$formvars['selected_layer_id'];
+	// 	$sql = 'UPDATE used_layer SET layer_id = '.$formvars['selected_layer_id'];
 	// 	$sql .= ', queryable = "'.$formvars['queryable'].'"';
 	// 	$sql .= ', use_geom = '.$formvars['use_geom'];
 	// 	if ($formvars['minscale']!='') {
@@ -1866,7 +1866,7 @@ class stelle {
 	// 	$sql .= ', requires = '.$formvars['requires'];
 	// 	$sql .= ', start_aktiv = "'.$formvars['startaktiv'].'"';
 	// 	$sql .= ', logconsume = "'.$formvars['logconsume'].'"';
-	// 	$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
+	// 	$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND layer_id = '.$formvars['selected_layer_id'];
 	// 	#echo $sql.'<br>';
 	// 	$this->debug->write("<p>file:stelle.php class:stelle->updateLayer - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
 	// 	$this->database->execSQL($sql);
@@ -1882,7 +1882,7 @@ class stelle {
 				legendorder = ' . ($formvars['legendorder'] ?: 'NULL') . '
 			WHERE 
 				Stelle_ID = ' . $formvars['selected_stelle_id'] . ' AND 
-				Layer_ID = ' . $formvars['selected_layer_id'];
+				layer_id = ' . $formvars['selected_layer_id'];
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -1927,7 +1927,7 @@ class stelle {
 		# Lesen der Layer zur Stelle
 		$sql = "
 			SELECT
-				l.Layer_ID,
+				l.layer_id,
 				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
 				l.Name,
 				l.alias,
@@ -1935,7 +1935,7 @@ class stelle {
 				ul.legendorder
 			FROM
 				kvwmap.used_layer ul JOIN
-				kvwmap.layer l ON ul.Layer_ID = l.Layer_ID 
+				kvwmap.layer l ON ul.layer_id = l.layer_id 
 			WHERE" .
 				$condition .
 				$order . "
@@ -2001,14 +2001,14 @@ class stelle {
 	// 	# Lesen der Layer zur Stelle
 	// 	$sql = "
 	// 		SELECT
-	// 			layer.Layer_ID,
+	// 			layer.layer_id,
 	// 			layer.Gruppe,
 	// 			Name,
 	// 			used_layer.drawingorder,
 	// 			used_layer.legendorder
 	// 		FROM
 	// 			used_layer JOIN
-	// 			layer ON used_layer.Layer_ID = layer.Layer_ID 
+	// 			layer ON used_layer.layer_id = layer.layer_id 
 	// 		WHERE" .
 	// 			$condition .
 	// 		$order . "
@@ -2078,17 +2078,17 @@ class stelle {
 						las.privileg as privilegfk
 					FROM
 						kvwmap.layer l LEFT JOIN
-						kvwmap.used_layer ul ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+						kvwmap.used_layer ul ON l.layer_id = ul.layer_id LEFT JOIN
 						kvwmap.u_groups g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
-						kvwmap.layer_attributes AS la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' LEFT JOIN
-						kvwmap.layer_attributes2stelle AS las ON las.stelle_id = ul.Stelle_ID AND ul.Layer_ID = las.layer_id AND las.attributename = split_part(split_part(la.options, ';', 1) , ',',  -1)
+						kvwmap.layer_attributes AS la ON la.layer_id = ul.layer_id AND form_element_type = 'SubformFK' LEFT JOIN
+						kvwmap.layer_attributes2stelle AS las ON las.stelle_id = ul.Stelle_ID AND ul.layer_id = las.layer_id AND las.attributename = split_part(split_part(la.options, ';', 1) , ',',  -1)
 					WHERE
 						ul.stelle_id = " . $this->id . " AND
 						l.connectiontype = 6 AND
 						ul.queryable = '1'"
 						. ($privileg != NULL ? " AND ul.privileg >= '" . $privileg . "'" : "")
 						. ($export_privileg != NULL ? " AND ul.export_privileg > 0" : "")
-						. ($layer_id != NULL ? " AND l.Layer_ID = " . $layer_id : "") . "
+						. ($layer_id != NULL ? " AND l.layer_id = " . $layer_id : "") . "
 					ORDER BY
 						name
 				) as foo
@@ -2213,7 +2213,7 @@ class stelle {
 		# Hinzufügen der Layer als aktive Layer
 		for ($i=0;$i<count($layerid);$i++) {
 			$sql ='UPDATE used_layer SET aktivStatus="1"';
-			$sql.=' WHERE Stelle_ID='.$this->id.' AND Layer_ID='.$layerid[$i];
+			$sql.=' WHERE Stelle_ID='.$this->id.' AND layer_id='.$layerid[$i];
 			$this->debug->write("<p>file:stelle.php class:stelle->addAktivLayer - Hinzufügen von aktiven Layern zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -2232,7 +2232,7 @@ class stelle {
 				$aktiv_status=0;
 			}
 			$sql ='UPDATE used_layer SET aktivStatus="'.$aktiv_status.'"';
-			$sql.=' WHERE Stelle_ID='.$this->id.' AND Layer_ID='.$layerset[$i]['layer_id'];
+			$sql.=' WHERE Stelle_ID='.$this->id.' AND layer_id='.$layerset[$i]['layer_id'];
 			$this->debug->write("<p>file:stelle.php class:stelle->setAktivLayer - Speichern der aktiven Layer zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -2251,7 +2251,7 @@ class stelle {
 				$query_status=0;
 			}
 			$sql ='UPDATE used_layer set queryStatus="'.$query_status.'"';
-			$sql.=' WHERE Layer_ID='.$layerset[$i]['layer_id'];
+			$sql.=' WHERE layer_id='.$layerset[$i]['layer_id'];
 			$this->debug->write("<p>file:stelle.php class:stelle->setQueryStatus - Speichern des Abfragestatus der Layer zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -2294,7 +2294,7 @@ class stelle {
 				string_agg(s.bezeichnung, ',') as used_layer_parent_bezeichnung
 			FROM
 				kvwmap.layer AS l 
-				JOIN kvwmap.used_layer AS ul ON l.Layer_ID = ul.Layer_ID
+				JOIN kvwmap.used_layer AS ul ON l.layer_id = ul.layer_id
 				LEFT JOIN kvwmap.stellen_hierarchie ON child_id = " . $this->id . "
 				LEFT JOIN kvwmap.used_layer AS ul2 ON 
 					l.layer_id = ul2.layer_id AND	

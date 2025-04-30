@@ -36,7 +36,7 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 			rolle r JOIN
 			stelle s ON r.stelle_id = s.ID JOIN
 			used_layer ul ON s.ID = ul.Stelle_ID JOIN
-			layer l ON ul.Layer_ID = l.Layer_ID
+			layer l ON ul.layer_id = l.layer_id
 		WHERE
 			r.user_id = " . $GUI->user->id . " AND
 			l.sync = '1'
@@ -662,7 +662,7 @@ $GUI->mobile_reformat_classes = function ($classes) use ($GUI) {
 	return array_map(
 		function ($class) {
 			return array(
-				'id' => $class['Class_ID'],
+				'id' => $class['class_id'],
 				'name' => $class['name'],
 				'expression' => $class['Expression'],
 				'style' => array(

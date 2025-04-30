@@ -2365,7 +2365,7 @@ class db_mapObj {
 				ul.`privileg`,
 				ul.`export_privileg`,
 				ul.`group_id`,
-				l.Layer_ID," .
+				l.layer_id," .
 				$name_column . ",
 				l.alias,
 				l.Datentyp, COALESCE(ul.group_id, l.Gruppe) AS Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
@@ -2399,13 +2399,13 @@ class db_mapObj {
 			FROM
 				kvwmap.u_rolle2used_layer AS rl,
 				kvwmap.used_layer AS ul JOIN
-				kvwmap.layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+				kvwmap.layer AS l ON l.layer_id = ul.layer_id LEFT JOIN
 				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
 				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				kvwmap.connections as c ON l.connection_id = c.id
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
-				rl.layer_id = ul.Layer_ID AND
+				rl.layer_id = ul.layer_id AND
 				(ul.minscale != -1 OR ul.minscale IS NULL) AND
 				l.Datentyp != 5 AND 
 				rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
@@ -2419,9 +2419,9 @@ class db_mapObj {
 				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . 
 				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
 				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . 
-				($this->nurLayerID ? " AND l.Layer_ID = " . $this->nurLayerID : '') .
-				($this->nurLayerIDs ? " AND l.Layer_ID IN (" . $this->nurLayerIDs . ")" : '') .
-				($this->nichtLayerID ? " AND l.Layer_ID != " . $this->nichtLayerID : '') . "
+				($this->nurLayerID ? " AND l.layer_id = " . $this->nurLayerID : '') .
+				($this->nurLayerIDs ? " AND l.layer_id IN (" . $this->nurLayerIDs . ")" : '') .
+				($this->nichtLayerID ? " AND l.layer_id != " . $this->nichtLayerID : '') . "
 			ORDER BY
 				drawingorder
 		";
@@ -2525,7 +2525,7 @@ class db_mapObj {
 				`Name_english`,
 				`Name_polish`,
 				`Name_vietnamese`,
-				`Class_ID`,
+				`class_id`,
 				`Layer_ID`,
 				`Expression`,
 				`classification`,
@@ -2550,7 +2550,7 @@ class db_mapObj {
 				NULLIF(classification, '') IS NULL,
 				classification,
 				drawingorder,
-				Class_ID
+				class_id
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>", 4);
@@ -2558,12 +2558,12 @@ class db_mapObj {
 		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
 		$index = 0;
 		while ($rs = $ret['result']->fetch_assoc()) {
-			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
-			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+			$rs['Style'] = $this->read_Styles($rs['class_id']);
+			$rs['Label'] = $this->read_Label($rs['class_id']);
 			$rs['index'] = $index;
 			#Anne
 			if($disabled_classes){
-				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
+				if($disabled_classes['status'][$rs['class_id']] == 2) {
 					$rs['Status'] = 1;
 					for($i = 0; $i < count($rs['Style']); $i++) {
 						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
@@ -2576,7 +2576,7 @@ class db_mapObj {
 						}
 					}
 				}
-				elseif ($disabled_classes['status'][$rs['Class_ID']] == '0') {
+				elseif ($disabled_classes['status'][$rs['class_id']] == '0') {
 					$rs['Status'] = 0;
 				}
 				else $rs['Status'] = 1;

@@ -195,7 +195,7 @@ switch ($this->formvars['action']) {
 					SET
 						oid = '" . $this->formvars['new_oid_' . $layer_id] . "'
 					WHERE
-						Layer_ID = " . $layer_id . "
+						layer_id = " . $layer_id . "
 				";
 				$result = $this->database->execSQL($sql);
 			}
@@ -210,7 +210,7 @@ switch ($this->formvars['action']) {
 					SET
 						pfad = '" . $this->formvars['new_query_' . $layer_id] . "'
 					WHERE
-						Layer_ID = " . $layer_id . "
+						layer_id = " . $layer_id . "
 				";
 				$result = $this->database->execSQL($sql);
 			}
@@ -235,7 +235,7 @@ switch ($this->formvars['action']) {
 							SET
 								Data = '" . $this->formvars['new_data_' . $layer_id] . "'
 							WHERE
-								Layer_ID = " . $layer_id . "
+								layer_id = " . $layer_id . "
 						";
 						$result = $this->database->execSQL($sql);
 					}
@@ -253,12 +253,12 @@ $this->formvars['order'] = $this->formvars['order'] ?: 'name';
 $query = "
 	SELECT DISTINCT 
 		layer.*,
-		ul.Layer_ID as used_layer_layer_id,
+		ul.layer_id as used_layer_layer_id,
 		CONCAT('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as connectionstring,
 		g.Gruppenname
 	FROM 
 		`layer` 
-		LEFT JOIN used_layer ul ON ul.Layer_ID = layer.Layer_ID
+		LEFT JOIN used_layer ul ON ul.layer_id = layer.layer_id
 		LEFT JOIN	u_groups g ON layer.Gruppe = g.id 
 		LEFT JOIN	connections c ON c.id = connection_id
 	WHERE
@@ -270,13 +270,13 @@ $query = "
 #$with_layer_id = '1,2,3,4';
 $with_layer_id = '';
 if ($with_layer_id != '') {
-	$query .= '	AND Layer_ID IN (' . $with_layer_id . ')';
+	$query .= '	AND layer_id IN (' . $with_layer_id . ')';
 }
 # bestimmte Layer ausschließen
 #$without_layer_id = '1,2,3,4';
 $without_layer_id = '';
 if ($without_layer_id != '') {
-	$query .= '	AND Layer_ID NOT IN (' . $without_layer_id . ')';
+	$query .= '	AND layer_id NOT IN (' . $without_layer_id . ')';
 }
 
 #echo '<br>get layer with sql: ' . $query;
@@ -438,9 +438,9 @@ while ($layer = $this->database->result->fetch_assoc()) {
 					' . $layer["Gruppenname"] . '
 				</div>
 				<div style="width: 200px; margin-top: 40px;">
-					<input type="hidden" name="layer_id[]" value="' . $layer["Layer_ID"] . '">
-					<input style="float: left" type="checkbox" name="check_' . $layer["Layer_ID"] . '" value="1">
-					<div>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'&csrf_token=' . $_SESSION['csrf_token'] . '"target="_blank">'.$layer["Name"].'</a></div>
+					<input type="hidden" name="layer_id[]" value="' . $layer["layer_id"] . '">
+					<input style="float: left" type="checkbox" name="check_' . $layer["layer_id"] . '" value="1">
+					<div>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id='.$layer["layer_id"].'&csrf_token=' . $_SESSION['csrf_token'] . '"target="_blank">'.$layer["Name"].'</a></div>
 				</div>
 			</td>
 			<td style="background-color: '.$color[$status['oid']].'">
@@ -450,20 +450,20 @@ while ($layer = $this->database->result->fetch_assoc()) {
 			<td valign="top" style="background-color: '.$color[$status['query']].'">
 				' . ($i == 0 ? '<div class="fett scrolltable_header">Query</div>' : '') . '
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
-				' . ((!$status['query']) ? '<div class="replaced"><textarea name="new_query_' . $layer["Layer_ID"] . '" onmouseenter="select_text(this, \'oid\');">' . delete_oid_in_sql($layer['pfad']) . '</textarea></div>' : '') . '
+				' . ((!$status['query']) ? '<div class="replaced"><textarea name="new_query_' . $layer["layer_id"] . '" onmouseenter="select_text(this, \'oid\');">' . delete_oid_in_sql($layer['pfad']) . '</textarea></div>' : '') . '
 			</td>
 			<td valign="top" style="background-color: '.$color[$status['data']].'">
 				' . ($i == 0 ? '<div class="fett scrolltable_header">Data</div>' : '') . '
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['data'] . '</textarea>
-				' . ((!$status['data'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea name="new_data_' . $layer["Layer_ID"] . '" onmouseenter="select_text(this, \'oid\');">' . replace_oid_in_data($layer['data'], $result['oid_alternative']) . '</textarea></div>' : '') . '
+				' . ((!$status['data'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea name="new_data_' . $layer["layer_id"] . '" onmouseenter="select_text(this, \'oid\');">' . replace_oid_in_data($layer['data'], $result['oid_alternative']) . '</textarea></div>' : '') . '
 			</td>
 			<td>
 				' . ($i == 0 ? '<div class="fett scrolltable_header">oid-Alternative</div>' : '') . '
-				<input type="text" size="15" name="new_oid_' . $layer["Layer_ID"] . '" value="' . $result['oid_alternative'] . '">
+				<input type="text" size="15" name="new_oid_' . $layer["layer_id"] . '" value="' . $result['oid_alternative'] . '">
 			</td>			
 			<td>
 				' . ($i == 0 ? '<div class="fett scrolltable_header">Haupttabelle</div>' : '') . '
-				<input type="text" size="15" name="maintable_' . $layer["Layer_ID"] . '" value="' . $layer['maintable'] . '">
+				<input type="text" size="15" name="maintable_' . $layer["layer_id"] . '" value="' . $layer['maintable'] . '">
 			</td>
 			<td>
 				' . ($i == 0 ? '<div class="fett scrolltable_header">Fehlermeldung</div>' : '') . '

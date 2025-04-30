@@ -126,13 +126,13 @@ $query = "SELECT * FROM `layer` WHERE connectiontype = 7";
 #$with_layer_id = '1,2,3,4';
 $with_layer_id = '';
 if ($with_layer_id != '') {
-	$query .= '	AND Layer_ID IN (' . $with_layer_id . ')';
+	$query .= '	AND layer_id IN (' . $with_layer_id . ')';
 }
 # bestimmte Layer ausschließen
 #$without_layer_id = '1,2,3,4';
 $without_layer_id = '';
 if ($without_layer_id != '') {
-	$query .= '	AND Layer_ID NOT IN (' . $without_layer_id . ')';
+	$query .= '	AND layer_id NOT IN (' . $without_layer_id . ')';
 }
 #echo '<br>get layer with sql: ' . $query;
 $userDb->execSQL($query);
@@ -194,7 +194,7 @@ while ($line = $result->fetch_assoc()){
 			SET
 				`status` = '" . addslashes($status[1]) . "'
 			WHERE
-				`Layer_ID` = " . $line["Layer_ID"] . "
+				`layer_id` = " . $line["layer_id"] . "
 		";
 	}
 	else {
@@ -206,7 +206,7 @@ while ($line = $result->fetch_assoc()){
 			SET
 				`status` = ''
 			WHERE
-				`Layer_ID` = " . $line["Layer_ID"] . "
+				`layer_id` = " . $line["layer_id"] . "
 		";
 	}
 	$result2 = $userDb->execSQL($query);

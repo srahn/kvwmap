@@ -22,7 +22,7 @@
     <td>
     	<table width="100%" border="0" cellspacing="0" cellpadding="2">
 	      <tr>
-	        <th align="left"><a href="index.php?go=Metadaten_Uebersicht&order=Layer_ID"><?php echo $this->strID; ?></a></th>
+	        <th align="left"><a href="index.php?go=Metadaten_Uebersicht&order=layer_id"><?php echo $this->strID; ?></a></th>
 	        <th><a href="index.php?go=Metadaten_Uebersicht&order=Name"><?php echo $this->strName; ?></a></th>
 	        <td>&nbsp;</td>
 	      </tr>

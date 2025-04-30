@@ -1449,33 +1449,33 @@ from
 				}
 				echo '
 			<tr style="background-color:'.$tr_color.'">
-				<input type="hidden" name="ID['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">
-				<td style="border-bottom:1px solid #C3C7C3">'.$this->classes[$i]['Class_ID'].'</td>'; ?>
+				<input type="hidden" name="ID['.$this->classes[$i]['class_id'].']" value="'.$this->classes[$i]['class_id'].'">
+				<td style="border-bottom:1px solid #C3C7C3">'.$this->classes[$i]['class_id'].'</td>'; ?>
 				<td style="border-bottom:1px solid #C3C7C3">
-					<input size="12" type="text" name="name[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['name']; ?>">
+					<input size="12" type="text" name="name[<?php echo $this->classes[$i]['class_id']; ?>]" value="<?php echo $this->classes[$i]['name']; ?>">
 				</td><?php
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') { ?>
 						<td style="border-bottom:1px solid #C3C7C3">
-							<input size="12" type="text" name="name_<?php echo $language; ?>[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['Name_' . $language]; ?>">
+							<input size="12" type="text" name="name_<?php echo $language; ?>[<?php echo $this->classes[$i]['class_id']; ?>]" value="<?php echo $this->classes[$i]['Name_' . $language]; ?>">
 						</td><?php
 					}
 				} ?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<textarea name="expression[<?php echo $this->classes[$i]['Class_ID']; ?>]" cols="28" rows="3"><?php echo $this->classes[$i]['Expression']; ?></textarea>
+					<textarea name="expression[<?php echo $this->classes[$i]['class_id']; ?>]" cols="28" rows="3"><?php echo $this->classes[$i]['Expression']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<textarea name="text[<?php echo $this->classes[$i]['text']; ?>]" cols="18" rows="3"><?php echo $this->classes[$i]['text']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<input type="text" name="classification[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="18" value="<?php echo $this->classes[$i]['classification']; ?>">
+					<input type="text" name="classification[<?php echo $this->classes[$i]['class_id']; ?>]" size="18" value="<?php echo $this->classes[$i]['classification']; ?>">
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<table cellpadding="0" cellspacing="2">
 						<tr>
 							<td colspan="4">
 								<? echo $strImagefile; ?>:
-								<input type="text" name="legendgraphic[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="19" value="<?php echo $this->classes[$i]['legendgraphic']; ?>">
+								<input type="text" name="legendgraphic[<?php echo $this->classes[$i]['class_id']; ?>]" size="19" value="<?php echo $this->classes[$i]['legendgraphic']; ?>">
 							</td>
 						</tr>
 						<tr>
@@ -1483,13 +1483,13 @@ from
 								<? echo $strWidth; ?>:&nbsp;
 							</td>
 							<td>
-								<input size="1" type="text" name="legendimagewidth[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendimagewidth']; ?>">
+								<input size="1" type="text" name="legendimagewidth[<?php echo $this->classes[$i]['class_id']; ?>]" value="<?php echo $this->classes[$i]['legendimagewidth']; ?>">
 							</td>
 							<td>
 								<? echo $strHeight; ?>:&nbsp;
 							</td>
 							<td>
-								<input size="1" type="text" name="legendimageheight[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendimageheight']; ?>">
+								<input size="1" type="text" name="legendimageheight[<?php echo $this->classes[$i]['class_id']; ?>]" value="<?php echo $this->classes[$i]['legendimageheight']; ?>">
 							</td>
 						</tr>
 					</table>
@@ -1501,21 +1501,21 @@ from
 								<?php echo $strMap; ?>:&nbsp;
 							</td>
 							<td>
-								<input size="3" type="text" name="order[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['drawingorder']; ?>">
+								<input size="3" type="text" name="order[<?php echo $this->classes[$i]['class_id']; ?>]" value="<?php echo $this->classes[$i]['drawingorder']; ?>">
 							</td>
 						</tr>
 							<td>
 								<?php echo $strLegend; ?>:&nbsp;
 							</td>
 							<td>
-								<input size="3" type="text" name="classlegendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>">
+								<input size="3" type="text" name="classlegendorder[<?php echo $this->classes[$i]['class_id']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>">
 							</td>
 						</tr>
 					</table>
 				</td>				
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<? if($this->formvars['editable']) { ?>
-					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
+					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['class_id']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
 					<? } ?>
 				</td>
 			</tr><?php

@@ -83,7 +83,7 @@
 							<tr>
 								<th>&nbsp;</th>
 								<th align="left">
-									<a href="index.php?go=Layer_Anzeigen&order=Layer_ID&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a>
+									<a href="index.php?go=Layer_Anzeigen&order=layer_id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a>
 								</th>
 								<th align="left">
 									<a href="index.php?go=Layer_Anzeigen&order=<? echo $switch_to_order; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">

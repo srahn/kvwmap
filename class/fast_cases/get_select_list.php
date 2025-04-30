@@ -855,7 +855,7 @@ class db_mapObj{
 			FROM
 				" . ($layer_id < 0 ? "rollenlayer" : "layer") . "
 			WHERE
-				" . ($layer_id < 0 ? "-id" : "Layer_ID") . " = " . $layer_id . " AND
+				" . ($layer_id < 0 ? "-id" : "layer_id") . " = " . $layer_id . " AND
 				`connectiontype` = 6
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_layer_connection - Lesen der connection Daten des Layers:<br>" . $sql, 4);

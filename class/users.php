@@ -209,7 +209,7 @@ class account {
 			$sql.=' ,stelle AS s, user AS u';
 		}
 		$sql.=' WHERE c.user_id=c2l.user_id';
-		$sql.=' AND c2l.layer_id = l.Layer_ID';
+		$sql.=' AND c2l.layer_id = l.layer_id';
 		$sql.=' AND c.time_id=c2l.time_id';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
@@ -477,7 +477,7 @@ class account {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALB.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeALB';
-			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.Layer_ID = c2l.layer_id ON c2l.time_id = u_consumeALB.time_id AND c2l.user_id = u_consumeALB.user_id AND c2l.stelle_id = u_consumeALB.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
+			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALB.time_id AND c2l.user_id = u_consumeALB.user_id AND c2l.stelle_id = u_consumeALB.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
 			$sql.=' WHERE 1=1';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
 				$sql.=' AND '.$era.'(u_consumeALB.time_id)='.$date.' AND YEAR(u_consumeALB.time_id)='.$year;
@@ -540,7 +540,7 @@ class account {
 			$sql.=' ,stelle AS s, user AS u';
 		}
 		$sql.=', u_consumeALK';
-		if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.Layer_ID = c2l.layer_id ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
+		if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
 		$sql.=' WHERE u_consumeALK.druckrahmen_id = druckrahmen.id';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
@@ -575,7 +575,7 @@ class account {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM druckrahmen, user AS u, stelle AS s, u_consumeALK';
-			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.Layer_ID = c2l.layer_id ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
+			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
 			$sql.=' WHERE u_consumeALK.druckrahmen_id = druckrahmen.id';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
 				$sql.=' AND '.$era.'(u_consumeALK.time_id)='.$date.' AND YEAR(u_consumeALK.time_id)='.$year;
@@ -613,7 +613,7 @@ class account {
 		# Abfrage der Anzahl der Layer
 		$sql = "
 			SELECT
-				COUNT(Layer_ID) AS layers
+				COUNT(layer_id) AS layers
 			FROM
 				layer
 			WHERE
@@ -740,7 +740,7 @@ class user {
 			FROM
 				layer
 			WHERE
-				Layer_ID = " . $layer_id . " AND
+				layer_id = " . $layer_id . " AND
 				shared_from = " . $user_id . "
 		";
 		$this->debug->write("<p>file:users.php class:user->layerIsSharedFrom:<br>" . $sql, 4);

@@ -58,7 +58,7 @@
 	$GUI->ukos_new_doppikobjekt = function($schema_name, $table_name, $geometry_type) use ($GUI) {
 		$sql = "
 			SELECT
-				`Layer_ID`,
+				`layer_id`,
 				`Name`
 			FROM
 				`layer`

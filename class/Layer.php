@@ -202,7 +202,7 @@ class Layer extends PgObject {
 	 */
 	function get_stellen() {
 		include_once(CLASSPATH . 'Layer2Stelle.php');
-		$used_layers = Layer2Stelle::find($this->gui, "Layer_ID = " . $this->get_id());
+		$used_layers = Layer2Stelle::find($this->gui, "layer_id = " . $this->get_id());
 		$stellen_ids = array_map(
 			function($used_layer) {
 				return $used_layer->get('Stelle_ID');
@@ -344,13 +344,13 @@ class Layer extends PgObject {
 l.Name AS sub_layer_name
 		FROM
 			`layer_attributes` la JOIN
-			`used_layer` ul ON la.layer_id = ul.Layer_ID JOIN
+			`used_layer` ul ON la.layer_id = ul.layer_id JOIN
 			`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.Stelle_ID = las.stelle_id LEFT JOIN
-			`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.Layer_ID
+			`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.layer_id
 		WHERE
 			la.layer_id = " . $id . " AND
 			la.form_element_type = 'SubFormEmbeddedPK' AND
-			l.Layer_ID IS NOT NULL AND
+			l.layer_id IS NOT NULL AND
 			l.sync != '1' AND
 			las.privileg = '1'
 		";
@@ -378,12 +378,12 @@ l.Name AS sub_layer_name
 				l.Name AS layer_name
 			FROM
 				`layer_attributes` la LEFT JOIN
-				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.Layer_ID
+				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.layer_id
 			WHERE
 				la.layer_id = " . $id . " AND
 				la.visible = 1 AND
 				la.form_element_type = 'SubFormEmbeddedPK' AND
-				l.Layer_ID IS NULL
+				l.layer_id IS NULL
 		";
 		#echo '<br>SQL to find coupled sublayer that not exists: ' . $sql;
 		$this->database->execSQL($sql);
@@ -409,16 +409,16 @@ l.Name AS sub_layer_name
 				s.Bezeichnung AS stelle_bezeichnung
 			FROM
 				`layer_attributes` la JOIN
-				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.Layer_ID JOIN
-				`used_layer` ul ON la.layer_id = ul.Layer_ID JOIN
+				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.layer_id JOIN
+				`used_layer` ul ON la.layer_id = ul.layer_id JOIN
 				`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.Stelle_ID = las.stelle_id JOIN 
 				`stelle` s ON ul.Stelle_ID = s.ID LEFT JOIN
-				`used_layer` ul2 ON ul.Stelle_ID = ul2.Stelle_ID AND SUBSTRING_INDEX(la.options, ',', 1) = ul2.Layer_ID
+				`used_layer` ul2 ON ul.Stelle_ID = ul2.Stelle_ID AND SUBSTRING_INDEX(la.options, ',', 1) = ul2.layer_id
 			WHERE
 				la.layer_id = " . $id. " AND
 				la.form_element_type = 'SubFormEmbeddedPK' AND
 				ul2.Stelle_ID IS NULL AND
-				ul2.Layer_ID IS NULL
+				ul2.layer_id IS NULL
 		";
 		#echo '<br>SQL to find sublayer that are not in same stelle: ' . $sql;
 		$this->database->execSQL($sql);
@@ -488,7 +488,7 @@ l.Name AS sub_layer_name
 				) OR
 				`Data` LIKE '%" . $this->get('schema') . "." . $this->get('maintable') . "%'
 			) AND
-			`Layer_ID` != " . $this->get($this->identifier) . "
+			`layer_id` != " . $this->get($this->identifier) . "
 		");
 		$this->data = $data;
 		return (count($layers) > 0);
@@ -510,13 +510,13 @@ l.Name AS sub_layer_name
 				function($attribute) {
 					return explode(',', $attribute->get('options'))[0];
 				},
-				LayerAttribute::find($this->gui, "Layer_ID = " . $this->get('layer_id') . " AND form_element_type LIKE 'SubForm%PK'")
+				LayerAttribute::find($this->gui, "layer_id = " . $this->get('layer_id') . " AND form_element_type LIKE 'SubForm%PK'")
 			)
 		);
 		if (count($subform_layer_ids) > 0) {
 			return Layer::find(
 				$this->gui,
-				"Layer_ID IN (" . implode(', ', $subform_layer_ids) . ')'
+				"layer_id IN (" . implode(', ', $subform_layer_ids) . ')'
 			);
 		}
 		else {
@@ -531,13 +531,13 @@ l.Name AS sub_layer_name
 				function($attribute) {
 					return $attribute->get('layer_id');
 				},
-				LayerAttribute::find($this->gui, "Layer_ID != " . $this->get('layer_id') . " AND options LIKE '" . $this->get('layer_id') . ",%' AND form_element_type LIKE 'SubForm%PK'")
+				LayerAttribute::find($this->gui, "layer_id != " . $this->get('layer_id') . " AND options LIKE '" . $this->get('layer_id') . ",%' AND form_element_type LIKE 'SubForm%PK'")
 			)
 		);
 		if (count($parentform_layer_ids) > 0) {
 			return Layer::find(
 				$this->gui,
-				"Layer_ID IN (" . implode(', ', $parentform_layer_ids) . ')'
+				"layer_id IN (" . implode(', ', $parentform_layer_ids) . ')'
 			);
 		}
 		else {

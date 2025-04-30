@@ -1828,7 +1828,7 @@ class GUI {
 									$original_class_image = $imagename;
 								}
 								####################################
-								$classid = $layer['Class'][$k]['Class_ID'];
+								$classid = $layer['Class'][$k]['class_id'];
 								if($this->mapDB->disabled_classes['status'][$classid] == '0'){
 									if($height < $width)$height1 = 12;
 									else $height1 = 18;
@@ -3047,7 +3047,7 @@ class db_mapObj {
 			FROM
 				kvwmap.u_rolle2used_layer AS rl,
 				kvwmap.used_layer AS ul JOIN
-				kvwmap.layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+				kvwmap.layer AS l ON l.layer_id = ul.layer_id LEFT JOIN
 				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
 				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				kvwmap.connections as c ON l.connection_id = c.id

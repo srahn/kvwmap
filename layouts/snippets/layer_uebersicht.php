@@ -211,7 +211,7 @@
 		<td width="">
 			<table width="100%" border="0" style="border:2px solid #C3C7C3"cellspacing="0" cellpadding="3">
 				<tr>
-					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="id-column"><a href="index.php?go=Layer_Uebersicht&order=Layer_ID">ID</a></th>
+					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="id-column"><a href="index.php?go=Layer_Uebersicht&order=layer_id">ID</a></th>
 					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="layer-column"><a href="index.php?go=Layer_Uebersicht">Thema</a></th>
 					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="drawingorder-column">Default<br>Zeichen-<br>reihenfolge</th>
 					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="wms_keywordlist-column">

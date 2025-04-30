@@ -935,7 +935,7 @@ echo '			</table>
 				# alte Klassen löschen
 				$old_classes = $dbmap->read_Classes($this->formvars['selected_layer_id']);
 				for($i = 0; $i < count($old_classes); $i++){
-					$dbmap->delete_Class($old_classes[$i]['Class_ID']);
+					$dbmap->delete_Class($old_classes[$i]['class_id']);
 				}
 				for ($i = 0; $i < count($result); $i++) {
 					foreach ($result[$i] As $key => $value) {
@@ -960,7 +960,7 @@ echo '			</table>
 						$empty_label->maxsize = '10';
 						$empty_label->position = '6';
 						$new_label_id = $dbmap->new_Label($empty_label);
-						$dbmap->addLabel2Class($class['Class_ID'], $new_label_id, 0);
+						$dbmap->addLabel2Class($class['class_id'], $new_label_id, 0);
 					}
 				}
 			}
@@ -1586,7 +1586,7 @@ echo '			</table>
 									$original_class_image = $imagename;
 								}
 								####################################
-								$classid = $layer['Class'][$k]['Class_ID'];
+								$classid = $layer['Class'][$k]['class_id'];
 								if($this->mapDB->disabled_classes['status'][$classid] == '0'){
 									if($height < $width)$height1 = 12;
 									else $height1 = 18;
@@ -4697,7 +4697,7 @@ echo '			</table>
     }
     echo ' >';
     for($i = 0; $i < count($this->classdaten); $i++){
-      echo html_umlaute('<option value="'.$this->classdaten[$i]['Class_ID'].'">'.$this->classdaten[$i]['name'].'</option>');
+      echo html_umlaute('<option value="'.$this->classdaten[$i]['class_id'].'">'.$this->classdaten[$i]['name'].'</option>');
     }
     echo'
       </select>';
@@ -5912,7 +5912,7 @@ echo '			</table>
 		# alte Klassen löschen
 		$this->classes = $dbmap->read_Classes($this->formvars['selected_layer_id']);
 		for($i = 0; $i < count($this->classes); $i++){
-			$dbmap->delete_Class($this->classes[$i]['Class_ID']);
+			$dbmap->delete_Class($this->classes[$i]['class_id']);
 		}
 		for ($i = 0; $i < count($result); $i++) {
 			foreach ($result[$i] As $key => $value) {
@@ -8626,7 +8626,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$attrib['legendimageheight'] = $legendimageheight[$i];
 			$attrib['order'] = $order[$i];
 			$attrib['legendorder'] = ($legendorder[$i] == '' ? 'NULL' : $legendorder[$i]);
-			$attrib['class_id'] = $this->classes[$i]['Class_ID'];
+			$attrib['class_id'] = $this->classes[$i]['class_id'];
 			$mapDB->update_Class($attrib);
 			if ($attrib['class_id'] != $attrib['new_class_id']) {
 				$mapDB->updateStyle2Class_ClassID($attrib['class_id'], $attrib['new_class_id']);
@@ -9266,7 +9266,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# auch die Klassen löschen
 		$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
 		for($i = 0; $i < count($this->classes); $i++){
-			$mapDB->delete_Class($this->classes[$i]['Class_ID']);
+			$mapDB->delete_Class($this->classes[$i]['class_id']);
 		}
 		# layer_attributes löschen
 		$mapDB->delete_layer_attributes($this->formvars['selected_layer_id']);
@@ -10401,7 +10401,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else{
 			$name_column = "l.Name";
 		}
-		$sql = "SELECT count(z.layer_id) as count, z.layer_id, " . $name_column.", l.alias FROM zwischenablage as z, layer as l WHERE z.layer_id = l.Layer_ID AND user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." GROUP BY z.layer_id, l.Name";
+		$sql = "SELECT count(z.layer_id) as count, z.layer_id, " . $name_column.", l.alias FROM kvwmap.zwischenablage as z, layer as l WHERE z.layer_id = l.layer_id AND user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." GROUP BY z.layer_id, l.Name";
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql,4, 1);
 		$result = $this->database->result;
@@ -12902,8 +12902,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				t2.privileg = t1.privileg,
 				t2.export_privileg = t1.export_privileg
 			WHERE
-				t1.Layer_ID = " . $this->formvars['from_layer_id'] . " AND
-				t2.Layer_ID = " . $this->formvars['to_layer_id'] . "
+				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
+				t2.layer_id = " . $this->formvars['to_layer_id'] . "
 		";
 		#echo '<br>Sql zur Übernahme der default layer attribute privileges von einem Layer auf einen anderen: ' . $sql;
 		$this->debug->write("<p>file:users.php class:gui->Attributeditor_takeover_default_layer_privileges - Speichern der Default-Layerrechte:<br>" . $sql,4);
@@ -14720,7 +14720,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			FROM 
 				datasources as d JOIN
 				layer_datasources as ld ON ld.datasource_id = d.id JOIN
-				layer as l ON l.Layer_ID = ld.layer_id JOIN
+				layer as l ON l.layer_id = ld.layer_id JOIN
 				u_rolle2used_layer r ON r.layer_id = ld.layer_id AND r.user_id = " . $this->user->id . " AND r.stelle_id = " . $this->Stelle->id . "
 			WHERE
 				r.aktivStatus != '0'
@@ -18143,7 +18143,7 @@ class db_mapObj{
 			FROM
 				kvwmap.u_rolle2used_layer AS rl,
 				kvwmap.used_layer AS ul JOIN
-				kvwmap.layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+				kvwmap.layer AS l ON l.layer_id = ul.layer_id LEFT JOIN
 				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
 				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				kvwmap.connections as c ON l.connection_id = c.id
@@ -18325,7 +18325,7 @@ class db_mapObj{
 		return $Classes;
 	}
 
-	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {
+	function read_Classes($layer_id, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
 		$Classes = array();
 
@@ -18355,7 +18355,7 @@ class db_mapObj{
 			FROM
 				kvwmap.classes
 			WHERE
-				layer_id = " . $Layer_ID .
+				layer_id = " . $layer_id .
 				(
 					(!empty($classification)) ? " AND
 						(
@@ -18600,7 +18600,7 @@ class db_mapObj{
 	}
 
   function deleteFilter($stelle_id, $layer_id, $attributname){
-    $sql = 'DELETE FROM u_attributfilter2used_layer WHERE Stelle_ID = '.$stelle_id.' AND Layer_ID = '.$layer_id.' AND attributname = "'.$attributname.'"';
+    $sql = 'DELETE FROM u_attributfilter2used_layer WHERE Stelle_ID = '.$stelle_id.' AND layer_id = '.$layer_id.' AND attributname = "'.$attributname.'"';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteFilter - Löschen eines Attribut-Filters eines used_layers:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
@@ -18623,7 +18623,7 @@ class db_mapObj{
 				Filter = '" . $filterstring . "'
 			WHERE
 				Stelle_ID = " . $stelle_id . " AND
-				Layer_ID = " . $layer_id . "
+				layer_id = " . $layer_id . "
 		";
 		// echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->write_filter - Speichern des Filterstrings:<br>" . $sql, 4);
@@ -18671,7 +18671,7 @@ class db_mapObj{
 				operator = '" . $formvars['operator']. "',
 				type = '" . $formvars['type'] . "',
 				Stelle_ID = " . $formvars['stelle'] . ",
-				Layer_ID = " . $formvars['layer'] . "
+				layer_id = " . $formvars['layer'] . "
 			ON DUPLICATE KEY UPDATE  
 				attributvalue = '" . pg_escape_string($formvars['attributvalue']) . "', 
 				operator = '" . $formvars['operator'] . "'";
@@ -18684,7 +18684,7 @@ class db_mapObj{
 		}
 	}
 
-	function read_attribute_filter($Stelle_ID, $Layer_ID) {
+	function read_attribute_filter($Stelle_ID, $layer_id) {
 		$filter = [];
 		$sql = "
 			SELECT
@@ -18693,7 +18693,7 @@ class db_mapObj{
 				u_attributfilter2used_layer
 			WHERE
 				Stelle_ID = " . $Stelle_ID . " AND
-				Layer_ID = " . $Layer_ID . "
+				layer_id = " . $layer_id . "
 		";
 		# echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_attribute_filter - Lesen der Attribute-Filter-Parameter:<br>" . $sql, 4);
@@ -18967,7 +18967,7 @@ class db_mapObj{
 									$further_options = explode(' ', $optionen[1]);
 									for ($k = 0; $k < count($further_options); $k++) {
 										if (strpos($further_options[$k], 'layer_id') !== false) {
-											#layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+											#layer_id=XX bietet die Möglichkeit hier eine layer_id zu definieren, für die man einen neuen Datensatz erzeugen kann
 											$attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
 											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
@@ -19171,7 +19171,7 @@ class db_mapObj{
 								if ($optionen[1] != '') {
 									$further_options = explode(' ', $optionen[1]);			# die weiteren Optionen exploden (opt1 opt2 opt3)
 									for($k = 0; $k < count($further_options); $k++) {
-										if (strpos($further_options[$k], 'layer_id') !== false) {		 #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+										if (strpos($further_options[$k], 'layer_id') !== false) {		 #layer_id=XX bietet die Möglichkeit hier eine layer_id zu definieren, für die man einen neuen Datensatz erzeugen kann
 											$attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
 											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
@@ -19486,7 +19486,7 @@ class db_mapObj{
 					stelle AS s JOIN
 					used_layer AS ul ON (s.ID = ul.Stelle_ID)
 				WHERE
-					ul.Layer_ID IN (" . implode(', ', $layer_ids) . ")
+					ul.layer_id IN (" . implode(', ', $layer_ids) . ")
 			";
 			#echo '<br>Sql: ' . $sql;
 			$ret = $database->execSQL($sql, 4, 0);
@@ -19534,7 +19534,7 @@ class db_mapObj{
 				' . ($this->GUI->plugin_loaded('mobile') ? ', sync' : '') . '
 				' . ($this->GUI->plugin_loaded('mobile') ? ', vector_tile_url' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', cluster_option' : '') . '
-				FROM layer WHERE Layer_ID=' . $layer_ids[$i]
+				FROM layer WHERE layer_id=' . $layer_ids[$i]
 			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
@@ -19548,7 +19548,7 @@ class db_mapObj{
 						'',
 						"
 							SELECT
-								'" . $last_layer_id . "' AS Layer_ID,
+								'" . $last_layer_id . "' AS layer_id,
 								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
 								queryable,
 								drawingorder,
@@ -19559,7 +19559,7 @@ class db_mapObj{
 							FROM
 								used_layer
 							WHERE
-								Layer_ID = " . $layer_ids[$i] . " AND
+								layer_id = " . $layer_ids[$i] . " AND
 								Stelle_ID = " . $stellen[$s]['id'] . "
 						"
 					);
@@ -19574,7 +19574,7 @@ class db_mapObj{
 						"
 							SELECT
 								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
-								'" . $last_layer_id . "' AS Layer_ID,
+								'" . $last_layer_id . "' AS layer_id,
 								attributname,
 								attributvalue,
 								operator,
@@ -19582,7 +19582,7 @@ class db_mapObj{
 							FROM
 								u_attributfilter2used_layer
 							WHERE
-								Layer_ID = " . $layer_ids[$i] . " AND
+								layer_id = " . $layer_ids[$i] . " AND
 								Stelle_ID = " . $stellen[$s]['id'] . "
 						"
 					);
@@ -19669,12 +19669,12 @@ class db_mapObj{
 				}
 			}
 
-			$classes = $database->create_insert_dump('classes', 'Class_ID', 'SELECT Class_ID, Name, \''.$last_layer_id.'\' AS Layer_ID, Expression, drawingorder, text FROM classes WHERE Layer_ID=' . $layer_ids[$i]);
+			$classes = $database->create_insert_dump('classes', 'class_id', 'SELECT class_id, Name, \''.$last_layer_id.'\' AS layer_id, Expression, drawingorder, text FROM classes WHERE layer_id=' . $layer_ids[$i]);
 			for ($j = 0; $j < count_or_0($classes['insert']); $j++) {
 				$dump_text .= "\n\n-- Class " . $classes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $classes['insert'][$j];
 				$dump_text .= "\nSET @last_class_id=LAST_INSERT_ID();";
 
-				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, symbol,symbolname,size,color,outlinecolor, colorrange, datarange, rangeitem, opacity, minsize,maxsize, minscale, maxscale, angle,angleitem,width,minwidth,maxwidth, offsetx, offsety, polaroffset, pattern, geomtransform, gap, initialgap, linecap, linejoin, linejoinmaxsize FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
+				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, symbol,symbolname,size,color,outlinecolor, colorrange, datarange, rangeitem, opacity, minsize,maxsize, minscale, maxscale, angle,angleitem,width,minwidth,maxwidth, offsetx, offsety, polaroffset, pattern, geomtransform, gap, initialgap, linecap, linejoin, linejoinmaxsize FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND class_id='.$classes['extra'][$j].' ORDER BY drawingorder');
 				for ($k = 0; $k < count_or_0($styles['insert']); $k++) {
 					$dump_text .= "\n\n-- Style " . $styles['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $styles['insert'][$k] . "\nSET @last_style_id=LAST_INSERT_ID();";
@@ -19682,7 +19682,7 @@ class db_mapObj{
 					$dump_text .= "\nINSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, " . $k . ");";
 				}
 
-				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
+				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND class_id='.$classes['extra'][$j]);
 				for ($k = 0; $k < count_or_0($labels['insert']); $k++) {
 					$dump_text .= "\n\n-- Label " . $labels['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $labels['insert'][$k] . "\nSET @last_label_id=LAST_INSERT_ID();";
@@ -20294,7 +20294,7 @@ class db_mapObj{
 				SET
 					drawingorder = " . $formvars['orders'][$i] . "
 				WHERE
-					Layer_ID = " . $layer_id;
+					layer_id = " . $layer_id;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>" . $sql, 4);
 			$ret = $this->db->execSQL($sql, 4, 1, true);
 			if (!$ret['success']) {
@@ -21499,7 +21499,7 @@ class db_mapObj{
 					privileg = '" . $formvars['privileg'] . "',
 					export_privileg = '" . $formvars['export_privileg'] . "'
 				WHERE
-					Layer_ID = " . $formvars['selected_layer_id'] . "
+					layer_id = " . $formvars['selected_layer_id'] . "
 			";
 			#echo '<br>Sql zur Speicherung der Default-Layerrechte: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern der Layerrechte zur Stelle:<br>" . $sql,4);
@@ -21636,12 +21636,12 @@ class db_mapObj{
     $classes = $this->read_Classes($layer_id);
     $anzahl = count($classes);
     if($anzahl == 1){
-      return $classes[0]['Class_ID'];
+      return $classes[0]['class_id'];
     }
     else{
       for($i = 0; $i < $anzahl; $i++){
 				if ($classes[$i]['Expression'] == '') {
-          return $classes[$i]['Class_ID'];
+          return $classes[$i]['class_id'];
         }
 				$exp = mapserverExp2SQL($classes[$i]['Expression'], $classitem);
 				
@@ -21651,7 +21651,7 @@ class db_mapObj{
     		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
         $count=pg_num_rows($query);
         if($count > 0){
-          return $classes[$i]['Class_ID'];
+          return $classes[$i]['class_id'];
         }
       }
     }
@@ -21773,7 +21773,7 @@ class db_mapObj{
 			if (value_of($attrib, 'legendimagewidth') == '') $attrib['legendimagewidth'] = 'NULL';
 			if (value_of($attrib, 'legendimageheight') == '') $attrib['legendimageheight'] = 'NULL';
 			if (value_of($attrib, 'legendorder') == '') $attrib['legendorder'] = 'NULL';
-			# attrib:(Name, Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder)
+			# attrib:(Name, layer_id, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder)
 			$sql = '
 				INSERT INTO 
 					kvwmap.classes 
@@ -21886,12 +21886,12 @@ class db_mapObj{
 
 		$sql = '
 			UPDATE
-				classes
+				kvwmap.classes
 			SET
-				Class_ID = ' . $attrib['new_class_id'] . ',
+				class_id = ' . $attrib['new_class_id'] . ',
 				'.$names.',
-				Layer_ID = ' . $attrib['layer_id'] . ',
-				Expression = "' . str_replace('\\', '\\\\', $attrib['expression']) . '",
+				layer_id = ' . $attrib['layer_id'] . ',
+				expression = "' . str_replace('\\', '\\\\', $attrib['expression']) . '",
 				text = "' . $attrib['text'] . '",
 				classification = "' . $attrib['classification'] . '",
 				legendgraphic= "' . $attrib['legendgraphic'] . '",
@@ -21900,7 +21900,7 @@ class db_mapObj{
 				drawingorder = ' . $attrib['order'] . ',
 				legendorder = '. $attrib['legendorder'] . '
 			WHERE
-				Class_ID = ' . $attrib['class_id'] . '
+				class_id = ' . $attrib['class_id'] . '
 		';
 
 		#echo $sql.'<br>';

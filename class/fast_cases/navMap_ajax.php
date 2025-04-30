@@ -3019,10 +3019,10 @@ class rolle {
 						kvwmap.layer_attributes AS la,
 						kvwmap.layer_attributes2stelle AS las
 					WHERE
-						la.layer_id = ul.Layer_ID AND
+						la.layer_id = ul.layer_id AND
 						form_element_type = 'SubformFK' AND
 						las.stelle_id = ul.Stelle_ID AND
-						ul.Layer_ID = las.layer_id AND
+						ul.layer_id = las.layer_id AND
 						las.attributename = split_part(split_part(la.options, ';', 1) , ',', -1)
 				) as privilegfk";
 		}
@@ -4198,7 +4198,7 @@ class db_mapObj{
 			FROM
 				kvwmap.u_rolle2used_layer AS rl,
 				kvwmap.used_layer AS ul JOIN
-				kvwmap.layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+				kvwmap.layer AS l ON l.layer_id = ul.layer_id LEFT JOIN
 				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
 				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				kvwmap.connections as c ON l.connection_id = c.id

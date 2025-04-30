@@ -1,11 +1,11 @@
 <?php
-class LayerClass extends MyObject {
+class LayerClass extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'classes');
-		$this->identifier = 'Class_ID';
+		parent::__construct($gui, 'kvwmap', 'classes');
+		$this->identifier = 'class_id';
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
@@ -61,7 +61,7 @@ class LayerClass extends MyObject {
 	}
 
 	function get_layerdef($classitem = null, $datentyp = 0, $layer_opacity = 1) {
-		#echo 'get_layerdef for Class: ' . $this->get('name') . '(' . $this->get('Class_ID') . ')';
+		#echo 'get_layerdef for Class: ' . $this->get('name') . '(' . $this->get('class_id') . ')';
 
 		if ($this->get('Expression') == '') {
 			$def = '';

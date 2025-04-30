@@ -1297,13 +1297,13 @@ class rolle {
   function read_disabled_class_expressions($layerset) {
 		$sql = "
 			SELECT 
-				cl.Layer_ID,
-				cl.Class_ID,
+				cl.layer_id,
+				cl.class_id,
 				cl.Expression,
 				cl.classification
 			FROM 
 				classes as cl
-				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID    
+				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.class_id    
 			WHERE 
 				r2uc.status = 0 AND 
 				r2uc.user_id = " . $this->user_id . "	AND 
@@ -1438,7 +1438,7 @@ class rolle {
 
 		if ($LayerName != '') {
 			if (is_numeric($LayerName)) {
-				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
+				$layer_name_filter .= " AND l.layer_id = " . $LayerName;
 			} else {
 				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
 			}
@@ -1450,10 +1450,10 @@ class rolle {
 						layer_attributes AS la,
 						layer_attributes2stelle AS las
 					WHERE
-						la.layer_id = ul.Layer_ID AND
+						la.layer_id = ul.layer_id AND
 						form_element_type = 'SubformFK' AND
 						las.stelle_id = ul.Stelle_ID AND
-						ul.Layer_ID = las.layer_id AND
+						ul.layer_id = las.layer_id AND
 						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 				) as privilegfk";
 		}
@@ -1465,7 +1465,7 @@ class rolle {
 		$sql = "
 			SELECT " .
 			$name_column . ",
-				l.Layer_ID,
+				l.layer_id,
 				l.alias, Datentyp, COALESCE(ul.group_id, Gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
@@ -1509,8 +1509,8 @@ class rolle {
 				" . ($this->gui_object->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
 				layer AS l JOIN
-				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
-				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID = ul.Stelle_ID AND r2ul.Layer_ID = ul.Layer_ID LEFT JOIN
+				used_layer AS ul ON l.layer_id=ul.layer_id JOIN
+				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID = ul.Stelle_ID AND r2ul.layer_id = ul.layer_id LEFT JOIN
 				connections as c ON l.connection_id = c.id
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
@@ -1896,7 +1896,7 @@ class db_mapObj{
 			FROM
 				" . ($layer_id < 0 ? "rollenlayer" : "layer") . "
 			WHERE
-				" . ($layer_id < 0 ? "-id" : "Layer_ID") . " = " . $layer_id . " AND
+				" . ($layer_id < 0 ? "-id" : "layer_id") . " = " . $layer_id . " AND
 				`connectiontype` = 6
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_layer_connection - Lesen der connection Daten des Layers:<br>" . $sql, 4);
@@ -2505,7 +2505,7 @@ class db_mapObj{
 	}
 
   function get_used_Layer($id) {
-    $sql ='SELECT * FROM used_layer WHERE Layer_ID = '.$id.' AND Stelle_ID = '.$this->Stelle_ID;
+    $sql ='SELECT * FROM used_layer WHERE layer_id = '.$id.' AND Stelle_ID = '.$this->Stelle_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_Layer - Lesen eines Layers:<br>" . $sql,4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
