@@ -41,8 +41,7 @@ class administration{
 	var $migration_files;
 	var $migrations_to_execute;
 
-	function __construct($database, $pgdatabase) {
-		$this->database = $database;
+	function __construct($pgdatabase) {
 		$this->pgdatabase = $pgdatabase;
 	}
 
@@ -51,21 +50,21 @@ class administration{
 		$migrations = array();
 		$sql = "
 			SELECT *
-			FROM migrations
+			FROM kvwmap.migrations
 		";
 		#echo '<br>SQL zur Abfrage der registrierten Migrationen: ' . $sql;
-		$result = $this->database->execSQL($sql,0, 0);
-		if (!$this->database->success) {
+		$result = $this->pgdatabase->execSQL($sql,0, 0);
+		if (!$this->pgdatabase->success) {
 			echo '<br>Migrationstabelle existiert noch nicht. Bei Neuinstallation wird sie angelegt ... <br>'; // bei Neuinstallation gibt es diese Tabelle noch nicht
 			$sql = "
-				CREATE TABLE IF NOT EXISTS `migrations` (
-				  `component` varchar(50) NOT NULL,
-				  `type` enum('mysql','postgresql') NOT NULL,
-				  `filename` varchar(255) NOT NULL
-				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+				CREATE TABLE IF NOT EXISTS kvwmap.migrations (
+				  component varchar(50) NOT NULL,
+				  type enum('postgresql') NOT NULL,
+				  filename varchar(255) NOT NULL
+				);
 			";
-			$result = $this->database->execSQL($sql,0, 0);
-			if ($this->database->success) {
+			$result = $this->pgdatabase->execSQL($sql,0, 0);
+			if ($this->pgdatabase->success) {
 				echo ' Migrationstabelle erfolgreich angelegt!';
 			}
 			else {
@@ -74,7 +73,7 @@ class administration{
 			}
 		}
 		else {
-			while ($rs = $this->database->result->fetch_array()) {
+			while ($rs = pg_fetch_array($result[1])) {
 				$migrations[$rs['component']][$rs['type']][$rs['filename']] = 1;
 			}
 		}
@@ -114,9 +113,7 @@ class administration{
 	}
 
 	function get_database_status() {
-		$this->migrations_to_execute['mysql'] = array();
 		$this->migrations_to_execute['postgresql'] = array();
-		$this->seeds_to_execute['mysql'] = array();
 		$this->seeds_to_execute['postgresql'] = array();
 		$this->migration_logs = $this->get_migration_logs();
 		$this->schema_migration_files = $this->get_schema_migration_files();
@@ -145,13 +142,6 @@ class administration{
 
 	function update_databases() {
 		$err_msgs = array();
-		foreach ($this->migrations_to_execute['mysql'] as $component => $component_migration) {
-			foreach ($component_migration as $file) {
-				$migration['component'] = $component;
-				$migration['file'] = $file;
-				$my_migrations[] = $migration;
-			}
-		}
 
 		foreach ($this->migrations_to_execute['postgresql'] as $component => $component_migration) {
 			foreach ($component_migration as $file) {
@@ -160,34 +150,33 @@ class administration{
 				$pg_migrations[] = $migration;
 			}
 		}
-		$err_msgs = array_merge($err_msgs, $this->execute_migrations('mysql', $my_migrations));
 		$err_msgs = array_merge($err_msgs, $this->execute_migrations('postgresql', $pg_migrations));
 
-		foreach ($this->seeds_to_execute['mysql'] as $component => $component_seed) {
-			$prepath = PLUGINS.$component.'/';
-			foreach ($component_seed as $file) {
-				$filepath = $prepath.'db/mysql/data/'.$file;
-				#echo '<br>Execute SQL from seed file: ' . $filepath;
-				$result = $this->database->exec_commands(
-					file_get_contents($filepath),
-					null, # Do not replace connection since we have connection_id's in layer defenitions ($this->pgdatabase->get_connection_string(),)
-					$this->pgdatabase->connection_id,
-					true
-				); # replace known constants
-				if ($result[0]) {
-					echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
-				}
-				else{
-					$sql = "
-						INSERT INTO `migrations`
-							(`component`, `type`, `filename`)
-						VALUES ('" . $component . "', 'mysql', '" . $file . "');
-					";
-					#echo '<p>Register MySQL migration for component ' . $component . ' with sql: <br>' . $sql;
-					$result=$this->database->execSQL($sql,0, 0);
-				}
-			}
-		}
+		// foreach ($this->seeds_to_execute['mysql'] as $component => $component_seed) {
+		// 	$prepath = PLUGINS.$component.'/';
+		// 	foreach ($component_seed as $file) {
+		// 		$filepath = $prepath.'db/mysql/data/'.$file;
+		// 		#echo '<br>Execute SQL from seed file: ' . $filepath;
+		// 		$result = $this->database->exec_commands(
+		// 			file_get_contents($filepath),
+		// 			null, # Do not replace connection since we have connection_id's in layer defenitions ($this->pgdatabase->get_connection_string(),)
+		// 			$this->pgdatabase->connection_id,
+		// 			true
+		// 		); # replace known constants
+		// 		if ($result[0]) {
+		// 			echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
+		// 		}
+		// 		else{
+		// 			$sql = "
+		// 				INSERT INTO `migrations`
+		// 					(`component`, `type`, `filename`)
+		// 				VALUES ('" . $component . "', 'mysql', '" . $file . "');
+		// 			";
+		// 			#echo '<p>Register MySQL migration for component ' . $component . ' with sql: <br>' . $sql;
+		// 			$result=$this->database->execSQL($sql,0, 0);
+		// 		}
+		// 	}
+		// }
 		return $err_msgs;
 	}
 
@@ -215,26 +204,20 @@ class administration{
 							if (EPSGCODE_ALKIS != -1) {
 								$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
 							}
-							if ($database_type == 'mysql') {
-								#echo ' Exec SQL';
-								$result = $this->database->exec_commands($sql, NULL, NULL, false, true);	# mysql
+							if (stripos($sql, '-- exec statements separated') !== false) {
+								$sql = str_ireplace('-- exec statements separated', '', $sql);
+								$sql = str_ireplace('BEGIN;', '', $sql);
+								$sql = str_ireplace('COMMIT;', '', $sql);
+								$sql_parts = explode(';', $sql);
 							}
 							else {
-								if (stripos($sql, '-- exec statements separated') !== false) {
-									$sql = str_ireplace('-- exec statements separated', '', $sql);
-									$sql = str_ireplace('BEGIN;', '', $sql);
-									$sql = str_ireplace('COMMIT;', '', $sql);
-									$sql_parts = explode(';', $sql);
-								}
-								else {
-									$sql_parts = array($sql);
-								}
-								foreach ($sql_parts AS $sql) {
-									$sql = trim($sql);
-									if ($sql != '') {
-										#echo ' Query SQL';
-										$result = $this->pgdatabase->execSQL($sql, 4, 0, true);	# postgresql
-									}
+								$sql_parts = array($sql);
+							}
+							foreach ($sql_parts AS $sql) {
+								$sql = trim($sql);
+								if ($sql != '') {
+									#echo ' Query SQL';
+									$result = $this->pgdatabase->execSQL($sql, 4, 0, true);	# postgresql
 								}
 							}
 						}
@@ -251,10 +234,10 @@ class administration{
 				}
 				else {
 					$sql = "
-						INSERT INTO `migrations` (
-							`component`,
-							`type`,
-							`filename`
+						INSERT INTO kvwmap.migrations (
+							component,
+							type,
+							filename
 						) VALUES (
 							'" . $component . "',
 							'" . $database_type . "',
@@ -262,7 +245,7 @@ class administration{
 						);
 					";
 					#echo 'register migration with sql: ' . $sql;
-					$result=$this->database->execSQL($sql, 4, 0);
+					$result=$this->pgdatabase->execSQL($sql, 4, 0);
 				}
 			}
 		}
@@ -276,13 +259,13 @@ class administration{
 		}
 		exec('sudo -u ' . GIT_USER . ' git status -s --porcelain 2>&1', $output, $return_var);
 		if (count($output) > 0) {
-			$this->database->gui->add_message('Fehler', 'Update kann nicht erfolgen!<p>Es gibt folgende noch nicht committete Änderungen:<br>' . implode('<br>', $output) . '<br>Erst Änderungen committen oder auschecken!');
+			$this->pgdatabase->gui->add_message('Fehler', 'Update kann nicht erfolgen!<p>Es gibt folgende noch nicht committete Änderungen:<br>' . implode('<br>', $output) . '<br>Erst Änderungen committen oder auschecken!');
 			return false;
 		}
 		else {
 			exec('cd ' . $folder . ' && sudo -u ' . GIT_USER . ' git stash && sudo -u ' . GIT_USER . ' git pull origin', $ausgabe, $ret);
 			if ($ret != 0) {
-				$this->database->gui->add_message('Fehler', 'Fehler bei der Ausführung von "git pull origin"!');
+				$this->pgdatabase->gui->add_message('Fehler', 'Fehler bei der Ausführung von "git pull origin"!');
 			}
 			return $ausgabe;
 		}
@@ -292,16 +275,16 @@ class administration{
 		$this->config_params = array();
 		$sql = "
 			SELECT *
-			FROM config
-			ORDER BY `group`, name
+			FROM kvwmap.config
+			ORDER BY \"group\", name
 		";
 		#echo 'SQL: ' . $sql;
-		$this->database->execSQL($sql, 0, 0);
-		if (!$this->database->success) {
+		$ret = $this->pgdatabase->execSQL($sql, 0, 0);
+		if (!$this->pgdatabase->success) {
 			#echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
 		}
 		else {
-			while ($rs = $this->database->result->fetch_assoc()) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
 				$this->config_params[$rs['name']] = $rs;
 			}
 			foreach ($this->config_params as &$param) {
@@ -338,7 +321,7 @@ class administration{
 			if (isset($formvars[$param['name']])) {
 				$sql = "
 					UPDATE
-						config
+						kvwmap.config
 					SET
 						" . ($formvars[$param['name'] . '_prefix'] != '' ? "prefix = '" . $formvars[$param['name'] . '_prefix'] . "'," : "") . "
 						value = '" . $formvars[$param['name']] . "',
@@ -347,7 +330,7 @@ class administration{
 						name = '" . $param['name'] . "'
 				";
 				#echo 'Update config with sql: ' . $sql . ' prefix: ' . $param['prefix'] . ' formvar: ' . $formvars[$param['prefix']] . ' <br>';
-				$result = $this->database->execSQL($sql,0, 0);
+				$result = $this->pgdatabase->execSQL($sql,0, 0);
 				if ($result[0]) {
 					echo '<br>Fehler beim Update der Tabelle config.<br>';
 				}
@@ -375,7 +358,7 @@ class administration{
 				if ($param['type'] == 'array') {
 					$param_array_str = str_replace(['(object) ', 'stdClass::__set_state'], '', var_export(json_decode($param['value']), true));
 					if ($param_array_str == 'NULL') {
-						$this->database->gui->add_message('error', 'Syntaxfehler im Parameter: ' . $param['name'] . '!<br>Bitte auf das richtige setzen von Anführungsstrichen<br>und Klammern achten.');
+						$this->pgdatabase->gui->add_message('error', 'Syntaxfehler im Parameter: ' . $param['name'] . '!<br>Bitte auf das richtige setzen von Anführungsstrichen<br>und Klammern achten.');
 						$param_array_str = 'array()';
 					}
 					$config .= "$" . $param['name'] . " = " . $param_array_str . ";\n\n";
@@ -407,7 +390,7 @@ class administration{
 			}
 			else {
 				if($plugin == ''){
-					$this->database->gui->add_message('warning', 'Konfigurationsdatei config.php geschrieben.<br>Zum Wirksamwerden muss die Seite nochmal geladen werden.');
+					$this->pgdatabase->gui->add_message('warning', 'Konfigurationsdatei config.php geschrieben.<br>Zum Wirksamwerden muss die Seite nochmal geladen werden.');
 				}
 				$result[0] = 0;
 			}
