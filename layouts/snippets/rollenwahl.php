@@ -129,7 +129,7 @@ if ($this->Fehlermeldung!='') {
 								if (value_of($this->formvars, 'hide_stellenwahl')) { ?>
 									<tr>
 										<td>
-											<input type="hidden" name="Stelle_ID" value="<? echo $this->user->stelle_id; ?>">
+											<input type="hidden" name="stelle_id" value="<? echo $this->user->stelle_id; ?>">
 										</td>
 									</tr><?
 								}

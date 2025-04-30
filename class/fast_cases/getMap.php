@@ -2404,7 +2404,7 @@ class db_mapObj {
 				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				kvwmap.connections as c ON l.connection_id = c.id
 			WHERE
-				rl.stelle_id = ul.Stelle_ID AND
+				rl.stelle_id = ul.stelle_id AND
 				rl.layer_id = ul.layer_id AND
 				(ul.minscale != -1 OR ul.minscale IS NULL) AND
 				l.Datentyp != 5 AND 

@@ -113,7 +113,7 @@ class rolle {
 					WHERE
 						la.layer_id = ul.layer_id AND
 						form_element_type = 'SubformFK' AND
-						las.stelle_id = ul.Stelle_ID AND
+						las.stelle_id = ul.stelle_id AND
 						ul.layer_id = las.layer_id AND
 						las.attributename = split_part(split_part(la.options, ';', 1) , ',', -1)
 				) as privilegfk";
@@ -2173,7 +2173,7 @@ class rolle {
 			INSERT INTO kvwmap.u_groups2rolle 				
 			WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
 				SELECT DISTINCT
-						ul.Stelle_ID AS stelle_id,
+						ul.stelle_id AS stelle_id,
 						r.user_id,
 						coalesce(ul.group_id, l.Gruppe) AS group_id
 				FROM
@@ -2215,13 +2215,13 @@ class rolle {
 						(
 							WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
 								SELECT DISTINCT
-										ul.Stelle_ID AS stelle_id,
+										ul.stelle_id AS stelle_id,
 										r.user_id,
 										coalesce(ul.group_id, l.Gruppe) AS group_id
 								FROM
 										kvwmap.used_layer ul JOIN
 										kvwmap.layer l ON ul.layer_id = l.layer_id JOIN
-										kvwmap.rolle r ON ul.Stelle_ID = r.stelle_id
+										kvwmap.rolle r ON ul.stelle_id = r.stelle_id
 								UNION ALL
 								SELECT 
 										cte.stelle_id,

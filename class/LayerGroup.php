@@ -75,7 +75,7 @@ class LayerGroup extends PgObject {
 					l.selectiontype != 'radio'
 			) AS sub JOIN
 			u_groups g ON sub.group_id = g.id",
-			'where' => 'sub.Stelle_ID = ' . $stelle_id,
+			'where' => 'sub.stelle_id = ' . $stelle_id,
 			'order' => '`order`'
 		));
 	}
@@ -90,12 +90,12 @@ class LayerGroup extends PgObject {
 			));
 		}
 		else {
-			// z.B. SELECT DISTINCT child.`id`, child.`Gruppenname`, child.`icon`, child.`order` FROM `u_groups` parent JOIN `u_groups` child ON parent.`id` = child.`obergruppe` JOIN `layer` l ON child.`id` = l.`Gruppe` JOIN `used_layer` ul ON l.`layer_id` = ul.`layer_id` WHERE parent.`id` = 7 AND ul.Stelle_ID = 7 ORDER BY child.`order` 
+			// z.B. SELECT DISTINCT child.`id`, child.`Gruppenname`, child.`icon`, child.`order` FROM `u_groups` parent JOIN `u_groups` child ON parent.`id` = child.`obergruppe` JOIN `layer` l ON child.`id` = l.`Gruppe` JOIN `used_layer` ul ON l.`layer_id` = ul.`layer_id` WHERE parent.`id` = 7 AND ul.stelle_id = 7 ORDER BY child.`order` 
 
 			return $this->find_by_sql(array(
 				'select' => "DISTINCT child.`id`, child.`Gruppenname`, child.`icon`, child.`order`",
 				'from' => "`kvwmap.u_groups` parent JOIN `kvwmap.u_groups` child ON parent.`id` = child.`obergruppe`" . ($stelle_id != null ? " JOIN `kvwmap.layer` l ON child.`id` = l.`Gruppe` JOIN `kvwmap.used_layer` ul ON l.`layer_id` = ul.`layer_id`" : ''),
-				'where' => "parent.`id` = " . $this->get('id') . ($stelle_id != null ? " AND ul.Stelle_ID =" . $stelle_id : ''),
+				'where' => "parent.`id` = " . $this->get('id') . ($stelle_id != null ? " AND ul.stelle_id =" . $stelle_id : ''),
 				'order' => "child.`order`"
 			));
 		}

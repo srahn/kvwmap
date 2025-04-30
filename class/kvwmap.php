@@ -12752,7 +12752,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	*/
 	function save_layers_attribute_privileges($formvars) {
 		$this->save_layer_attribute_privileges($formvars);
-		foreach (Layer::find_by_duplicate_from_layer_id($this->database, $formvars['selected_layer_id']) AS $formvars['selected_layer_id']) {
+		foreach (Layer::find_by_duplicate_from_layer_id($this->pgdatabase, $formvars['selected_layer_id']) AS $formvars['selected_layer_id']) {
 			$this->save_layer_attribute_privileges($formvars);
 		}
 	}
@@ -12768,7 +12768,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($formvars['stelle'] != '' AND $formvars['selected_layer_id'] != '') {
 			$stellen = explode('|', $formvars['stelle']);
 			foreach ($stellen as $stelleid) {
-				$stelle = new stelle($stelleid, $this->database);
+				$stelle = new stelle($stelleid, $this->pgdatabase);
 				if ($formvars['use_parent_privileges' . $stelleid] == 1) {
 					# wenn Eltern-Stellen für diesen Layer vorhanden, deren Rechte übernehmen
 					$formvars['used_layer_parent_ids'] = $this->get_upper_parent_ids($formvars, [$stelleid]);
@@ -12791,7 +12791,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		foreach($parent_ids as $key => $parent_id) {
 			if (!isset($formvars['privileg_' . $this->attributes['name'][0] .'_'. $parent_id])) {
 				# oberste Elternstelle suchen
-				$parent_stelle = new stelle($parent_id, $this->database);
+				$parent_stelle = new stelle($parent_id, $this->pgdatabase);
 				$layer = $parent_stelle->getLayer($formvars['selected_layer_id']);
 				$upper_parents = array_merge($upper_parents, $this->get_upper_parent_ids($formvars, explode(',', $layer[0]['used_layer_parent_id'])));
 				unset($parent_ids[$key]);
@@ -12808,8 +12808,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over layer attributes privileges
 		$sql = "
 			UPDATE
-				layer_attributes2stelle AS t2 INNER JOIN
-				layer_attributes2stelle AS t1 ON t1.attributename = t2.attributename AND t1.stelle_id = t2.stelle_id
+				kvwmap.layer_attributes2stelle AS t2 INNER JOIN
+				kvwmap.layer_attributes2stelle AS t1 ON t1.attributename = t2.attributename AND t1.stelle_id = t2.stelle_id
 			SET
 				t2.privileg = t1.privileg,
 				t2.tooltip = t1.tooltip
@@ -12822,15 +12822,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->database->execSQL($sql,4, 1);
 		$sql = "
 		DELETE FROM 
-			layer_attributes2stelle 
+			kvwmap.layer_attributes2stelle 
 		WHERE 
 			concat(stelle_id, ' ' , layer_id, ' ' , attributename) IN 
 				(
 					SELECT 
 						concat(t2.stelle_id, ' ', t2.layer_id, ' ', t2.attributename) 
 					FROM
-						layer_attributes2stelle AS t2 
-						LEFT JOIN	layer_attributes2stelle AS t1 ON 
+						kvwmap.layer_attributes2stelle AS t2 
+						LEFT JOIN	kvwmap.layer_attributes2stelle AS t1 ON 
 							t1.attributename = t2.attributename AND 
 							t1.stelle_id = t2.stelle_id AND 
 							t1.layer_id = " . $this->formvars['from_layer_id'] . "
@@ -15334,7 +15334,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_once(CLASSPATH . 'FormObject.php');
     $this->user->Stellen = $this->user->getStellen(0);
     $this->Hinweis .= 'Aktuelle Stellen_ID: ' . $Stelle_ID;
-    $StellenFormObj = new FormObject("Stelle_ID", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'max12', "", "", NULL , NULL, "vertical-align: middle;");
+    $StellenFormObj = new FormObject("stelle_id", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'max12', "", "", NULL , NULL, "vertical-align: middle;");
     # hinzufügen von Javascript welches dafür sorgt, dass die Angegebenen Werte abgefragt werden
     # und die genannten Formularobjekte mit diesen Werten bestückt werden
     # übergebene Werte
@@ -15344,11 +15344,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $select =  "nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
     $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
     $from = "rolle";
-    $where = "stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
+    $where = "stelle_id='+this.form.stelle_id.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
 			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
-			. ((value_of($this->formvars, 'show_layer_parameter')) ? "ahah('index.php','go=getLayerParamsForm&stelle_id='+document.GUI.Stelle_ID.value, new Array(document.getElementById('layer_parameters_div')), new Array('sethtml'))" : "")
+			. ((value_of($this->formvars, 'show_layer_parameter')) ? "ahah('index.php','go=getLayerParamsForm&stelle_id='+document.GUI.stelle_id.value, new Array(document.getElementById('layer_parameters_div')), new Array('sethtml'))" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
@@ -18600,7 +18600,7 @@ class db_mapObj{
 	}
 
   function deleteFilter($stelle_id, $layer_id, $attributname){
-    $sql = 'DELETE FROM u_attributfilter2used_layer WHERE Stelle_ID = '.$stelle_id.' AND layer_id = '.$layer_id.' AND attributname = "'.$attributname.'"';
+    $sql = 'DELETE FROM kvwmap.u_attributfilter2used_layer WHERE stelle_id = '.$stelle_id.' AND layer_id = '.$layer_id.' AND attributname = "'.$attributname.'"';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteFilter - Löschen eines Attribut-Filters eines used_layers:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
@@ -18618,11 +18618,11 @@ class db_mapObj{
 		$filterstring = pg_escape_string($filterstring);
 		$sql = "
 			UPDATE
-				used_layer
+				kvwmap.used_layer
 			SET
-				Filter = '" . $filterstring . "'
+				filter = '" . $filterstring . "'
 			WHERE
-				Stelle_ID = " . $stelle_id . " AND
+				stelle_id = " . $stelle_id . " AND
 				layer_id = " . $layer_id . "
 		";
 		// echo $sql;
@@ -18670,7 +18670,7 @@ class db_mapObj{
 				attributvalue = '" . pg_escape_string($formvars['attributvalue']) . "',
 				operator = '" . $formvars['operator']. "',
 				type = '" . $formvars['type'] . "',
-				Stelle_ID = " . $formvars['stelle'] . ",
+				stelle_id = " . $formvars['stelle'] . ",
 				layer_id = " . $formvars['layer'] . "
 			ON DUPLICATE KEY UPDATE  
 				attributvalue = '" . pg_escape_string($formvars['attributvalue']) . "', 
@@ -18692,7 +18692,7 @@ class db_mapObj{
 			FROM
 				u_attributfilter2used_layer
 			WHERE
-				Stelle_ID = " . $Stelle_ID . " AND
+				stelle_id = " . $Stelle_ID . " AND
 				layer_id = " . $layer_id . "
 		";
 		# echo '<br>Sql: ' . $sql;
@@ -19484,7 +19484,7 @@ class db_mapObj{
 					Bezeichnung
 				FROM
 					stelle AS s JOIN
-					used_layer AS ul ON (s.ID = ul.Stelle_ID)
+					used_layer AS ul ON (s.ID = ul.stelle_id)
 				WHERE
 					ul.layer_id IN (" . implode(', ', $layer_ids) . ")
 			";
@@ -19549,7 +19549,7 @@ class db_mapObj{
 						"
 							SELECT
 								'" . $last_layer_id . "' AS layer_id,
-								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
+								'" . $stellen[$s]['var'] . "' AS stelle_id,
 								queryable,
 								drawingorder,
 								legendorder, minscale, maxscale, offsite, transparency, postlabelcache, Filter,
@@ -19560,7 +19560,7 @@ class db_mapObj{
 								used_layer
 							WHERE
 								layer_id = " . $layer_ids[$i] . " AND
-								Stelle_ID = " . $stellen[$s]['id'] . "
+								stelle_id = " . $stellen[$s]['id'] . "
 						"
 					);
 					if (count($used_layer['insert']) > 0) {
@@ -19573,7 +19573,7 @@ class db_mapObj{
 						'',
 						"
 							SELECT
-								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
+								'" . $stellen[$s]['var'] . "' AS stelle_id,
 								'" . $last_layer_id . "' AS layer_id,
 								attributname,
 								attributvalue,
@@ -19583,7 +19583,7 @@ class db_mapObj{
 								u_attributfilter2used_layer
 							WHERE
 								layer_id = " . $layer_ids[$i] . " AND
-								Stelle_ID = " . $stellen[$s]['id'] . "
+								stelle_id = " . $stellen[$s]['id'] . "
 						"
 					);
 					if (count($attributfilter2used_layer['insert']) > 0) {
@@ -19860,7 +19860,7 @@ class db_mapObj{
 					";
 					$ret = $this->db->execSQL($sql);
 					if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-					$rs = pg_fetch_array();
+					$rs = pg_fetch_array($ret[1]);
 					if ($rs[0] == 1) {		# Tabelle nur löschen, wenn das der einzige Layer ist, der sie benutzt
 						$sql = 'DROP TABLE IF EXISTS ' . CUSTOM_SHAPE_SCHEMA . '."' . trim($explosion[0], '"') . '";';
 						$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
@@ -20724,7 +20724,7 @@ class db_mapObj{
 	}
 
 	function delete_layer_filterattributes($layer_id){
-    $sql = 'DELETE FROM u_attributfilter2used_layer WHERE layer_id = '.$layer_id;
+    $sql = 'DELETE FROM kvwmap.u_attributfilter2used_layer WHERE layer_id = '.$layer_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_layer_filterattributes:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -21479,7 +21479,7 @@ class db_mapObj{
 			if ($formvars['privileg_'.$attributes['name'][$i].'_'] == '') $formvars['privileg_'.$attributes['name'][$i].'_'] = 'NULL';
 			$sql = "
 				UPDATE
-					layer_attributes
+					kvwmap.layer_attributes
 				SET
 					privileg = " . $formvars['privileg_' . $attributes['name'][$i].'_'] . ",
 					query_tooltip = " . ($formvars['tooltip_' . $attributes['name'][$i].'_'] == 'on' ? "1" : "0") ."
@@ -21494,7 +21494,7 @@ class db_mapObj{
 
 			$sql = "
 				UPDATE
-					layer
+					kvwmap.layer
 				SET
 					privileg = '" . $formvars['privileg'] . "',
 					export_privileg = '" . $formvars['export_privileg'] . "'
@@ -21688,7 +21688,7 @@ class db_mapObj{
 			linejoin,
 			linejoinmaxsize';
 		$sql = '
-			INSERT INTO styles 
+			INSERT INTO kvwmap.styles 
 				(' . $columns . ') 
 			SELECT 
 				' . $columns . ' 
@@ -21709,19 +21709,56 @@ class db_mapObj{
 	}
 
 	function copyLabel($label_id){
-		$sql = "
-			INSERT INTO labels 
-				(font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force) SELECT font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels WHERE Label_ID = " . $label_id;
+		$columns = '
+			font,
+			type,
+			color,
+			outlinecolor,
+			shadowcolor,
+			shadowsizex,
+			shadowsizey,
+			backgroundcolor,
+			backgroundshadowcolor,
+			backgroundshadowsizex,
+			backgroundshadowsizey,
+			size,
+			minsize,
+			maxsize,
+			position,
+			offsetx,
+			offsety,
+			angle,
+			anglemode,
+			buffer,
+			minfeaturesize,
+			maxfeaturesize,
+			partials,
+			wrap,
+			the_force
+		';
+		$sql = '
+			INSERT INTO kvwmap.labels 
+				(' . $columns . ')  
+			SELECT 
+				' . $columns . ' 
+			FROM 
+				kvwmap.labels WHERE Label_ID = ' . $label_id . '
+			RETURNING label_id';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyLabel - Kopieren eines Labels:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		return $this->db->mysqli->insert_id;
+    if (!$this->db->success) { 
+			echo err_msg($this->script_name, __LINE__, $sql); return 0; 
+		}
+		else {
+			$rs = pg_fetch_assoc($ret[1]);
+		}
+		return $rs['label_id'];
 	}
 
   function copyClass($class_id, $layer_id){
     # diese Funktion kopiert eine Klasse mit Styles und Labels und gibt die ID der neuen Klasse zurück
     $class = $this->read_ClassesbyClassid($class_id);
-		$rows = "
+		$columns = "
 			name, 
 			name_low_german, 
 			name_english, 
@@ -21736,11 +21773,11 @@ class db_mapObj{
     $sql = "
 			INSERT INTO kvwmap.classes (
 				layer_id, 
-				" . $rows . "
+				" . $columns . "
 			) 
 			SELECT 
 				" . $layer_id . ",
-				" . $rows . " 
+				" . $columns . " 
 			FROM 
 				kvwmap.classes 
 			WHERE 
@@ -22376,7 +22413,7 @@ class db_mapObj{
 	}
 
   function addLabel2Class($class_id, $label_id){
-    $sql = 'INSERT INTO u_labels2classes VALUES ('.$class_id.', '.$label_id.')';
+    $sql = 'INSERT INTO kvwmap.u_labels2classes VALUES ('.$class_id.', '.$label_id.')';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->addLabel2Class - Hinzufügen eines Labels zu einer Klasse:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);

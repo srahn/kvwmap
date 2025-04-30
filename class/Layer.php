@@ -205,7 +205,7 @@ class Layer extends PgObject {
 		$used_layers = Layer2Stelle::find($this->gui, "layer_id = " . $this->get_id());
 		$stellen_ids = array_map(
 			function($used_layer) {
-				return $used_layer->get('Stelle_ID');
+				return $used_layer->get('stelle_id');
 			},
 			$used_layers
 		);
@@ -345,7 +345,7 @@ l.Name AS sub_layer_name
 		FROM
 			`layer_attributes` la JOIN
 			`used_layer` ul ON la.layer_id = ul.layer_id JOIN
-			`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.Stelle_ID = las.stelle_id LEFT JOIN
+			`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.stelle_id = las.stelle_id LEFT JOIN
 			`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.layer_id
 		WHERE
 			la.layer_id = " . $id . " AND
@@ -405,19 +405,19 @@ l.Name AS sub_layer_name
 				la.name AS attribute_name,
 				SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
 				l.Name AS layer_name,
-				ul.Stelle_ID AS stelle_id,
+				ul.stelle_id AS stelle_id,
 				s.Bezeichnung AS stelle_bezeichnung
 			FROM
 				`layer_attributes` la JOIN
 				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.layer_id JOIN
 				`used_layer` ul ON la.layer_id = ul.layer_id JOIN
-				`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.Stelle_ID = las.stelle_id JOIN 
-				`stelle` s ON ul.Stelle_ID = s.ID LEFT JOIN
-				`used_layer` ul2 ON ul.Stelle_ID = ul2.Stelle_ID AND SUBSTRING_INDEX(la.options, ',', 1) = ul2.layer_id
+				`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.stelle_id = las.stelle_id JOIN 
+				`stelle` s ON ul.stelle_id = s.ID LEFT JOIN
+				`used_layer` ul2 ON ul.stelle_id = ul2.stelle_id AND SUBSTRING_INDEX(la.options, ',', 1) = ul2.layer_id
 			WHERE
 				la.layer_id = " . $id. " AND
 				la.form_element_type = 'SubFormEmbeddedPK' AND
-				ul2.Stelle_ID IS NULL AND
+				ul2.stelle_id IS NULL AND
 				ul2.layer_id IS NULL
 		";
 		#echo '<br>SQL to find sublayer that are not in same stelle: ' . $sql;

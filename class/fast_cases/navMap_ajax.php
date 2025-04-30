@@ -3021,7 +3021,7 @@ class rolle {
 					WHERE
 						la.layer_id = ul.layer_id AND
 						form_element_type = 'SubformFK' AND
-						las.stelle_id = ul.Stelle_ID AND
+						las.stelle_id = ul.stelle_id AND
 						ul.layer_id = las.layer_id AND
 						las.attributename = split_part(split_part(la.options, ';', 1) , ',', -1)
 				) as privilegfk";

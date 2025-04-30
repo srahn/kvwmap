@@ -1,10 +1,10 @@
 <?php
-class LayerAttributes2Stelle extends MyObject {
+class LayerAttributes2Stelle extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'layer_attributes2stelle');
+		parent::__construct($gui, 'kvwmap', 'layer_attributes2stelle');
 	}
 
 	public static	function find($gui, $where) {

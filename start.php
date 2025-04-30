@@ -207,9 +207,9 @@ else {
 						if ($GUI->user->stelle_id == '') {
 							# Nutzer hat keine stellen_id
 							$GUI->user->Stellen = $GUI->user->getStellen(0);
-							if (count($GUI->user->Stellen['ID']) > 0) {
+							if (count($GUI->user->Stellen['id']) > 0) {
 								# Nutzer hat aber rollen, weise die stellen_id der ersten Rolle zu
-								$GUI->formvars['Stelle_ID'] = $GUI->user->Stellen['ID'][0];
+								$GUI->formvars['Stelle_ID'] = $GUI->user->Stellen['id'][0];
 							}
 						}
 					}
@@ -875,14 +875,14 @@ function checkRegistration($gui) {
 	}
 
 	# Prüft ob eine stellen_id übergeben wurde
-	if ($check == 0 AND $params['Stelle_ID'] == '') {
+	if ($check == 0 AND $params['stelle_id'] == '') {
 		$registration_errors[] = 'Parameter stellen_id fehlt.';
 		$check = 1;
 	}
 
 	# Prüft ob stelle_id zum token passt
-	if ($check == 0 AND $params['Stelle_ID'] != $invitation->get('stelle_id')) {
-		$registration_errors[] = 'stelle_id: ' . $params['Stelle_ID'] . ' passt nicht zu<br>token: ' . $params['token'] . '.';
+	if ($check == 0 AND $params['stelle_id'] != $invitation->get('stelle_id')) {
+		$registration_errors[] = 'stelle_id: ' . $params['stelle_id'] . ' passt nicht zu<br>token: ' . $params['token'] . '.';
 		$check = 1;
 	}
 

@@ -1452,7 +1452,7 @@ class rolle {
 					WHERE
 						la.layer_id = ul.layer_id AND
 						form_element_type = 'SubformFK' AND
-						las.stelle_id = ul.Stelle_ID AND
+						las.stelle_id = ul.stelle_id AND
 						ul.layer_id = las.layer_id AND
 						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 				) as privilegfk";
@@ -1510,10 +1510,10 @@ class rolle {
 			FROM
 				layer AS l JOIN
 				used_layer AS ul ON l.layer_id=ul.layer_id JOIN
-				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID = ul.Stelle_ID AND r2ul.layer_id = ul.layer_id LEFT JOIN
+				u_rolle2used_layer as r2ul ON r2ul.stelle_id = ul.stelle_id AND r2ul.layer_id = ul.layer_id LEFT JOIN
 				connections as c ON l.connection_id = c.id
 			WHERE
-				ul.Stelle_ID = " . $this->stelle_id . " AND
+				ul.stelle_id = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
 			$layer_name_filter . 
 			$active_filter . "
@@ -2505,7 +2505,7 @@ class db_mapObj{
 	}
 
   function get_used_Layer($id) {
-    $sql ='SELECT * FROM used_layer WHERE layer_id = '.$id.' AND Stelle_ID = '.$this->Stelle_ID;
+    $sql ='SELECT * FROM used_layer WHERE layer_id = '.$id.' AND stelle_id = '.$this->Stelle_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_Layer - Lesen eines Layers:<br>" . $sql,4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }

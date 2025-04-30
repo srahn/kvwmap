@@ -6,7 +6,7 @@ class Layer2Stelle extends MyObject {
 
 	function __construct($gui) {
 		parent::__construct($gui, 'used_layer');
-		$this->identifier = array('layer_id', 'Stelle_ID');
+		$this->identifier = array('layer_id', 'stelle_id');
 	}
 
 	public static	function find($gui, $where) {
@@ -26,7 +26,7 @@ class Layer2Stelle extends MyObject {
 		return $layer2stelle->find_by_sql(array(
 			'select' => 'l.layer_id, l.schema, l.maintable, ul.privileg',
 			'from' => 'used_layer ul JOIN kvwmap.layer l ON ul.layer_id = l.layer_id',
-			'where' => 'ul.Stelle_ID = ' . $stelle_id . " AND l.editable = 1 and l.sync = '1'",
+			'where' => 'ul.stelle_id = ' . $stelle_id . " AND l.editable = 1 and l.sync = '1'",
 			'order' => 'l.layer_id'
 		));
 	}
@@ -37,7 +37,7 @@ class Layer2Stelle extends MyObject {
 		return $layer2stelle->find_by_sql(array(
 			'select' => 'l.layer_id',
 			'from' => 'used_layer ul JOIN layer l ON ul.layer_id = l.layer_id',
-			'where' => 'ul.Stelle_ID = ' . $stelle_id . " AND l.selectiontype = 'radio'",
+			'where' => 'ul.stelle_id = ' . $stelle_id . " AND l.selectiontype = 'radio'",
 			'order' => 'ul.legendorder'
 		));
 	}
@@ -49,7 +49,7 @@ class Layer2Stelle extends MyObject {
 		return $layer2stelle->find_by_sql(array(
 			'select' => 'l.layer_id, ul.minscale, ul.maxscale, ul.transparency',
 			'from' => 'used_layer ul JOIN layer l ON ul.layer_id = l.layer_id JOIN u_groups g ON l.Gruppe = g.id',
-			'where' => 'ul.Stelle_ID = ' . $stelle_id . " AND l.selectiontype != 'radio'",
+			'where' => 'ul.stelle_id = ' . $stelle_id . " AND l.selectiontype != 'radio'",
 			'order' => 'g.`order`, ul.`legendorder`'
 		));
 	}

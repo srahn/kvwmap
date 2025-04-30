@@ -35,7 +35,7 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 		FROM
 			rolle r JOIN
 			stelle s ON r.stelle_id = s.ID JOIN
-			used_layer ul ON s.ID = ul.Stelle_ID JOIN
+			used_layer ul ON s.ID = ul.stelle_id JOIN
 			layer l ON ul.layer_id = l.layer_id
 		WHERE
 			r.user_id = " . $GUI->user->id . " AND
