@@ -21283,14 +21283,14 @@ class db_mapObj{
 			SELECT
 				*
 			FROM
-				layer_parameter
+				kvwmap.layer_parameter
 		";
-		$this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) {
 			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 		}
 		else {
-			while ($rs = $this->db->result->fetch_assoc()) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
 				$layer_params[] = $rs;
 			}
 		}
