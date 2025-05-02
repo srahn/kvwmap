@@ -33,10 +33,9 @@
 
 class spatial_processor {
   
-  function __construct($rolle, $database, $pgdatabase) {
+  function __construct($rolle, $pgdatabase) {
     global $debug;
     $this->debug = $debug;
-    $this->database = $database;
     $this->pgdatabase = $pgdatabase;
 		$this->rolle = $rolle;
   }

@@ -28,8 +28,8 @@ class Role extends PgObject {
 		$roles = $role->find_where($where, $order, $find_direction);
 		foreach ($roles AS $role) {
 			$role->user = Nutzer::find_by_id($gui, $role->get('user_id'));
-			$stelle = new MyObject($gui, 'stelle', 'ID');
-			$role->stelle = $stelle->find_by('ID', $role->get('stelle_id'));
+			$stelle = new PgObject($gui, 'kvwmap', 'stelle', 'id');
+			$role->stelle = $stelle->find_by('id', $role->get('stelle_id'));
 		}
 		return $roles;
 	}

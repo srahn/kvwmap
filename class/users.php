@@ -697,7 +697,7 @@ class user {
 	}
 
 	public static	function find($gui, $where, $order = '', $sort_direction = '') {
-		$user = new MyObject($gui, 'user');
+		$user = new PgObject($gui, 'kvwmap' ,'user');
 		return $user->find_where($where, $order, $sort_direction);
 	}
 
@@ -1404,7 +1404,7 @@ class user {
 		$columns['login_name'] = "'" . trim($userdaten['loginname']) . "'";
 		$columns['namenszusatz'] = "'" . $userdaten['Namenszusatz'] . "'";
 		$columns['password'] = "kvwmap.sha1('" . pg_escape_string(trim($userdaten['password2'])) . "')";
-		$columns['password_setting_time'] = "CURRENT_TIMESTAMP()";
+		$columns['password_setting_time'] = "CURRENT_TIMESTAMP";
 		$columns['password_expired'] = ($userdaten['password_expired'] ? '1' : '0');
 		if ($userdaten['phon']!='') {
 			$columns['phon'] = "'" . $userdaten['phon'] . "'";
@@ -1458,23 +1458,23 @@ class user {
 		if ($userdaten['changepasswd'] == 1) {
 			$password_columns = ",
 				password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . "'),
-				password_setting_time = CURRENT_TIMESTAMP(),
+				password_setting_time = CURRENT_TIMESTAMP,
 				password_expired = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
 			";
 		}
 
 		$sql = "
 			UPDATE
-				user
+				kvwmap.user
 			SET
-				Name = '" . $userdaten['nachname'] . "',
-				Vorname = '" . $userdaten['vorname'] . "',
+				name = '" . $userdaten['nachname'] . "',
+				vorname = '" . $userdaten['vorname'] . "',
 				login_name = '" . trim($userdaten['loginname']) . "',
-				Namenszusatz = '" . $userdaten['Namenszusatz'] . "',
+				namenszusatz = '" . $userdaten['Namenszusatz'] . "',
 				start = '" . ($userdaten['start'] ?: '0000-00-00') . "',
 				stop= '" . ($userdaten['stop'] ?: '0000-00-00') . "',
 				archived= " . ($userdaten['archived']? "'" . $userdaten['archived'] . "'" : "NULL") . ",
-				ID =  " . $userdaten['id'].",
+				id =  " . $userdaten['id'].",
 				phon = '" . $userdaten['phon']."',
 				email = '" . $userdaten['email']."',
 				organisation = '" . $userdaten['organisation']."',
@@ -1485,7 +1485,7 @@ class user {
 				layer_data_import_allowed = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
 				$password_columns . "
 			WHERE
-				ID= " . $userdaten['selected_user_id'] . "
+				id = " . $userdaten['selected_user_id'] . "
 		";
 		#echo 'SQL: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -1498,11 +1498,11 @@ class user {
 	function archivieren() {
 		$sql = "
 			UPDATE
-				user
+				kvwmap.user
 			SET
 				archived = CURRENT_TIMESTAMP
 			WHERE
-				ID= " . $this->id . "
+				id = " . $this->id . "
 		";
 		#echo 'SQL: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -1515,11 +1515,11 @@ class user {
 	function set_userdata_checking_time() {
 		$sql = "
 			UPDATE
-				user
+				kvwmap.user
 			SET
 				userdata_checking_time = CURRENT_TIMESTAMP
 			WHERE
-				ID= " . $this->id . "
+				id = " . $this->id . "
 		";
 		#echo 'SQL: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -1548,13 +1548,13 @@ class user {
 		$password_setting_time = date('Y-m-d H:i:s', time());
 		$sql = "
 			UPDATE
-				user
+				kvwmap.user
 			SET
 				password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string($password) . "'),
 				password_setting_time = '" . $password_setting_time . "',
 				password_expired = false
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 		#echo $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
@@ -1571,22 +1571,22 @@ class user {
 	function delete($user_id) {
 		$sql ="
 			DELETE FROM
-				user
+				kvwmap.user
 			WHERE
-				ID = " . $user_id . "
+				id = " . $user_id . "
 		";
 		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
 			$ret[1] .= '<br>Der Benutzer konnte nicht gelöscht werden.<br>' . $ret[1];
 		}
 		else {
-			$sql = "
-				ALTER TABLE user PACK_KEYS = 0 CHECKSUM = 0 DELAY_KEY_WRITE = 0 AUTO_INCREMENT = 1
-			";
-			$ret = $this->database->execSQL($sql, 4, 0);
-			if ($ret[0]) {
-				$ret[1] .= '<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
-			}
+			// $sql = "
+			// 	ALTER TABLE user PACK_KEYS = 0 CHECKSUM = 0 DELAY_KEY_WRITE = 0 AUTO_INCREMENT = 1
+			// ";
+			// $ret = $this->database->execSQL($sql, 4, 0);
+			// if ($ret[0]) {
+			// 	$ret[1] .= '<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
+			// }
 		}
 		return $ret;
 	}

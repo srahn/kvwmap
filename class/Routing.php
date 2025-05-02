@@ -2,17 +2,16 @@
 
 class routing {
   
-  function __construct($rolle, $database, $pgdatabase) {
+  function __construct($rolle, $pgdatabase) {
     global $debug;
     $this->debug = $debug;
-    $this->database = $database;
     $this->pgdatabase = $pgdatabase;
 		$this->rolle = $rolle;
   }
 
   function getRoute($formvars){
     include_(CLASSPATH.'spatial_processor.php');
-		$spatial_processor = new spatial_processor($this->rolle, $this->database, $this->pgdatabase);
+		$spatial_processor = new spatial_processor($this->rolle, $this->pgdatabase);
 		$projFROM = new projectionObj("init=epsg:".$this->rolle->epsg_code);
 		$projTO = new projectionObj("init=epsg:4326");
 		$start = explode(',', $formvars['start']);

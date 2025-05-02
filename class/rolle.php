@@ -2108,7 +2108,7 @@ class rolle {
 		# trägt die Gruppen und Obergruppen der übergebenen Stellenid und Layerids für einen Benutzer ein. Gruppen, die aktive Layer enthalten werden aufgeklappt
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			$sql = "
-				INSERT IGNORE INTO 
+				INSERT INTO 
 					kvwmap.u_groups2rolle
 				SELECT 
 					".$user_id.",
@@ -2116,10 +2116,11 @@ class rolle {
 					id,
 					status
 				FROM 
-						u_groups2rolle
+						kvwmap.u_groups2rolle
 				WHERE
-					stelle_id = ".$stelle_id." AND
-					user_id = ".$default_user_id;
+					stelle_id = " . $stelle_id . " AND
+					user_id = " . $default_user_id . "
+				ON CONFLICT (user_id, stelle_id, id) DO NOTHING";
 			#echo '<br>Gruppen: '.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rolle:<br>".$sql,4);
 			$this->database->execSQL($sql);
@@ -2128,7 +2129,7 @@ class rolle {
 		else {
 			for($j = 0; $j < count_or_0($layerids); $j++){
 				$sql = "
-					INSERT IGNORE INTO kvwmap.u_groups2rolle 
+					INSERT INTO kvwmap.u_groups2rolle 
 					WITH RECURSIVE cte (group_id) AS (
 						SELECT 
             	coalesce(ul.group_id, l.gruppe) AS group_id
@@ -2146,7 +2147,8 @@ class rolle {
 						" . $stelle_id . ", 
 						group_id, 
 						0
-					FROM cte;";
+					FROM cte
+					ON CONFLICT (user_id, stelle_id, id) DO NOTHING;";
 				#echo '<br>Gruppen: '.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
@@ -2284,7 +2286,8 @@ class rolle {
 					querystatus,
 					gle_view,
 					showclasses,
-					logconsume
+					logconsume,
+					geom_from_layer
 				FROM
 					kvwmap.u_rolle2used_layer
 				WHERE
@@ -2303,7 +2306,8 @@ class rolle {
 					start_aktiv,
 					1,
 					1,
-					0
+					0,
+					layer_id
 				FROM
 					kvwmap.used_layer
 				WHERE
@@ -2320,7 +2324,8 @@ class rolle {
 				querystatus,
 				gle_view,
 				showclasses,
-				logconsume
+				logconsume,
+				geom_from_layer
 			) " .
 			$rolle2used_layer_select_sql . "
 			ON CONFLICT (user_id, stelle_id, layer_id) DO NOTHING

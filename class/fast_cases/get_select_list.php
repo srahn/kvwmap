@@ -521,34 +521,47 @@ class user {
 		return 0;
 	}
 
-	function getStellen($stelle_ID) {
+	function getStellen($stelle_ID, $with_expired = false) {
+		global $language;
+		if ($language != '' AND $language != 'german') {
+			$name_column = "
+			CASE
+				WHEN s.bezeichnung_" . $language . " != \"\" THEN s.bezeichnung_" . $language . "
+				ELSE s.bezeichnung
+			END AS bezeichnung";
+		}
+		else {
+			$name_column = "s.bezeichnung";
+		}
 		$sql = "
 			SELECT
-				s.ID,
-				s.Bezeichnung
+				s.id,
+				" . $name_column . "
 			FROM
-				stelle AS s,
-				rolle AS r
+				kvwmap.stelle AS s,
+				kvwmap.rolle AS r
 			WHERE
-				s.ID = r.stelle_id AND
+				s.id = r.stelle_id AND
 				r.user_id = " . $this->id .
-				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . "
+				($stelle_ID > 0 ? " AND s.id = " . $stelle_ID : "") . 
+				(!$with_expired ? "
 				AND (
-					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
+					(
+						('" . date('Y-m-d h:i:s') . "' >= s.start OR s.start IS NULL) AND 
+						('" . date('Y-m-d h:i:s') . "' <= s.stop OR s.stop IS NULL)
+					)
 					OR
-					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
-				)
+					(s.start IS NULL AND s.stop IS NULL)
+				)" : "") . "
 			ORDER BY
-				Bezeichnung;
+				bezeichnung;
 		";
-
-		#echo '<br>sql: ' . $sql;
-		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
-			$stellen['ID'][]=$rs['ID'];
-			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
+		#debug_write('<br>sql: ', $sql, 1);
+		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$stellen['ID'][]=$rs['id'];
+			$stellen['Bezeichnung'][]=$rs['bezeichnung'];
 		}
 		return $stellen;
 	}

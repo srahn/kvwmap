@@ -33,7 +33,7 @@
 	<tr>
 		<td style="float: right; margin-right: 50px"><input type="checkbox" onclick="toggle_archived_users();" id="archived" name="archived"> archivierte Nutzer anzeigen</td>
   </tr>
-  <? if (in_array($this->formvars['order'], ['name', 'Name,Vorname'])) { ?>
+  <? if (in_array($this->formvars['order'], ['name', 'name,vorname'])) { ?>
   <tr height="50px" valign="bottom">
     <td colspan="2">
     <? $umlaute=array("Ä","Ö","Ü");
@@ -52,8 +52,8 @@
 				<table width="100%" border="0" cellspacing="0" cellpadding="2">
 					<tr>
 						<th>&nbsp;</th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=ID&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID;?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=Name,Vorname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName;?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID;?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=name,vorname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName;?></a></th>
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=stop&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strIntervall;?></a></th>
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=last_timestamp&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strLastActivity;?></a></th>
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=organisation&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strOrganisation;?></a></th>
@@ -66,7 +66,7 @@
 						<th>&nbsp;</th>
 					</tr><?php
 					for ($i = 0; $i < count($this->userdaten); $i++) {
-						if (in_array($this->formvars['order'], ['name', 'Name,Vorname'])) {
+						if (in_array($this->formvars['order'], ['name', 'name,vorname'])) {
 							$first = strtoupper(mb_substr($this->userdaten[$i]['name'],0,1));
 							if (in_array($first,$umlaute)) {
 								switch ($first) {
@@ -112,10 +112,10 @@
 						} ?>
 						<tr class="listen-tr <? if ($this->userdaten[$i]['archived']) {echo ' archived" style="display: none';} ?>">
 							<td>&nbsp;</td>
-							<td><?php echo $this->userdaten[$i]['ID']; ?>&nbsp;&nbsp;</td>
+							<td><?php echo $this->userdaten[$i]['id']; ?>&nbsp;&nbsp;</td>
 							<td>
-								<a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<?php echo $this->strChange; ?>"><?
-									echo $this->userdaten[$i]['Namenszusatz'].' '; ?><?php echo $this->userdaten[$i]['name']; ?>,&nbsp;<?php echo $this->userdaten[$i]['Vorname']; ?>
+								<a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<?php echo $this->strChange; ?>"><?
+									echo $this->userdaten[$i]['namenszusatz'].' '; ?><?php echo $this->userdaten[$i]['name']; ?>,&nbsp;<?php echo $this->userdaten[$i]['vorname']; ?>
 								</a>
 							</td>
 							<td><? if($this->userdaten[$i]['stop'] != '0000-00-00') echo $this->userdaten[$i]['start'].'&nbsp;- '.$this->userdaten[$i]['stop']; ?>&nbsp;</td>
@@ -136,7 +136,7 @@
 							} ?>
 							<td>
 								<? if (!$this->userdaten[$i]['archived']) { ?>
-								<a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->userdaten[$i]['Vorname'] . ' ' . $this->userdaten[$i]['name'], $loeschen); ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a>
+								<a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['id']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->userdaten[$i]['Vorname'] . ' ' . $this->userdaten[$i]['name'], $loeschen); ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a>
 								<? } ?>
 							</td>
 						</tr><?

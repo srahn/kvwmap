@@ -944,7 +944,7 @@ echo '			</table>
 						}
 					}
 				}
-				$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['datentyp'], $this->database);
+				$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['datentyp'], $this->pgdatabase);
 			}
 			$classes = $dbmap->read_Classes($this->formvars['layer_options_open']);
 			if (!empty($classes)) {
@@ -1687,7 +1687,7 @@ echo '			</table>
 				";
 				$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>" . $sql, 4);
 				$ret = $this->pgdatabase->execSQL($sql);
-				if (!$ret['success']) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
+				if (!$ret['success']) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4); return 0; }
 			}
 			$sql = "
 				UPDATE
@@ -1701,7 +1701,7 @@ echo '			</table>
 			";
 			$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>" . $sql, 4);
 			$ret = $this->pgdatabase->execSQL($sql);
-			if (!$ret['success']) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
+			if (!$ret['success']) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4); return 0; }
 		}
 		elseif ($status == 'off') {
 			$sql = "
@@ -1716,7 +1716,7 @@ echo '			</table>
 			";
 			$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>" . $sql, 4);
 			$ret = $this->pgdatabase->execSQL($sql);
-			if (!$ret['success']) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
+			if (!$ret['success']) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4); return 0; }
 		}
 	}
 
@@ -3958,16 +3958,16 @@ echo '			</table>
 			SELECT
 				stelle_id
 			FROM
-				rolle
+				kvwmap.rolle
 			WHERE
 				user_id = " . $user_id . " AND
 				stelle_id NOT IN (" . implode(', ', $stellen) . ")
 		";
 		#echo '<br>sql: ' . $sql;
 
-		$result = $this->database->execSQL($sql, 0, 0);
+		$result = $this->pgdatabase->execSQL($sql, 0, 0);
 		if ($result['success']) {
-			if ($this->database->result->num_rows > 0) {
+			if (pg_num_rows($result[1]) > 0) {
 				$ret = true;
 				$this->add_message('error', 'Nutzer mit der ID: ' . $user_id . ' gehört noch zu anderen Stellen und kann daher nur in Adminstellen bearbeitet werden!');
 			}
@@ -4067,7 +4067,7 @@ echo '			</table>
 			$this->debug->write("<br>WFS-Request: ".$request,4);
 			$gml = url_get_contents($request, $layer['wms_auth_username'], $layer['wms_auth_password']);
 			#$this->debug->write("<br>WFS-Response: ".$gml,4);
-			$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
+			$spatial_processor = new spatial_processor($this->user->rolle, $this->pgdatabase);
 			switch($layer['datentyp']){
 				case MS_LAYER_POLYGON : {
 					$wkt = $spatial_processor->composePolygonArrayWKTStringFromGML($gml, $layer['wfs_geom'], $layer['epsg_code']);
@@ -4104,7 +4104,7 @@ echo '			</table>
 
 	function getRoute($formvars) {
 		include_(CLASSPATH.'Routing.php');
-		$routing = new routing($this->user->rolle, $this->database, $this->pgdatabase);
+		$routing = new routing($this->user->rolle, $this->pgdatabase);
 		echo $routing->getRoute($formvars);
 	}
 
@@ -4160,7 +4160,7 @@ echo '			</table>
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-		$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
+		$spatial_processor = new spatial_processor($this->user->rolle, $layerdb);
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $this->attributes['geomtype'][$this->attributes['the_geom']]);
 		$this->copy_dataset($mapdb, $this->formvars['selected_layer_id'], array($layerset[0]['oid']), array($this->formvars['oid']), count($single_geoms), array($this->formvars['layer_columnname']), $single_geoms, true);
 		$this->loadMap('DataBase');					# Karte anzeigen
@@ -5921,7 +5921,7 @@ echo '			</table>
 				}
 			}
 		}
-		$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['datentyp'], $this->database);
+		$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['datentyp'], $this->pgdatabase);
 		$this->loadMap('DataBase');
     // $this->saveMap('');
     // $currenttime=date('Y-m-d H:i:s',time());
@@ -6140,7 +6140,7 @@ echo '			</table>
 						}
 					}
 				}
-				$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, $layer_id, $layerset[0]['datentyp'], $this->database);
+				$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, $layer_id, $layerset[0]['datentyp'], $this->pgdatabase);
 			}
 			# ------------ automatische Klassifizierung Ende -------------------
 			else{
@@ -6524,7 +6524,7 @@ echo '			</table>
 
   function metadaten_generieren($layer_id){
 		include_(CLASSPATH.'metadaten_csw.php');
-  	$md = new metadata_csw($this->database);
+  	$md = new metadata_csw(this->pgdatabase);
   	$md->make_xml($layer_id);
   	return $md->create_csw_insert();
   }
@@ -8318,7 +8318,7 @@ echo '			</table>
 			$export_layer_ids = $this->formvars['layer'];
 			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 			$result = $mapDB->create_layer_dumpfile(
-				$this->database,
+				this->pgdatabase,
 				$export_layer_ids,
 				($this->formvars['with_privileges'] != ''),
 				($this->formvars['with_datatypes'] != '')
@@ -8368,9 +8368,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					if (in_array($table['name'], $selected_tables)) {
 						$msg .= '<br>Gebe Definition für Tabelle ' . $table['name'] . ' aus';
 						$this->sql .= $this->generate_layer($selected_schema, $table);
-						$this->sql .= $this->database->generate_classes($table);
-						$this->sql .= $this->database->generate_styles();
-						$this->sql .= $this->database->generate_style2classes();
+						$this->sql .= $this->pgdatabase->generate_classes($table);
+						$this->sql .= $this->pgdatabase->generate_styles();
+						$this->sql .= $this->pgdatabase->generate_style2classes();
 					}
 				}
 			}
@@ -8385,7 +8385,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	*/
 	function generate_layer($schema, $table, $group_id = 0, $connection_id = '', $epsg_code = '25832', $geometrie_column = '', $geometrietyp = '', $layertyp = '') {
 		$this->debug->write("<p>schema: {$schema}, table: {$table['name']}, group_id: {$group_id}, connection: {$connection}, epsg_code: {$epsg_code}, geometrie_column: {$geometrie_column}, geometrietype: {$geometrietyp}, layertype: {$layertype}", 4);
-		$sql = $this->database->generate_layer($schema, $table, $group_id, $connection_id, $epsg_code, $geometrie_column, $geometrietyp, $layertyp);
+		$sql = $this->pgdatabase->generate_layer($schema, $table, $group_id, $connection_id, $epsg_code, $geometrie_column, $geometrietyp, $layertyp);
 		$table_attributes = $this->pgdatabase->get_attribute_information($schema, $table['name']);
 		$sql .= $this->generate_layer_attributes($schema, $table, $table_attributes);
 		return $sql;
@@ -8417,7 +8417,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		else
 			$enum_options = array('option' => '', 'constraint' => '');
 
-		$sql .= $this->database->generate_layer_attribute($table_attribute, $table, $enum_options);
+		$sql .= $this->pgdatabase->generate_layer_attribute($table_attribute, $table, $enum_options);
 		return $sql;
 	}
 
@@ -8425,7 +8425,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	* This function generate sql for a datatype definition and its attributes in mysql
 	*/
 	function generate_datatype($schema, $table_attribute) {
-		$sql .= $this->database->generate_datatype($schema, $table_attribute);
+		$sql .= $this->pgdatabase->generate_datatype($schema, $table_attribute);
 
 		# generate datatypes attributes
 		$datatype_attributes = $this->pgdatabase->get_attribute_information($schema, $table_attribute['type']);
@@ -8455,7 +8455,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		else
 			$enum_options = array('option' => '', 'constraint' => '');
 
-		$sql = $this->database->generate_datatype_attribute($datatype_attribute, $table, $enum_options);
+		$sql = $this->pgdatabase->generate_datatype_attribute($datatype_attribute, $table, $enum_options);
 
 		if ($datatype_attribute['type_type'] == 'c') {
 			$sql .= $this->generate_datatype($schema, $datatype_attribute);
@@ -8907,7 +8907,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       } break;
     }
 		if($method == 1){			# für jeden Wert eine Klasse: zufällige Farben
-			$colors = read_colors($this->database);
+			$colors = read_colors(this->pgdatabase);
 			foreach ($classes AS $key => $class) {
 				shuffle($colors);
 				$classes[$key]['style_color'] = $colors[0]['red'].' '.$colors[0]['green'].' '.$colors[0]['blue'];
@@ -9188,7 +9188,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       if ($deletestellen != 0){
         $this->removeLayerFromStellen($formvars['selected_layer_id'], $deletestellen);
 				for ($i = 0; $i < count($deletestellen); $i++) {
-					$stelle = new stelle($deletestellen[$i], $this->database);
+					$stelle = new stelle($deletestellen[$i], $this->pgdatabase);
 					$stelle->updateLayerParams();
 					$this->update_layer_parameter_in_rollen($deletestellen[$i]);
 				}
@@ -9247,7 +9247,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function removeLayerFromStellen($layer_id, $deletestellen) {
 		for($i = 0; $i < count($deletestellen); $i++){
-			$stelle = new stelle($deletestellen[$i], $this->database);
+			$stelle = new stelle($deletestellen[$i], $this->pgdatabase);
 			$stelle->deleteLayer(array($layer_id), $this->pgdatabase);
 			$users = $stelle->getUser();
 			for($j = 0; $j < count($users['ID']); $j++){
@@ -10354,16 +10354,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$oid = $element[3];
 				if ($oid != '') {
 					$sql = "
-						INSERT INTO zwischenablage
+						INSERT INTO kvwmap.zwischenablage
 						VALUES (
 							" . $this->user->id . ",
 							" . $this->Stelle->id . ",
 							" . $this->formvars['chosen_layer_id'] . ",
 							'" . $oid . "'
-						) ON DUPLICATE KEY
-						UPDATE layer_id=layer_id
+						) ON CONFLICT (user_id, stelle_id, layer_id, oid) DO NOTHING
 					";
-					$ret = $this->database->execSQL($sql,4, 1);
+					$ret = $this->pgdatabase->execSQL($sql,4, 1);
 				}
 			}
 		}
@@ -10377,11 +10376,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $oids[] = $element[3];
 			}
 		}
-		$sql = 'DELETE FROM zwischenablage WHERE user_id = '.$this->user->id.' AND stelle_id = '.$this->Stelle->id;
+		$sql = 'DELETE FROM kvwmap.zwischenablage WHERE user_id = '.$this->user->id.' AND stelle_id = '.$this->Stelle->id;
 		if($this->formvars['chosen_layer_id'] != '')$sql.= ' AND layer_id = '.$this->formvars['chosen_layer_id'];
 		if(count_or_0($oids) > 0)$sql.= ' AND oid IN ('.implode(', ', $oids).')';
 		#echo $sql.'<br>';
-		$ret = $this->database->execSQL($sql,4, 1);
+		$ret = $this->pgdatabase->execSQL($sql,4, 1);
 		if(count_or_0($oids) == 0){
 			$this->Zwischenablage();
 		}
@@ -10394,19 +10393,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.Name_" . $language . " != \"\" THEN l.Name_" . $language . "
-				ELSE l.Name
+				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "
+				ELSE l.name
 			END AS Name";
 		}
 		else{
 			$name_column = "l.Name";
 		}
-		$sql = "SELECT count(z.layer_id) as count, z.layer_id, " . $name_column.", l.alias FROM kvwmap.zwischenablage as z, layer as l WHERE z.layer_id = l.layer_id AND user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." GROUP BY z.layer_id, l.Name";
+		$sql = "SELECT count(z.layer_id) as count, z.layer_id, " . $name_column.", l.alias FROM kvwmap.zwischenablage as z, layer as l WHERE z.layer_id = l.layer_id AND user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." GROUP BY z.layer_id, l.name";
 		#echo $sql.'<br>';
-		$ret = $this->database->execSQL($sql,4, 1);
-		$result = $this->database->result;
-    $this->num_rows = $this->database->result->num_rows;
-		while($rs = $result->fetch_assoc()){
+		$ret = $this->pgdatabase->execSQL($sql,4, 1);
+    $this->num_rows = pg_num_rows($ret[1]);
+		while($rs = pg_fetch_assoc($ret[1])){
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->Stelle->useLayerAliases) ? 'name' : 'alias'];
 			$rs['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $rs['layer_id'], array(0,1), 'only_ids');
 			$this->layer[] = $rs;
@@ -10434,16 +10432,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				oid,
 				layer_id
 			FROM
-				zwischenablage
+				kvwmap.zwischenablage
 			WHERE
 				user_id = " . $this->user->id . " AND
 				stelle_id = " . $this->Stelle->id . "
 				" . ($layer_id ? 'AND layer_id = ' . $layer_id : '') . "
 		";
 		#echo $sql.'<br>';
-		$ret = $this->database->execSQL($sql, 4, 1);
+		$ret = $this->pgdatabase->execSQL($sql, 4, 1);
 		$oids = array();
-		while ($rs = $this->database->result->fetch_assoc()){
+		while ($rs = pg_fetch_assoc($ret[1])){
 			$oids[$rs['layer_id']][] = $rs['oid'];
 		}
 		return $oids;
@@ -10813,7 +10811,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		if ($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
 			include_(CLASSPATH.'spatial_processor.php');
-			$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
+			$spatial_pro = new spatial_processor($this->user->rolle, $this->pgdatabase);
 			if ($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
 				$this->formvars['newpathwkt'] = $spatial_pro->composePolygonWKTStringFromSVGPath($this->formvars['newpath']);
 			}
@@ -12004,7 +12002,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$colors['blue'] =				 Array( 80,  80, 255);
 		$colors['black'] =  		 Array(  0,   0,   0);
 
-		$result_colors = read_colors($this->database);		# Farben fürs Kreisdiagramm
+		$result_colors = read_colors(this->pgdatabase);		# Farben fürs Kreisdiagramm
     for ($i = 0; $i < count($result_colors); $i++) {
     	$piecolors[] = Array($result_colors[$i]['red'], $result_colors[$i]['green'], $result_colors[$i]['blue']);
     }
@@ -12819,7 +12817,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		";
 		#echo '<br>Sql zur Übernahme der Attributrechte: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:gui->Attributeditor_takeover_layer_attributes_privileges - Übernehmen der Stellen-Layerrechte von einem Layer zu einem anderen:<br>" . $sql, 4);
-		$this->database->execSQL($sql,4, 1);
+		this->pgdatabase->execSQL($sql,4, 1);
 		$sql = "
 		DELETE FROM 
 			kvwmap.layer_attributes2stelle 
@@ -12841,7 +12839,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		";
 		#echo '<br>Sql zur Übernahme der Attributrechte: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:gui->Attributeditor_takeover_layer_attributes_privileges - Übernehmen der Stellen-Layerrechte von einem Layer zu einem anderen:<br>" . $sql, 4);
-		$this->database->execSQL($sql,4, 1);
+		this->pgdatabase->execSQL($sql,4, 1);
 	}
 
 	/*
@@ -12852,8 +12850,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over layer privileges
 		$sql = "
 			UPDATE
-				used_layer AS t2 INNER JOIN
-				used_layer AS t1 ON t1.stelle_id = t2.stelle_id
+				kvwmap.used_layer AS t2 INNER JOIN
+				kvwmap.used_layer AS t1 ON t1.stelle_id = t2.stelle_id
 			SET
 				t2.privileg = t1.privileg,
 				t2.export_privileg = t1.export_privileg
@@ -12863,7 +12861,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		";
 		# echo '<br>Sql zur Übernahme der layer privileges von einem Layer zum anderen
 		$this->debug->write("<p>file:stelle.php class:gui->Attributeditor_takeover_attributes_privileges - übernehmen der Layerrechte von einem Layer zu einem anderen:<br>".$sql,4);
-		$this->database->execSQL($sql,4, 1);
+		this->pgdatabase->execSQL($sql,4, 1);
 	}
 
 	/*
@@ -12874,8 +12872,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over default layer attributes
 		$sql = "
 			UPDATE
-				layer_attributes AS t2 INNER JOIN
-				layer_attributes AS t1 ON t1.name = t2.name
+				kvwmap.layer_attributes AS t2 INNER JOIN
+				kvwmap.layer_attributes AS t1 ON t1.name = t2.name
 			SET
 				t2.privileg = t1.privileg,
 				t2.query_tooltip = t1.query_tooltip
@@ -12885,7 +12883,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		";
 		#echo '<br>Sql zur Übernahme der default layer privileges von einem Layer auf einen anderen: ' . $sql;
 		$this->debug->write("<p>file:users.php class:gui->Attributeditor_takeover_default_layer_attributes_privileges - Speichern der Default-Layerrechte der Attribute:<br>" . $sql,4);
-		$this->database->execSQL($sql,4, 1);
+		this->pgdatabase->execSQL($sql,4, 1);
 	}
 
 	/*
@@ -12896,8 +12894,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over default layer privileges
 		$sql = "
 			UPDATE
-				layer AS t2,
-				layer AS t1
+				kvwmap.layer AS t2,
+				kvwmap.layer AS t1
 			SET
 				t2.privileg = t1.privileg,
 				t2.export_privileg = t1.export_privileg
@@ -12907,7 +12905,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		";
 		#echo '<br>Sql zur Übernahme der default layer attribute privileges von einem Layer auf einen anderen: ' . $sql;
 		$this->debug->write("<p>file:users.php class:gui->Attributeditor_takeover_default_layer_privileges - Speichern der Default-Layerrechte:<br>" . $sql,4);
-		$this->database->execSQL($sql,4, 1);
+		this->pgdatabase->execSQL($sql,4, 1);
 	}
 
 	/**
@@ -13513,7 +13511,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 
     if ($this->formvars['stelle'] != '') {
-      $stelle = new stelle($this->formvars['stelle'], $this->database);
+      $stelle = new stelle($this->formvars['stelle'], $this->pgdatabase);
       $this->layerdaten = $stelle->getLayers(NULL, 'name');
       if ($this->formvars['selected_layers'] != '') {
         $this->selected_layers = explode(', ', $this->formvars['selected_layers']);
@@ -13846,7 +13844,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
   function StatistikAuswahl() {
     # Abfragen aller Stellen für die Statistik oder Abrechnung
-    $this->account = new account($this->database);
+    $this->account = new account(this->pgdatabase);
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     if($this->formvars['go'] == 'StatistikAuswahl_Stelle'){
     	$this->stellendaten=$this->user->getStellen('Bezeichnung');
@@ -13926,7 +13924,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         showAlert($this->Meldung);
         return;
     }
-    $this->account = new account($this->database);
+    $this->account = new account(this->pgdatabase);
     $this->account->getStatistik($this->formvars['nutzer'],$this->formvars['nutzung'],$this->formvars['stelle'],$this->formvars['zeitraum'],$this->formvars['day_d'],$this->formvars['week_w'],$this->formvars['month_d'],$this->formvars['month_w'],$this->formvars['month_m'],$this->formvars['year_m'],$this->formvars['year_w'],$this->formvars['year_d'],$this->formvars['day_e1'],$this->formvars['day_e2'],$this->formvars['month_e1'],$this->formvars['month_e2'],$this->formvars['year_e1'],$this->formvars['year_e2']);
 
     $this->account->ALKA4 = 0;
@@ -14213,7 +14211,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
 		if ($this->formvars['selected_user_id'] > 0) {
 			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id, true);
-			$this->user_stelle = new stelle($this->userdaten[0]['stelle_id'], $this->database);
+			$this->user_stelle = new stelle($this->userdaten[0]['stelle_id'], $this->pgdatabase);
 			$this->formvars['nachname'] 									= $this->userdaten[0]['name'];
 			$this->formvars['vorname'] 										= $this->userdaten[0]['Vorname'];
 			$this->formvars['loginname'] 									= $this->userdaten[0]['login_name'];
@@ -14295,7 +14293,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $this->formvars['selected_user_id'] = $ret[1];
         $stellen = array_filter(explode(', ', $this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
-					$stelle = new stelle($stellen[$i], $this->database);
+					$stelle = new stelle($stellen[$i], $this->pgdatabase);
 					$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -14329,7 +14327,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->formvars['selected_user_id'] = $this->formvars['id'];
 			}
 			for ($i = 0; $i < count($stellen); $i++) {
-				$stelle = new stelle($stellen[$i], $this->database);
+				$stelle = new stelle($stellen[$i], $this->pgdatabase);
 				$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -14373,7 +14371,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
 	function BenutzerdatenLayerDeaktivieren(){
-		$user_rolle = new rolle($this->formvars['user_id'], $this->formvars['stelle_id'], $this->database);
+		$user_rolle = new rolle($this->formvars['user_id'], $this->formvars['stelle_id'], $this->pgdatabase);
 		$user_rolle->setOneLayer($this->formvars['layer_id'], 0);
 	}
 
@@ -14384,7 +14382,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->stellen = $this->Stelle->getStellen('Bezeichnung');
     for($i = 0; $i < count($this->stellen['ID']); $i++){
     	# Abfragen der Benutzer der Stelle
-    	$stelle = new stelle($this->stellen['ID'][$i], $this->database);
+    	$stelle = new stelle($this->stellen['ID'][$i], $this->pgdatabase);
     	$this->stellen['user'][$i] = $stelle->getUser();
     }
     $this->unassigned_users = $this->user->get_Unassigned_Users();
@@ -14559,8 +14557,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 			else {
 				$result = $this->myobject->delete();
-				if ($result['success']) {
-					$num_affected_rows = $this->database->mysqli->affected_rows;
+				if (this->myobject->database->success) {
+					$num_affected_rows = pg_affected_rows($result);
 					switch ($num_affected_rows) {
 						case (-1) : {
 							$result = array(
@@ -14715,22 +14713,22 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function get_copyrights(){
 		$sql = "
 			SELECT 
-				GROUP_CONCAT(" . ($this->Stelle->useLayerAliases ? 'COALESCE(l.alias, l.Name)' : 'l.Name') . " SEPARATOR ', ') as layer, 
+				string_agg(" . ($this->Stelle->useLayerAliases ? 'COALESCE(l.alias, l.name)' : 'l.name') . ", ', ') as layer, 
 				d.beschreibung
 			FROM 
-				datasources as d JOIN
-				layer_datasources as ld ON ld.datasource_id = d.id JOIN
-				layer as l ON l.layer_id = ld.layer_id JOIN
-				u_rolle2used_layer r ON r.layer_id = ld.layer_id AND r.user_id = " . $this->user->id . " AND r.stelle_id = " . $this->Stelle->id . "
+				kvwmap.datasources as d JOIN
+				kvwmap.layer_datasources as ld ON ld.datasource_id = d.id JOIN
+				kvwmap.layer as l ON l.layer_id = ld.layer_id JOIN
+				kvwmap.u_rolle2used_layer r ON r.layer_id = ld.layer_id AND r.user_id = " . $this->user->id . " AND r.stelle_id = " . $this->Stelle->id . "
 			WHERE
-				r.aktivStatus != '0'
+				r.aktivStatus != 0
 			GROUP BY
 				d.id
 		";
-		$ret = $this->database->execSQL($sql, 4, 1);
+		$ret = $this->pgdatabase->execSQL($sql, 4, 1);
 		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$output = '<table>';
-		while ($rs = $this->database->result->fetch_assoc()){
+		while ($rs = pg_fetch_assoc($ret[1])){
 			$rs['layer'] = replace_params_rolle($rs['layer']);
       $output .= '<tr>
 							<td>' . $rs['layer'] . '</td>
@@ -15384,7 +15382,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->PasswordError = 'Geben Sie bitte ihr aktuelles Passwort an.';
 			}
 			else {
-				$user = new user($this->user->login_name, 0, $this->database, $this->formvars['passwort']);
+				$user = new user($this->user->login_name, 0, $this->pgdatabase, $this->formvars['passwort']);
 				if ($user->login_name != $this->user->login_name) {
 					$this->PasswordError = 'Das angegebene Passwort stimmt nicht mit dem aktuellen Passwort überein.';
 				}
@@ -16743,7 +16741,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layerdb = $this->pgdatabase;
 			}
 		}
-		$this->processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
+		$this->processor = new spatial_processor($this->user->rolle, $layerdb);
 		$this->processor->process_query($this->formvars);
 	}
 
@@ -17693,8 +17691,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$rolle = $this->user->rolle;
 			}
 			else{												# Parameter einer anderen Stelle abfragen
-				$stelle = new stelle($stelle_id, $this->database);
-				$rolle = new rolle($this->user->id, $stelle_id, $this->database);
+				$stelle = new stelle($stelle_id, $this->pgdatabase);
+				$rolle = new rolle($this->user->id, $stelle_id, $this->pgdatabase);
 				$rolle->readSettings();
 			}
 			$this->params_layer = $mapDB->get_layer_params_layer();
