@@ -875,7 +875,7 @@ CREATE TABLE stelle (
   ows_namespace varchar(100) DEFAULT NULL,
   ows_title varchar(255) DEFAULT NULL,
   wms_accessconstraints varchar(255) DEFAULT NULL,
-  ows_abstract varchar(255) DEFAULT NULL,
+  ows_abstract text DEFAULT NULL,
   ows_contactperson varchar(255) DEFAULT NULL,
   ows_contactorganization varchar(255) DEFAULT NULL,
   ows_contenturl text,
