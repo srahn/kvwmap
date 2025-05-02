@@ -1,11 +1,11 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class CronJob extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class CronJob extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'cron_jobs');
+		parent::__construct($gui, 'kvwmap', 'cron_jobs');
 		$this->setKeys(
 			array(
 				"id",
