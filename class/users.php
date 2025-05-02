@@ -1397,41 +1397,48 @@ class user {
 	function NeuAnlegen($userdaten) {
 		$stellen = array_filter(explode(', ',$userdaten['selstellen']));
 		# Neuen Nutzer anlegen
-		$sql ='INSERT INTO user SET';
 		if($userdaten['id'] != ''){
-			$sql.=' ID='.$userdaten['id'].', ';
+			$columns['id'] = $userdaten['id'];
 		}
-		$sql.=' Name="'.$userdaten['nachname'].'"';
-		$sql.=',Vorname="'.$userdaten['vorname'].'"';
-		$sql.=',login_name="' . trim($userdaten['loginname']) . '"';
-		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		$sql.=',password = kvwmap.sha1("' . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . '")';
-		$sql.=',password_setting_time = CURRENT_TIMESTAMP()';
-		$sql.=',password_expired = ' . ($userdaten['password_expired'] ? '1' : '0');
+		$columns['name'] = "'" . $userdaten['nachname'] . "'";
+		$columns['vorname'] = "'" . $userdaten['vorname'] . "'";
+		$columns['login_name'] = "'" . trim($userdaten['loginname']) . "'";
+		$columns['namenszusatz'] = "'" . $userdaten['Namenszusatz'] . "'";
+		$columns['password'] = "kvwmap.sha1('" . pg_escape_string(trim($userdaten['password2'])) . "')";
+		$columns['password_setting_time'] = "CURRENT_TIMESTAMP()";
+		$columns['password_expired'] = ($userdaten['password_expired'] ? '1' : '0');
 		if ($userdaten['phon']!='') {
-			$sql.=',phon="'.$userdaten['phon'].'"';
+			$columns['phon'] = "'" . $userdaten['phon'] . "'";
 		}
 		if ($userdaten['email']!='') {
-			$sql.=',email="'.$userdaten['email'].'"';
+			$columns['email'] = "'" . $userdaten['email'] . "'";
 		}
 		if ($userdaten['organisation']!='') {
-			$sql.=',organisation="'.$userdaten['organisation'].'"';
+			$columns['organisation'] = "'" . $userdaten['organisation'] . "'";
 		}
 		if ($userdaten['position']!='') {
-			$sql.=',position="'.$userdaten['position'].'"';
+			$columns['position'] = "'" . $userdaten['position'] . "'";
 		}
 		if ($userdaten['start'] != '') {
-			$sql.=',start="' . ($userdaten['start'] ?: '0000-00-00') . '"';
+			$columns['start'] = ($userdaten['start'] ? "'" . $userdaten['start'] . "'" : 'NULL');
 		}
 		if ($userdaten['stop'] != '') {
-			$sql.=',stop="' . ($userdaten['stop'] ?: '0000-00-00') . '"';
+			$columns['stop'] = ($userdaten['stop'] ? "'" . $userdaten['stop'] . "'" : 'NULL');
 		}
 		if ($userdaten['ips']!='') {
-			$sql.=',ips="'.$userdaten['ips'].'"';
+			$columns['ips'] = "'" . $userdaten['ips'] . "'";
 		}
 		if($stellen[0] != ''){
-			$sql.=',stelle_id='.$stellen[0];
+			$columns['stelle_id'] = $stellen[0];
 		}
+		$sql = "
+			INSERT INTO 
+				kvwmap.user
+			(" . implode(', ', array_keys($columns)) . ")
+			VALUES	
+				(" . implode(', ', $columns) . ")
+			RETURNING id";
+		
 		// echo '<p>SQL zum Eintragen eines neuen Nutzers: ' . $sql;
 		# Abfrage starten
 		$ret = $this->database->execSQL($sql,4, 0);
@@ -1440,36 +1447,9 @@ class user {
 			$ret[1].='<br>Die Benutzerdaten konnten nicht eingetragen werden.<br>'.$ret[1];
 		}
 		else {
-			# User Erfolgreich angelegt
-			# Abfragen der user_id des neu eingetragenen Benutzers
-			$sql ='SELECT ID FROM user WHERE';
-			$sql.=' Name="'.$userdaten['nachname'].'"';
-			$sql.=' AND Vorname="'.$userdaten['vorname'].'"';
-			$sql.=' AND login_name="'.$userdaten['loginname'].'"';
-			if ($userdaten['phon']!='') {
-				$sql.=' AND phon="'.$userdaten['phon'].'"';
-			}
-			if ($userdaten['email']!='') {
-				$sql.=' AND email="'.$userdaten['email'].'"';
-			}
-			if ($userdaten['organisation']!='') {
-				$sql.=' AND organisation="'.$userdaten['organisation'].'"';
-			}
-			if ($userdaten['position']!='') {
-				$sql.=' AND position="'.$userdaten['position'].'"';
-			}
-			# Starten der Anfrage
-			$this->database->execSQL($sql,4, 0);
-			#echo $sql;
-			if (!$this->database->success) {
-				# Fehler bei der Datenbankanfrage
-				$ret[1] .= '<br>Die Benutzerdaten konnten nicht eingetragen werden.<br>'.$ret[1];
-			}
-			else {
-				# Abfrage erfolgreich durchgeführt, übergeben der user_id zur Rückgabe der Funktion
-				$rs = $this->database->result->fetch_array();
-				$ret[1] = $rs['ID'];
-			}
+			# Abfrage erfolgreich durchgeführt, übergeben der user_id zur Rückgabe der Funktion
+			$rs = pg_fetch_assoc($ret[1]);
+			$ret[1] = $rs['id'];
 		}
 		return $ret;
 	}

@@ -95,13 +95,13 @@ class Nutzer extends PgObject {
 
 		if ($results[0]['success']) {
 			$result['success'] = false;
-			$rolle = new rolle($user->get('ID'), $stelle_id, $gui->database);
-			if ($rolle->setRolle($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
-				if ($rolle->setMenue($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
-					if ($rolle->setLayer($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
+			$rolle = new rolle($user->get('id'), $stelle_id, $gui->database);
+			if ($rolle->setRolle($user->get('id'), $stelle_id, $stelle->default_user_id)) {
+				if ($rolle->setMenue($user->get('id'), $stelle_id, $stelle->default_user_id)) {
+					if ($rolle->setLayer($user->get('id'), $stelle_id, $stelle->default_user_id)) {
 						$layers = $stelle->getLayers(NULL);
-						if ($rolle->setGroups($user->get('ID'), $stelle_id, $stelle->default_user_id, $layers['ID'])) {
-							$rolle->setSavedLayersFromDefaultUser($user->get('ID'), $stelle_id, $stelle->default_user_id);
+						if ($rolle->setGroups($user->get('id'), $stelle_id, $stelle->default_user_id, $layers['id'])) {
+							$rolle->setSavedLayersFromDefaultUser($user->get('id'), $stelle_id, $stelle->default_user_id);
 							$result['success'] = true;
 						}
 					}

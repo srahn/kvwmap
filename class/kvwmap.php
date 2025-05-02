@@ -3886,7 +3886,7 @@ echo '			</table>
 	*/
 	function stelle_bearbeiten_allowed($selected_stelle, $editor_user) {
 		if (!$this->is_admin_user($editor_user)) {
-			$editor_stellen = $this->Stelle->getStellen('ID', $editor_user);
+			$editor_stellen = $this->Stelle->getStellen('id', $editor_user);
 			if (!in_array($selected_stelle, $editor_stellen['ID'])) {
 				$this->add_message('error', 'Sie sind nicht berechtigt die Stelle ' . $selected_stelle . ' zu bearbeiten!');
 				go_switch('', true);
@@ -3907,7 +3907,7 @@ echo '			</table>
 			# Fragt user ab, die Bearbeiter sehen kann
 			$editor_users = $this->user->getall_Users('name', $selected_user, $editor_user);
 			# Fragt stellen ab, die Bearbeiter sehen kann
-			$editor_stellen = $this->Stelle->getStellen('ID', $editor_user);
+			$editor_stellen = $this->Stelle->getStellen('id', $editor_user);
 			if (
 				!in_array($selected_user, $editor_users['ID']) OR
 				$this->user_is_in_fremden_stellen($selected_user, $editor_stellen['ID'])
@@ -9466,7 +9466,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			function($stelle) {
 				return array(
 					'value' => $stelle->get('ID'),
-					'output' => $stelle->get('Bezeichnung')
+					'output' => $stelle->get('bezeichnung')
 				);
 			},
 			$stellen
@@ -13428,8 +13428,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['comment'] = $this->stellendaten['comment'];
 			$where = 'id != '.$this->formvars['selected_stelle_id'];
 
-			$children_ids = array_map(function($child) {return $child['ID'];}, $this->formvars['selchildren']);
-			$parent_ids = array_map(function($parent) {return $parent['ID'];}, $this->formvars['selparents']);
+			$children_ids = array_map(function($child) {return $child['id'];}, $this->formvars['selchildren']);
+			$parent_ids = array_map(function($parent) {return $parent['id'];}, $this->formvars['selparents']);
     }
 
 		$alle_anderen_stellen = $stelle->find_where($where, 'bezeichnung');
@@ -19480,11 +19480,11 @@ class db_mapObj{
 			# Frage Stellen der Layer ab
 			$sql = "
 				SELECT DISTINCT
-					ID,
-					Bezeichnung
+					id,
+					bezeichnung
 				FROM
-					stelle AS s JOIN
-					used_layer AS ul ON (s.ID = ul.stelle_id)
+					kvwmap.stelle AS s JOIN
+					kvwmap.used_layer AS ul ON (s.ID = ul.stelle_id)
 				WHERE
 					ul.layer_id IN (" . implode(', ', $layer_ids) . ")
 			";
@@ -19495,28 +19495,27 @@ class db_mapObj{
 				$err_msg = $ret[1];
 			}
 			else {
-				$result = $database->result;
-				while ($rs = $result->fetch_assoc()) {
-					$stelle_id_var = '@stelle_id_' . $rs['ID'];
+				while ($rs = pg_fetch_assoc($ret[1])) {
+					$stelle_id_var = '@stelle_id_' . $rs['id'];
 					$stellen[] = array(
-						'id' => $rs['ID'],
+						'id' => $rs['id'],
 						'var' => $stelle_id_var
 					);
 
 					$stelle = $database->create_insert_dump(
 						'stelle',
-						'ID',
+						'id',
 						"
 							SELECT
 								*
 							FROM
-								stelle
+								kvwmap.stelle
 							WHERE
-								ID = " . $rs['ID'] . "
+								id = " . $rs['id'] . "
 						"
 					);
 					# Stelle
-					$dump_text .= "\n\n-- Stelle " . $rs['Bezeichnung'] . " (id=" . $rs['ID'] . ")";
+					$dump_text .= "\n\n-- Stelle " . $rs['Bezeichnung'] . " (id=" . $rs['id'] . ")";
 					$dump_text .= "\n" . $stelle['insert'][0];
 
 					# Variable für Stelle

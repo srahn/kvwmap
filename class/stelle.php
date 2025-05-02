@@ -957,7 +957,7 @@ class stelle {
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
 		while ($rs = pg_fetch_assoc($ret[1])) {
-			$parents[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
+			$parents[] = ($return == 'only_ids' ? $rs['id'] : $rs);
 		};
 		return $parents;
 	}
@@ -986,9 +986,9 @@ class stelle {
 				}
 				return [];
 			}
-			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
+			$children[] = ($return == 'only_ids' ? $rs['id'] : $rs);
 			if($recursive){
-				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true, $loop_test, $loop_counter++));
+				$children = array_merge($children, $this->getChildren($rs['id'], $order, $return, true, $loop_test, $loop_counter++));
 			}
 		};
 		return $children;

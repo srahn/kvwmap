@@ -1,6 +1,6 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class Invitation extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class Invitation extends PgObject {
 
 	static $write_debug = false;
 
@@ -32,9 +32,9 @@ class Invitation extends MyObject {
 		$invitation = new Invitation($gui);
 		$invitation = $invitation->find_by($invitation->identifier, $id);
 		$inviter = new MyObject($gui, 'user');
-		$invitation->inviter = $inviter->find_by('ID', $invitation->get('inviter_id'));
+		$invitation->inviter = $inviter->find_by('id', $invitation->get('inviter_id'));
 		$stelle = new MyObject($gui, 'stelle');
-		$invitation->stelle = $stelle->find_by('ID', $invitation->get('stelle_id'));
+		$invitation->stelle = $stelle->find_by('id', $invitation->get('stelle_id'));
 		return $invitation;
 	}
 
