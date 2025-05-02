@@ -1283,16 +1283,16 @@ class user {
 			SELECT
 				*
 			FROM
-				user
+				kvwmap.user
 			WHERE
-				ID = " . $id . "
+				id = " . $id . "
 		";
-		$this->database->execSQL($sql,4, 0);
+		$ret = $this->database->execSQL($sql,4, 0);
 		if (!$this->database->success) {
 			$ret[1] .= '<br>Die Abfrage konnte nicht ausgeführt werden.' . $ret[1];
 		}
 		else {
-			if ($this->database->result->num_rows > 0) {
+			if (pg_num_rows($ret[1]) > 0) {
 				$ret[1] = 1;
 			}
 			else {
@@ -1336,22 +1336,21 @@ class user {
 			SELECT
 				*
 			FROM
-				user
+				kvwmap.user
 			WHERE
 				login_name = '" . $login . "'
 		";
 		if ($id != NULL) {
 			$sql.= "
-				AND ID != " . $id;
+				AND id != " . $id;
 		}
-		$this->database->execSQL($sql,4, 0);
+		$ret = $this->database->execSQL($sql,4, 0);
 		if (!$this->database->success) {
 			$ret[1].='<br>Die Abfrage konnte nicht ausgeführt werden.'.$ret[1];
 		}
 		else {
-			if ($this->database->result->num_rows > 0) {
-				$ret[1] = 1;
-				$ret['user'] = $this->database->result->fetch_array();
+			if (pg_num_rows($ret[1]) > 0) {
+				$ret['user'] = pg_fetch_array($ret[1]);
 			}
 			else {
 				$ret[1] = 0;
