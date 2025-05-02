@@ -27,9 +27,9 @@
     SET session_replication_role = 'origin';
     COMMIT;
   ";
-  $this->pgdatabase->execSQL($sql, 0, 0);
+  $ret = $this->pgdatabase->execSQL($sql, 0, 0);
 
-  if ($this->pgdatabase->success) {
+  if ($ret['success']) {
     $sql = "
       with sequences as (
         select *
