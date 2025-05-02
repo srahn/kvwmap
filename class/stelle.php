@@ -2325,6 +2325,9 @@ class stelle {
 			'overlays' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					if ($layer2Stelle->get('group_id')) {
+						$layer->set('Gruppe', $layer2Stelle->get('group_id'));
+					}
 					if ($layer) {
 						// return overlay_def only if layer has been found
 						$layer->minScale = $layer2Stelle->get('minscale');
