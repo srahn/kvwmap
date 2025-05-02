@@ -2904,7 +2904,7 @@ class Gml_extractor {
 				'sql'::xplankonverter.enum_factory AS factory,
 				'" . $regel . "' AS sql,
 				'" . $enum_geometrie_typ . "'::xplankonverter.enum_geometrie_typ AS geometrietyp,
-				'" . $uml_class . "_" . $bereich_index . "_" . $geometrietyp . "' AS name,
+				'" . $uml_class . "_" . $bereich_index . "_" .$name . "' AS name,
 				'regel created automatically from gmlas extraction' AS beschreibung,
 				" . $konvertierung_id . " AS konvertierung_id,
 				" . $stelle_id . " AS stelle_id,

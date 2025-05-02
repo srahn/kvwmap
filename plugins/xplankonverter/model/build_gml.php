@@ -445,7 +445,7 @@ class Gml_builder {
 							$codeSpaceUri = ltrim($gml_value_array[0], '"(');
 							$code_value = $gml_value_array[1];
 							if(!empty($codeSpaceUri) || !empty($code_value)) {
-								$gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">" . htmlentities(trim($code_value, '"')) . "</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
+								$gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">" . htmlspecialchars(trim($code_value, '\"'), ENT_XML1, 'UTF-8') . "</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
 							}
 							break;
 						case "DataType" :

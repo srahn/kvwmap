@@ -63,12 +63,12 @@ class LayerGroup extends PgObject {
 			'select' => 'id, Gruppenname, icon, `order`',
 			'from' => "(
 				SELECT DISTINCT
-					CASE WHEN g3.id IS NULL THEN CASE WHEN g2.id IS NULL THEN g1.id ELSE g2.id END ELSE g3.id END AS group_id,
+					COALESCE(g3.id, g2.id, g1.id) AS group_id,
 					ul.Stelle_id
 				FROM
 					used_layer ul JOIN
 					layer l ON ul.layer_id = l.layer_id JOIN
-					u_groups g1 ON l.Gruppe = g1.id LEFT JOIN
+					u_groups g1 ON COALESCE(ul.group_id, l.gruppe) = g1.id LEFT JOIN
 					u_groups g2 ON g1.obergruppe = g2.id LEFT JOIN
 					u_groups g3 ON g2.obergruppe = g3.id
 				WHERE
