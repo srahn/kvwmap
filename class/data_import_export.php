@@ -291,7 +291,7 @@ class data_import_export {
 		else {
 			return;
 		}
-		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, '-lco FID=gid', $encoding, true, $overwrite);
+		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, '-lco FID=gid', $encoding, true, false, $overwrite);
 		if (file_exists('.esri.gz')) {
 			unlink('.esri.gz');
 		}
