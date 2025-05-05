@@ -98,14 +98,13 @@ class PgObject {
 
 	function find_by($attribute, $value) {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, $this->show);
-		$sql = "
+		$sql = '
 			SELECT
-				{$this->select}
+				' . $this->select . '
 			FROM
-				\"{$this->schema}\".\"{$this->tableName}\"
+				"' . $this->schema . '"."' . $this->tableName . '"
 			WHERE
-				\"{$attribute}\" = '{$value}'
-		";
+				"' . $attribute . '" = \'' . $value . '\'';
 		$this->debug->show('find_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
