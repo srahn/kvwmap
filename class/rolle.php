@@ -2134,8 +2134,8 @@ class rolle {
 						SELECT 
             	coalesce(ul.group_id, l.gruppe) AS group_id
 						FROM
-          		used_layer ul JOIN
-            	layer l ON ul.layer_id = l.layer_id
+          		kvwmap.used_layer ul JOIN
+            	kvwmap.layer l ON ul.layer_id = l.layer_id
             WHERE 
             	l.layer_id = " . $layerids[$j] . " AND
             	ul.stelle_id = " . $stelle_id . "
@@ -2206,10 +2206,10 @@ class rolle {
 
 	static function clear_groups2rolle($database) {
 		$sql = "
-			DELETE
+			DELETE FROM
 				kvwmap.u_groups2rolle
-			FROM 
-				kvwmap.u_groups2rolle LEFT JOIN
+			USING 
+				kvwmap.u_groups2rolle g2r LEFT JOIN
 				(
 					SELECT DISTINCT
 						*
@@ -2240,10 +2240,13 @@ class rolle {
 					WHERE
 						group_id IS NOT NULL
 				) n ON 
-					u_groups2rolle.stelle_id = n.stelle_id AND 
-					u_groups2rolle.user_id = n.user_id AND 
-					u_groups2rolle.id = n.group_id
+					g2r.stelle_id = n.stelle_id AND 
+					g2r.user_id = n.user_id AND 
+					g2r.id = n.group_id
 			WHERE
+				g2r.stelle_id = u_groups2rolle.stelle_id AND 
+				g2r.user_id = u_groups2rolle.user_id AND 
+				g2r.id = u_groups2rolle.id AND 
 				n.stelle_id IS NULL AND
 				n.user_id IS NULL AND
 				n.group_id IS NULL
@@ -2302,11 +2305,11 @@ class rolle {
 					$user_id . ", " .
 					$stelle_id . ",
 					layer_id,
-					start_aktiv,
-					start_aktiv,
+					start_aktiv::integer,
+					start_aktiv::integer,
 					1,
 					1,
-					0,
+					false,
 					layer_id
 				FROM
 					kvwmap.used_layer

@@ -78,16 +78,16 @@ class Funktion extends PgObject {
 	}
 
 	function Aendern($formvars){
-		$sql = "UPDATE u_funktionen SET id = ".(int)$formvars['id'].", bezeichnung = '".$formvars['bezeichnung']."' ";
+		$sql = "UPDATE kvwmap.u_funktionen SET id = ".(int)$formvars['id'].", bezeichnung = '".$formvars['bezeichnung']."' ";
 		$sql.= "WHERE id = ".(int)$formvars['selected_function_id'];
 		$ret=$this->database->execSQL($sql,4, 1);
 	}
 
 	function Loeschen($formvars){
-		$sql = "DELETE FROM u_funktionen ";
+		$sql = "DELETE FROM kvwmap.u_funktionen ";
 		$sql.= "WHERE id = ".(int)$formvars['selected_function_id'];
 		$ret=$this->database->execSQL($sql,4, 1);
-		$sql = "DELETE FROM u_funktion2stelle ";
+		$sql = "DELETE FROM kvwmap.u_funktion2stelle ";
 		$sql.= "WHERE funktion_id = ".(int)$formvars['selected_function_id'];
 		$ret=$this->database->execSQL($sql,4, 1);
 	}

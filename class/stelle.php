@@ -630,25 +630,25 @@ class stelle {
 	# Stelle ändern
 	function Aendern($stellendaten) {
 		$language = rolle::$language;
-		$stelle = ($stellendaten['id'] != '' ? "ID = " . $stellendaten['id'] . ", " : "");
+		$stelle = ($stellendaten['id'] != '' ? "id = " . $stellendaten['id'] . ", " : "");
 		$wappen = (value_of($stellendaten, 'wappen') != '' ? "wappen = '" . $stellendaten['wappen'] . "', " : "");
 		$sql = "
 			UPDATE
-				stelle
-			SET" .
+				kvwmap.stelle 
+			SET " .
 				$stelle .
 				$wappen . "
-				Bezeichnung = '" . $stellendaten['bezeichnung'] . "'," .
-				(array_key_exists('Bezeichnung_' . $language, $stellendaten) ? "
-				Bezeichnung_" . $language . " = '" . $stellendaten['Bezeichnung_' . $language] . "'," : "") . "
+				bezeichnung = '" . $stellendaten['bezeichnung'] . "'," .
+				(array_key_exists('bezeichnung_' . $language, $stellendaten) ? "
+				bezeichnung_" . $language . " = '" . $stellendaten['bezeichnung_' . $language] . "'," : "") . "
 				referenzkarte_id = " . $stellendaten['referenzkarte_id'] . ",
 				minxmax = '" . $stellendaten['minxmax'] . "',
 				minymax = '" . $stellendaten['minymax'] . "',
 				maxxmax = '" . $stellendaten['maxxmax'] . "',
 				maxymax = '" . $stellendaten['maxymax'] . "',
 				epsg_code = '" . $stellendaten['epsg_code'] . "',
-				start = '" . ($stellendaten['start'] == '' ? '0000-00-00' : $stellendaten['start']) . "',
-				stop = '" . ($stellendaten['stop'] == '' ? '0000-00-00' : $stellendaten['stop']). "',
+				start = " . ($stellendaten['start'] == '' ? 'NULL' : "'" . $stellendaten['start'] . "'") . ",
+				stop = " . ($stellendaten['stop'] == '' ? 'NULL' : "'" . $stellendaten['stop'] . "'"). ",
 				ows_title = '" . $stellendaten['ows_title'] . "',
 				ows_namespace = '" . $stellendaten['ows_namespace'] . "',
  				ows_abstract = '" . $stellendaten['ows_abstract'] . "',
@@ -696,13 +696,13 @@ class stelle {
 				hist_timestamp = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				allowed_password_age = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
 				default_user_id = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
-				show_shared_layers = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
+				show_shared_layers = " . ($stellendaten['show_shared_layers'] ? 'true' : 'false') . ",
 				version = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				reset_password_text = '" . $stellendaten['reset_password_text'] . "',
 				invitation_text = '" . $stellendaten['invitation_text'] . "',
 				comment = '" . $stellendaten['comment'] . "'
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 
 		#echo '<br>sql' . $sql;
@@ -718,7 +718,7 @@ class stelle {
 	function metadaten_aendern($stellendaten) {
 		$sql = "
 			UPDATE
-				stelle
+				kvwmap.stelle 
 			SET
 				ows_title = '" . $stellendaten['ows_title'] . "',
 				ows_namespace = '" . $stellendaten['ows_namespace'] . "',
@@ -761,7 +761,7 @@ class stelle {
 				ows_fees = '" . $stellendaten['ows_fees'] . "',
 				ows_srs = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "'
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 
 		#echo '<br>SQL zum Updaten der Stellenmetadaten' . $sql;
@@ -1483,7 +1483,7 @@ class stelle {
 
 	function removeFunctions(){
 		# Entfernen von Funktionen zur Stelle
-		$sql ='DELETE FROM u_funktion2stelle ';
+		$sql ='DELETE FROM kvwmap.u_funktion2stelle ';
 		$sql.='WHERE stelle_id = '.$this->id;
 		$this->debug->write("<p>file:stelle.php class:stelle->removeFunctions - Entfernen von Funktionen zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);

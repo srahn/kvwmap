@@ -1,14 +1,14 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'Layer.php');
-class LayerParam extends MyObject {
+class LayerParam extends PgObject {
 
 	static $write_debug = false;
 
 	var $layers = [];
 
 	function __construct($gui) {
-		parent::__construct($gui, 'layer_parameter');
+		parent::__construct($gui, 'kvwmap', 'layer_parameter');
 		$this->gui = $gui;
 		$this->has_many = array(
 			"layers" => array(

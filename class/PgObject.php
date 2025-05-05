@@ -177,7 +177,7 @@ class PgObject {
 			SELECT
 				*
 			FROM
-				`" . $this->tableName . "`
+				" . $this->schema . '.' . $this->tableName . "
 			WHERE
 				" . $this->get_identifier_expression() . "
 		";
@@ -186,7 +186,7 @@ class PgObject {
 		if (!$ret['success']) {
 			return $this;
 		}
-		$rs = $this->database->result->fetch_assoc();
+		$rs = pg_fetch_assoc($ret[1]);
 		if ($rs !== false) {
 			$this->data = $rs;
 		}
