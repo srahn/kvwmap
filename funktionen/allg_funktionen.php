@@ -106,7 +106,7 @@ function quote($var, $type = '') {
 }
 
 function quote_or_null($var) {
-	return ($var == '' ? 'NULL' : quote($var));
+	return (($var === '' OR $var === null) ? 'NULL' : quote($var));
 }
 
 function append_slash($var) {
