@@ -14341,7 +14341,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Layerparameter aktualisieren
 				$stelle->updateLayerParams();
 				$this->update_layer_parameter_in_rollen($stelle->id);
-				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
       $this->selected_user = new user('',$this->formvars['selected_user_id'],$this->user->database, '', true);
       # Löschen der in der Selectbox entfernten Stellen
