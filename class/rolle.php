@@ -1846,7 +1846,7 @@ class rolle {
 		$new_layer_params = array();
 		foreach (array_keys($layer_params) AS $key) {
 			$layer_param = LayerParam::find_by_key($this->gui_object, $key);
-			$options = $layer_param->get_options($this->user_id, $this->stelle_id);
+			$result = $layer_param->get_options($this->user_id, $this->stelle_id);
 			if (!$result['success']) {
 				return $result;
 			}
@@ -1856,10 +1856,10 @@ class rolle {
 					function($option) {
 						return $option['value'];
 					},
-					$options
+					$result['options']
 				)
 			)) {
-				$layer_params[$key] = $options[$value];
+				$layer_params[$key] = $result['options']['value'][0];
 			};
 		}
 		foreach ($layer_params AS $param_key => $value) {
