@@ -3233,13 +3233,13 @@ class db_mapObj {
 	}
 
   function read_Styles($Class_ID) {
-    $sql ='SELECT * FROM styles AS s,u_styles2classes AS s2c';
-    $sql.=' WHERE s.Style_ID=s2c.style_id AND s2c.class_id='.$Class_ID;
+    $sql ='SELECT * FROM kvwmap.styles AS s, kvwmap.u_styles2classes AS s2c';
+    $sql.=' WHERE s.style_id = s2c.style_id AND s2c.class_id = ' . $Class_ID;
     $sql.=' ORDER BY drawingorder';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
-    while($rs = $this->db->result->fetch_assoc()) {
+    while($rs = pg_fetch_assoc($ret[1])) {
       $Styles[]=$rs;
     }
     return $Styles;
@@ -3251,16 +3251,16 @@ class db_mapObj {
 			SELECT
 				*
 			FROM
-				labels AS l,
-				u_labels2classes AS l2c
+				kvwmap.labels AS l,
+				kvwmap.u_labels2classes AS l2c
 			WHERE
-				l.Label_ID = l2c.label_id
+				l.label_id = l2c.label_id
 				AND l2c.class_id = " . $Class_ID . "
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>" . $sql,4);
-		$this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
-		while ($rs = $this->db->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$Labels[]=$rs;
 		}
 		return $Labels;
