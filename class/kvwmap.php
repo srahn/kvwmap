@@ -12949,7 +12949,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		# Rolleneinstellungen
 		for ($i = 0; $i < count($selectedusers); $i++) {
-			rolle::create($this->database, $new_stelle->id, $selectedusers[$i], $new_stelle->default_user_id, $layer);
+			rolle::create($this->pgdatabase, $new_stelle->id, $selectedusers[$i], $new_stelle->default_user_id, $layer);
 			// $this->user->rolle->setRolle($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
 			// $this->user->rolle->setMenue($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
 			// $this->user->rolle->setLayer($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
@@ -13281,7 +13281,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$users = put_value_first($users, $Stelle->default_user_id);
 				}
 				for ($i = 0; $i < count($users); $i++) {
-					rolle::create($this->database, $Stelle->id, $users[$i], $Stelle->default_user_id, $layer, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));
+					rolle::create($this->pgdatabase, $Stelle->id, $users[$i], $Stelle->default_user_id, $layer, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));
 					// $this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
 					// $this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
 					// $this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
