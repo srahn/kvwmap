@@ -47,10 +47,10 @@ class rolle {
 	 * @param Layer[] $layer Array with layer_ids to assign rolle to there groups.
 	 * @return Array Result with Boolean success and String $msg.
 	 */
-	public static	function create($database, $stelle_id, $user_id, $default_user_id = 0, $layer = array()) {
+	public static	function create($database, $stelle_id, $user_id, $default_user_id = 0, $layer = array(), $parent_stelle_id = NULL) {
 		$rolle = new rolle($user_id, $stelle_id, $database);
 		# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id)) {
+		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id)) {
 			return array(
 				'success' => false,
 				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $this->database->errormessage

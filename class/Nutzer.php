@@ -97,7 +97,7 @@ class Nutzer extends MyObject {
 			return $result;
 		}
 
-		$create_rolle_result = rolle::create($gui->database, $stelle_id, $user->get('ID'), $stelle->default_user_id, $layers['ID']);
+		$create_rolle_result = rolle::create($gui->database, $stelle_id, $user->get('ID'), $stelle->default_user_id, $stelle->getLayers(NULL));
 		if (!$create_rolle_result['success']) {
 			return $create_rolle_result;
 		}
