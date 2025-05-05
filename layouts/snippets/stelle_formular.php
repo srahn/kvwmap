@@ -3,6 +3,14 @@
 	include(LAYOUTPATH . 'languages/stelle_formular_' . rolle::$language . '.php');
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript">
 </script>
+<?php 
+  $is_admin_stelle = in_array($this->Stelle->id, $admin_stellen);
+?>
+<style>
+	.hidden-metadata {
+		display: none;
+	}
+</style>
 <script language="JavaScript">
 <!--
 
@@ -770,7 +778,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				</td>
 			</tr>
 
-			<tr class="group-metadata">
+			<tr class="group-metadata<? echo ($is_admin_stelle ? '' : ' hidden-metadata'); ?>">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsNameSpace; ?>&nbsp;<span data-tooltip="<?php echo $strOwsNameSpaceHint; ?>"></span>
 				</th>
