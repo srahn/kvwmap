@@ -2203,14 +2203,23 @@ class rolle {
 					FROM
 						(
 							WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
-								SELECT DISTINCT
+								(
+									SELECT DISTINCT
 										ul.`Stelle_ID` AS stelle_id,
 										r.user_id,
 										coalesce(ul.group_id, l.Gruppe) AS group_id
-								FROM
+									FROM
 										used_layer ul JOIN
 										layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
 										rolle r ON ul.`Stelle_ID` = r.stelle_id
+									UNION ALL
+									SELECT DISTINCT
+										stelle_id,
+										user_id,
+										Gruppe
+									FROM
+										rollenlayer
+								)
 								UNION ALL
 								SELECT 
 										cte.stelle_id,
