@@ -9651,7 +9651,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				for ($m = 0; $m <= (value_of($this->formvars, 'searchmask_count') ?: 0); $m++){
 					if ($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 						$prefix = $m . '_';
-						$sql_where .= ' ' . $this->formvars['boolean_operator_'.$m].' ';			// mit AND/OR verketten
+						sanitize('boolean_operator_' . $m, 'boolean');
+						$sql_where .= ' ' . $this->formvars['boolean_operator_'.$m] .' ';			// mit AND/OR verketten
 					}
 					else {
 						$prefix = '';

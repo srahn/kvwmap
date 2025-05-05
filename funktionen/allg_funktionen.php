@@ -2573,7 +2573,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 		case 'int' :
 		case 'int4' :
 		case 'oid' :
-		case 'boolean':
+		case 'boolean' :
 		case 'int8' : {
 			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;

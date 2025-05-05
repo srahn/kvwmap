@@ -5,7 +5,7 @@
 									+ $size['scale_bar']['height'] +
 									+ ((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0)
 									+ ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0)
-									- $this->reference_map->reference->height
+									- (in_array(MENU_REFMAP, array('oben', 'unten'))  ? $this->reference_map->reference->height : 0 )
 									- 22;
 ?>
 
@@ -113,7 +113,7 @@ function showMenue() {
 			$wappen_html = '';
 		}
 
-		if (MENU_WAPPEN=="oben") {
+		if (MENU_WAPPEN == "oben") {
 			echo $wappen_html;
 		}
 
@@ -139,9 +139,8 @@ function showMenue() {
 			} ?>
 			</div>
 		</div>
-
 		<div id="menuefooter"><?
-			if (MENU_REFMAP !="oben") {
+			if (!in_array(MENU_REFMAP, array('oben', 'ohne'))) {
 				echo $refmap_html;
 			}
 			if (MENU_WAPPEN == "unten") {
