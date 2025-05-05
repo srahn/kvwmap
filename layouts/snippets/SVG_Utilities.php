@@ -298,12 +298,18 @@ SCRIPTDEFINITIONS;
 		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 		enclosingForm.last_doing.value = "zoomin"; 
 	  document.getElementById("canvas").setAttribute("cursor", "crosshair");
+		if(measurefunctions == true){
+			save_measure_path();
+		}
 	}
 
 	function zoomout(){
 		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 		enclosingForm.last_doing.value = "zoomout";
 	  document.getElementById("canvas").setAttribute("cursor", "crosshair");
+		if(measurefunctions == true){
+			save_measure_path();
+		}
 	}
 
 	function zoomall(){
@@ -730,6 +736,9 @@ SCRIPTDEFINITIONS;
 	}
 	
 	function mousewheelchange(evt) {
+		if(measurefunctions == true){
+			save_measure_path();
+		}
 		if (!evt) {
 			evt = window.event; // For IE
 		}
@@ -4002,6 +4011,7 @@ $measurefunctions = '
 			}
 			enclosingForm.str_pathx.value = str_pathx;
 			enclosingForm.str_pathy.value = str_pathy;
+			console.log(enclosingForm.str_pathx.value);
 			top.document.GUI.measured_distance.value = measured_distance;
 		}
 	}
