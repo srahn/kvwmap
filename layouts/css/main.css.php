@@ -146,13 +146,24 @@ body {
 	margin: auto;
 }
 
-.collapsed {
+.collapsed, .collapsedfull {
 	visibility: collapse;
   height: 0;
+	padding: 0 !important;
+	display: block;
 }
 
 .collapsed *{
+	visibility: collapse !important;
 	margin: 0 !important;
+  padding: 0;
+}
+
+.collapsedfull *{
+	visibility: collapse !important;
+	margin: 0 !important;
+	width: 0;
+  padding: 0;
 }
 
 #copyrights_div table td {
@@ -197,6 +208,10 @@ input[type="checkbox"], input[type="radio"] {
 	outline: 0;
 	cursor: pointer;
 	background: #fff;
+}
+
+.radio-label {
+	margin-right: 2px;
 }
 
 #scrolldiv input[type="checkbox"], #scrolldiv input[type="radio"] {
@@ -304,7 +319,14 @@ input[type="button"][value='«'], input[type="button"][value='»'] {
 form {
 	margin: 0;
 	padding: 0;
-} 
+}
+
+hr {
+	margin: 7px; 
+	background-color: #777; 
+	height: 1px; 
+	border-width: 0;
+}
 
 .fett{
 	font-family: SourceSansPro2;
@@ -412,6 +434,7 @@ span[data-tooltip] {
   cursor: help;
 	--left: -250px;
 	--width: 500px;
+	--top: 24px;
 	font-weight: normal;
 }
 
@@ -426,7 +449,7 @@ span[data-tooltip]:hover::after {
 	right: 0px;
 	left: -300px;		/* IE Fallback */
 	left: var(--left);
-  top: 24px;
+  top: var(--top);
 	max-width: 500px;		/* IE Fallback */
   max-width: var(--width);
 	font-size: <? echo $font_size_factor * 11; ?>px;
@@ -447,11 +470,11 @@ span[data-tooltip]:hover::after {
 .custom-select {
 	background-color: #e9e9ed;
   position: relative;
-  /*width: 250px;*/
+  width: 200px;
   border: 1px solid #888;
 	border-radius: 2px;
   align-items: center;
-	margin: 0 3px 3px 0;
+	margin: 0 0 3px 0;
 }
 
 .custom-select .dropdown {
@@ -468,10 +491,10 @@ span[data-tooltip]:hover::after {
   top: 1px;
   right: 0;
   left: 0;
-	max-height: 400px;
+	max-height: 350px;
 	overflow-y: auto;
 	overflow-x: hidden;
-	margin: 0;
+	margin: 0 0 0 -1px;
 }
 
 .custom-select .dropdown.upward {
@@ -1345,7 +1368,7 @@ a.menuered:hover {
 	opacity: 1;
 }
 
-#header{
+#header {
 	height: <? echo ($size['header']['height'] - 2); ?>px;
 	border: 1px solid;
 	border-color: #ffffff #cccccc #bbbbbb;
@@ -1532,13 +1555,13 @@ a.menuered:hover {
 	position: relative;
 	z-index: 1000;
 	margin: 0;
-	height: 0px;
+	height: 1px;
 	width: 100%;
 }
 
 .dropZone.ready{
 	margin: -12 0 -12 15;
-	height: 24px;
+	height: 25px;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
@@ -1558,6 +1581,7 @@ a.menuered:hover {
 	min-width: 177px;
 	border: 1px solid grey;
 	cursor: pointer;
+	text-align: start;
 }
 
 .dragObject:hover{
@@ -1570,11 +1594,7 @@ a.menuered:hover {
 
 .dragObject.picked{
 	visibility: hidden;
-	height: 0px;
-	margin: 0 0 0 0;
-	padding: 0 0 0 0;
-	border: none;
-	transition: height 0.15s ease, margin 0.15s ease, padding 0.15s ease;
+	max-height: 16px;
 }
 
 .dragObject.over{
@@ -1599,6 +1619,7 @@ a.menuered:hover {
 
 #legend{
 	margin: 4px 0 4px 7px;
+	width: 93%;
 }
 
 .normallegend {
@@ -1815,6 +1836,8 @@ a:hover .preview_image{
 	border:1px solid #999;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
+	margin: 7px 5px 11px 0;
+	width: fit-content;
 }
 
 #nds_edit .datensatz {
@@ -1885,6 +1908,42 @@ a:hover .preview_image{
 	width: 90%;
 }
 
+#overlayheader {
+	box-shadow: inset 0px -1px 0px 0px #ccc; 
+	position:fixed; 
+	top: 0px; 
+	margin: 0px 0 -11px 0; 
+	padding-top: 0; 
+}
+
+#overlayheader2 {
+	margin-top: -2px; 
+}
+
+#overlayheader, #overlayheader2 {
+	background: url(<? echo BG_IMAGE; ?>);
+	z-index: 1000;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	justify-content: flex-start;
+	width: 100%;
+}
+
+#contentdiv {
+	background: url(<? echo BG_IMAGE; ?>);
+	width: fit-content;
+	position:relative;
+}
+
+#overlayfooter {
+	background: url(<? echo BG_IMAGE; ?>);
+	border: 1px solid #cccccc;
+	width: 100%; 
+	position:fixed; 
+	bottom: 0px;
+}
+
 .dstable{
 	#max-width: 900px;
 	width: 100%;
@@ -1914,8 +1973,30 @@ thead.gle th {
  text-align:left;
 }
 
+.gle-view {
+	display: flex;
+	position: sticky;
+  right: 18px;
+  height: 18px;
+	clip-path: polygon(100% 0px, 100% 18px, calc(100% - 18px) 18px, calc(100% - 18px) 0px);
+	transition: clip-path 0.2s ease;
+}
+
+.gle-view:hover {
+	clip-path: polygon(100% 0px, 100% 18px, 0px 18px, 0px 0px);
+}
+
+.gle-view-button.active {
+	order: 2;
+}
+
+#column_options_button{
+	cursor: pointer;
+  margin: 1px 8px 0 8px;
+}
+
 #gle_column_options_div {
-	position: absolute;
+	position: fixed;
 	right: 2px;
 	margin-right: 35px;
 	text-align: left;
@@ -1931,7 +2012,6 @@ thead.gle th {
 	display: flex;
 	margin: 2px 0 -11px 0;
 	border-left: 1px solid #bbb;
-	height: 27px
 }
 
 .gle_tabs > div{
@@ -1943,12 +2023,7 @@ thead.gle th {
 	color: #aaa;
 	white-space: nowrap;
 	border-radius: 0 5px 0 0;
-	margin-left: -4px;
-}
-
-.gle_tabs > div:first-child {
-	padding: 1px 5px 0 5px;
-	margin-left: 0;
+	height: 21px;
 }
 
 .gle_tabs > div.active_tab{
@@ -2441,7 +2516,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	background-color: #FFFFFF;
 	position:absolute;
 	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.3);
-	top: 30px;
+	top: 42px;
 	right: <? echo $font_size_factor * 15; ?>px;
 	z-index: 2000;
 }
@@ -2491,8 +2566,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .layerOptions, #legendOptions{
-	min-width: 220px;
-	border: 1px solid #cccccc;
+	min-width: 200px;
 	background: #EDEFEF;
 	padding:0px;
 	position:absolute;
@@ -2502,7 +2576,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .layerOptions{
 	top:300px;
-	right:210px;
+	right:240px;
 }
 
 .layerOptionsIcon{
@@ -2711,7 +2785,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 #neuer_datensatz_button {
-	display: none;
+	/* display: none; */
 	position: relative;
 	text-align: right;
 	margin-right: 8px;
@@ -2733,7 +2807,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .scrolltable_header{
 	position: absolute;
 	top: -30px;
-	padding-left: 5px;
 }
 
 .scrolltable_footer{
@@ -2873,6 +2946,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nds_submit span {
 	margin: auto;
 	margin-left: 3px;
+}
+
+#dataset_operations {
+	text-align: left;
+  padding: 2;
 }
 
 #nds_edit #dataset_operations {

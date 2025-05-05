@@ -16,6 +16,7 @@ class Layer extends MyObject {
 	public $opacity;
 	public $minScale;
 	public $maxScale;
+	public $document_attributes;
 
 	function __construct($gui) {
 		$this->gui = $gui;
@@ -36,7 +37,7 @@ class Layer extends MyObject {
 			)
 		);
 		parent::__construct($gui, 'layer');
-		$this->stelle_id = $gui->stelle->id;
+		$this->stelle_id = ($gui->stelle ? $gui->stelle->id : null);
 		$this->identifier = 'Layer_ID';
 		$this->geometry_types = array('Point', 'LineString', 'Polygon');
 		$this->geom_column = 'geom';
@@ -47,13 +48,22 @@ class Layer extends MyObject {
 		return $layer->find_where($where, $order);
 	}
 
+	/**
+	 * Function find layer with $id in MariaDb database
+	 * and return the layer object with beloning attributes and charts
+	 * If no layer has been found, it returns false
+	 * @param GUI $gui
+	 * @param int $id
+	 * @return Layer|false
+	 */
 	public static	function find_by_id($gui, $id) {
 		$obj = new Layer($gui);
 		$layer = $obj->find_by('Layer_ID', $id);
-		if ($layer->get_id() != '') {
-			$layer->attributes = $layer->get_layer_attributes();
-			$layer->charts = $layer->get_layer_charts();
+		if ($layer->get_id() == '') {
+			return false;
 		}
+		$layer->attributes = $layer->get_layer_attributes();
+		$layer->charts = $layer->get_layer_charts();
 		return $layer;
 	}
 
@@ -82,7 +92,7 @@ class Layer extends MyObject {
 	/**
 	* This function return the layer id's of the duplicates of a layer
 	* @param mysql_connection object
-	* @param integer $duplicate_from_layer_id The layer id from witch the others are duplicates
+	* @param int $duplicate_from_layer_id The layer id from witch the others are duplicates
 	* @param array(integer) The layer_ids of the duplicates
 	*/
 	public static function find_by_duplicate_from_layer_id($database, $duplicate_from_layer_id) {
@@ -112,17 +122,36 @@ class Layer extends MyObject {
 		return $duplicate_layer_ids;
 	}
 
+	function get_layer_db() {
+		$db_map_obj = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
+		$layer_db = $db_map_obj->getlayerdatabase($this->get_id(), '');
+		return $layer_db;
+	}
+
 	function update_datasources($gui, $datasource_ids) {
-		#echo '<br>update_datasources: ' . implode(', ', $datasource_ids) . ' of layer: ' . $this->get_id(); 
-		foreach(LayerDataSource::find($gui, '`layer_id` = ' . $this->get_id()) AS $layer_datasource) {
-			$layer_datasource->delete();
-		}
 		$layer_datasource = new LayerDataSource($gui);
+		$layer_datasource->delete('`layer_id` = ' . $this->get_id());
 		foreach($datasource_ids AS $datasource_id) {
 			$layer_datasource->create(array(
 				'layer_id' => $this->get_id(),
 				'datasource_id' => $datasource_id
 			));
+		}
+	}
+
+	function update_labelitems($gui, $names, $aliases) {
+		$layer_labelitems = new MyObject($gui, 'layer_labelitems');
+		$layer_labelitems->delete('layer_id = ' . $this->get_id());
+		for ($i = 1; $i < count($names); $i++) {
+			# der erste ist ein Dummy und wird ausgelassen
+			if ($names[$i] != '') {
+				$layer_labelitems->create(array(
+					'layer_id' => $this->get_id(),
+					'name' => $names[$i],
+					'alias' => $aliases[$i],
+					'order' => $i + 1
+				));
+			}
 		}
 	}
 
@@ -465,14 +494,14 @@ l.Name AS sub_layer_name
 		return (count($layers) > 0);
 	}
 
-	function delete() {
-		#echo '<br>Class Layer Method delete';
-		$ret = parent::delete();
-		if (MYSQLVERSION > 412) {
-			parent::reset_auto_increment();
-		}
-		return $ret;
-	}
+	// function delete() {
+	// 	#echo '<br>Class Layer Method delete';
+	// 	$ret = parent::delete();
+	// 	if (MYSQLVERSION > 412) {
+	// 		parent::reset_auto_increment();
+	// 	}
+	// 	return $ret;
+	// }
 
 	function get_subform_layers() {
 		include_once(CLASSPATH . 'LayerAttribute.php');
@@ -540,6 +569,11 @@ l.Name AS sub_layer_name
 		}
 	}
 
+	/**
+	 * Create the layer definition for a baselayer in stelle with $stelle_id
+	 * @param int $stelle_id
+	 * @return array{ label: String, options: array{}, shortLabel: String, img: String, url: String}
+	 */
 	function get_baselayers_def($stelle_id) {
 		$this->debug->show('<p>Layer->get_baselayers_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
 		#echo '<p>get_baselayer_def for Layer: ' . $this->get('Name');
@@ -758,7 +792,7 @@ l.Name AS sub_layer_name
 	}
 
 	function get_name($name_col = 'Name') {
-		return $this->get($name_col . (($name_col == 'Name' AND $this->gui->user->rolle->language != 'german') ? '_' . $this->gui->user->rolle->language : ''));
+		return $this->get($name_col . (($name_col == 'Name' AND rolle::$language != 'german') ? '_' . rolle::$language : ''));
 	}
 
 	function write_mapserver_templates($ansicht = 'Tabelle') {
@@ -800,7 +834,7 @@ l.Name AS sub_layer_name
 		$query_attribute_aliases = array();
 
 		for ($i = 0; $i < count($query_attributes['name']); $i++) {
-			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language : '')][$i];
+			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . (rolle::$language != 'german' ? '_' . rolle::$language : '')][$i];
 		}
 
 		$data_attribute_names = array_map(

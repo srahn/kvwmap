@@ -1,6 +1,7 @@
 <?php
+	include_once(CLASSPATH.'FormObject.php');
 	include(SNIPPETS.'generic_form_parts.php');
-  include(LAYOUTPATH.'languages/new_layer_data_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/new_layer_data_'.rolle::$language.'.php');
 	
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>

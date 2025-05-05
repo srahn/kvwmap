@@ -155,7 +155,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
    	</td>
   </tr>
   <?php
-  $anz = @count($this->jagdbezirke);
+  $anz = count_or_0($this->jagdbezirke);
   if ($anz > 0) {
    ?>
   <tr>

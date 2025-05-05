@@ -1,7 +1,7 @@
 <?
 	# dies ist das Snippet für die Sachdatenanzeige eines aufgeklappten Links aus einer SubformEmbeddedPK-Liste
 	include_once(SNIPPETS.'generic_form_parts.php'); 
-  include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/sachdatenanzeige_'.rolle::$language.'.php');
   
 	$i = 0;
 

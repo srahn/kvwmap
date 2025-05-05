@@ -655,8 +655,9 @@
 	}
 
 	function konvertierungWirksamkeitsdatumSorter(fieldA, fieldB, rowA, rowB) {
-		const dateA = fieldA.split(".").reverse().join("");
-		const dateB = fieldB.split(".").reverse().join("");
+		
+		const dateA = fieldA == null ? "000000" : fieldA.split(".").reverse().join("");
+		const dateB = fieldB == null ? "000000" : fieldB.split(".").reverse().join("");
 		console.log('A: ' + dateA + ' > B: ' + dateB);
 		return dateA > dateB ? 1 : -1;
 	}
@@ -763,7 +764,8 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 						data-filter-control="select"
 						data-filter-control-placeholder="Filtern nach"
 					>Status</th><?php
-				} ?>
+				}
+				if ($this->plan_layer_id == XPLANKONVERTER_FP_PLAENE_LAYER_ID) { ?>
 				<th
 					data-field="wirksamkeitsdatum"
 					data-sortable="true"
@@ -772,6 +774,17 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					class="col-md-2"
 					data-filter-control="input"
 				>Wirksamkeit</th><?
+				}
+				if ($this->plan_layer_id == XPLANKONVERTER_BP_PLAENE_LAYER_ID) { ?>
+				<th
+					data-field="inkrafttretensdatum"
+					data-sortable="true"
+					data-visible="true"
+					data-sorter="konvertierungWirksamkeitsdatumSorter"
+					class="col-md-2"
+					data-filter-control="input"
+				>Inkrafttretensdatum</th><?
+				}
 				/*
 				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
 					<th

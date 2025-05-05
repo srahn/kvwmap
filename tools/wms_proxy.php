@@ -31,7 +31,7 @@
     header("Pragma: public");
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
     header('Content-Disposition: filename=test.jpg');
-    if($width > $image_tile_size OR $heigth > $image_tile_size){		# hier muss gekachelt werden
+    if($width > $image_tile_size OR $height > $image_tile_size){		# hier muss gekachelt werden
     	$resultimage = imagecreatetruecolor($width, $height);
     	$extent = explode(',', $bbox);
     	$extentwidth = $extent[2]-$extent[0];
@@ -40,16 +40,16 @@
    		$maxy = $extent[1];												# am Anfang auf "0" setzen
     	$tilesx = ceil($width/$image_tile_size);		# Anzahl an Kacheln in x-Richtung
     	$tilesy = ceil($height/$image_tile_size);		# Anzahl an Kacheln in y-Richtung
-    	$restheight = $height;											# Resthöhe des Teils des Gesamtbildes, für den noch keine Kacheln erzeugt wurden
-    	$tileheight = $image_tile_size;							# Kachelhöhe
+    	$restheight = $height;											# ResthÃ¶he des Teils des Gesamtbildes, fÃ¼r den noch keine Kacheln erzeugt wurden
+    	$tileheight = $image_tile_size;							# KachelhÃ¶he
     	
     	for($y = 0; $y < $tilesy; $y++){
     		if($restheight < $image_tile_size)$tileheight = $restheight;
     		$tileextentheight = $extentheight/$height*$tileheight;
     		$miny = $maxy;													# das miny ist das maxy der letzten Kachel
-    		$maxy = $maxy + $tileextentheight; 			# das maxy ist das maxy der letzten Kachel + die Höhe der Kachel
+    		$maxy = $maxy + $tileextentheight; 			# das maxy ist das maxy der letzten Kachel + die HÃ¶he der Kachel
     		$tilewidth = $image_tile_size;						# Kachelbreite
-    		$restwidth = $width;											# Restbreite des Teils der Zeile, für den noch keine Kacheln erzeugt wurden
+    		$restwidth = $width;											# Restbreite des Teils der Zeile, fÃ¼r den noch keine Kacheln erzeugt wurden
     		$minx = $extent[0];												# am Anfang jeder Zeile auf "0" setzen
     		$maxx = $extent[0];												# am Anfang jeder Zeile auf "0" setzen
     		for($x = 0; $x < $tilesx; $x++){

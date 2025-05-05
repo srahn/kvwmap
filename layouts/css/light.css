@@ -1,0 +1,53 @@
+#gui-table{
+  width: auto;
+}
+
+#header_menue {
+  position: absolute;
+  top: 0;
+  right: 5px;
+  font-size: 15px;
+  line-height: 16px;
+  font-family: SourceSansPro1;
+  display: flex;
+}
+
+.header-button {
+  color: #40637d;
+}
+
+#legenddiv {
+  display: none;
+}
+
+#legend_layer {
+  display: block;
+  position: absolute;
+  top: 42px;
+  right: 0px;
+  background-color: #eff9ff;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: -4px 4px 5px #939191;
+  opacity: 90%;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+#scrolldiv {
+  max-height: 890px;
+  padding-bottom: 1px;
+}
+
+#legend {
+  margin: 0 0 0 7px;
+}
+
+.button_background {
+  display: none;
+}
+
+#layer_switch_icon {
+  width: 18px;
+  height: 18px
+}

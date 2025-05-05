@@ -17,7 +17,7 @@
 				<a href="index.php?go=ukos_new_doppikobjekt&schema_name=' . $klasse['schema_name'] . '&table_name=' . $klasse['table_name'] . '&geometry_type=' . $klasse['geometry_type'] .'">
 					<div class="ukos-doppikobjekt">
 						<i class="fa ' . $icon[$klasse['geometry_type']] . ' ukos-map-icon" aria-hidden="true"></i>' .
-					ucwords(umlaute_umwandeln_reverse(ucfirst($klasse['doppik_objekt_name']))) . '
+					ucwords(sonderzeichen_umwandeln_reverse(ucfirst($klasse['doppik_objekt_name']))) . '
 					</div>
 				</a>
 			';

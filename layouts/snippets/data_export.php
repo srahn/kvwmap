@@ -1,8 +1,9 @@
 <?php
  # 2008-01-22 pkvvm
-  include(LAYOUTPATH.'languages/data_export_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/data_export_'.rolle::$language.'.php');
 	include_once(CLASSPATH . 'FormObject.php');
 	$simple = ($this->formvars['simple'] == 1);
+	$document_ids = [];
 	$available_formats = array(
 		"Shape" => array(
 			"export_privileg" => 1,
@@ -65,28 +66,6 @@
 <script type="text/javascript">
 <!--
 
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	wkt = "POLYGON((";
-	parts = svgpath.split("M");
-	for(j = 1; j < parts.length; j++){
-		if(j > 1){
-			wkt = wkt + "),("
-		}
-		koords = ""+parts[j];
-		coord = koords.split(" ");
-		wkt = wkt+coord[1]+" "+coord[2];
-		for(var i = 3; i < coord.length-1; i++){
-			if(coord[i] != ""){
-				wkt = wkt+","+coord[i]+" "+coord[i+1];
-			}
-			i++;
-		}
-	}
-	wkt = wkt+"))";
-	return wkt;
-}
-
 function update_format(){
 	if(document.GUI.export_format.value == 'UKO' || document.GUI.export_format.value == 'OVL'){
 		document.getElementById('attributes_div').style.visibility = 'hidden';
@@ -129,7 +108,7 @@ function data_export() {
 			if(sure == false)return;
 		}
 		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 		document.GUI.go_plus.value = 'Exportieren';
 		document.GUI.submit();
@@ -166,7 +145,7 @@ function select_document_attributes(ids){
 function save_settings(){
 	if(document.GUI.setting_name.value != ''){
 		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 		document.GUI.go_plus.value = 'Einstellungen_speichern';
 		document.GUI.submit();
@@ -190,8 +169,8 @@ function delete_settings(){
 </script>
 
 <?
-$floor = floor(count($this->data_import_export->attributes['name'])/4);
-$rest = count($this->data_import_export->attributes['name']) % 4;
+$floor = floor(count_or_0($this->attributes['name'])/4);
+$rest = count_or_0($this->attributes['name']) % 4;
 if ($rest % 4 != 0) {
  $r=1;
 } else {
@@ -218,51 +197,46 @@ $j=0;
 				<div style="padding-top:1px; padding-bottom:5px;">
 					<table>
 						<tr>
-							<td><? echo $strLayer; ?>:</td>
-						</tr>
-						<tr>
-							<td><?
-								$select_options = array();
-								for ($i = 0; $i < count($this->data_import_export->layerdaten['ID']); $i++) {
-									if ($this->data_import_export->layerdaten['ID'][$i] == $this->data_import_export->formvars['selected_layer_id']) {
-										$selectindex = $i;
-									}
-									if (!array_key_exists($this->data_import_export->layerdaten['ID'][$i], $select_options)) {
-										$select_options[$this->data_import_export->layerdaten['ID'][$i]] = array(
-											'value' => $this->data_import_export->layerdaten['ID'][$i],
-											'output' => $this->data_import_export->layerdaten['Bezeichnung'][$i]
-										);
-									}
-								}
-								echo FormObject::createSelectField(
-									'selected_layer_id',
-									$select_options,
-									$this->data_import_export->formvars['selected_layer_id'],
-									1,
-									'width: 250px',
-									"if (document.GUI.epsg != undefined) { document.GUI.epsg.value=''; } document.GUI.submit();",
-									'',
-									'',
-									'',
-									$this->strPleaseSelect
-								); /*?>
-								<select style="width:250px" size="1"  name="selected_layer_id" onchange="if(document.GUI.epsg != undefined) document.GUI.epsg.value=''; document.GUI.submit();" <?php if(count($this->data_import_export->layerdaten['ID']) == 0){ echo 'disabled';}?>>
-									<option value=""><?php echo $this->strPleaseSelect; ?></option><?
-									for ($i = 0; $i < count($this->data_import_export->layerdaten['ID']); $i++){
-										echo '<option';
-										if($this->data_import_export->layerdaten['ID'][$i] == $this->data_import_export->formvars['selected_layer_id']){
-											echo ' selected';
-											$selectindex = $i;
-										}
-										echo ' value="'.$this->data_import_export->layerdaten['ID'][$i].'">'.$this->data_import_export->layerdaten['Bezeichnung'][$i].'</option>';
-									} ?>
-								</select><?
-								*/ ?>
+							<td>		
+								<div id="gsl_formular">
+									<div class="gsl_gruppe_waehlen gsl_gruppe_waehlen_name"><? echo $this->strGroup; ?>:</div>
+									<div class="gsl_gruppe_waehlen gsl_gruppe_waehlen_select">
+										<select size="1"  name="selected_group_id" style="width: 250px" onchange="document.GUI.selected_layer_id.value='';document.GUI.submit();" <?php if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
+											<option value="">  -- <?php echo $this->strPleaseSelect; ?> --  </option>
+							<?
+											for($i = 0; $i < count($this->layergruppen['ID']); $i++){         
+												echo '<option';
+												if($this->layergruppen['ID'][$i] == $this->formvars['selected_group_id']){
+													echo ' selected';
+												}
+												echo ' value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
+											}
+							?>
+										</select>
+									</div>
+								
+									<div class="gsl_layer_waehlen gsl_layer_waehlen_name"><?php echo $strLayer; ?>:</div>
+									<div class="gsl_layer_waehlen gsl_layer_waehlen_select">
+										<select size="1"  name="selected_layer_id" style="width: 250px" onchange="if (document.GUI.epsg != undefined) { document.GUI.epsg.value=''; } document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+											<option value="">  -- <?php echo $this->strPleaseSelect; ?> --  </option>
+							<?
+											for($i = 0; $i < count($this->layerdaten['ID']); $i++){         
+												echo '<option';
+												if($this->layerdaten['ID'][$i] == value_of($this->formvars, 'selected_layer_id')){
+													$selectindex = $i;
+													echo ' selected';
+												}
+												echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+											}
+							?>
+										</select>		
+									</div>
+								</div>
 							</td>
 						</tr>
 					</table>
 				</div><?
-				if ($this->data_import_export->formvars['selected_layer_id'] != '') { ?>
+				if ($this->formvars['selected_layer_id'] != '') { ?>
 					<div style="padding-top:1px; padding-bottom:5px; margin-left: 15px;">
 						<table>
 							<tr>
@@ -273,10 +247,10 @@ $j=0;
 									<select name="export_format" onchange="update_format();"><?
 										foreach ($allowed_formats AS $format => $required) {
 											if (
-												$this->data_import_export->layerdaten['export_privileg'][$selectindex] <= $required['export_privileg'] AND
-												$this->data_import_export->attributes[$required['geom_attribute']] != '' OR
-												($this->data_import_export->layerset[0]['connectiontype'] == 9 AND $format == 'GeoJSON') OR
-												($this->data_import_export->layerset[0]['connectiontype'] == 6 AND $format == 'CSV')
+												$this->layerdaten['export_privileg'][$selectindex] <= $required['export_privileg'] AND
+												$this->attributes[$required['geom_attribute']] != '' OR
+												($this->layerset[0]['connectiontype'] == 9 AND $format == 'GeoJSON') OR
+												($this->layerset[0]['connectiontype'] == 6 AND $format == 'CSV')
 											) {
 												echo '<option' . ($this->formvars['export_format'] == $format ? ' selected' : '') . ' value="' . $format . '">' . $format . '</option>';
 												if ($this->formvars['export_format'] == '') {
@@ -290,8 +264,8 @@ $j=0;
 						</table>
 					</div><?
 				}
-				if ($this->data_import_export->attributes['the_geom'] != ''){ ?>
-					<div id="coord_div" style="padding-top:1px; padding-bottom:5px; margin-left: 15px;<? if($this->formvars['export_format'] == 'CSV' OR $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1)echo 'display:none'; ?>">
+				if ($this->attributes['the_geom'] != ''){ ?>
+					<div id="coord_div" style="padding-top:1px; padding-bottom:5px; margin-left: 15px;<? if($this->formvars['export_format'] == 'CSV' OR $this->layerdaten['export_privileg'][$selectindex] != 1)echo 'display:none'; ?>">
 						<table>
 							<tr>
 								<td><? echo $strTransformInto; ?>:</td>
@@ -336,7 +310,7 @@ $j=0;
 								<select name="export_setting">
 									<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
 									<?
-										for($i = 0; $i < count($this->export_settings); $i++){
+										for($i = 0; $i < count_or_0($this->export_settings); $i++){
 											echo '<option value="'.$this->export_settings[$i]['name'].'" ';
 											if($this->selected_export_setting[0]['name'] == $this->export_settings[$i]['name']){echo 'selected ';}
 											echo '>'.$this->export_settings[$i]['name'].'</option>';
@@ -359,25 +333,25 @@ $j=0;
 					for($s = 0; $s < 4; $s++){ ?>
 						<div style="float: left; padding: 4px;"><?
 							for($i = 0; $i < $floor+$r; $i++) {
-								if(!in_array($this->data_import_export->attributes['form_element_type'][$j], ['dynamicLink']) AND ($this->data_import_export->attributes['type'][$j] != 'unknown' OR $this->data_import_export->attributes['form_element_type'][$j] == 'SubFormEmbeddedPK')){
-									if($this->data_import_export->attributes['group'][$j] != '') $groupnames = true;
-									if($this->data_import_export->attributes['form_element_type'][$j] == 'Time' AND $this->data_import_export->attributes['options'][$j] == 'export') $exporttimestamp = true;
-									if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
+								if(!in_array($this->attributes['form_element_type'][$j], ['dynamicLink']) AND ($this->attributes['type'][$j] != 'unknown' OR $this->attributes['form_element_type'][$j] == 'SubFormEmbeddedPK')){
+									if($this->attributes['group'][$j] != '') $groupnames = true;
+									if($this->attributes['form_element_type'][$j] == 'Time' AND $this->attributes['options'][$j] == 'export') $exporttimestamp = true;
+									if($this->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
 									<div style="padding: 4px;
-								<? 	if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom']){
-											if($this->formvars['export_format'] == 'CSV' OR $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1){echo 'display:none"';} echo '" id="geom_div"';
+								<? 	if($this->attributes['name'][$j] == $this->attributes['the_geom']){
+											if($this->formvars['export_format'] == 'CSV' OR $this->layerdaten['export_privileg'][$selectindex] != 1){echo 'display:none"';} echo '" id="geom_div"';
 										} ?>
 									">
-										<input class="attribute_selector" id="check_attribute_<? echo $j; ?>" type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->data_import_export->attributes['name'][$j]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->data_import_export->attributes['name'][$j]; ?>"><?php
-										if($this->data_import_export->attributes['alias'][$j] != ''){
-											echo $this->data_import_export->attributes['alias'][$j];
+										<input class="attribute_selector" id="check_attribute_<? echo $j; ?>" type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->attributes['name'][$j]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->attributes['name'][$j]; ?>"><?php
+										if($this->attributes['alias'][$j] != ''){
+											echo $this->attributes['alias'][$j];
 										}
 										else {
-											if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom']){
+											if($this->attributes['name'][$j] == $this->attributes['the_geom']){
 												echo $strNameGeometryField;
 											}
 											else {
-												echo $this->data_import_export->attributes['name'][$j];
+												echo $this->attributes['name'][$j];
 											}
 										} ?>
 									</div><?
@@ -391,7 +365,7 @@ $j=0;
 						}
 					} ?>
 				</div>
-				&nbsp;&nbsp;&nbsp;&nbsp;<a id="selectall_link" href="javascript:selectall('<? echo $this->data_import_export->attributes['the_geom']; ?>')"><? echo $strSelectAll; ?></a>
+				&nbsp;&nbsp;&nbsp;&nbsp;<a id="selectall_link" href="javascript:selectall('<? echo $this->attributes['the_geom']; ?>')"><? echo $strSelectAll; ?></a>
 			</div><?
 
 			if($groupnames OR $document_attributes or true){ ?>
@@ -400,14 +374,23 @@ $j=0;
 					<table cellspacing="7">
 						<tr>
 							<td>
-								&nbsp;<? echo $strFilename; ?>:&nbsp;&nbsp;<input type="text" name="layer_name" value="<? echo umlaute_umwandeln($this->data_import_export->layerdaten['Bezeichnung'][$selectindex]); ?>">
+								&nbsp;<? echo $strFilename; ?>:&nbsp;&nbsp;<input type="text" name="layer_name" value="<? echo sonderzeichen_umwandeln($this->layerdaten['Bezeichnung'][$selectindex]); ?>">
 							</td>
 						</tr>
+				<? 	if ($this->layerset[0]['metalink'] != '') { ?>
 						<tr>
 							<td>
 								<input type="checkbox" name="with_metadata_document" value="1" <? if ($this->formvars['with_metadata_document'] == 1)echo 'checked'; ?>> <? echo $strExportMetadatadocument; ?>
 							</td>
-						</tr><?
+						</tr>
+				<? 	}
+						if ($this->layerset[0]['terms_of_use_link'] != '') { ?>
+						<tr style="display: none">
+							<td>
+								<input type="checkbox" name="with_terms_of_use_document" value="1" checked> <? echo $strExportTermsOfUsedocument; ?>
+							</td>
+						</tr>
+				<? 	}
 						if ($groupnames){ ?>
 							<tr>
 								<td>
@@ -435,7 +418,7 @@ $j=0;
 
 			<div style="margin-top:30px; margin-bottom:10px; text-align: center;">
 				<input name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>"><?php
-					if ($this->data_import_export->formvars['selected_layer_id'] != '') { ?>
+					if ($this->formvars['selected_layer_id'] != '') { ?>
 						<input name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>"><?php
 					} ?>
 			</div>
@@ -447,7 +430,7 @@ $j=0;
   		<input id="go_plus" type="hidden" name="go_plus" value="">
   	</td>
   </tr>
-  <tr<?php if ($simple OR $this->data_import_export->attributes['the_geom'] == '') echo ' style="display: none;"'; ?>>
+  <tr<?php if ($simple OR $this->attributes['the_geom'] == '') echo ' style="display: none;"'; ?>>
     <td align="right">
 			<input type="checkbox" name="within" value="1" <? if($this->formvars['within'] == 1)echo 'checked'; ?>>
 			<? echo $strWithin; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -474,11 +457,11 @@ $j=0;
   </tr>
 </table>
 
-<input type="hidden" name="selectstring_save" value="<? echo $this->data_import_export->formvars['selectstring_save'] ?>">
+<input type="hidden" name="selectstring_save" value="<? echo $this->formvars['selectstring_save'] ?>">
 <input type="hidden" name="client_epsg" value="<? echo $this->user->rolle->epsg_code ?>">
 <input type="hidden" name="go" value="Daten_Export">
 <input type="hidden" name="area" value="">
-<INPUT TYPE="hidden" NAME="export_columnname" VALUE="<? echo $this->data_import_export->formvars['columnname'] ?>">
+<INPUT TYPE="hidden" NAME="export_columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
 <input type="hidden" name="always_draw" value="<? echo $always_draw; ?>"><?php
 if ($simple) { ?>
 	<input type="hidden" name="simple" value="1"><?php

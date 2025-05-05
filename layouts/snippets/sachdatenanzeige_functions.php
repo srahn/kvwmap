@@ -4,7 +4,7 @@ if (value_of($this->formvars, 'anzahl') == '') {
 }
 
 include('funktionen/input_check_functions.php');
-include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 ?>
 
 <script type="text/javascript">
@@ -13,13 +13,9 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	var enclosingForm = <? echo $this->currentform; ?>;
 		
 	update_geometry = function(){
-		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.update_geometry();
 	}
-	
-	show_foreign_vertices = function(){
-		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-	}
-	
+		
 	adjustHref = function(link){
 		if (link.href.indexOf('index.php?') != -1 && link.target != 'root' && enclosingForm.name == 'GUI2') {
 			link.href = link.href.replace('?', '?window_type=overlay&');
@@ -85,6 +81,26 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 	}	
 
+	save_scrollposition = function(){
+		var pos = document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0];
+		if (enclosingForm.name == 'GUI2') {
+			pos.value = document.scrollingElement.scrollTop;
+		}
+		else {
+			pos.value = document.getElementById('contentdiv').scrollTop;
+		}
+	}
+
+	scrollto_saved_position = function(){
+		var pos = document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0];
+		if (enclosingForm.name == 'GUI2') {
+			window.scrollTo({top: pos.value, left: 0, behavior: "instant"});
+		}
+		else {
+			document.getElementById('contentdiv').scrollTo({top: pos.value, left: 0, behavior: "instant"});
+		}
+	}
+
 	scrolltop = function(){
 		if(querymode == 1){
 			window.scrollTo(0, 0);
@@ -125,15 +141,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		tab.classList.add("active_tab");
 		var groups_to_close = dataset.querySelectorAll('.tab');
 		[].forEach.call(groups_to_close, function (group){
-			group.style.visibility = 'collapse';
+			group.classList.add('collapsed');
 		});
 		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
 		[].forEach.call(groups_to_open, function (group){
-			group.style.visibility = 'visible';
+			group.classList.remove('collapsed');
 		});
 	}
 
 	toggle_layer = function(tab, layer_id){
+		enclosingForm.active_layer_id.value = layer_id;
 		var active_tab = document.querySelector('.gle_layer_tab.active_tab');
 		active_tab.classList.remove("active_tab");
 		tab.classList.add("active_tab");
@@ -143,6 +160,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		});
 		var layer_to_open = document.querySelector('#result_' + layer_id);
 		layer_to_open.classList.remove('collapsed');
+		scrollto_saved_position();
 		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
 	
@@ -161,19 +179,23 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 			if(field_has_value(object, operator, value)){
-				if(name_dependent != null)name_dependent.style.visibility = 'inherit';
-				value_dependent.style.visibility = 'inherit';
+				if (name_dependent != null) {
+					name_dependent.classList.remove('collapsedfull');
+				}
+				value_dependent.classList.remove('collapsedfull');
 			}
-			else{
-				if(name_dependent != null)name_dependent.style.visibility = 'hidden';
-				value_dependent.style.visibility = 'hidden';
+			else {
+				if (name_dependent != null) {
+					name_dependent.classList.add('collapsedfull');
+				}
+				value_dependent.classList.add('collapsedfull');
 			}
 			// visibility of row
 			var row = value_dependent.parentNode;
 			all_attributes_in_row = [].slice.call(row.childNodes);
 			row_display = 'none';
 			all_attributes_in_row.forEach(function(td){
-				if(td.nodeType == 1 && td.id != '' && td.style.visibility != 'hidden'){
+				if(td.nodeType == 1 && td.id != '' && !td.classList.contains('collapsedfull')){
 					row_display = '';
 				}
 			})
@@ -301,16 +323,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			if (elements[i].classList[0] == id)	{
 				value = elements[i].value;
 				name = elements[i].name;
-				type = elements[i].type;
-				if (type == 'checkbox' && elements[i].checked == false) {
-					value = 'f';
-				}
+				type = elements[i].type;			
 				if (['int', 'int4', 'int8'].includes(datatype)) {
 					value = parseInt(value);
 				}
 				if (['numeric', 'float4', 'float8', 'float'].includes(datatype)) {
 					value = parseFloat(value);
 				}
+				if (type == 'checkbox' && elements[i].checked == false) {
+					value = 'f';
+				}				
+				if (type == 'radio' && elements[i].checked == false) {
+					value = '';
+				}					
 				if(name.slice(-4) != '_alt'){
 					if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 						if (value != '') {
@@ -428,7 +453,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
-			enclosingForm.gle_scrollposition.value = 0;
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -449,7 +474,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
-			enclosingForm.gle_scrollposition.value = 0;
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -470,7 +495,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
-			enclosingForm.gle_scrollposition.value = 0;
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -488,7 +513,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
-			enclosingForm.gle_scrollposition.value = 0;
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -615,8 +640,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			fieldstring = form_fields[i] + '';
 			field = fieldstring.split(';');
 			var element = document.getElementsByName(fieldstring)[0];
-			if (element != undefined && element.type != 'hidden' && field[4] != 'SubFormFK' && field[7] != '0' && (element.readOnly != true) && field[5] == '0' && element.value == ''){
-			  message('Das Feld '+element.title+' erfordert eine Eingabe.');
+			if (
+				element != undefined &&
+				element.type != 'hidden' &&
+				// field[4] != 'SubFormFK' &&
+				field[7] != '0' &&
+				element.readOnly != true &&
+				field[5] == '0' &&
+				element.value == ''
+			) {
+			  message('Das Feld ' + element.title +' erfordert eine Eingabe.');
 				return;
 			}
 			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)){
@@ -699,7 +732,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
-		ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
+		ahah('index.php', formData, new Array(''), new Array('execute_function'));
 	}
 
 	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, list_edit){
@@ -741,7 +774,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
 		formData.append('list_edit', list_edit);
-		ahah('index.php', formData, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
+		ahah('index.php', formData, new Array(''), new Array('execute_function'));
 	}
 
 	clearsubforms = function(layer_id){
@@ -761,10 +794,22 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		auto_resize_overlay();
 	}
 	
-	switch_gle_view1 = function(layer_id){
-		enclosingForm.chosen_layer_id.value = layer_id;
-		enclosingForm.go.value='toggle_gle_view';
-		overlay_submit(enclosingForm, false);
+	switch_gle_view1 = function(layer_id, from_mode, to_mode, button){
+		var active_button = enclosingForm.querySelector('.gle-view-button.active');
+		var div = enclosingForm.querySelector('#result_' + layer_id + '>#layer>div.records');
+		var req = 'go=switch_gle_view&chosen_layer_id=' + layer_id + '&mode=' + to_mode;
+		var reload = false;
+
+		if (from_mode == 0 && to_mode > 0 || from_mode > 0 && to_mode == 0){		// Wechsel zwischen 0 und 1/2
+			overlay_link(req + '&reload=1');
+		}
+		else {																																	// Wechsel zwischen 1 und 2
+			active_button.classList.remove('active');
+			button.classList.add('active');
+			div.style.display = (to_mode == 1? '' : 'flex');
+			auto_resize_overlay();
+			ahah('index.php', req, [], []);
+		}		
 	}
 	
 	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp) {
@@ -811,7 +856,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				}
 				else if(enclosingForm.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
 					if(enclosingForm.newpath.value != ''){
-						geom = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
+						geom = SVG.buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 					}
 				}
 				attributenames += attributenamesarray[i] + '|';
@@ -879,6 +924,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
+		count_selected(layer_id);
 		document.getElementById('selectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		document.getElementById('deselectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
@@ -896,23 +942,23 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 
 	zoom2object = function(layer_id, columnname, oid, selektieren){
 		params = 'go=zoomto_dataset&oid='+oid+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
-		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+		if (root.document.getElementById('mapimage') != null) {					// aus overlay und Hauptkarte im root Fenster heraus --> Kartenzoom per Ajax machen
 			startwaiting();
 			root.get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
 		}
-		else{
-			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+		else {
+			root.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}
 	
 	zoom2wkt = function(wkt, epsg){
 		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
-		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+		if (root.document.getElementById('mapimage') != null) {					// aus overlay und Hauptkarte im root Fenster heraus --> Kartenzoom per Ajax machen
 			startwaiting();
 			root.get_map_ajax(params, '', '');
 		}
 		else{
-			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+			root.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}	
 
@@ -978,7 +1024,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 
 	daten_export = function(layer_id, anzahl, format){
-		enclosingForm.all.value = document.getElementById('all_'+layer_id).value;
+		enclosingForm.all.value = (document.getElementById('all_' + layer_id + '_2').checked? '1' : '');
 		if(enclosingForm.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
 			var option = document.createElement("option");
 			option.text = anzahl;
@@ -1242,6 +1288,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				}
 			}
 		});
+	}
+
+	count_selected = function(layer_id){
+		document.getElementById('selected_count_' + layer_id).innerHTML = document.querySelectorAll('.check_' + layer_id + ':checked').length;
 	}
 
 </script>

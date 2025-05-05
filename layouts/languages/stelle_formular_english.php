@@ -25,7 +25,9 @@
   $strOwsSrs = 'Coordinate Reference System';
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'Organization';
-	$strOwsContactOrganizationHint = 'Name of responsible organization';
+  $strOwsContactOrganizationHint = 'Name of responsible organization';
+  $strOwsContactUrl = 'URL';
+  $strOwsContactUrlHint = 'Home page url with further informationen about the contact or the geodata.';
   $strOwsContactEmailAddress = 'E-Mail Address';
   $strOwsContactEmailAddressHint = '';
   $strOwsContactPerson = 'Responsible Person';

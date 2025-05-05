@@ -11,6 +11,7 @@ function go_switch_bauleitplanung($go){
 			$rok = new rok($layerdb);
 			$rok->delete_bplan($GUI->formvars['plan_id']);
 			if($GUI->formvars['value_b_plan_stammdaten_oid'] == ''){
+				$GUI->last_query = $GUI->user->rolle->get_last_query();
 				$GUI->GenerischeSuche_Suchen();		# Trefferliste wieder anzeigen
 			}
 			else{
@@ -70,6 +71,7 @@ function go_switch_bauleitplanung($go){
 			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
 			$rok = new rok($layerdb);
 			$rok->update_bplan_from_rok($GUI->formvars['plan_id']);
+			$GUI->last_query = $GUI->user->rolle->get_last_query();
 			$GUI->GenerischeSuche_Suchen();
 		} break;
 		
@@ -80,6 +82,7 @@ function go_switch_bauleitplanung($go){
 			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
 			$rok = new rok($layerdb);
 			$rok->update_fplan_from_rok($GUI->formvars['plan_id']);
+			$GUI->last_query = $GUI->user->rolle->get_last_query();
 			$GUI->GenerischeSuche_Suchen();
 		} break;
 		
@@ -128,7 +131,7 @@ function go_switch_bauleitplanung($go){
 		} break;
 		
 		default : {
-			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgefï¿½hrt
 		}
 	}
 }

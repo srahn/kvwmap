@@ -1,8 +1,8 @@
 <?php
-	include(LAYOUTPATH . 'languages/menuedaten_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/menuedaten_' . rolle::$language . '.php');
 	$name_column = 'name';
-	if ($this->user->rolle->language != 'german') {
-		$name_column .= '_' . $this->user->rolle->language;
+	if (rolle::$language != 'german') {
+		$name_column .= '_' . rolle::$language;
 	}
 ?>
 <script>

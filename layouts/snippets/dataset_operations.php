@@ -1,13 +1,12 @@
 <?
 	if (value_of($this->formvars, 'printversion') == '') { ?>
-		<tr id="dataset_operations">
-			<td colspan="2"align="left"><?
+		<div id="dataset_operations">
+			<?
 				if ($layer['connectiontype'] == 6 AND $this->new_entry != true AND $layer['Layer_ID'] > 0){ ?>
-					<table width="100%" border="0" cellspacing="4" cellpadding="0"><?
+					<table border="0" cellspacing="4" cellpadding="0" class="button_background" style="box-shadow: none; border: 1px solid #bbb"><?
 						include(SNIPPETS . 'generic_layer_editor_common_part.php'); ?>
-						<tr>
 							<td>
-								<table cellspacing="0" cellpadding="0" class="button_background" style="box-shadow: none; border: 1px solid #bbb">
+								<table cellspacing="0" cellpadding="0">
 									<tr><?
 										if ($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
 											<td>
@@ -138,7 +137,6 @@
 						</tr>
 					</table><?
 				} ?>
-			</td>
-		</tr><?
+		</div><?
 	}
 ?>

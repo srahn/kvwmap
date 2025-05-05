@@ -67,7 +67,7 @@ class GeonetworkClient {
 	 *      OVERWRITE überschreibt den Datensatz mit der UUID
 	 *
 	 */	 
-	public function putMetaData(string $xml, string $uuidProcessing='NOTHING') {
+	public function putMetaData(string $xml, string $uuidProcessing = 'NOTHING') {
 		$ch = $this->ch;
 		$urlPut = "$this->CATALOG/srv/api/0.1/records?metadataType=METADATA&recursiveSearch=false&publishToAll=true&assignToCatalog=false&uuidProcessing=${uuidProcessing}&rejectIfInvalid=false&transformWith=_none_";
 	

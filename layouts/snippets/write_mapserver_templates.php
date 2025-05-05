@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/layer_formular_' . rolle::$language . '.php');
 	$write_options = array(
 		'data' => $strWriteMapserverTemplatesOption1,
 		'generic' => $strWriteMapserverTemplatesOption2

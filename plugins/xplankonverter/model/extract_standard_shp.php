@@ -198,17 +198,17 @@ class Standard_shp_extractor {
 	*	Returns an array of all tables of a schema according to the informationschema
 	*/
 	function get_all_tables_of_schema($shape_schema) {
-	$sql = "
-		SELECT
-			table_name
-		FROM
-			information_schema.tables
-		WHERE
-			table_schema  = '". $shape_schema . "';
-	";
-	$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-	$result = pg_fetch_all_columns($ret[1]);
-	return $result;
+		$sql = "
+			SELECT
+				table_name
+			FROM
+				information_schema.tables
+			WHERE
+				table_schema  = '". $shape_schema . "';
+		";
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$result = pg_fetch_all_columns($ret[1]);
+		return $result;
 	}
 
 	/*

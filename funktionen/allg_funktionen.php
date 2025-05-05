@@ -28,21 +28,27 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 /**
  * Funktion wandelt die gegebene MapServer-Expression in einen SQL-Ausdruck um
  * der in WHERE-Klauseln für die Klassifizierung von Datensätzen verwendet werden kann
- * @param String $exp Die MapServer-Expression
- * @param String $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
+ * @param string $exp Die MapServer-Expression
+ * @param string $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
  * @return String Die aus der MapServer-Expression erzeugte SQL-Expression
  */
 function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
-	$exp = str_replace(' eq ', '=', $exp);
-	$exp = str_replace(' ne ', '!=', $exp);
+	$exp = str_replace(' eq ', ' = ', $exp);
+	$exp = str_replace(' ne ', ' != ', $exp);
+	$exp = str_replace(' ge ', ' >= ', $exp);
+	$exp = str_replace(' le ', ' <= ', $exp);
+	$exp = str_replace(' gt ', ' > ', $exp);
+	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
 
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
+			$exp = str_replace('\/', 'escaped_slash', $exp);
 			$exp = str_replace('/', '', $exp);
+			$exp = str_replace('escaped_slash', '/', $exp);
 		}
 		else {
 			$operator = '=';
@@ -81,7 +87,14 @@ function get_url(){
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
-function quote($var, $type = NULL){
+/**
+ * Function enclose $var with single quotes when $type is text or varchar
+ * and elsewhere if $var has a numerical value
+ * @param any $var The value that has to be enclosed with quotas or not
+ * @param string $type optional type of var, default empty string
+ * @return any $var as string with enclosed quotes or as it is if not.
+ */
+function quote($var, $type = '') {
 	switch ($type) {
 		case 'text' : case 'varchar' : {
 			return "'" . $var . "'";
@@ -93,7 +106,7 @@ function quote($var, $type = NULL){
 }
 
 function quote_or_null($var) {
-	return ($var == '' ? 'NULL' : quote($var));
+	return (($var === '' OR $var === null) ? 'NULL' : quote($var));
 }
 
 function append_slash($var) {
@@ -162,17 +175,6 @@ function format_human_filesize($bytes, $precision = 2) {
 function human_filesize($file) {
 	$bytes = @filesize($file);
 	return format_human_filesize($bytes);
-}
-
-function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
-	if (!(error_reporting() & $errno)) {
-		// This error code is not included in error_reporting
-		return;
-	}
-	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	/* Don't execute PHP internal error handler */
-	return true;
 }
 
 function versionFormatter($version) {
@@ -385,12 +387,16 @@ function InchesPerUnit($unit, $center_y){
 		return 39.3701;
 	}
 	elseif($unit == MS_DD){
-		if($center_y != 0.0){
-			$cos_lat = cos(pi() * $center_y/180.0);
-			$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
-		}
-		return 4374754 * $lat_adj;
+		return 39.3701 * degree2meter($center_y);
 	}
+}
+
+function degree2meter($center_y) {
+	if($center_y != 0.0){
+		$cos_lat = cos(pi() * $center_y/180.0);
+		$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
+	}
+	return 111319 * $lat_adj;
 }
 
 function ie_check(){
@@ -528,7 +534,11 @@ function buildsvgpolygonfromwkt($wkt){
 }
 
 function transformCoordsSVG($path){
+	$path = str_replace([',', 'cx=', 'cy=', '"', ','], [' ', ''], $path);		# bei MULTIPOINTs mit drin
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
+	if (strpos($path, 'M') === false) {
+		$path = 'M ' . $path;
+	}
   $svgcoords = explode(' ',$path);
 	$newsvgcoords = [];
   for($i = 0; $i < count($svgcoords); $i++){
@@ -548,7 +558,7 @@ function transformCoordsSVG($path){
     }
   }
   $svgresult = 'M';
-  for($i = 1; $i < @count($newsvgcoords); $i++){
+  for($i = 1; $i < count_or_0($newsvgcoords); $i++){
     $svgresult .= ' '.$newsvgcoords[$i];
   }
   return $svgresult;
@@ -701,8 +711,8 @@ function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$y = 54.075214183333;
   $point = new PointObj();
 	$point->setXY($x,$y);
-	$projFROM = ms_newprojectionobj("init=epsg:".$from_epsg);
-  $projTO = ms_newprojectionobj("init=epsg:".$to_epsg);
+	$projFROM = new projectionObj("init=epsg:".$from_epsg);
+  $projTO = new projectionObj("init=epsg:".$to_epsg);
   $point->project($projFROM, $projTO);
   return $point;
 }
@@ -1089,45 +1099,18 @@ if (!function_exists('str_split')) {
 }
 
 function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite=true){
-	# 1. Methode über unzip (nur Linux)
-	$output = array();
+	# 1. Methode über unzip (nur Linux) rausgenommen, da Umlaute kaputt gehen
 	$entries = NULL;
-	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
-	#echo '<br>unzip -l "'.$src_file.'" -d '.dirname($src_file);
-	for($i = 3; $i < count($output)-2; $i++){
-  		$entries[] = array_pop(explode('   ', $output[$i]));
+	if ($dest_dir === false) {
+		$dest_dir = dirname($src_file);
 	}
-	if($entries != NULL){
-		exec('export LD_LIBRARY_PATH=;unzip -o "'.$src_file.'" -d '.dirname($src_file));
-	}
-	# 2. Methode über php_zip Extension
-	else{
-	  if ($zip = zip_open($src_file)){
-	    if ($zip){
-	      $splitter = ($create_zip_name_dir === true) ? "." : "/";
-	      if ($dest_dir === false) $dest_dir = substr($src_file, 0, strrpos($src_file, $splitter))."/";
-	      @mkdir($dest_dir);
-	      while ($zip_entry = zip_read($zip)){
-	        $entries[] = zip_entry_name($zip_entry);
-	        $pos_last_slash = strrpos(zip_entry_name($zip_entry), "/");
-	        if ($pos_last_slash !== false){
-	          @mkdir($dest_dir.substr(zip_entry_name($zip_entry), 0, $pos_last_slash+1));
-	        }
-	        if (zip_entry_open($zip,$zip_entry,"r")){
-	          $file_name = $dest_dir.zip_entry_name($zip_entry);
-	          if ($overwrite === true || $overwrite === false && !is_file($file_name)){
-	            $fstream = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
-							$fp = fopen($file_name, 'w');
-	            fwrite($fp, $fstream );
-	            fclose($fp);
-	            chmod($file_name, 0777);
-	          }
-	          zip_entry_close($zip_entry);
-	        }
-	      }
-	      zip_close($zip);
-	    }
-	  }
+	$zip = new ZipArchive;
+	if ($zip->open($src_file)) {
+		for ($i = 0; $i < $zip->numFiles; $i++) {
+			$entries[] = $zip->getNameIndex($i);
+		}
+		$zip->extractTo($dest_dir); 
+		$zip->close(); 
 	}
 	return $entries;
 }
@@ -1203,6 +1186,9 @@ function umlaute_sortieren($array, $second_array) {
 	  	$array[$i] = str_replace('Ä', 'A', $array[$i]);
 	  	$array[$i] = str_replace('Ü', 'U', $array[$i]);
 	  	$array[$i] = str_replace('Ö', 'O', $array[$i]);
+			$array[$i] = str_replace('ä', 'A', $array[$i]);
+	  	$array[$i] = str_replace('ü', 'U', $array[$i]);
+	  	$array[$i] = str_replace('ö', 'O', $array[$i]);
 	  	$array[$i] = str_replace('ß', 's', $array[$i]);
 		}
 		@asort($array);
@@ -1240,6 +1226,11 @@ function umlaute_umwandeln($name) {
 	$name = str_replace('U?', 'ue', $name);
 	$name = str_replace('O?', 'oe', $name);
 	$name = str_replace('ß', 'ss', $name);
+	return $name;
+}
+
+function sonderzeichen_umwandeln($name) {
+	$name = umlaute_umwandeln($name);
 	$name = str_replace('.', '', $name);
 	$name = str_replace(':', '', $name);
 	$name = str_replace('(', '', $name);
@@ -1260,7 +1251,7 @@ function umlaute_umwandeln($name) {
 	return $name;
 }
 
-function umlaute_umwandeln_reverse($name){
+function sonderzeichen_umwandeln_reverse($name){
   $name = str_replace('ae', 'ä', $name);
   $name = str_replace('ue', 'ü', $name);
   $name = str_replace('oe', 'ö', $name);
@@ -1375,9 +1366,9 @@ function microtime_float(){
 
 
 function copy_file_to_tmp($frompath, $dateiname = ''){
-  $dateityp = explode('.',$frompath);
+	$dateityp = pathinfo($frompath)['extension'];
   $dateipfad=IMAGEPATH;
-  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp[1];
+  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp;
   if(copy($frompath, $dateipfad.$dateiname) == true){
     return TEMPPATH_REL.$dateiname;
   }
@@ -1675,7 +1666,7 @@ function emailcheck($email) {
   }
 
   $postfix=strlen(strrchr($email,"."))-1;
-  if (!($postfix > 1 AND $postfix < 5)) {
+  if (!($postfix > 1 AND $postfix < 8)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
   }
@@ -1683,38 +1674,38 @@ function emailcheck($email) {
 }
 
 function buildExpressionString($str) {
-  $intervalle=explode(';',$str);
-  $anzInt=count($intervalle);
-  if ($intervalle[$anzInt-1]=='') { $anzInt--; }
+  $intervalle = explode(';', $str);
+  $anzInt = count($intervalle);
+  if ($intervalle[$anzInt-1] == '') { $anzInt--; }
   # Beginne mit der Erstellung des Ausdrucks
-  $expr.='(';
+  $expr.= '(';
   # man neheme das erste Intervall
   # Zerlege es in Anfang und Ende
-  $grenzen=explode('-',$intervalle[0]);
+  $grenzen = explode('-', $intervalle[0]);
   # Teste ob es überhaupt ein Ende gibt, oder nur einen einzelnen Wert
-  if (count($grenzen)==1) {
+  if (count($grenzen) == 1) {
     # Wenn ja, wird die erste einschränkung geschrieben.
-    $expr.='[ID]='.$grenzen[0];
+    $expr.= '[ID] = ' . $grenzen[0];
   }
   else {
     # Wenn es Anfang und Ende gibt, müssen zwei Bedingungen geschrieben werden
-    $expr.='([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+    $expr.='([ID] > '.$grenzen[0].' AND [ID] < ' . $grenzen[1] . ')';
   }
   # weiter geht es mit den nächsten Intervallen
-  for ($i=1;$i<$anzInt;$i++) {
+  for ($i = 1; $i < $anzInt; $i++) {
     # wieder Zerlegen in Anfang und Ende
-    $grenzen=explode('-',$intervalle[$i]);
-    if (count($grenzen)==1) {
+    $grenzen = explode('-', $intervalle[$i]);
+    if (count($grenzen) == 1) {
       # Es gibt nur einen Wert
-      $expr.=' OR [ID]='.$grenzen[0];
+      $expr.=' OR [ID] = ' . $grenzen[0];
     }
     else {
       # Es gibt Anfang und Ende im Intervall
-      $expr.=' OR ([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+      $expr.=' OR ([ID] > ' . $grenzen[0] . ' AND [ID] < ' . $grenzen[1] . ')';
     }
   }
   # Beenden des Ausdrucks
-  $expr.=')';
+  $expr .= ')';
   return $expr;
 }
 
@@ -1931,25 +1922,35 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 }
 
 /**
-* Funktion ersetzt in $str die Schlüsselwörter, die in $params
-* als key übergeben werden durch die values von $params und zusätzlich die Werte der
-* Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
+* Funktion ersetzt in $str die Schlüsselwörter, die in rolle::$layer_params als key enthalten sind durch deren values.
+* Zusätzlich werden die vordefinierten Parameter ($USER_ID usw.) ersetzt
+* Im optionalen Array $additional_params können weitere zu ersetzende key-value-Paare übergeben werden
 */
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+function replace_params_rolle($str, $additional_params = NULL) {
 	if (strpos($str, '$') !== false) {
-		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
-		if (is_array($params)) {
-			foreach($params AS $key => $value){
-				$str = str_replace('$'.$key, $value, $str);
-			}
+		$params = rolle::$layer_params;
+		if (is_array($additional_params)) {
+			$params = array_merge($params, $additional_params);
 		}
-		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
-		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
-		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
-		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
-		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
-		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
-		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
+		$str = replace_params($str, $params);
+		$current_time = time();
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d', $current_time), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);
+		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
+		$str = str_replace('$STELLE_ID', rolle::$stelle_ID, $str);
+		$str = str_replace('$STELLE', rolle::$stelle_bezeichnung, $str);
+		$str = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $str);
+		$str = str_replace('$LANGUAGE', rolle::$language, $str);
+		$str = str_replace('$EXPORT', rolle::$export, $str);
+	}
+	return $str;
+}
+
+function replace_params($str, $params) {
+	if (is_array($params)) {
+		foreach ($params AS $key => $value) {
+			$str = str_replace('$'.$key, $value, $str);
+		}
 	}
 	return $str;
 }
@@ -1957,7 +1958,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 function replace_params_link($str, $params, $layer_id) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerParamsForm(' . $layer_id .  ')">' . $value . '</a>', $str);
 		}
 	}
 	return $str;
@@ -2051,12 +2052,12 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 * and return the elements of the string as array separated by the delimmiter.
 * The elements of the string will be replaced by slashes and timed from white spaces and ".
 */
-function arrStrToArr($str, $delimiter) {
+function arrStrToArr($str, $delimiter, $brackets = '[]') {
 #	if(is_string($delimiter) and in_array())
 #	echo gettype($delimiter);
-	$arr = explode($delimiter, trim($str, '[]'));
+	$arr = explode($delimiter, trim($str, $brackets));
 	foreach ($arr as &$value) {
-		$value = trim(stripslashes($value), '"[]"');
+		$value = trim(stripslashes($value), '"' . $brackets . '"');
 	}
 	return $arr;
 }
@@ -2346,10 +2347,38 @@ function str_replace_last($search , $replace, $str) {
 }
 
 /**
-* Liefert den Originalnamen vom Namen der Thumb-Datei
-*/
-function get_name_from_thump($thumb) {
+ * Liefert den Namen der Thumb-Datei vom Originalnamen in $path
+ * @param String $path Name of original file.
+ * @return String Name of thump file.
+ */
+function get_thumb_from_name($path) {
+	return before_last($path, '.') . '_thumb.jpg';
+}
+
+/**
+ * Liefert den Basename der Originaldatei vom Namen der Thumb-Datei
+ * @param String $thumb Name of the thumb file.
+ * @return String Basename of the original File.
+ */
+function get_name_from_thumb($thumb) {
 	return before_last($thumb, '_thumb.jpg');
+}
+
+/**
+ * Function return the most likely delimiter of $line
+ * @param string $line The line to test.
+ * @return string The detected delimiter.
+ */
+function detect_delimiter($line) {
+	$delimiters = [',', ';', "\t", '|', ':'];
+	$delimiter_counts = [];
+	foreach ($delimiters as $delimiter) {
+
+		$delimiter_counts[$delimiter] = substr_count($line, $delimiter);
+	}
+	// Find the delimiter with the highest count
+	$most_likely_delimiter = array_keys($delimiter_counts, max($delimiter_counts));
+	return $most_likely_delimiter[0];
 }
 
 /**
@@ -2381,7 +2410,7 @@ function before_last($txt, $delimiter) {
  * Function extract from first select until last closing bracket.
  * If no open pracket is before select like in this example:
  * select id, the_geom from schema.tabelle where true, return $data as it is
- * @param String $data Mapserver data statement
+ * @param string $data Mapserver data statement
  * @return String inner sql
  */
 function get_sql_from_mapserver_data($data) {
@@ -2399,9 +2428,9 @@ function get_sql_from_mapserver_data($data) {
  * Returns an empty string if $schema_name.$table_name not exists in $sql.
  * Returns $table_name if $schema_name.$table_name exists but no alias for it.
  * Befor parsing the sql all select expressions will be replaced by *
- * @param String $sql The SQL-Statement to parse.
- * @param String $schema_name The schema name of the table.
- * @param String $table_name The table name.
+ * @param string $sql The SQL-Statement to parse.
+ * @param string $schema_name The schema name of the table.
+ * @param string $table_name The table name.
  * @return String Empty if $schema_name.$table_name not exists, alias if exists else $table_name
  */
 function get_table_alias($sql, $schema_name, $table_name) {
@@ -2543,10 +2572,11 @@ function sanitize(&$value, $type, $removeTT = false) {
 	}
 
 	switch ($type) {
+		case 'integer' :
 		case 'int' :
 		case 'int4' :
 		case 'oid' :
-		case 'boolean':
+		case 'boolean' :
 		case 'int8' : {
 			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;
@@ -2673,7 +2703,7 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 
 /**
  * Function read all files recursively from a directory
- * @param String $dir - The directory
+ * @param string $dir - The directory
  * @return Array $files - The files in the directory and below
  */
 function getAllFiles($dir) {
@@ -2750,5 +2780,13 @@ function required_shape_files_exists($files, $required = array('shp', 'shx', 'db
 			'msg' => 'In der ZIP-Datei ' . (count($missing) == 1 ? 'fehlt die Datei mit der Endung' : 'fehlen die Dateien mit den Endungen') . ' ' . implode(', ', $missing)
 		);
 	}
+}
+
+function set_href($text) {
+	if (strpos($text, ';http') !== false) {
+		$parts = explode(';http', $text);
+		$text = '<a href="http' . $parts[1] . '" target="Urheber" title="' . $parts[0] . '">' . $parts[0] .'</a>';
+	}
+	return $text;
 }
 ?>

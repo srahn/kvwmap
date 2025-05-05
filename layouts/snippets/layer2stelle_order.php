@@ -4,7 +4,7 @@
 
 	$this->outputGroup = function($group, $indent = 0) use ($GUI){	
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
-		$anzahl_layer = @count($group_layer_ids);
+		$anzahl_layer = count_or_0($group_layer_ids);
 		if($anzahl_layer > 0 OR $group['untergruppen'] != ''){
 			echo '
 						<tr>
@@ -30,9 +30,6 @@
 				&nbsp;<? echo $GUI->layers['Bezeichnung'][$i]; ?>
 			</td>
 			<td style="border-bottom: 1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center">
-				<input size="7" type="text" name="drawingorder_layer<? echo $GUI->layers['ID'][$i]; ?>" value="<? echo $GUI->layers['drawingorder'][$i]; ?>">
-			</td>
-			<td style="border-bottom: 1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center">
 				<input size="7" type="text" name="legendorder_layer<? echo $GUI->layers['ID'][$i]; ?>" value="<? echo $GUI->layers['legendorder'][$i]; ?>">
 			</td>
 			<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center">
@@ -45,7 +42,7 @@
 	};
 
   # 2007-12-30 pk
-  include(LAYOUTPATH.'languages/layer2stelle_order_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/layer2stelle_order_'.rolle::$language.'.php');
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
@@ -58,11 +55,8 @@
     		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">
 					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strLayer; ?></a>
 				</td>
-    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">
-					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=drawingorder&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strDrawingOrder; ?></a>
-				</td>
 				<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">
-					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=legendorder, drawingorder desc&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strLegendOrder; ?></a>
+					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=ul.legendorder, l.drawingorder desc&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strLegendOrder; ?></a>
 				</td>
     		<td colspan="2" style="border-top:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center" class="fett">
 					<?php echo $strProperties; ?></td>
@@ -72,7 +66,7 @@
     		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3" class="fett"><?php echo $strGlobal; ?></td>
     	</tr>
       <?
-			if($this->formvars['order'] == 'legendorder, drawingorder desc'){
+			if($this->formvars['order'] == 'ul.legendorder, l.drawingorder desc'){
 				foreach($this->groups as $group){
 					if($group['obergruppe'] == ''){
 						$this->outputGroup($group);

@@ -11,7 +11,6 @@
 	global $last_x;$last_x = 0;
 	global $events;$events = true;	
 	
-	include(LAYOUTPATH.'snippets/SVGvars_defs.php'); 					# zuweisen von: $SVGvars_defs
 	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons
 	include(LAYOUTPATH.'snippets/SVGvars_navscript.php'); 		# zuweisen von: $SVGvars_navscript
 	include(LAYOUTPATH.'snippets/SVGvars_coordscript.php'); 	# zuweisen von: $SVGvars_coordscript
@@ -38,10 +37,10 @@
 #
 # Positionsanzeigetext ausserhalb der Anzeigeflaeche bei Start
 #
-	$pixel_y=($this->formvars['center_y']-$this->map->extent->miny)/$scale;
-	$pixel_x=($this->formvars['center_x']-$this->map->extent->minx)/$scale;
-	$refpoint_y=($this->formvars['refpoint_y']-$this->map->extent->miny)/$scale;
-	$refpoint_x=($this->formvars['refpoint_x']-$this->map->extent->minx)/$scale;
+	$pixel_y = ((float)$this->formvars['center_y'] - $this->map->extent->miny)/$scale;
+	$pixel_x = ((float)$this->formvars['center_x'] - $this->map->extent->minx)/$scale;
+	$refpoint_y = ((float)$this->formvars['refpoint_y'] - $this->map->extent->miny)/$scale;
+	$refpoint_x = ((float)$this->formvars['refpoint_x'] - $this->map->extent->minx)/$scale;
 	$angle = $this->formvars['angle'];
 	$pos_x = round($pixel_x-$printwidth/2);
 	$pos_y = round($pixel_y-$printheight/2);
@@ -141,7 +140,7 @@
 #
 # zusammenstellen der SVG ###
 #
-$fpsvg = fopen(IMAGEPATH.$svgfile,w) or die('fail: fopen('.$svgfile.')');
+$fpsvg = fopen(IMAGEPATH.$svgfile, 'w') or die('fail: fopen('.$svgfile.')');
 chmod(IMAGEPATH.$svgfile, 0666);
 $svg='<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
@@ -293,8 +292,8 @@ function recentre(){
 }
 
 function highlightbyid(id){
-	document.querySelector(".active").classList.remove("active");
-  document.getElementById(id).classList.add("active");
+	document.querySelector(".active").classList.remove("active_navbutton");
+  document.getElementById(id).classList.add("active_navbutton");
 }
 
 function focus_NAV(){

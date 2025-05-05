@@ -90,7 +90,7 @@ class pgdatabase {
 			$connection_string = $this->get_connection_string();
 		}
 		try {
-			$this->dbConn = pg_connect($connection_string, $flag);
+			$this->dbConn = pg_connect($connection_string . ' connect_timeout=5', $flag);
 		}
 		catch (Exception $e) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
@@ -143,7 +143,7 @@ class pgdatabase {
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
 			"password='" . addslashes($credentials['password']) . "' " .
-			"application_name=kvwmap_user_" . $this->gui->user->id;
+			"application_name=kvwmap_user_" . ($this->gui->user ? $this->gui->user->id : '');
 		return $connection_string;
 	}
 
@@ -197,7 +197,7 @@ class pgdatabase {
 			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
 			SET datestyle TO 'German';
 			";
-		$ret=$this->execSQL($sql, 4, 0);
+		$ret = $this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];
   }
@@ -206,6 +206,33 @@ class pgdatabase {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
   }
+
+	function schema_exists($schema_name) {
+		$sql = "
+			SELECT
+				EXISTS(
+					SELECT
+						1
+					FROM
+						information_schema.schemata
+					WHERE 
+						schema_name = '" . $schema_name . "'
+					AND
+						catalog_name = '" . POSTGRES_DBNAME . "'
+				)
+			;";
+		$ret = $this->execSQL($sql, 4, 0);
+		$result = pg_fetch_row($ret[1]);
+		return ($result[0] === 't');
+	}
+
+	function create_schema($schema_name) {
+		$sql = "
+			CREATE SCHEMA IF NOT EXISTS " . $schema_name . "
+		";
+		$ret = $this->execSQL($sql, 4,0);
+		return $ret;
+	}
 
 	function get_schemata($user_name) {
 		$schemata = array();
@@ -527,8 +554,8 @@ FROM
       $ret[1]=$curExtent;
     }
     
-    /*$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
-		$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+    /*$projFROM = new projectionObj("init=epsg:".$curSRID);
+		$projTO = new projectionObj("init=epsg:".$newSRID);
 		$curExtent->project($projFROM, $projTO);
 		$ret[0] = 0;
 		$ret[1] = $curExtent;*/
@@ -542,7 +569,7 @@ FROM
 	*/
 	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
 		if (!$this->dbConn) {
-			echo '<p>pgconn: ' . $this->dbConn; exit;
+			echo '<p>pgconn: ' . $this->dbConn;
 		}
 		$ret = array(); // Array with results to return
 		$ret['msg'] = '';
@@ -679,7 +706,7 @@ FROM
 			# alles ok mach nichts weiter
 		}
 		else {
-			# Fehler setze entsprechende Fags und Fehlermeldung
+			# Fehler setze entsprechende Flags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
@@ -719,7 +746,7 @@ FROM
 		$timestamp = rolle::$hist_timestamp;
 		if($timestamp == ''){
 			foreach($tablenames as $tablename){
-				$filter .= ' AND ('.$tablename.'.zeigtaufexternes_art IS NULL OR NOT \'http://www.lverma-mv.de/_fdv#7040\' = any('.$tablename.'.zeigtaufexternes_art))';
+				$filter .= ' AND (' . $tablename . '.historisch IS NULL OR ' . $tablename . '.historisch != \'true\') AND ('.$tablename.'.zeigtaufexternes_art IS NULL OR NOT \'urn:mv:fdv:7040\' = any('.$tablename.'.zeigtaufexternes_art))';
 			}
 		}
 		return $filter;
@@ -824,7 +851,7 @@ FROM
 			if(strpos($error_message, "\n      :resno") !== false){
 				$error_list[] = $error_message;
 			}
-			return false;
+			#return false;
 		};
 		set_error_handler($myErrorHandler);
 		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
@@ -878,7 +905,7 @@ FROM
 					$fields[$i]['schema_name'] = $schemaname = $schema_names[$table_oid];
 					
 					$constraintstring = '';
-					
+					// Frage die attribute informationen der Tablle falls noch nicht geschehen
 					if(!is_array($attribute_infos[$schemaname][$tablename])){
 						$attribute_infos[$schemaname][$tablename] = $this->get_attribute_information($schemaname, $tablename);
 					}
@@ -895,8 +922,12 @@ FROM
 								$view_defintion_attributes[$tablename] = array();
 							}
 						}
-						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
-						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL) {
+							$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						}
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL) {
+							$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						}
 					}
 					# realer Name der Spalte in der Tabelle
 					$fields[$i]['real_name'] = $attr_info['name'];
@@ -904,7 +935,7 @@ FROM
 					$fields[$i]['nullable'] = $attr_info['nullable']; 
 					$fields[$i]['length'] = $attr_info['length'];
 					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
-					$fields[$i]['default'] = $attr_info['default'];
+					$fields[$i]['default'] = ($attr_info['generated'] == '' ? $attr_info['default'] : '');
 					$fields[$i]['type_type'] = $attr_info['type_type'];
 					$fields[$i]['type_schema'] = $attr_info['type_schema'];
 					$fields[$i]['is_array'] = $attr_info['is_array'];
@@ -925,7 +956,7 @@ FROM
 					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < @count($constraints[$table_oid] ?: []); $j++){
+						for($j = 0; $j < count_or_0($constraints[$table_oid] ?: []); $j++){
 							if(strpos($constraints[$table_oid][$j], '(' . $fieldname . ')') AND strpos($constraints[$table_oid][$j], '=')){
 								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
@@ -940,7 +971,7 @@ FROM
 						}
 					}
 					$fields[$i]['constraints'] = $constraintstring;
-					$fields[$i]['saveable'] = 1;
+					$fields[$i]['saveable'] = ($attr_info['generated'] == '' ? 1 : 0);
 				}
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
 					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
@@ -992,6 +1023,7 @@ FROM
 				c.relkind,
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
+				" . (POSTGRESVERSION >= 1300 ? 'a.attgenerated as generated' : 'NULL as generated') . ",
 				a.attnum AS ordinal_position,
 				pg_get_expr(ad.adbin, ad.adrelid) as default,
 				t.typname AS type_name,
@@ -1042,7 +1074,7 @@ FROM
 				" . $and_column . "
 			ORDER BY a.attnum, indisunique desc, indisprimary desc
 		";
-		#echo '<br><br>' . $sql;
+		#echo '<br>SQL zur Abfrage der Attributinformationen aus der Datenbank: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret[0] == 0) {
 			while ($attr_info = pg_fetch_assoc($ret[1])) {
@@ -1060,13 +1092,11 @@ FROM
 				}
 				if ($attr_info['decimal_length'] == '') {
 					$attr_info['decimal_length'] = 'NULL';
-				}
-				/*
+				}/*
 				if (strpos($attr_info['type_name'], 'xp_spezexternereferenzauslegung') !== false) {
 					$attr_info['type_name'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type_name']);
 					$attr_info['type'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type']);
-				}
-				*/
+				}*/
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
@@ -1131,9 +1161,10 @@ FROM
 	
 	function writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
+		$attribute_names = [];
 		for($i = 1; $i < count($attr_info)+1; $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
-			$fields[$i]['name'] = $attr_info[$i]['name'];
+			$attribute_names[] = $fields[$i]['name'] = $attr_info[$i]['name'];
 			$fieldtype = $attr_info[$i]['type_name'];
 			$fields[$i]['nullable'] = $attr_info[$i]['nullable']; 
 			$fields[$i]['length'] = $attr_info[$i]['length'];
@@ -1184,6 +1215,16 @@ FROM
 			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
+		$sql = "
+			DELETE FROM
+				datatype_attributes
+			WHERE
+				layer_id = " . $layer_id . " AND
+				datatype_id = " . $datatype_id . " AND
+				name NOT IN ('" . implode("', '", $attribute_names) . "')";
+		#echo "<br>Löschen der alten Datentyp-Attribute: " . $sql;
+		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 	}
 
 	/*
@@ -1340,13 +1381,19 @@ FROM
   function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$hist_alb = false, $fiktiv = false, $buchungsstelle = NULL, $without_temporal_filter = false) {
     $sql ="SELECT DISTINCT gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemarkungsname, g.land || g.bezirk as bezirk, g.bezirk as gbezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart, s.gml_id, s.laufendenummer AS bvnr, ltrim(s.laufendenummer, '~>a')::integer, s.buchungsart, s.buchungstext, art.beschreibung as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum "; 
 		if($FlurstKennz!='') {
-			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
-			else $sql.="FROM alkis.ax_flurstueck f ";  
+			if ($hist_alb) {
+				$sql .= "FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+				$istgebucht = 'isthistgebucht';
+			}
+			else {
+				$sql.="FROM alkis.ax_flurstueck f ";
+				$istgebucht = 'istgebucht';
+			}
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			if($fiktiv){
-				$sql.="JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
+				$sql.="JOIN alkis.ax_buchungsstelle s ON ARRAY[f." . $istgebucht . "] <@ s.an ";
 			}
-			else $sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f.istgebucht] <@ s.an) ";
+			else $sql.="JOIN alkis.ax_buchungsstelle s ON f." . $istgebucht . " = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f." . $istgebucht . "] <@ s.an) ";
 			
 			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
@@ -1465,7 +1512,7 @@ FROM
   function getGemeindeListeByKreisGemeinden($Gemeinden){
     $sql ="SELECT DISTINCT g.schluesselgesamt AS id, g.bezeichnung AS name";
     $sql.=" FROM alkis.ax_gemeinde AS g WHERE 1=1";
-    if(is_array($Gemeinden)){
+    if(!empty($Gemeinden)){
 			$sql.=" AND g.schluesselgesamt IN ('".implode("','", $Gemeinden)."')";
     }
 		$sql.= $this->build_temporal_filter(array('g'));
@@ -1493,7 +1540,7 @@ FROM
 						alkis.ax_flurstueck
 					WHERE 
 						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" . 
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						flurstueckskennzeichen";
@@ -1534,7 +1581,7 @@ FROM
 						alkis.ax_flurstueck
 					WHERE 
 						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" .
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
 					UNION
 					SELECT 
 						hf.flurstueckskennzeichen,
@@ -1679,10 +1726,10 @@ FROM
 			FROM 
 				alkis.ax_kreisregion AS k, 
 				alkis.ax_gemeinde as g, 
-				alkis.ax_gemarkung AS gem, 
-				alkis.ax_flurstueck AS f 
+				alkis.ax_gemarkung AS gem
 				LEFT JOIN 
-					alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(f.zustaendigestelle_stelle)
+					alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(gem.istamtsbezirkvon_stelle),
+				alkis.ax_flurstueck AS f 				
 				LEFT JOIN
 					alkis.aa_antrag a ON a.identifier = any(f.zeigtaufexternes_uri)
 			WHERE 
@@ -2103,7 +2150,11 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
-		if($ganze_gemkg_ids[0] != '' OR @count($eingeschr_gemkg_ids) > 0){
+		if (value_of($formvars, 'newpathwkt') != ''){
+			# Suche im Suchpolygon
+			$sql .=' AND st_intersects(f.wkb_geometry, (st_transform(st_geomfromtext(\'' . $formvars['newpathwkt'] . '\', ' . $formvars['user_epsg'] . '), ' . EPSGCODE_ALKIS . ')))';
+		}
+		if($ganze_gemkg_ids[0] != '' OR count_or_0($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
 				$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
@@ -2303,6 +2354,7 @@ FROM
   function getGrundbuchbezirksliste(){
   	$sql ="SELECT schluesselgesamt as grundbuchbezschl, bezeichnung FROM alkis.ax_buchungsblattbezirk WHERE 1=1";
 		$sql.= $this->build_temporal_filter(array('ax_buchungsblattbezirk'));
+		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('ax_buchungsblattbezirk'));
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
     	while($rs=pg_fetch_assoc($ret[1])){
@@ -2345,16 +2397,27 @@ FROM
   }
     
   function getGrundbuchbezirke($FlurstKennz, $hist_alb = false) {
-		$sql ="SELECT distinct b.schluesselgesamt as Schluessel, b.bezeichnung AS Name ";
-		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
-		else $sql.="FROM alkis.ax_flurstueck f ";  
-		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f.istgebucht] <@ s2.an ";
-		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
-		$sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f.istgebucht] <@ s.an) ";
-		$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
-		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
-		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-		$sql.="WHERE f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
+		$sql ="
+			SELECT distinct 
+				b.schluesselgesamt as Schluessel, 
+				b.bezeichnung AS Name ";
+		if ($hist_alb) {
+			$sql .= "FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+			$istgebucht = 'isthistgebucht';
+		}
+		else {
+			$sql.="FROM alkis.ax_flurstueck f ";
+			$istgebucht = 'istgebucht';
+		}
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f." . $istgebucht . "] <@ s2.an ";
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f." . $istgebucht . " = s.gml_id OR array[f." . $istgebucht . "] <@ s.an OR array[f." . $istgebucht . "] <@ s2.an AND array[s2.gml_id] <@ s.an ";
+		$sql.="
+				JOIN alkis.ax_buchungsstelle s ON f." . $istgebucht . " = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f." . $istgebucht . "] <@ s.an) 
+				LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert 
+				LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk 
+			WHERE 
+				f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
 		if(!$hist_alb) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -2507,7 +2570,7 @@ FROM
 						alkis.ax_flurstueck 
 					WHERE 
 						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" . 
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
+						(!empty($FlurID)? ' AND flurnummer IN (' . implode(',', $FlurID) . ')' : '') . 
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						FlurID";
@@ -2551,8 +2614,8 @@ FROM
 					FROM 
 						alkis.ax_flurstueck
 					WHERE 
-						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" .
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
+					flurstueckskennzeichen LIKE '" . $GemkgID . "%'" . 
+					(!empty($FlurID)? ' AND flurnummer IN (' . implode(',', $FlurID) . ')' : '') . "
 					UNION
 					SELECT 
 						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
@@ -2696,7 +2759,7 @@ FROM
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.ax_flurstueck AS f";
     $sql.=" WHERE 1=1";
-    $anzflst = @count($flurstkennz);
+    $anzflst = count_or_0($flurstkennz);
     if ($anzflst>0) {
       $sql.=" AND f.flurstueckskennzeichen IN ('".$flurstkennz[0]."'";
       for ($i=1;$i<$anzflst;$i++) {
@@ -3082,6 +3145,15 @@ FROM
 		";
 		#echo '<br>SQL: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
+		return $ret;
+	}
+
+	function drop_schema($schema_name, $cascade = false) {
+		$sql = "
+			DROP SCHEMA IF EXISTS " . $schema_name .
+			($cascade ? ' CASCADE' : '') . "
+		";
+		$ret = $this->execSQL($sql, 4,0);
 		return $ret;
 	}
 }

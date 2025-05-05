@@ -65,7 +65,7 @@
 		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		$layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
 		$map = new mapObj(NULL);
-		$map->set('debug', 5);
+		$map->debug = 5;
 		# Auf den Datensatz zoomen
 		$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
 		$sql.=" FROM (SELECT box2D(st_transform(the_geom, ".$GUI->user->rolle->epsg_code.")) as bbox";
@@ -92,11 +92,16 @@
 			$layer->type = 2;
 			$layer->symbolscaledenom = 10000;
 			$layer->labelitem = 'fsnum';
-			$layer->setConnectionType(6);
+			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->metadata->set('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
 			$klasse = new ClassObj($layer);
 			$klasse->status = MS_ON;
 			$style = new StyleObj($klasse);
@@ -123,12 +128,17 @@
 			$layer->type = 2;
 			$layer->maxscaledenom = 2000;
 			$layer->symbolscaledenom = 10000;
-			$layer->opacity = 5;
-			$layer->setConnectionType(6);
+			$layer->updateFromString("LAYER COMPOSITE OPACITY 5 END END");
+			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->metadata->set('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
 			$klasse = new ClassObj($layer);
 			$klasse->status = MS_ON;
 			$style = new StyleObj($klasse);
@@ -137,19 +147,24 @@
 			$style->maxwidth = 1;
 			$style->outlinecolor->setRGB(0,0,0);
 			# Flur-Layer erzeugen
-			$layer=ms_newLayerObj($map);
+			$layer= new layerObj($map);
 			$layer->data = 'the_geom from alkis.pp_flur as foo using unique gid using srid='.EPSGCODE_ALKIS;
 			$layer->status = MS_ON;
 			$layer->template = ' ';
 			$layer->name = 'querymap'.$k;
 			$layer->type = 2;
 			$layer->symbolscaledenom = 10000;
-			$layer->opacity = 80;
-			$layer->setConnectionType(6);
+			$layer->updateFromString("LAYER COMPOSITE OPACITY 80 END END");
+			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->metadata->set('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
 			$klasse = new ClassObj($layer);
 			$klasse->status = MS_ON;
 			$style = new StyleObj($klasse);
@@ -168,12 +183,17 @@
 			$layer->template = ' ';
 			$layer->name = 'querymap'.$k;
 			$layer->type = 2;
-			$layer->opacity = 50;
-			$layer->setConnectionType(6);
+			$layer->updateFromString("LAYER COMPOSITE OPACITY 50 END END");
+			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
 			$layer->metadata->set('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
 			$klasse = new ClassObj($layer);
 			$klasse->status = MS_ON;
 			$style = new StyleObj($klasse);
@@ -181,11 +201,11 @@
 			$style->width = 2;
 			$style->outlinecolor->setRGB(-1,-1,-1);
 			# Karte rendern
-			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code,MS_TRUE);
-			$map->web->set('imagepath', IMAGEPATH);
-			$map->web->set('imageurl', IMAGEURL);
-			$map->set('width', 300);
-			$map->set('height', 300);
+			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code);
+			$map->web->imagepath = IMAGEPATH;
+			$map->web->imageurl = IMAGEURL;
+			$map->width = 300;
+			$map->height = 300;
 			$image_map = $map->draw();
 			$filename = $GUI->map_saveWebImage($image_map,'jpeg');
 			$newname = $GUI->user->id.basename($filename);
@@ -215,7 +235,7 @@
       $GUI->antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
 			$GUI->antrag->getAntraege(array($antr_selected),'','','',$stelle_id);
 			$GUI->antrag->searches = $GUI->Suchparameter_abfragen($antr_selected, $stelle_id);
-			$antragsnr = $GUI->antrag->nr;
+			$antragsnr = sonderzeichen_umwandeln($GUI->antrag->nr);
 			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
       if(is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
         chdir(RECHERCHEERGEBNIS_PATH);
@@ -286,7 +306,7 @@
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
-      elseif(@count($festpunkte->liste) > 0){
+      elseif(count_or_0($festpunkte->liste) > 0){
         $ret=$antrag->EinmessungsskizzenInOrdnerZusammenstellen($festpunkte);
         $msg.=$ret;
       }
@@ -306,6 +326,7 @@
     $GUI->main= PLUGINS.'nachweisverwaltung/view/dokumenteneingabeformular.php';
     $GUI->titel='Dokument überarbeiten';    
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
+		if($GUI->formvars['bufferwidth'] == '')$GUI->formvars['bufferwidth'] = 2;
     # Nachweisdaten aus Datenbank abfragen
     $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     $GUI->hauptdokumentarten = $nachweis->getHauptDokumentarten();
@@ -330,8 +351,8 @@
 				$GUI->loadMap('DataBase');
 			}
 			if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-      # zoomToMaxLayerExtent
-			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
+      # zoom_to_max_layer_extent
+			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);
       $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
 	    if(!$GUI->formvars['geom_from_layer']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -419,7 +440,7 @@
 		#echo $sql;
 		$GUI->debug->write("<p>nachweiseAuswahlSpeichern - Speichern der aktuellen Auswahl im Rechercheergebnis",4);
 		$GUI->database->execSQL($sql,4, 1);
-		if (@count($nachweis_ids) > 0) {
+		if (count_or_0($nachweis_ids) > 0) {
 			$sql = '
 				INSERT INTO 
 					rolle_nachweise_rechercheauswahl 
@@ -730,7 +751,7 @@
 		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft'], $GUI->formvars['alle_der_messung']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft'], $GUI->formvars['alle_der_messung'], $GUI->formvars['suchformat']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -1213,7 +1234,7 @@
 					$GUI->pdf=$pdf;
 					$dateipfad=IMAGEPATH;
 					$currenttime = date('Y-m-d_H:i:s',time());
-					$name = umlaute_umwandeln($GUI->user->Name);
+					$name = sonderzeichen_umwandeln($GUI->user->Name);
 					$dateiname = $name.'-'.$currenttime.'.pdf';
 					$GUI->outputfile = $dateiname;
 					$fp=fopen($dateipfad.$dateiname,'wb');
@@ -1384,7 +1405,7 @@
       $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
       $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
     }
-		elseif($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);	# zoomToMaxLayerExtent
+		elseif($GUI->formvars['zoom_layer_id'] != '')$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);	# zoom_to_max_layer_extent
 		
 		if($GUI->formvars['FlurstKennz'] != ''){		# über die Flurstückssuche gefundene Flurstücke -> Geometrie als Suchpolygon übernehmen
 			$GUI->formvars['suchpolygon'] = $GUI->pgdatabase->getGeomfromFlurstuecke($GUI->formvars['FlurstKennz'], $GUI->user->rolle->epsg_code);
@@ -1576,6 +1597,7 @@
 		$GUI->sanitize(['dokauswahl_name' => 'text', 'dokauswahlen' => 'int', 'FlurstKennz' => 'text']);
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
+		if($GUI->formvars['bufferwidth'] == '')$GUI->formvars['bufferwidth'] = 2;
 		# Speichern einer neuen Dokumentauswahl
 		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_speichern'){
 			$GUI->formvars['dokauswahlen'] = $GUI->save_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars);
@@ -1631,7 +1653,7 @@
 			$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
-    $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
+    $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","", 190);
 		$GUI->GemkgFormObj->addJavaScript("onchange","updateGemarkungsschluessel(this.value)");
 		$GUI->GemkgFormObj->insertOption('',0,'--Auswahl--',0);
 			
@@ -1639,7 +1661,7 @@
     $GUI->FormObjVermStelle=$GUI->getFormObjVermStelle('sVermStelle', $GUI->formvars['sVermStelle']);
     $GUI->FormObjVermStelle->insertOption('', NULL, '--- Auswahl ---', 0);    
     # aktuellen Kartenausschnitt laden + zeichnen!
-    $saved_scale = $GUI->reduce_mapwidth(200);
+    $saved_scale = $GUI->reduce_mapwidth(207);
 		$GUI->loadMap('DataBase');
 		if($saved_scale != NULL AND !isset($GUI->formvars['datum']))$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     if ($GUI->formvars['CMD']!='') {
