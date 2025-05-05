@@ -2289,14 +2289,23 @@ class rolle {
 					FROM
 						(
 							WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
-								SELECT DISTINCT
+								(
+									SELECT DISTINCT
 										ul.stelle_id AS stelle_id,
 										r.user_id,
-										coalesce(ul.group_id, l.Gruppe) AS group_id
-								FROM
+										coalesce(ul.group_id, l.gruppe) AS group_id
+									FROM
 										kvwmap.used_layer ul JOIN
 										kvwmap.layer l ON ul.layer_id = l.layer_id JOIN
 										kvwmap.rolle r ON ul.stelle_id = r.stelle_id
+									UNION ALL
+									SELECT DISTINCT
+										stelle_id,
+										user_id,
+										gruppe
+									FROM
+										kvwmap.rollenlayer
+								)
 								UNION ALL
 								SELECT 
 										cte.stelle_id,
