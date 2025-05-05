@@ -717,16 +717,19 @@
 		$md->set('date_de', date('d.m.Y', $current_time));
 		$md->set('id_cite_date', date('Y-m-d', $current_time));
 		if ($GUI->konvertierung->get('planart') == 'FP-Plan') {
-			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst. Die Daten wurden im Rahmen des Projektes PlanDigital zusammengestellt und durch das testportal-plandigital.de bereitgestellt.';
+			//$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst. Die Daten wurden im Rahmen des Projektes PlanDigital zusammengestellt und durch das testportal-plandigital.de bereitgestellt.';
 		}
 		else {
 			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '.';
 		}
 
 		$md->set('id_abstract', array(
-			'dataset' => $admin_stelle->ows_abstract . $abstract_zusatz,
-			'viewservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
-			'downloadservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			//'dataset' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			//'viewservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			//'downloadservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			'dataset' => defined('XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DATASET') ? XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DATASET : ($admin_stelle->ows_abstract . $abstract_zusatz),
+			'viewservice' => defined('XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_VIEWSERVICE') ? XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_VIEWSERVICE : ($admin_stelle->ows_abstract . $abstract_zusatz),
+			'downloadservice' =>  defined('XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DOWNLOADSERVICE') ? XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DOWNLOADSERVICE : ($admin_stelle->ows_abstract . $abstract_zusatz)
 		));
 		$md->set('version', floatval(implode('.', array_slice(explode('/', XPLAN_NS_URI), -2))));
 		$md->set('extents', $plan_object->extents);
