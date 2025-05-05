@@ -1155,34 +1155,33 @@ FROM
 			SELECT
 				id
 			FROM
-				datatypes
+				kvwmap.datatypes
 			WHERE
-				`name` = '" . $typname . "' AND
-				`schema` = '" . $schema . "' AND
-				`connection_id` = '" . $connection_id . "'
+				name = '" . $typname . "' AND
+				schema = '" . $schema . "' AND
+				connection_id = " . $connection_id . "
 		";
-		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+		$ret1 = $this->execSQL($sql, 4, 1);
 		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs = $this->gui->database->result->fetch_assoc();
+		$rs = pg_fetch_assoc($ret1[1]);
 		if ($rs == NULL) {
 			$sql = "
-				INSERT INTO datatypes (
-					`name`,
-					`schema`,
-					`connection_id`
+				INSERT INTO kvwmap.datatypes (
+					name,
+					schema,
+					connection_id
 				)
 				VALUES (
 					'" . $typname . "',
 					'" . $schema . "',
 					'" . $connection_id . "'
 				)
+				RETURNING id
 			";
-			$ret2 = $this->gui->database->execSQL($sql, 4, 1);
-			$datatype_id = $this->gui->database->mysqli->insert_id;
+			$ret2 = $this->execSQL($sql, 4, 1);
+			$rs = pg_fetch_assoc($ret2[1]);
 		}
-		else{	
-			$datatype_id = $rs['id'];
-		}
+		$datatype_id = $rs['id'];
 		return $datatype_id;
 	}
 	
@@ -1226,45 +1225,43 @@ FROM
 			if($fields[$i]['nullable'] == '')$fields[$i]['nullable'] = 'NULL';
 			if($fields[$i]['length'] == '')$fields[$i]['length'] = 'NULL';
 			if($fields[$i]['decimal_length'] == '')$fields[$i]['decimal_length'] = 'NULL';
+
+			$columns = [
+				'layer_id' => $layer_id,
+				'datatype_id' => $datatype_id,
+				'name' => "'" . $fields[$i]['name'] . "'",
+				'real_name' => "'" . $fields[$i]['real_name'] . "'",
+				'type' => "'" . $fields[$i]['type'] . "'",
+				'constraints' => "'" . pg_escape_string($fields[$i]['constraints']) . "'",
+				'form_element_type' => "'" . (pg_escape_string($fields[$i]['constraints']) != '' ? 'Auswahlfeld' : 'Text') . "'",
+				'nullable' => $fields[$i]['nullable'],
+				'length' => $fields[$i]['length'],
+				'decimal_length' => $fields[$i]['decimal_length'],
+				'"default"' => "'" . pg_escape_string($fields[$i]['default']) . "'",
+				'"order"' => $i
+			];
 			$sql = "
 				INSERT INTO
-					datatype_attributes
-				SET
-					layer_id = " . $layer_id . ",
-					datatype_id = " . $datatype_id . ",
-					name = '" . $fields[$i]['name'] . "',
-					real_name = '" . $fields[$i]['real_name'] . "',
-					type = '" . $fields[$i]['type'] . "',
-					constraints = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) . "',
-					form_element_type = '" . ($this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) != '' ? 'Auswahlfeld' : 'Text') . "',
-					nullable = " . $fields[$i]['nullable'] . ",
-					length = " . $fields[$i]['length'] . ",
-					decimal_length = " . $fields[$i]['decimal_length'] . ",
-					`default` = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['default']) . "',
-					`order` = " . $i . "
-				ON DUPLICATE KEY UPDATE
-					real_name = '" . $fields[$i]['real_name'] . "',
-					type = '" . $fields[$i]['type'] . "',
-					constraints = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) . "',
-					nullable = " . $fields[$i]['nullable'] . ",
-					length = " . $fields[$i]['length'] . ",
-					decimal_length = " . $fields[$i]['decimal_length'] . ",
-					`default` = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['default']) . "',
-					`order` = " . $i . "
-			";
+					kvwmap.datatype_attributes
+					(" . implode(', ', array_keys($columns)) . ")
+				VALUES	
+					(" . implode(', ', $columns) . ")
+				ON CONFLICT (layer_id, datatype_id, name) DO	UPDATE 
+					SET " .
+						implode(', ',	array_map(function($key) {return $key . ' = EXCLUDED.' . $key;}, array_keys($columns)));
 			#echo "<br>SQL zum Anlegen eines Datentypes: " . $sql;
-			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+			$ret1 = $this->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
 		$sql = "
 			DELETE FROM
-				datatype_attributes
+				kvwmap.datatype_attributes
 			WHERE
 				layer_id = " . $layer_id . " AND
 				datatype_id = " . $datatype_id . " AND
 				name NOT IN ('" . implode("', '", $attribute_names) . "')";
 		#echo "<br>Löschen der alten Datentyp-Attribute: " . $sql;
-		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+		$ret1 = $this->execSQL($sql, 4, 1);
 		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 	}
 

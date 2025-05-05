@@ -1531,7 +1531,7 @@ class stelle {
 				start_aktiv
 			)";
 			if (!$assign_default_values) {
-				# Einstellungen von der Elternstelle übernehmen
+				# Einstellungen von der ersten Elternstelle übernehmen (LIMTI 1)
 				$sql = "
 					INSERT INTO kvwmap.used_layer " . $insert . "
 					SELECT
@@ -1562,6 +1562,7 @@ class stelle {
 						layer_id = " . $layer_ids[$i] . " AND
 						stelle_id = parent_id AND
 						child_id = " . $this->id . "
+					LIMIT 1
 					ON CONFLICT (stelle_id, layer_id) DO UPDATE SET
 						queryable = EXCLUDED.queryable, 
 						use_geom = EXCLUDED.use_geom, 
@@ -1571,11 +1572,15 @@ class stelle {
 						symbolscale = EXCLUDED.symbolscale, 
 						offsite = EXCLUDED.offsite, 
 						transparency = EXCLUDED.transparency, 
+						filter = EXCLUDED.filter,
 						template = EXCLUDED.template, 
+						header = EXCLUDED.header,
+						footer = EXCLUDED.footer,
 						postlabelcache = EXCLUDED.postlabelcache,
 						privileg = EXCLUDED.privileg,
 						export_privileg = EXCLUDED.export_privileg,
-						requires = EXCLUDED.requires
+						requires = EXCLUDED.requires,
+						start_aktiv = EXCLUDED.start_aktiv
 				";
 				// echo $sql.'<br><br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
@@ -1667,14 +1672,14 @@ class stelle {
 							layer_id = " . $layer_ids[$i] . " AND
 							stelle_id = parent_id AND
 							child_id = " . $this->id . "
-						GROUP BY attributename
+						GROUP BY layer_id, attributename
 					) as foo
-					ON CONFLICT (layer_id, attributename, stelle_id) DO UPDATE
-						layer_id = foo.layer_id, 
-						attributename = foo.attributename, 
-						stelle_id = " . $this->id . ", 
-						privileg = foo.privileg, 
-						tooltip = foo.tooltip
+					ON CONFLICT (layer_id, attributename, stelle_id) DO UPDATE SET
+						layer_id = EXCLUDED.layer_id, 
+						attributename = EXCLUDED.attributename, 
+						stelle_id = EXCLUDED.stelle_id, 
+						privileg = EXCLUDED.privileg, 
+						tooltip = EXCLUDED.tooltip
 					";
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
@@ -1686,8 +1691,9 @@ class stelle {
 				if (pg_affected_rows($ret[1]) != 0) {
 					# löschen der Einträge für "kein Zugriff" Rechte
 					$sql = "
-					DELETE l 
-					FROM 
+					DELETE FROM
+						kvwmap.layer_attributes2stelle
+					USING
 						kvwmap.layer_attributes2stelle l 
 						LEFT JOIN (
 							SELECT 
@@ -1703,6 +1709,9 @@ class stelle {
 							l.layer_id = foo.layer_id AND
 							l.attributename = foo.attributename
 					WHERE
+						layer_attributes2stelle.layer_id = l.layer_id AND
+						layer_attributes2stelle.attributename = l.attributename AND
+						layer_attributes2stelle.stelle_id = l.stelle_id AND
 						l.layer_id = " . $layer_ids[$i] . " AND 
 						l.stelle_id = " . $this->id . " AND
 						foo.layer_id IS NULL";
