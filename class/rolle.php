@@ -45,7 +45,7 @@ class rolle {
 		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $this->errormessage
+				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $this->database->errormessage
 			);
 		}
 
@@ -53,7 +53,7 @@ class rolle {
 		if (!$rolle->setMenue($user_id, $stelle_id, $default_user_id)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Zuordnen der Menüs der Stelle zum Nutzer.<br>' . $this->errormessage
+				'msg' => 'Fehler beim Zuordnen der Menüs der Stelle zum Nutzer.<br>' . $this->database->errormessage
 			);
 		}
 
@@ -61,7 +61,7 @@ class rolle {
 		if (!$rolle->setLayer($user_id, $stelle_id, $default_user_id)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Zuordnen des Layers zur Rolle.<br>' . $this->errormessage
+				'msg' => 'Fehler beim Zuordnen des Layers zur Rolle.<br>' . $this->database->errormessage
 			);
 		}
 
@@ -69,14 +69,14 @@ class rolle {
 		if (!$rolle->setGroups($user_id, $stelle_id, $default_user_id, $layer)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Hinzufügen der Layergruppen der selektierten Layer zur Rolle.<br>' . $this->errormessage
+				'msg' => 'Fehler beim Hinzufügen der Layergruppen der selektierten Layer zur Rolle.<br>' . $this->database->errormessage
 			);
 		};	
 
 		if (!$rolle->setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Zuordnen von savedLayersFromDefaultUser.<br>' . $this->errormessage
+				'msg' => 'Fehler beim Zuordnen von savedLayersFromDefaultUser.<br>' . $this->database->errormessage
 			);
 		}
 
@@ -1722,6 +1722,11 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Fügt die Rolle für den Nutzer $user_id in der Stelle $stelle_id hinzu.
+	 * Verwendet die Defaulteinstellungen der Rolle $default_user_id, falls übergeben
+	 * und anders als $user_id
+	 */
 	function setRolle($user_id, $stelle_id, $default_user_id) {
 		# trägt die Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
