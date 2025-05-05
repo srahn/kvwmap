@@ -47,13 +47,13 @@ class rolle {
 	 * @param Layer[] $layer Array with layer_ids to assign rolle to there groups.
 	 * @return Array Result with Boolean success and String $msg.
 	 */
-	public static	function create($database, $stelle_id, $user_id, $default_user_id = 0, $layer = array()) {
+	public static	function create($database, $stelle_id, $user_id, $default_user_id = 0, $layer = array(), $parent_stelle_id = NULL) {
 		$rolle = new rolle($user_id, $stelle_id, $database);
 		# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id)) {
+		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $this->database->errormessage
+				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $database->errormessage
 			);
 		}
 
@@ -61,7 +61,7 @@ class rolle {
 		if (!$rolle->setMenue($user_id, $stelle_id, $default_user_id)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Zuordnen der Menüs der Stelle zum Nutzer.<br>' . $this->database->errormessage
+				'msg' => 'Fehler beim Zuordnen der Menüs der Stelle zum Nutzer.<br>' . $database->errormessage
 			);
 		}
 
@@ -69,7 +69,7 @@ class rolle {
 		if (!$rolle->setLayer($user_id, $stelle_id, $default_user_id)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Zuordnen des Layers zur Rolle.<br>' . $this->database->errormessage
+				'msg' => 'Fehler beim Zuordnen des Layers zur Rolle.<br>' . $database->errormessage
 			);
 		}
 
@@ -77,14 +77,14 @@ class rolle {
 		if (!$rolle->setGroups($user_id, $stelle_id, $default_user_id, $layer)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Hinzufügen der Layergruppen der selektierten Layer zur Rolle.<br>' . $this->database->errormessage
+				'msg' => 'Fehler beim Hinzufügen der Layergruppen der selektierten Layer zur Rolle.<br>' . $database->errormessage
 			);
 		};	
 
 		if (!$rolle->setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id)) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Zuordnen von savedLayersFromDefaultUser.<br>' . $this->database->errormessage
+				'msg' => 'Fehler beim Zuordnen von savedLayersFromDefaultUser.<br>' . $database->errormessage
 			);
 		}
 

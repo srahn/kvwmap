@@ -13282,7 +13282,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				for ($i = 0; $i < count($users); $i++) {
 					rolle::create($this->database, $Stelle->id, $users[$i], $Stelle->default_user_id, $layer, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));
-					$this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+					// $this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
 					// $this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
 					// $this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
 					// $this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
@@ -14299,17 +14299,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $stellen = array_filter(explode(', ', $this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->pgdatabase);
-					$layers = $stelle->getLayers(NULL);
-					rolle::create($this->database, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $layers['id']);
+					rolle::create($this->pgdatabase, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL));
 					// $this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['id']);
 					// $this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
-					# Layerparameter aktualisieren
 					$stelle->updateLayerParams();
 					$this->update_layer_parameter_in_rollen($stelle->id);
-					$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				}
         if ($ret[0]) {
           $this->Meldung = $ret[1];
@@ -14335,8 +14332,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$stellen = array_filter(explode(', ',$this->formvars['selstellen']));
 			for ($i = 0; $i < count($stellen); $i++) {
 				$stelle = new stelle($stellen[$i], $this->pgdatabase);
-				$layers = $stelle->getLayers(NULL);
-				rolle::create($this->database, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $layers['id']);
+				rolle::create($this->pgdatabase, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id);
 				// $this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				// $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				// $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
