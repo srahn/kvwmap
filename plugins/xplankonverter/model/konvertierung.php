@@ -2912,11 +2912,9 @@ class Konvertierung extends PgObject {
 		//$md->set('id_cite_title', $plan->get('name'));
 		$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist der " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
 		$md->set('id_abstract', array(
-			'dataset' => ' des Plans ' . $plan->get('name') . $abstract_zusatz,
-			//'viewservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
-			//'downloadservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
-			'viewservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
-			'downloadservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
+			'dataset' => 'Geodatensatz des Plans ' . $plan->get('name') . $abstract_zusatz,
+			'viewservice' => 'Darstellungsdienst (WMS) des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
+			'downloadservice' => 'Downloaddienst (WFS) des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
 		));
 		$md->set('date_title', $this->get_plan_attribut_aktualitaet());
 		//$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));

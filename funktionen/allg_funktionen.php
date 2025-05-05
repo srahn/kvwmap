@@ -106,7 +106,7 @@ function quote($var, $type = '') {
 }
 
 function quote_or_null($var) {
-	return ($var == '' ? 'NULL' : quote($var));
+	return (($var === '' OR $var === null) ? 'NULL' : quote($var));
 }
 
 function append_slash($var) {
@@ -2573,7 +2573,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 		case 'int' :
 		case 'int4' :
 		case 'oid' :
-		case 'boolean':
+		case 'boolean' :
 		case 'int8' : {
 			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;
