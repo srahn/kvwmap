@@ -65,7 +65,11 @@ function showMenue() {
 <div id="menue_options">
 <?	
   if (!$this->user->rolle->hideMenue) {
-		include(LAYOUTPATH.'languages/menue_body_'.rolle::$language.'.php');
+		# rolle::$language wurde in Version 3.10 eingeführt
+		# Damit beim Update auf diese Version kein Fehler wegen unbekannter Variable erscheint:
+		# Später wenn alle auf mind. dieser Version sind, kann das wieder entfernt werden
+		$language = (isset(rolle::$language) ? rolle::$language : 'german');
+		include(LAYOUTPATH.'languages/menue_body_'.$language.'.php');
 
 		if (MENU_WAPPEN != 'kein') {
 			$wappen = $this->Stelle->getWappen();

@@ -19,7 +19,7 @@
 				for($i = 0; $i < $cell_count; $i++) {
 					$cell = $row['cells'][$i];
 					if ($row['contains_attribute_names']) {
-						if ($cell['properties'] == 'class="gle-attribute-name"') {
+						if ($cell_count > 1 AND $cell['properties'] == 'class="gle-attribute-name"') {
 							$width = 'width="' . ($i == 0 ? '10%' : '1%') . '"';
 						}
 						else {
@@ -539,12 +539,14 @@
 							else{
 								$enum = $attributes['enum'][$index];
 							}
-							if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
+							if ($attributes['nullable'][$index] != '0') {
+								$strPleaseSelect = $gui->strPleaseSelect;
+							}
 							$onchange = 'set_changed_flag(this, \'changed_'.$layer_id.'_'.$oid.'\');';
 							$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class);
 						}break;
 						default : {
-							$datapart .= '<input class="'.$field_class.'" style="';
+							$datapart .= '<input title="' . $attributes['alias'][$index] . '" class="'.$field_class.'" style="';
 							if($attributes['privileg'][$name_] == '0'){
 								$datapart .= ';background-color:transparent;border:0px;display:none;background-color:#e8e3da;" readonly ';
 							}
@@ -1200,7 +1202,8 @@
 				if ($value != NULL AND $enum_key == $value) {
 					$datapart .= 'selected ';
 				}
-				$datapart .= 'value="' . $enum_key . '">' . $enum['output'] . '</option>';
+				$title = $enum['output'] . ($enum['output'] != $enum_key ? ' (' . $enum_key . ')' : '');
+				$datapart .= 'value="' . $enum_key . '" title="' . $title . '">' . $enum['output'] . '</option>';
 			}
 			$datapart .= '</select>';
 			if($subform_layer_id != ''){

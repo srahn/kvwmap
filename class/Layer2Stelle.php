@@ -47,8 +47,8 @@ class Layer2Stelle extends MyObject {
 		$layer2stelle = new Layer2Stelle($gui);
 		$layer2stelle->debug->show('<p>Find overlay layer with selectiontype != radio for stelle_id: ' . $stelle_id, MyObject::$write_debug);
 		return $layer2stelle->find_by_sql(array(
-			'select' => 'l.Layer_ID, ul.minscale, ul.maxscale, ul.transparency',
-			'from' => 'used_layer ul JOIN layer l ON ul.Layer_ID = l.Layer_ID JOIN u_groups g ON l.Gruppe = g.id',
+			'select' => 'l.Layer_ID, ul.minscale, ul.maxscale, ul.transparency, ul.group_id',
+			'from' => 'used_layer ul JOIN layer l ON ul.Layer_ID = l.Layer_ID JOIN u_groups g ON COALESCE(ul.group_id, l.Gruppe) = g.id',
 			'where' => 'ul.Stelle_ID = ' . $stelle_id . " AND l.selectiontype != 'radio'",
 			'order' => 'g.`order`, ul.`legendorder`'
 		));

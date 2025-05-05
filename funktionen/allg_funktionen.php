@@ -1932,11 +1932,13 @@ function replace_params_rolle($str, $additional_params = NULL) {
 		$str = replace_params($str, $params);
 		$current_time = time();
 		$str = str_replace('$CURRENT_DATE', date('Y-m-d', $current_time), $str);
-		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);
+		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
 		$str = str_replace('$STELLE_ID', rolle::$stelle_ID, $str);
 		$str = str_replace('$STELLE', rolle::$stelle_bezeichnung, $str);
 		$str = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $str);
 		$str = str_replace('$LANGUAGE', rolle::$language, $str);
+		$str = str_replace('$EXPORT', rolle::$export, $str);
 	}
 	return $str;
 }
@@ -1953,7 +1955,7 @@ function replace_params($str, $params) {
 function replace_params_link($str, $params, $layer_id) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerParamsForm(' . $layer_id .  ')">' . $value . '</a>', $str);
 		}
 	}
 	return $str;
@@ -2047,12 +2049,12 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 * and return the elements of the string as array separated by the delimmiter.
 * The elements of the string will be replaced by slashes and timed from white spaces and ".
 */
-function arrStrToArr($str, $delimiter) {
+function arrStrToArr($str, $delimiter, $brackets = '[]') {
 #	if(is_string($delimiter) and in_array())
 #	echo gettype($delimiter);
-	$arr = explode($delimiter, trim($str, '[]'));
+	$arr = explode($delimiter, trim($str, $brackets));
 	foreach ($arr as &$value) {
-		$value = trim(stripslashes($value), '"[]"');
+		$value = trim(stripslashes($value), '"' . $brackets . '"');
 	}
 	return $arr;
 }
@@ -2567,6 +2569,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 	}
 
 	switch ($type) {
+		case 'integer' :
 		case 'int' :
 		case 'int4' :
 		case 'oid' :

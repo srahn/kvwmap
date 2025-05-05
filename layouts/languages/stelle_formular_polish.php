@@ -26,6 +26,8 @@
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'adres organizacji posiadającej OWS';
 	$strOwsContactOrganizationHint = 'Name of responsible organization';
+  $strOwsContactUrl = 'URL';
+  $strOwsContactUrlHint = 'Home page url with further informationen about the contact or the geodata.';
   $strOwsContactEmailAddress = 'kontaktowy adres e-mail';
   $strOwsContactEmailAddressHint = '';
   $strOwsContactPerson = 'WMS osoba do kontaktu';

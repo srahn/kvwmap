@@ -44,7 +44,9 @@
 	$strOwsContactCityHint = 'Ortsname der Adresse der zuständigen Person oder Organisation.';
 	$strOwsContactAdministrativeArea = 'Bundesland';
 	$strOwsContactAdministrativeAreaHint = 'Bundesland oder andere administrative Einheit der Adresse der zuständigen Person oder Organisation.';
-	$strOwsGeographicDescription = 'Regionalschlüssel';
+  $strOwsContactUrl = 'URL';
+  $strOwsContactUrlHint = 'URL der Home-Page mit näheren Informationen zum Kontakt oder den Daten.';
+  $strOwsGeographicDescription = 'Regionalschlüssel';
 	$strOwsGeographicDescriptionHint = 'Amtlicher Regionalschlüssel (ARS) als 12-stelliger Schlüssel zur eindeutigen Identifizierung der Gebietseinheit mit den Bestandteilen: Bundesland (2 Stellen), Regierungsbezirk (1 Stelle, wenn nicht vorhanden: 0), Kreis (2 Stellen), Gemeindeverband (4 Stellen) und Gemeinde (3 Stellen). Gibt es keinen eindeutigen AGS, kann auch der Name der Verwaltungseiheit zu dem der Datensatz gehört angegeben werden.';
   $strLogo = 'Wappen';
   $strNoLogoSelected = 'kein Wappen ausgewählt';

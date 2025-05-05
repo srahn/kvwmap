@@ -126,7 +126,7 @@ class multigeomeditor {
 		$sql = "
 			SELECT
 				ST_Transform(
-					" . (strtoupper(substr($options['geomtype'], 0, 5)) == 'MULTI' ? $this->get_multigeom($options['geom']) : $this->get_geom($options['geom'])) . ",					
+					" . (in_array(strtoupper(substr($options['geomtype'], 0, 5)), ['MULTI', 'GEOME']) ? $this->get_multigeom($options['geom']) : $this->get_geom($options['geom'])) . ",					
 					" . $this->layerepsg . "
 				) AS wkb_geometry
 		";

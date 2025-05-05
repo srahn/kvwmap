@@ -424,9 +424,11 @@ function go_switch($go, $exit = false) {
 				$GUI->resetLegendOptions();
 			} break;
 
-			case 'toggle_gle_view' : {
+			case 'switch_gle_view' : {
 				$GUI->sanitize([
-					'chosen_layer_id' => 'int'
+					'chosen_layer_id' => 'int',
+					'mode' => 'int',
+					'reload' => 'int'
 				]);
 				$GUI->switch_gle_view();
 			} break;
@@ -448,11 +450,11 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'getLayerParamsForm' : {
-				echo $GUI->get_layer_params_form($GUI->formvars['stelle_id']);
+				echo $GUI->get_layer_params_form($GUI->formvars['stelle_id'], $GUI->formvars['layer_id'], '', true, $GUI->formvars['open']);
 			} break;
 
 			case 'setLayerParams' : {
-				$GUI->setLayerParams();
+				$GUI->setLayerParams($GUI->formvars['prefix']);
 				echo "onLayerParamsUpdated('success')";
 			} break;
 
@@ -1295,14 +1297,6 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Export_Exportieren' : {
-				//TODO hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
-				$GUI->sanitize([
-					'selected_layer_id' => 'int',
-					'layer_name' => 'text',
-					'epsg' => 'int',
-					'newpathwkt' => 'text',
-					'precision' => 'int'
-				]);
 				if (!$GUI->Stelle->is_gast_stelle()) {
 					$GUI->checkCaseAllowed('Daten_Export');
 				};

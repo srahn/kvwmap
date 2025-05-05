@@ -158,15 +158,10 @@ function showmap(){
 						<td align="center"><?
 							echo FormObject::createSelectField(
 								'operator_' . $key,
-								array_map(
-									function($operator) {
-										return array('value' => $operator, 'output' => $operator);
-									},
-									array('=', '!=', '<', '>', 'LIKE', 'NOT LIKE', 'IS', 'IN', 'NOT IN')
-								),
+								array('=', '!=', '<', '>', ['value' => 'like', 'output' => 'LIKE'], 'IS', 'IN'),
 								$operator,
 								1,
-								'',
+								'width: 85px',
 								'',
 								'',
 								'',
@@ -245,9 +240,6 @@ function showmap(){
 			;
     }
 ?>
-<INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
-<INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
-<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 <input type="hidden" name="go" value="Filterverwaltung">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="selected_layers" value="<? echo $this->formvars['selected_layers'] ?>">

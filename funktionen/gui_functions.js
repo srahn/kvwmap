@@ -468,7 +468,7 @@ function fetchMessageFromURL(url) {
 * @param string confim_value The Value that will be send with the callback function wenn the message ist confirmed
 * @param string callback The name of the function called when the user confirmd the message
 */
-function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancel_button_value = 'Abbrechen', width = null) {
+function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancel_button_value = 'Abbrechen', maxWidth = null, width = null) {
 	//console.log('Show Message: %o: ', messages);
 	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
@@ -481,8 +481,11 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 	else {
 		msgBoxDiv.html('');
 	}
+	if (maxWidth != null) {
+		msgBoxDiv.css('maxWidth', maxWidth);
+	}
 	if (width != null) {
-		msgBoxDiv.css('maxWidth', width);
+		msgBoxDiv.css('width', width);
 	}
 	if (document.getElementById('messages') == null) {
     msgBoxDiv.append('<div id="messages"></div>');
@@ -542,7 +545,7 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 		}
 		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
 			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="' + confirm_button_value + '" style="margin: 10px 0px 0px 0px;">');
-			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancel_button_value + '" style="margin: 0px 0px -6px 8px;">');
+			msgBoxDiv.append('<input id="message_cancel_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancel_button_value + '" style="margin: 0px 0px -6px 8px;">');
 		}
 	});
 	
@@ -677,7 +680,7 @@ function drag(event) {
 function auto_resize_overlay(){
 	if (root.resized < 2) {		// wenn resized > 1 hat der Nutzer von Hand die Groesse veraendert, dann keine automatische Anpassung
 		root.resized = 0;
-		var contentWidth = Math.max(document.getElementById("overlayheader").offsetWidth, document.getElementById("contentdiv").scrollWidth);
+		var contentWidth = Math.max(document.getElementById("overlayheader")?.offsetWidth, document.getElementById("contentdiv")?.scrollWidth);
 		if (contentWidth < screen.width) {
 			window.resizeTo(contentWidth+35, 800);
 		}
@@ -1243,7 +1246,13 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 
 function getLayerOptions(layer_id){
 	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
-	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
+	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_content_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
+	document.GUI.layer_options_open.value = layer_id;
+}
+
+function getLayerParamsForm(layer_id){
+	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
+	ahah('index.php', 'go=getLayerParamsForm&layer_id=' + layer_id + '&open=1', new Array(document.getElementById('options_content_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
 	document.GUI.layer_options_open.value = layer_id;
 }
 
@@ -1282,7 +1291,7 @@ function getGroupOptions(group_id) {
 
 function closeLayerOptions(layer_id){
 	document.GUI.layer_options_open.value = '';
-	document.getElementById('options_'+layer_id).innerHTML=' ';
+	document.getElementById('options_content_'+layer_id).innerHTML=' ';
 }
 
 function closeGroupOptions(group_id) {
@@ -1294,6 +1303,13 @@ function saveLayerOptions(layer_id){
 	var formdata = new FormData(document.GUI);
 	formdata.set('go', 'saveLayerOptions');
 	ahah("index.php",	formdata, [], []);
+	neuLaden();
+}
+
+function setLayerParam(name) {
+	var data = 'go=setLayerParams&prefix=options_&options_layer_parameter_' + name + '=' + document.getElementsByName('options_layer_parameter_' + name)[0].value;
+	ahah('index.php', data, [], []);
+	document.GUI.legendtouched.value = 1;
 	neuLaden();
 }
 

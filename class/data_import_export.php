@@ -973,14 +973,35 @@ class data_import_export {
 	 *  2.1) exitCode of output of curl_exec or
 	 *  2.2) echo exitCode of output of curl_exec and exit
 	 */
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false, $unlogged = false) {
 		// echo '<br>Function ogr2ogr_import';
 		$command = '';
 		if ($options != NULL) {
 			$command .= $options;
 		}
 		// $command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
-		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		// $command .= ' -oo ENCODING=' . $encoding
+		// 	. ' -f PostgreSQL'
+		// 	. ' -dim XY'
+		// 	. ' -lco GEOMETRY_NAME=the_geom'
+		// 	. ' -lco launder=NO'
+		// 	. ' -lco FID=' . $this->unique_column
+		// 	. ' -lco precision=NO '
+		// 	. ($multi? '-nlt PROMOTE_TO_MULTI' : '')
+		// 	. ' -nln ' . $tablename
+		// // 	. ($unlogged ? ' -lco UNLOGGED=ON' : '')
+		// 	. ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		$command .= ' -oo ENCODING=' . $encoding
+			. ' -f PostgreSQL'
+			. ' -dim XY'
+			. ' -lco GEOMETRY_NAME=the_geom'
+			. ' -lco launder=NO'
+			. ' -lco precision=NO '
+			. ' -lco FID=' . $this->unique_column
+			. ' -nln ' . $tablename
+			. ($unlogged ? ' -lco UNLOGGED=ON' : '')
+			. ($multi ? ' -nlt PROMOTE_TO_MULTI' : '')
+			. ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
 		}
@@ -1285,6 +1306,7 @@ class data_import_export {
 		ini_set('memory_limit', '8192M');
 		global $GUI;
 		global $kvwmap_plugins;
+		rolle::$export = 'true';
 		$currenttime = date('Y-m-d H:i:s',time());
 		$this->formvars = $formvars;
 		$export_rollen_layer = ((int)$this->formvars['selected_layer_id'] < 0);
@@ -1332,8 +1354,7 @@ class data_import_export {
 			$filter = '';
 			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1)) { 
 				$filter = replace_params_rolle(
-					$mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id),
-					['$EXPORT' => 'true']
+					$mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id)
 				);
 			}
 
@@ -1623,7 +1644,7 @@ class data_import_export {
 					}
 					# temp. Tabelle wieder löschen
 					$sql = 'DROP TABLE ' . $temp_table;
-					// $ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
+					$ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
 					if ($this->formvars['export_format'] != 'CSV') {
 						$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
 					}

@@ -8,9 +8,10 @@
 <script language="javascript" type="text/javascript">
 	$('#gui-table').css('width', '100%');
 	$(function () {
+    console.info("Start function()");
 		result = $('#eventsResult');
 		result.success = function(text) {
-			message([{ type: 'notice', msg: text}], 3000, 3000, '13%');
+			message([{ type: 'notice', msg: text}], 3000, 3000, '30%');
 /*			result.text(text);
 			result.removeClass('alert-danger');
 			result.addClass('alert-success');*/
@@ -23,17 +24,17 @@
 		};
 
 		// event handler
+		$('#konvertierungen_table').on('all.bs.table', (p, p1)=>{console.info(p, p1);});
 		$('#konvertierungen_table')
-		.one('load-success.bs.table', function (e, data) {
+		// .one('load-success.bs.table', function (e, data) {
+		.one('post-body.bs.table', function (e, data) {
 			result.success('Tabelle erfolgreich geladen.');
+			console.log('Tabelle erfolgreich geladen.');
+                        
+			console.info("Nodes .xpk-func-generate-gml", document.querySelectorAll('.xpk-func-generate-gml').length);
 		})
-		.on('load-success.bs.table', function (e, data) {
-			$('.xpk-func-convert').click(
-				starteKonvertierung
-			);
-			$('.xpk-func-generate-gml').click(
-				starteXplanGmlGenerierung
-			);
+		//.on('load-success.bs.table', function (e, data) {
+		.one('post-body.bs.table', function (e, data) {
 			$('.xpk-func-generate-inspire-gml').click(
 				starteInspireGmlGenerierung
 			);
@@ -108,8 +109,8 @@
 		});
 	};
 
-	starteXplanGmlGenerierung = function(e) {
-		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
+	starteXplanGmlGenerierung = function(konvertierung_id) {
+		// var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
 
 		// onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
 		result.success('Starte GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
@@ -260,7 +261,7 @@
                   || row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
 
 		funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
-		output += '<a title="XPlan-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-code') + '"></i></a>';
+		output += '<a title="XPlan-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-code') + '" onclick="starteXplanGmlGenerierung(' + value + ')"></i></a>';
 
 		if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
 			// INSPIRE-Erstellung
@@ -350,7 +351,6 @@
 			});
 		}
 	};
-
 </script>
 <h2>Konvertierungen</h2>
 <!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
