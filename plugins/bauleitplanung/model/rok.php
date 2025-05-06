@@ -383,7 +383,6 @@ class rok {
   	$sql.= "WHERE plan_id = ".$plan_id;
 		$sql.= " RETURNING plan_id";
   	$ret = $this->database->execSQL($sql,4, 1);
-		$ret = $layerdb->execSQL($sql, 4, 1, false);
 		if ($ret['success']) {
 			$result = pg_fetch_row($ret['query']);
 			$new_plan_id = $result[0];

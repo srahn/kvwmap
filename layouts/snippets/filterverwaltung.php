@@ -158,15 +158,10 @@ function showmap(){
 						<td align="center"><?
 							echo FormObject::createSelectField(
 								'operator_' . $key,
-								array_map(
-									function($operator) {
-										return array('value' => $operator, 'output' => $operator);
-									},
-									array('=', '!=', '<', '>', 'LIKE', 'NOT LIKE', 'IS', 'IN', 'NOT IN')
-								),
+								array('=', '!=', '<', '>', ['value' => 'like', 'output' => 'LIKE'], 'IS', 'IN'),
 								$operator,
 								1,
-								'',
+								'width: 85px',
 								'',
 								'',
 								'',
