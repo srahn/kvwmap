@@ -5731,7 +5731,7 @@ echo '			</table>
 		$multigeomeditor = new multigeomeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		if (
 			!$this->formvars['edit_other_object'] AND
-			($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')
+			($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['CMD'] != '')
 		) {
 			$this->neuLaden();
 		}
