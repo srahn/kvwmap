@@ -22337,68 +22337,20 @@ class db_mapObj{
   }
 
   function new_Label($label){
-  	if(is_array($label)){
-  	$sql = "INSERT INTO labels SET ";
-	    if($label['type']){$sql.= "type = '" . $label['type']."', ";}
-	    if($label['font']){$sql.= "font = '" . $label['font']."', ";}
-	    if($label['size']){$sql.= "size = '" . $label['size']."', ";}
-	    if($label['color']){$sql.= "color = '" . $label['color']."', ";}
-	    if($label['shadowcolor']){$sql.= "shadowcolor = '" . $label['shadowcolor']."', ";}
-	    if($label['shadowsizex']){$sql.= "shadowsizex = '" . $label['shadowsizex']."', ";}
-	    if($label['shadowsizey']){$sql.= "shadowsizey = '" . $label['shadowsizey']."', ";}
-	    if($label['backgroundcolor']){$sql.= "backgroundcolor = '" . $label['backgroundcolor']."', ";}
-	    if($label['backgroundshadowcolor']){$sql.= "backgroundshadowcolor = '" . $label['backgroundshadowcolor']."', ";}
-	    if($label['backgroundshadowsizex']){$sql.= "backgroundshadowsizex = '" . $label['backgroundshadowsizex']."', ";}
-	    if($label['backgroundshadowsizey']){$sql.= "backgroundshadowsizey = '" . $label['backgroundshadowsizey']."', ";}
-	    if($label['outlinecolor']){$sql.= "outlinecolor = '" . $label['outlinecolor']."', ";}
-	    if($label['position']){$sql.= "position = '" . $label['position']."', ";}
-	    if($label['offsetx']){$sql.= "offsetx = '" . $label['offsetx']."', ";}
-	    if($label['offsety']){$sql.= "offsety = '" . $label['offsety']."', ";}
-	    if($label['angle']){$sql.= "angle = '" . $label['angle']."', ";}
-	    if($label['anglemode']){$sql.= "anglemode = '" . $label['anglemode']."', ";}
-	    if($label['buffer']){$sql.= "buffer = '" . $label['buffer']."', ";}
-	    if($label['minfeaturesize']){$sql.= "minfeaturesize = '" . $label['minfeaturesize']."', ";}
-	    if($label['maxfeaturesize']){$sql.= "maxfeaturesize = '" . $label['maxfeaturesize']."', ";}
-	    if($label['partials']){$sql.= "partials = '" . $label['partials']."', ";}
-	    if($label['wrap']){$sql.= "wrap = '" . $label['wrap']."', ";}
-	    if($label['the_force']){$sql.= "the_force = '" . $label['the_force']."', ";}
-	    if($label['minsize']){$sql.= "minsize = '" . $label['minsize']."', ";}
-	    if($label['maxsize']){$sql.= "maxsize = '" . $label['maxsize']."'";}
-  	}
-  	else{
-	    # labelobjekt wird übergeben
-	    $sql = "INSERT INTO labels SET ";
-	    if($label->type){$sql.= "type = '" . $label->type."', ";}
-	    if($label->font){$sql.= "font = '" . $label->font."', ";}
-	    if($label->size){$sql.= "size = '" . $label->size."', ";}
-	    if($label->color){$sql.= "color = '" . $label->color->red." " . $label->color->green." " . $label->color->blue."', ";}
-	    if($label->shadowcolor){$sql.= "shadowcolor = '" . $label->shadowcolor->red." " . $label->shadowcolor->green." " . $label->shadowcolor->blue."', ";}
-	    if($label->shadowsizex){$sql.= "shadowsizex = '" . $label->shadowsizex."', ";}
-	    if($label->shadowsizey){$sql.= "shadowsizey = '" . $label->shadowsizey."', ";}
-	    if($label->backgroundcolor){$sql.= "backgroundcolor = '" . $label->backgroundcolor->red." " . $label->backgroundcolor->green." " . $label->backgroundcolor->blue."', ";}
-	    if($label->backgroundshadowcolor){$sql.= "backgroundshadowcolor = '" . $label->backgroundshadowcolor->red." " . $label->backgroundshadowcolor->green." " . $label->backgroundshadowcolor->blue."', ";}
-	    if($label->backgroundshadowsizex){$sql.= "backgroundshadowsizex = '" . $label->backgroundshadowsizex."', ";}
-	    if($label->backgroundshadowsizey){$sql.= "backgroundshadowsizey = '" . $label->backgroundshadowsizey."', ";}
-	    if($label->outlinecolor){$sql.= "outlinecolor = '" . $label->outlinecolor->red." " . $label->outlinecolor->green." " . $label->outlinecolor->blue."', ";}
-	    if($label->position !== NULL){$sql.= "position = '" . $label->position."', ";}
-	    if($label->offsetx){$sql.= "offsetx = '" . $label->offsetx."', ";}
-	    if($label->offsety){$sql.= "offsety = '" . $label->offsety."', ";}
-	    if($label->angle){$sql.= "angle = '" . $label->angle."', ";}
-	    if($label->anglemode){$sql.= "anglemode = '" . $label->anglemode."', ";}
-	    if($label->buffer){$sql.= "buffer = '" . $label->buffer."', ";}
-	    if($label->minfeaturesize){$sql.= "minfeaturesize = '" . $label->minfeaturesize."', ";}
-	    if($label->maxfeaturesize){$sql.= "maxfeaturesize = '" . $label->maxfeaturesize."', ";}
-	    if($label->partials){$sql.= "partials = '" . $label->partials."', ";}
-	    if($label->wrap){$sql.= "wrap = '" . $label->wrap."', ";}
-	    if($label->the_force){$sql.= "the_force = '" . $label->the_force."', ";}
-	    if($label->minsize){$sql.= "minsize = '" . $label->minsize."', ";}
-	    if($label->maxsize){$sql.= "maxsize = '" . $label->maxsize."'";}
-  	}
+		$label = (array) $label;
+  	$sql = "
+			INSERT INTO kvwmap.labels
+				(" . implode(', ', array_keys($label)) . ")
+			VALUES
+				(" . implode(', ',	array_map(function($column) {return quote($column)}, $label)) . ")
+			RETURNING label_id
+		";
     #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Style - Erzeugen eines Styles:<br>" . $sql,4);
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Label - Erzeugen eines Labels:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
-    return $this->db->mysqli->insert_id;
+		$rs = pg_fetch_assoc($ret[1]);
+    return $rs['label_id'];
   }
 
 	function get_classes2label($label_id){
