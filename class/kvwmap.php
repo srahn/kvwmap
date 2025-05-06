@@ -22342,7 +22342,7 @@ class db_mapObj{
 			INSERT INTO kvwmap.labels
 				(" . implode(', ', array_keys($label)) . ")
 			VALUES
-				(" . implode(', ',	array_map(function($column) {return quote($column)}, $label)) . ")
+				(" . implode(', ',	array_map(function($column) {return quote($column);}, $label)) . ")
 			RETURNING label_id
 		";
     #echo $sql;
