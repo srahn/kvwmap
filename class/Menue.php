@@ -160,7 +160,7 @@ class Menue extends PgObject {
 					m.menueebene
 				",
 				'from' => "
-					u_menues m" .
+					kvwmap.u_menues m" .
 					$more_from . "
 				",
 				'where' => "

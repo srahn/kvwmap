@@ -434,7 +434,7 @@ class PgObject {
 		);
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
-				" . implode(', ', $this->getKeys()) . "
+				" . implode(', ', array_map(function ($key) {return '"' . $key . '"';}, $this->getKeys())) . "
 			)
 			VALUES (" .
 				"'" . implode(
@@ -645,6 +645,22 @@ class PgObject {
 		return $results;
 	}
 
+
+	function setKeysFromTable() {
+		#$this->debug->show('setKeysFromTable', MyObject::$write_debug);
+		$columns = $this->get_attribute_types();
+		foreach($columns AS $column => $type) {
+			$this->set($column, NULL);
+		}
+		return $this->getKeys();
+	}
+
+	function setKeysFromFormvars($formvars) {
+		$this->debug->show('setKeysFromFormvars', MyObject::$write_debug);
+		$this->data = array_map(function($attribute) { return null; }, array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable()))));
+	}
+
+
 	/*
 	* Fragt die foreign constraints der Tabelle ab und
 	* speichert sie im Array $this->fkeys
@@ -797,7 +813,6 @@ class PgObject {
 	}
 
 	public function validates($key, $condition, $msg = '', $option = '', $on = '') {
-		$this->debug->show('MyObject validates key: ' . $key . ' condition: ' . $condition . ' msg: ' . $msg . ' option: ' . print_r($option, true), MyObject::$write_debug);
 		switch ($condition) {
 
 			case 'date' :
@@ -836,7 +851,6 @@ class PgObject {
 				$result = $this->validate_value_is_one_off($key, $option, $msg);
 				break;
 		}
-		$this->debug->show('MyObject validates result: ' . print_r($result, true), MyObject::$write_debug);
 		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result, 'attribute' => $key, 'condition' => $condition, 'option' => $option));
 	}
 

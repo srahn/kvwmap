@@ -225,8 +225,8 @@ class pgdatabase {
 	function generate_layer($schema, $table, $group_id = 0, $connection_id, $epsg = 25832, $geometrie_column = 'the_geom', $geometrietyp = '', $layertyp = '2') {
 		#echo '<br>Create Layer: ' . $table['name'];
 		if ($geometrietyp != '') $geometrie_column = "({$geometrie_column}).{$geometrietyp}";
-		if ($group_id == 0) $group_id = '@group_id';
-		if ($connection_id == '') $connection_id = '@connection_id';
+		if ($group_id == 0) $group_id = "vars_group_id";
+		if ($connection_id == '') $connection_id = "vars_connection_id";
 		$sql = "
 -- Create layer {$table['name']}
 INSERT INTO kvwmap.layer (
@@ -238,6 +238,7 @@ INSERT INTO kvwmap.layer (
 	data,
 	schema,
 	connection_id,
+	connection,
 	connectiontype,
 	tolerance,
 	toleranceunits,
@@ -262,7 +263,8 @@ VALUES (
 	'{$table['name']}',
 	'geom from (select oid, {$geometrie_column} AS geom FROM {$schema}.{$table['name']}) as foo using unique oid using srid={$epsg}',
 	'{$schema}',
-	'{$connection_id}'
+	{$connection_id},
+	'',
 	'6',
 	'3',
 	'pixels',
@@ -279,7 +281,7 @@ VALUES (
 	'2',
 	'{$geometrie_column}'
 )
-RETURNING layer_id INTO vars['last_layer_id_{$table['oid']}'];
+RETURNING layer_id INTO last_layer_id;
 ";
 		return $sql;
 	}
@@ -314,7 +316,7 @@ INSERT INTO kvwmap.layer_attributes (
 	query_tooltip
 )
 VALUES (
-	vars['last_layer_id_{$table['oid']}'],
+	last_layer_id,
 	'{$attribute['name']}',
 	'{$attribute['name']}', -- real_name
 	'{$attribute['table_name']}',
@@ -323,15 +325,15 @@ VALUES (
 	'', -- geometrytype
 	'{$options['constraint']}', -- constraints
 	'{$attribute['nullable']}',
-	'{$attribute['length']}', -- length
-	'{$attribute['decimal_length']}', -- decimal_length
-	'{$attribute['default']}', -- default
+	{$attribute['length']}, -- length
+	{$attribute['decimal_length']}, -- decimal_length
+	'" . pg_escape_string($attribute['default']) . "', -- default
 	'text', -- form_element_type
 	'{$options['option']}', -- options
 	'', -- group
 	NULL, -- raster_visibility
 	NULL, -- mandatory
-	'{$attributes['ordinal_position']}', -- order
+	'{$attribute['ordinal_position']}', -- order
 	'1',
 	'0'
 );
@@ -357,7 +359,7 @@ VALUES (
 	'localhost',
 	'5432'
 )
-RETURNING id INTO vars['last_datatype_id_{$datatype['attribute_type_oid']}'];
+RETURNING id INTO last_datatype_id;
 ";
 		return $sql;
 	}
@@ -389,7 +391,7 @@ INSERT INTO kvwmap.datatype_attributes (
 	query_tooltip
 )
 VALUES (
-	vars['last_datatype_id_{$table['attribute_type_oid']}'],
+	last_datatype_id,
 	'{$attribute['name']}',
 	'{$attribute['name']}', -- real_name
 	'{$attribute['table_name']}',
@@ -406,7 +408,7 @@ VALUES (
 	'', -- group
 	NULL, -- raster_visibility
 	" . (($attribute['is_nullable'] == 'NO') ? 'TRUE' : 'NULL') . ", -- mandatory
-	'{$attributes['ordinal_position']}', -- order
+	'{$attribute['ordinal_position']}', -- order
 	'1',
 	'0'
 );
@@ -426,12 +428,12 @@ INSERT INTO kvwmap.classes (
 )
 VALUES(
 	'alle',
-	vars['last_layer_id_{$table['oid']}'],
+	last_layer_id,
 	'(1 = 1)',
 	'1',
 	''
 )
-RETURNING class_id INTO vars['last_class_id'];
+RETURNING class_id INTO last_class_id;
 ";
 		return $sql;
 	}
@@ -449,11 +451,9 @@ INSERT INTO kvwmap.styles (
 	maxsize,
 	angle,
 	angleitem,
-	antialias,
 	width,
 	minwidth,
-	maxwidth,
-	sizeitem
+	maxwidth
 ) VALUES (
 	NULL,
 	'',
@@ -467,11 +467,9 @@ INSERT INTO kvwmap.styles (
 	'',
 	NULL,
 	NULL,
-	NULL,
-	NULL,
-	''
+	NULL
 )
-RETURNING style_id INTO vars['last_style_id'];
+RETURNING style_id INTO last_style_id;
 ";
 		return $sql;
 	}
@@ -483,8 +481,8 @@ INSERT INTO kvwmap.u_styles2classes (
 	class_id,
 	drawingorder
 ) VALUES (
-	vars['last_style_id'],
-	vars['last_class_id'],
+	last_style_id,
+	last_class_id,
 	0
 );
 ";
