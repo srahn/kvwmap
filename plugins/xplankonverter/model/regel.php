@@ -415,8 +415,8 @@ class Regel extends PgObject {
 	function gml_layer_exists() {
 		$this->debug->show("Prüfe ob Layer: " . $this->get_layername() . " mit Typ: " . $this->get_layertyp() . " in Gruppe: " . $this->konvertierung->get('gml_layer_group_id') . " existiert", Regel::$write_debug);
 		$layers = Layer::find($this->gui, "
-			`Name` = '{$this->get_layername()}' AND
-			`Datentyp`= {$this->get_layertyp()}
+			name = '{$this->get_layername()}' AND
+			datentyp= {$this->get_layertyp()}
 		");
 		if (count($layers) > 0) {
 			$layer_exists = true;

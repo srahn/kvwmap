@@ -110,18 +110,27 @@ function getExceptionCode($data){
 }
 
 include($config);
-include($credentials);
+#include($credentials);
 include(CLASSPATH.'log.php');
-include(CLASSPATH.'mysql.php');
+include(CLASSPATH.'postgresql.php');
 $debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
-$userDb = new database();
-$userDb->host = MYSQL_HOST;
-$userDb->user = MYSQL_USER;																			
-$userDb->passwd = MYSQL_PASSWORD;															
-$userDb->dbName = MYSQL_DBNAME;
+$userDb = new pgdatabase();
 $userDb->open();
 
-$query = "SELECT * FROM `layer` WHERE connectiontype = 7";
+$params = [];
+$sql = "
+	SELECT
+		key, 
+		default_value
+	FROM
+		kvwmap.layer_parameter
+";
+$ret = $userDb->execSQL($sql);
+while ($line = pg_fetch_assoc($ret[1])) {
+	$params[$line['key']] = $line['default_value'];
+}
+
+$query = "SELECT * FROM kvwmap.layer WHERE connectiontype = 7";
 # nur bestimmte Layer einschließen
 #$with_layer_id = '1,2,3,4';
 $with_layer_id = '';
@@ -135,24 +144,9 @@ if ($without_layer_id != '') {
 	$query .= '	AND layer_id NOT IN (' . $without_layer_id . ')';
 }
 #echo '<br>get layer with sql: ' . $query;
-$userDb->execSQL($query);
-$result = $userDb->result;
+$ret = $userDb->execSQL($query);
 
-$params = [];
-$sql = "
-	SELECT
-		`key`, 
-		`default_value`
-	FROM
-		layer_parameter
-";
-$userDb->execSQL($sql);
-$ret = $userDb->result;
-while ($line = $ret->fetch_assoc()) {
-	$params[$line['key']] = $line['default_value'];
-}
-
-while ($line = $result->fetch_assoc()){
+while ($line = pg_fetch_assoc($ret[1])){
 	try {
 		$extent = ms_newRectObj();
 		$extent->setextent($bbox['left'], $bbox['bottom'], $bbox['right'], $bbox['top']);
@@ -190,11 +184,11 @@ while ($line = $result->fetch_assoc()){
 		echo 'nicht ok<br>' . $status[1] . $status[2];
 		$query = "
 			UPDATE
-				`layer`
+				kvwmap.layer
 			SET
-				`status` = '" . addslashes($status[1]) . "'
+				status = '" . addslashes($status[1]) . "'
 			WHERE
-				`layer_id` = " . $line["layer_id"] . "
+				layer_id = " . $line["layer_id"] . "
 		";
 	}
 	else {
@@ -202,11 +196,11 @@ while ($line = $result->fetch_assoc()){
 		echo 'ok<br>';
 		$query = "
 			UPDATE
-				`layer`
+				kvwmap.layer
 			SET
-				`status` = ''
+				status = ''
 			WHERE
-				`layer_id` = " . $line["layer_id"] . "
+				layer_id = " . $line["layer_id"] . "
 		";
 	}
 	$result2 = $userDb->execSQL($query);

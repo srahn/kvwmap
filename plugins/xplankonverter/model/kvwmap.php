@@ -272,30 +272,30 @@
 		$layers = Layer::find($GUI, "
 				(
 					(
-						`schema` LIKE 'xplan_gml' AND
-						LOWER(`Name`) NOT LIKE '%\_textabschnitt' AND
-						LOWER(`Name`) NOT LIKE '%\_begruendungabschnitt' AND
-						LOWER(`Name`) NOT LIKE '%_aendert'" .
-						//($planart == 'FP-Plan' ? " AND LOWER(`Name`) NOT LIKE 'rp\_%'" : '') . "
+						schema LIKE 'xplan_gml' AND
+						LOWER(name) NOT LIKE '%\_textabschnitt' AND
+						LOWER(name) NOT LIKE '%\_begruendungabschnitt' AND
+						LOWER(name) NOT LIKE '%_aendert'" .
+						//($planart == 'FP-Plan' ? " AND LOWER(name) NOT LIKE 'rp\_%'" : '') . "
 						($planart == 'FP-Plan' ? " AND (
-						LOWER(`Name`) LIKE 'xp\_%' OR
-						LOWER(`Name`) LIKE 'bp\_%' OR
-						LOWER(`Name`) LIKE 'fp\_%' OR
-						LOWER(`Name`) LIKE 'rp\_%' OR
-						LOWER(`Name`) LIKE 'so\_%' OR
-						LOWER(`Name`) LIKE 'zusammenzeichnungen%'
+						LOWER(name) LIKE 'xp\_%' OR
+						LOWER(name) LIKE 'bp\_%' OR
+						LOWER(name) LIKE 'fp\_%' OR
+						LOWER(name) LIKE 'rp\_%' OR
+						LOWER(name) LIKE 'so\_%' OR
+						LOWER(name) LIKE 'zusammenzeichnungen%'
 						)
-						AND LOWER(`Name`) != 'rp_bereich'
-						AND LOWER(`Name`) != 'rp_plan'
+						AND LOWER(name) != 'rp_bereich'
+						AND LOWER(name) != 'rp_plan'
 						" : '') . "
 					) OR
 					(
-						`schema` LIKE 'xplankonverter' AND
-						LOWER(`Name`) = 'geltungsbereiche'
+						schema LIKE 'xplankonverter' AND
+						LOWER(name) = 'geltungsbereiche'
 					)
 				) AND
-				`Datentyp` IN (0, 1, 2) AND
-				`connectiontype` = 6
+				datentyp IN (0, 1, 2) AND
+				connectiontype = 6
 		", 'drawingorder');
 		$xplan_layers = array_map(
 			function ($layer) {
