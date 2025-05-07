@@ -279,7 +279,7 @@ VALUES (
 	'2',
 	'{$geometrie_column}'
 )
-RETURNING layer_id INTO var_last_layer_id_{$table['oid']} = LAST_INSERT_ID();
+RETURNING layer_id INTO vars['last_layer_id_{$table['oid']}'];
 ";
 		return $sql;
 	}
@@ -291,7 +291,7 @@ RETURNING layer_id INTO var_last_layer_id_{$table['oid']} = LAST_INSERT_ID();
 		if($attribute['decimal_length'] == '')$attribute['decimal_length'] = 'NULL';
 		$sql = "
 -- Create layer_attribute {$attribute['name']} for layer {$attribute['table_name']}
-INSERT INTO layer_attributes (
+INSERT INTO kvwmap.layer_attributes (
 	layer_id,
 	name,
 	real_name,
@@ -303,18 +303,18 @@ INSERT INTO layer_attributes (
 	nullable,
 	length,
 	decimal_length,
-	default,
+	\"default\",
 	form_element_type,
 	options,
-	group,
+	\"group\",
 	raster_visibility,
 	mandatory,
-	order,
+	\"order\",
 	privileg,
 	query_tooltip
 )
 VALUES (
-	@last_layer_id_{$table['oid']},
+	vars['last_layer_id_{$table['oid']}'],
 	'{$attribute['name']}',
 	'{$attribute['name']}', -- real_name
 	'{$attribute['table_name']}',
@@ -343,7 +343,7 @@ VALUES (
 		#echo '<br>Create Datatype: ' . $datatype['type'] . ' for attribute ' . $datatype['name'];
 		$sql = "
 -- Create datatype {$datatype['type_name']}
-INSERT INTO datatypes (
+INSERT INTO kvwmap.datatypes (
 	name,
 	schema,
 	dbname,
@@ -356,8 +356,8 @@ VALUES (
 	'xplan_gml'
 	'localhost',
 	'5432'
-);
-SET @last_datatype_id_{$datatype['attribute_type_oid']} = LAST_INSERT_ID();
+)
+RETURNING id INTO vars['last_datatype_id_{$datatype['attribute_type_oid']}'];
 ";
 		return $sql;
 	}
@@ -366,7 +366,7 @@ SET @last_datatype_id_{$datatype['attribute_type_oid']} = LAST_INSERT_ID();
 		#echo '<br>Create Datatypeattribute: ' . $attribute['name'] . ' für Datentyp: ' . $attribute['table_name'];
 		$sql = "
 --Create datatype_attribute {$attribute['name']} for datatype {$attribute['table_name']}
-INSERT INTO datatype_attributes (
+INSERT INTO kvwmap.datatype_attributes (
 	layer_id,
 	name,
 	real_name,
@@ -389,7 +389,7 @@ INSERT INTO datatype_attributes (
 	query_tooltip
 )
 VALUES (
-	@last_datatype_id_{$table['attribute_type_oid']},
+	vars['last_datatype_id_{$table['attribute_type_oid']}'],
 	'{$attribute['name']}',
 	'{$attribute['name']}', -- real_name
 	'{$attribute['table_name']}',
@@ -417,28 +417,28 @@ VALUES (
 	function generate_classes($table) {
 		$sql = "
 -- Create class for layer {$table['name']}
-INSERT INTO classes (
-	Name,
-	Layer_ID,
-	Expression,
+INSERT INTO kvwmap.classes (
+	name,
+	layer_id,
+	expression,
 	drawingorder,
 	text
 )
 VALUES(
 	'alle',
-	@last_layer_id_{$table['oid']},
+	vars['last_layer_id_{$table['oid']}'],
 	'(1 = 1)',
 	'1',
 	''
-);
-SET @last_class_id = LAST_INSERT_ID();
+)
+RETURNING class_id INTO vars['last_class_id'];
 ";
 		return $sql;
 	}
 
 	function generate_styles() {
 		$sql = "
-INSERT INTO styles (
+INSERT INTO kvwmap.styles (
 	symbol,
 	symbolname,
 	size,
@@ -470,21 +470,21 @@ INSERT INTO styles (
 	NULL,
 	NULL,
 	''
-);
-SET @last_style_id = LAST_INSERT_ID();
+)
+RETURNING style_id INTO vars['last_style_id'];
 ";
 		return $sql;
 	}
 
 	function generate_style2classes() {
 		$sql = "
-INSERT INTO u_styles2classes (
+INSERT INTO kvwmap.u_styles2classes (
 	style_id,
 	class_id,
 	drawingorder
 ) VALUES (
-	@last_style_id,
-	@last_class_id,
+	vars['last_style_id'],
+	vars['last_class_id'],
 	0
 );
 ";
