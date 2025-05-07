@@ -4821,8 +4821,8 @@ echo '			</table>
     $this->get_labels();
   }
 
-  function save_style(){
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+  function save_style() {
+    $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     $mapDB->save_Style($this->formvars);
     $this->get_styles();
     echo '█';
@@ -5732,7 +5732,7 @@ echo '			</table>
 		$multigeomeditor = new multigeomeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		if (
 			!$this->formvars['edit_other_object'] AND
-			($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')
+			($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['CMD'] != '')
 		) {
 			$this->neuLaden();
 		}
@@ -8641,7 +8641,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->Klasseneditor();
   }
 
-  function Klasseneditor_KlasseHinzufuegen($output = true){
+  function Klasseneditor_KlasseHinzufuegen($output = true) {
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
@@ -8649,7 +8649,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $attrib['order'] = ($this->formvars['class_order'] != '') ? $this->formvars['class_order'] : 1;
     $attrib['expression'] = ($this->formvars['class_expression'] != '') ? $this->formvars['class_expression'] : '';
     $new_class = $mapDB->new_Class($attrib);
-		if($output)$this->Klasseneditor();
+		if ($output) {
+			$this->Klasseneditor();
+		}
 		return $new_class;
   }
 
@@ -9651,7 +9653,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				for ($m = 0; $m <= (value_of($this->formvars, 'searchmask_count') ?: 0); $m++){
 					if ($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 						$prefix = $m . '_';
-						$sql_where .= ' ' . $this->formvars['boolean_operator_'.$m].' ';			// mit AND/OR verketten
+						sanitize('boolean_operator_' . $m, 'boolean');
+						$sql_where .= ' ' . $this->formvars['boolean_operator_'.$m] .' ';			// mit AND/OR verketten
 					}
 					else {
 						$prefix = '';
@@ -12947,11 +12950,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		# Rolleneinstellungen
 		for ($i = 0; $i < count($selectedusers); $i++) {
-			$this->user->rolle->setRolle($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-			$this->user->rolle->setMenue($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
-			$this->user->rolle->setLayer($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
-			$this->user->rolle->setGroups($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id, $layer); 											# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
-			$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);
+			rolle::create($this->database, $new_stelle->id, $selectedusers[$i], $new_stelle->default_user_id, $layer);
+			// $this->user->rolle->setRolle($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+			// $this->user->rolle->setMenue($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+			// $this->user->rolle->setLayer($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+			// $this->user->rolle->setGroups($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id, $layer); 											# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+			// $this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);
 			$this->selected_user = new user(NULL,$selectedusers[$i],$this->user->database);
 			$this->selected_user->checkstelle();
 		}
@@ -13278,12 +13282,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$users = put_value_first($users, $Stelle->default_user_id);
 				}
 				for ($i = 0; $i < count($users); $i++) {
-					$this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-					$this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
-					$this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
-					$this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
-					$this->user->rolle->setSavedLayersFromDefaultUser($users[$i], $Stelle->id, $Stelle->default_user_id);
-					$this->selected_user = new user('',$users[$i],$this->user->database);
+					rolle::create($this->database, $Stelle->id, $users[$i], $Stelle->default_user_id, $layer, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));
+					// $this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+					// $this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+					// $this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+					// $this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
+					// $this->user->rolle->setSavedLayersFromDefaultUser($users[$i], $Stelle->id, $Stelle->default_user_id);
+					$this->selected_user = new user('', $users[$i], $this->user->database);
 					$this->selected_user->checkstelle();
 				}
 				$Stelle->updateLayerParams();
@@ -14295,15 +14300,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $stellen = array_filter(explode(', ', $this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->database);
-					$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
-					$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
-					$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
-					$layers = $stelle->getLayers(NULL);
-					$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
-					# Layerparameter aktualisieren
+					rolle::create($this->database, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL));
+					// $this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+					// $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+					// $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+					// $this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+					// $this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					$stelle->updateLayerParams();
 					$this->update_layer_parameter_in_rollen($stelle->id);
-					$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				}
         if ($ret[0]) {
           $this->Meldung = $ret[1];
@@ -14322,22 +14326,22 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
 		}
 		else {
-			$stellen = array_filter(explode(', ',$this->formvars['selstellen']));
 			$ret = $this->user->Aendern($this->formvars);
 			if ($this->formvars['id'] != '') {
 				$this->formvars['selected_user_id'] = $this->formvars['id'];
 			}
+			$stellen = array_filter(explode(', ',$this->formvars['selstellen']));
 			for ($i = 0; $i < count($stellen); $i++) {
 				$stelle = new stelle($stellen[$i], $this->database);
-				$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
-				$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
-				$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
-				$layers = $stelle->getLayers(NULL);
-				$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+				rolle::create($this->database, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id);
+				// $this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+				// $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+				// $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+				// $this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+				// $this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				# Layerparameter aktualisieren
 				$stelle->updateLayerParams();
 				$this->update_layer_parameter_in_rollen($stelle->id);
-				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
       $this->selected_user = new user('',$this->formvars['selected_user_id'],$this->user->database, '', true);
       # Löschen der in der Selectbox entfernten Stellen
@@ -21731,11 +21735,15 @@ class db_mapObj{
 				)
 			";
 		}
-		#echo $sql;
+		#echo '<br>sql zum Erzeugen der Klasse: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->new_Class - Erstellen einer Klasse zu einem Layer:<br>" . $sql, 4);
 		$ret = $this->db->execSQL($sql);
-		if ($this->db->logfile != NULL) $this->db->logfile->write($sql . ';');
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		if ($this->db->logfile != NULL) {
+			$this->db->logfile->write($sql . ';');
+		}
+    if (!$this->db->success) {
+			echo err_msg($this->script_name, __LINE__, $sql); return 0;
+		}
 		return $this->db->mysqli->insert_id;
 	}
 
@@ -21816,12 +21824,14 @@ class db_mapObj{
 		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
 	}
 
-  function new_Style($style){
+	function new_Style($style){
 		#echo '<p>style: ' . print_r($style, true);
-    if(is_array($style)){
-      $sql = "INSERT INTO styles SET ";
-			if($style['colorred'] != ''){$sql.= "color = '" . $style['colorred']." " . $style['colorgreen']." " . $style['colorblue']."'";}
-      else $sql.= "color = '" . $style['color']."'";
+		if (is_array($style)){
+			$sql = "
+				INSERT INTO styles
+				SET
+					color = '" . ($style['colorred'] != '' ? $style['colorred'] . " " . $style['colorgreen'] . " " . $style['colorblue'] : $style['color']) . "'
+			";
       if(value_of($style, 'symbol')){$sql.= ", symbol = '" . $style['symbol']."'";}
       if(value_of($style, 'symbolname')){$sql.= ", symbolname = '" . $style['symbolname']."'";}
       if(value_of($style, 'size')){$sql.= ", size = '" . $style['size']."'";}      
@@ -22073,7 +22083,10 @@ class db_mapObj{
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Style - Speichern der Styledaten:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+    if (!$this->db->success) {
+			echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__;
+			return 0;
+		}
   }
 
   function get_Style($style_id){

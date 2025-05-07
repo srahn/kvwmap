@@ -35,6 +35,17 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 	}
 }
 
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
+
 /**
  * checkStatus
  * 
@@ -153,13 +164,7 @@ while ($line = $ret->fetch_assoc()) {
 }
 
 while ($line = $result->fetch_assoc()){
-	try {
-		$extent = ms_newRectObj();
-		$extent->setextent($bbox['left'], $bbox['bottom'], $bbox['right'], $bbox['top']);
-  }
-	catch(Exception $e) {
-		$extent = new rectObj($bbox['left'], $bbox['bottom'], $bbox['right'], $bbox['top']);
-  }
+	$extent = rectObj($bbox['left'], $bbox['bottom'], $bbox['right'], $bbox['top']);
 	foreach ($params AS $key => $value) {
 		$line["connection"] = str_replace('$' . $key, $value, $line["connection"]);
 	}
