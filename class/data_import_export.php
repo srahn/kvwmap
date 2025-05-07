@@ -969,7 +969,7 @@ class data_import_export {
 	 *  2.1) exitCode of output of curl_exec or
 	 *  2.2) echo exitCode of output of curl_exec and exit
 	 */
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false, $unlogged = false, $overwrite = false) {
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false, $unlogged = false, $overwrite = false, $force_nullable = false) {
 		// echo '<br>Function ogr2ogr_import';
 		$command = ''
 			. ($options != NULL ? $options : '')
@@ -978,12 +978,13 @@ class data_import_export {
 			. ' -dim XY'
 			. ' -lco GEOMETRY_NAME=the_geom'
 			. ' -lco launder=NO'
-			. ' -lco precision=NO '
+			. ' -lco precision=NO'
 			. ' -lco FID=' . $this->unique_column
 			. ' -nln ' . $tablename
-			. ($overwrite ? ' -overwrite' : '')
-			. ($unlogged ? ' -lco UNLOGGED=ON' : '')
 			. ($multi ? ' -nlt PROMOTE_TO_MULTI' : '')
+			. ($unlogged ? ' -lco UNLOGGED=ON' : '')
+			. ($overwrite ? ' -overwrite' : '')
+			. ($force_nullable ? ' -forceNullable' : '')
 			. ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
