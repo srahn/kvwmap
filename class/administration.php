@@ -82,6 +82,11 @@ class administration{
 		return $migrations;
 	}
 
+	function get_mobile_logs() {
+		$log_files = glob(LOGPATH . 'kvmobile/*_debug_log.html');
+		return $log_files;
+	}
+
 	function get_schema_migration_files() {
 		#echo '<br>Get Schema Migration Files';
 		global $kvwmap_plugins;

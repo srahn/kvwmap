@@ -3787,6 +3787,11 @@ echo '			</table>
 		}
 	}
 
+	/**
+	 * This function checks if the given plugin is loaded
+	 * @param string $plugin The name of the plugin
+	 * @return boolean true if the plugin is loaded, false otherwise
+	 */
 	function plugin_loaded($plugin) {
 		global $kvwmap_plugins;
 		return in_array($plugin, $kvwmap_plugins);
@@ -7283,7 +7288,7 @@ echo '			</table>
 				$pathinfo = pathinfo($dateipfad);
 				if ($doc_type == '') {
 					$type = strtolower($pathinfo['extension']);
-					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf', 'heic', 'heif'))) {
 						$doc_type = 'local_img';
 					}
 					else {
@@ -20961,9 +20966,9 @@ class db_mapObj{
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
 						$attributes[$column][$i] = 	replace_params_rolle(
-																					$attributes[$column][$i],
-																					((count($attribute_values) > 0 AND $replace_only == 'default') ? $attribute_values : NULL)
-																				);
+							$attributes[$column][$i],
+							((count($attribute_values) > 0 AND in_array('default', $replace_only)) ? $attribute_values : NULL)
+						);
 					}
 				}
 			}
