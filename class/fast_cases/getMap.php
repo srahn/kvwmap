@@ -2513,7 +2513,7 @@ class db_mapObj {
 		return $classarray;
   }
 
-	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {
+	function read_Classes($layer_id, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
 		$Classes = array();
 
@@ -2521,29 +2521,29 @@ class db_mapObj {
 			SELECT " .
 				((!$all_languages AND $language != 'german') ? "
 					CASE
-						WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
-						ELSE `Name`
+						WHEN name_" . $language . "IS NOT NULL THEN name_" . $language . "
+						ELSE name
 					END" : "
-					`Name`"
-				) . " AS Name,
-				`Name_low-german`,
-				`Name_english`,
-				`Name_polish`,
-				`Name_vietnamese`,
-				`class_id`,
-				`Layer_ID`,
-				`Expression`,
-				`classification`,
-				`legendgraphic`,
-				`legendimagewidth`,
-				`legendimageheight`,
-				`drawingorder`,
-				`legendorder`,
-				`text`
+					name"
+				) . " AS name,
+				name_low_german,
+				name_english,
+				name_polish,
+				name_vietnamese,
+				class_id,
+				layer_id,
+				expression,
+				classification,
+				legendgraphic,
+				legendimagewidth,
+				legendimageheight,
+				drawingorder,
+				legendorder,
+				text
 			FROM
-				`classes`
+				kvwmap.classes
 			WHERE
-				`Layer_ID` = " . $Layer_ID .
+				layer_id = " . $layer_id .
 				(
 					(!empty($classification)) ? " AND
 						(
@@ -2559,17 +2559,16 @@ class db_mapObj {
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>", 4);
-		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
+		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$index = 0;
-		while ($rs = $ret['result']->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Style'] = $this->read_Styles($rs['class_id']);
 			$rs['Label'] = $this->read_Label($rs['class_id']);
 			$rs['index'] = $index;
 			#Anne
 			if($disabled_classes){
 				if($disabled_classes['status'][$rs['class_id']] == 2) {
-					$rs['Status'] = 1;
+					$rs['status'] = 1;
 					for($i = 0; $i < count($rs['Style']); $i++) {
 						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
@@ -2584,9 +2583,9 @@ class db_mapObj {
 				elseif ($disabled_classes['status'][$rs['class_id']] == '0') {
 					$rs['Status'] = 0;
 				}
-				else $rs['Status'] = 1;
+				else $rs['status'] = 1;
 			}
-			else $rs['Status'] = 1;
+			else $rs['status'] = 1;
 
 			$Classes[] = $rs;
 			$index++;
@@ -2629,22 +2628,22 @@ class db_mapObj {
 		return $Labels;
 	}
 
-	function read_RollenLayer($id = NULL, $typ = NULL) {
+	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
 			SELECT DISTINCT
-				l.`id`,
-				l.`user_id`,
-				l.`stelle_id`,
-				l.`aktivStatus`,
-				l.`queryStatus`,
-				l.`Name`,
-				l.`Name` as alias,
-				l.`Gruppe`,
-				l.`Typ`,
-				l.`Datentyp`,
-				l.`Data`,
-				l.`query`,
-				l.`connectiontype`,
+				l.id,
+				l.user_id,
+				l.stelle_id,
+				l.aktivstatus,
+				l.querystatus,
+				l.name,
+				l.name as alias,
+				l.gruppe,
+				l.typ,
+				l.datentyp,
+				l.data,
+				l.query,
+				l.connectiontype,
 				l.connection_id,
 				l.wms_auth_username,
 				l.wms_auth_password,
@@ -2652,46 +2651,50 @@ class db_mapObj {
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', l.user_id)
 					ELSE l.connection
 				END as connection,
-				l.`epsg_code`,
-				l.`transparency`,
-				l.`buffer`,
-				l.`labelitem`,
-				l.`classitem`,
-				l.`gle_view`,
-				l.`rollenfilter`,
-				l.`duplicate_from_layer_id`,
-				l.`duplicate_criterion`,
-				g.Gruppenname,
-				-l.id AS Layer_ID,
+				l.epsg_code,
+				l.transparency,
+				l.buffer,
+				l.labelitem,
+				l.classitem,
+				l.gle_view,
+				l.rollenfilter,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
+				g.gruppenname,
+				-l.id AS layer_id,
 				1 as showclasses,
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
-				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter
+				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter,
+				'' as wms_name,
+				'' as wms_format,
+				'' as wms_server_version,
+				'' as wms_connectiontimeout,
+				'' as oid
 			FROM
-				rollenlayer AS l JOIN
-				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
-				connections AS c ON l.connection_id = c.id
+				kvwmap.rollenlayer AS l JOIN
+				kvwmap.u_groups AS g ON l.Gruppe = g.id LEFT JOIN
+				kvwmap.connections AS c ON l.connection_id = c.id
 			WHERE
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
-				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . 
-				($this->nurLayerID ? " AND l.id = " . -($this->nurLayerID) : '') . 
-				($this->nichtLayerID ? " AND l.id != " . -($this->nichtLayerID) : '') . "
+				($typ != NULL ? " AND l.typ = '" . $typ . "'" : '') . 
+				($autodelete != NULL ? " AND l.autodelete = '" . $autodelete . "'" : '') . "
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
-		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
-		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		#echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
+		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$Layer = array();
-		while ($rs = $ret['result']->fetch_array()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
-			foreach (array('name', 'alias', 'connection', 'classification', 'pfad', 'data') AS $key) {
+			foreach (array('name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'data') AS $key) {
 				$rs[$key] = replace_params_rolle(
 					$rs[$key],
 					['duplicate_criterion' => $rs['duplicate_criterion']]
 				);
 			}
 			$rs['alias_link'] = $rs['alias'];
+			$rs['Name_or_alias'] = $rs['alias'];
 			$Layer[] = $rs;
 		}
 		return $Layer;
