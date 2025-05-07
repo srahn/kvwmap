@@ -214,6 +214,283 @@ class pgdatabase {
     return $ret;
   }
 
+	/**
+	* Erzeugt SQL zum anlegen eines Layer in mysql
+	*
+	* @params $geometrie_column, Name des Attributes der Tabelle, die abgefragt wird, die Geometrie beinhaltet.
+	* @params $geometrietyp String, Name des Attributes des Datentyps der Geometriespalte, welches die Geometrie beinhalten soll.
+	* @params $layertyp Integer, 0 point, 1 line, 2 polygon, 5 query
+	*
+	*/
+	function generate_layer($schema, $table, $group_id = 0, $connection_id, $epsg = 25832, $geometrie_column = 'the_geom', $geometrietyp = '', $layertyp = '2') {
+		#echo '<br>Create Layer: ' . $table['name'];
+		if ($geometrietyp != '') $geometrie_column = "({$geometrie_column}).{$geometrietyp}";
+		if ($group_id == 0) $group_id = '@group_id';
+		if ($connection_id == '') $connection_id = '@connection_id';
+		$sql = "
+-- Create layer {$table['name']}
+INSERT INTO kvwmap.layer (
+	name,
+	datentyp,
+	gruppe,
+	pfad,
+	maintable,
+	data,
+	schema,
+	connection_id,
+	connectiontype,
+	tolerance,
+	toleranceunits,
+	epsg_code,
+	queryable,
+	transparency,
+	ows_srs,
+	wms_name,
+	wms_server_version,
+	wms_format,
+	wms_connectiontimeout,
+	querymap,
+	kurzbeschreibung,
+	privileg,
+	geom_column
+)
+VALUES (
+	'{$table['name']}',
+	'{$layertyp}',
+	{$group_id},
+	'SELECT * FROM {$table['name']} WHERE 1=1',
+	'{$table['name']}',
+	'geom from (select oid, {$geometrie_column} AS geom FROM {$schema}.{$table['name']}) as foo using unique oid using srid={$epsg}',
+	'{$schema}',
+	'{$connection_id}'
+	'6',
+	'3',
+	'pixels',
+	'{$epsg}',
+	'1',
+	'60',
+	'EPSG:{$epsg}',
+	'{$table['name']}',
+	'1.1.0',
+	'image/png',
+	'60',
+	'1',
+	'Diese Tabelle enthält alle Objekte aus der Tabelle {$table['name']}.',
+	'2',
+	'{$geometrie_column}'
+)
+RETURNING layer_id INTO var_last_layer_id_{$table['oid']} = LAST_INSERT_ID();
+";
+		return $sql;
+	}
+
+	function generate_layer_attribute($attribute, $table, $options) {
+		#echo '<br>Create Layerattribute: ' . $attribute['name'];
+		if($attribute['nullable'] == '')$attribute['nullable'] = 'NULL';
+		if($attribute['length'] == '')$attribute['length'] = 'NULL';
+		if($attribute['decimal_length'] == '')$attribute['decimal_length'] = 'NULL';
+		$sql = "
+-- Create layer_attribute {$attribute['name']} for layer {$attribute['table_name']}
+INSERT INTO layer_attributes (
+	layer_id,
+	name,
+	real_name,
+	tablename,
+	table_alias_name,
+	type,
+	geometrytype,
+	constraints,
+	nullable,
+	length,
+	decimal_length,
+	default,
+	form_element_type,
+	options,
+	group,
+	raster_visibility,
+	mandatory,
+	order,
+	privileg,
+	query_tooltip
+)
+VALUES (
+	@last_layer_id_{$table['oid']},
+	'{$attribute['name']}',
+	'{$attribute['name']}', -- real_name
+	'{$attribute['table_name']}',
+	'{$attribute['table_name']}', -- table_alias_name
+	'{$attribute['type_name']}', -- type
+	'', -- geometrytype
+	'{$options['constraint']}', -- constraints
+	'{$attribute['nullable']}',
+	'{$attribute['length']}', -- length
+	'{$attribute['decimal_length']}', -- decimal_length
+	'{$attribute['default']}', -- default
+	'text', -- form_element_type
+	'{$options['option']}', -- options
+	'', -- group
+	NULL, -- raster_visibility
+	NULL, -- mandatory
+	'{$attributes['ordinal_position']}', -- order
+	'1',
+	'0'
+);
+";
+		return $sql;
+	}
+
+	function generate_datatype($schema, $datatype, $epsg = 25832) {
+		#echo '<br>Create Datatype: ' . $datatype['type'] . ' for attribute ' . $datatype['name'];
+		$sql = "
+-- Create datatype {$datatype['type_name']}
+INSERT INTO datatypes (
+	name,
+	schema,
+	dbname,
+	host,
+	port,
+)
+VALUES (
+	'{$datatype['type']}',
+	'{$schema}', -- schema
+	'xplan_gml'
+	'localhost',
+	'5432'
+);
+SET @last_datatype_id_{$datatype['attribute_type_oid']} = LAST_INSERT_ID();
+";
+		return $sql;
+	}
+
+	function generate_datatype_attribute($attribute, $table, $options) {
+		#echo '<br>Create Datatypeattribute: ' . $attribute['name'] . ' für Datentyp: ' . $attribute['table_name'];
+		$sql = "
+--Create datatype_attribute {$attribute['name']} for datatype {$attribute['table_name']}
+INSERT INTO datatype_attributes (
+	layer_id,
+	name,
+	real_name,
+	tablename,
+	table_alias_name,
+	type,
+	geometrytype,
+	constraints,
+	nullable,
+	length,
+	decimal_length,
+	default,
+	form_element_type,
+	options,
+	group,
+	raster_visibility,
+	mandatory,
+	order,
+	privileg,
+	query_tooltip
+)
+VALUES (
+	@last_datatype_id_{$table['attribute_type_oid']},
+	'{$attribute['name']}',
+	'{$attribute['name']}', -- real_name
+	'{$attribute['table_name']}',
+	'{$attribute['table_name']}', -- table_alias_name
+	'{$attribute['type_name']}', -- type
+	'', -- geometrytype
+	'{$options['constraint']}', -- constraints
+	" . (($attribute['is_nullable'] == 't') ? 'TRUE' : 'FALSE') . ",
+	'{$attribute['character_maximum_length']}', -- length
+	'{$attribute['numeric_precision']}', -- decimal_length
+	'{$attribute['attribute_default']}', -- default
+	'text', -- form_element_type
+	'{$options['option']}', -- options
+	'', -- group
+	NULL, -- raster_visibility
+	" . (($attribute['is_nullable'] == 'NO') ? 'TRUE' : 'NULL') . ", -- mandatory
+	'{$attributes['ordinal_position']}', -- order
+	'1',
+	'0'
+);
+";
+		return $sql;
+	}
+
+	function generate_classes($table) {
+		$sql = "
+-- Create class for layer {$table['name']}
+INSERT INTO classes (
+	Name,
+	Layer_ID,
+	Expression,
+	drawingorder,
+	text
+)
+VALUES(
+	'alle',
+	@last_layer_id_{$table['oid']},
+	'(1 = 1)',
+	'1',
+	''
+);
+SET @last_class_id = LAST_INSERT_ID();
+";
+		return $sql;
+	}
+
+	function generate_styles() {
+		$sql = "
+INSERT INTO styles (
+	symbol,
+	symbolname,
+	size,
+	color,
+	backgroundcolor,
+	outlinecolor,
+	minsize,
+	maxsize,
+	angle,
+	angleitem,
+	antialias,
+	width,
+	minwidth,
+	maxwidth,
+	sizeitem
+) VALUES (
+	NULL,
+	'',
+	'1',
+	'0 189 231',
+	'',
+	'22 97 113',
+	NULL,
+	'1',
+	'360',
+	'',
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	''
+);
+SET @last_style_id = LAST_INSERT_ID();
+";
+		return $sql;
+	}
+
+	function generate_style2classes() {
+		$sql = "
+INSERT INTO u_styles2classes (
+	style_id,
+	class_id,
+	drawingorder
+) VALUES (
+	@last_style_id,
+	@last_class_id,
+	0
+);
+";
+		return $sql;
+	}
+
 	function read_colors() {
 		$sql = "
 			SELECT
