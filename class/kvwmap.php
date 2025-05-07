@@ -21100,6 +21100,7 @@ class db_mapObj{
 		}
 
 		if (
+			!$only_listed AND # $only_listed ist true bei der Layer-Übersicht. Dann sollen alle Layer geladen werden (d.h. auch die, die der Nutzer gar nicht hat in seinen Stellen).
 			# Show non-admin users only layers that they self have shared
 			!$this->GUI->is_admin_user($this->GUI->user->id)
 		) {
