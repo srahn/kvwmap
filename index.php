@@ -1624,6 +1624,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layereditor_get_maintables' : {
+				include_once(CLASSPATH . 'Connection.php');
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->sanitize([
 					'connection_id' => 'integer'

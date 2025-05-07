@@ -166,7 +166,7 @@
 		let elm = document.getElementById("GUI").elements;
 		if (value) {
 			let [connection_id, schema_name, table_name] = value.split('.');
-			elm["Name"].value = table_name;
+			elm["name"].value = table_name;
 			elm["alias"].value = table_name.split('_').map((word) => { return word[0].toUpperCase() + word.substring(1); }).join(" ");
 			elm["connectiontype"].value = 6;
 			elm["connectiontype"].onchange();
@@ -192,7 +192,7 @@
 								let elm = document.getElementById("GUI").elements;
 								elm["epsg_code"].value = data.epsg_code || '';
 								elm["oid"].value = data.oid_column;
-								elm["Datentyp"].value = data.Datentyp;
+								elm["datentyp"].value = data.Datentyp;
 								elm["pfad"].value =
 `SELECT
   *
@@ -200,7 +200,7 @@ FROM
   ${data.table_name}
 WHERE
   true`;
-								elm["Data"].value = (data.geom_column ? `${data.geom_column} from (
+								elm["data"].value = (data.geom_column ? `${data.geom_column} from (
 select
   ${data.oid_column},
   ${data.geom_column}
@@ -230,7 +230,7 @@ from
 
 	function resetForm(form) {
 		let elm = document.getElementById(form).elements;
-		elm["Name"].value = '';
+		elm["name"].value = '';
 		elm["alias"].value = '';
 		elm["connectiontype"].value = '';
 		elm["connectiontype"].onchange();
@@ -240,9 +240,9 @@ from
 		elm["sizeunits"].value = '';
 		elm["epsg_code"].value = '';
 		elm["oid"].value = '';
-		elm["Datentyp"].value = '';
+		elm["datentyp"].value = '';
 		elm["pfad"].value = '';
-		elm["Data"].value = '';
+		elm["data"].value = '';
 	}
 
 	function add_labelitem(){
@@ -912,14 +912,16 @@ from
 						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerCharts; ?></th>
 						<td width="370" colspan="2" style="border-bottom:1px solid #C3C7C3">
 							<div style="float: left; width: 95%"><?
-								include_once(CLASSPATH . 'Layer.php');
-								$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
-								if ($this->layer) { ?>
-									<ul><?
-										foreach($this->layer->charts AS $chart) { ?>
-											<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
-										} ?>
-									</ul><?php
+								if ($this->formvars['selected_layer_id']) {
+									include_once(CLASSPATH . 'Layer.php');
+									$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+									if ($this->layer) { ?>
+										<ul><?
+											foreach($this->layer->charts AS $chart) { ?>
+												<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
+											} ?>
+										</ul><?php
+									}
 								} ?>
 							</div>
 							<a href="index.php?go=layer_charts_Anzeigen&layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">

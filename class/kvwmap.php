@@ -8556,6 +8556,7 @@ END $$;
 	function Layereditor() {
 		include_once(CLASSPATH . 'LayerChart.php');
 		include_once(CLASSPATH . 'DataSource.php');
+		include_once(CLASSPATH . 'Connection.php');
 		$this->titel = 'Layer Editor';
 		$this->main = 'layer_formular.php';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
