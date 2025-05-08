@@ -26,17 +26,6 @@ else {
 }
 if (!DBWRITE) { echo '<br>Das Schreiben in die Datenbank wird unterdrückt!'; }
 
-# Öffnen der Datenbankverbindung zur Kartenverwaltung (MySQL)
-# Erzeugen des MYSQL-DB-Objekts, falls es noch nicht durch den Login erzeugt wurde
-// if (!isset($userDb)) {
-// 	$userDb = new database();
-// 	$userDb->host = MYSQL_HOST;
-// 	$userDb->user = MYSQL_USER;
-// 	$userDb->passwd = MYSQL_PASSWORD;
-// 	$userDb->dbName = MYSQL_DBNAME;
-// }
-// $GUI->database = $userDb;
-
 $GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
 if (!$GUI->pgdatabase->open()) {
 	echo $GUI->pgdatabase->err_msg;
@@ -47,57 +36,6 @@ if ($formvars['go'] == 'health_check') {
 	include(SNIPPETS . 'health_check.php');
 	exit;
 }
-
-// if (!$GUI->database->open()) {
-//   # Prüfen ob eine neue Datenbank angelegt werden soll
-//   if ($GUI->formvars['go'] == 'install-mysql-db') {
-//     # Anlegen der neuen Datenbank
-//     # Herstellen der Verbindung mit defaultwerten
-// 		$GUI->mysqli = new mysqli(MYSQL_HOST, 'kvwmap', 'kvwmap', 'mysql');
-//     $GUI->debug->write('MySQL Datenbankverbindung hergestellt mit (' . MYSQL_HOST . ', kvwmap, kvwmap, mysql) thread_id: ' . $GUI->mysqli->thread_id, 4);
-//     # Erzeugen der leeren Datenbank für kvwmap
-//     $sql = 'CREATE DATABASE '.$GUI->database->dbName.' CHARACTER SET latin1 COLLATE latin1_german2_ci';
-//     $GUI->database->execSQL($sql,4,0);
-//     # Anlegen der leeren Tabellen für kvwmap
-//     if ($GUI->formvars['install-GUI']) {
-//       # Demo Daten in Datenbank schreiben
-//       $sql = file_get_contents(LAYOUTPATH.'sql_dumps/mysql_setup_GUI.sql');
-//       $GUI->database->execSQL($sql,4,0);
-//     }
-//     # Abfrage ob Zugang zur neuen Datenbank jetzt möglich
-//     if ($GUI->database->select_db($GUI->database->dbName)) {
-//       $GUI->debug->write("Verbindung zur MySQL Datenbank erfolgreich hergestellt.",4);
-//     }
-//     else {
-//       # Die neue Datenbank konnte nicht hergestellt werden
-//       echo 'Die Neue Datenbank konnte nicht hergestellt werden mit:';
-//       echo '<br>Host: '.$GUI->database->host;
-//       echo '<br>User: '.$GUI->database->user;
-//      # echo '<br>Passwd: '.$GUI->database->passwd;
-//       echo '<br>Datenbankname: '.$GUI->database->dbName;
-//       echo '<p>Das kann folgende Gründe haben:<lu>';
-//       echo '<li>Der Datenbankserver ist gerade nicht erreichbar.</li>';
-//       echo '<li>Die Angaben zum Host, Benutzer und Password in der config.php sind falsch.</li>';
-//       echo '<li>Die Angaben zum Host, Benutzer und Password in der Tabelle mysql.users sind falsch.</li>';
-//       echo '</lu>';
-//     } # ende fehler beim aufbauen der mysql datenbank
-//   } # ende mysql datenbank installieren
-//   else {
-//     # Es konnte keine Datenbankverbindung aufgebaut werden
-//     $errors[] = '
-// 		Die Verbindung zur Kartendatenbank konnte mit folgenden Daten nicht hergestellt werden:<br>
-// 		Host: ' . $GUI->database->host . '<br>
-// 		User: ' . $GUI->database->user . '<br>
-// 		Datenbankname: ' . $GUI->database->dbName . '<br>';
-// 		exit;
-//   }
-// }
-// else {
-//   $GUI->debug->write("Verbindung zur MySQL Kartendatenbank erfolgreich hergestellt.",4);
-// }
-
-// $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
-// $GUI->database->execSQL("SET CHARACTER SET ".MYSQL_CHARSET.";",0,0);
 
 /*
 *	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
@@ -189,9 +127,6 @@ else {
 				if not allready exists and only if it matches with the old md5 method.
 			*/
 			if (prepare_sha1(trim(pg_escape_string($GUI->formvars['login_name'])), trim(pg_escape_string($GUI->formvars['passwort'])))) {
-				if ($GUI->database->mysqli->affected_rows > 0) {
-					$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
-				}
 				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase);
 				$GUI->debug->write('Nutzer mit login_name ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);
 				if ($GUI->pgdatabase->success) {
@@ -236,7 +171,7 @@ else {
 					}
 				}
 				else {
-					$GUI->add_message('error', 'Fehler bei der Abfrage des Nutzers. ' . $GUI->database->mysqli->error);
+					$GUI->add_message('error', 'Fehler bei der Abfrage des Nutzers. ');
 					$show_login_form = true;
 					$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 					$go = 'login_failed';
@@ -245,7 +180,7 @@ else {
 				}
 			}
 			else {
-				$GUI->add_message('error', 'Fehler beim Eintragen des SHA1 Passwortes. ' . $GUI->database->mysqli->error);
+				$GUI->add_message('error', 'Fehler beim Eintragen des SHA1 Passwortes. ');
 				$show_login_form = true;
 				$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 				$go = 'login_failed';
@@ -261,10 +196,9 @@ else {
 					$GUI->debug->write('Registrierung mit neuem Passwort.', 4, $GUI->echo);
 					array_walk(
 						$GUI->formvars,
-						function(&$formvar, $key, $database) {
-							$formvar = $database->mysqli->real_escape_string($formvar);
-						},
-						$GUI->database
+						function(&$formvar) {
+							$formvar = pg_escape_string($formvar);
+						}
 					);
 
 					$new_registration_err = checkRegistration($GUI);
@@ -444,7 +378,7 @@ if (!$show_login_form) {
 				else {
 					$GUI->debug->write('Passwort ist nicht abgelaufen.', 4);
 					$GUI->add_message('error', $permission['errmsg'] . '<br>' . $permission['reason']);
-					$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
+					$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->pgdatabase);
 					$go = 'Stelle_waehlen';
 					$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
 					# login case 14
@@ -948,7 +882,7 @@ function prepare_sha1($login_name, $password) {
 	#echo "SQL to update the password with method sha1: ", $sql;
 	$GUI->debug->write("<p>file:users.php class:user->prepare_sha1 - Setzen des Passworthash in Attribut password mit SHA1 Methode:<br>", 3);
 	$ret = $GUI->pgdatabase->execSQL($sql, 4, 0, true);
-	if (!$ret['success']) { $GUI->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $GUI->database->mysqli->error, 4); return 0; }
+	if (!$ret['success']) { $GUI->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 	return $ret['success'];
 }
 ?>

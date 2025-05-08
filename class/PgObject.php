@@ -285,16 +285,16 @@ class PgObject {
 		return $this->extent;
 	}
 
-	function exists($where) {
+	function exists($key) {
 		$sql = "
 			SELECT
-				count(*) num_rows
+				" . $key . "
 			FROM
 				\"{$this->schema}\".\"{$this->tableName}\"
 			WHERE
-				" . $where . "
+				" . $key . " = " . quote($this->get($key)) . " AND
+				NOT " . $this->get_identifier_expression() . "
 		";
-		$this->debug->show('find_by_id sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$result = pg_fetch_assoc($query);
 		return ($result['num_rows'] > 0);
@@ -448,38 +448,7 @@ class PgObject {
 				) . "'
 			)
 			" . ($this->identifier != ''? "RETURNING " . $this->identifier : '');
-		/*
-		$sql = "
-			INSERT INTO " . $this->qualifiedTableName . " (
-				$1
-			)
-			VALUES (
-				'$2'
-			)
-			RETURNING
-				$3
-		";
-		*/
 		$this->debug->show('Create new dataset with sql: ' . $sql, $this->show);
-		#echo 'SQL zum Eintragen des Datensatzes: ' . $sql; exit;
-		/*
-		$query = pg_query_params(
-			$this->database->dbConn, $sql,
-			array(
-				implode(", ", $this->getKeys()),
-				implode(
-					"', '",
-					array_map(
-						function($value) {
-							return pg_escape_string($value);
-						},
-						$values
-					)
-				),
-				$this->identifier
-			)
-		);
-		*/
 		$query = pg_query($this->database->dbConn, $sql);
 		if(!$query){echo $sql; exit;}
 		$oid = pg_last_oid($query);
@@ -504,7 +473,22 @@ class PgObject {
 			$this->set($this->identifier, $row[$this->identifier]);
 		}
 		$this->debug->show('Dataset created with ' . $this->identifier . ': '. $this->get($this->identifier), $this->show);
-		return $this->get($this->identifier);
+
+		if ($this->database->success) {
+			$results[] = array(
+				'success' => true,
+				'msg' => 'Datensatz erfolgreich angelegt.',
+				'id' => $this->get($this->identifier)
+			);
+		}
+		else {
+			$results[] = array(
+				'success' => false,
+				'msg' => $this->database->errormessage,
+				'err_msg' => $this->database->errormessage
+			);
+		}
+		return $results;
 	}
 	/* Für Postgres Version in der RETURNING zusammen mit RULE und Bedingung funktioniert. 
 	function create($data = '') {

@@ -1,11 +1,11 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class Layer2Stelle extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class Layer2Stelle extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'used_layer');
+		parent::__construct($gui, 'kvwmap', 'used_layer');
 		$this->identifier = array('layer_id', 'stelle_id');
 	}
 
@@ -25,7 +25,7 @@ class Layer2Stelle extends MyObject {
 		$layer2stelle->debug->show('<p>Find layers with sync = true for stelle_id: ' . $stelle_id, MyObject::$write_debug);
 		return $layer2stelle->find_by_sql(array(
 			'select' => 'l.layer_id, l.schema, l.maintable, ul.privileg',
-			'from' => 'used_layer ul JOIN kvwmap.layer l ON ul.layer_id = l.layer_id',
+			'from' => 'kvwmap.used_layer ul JOIN kvwmap.layer l ON ul.layer_id = l.layer_id',
 			'where' => 'ul.stelle_id = ' . $stelle_id . " AND l.editable = 1 and l.sync = '1'",
 			'order' => 'l.layer_id'
 		));
@@ -36,7 +36,7 @@ class Layer2Stelle extends MyObject {
 		$layer2stelle->debug->show('<p>Find base layer with selectiontype = radio for stelle_id: ' . $stelle_id, MyObject::$write_debug);
 		return $layer2stelle->find_by_sql(array(
 			'select' => 'l.layer_id',
-			'from' => 'used_layer ul JOIN layer l ON ul.layer_id = l.layer_id',
+			'from' => 'kvwmap.used_layer ul JOIN kvwmap.layer l ON ul.layer_id = l.layer_id',
 			'where' => 'ul.stelle_id = ' . $stelle_id . " AND l.selectiontype = 'radio'",
 			'order' => 'ul.legendorder'
 		));
@@ -48,9 +48,9 @@ class Layer2Stelle extends MyObject {
 		$layer2stelle->debug->show('<p>Find overlay layer with selectiontype != radio for stelle_id: ' . $stelle_id, MyObject::$write_debug);
 		return $layer2stelle->find_by_sql(array(
 			'select' => 'l.layer_id, ul.minscale, ul.maxscale, ul.transparency, ul.group_id',
-			'from' => 'used_layer ul JOIN layer l ON ul.layer_id = l.layer_id JOIN u_groups g ON COALESCE(ul.group_id, l.gruppe) = g.id',
+			'from' => 'kvwmap.used_layer ul JOIN kvwmap.layer l ON ul.layer_id = l.layer_id JOIN u_groups g ON COALESCE(ul.group_id, l.gruppe) = g.id',
 			'where' => 'ul.stelle_id = ' . $stelle_id . " AND l.selectiontype != 'radio'",
-			'order' => 'g.`order`, ul.`legendorder`'
+			'order' => 'g."order", ul.legendorder'
 		));
 	}
 }

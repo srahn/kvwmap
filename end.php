@@ -6,15 +6,6 @@ if(!empty($GUI->allowed_documents)){
 }
 
 # Schließen der offenen Datenbankverbindungen
-if (isset($user)) {
-	if ($user->database->mysqli->thread_id > 0) {
-		$user->database->close();
-	}
-}
-
-if ($GUI->database->mysqli->thread_id > 0) {
-	$GUI->database->close();
-}
 
 if (isset($GUI->pgdatabase) and $GUI->pgdatabase->dbConn > 0) { 
 	$GUI->pgdatabase->close();

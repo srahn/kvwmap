@@ -10,7 +10,7 @@
 						<tr>
 							<td colspan="5" class="px17 fett" style="height: 30px; border-bottom:1px solid #C3C7C3;"><div style="margin-left: '.$indent.'px;">';
 			if($indent > 0)echo '<img src="graphics/pfeil_unten-rechts.gif">';
-			echo $group['Gruppenname'].'</div></td>
+			echo $group['gruppenname'].'</div></td>
 						</tr>
 					';
 			if($group['untergruppen'] != ''){

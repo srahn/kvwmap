@@ -1620,7 +1620,7 @@ class stelle {
 					ON CONFLICT (stelle_id, layer_id) DO ";
 					if ($assign_default_values){
 						$sql .= "
-						UPDATE 
+						UPDATE SET
 							queryable = l.queryable, 
 							use_geom = l.use_geom, 
 							legendorder = l.legendorder, 
@@ -1903,7 +1903,7 @@ class stelle {
 		# Aktualisieren der LayerzuStelle-Eigenschaften
 		$sql = '
 			UPDATE 
-				used_layer 
+				kvwmap.used_layer 
 			SET 
 				legendorder = ' . ($formvars['legendorder'] ?: 'NULL') . '
 			WHERE 

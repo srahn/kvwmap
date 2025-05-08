@@ -5543,14 +5543,14 @@ echo '			</table>
 	}
 
 	function closelogfiles(){
-		$dump_rolle =  $this->database->create_update_dump('rolle');
-		$dump_rolle2usedlayer =  $this->database->create_update_dump('u_rolle2used_layer');
-		$dump_menue2rolle = $this->database->create_update_dump('u_menue2rolle');
-		$dump_groups2rolle = $this->database->create_update_dump('u_groups2rolle');
-		$this->database->logfile->write($dump_rolle);
-		$this->database->logfile->write($dump_rolle2usedlayer);
-		$this->database->logfile->write($dump_menue2rolle);
-		$this->database->logfile->write($dump_groups2rolle);
+		$dump_rolle =  $this->pgdatabase->create_update_dump('rolle');
+		$dump_rolle2usedlayer =  $this->pgdatabase->create_update_dump('u_rolle2used_layer');
+		$dump_menue2rolle = $this->pgdatabase->create_update_dump('u_menue2rolle');
+		$dump_groups2rolle = $this->pgdatabase->create_update_dump('u_groups2rolle');
+		$this->pgdatabase->logfile->write($dump_rolle);
+		$this->pgdatabase->logfile->write($dump_rolle2usedlayer);
+		$this->pgdatabase->logfile->write($dump_menue2rolle);
+		$this->pgdatabase->logfile->write($dump_groups2rolle);
 		$this->main = 'showadminfunctions.php';
 		$this->titel = 'Administrationsfunktionen';
 	}
@@ -8950,8 +8950,8 @@ END $$;
 		global $supportedLanguages;
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if (trim($this->formvars['id']) !='' and $mapDB->id_exists('layer',$this->formvars['id'])) {
-			$table_information = $mapDB->get_table_information($this->Stelle->database->dbName, 'layer');
-			$this->add_message('error', 'Die Id: ' . $this->formvars['id'] . ' existiert schon. Nächste freie Layer_ID ist ' . $table_information['AUTO_INCREMENT']);
+			// $table_information = $mapDB->get_table_information('kvwmap', 'layer');
+			$this->add_message('error', 'Die Id: ' . $this->formvars['id'] . ' existiert schon.');
 			$this->use_form_data = true;
 		}
 		else {
@@ -9456,12 +9456,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['inviter_id'] = $this->user->id;
 			$this->invitation->setKeysFromTable();
 		}
-		$myobj = new MyObject($this, 'stelle');
+		$myobj = new PgObject($this, 'kvwmap', 'stelle');
 		if (in_array($this->Stelle->id, $admin_stellen)) {
 			$stellen = $myobj->find_by_sql(
 				array(
-					'select' => 's.ID, s.Bezeichnung',
-					'from' => 'stelle s',
+					'select' => 's.id, s.bezeichnung',
+					'from' => 'kvwmap.stelle s',
 					'order' => 'bezeichnung'
 				)
 			);
@@ -9469,9 +9469,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			$stellen = $myobj->find_by_sql(
 				array(
-					'select' => 's.ID, s.Bezeichnung',
-					'from' => 'stelle s, rolle r',
-					'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id,
+					'select' => 's.id, s.bezeichnung',
+					'from' => 'kvwmap.stelle s, kvwmap.rolle r',
+					'where' => 's.id = r.stelle_id AND r.user_id = ' . $this->user->id,
 					'order' => 'bezeichnung'
 				)
 			);
@@ -14423,58 +14423,58 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function connections_anzeigen() {
 		$this->class = 'Connection';
 		include_once(CLASSPATH . "{$this->class}.php");
-		$this->myobjects = $this->class::find($this, $this->formvars['order'], $this->formvars['sort']);
-		$this->main = 'myobject.php';
+		$this->pgobjects = $this->class::find($this, $this->formvars['order'], $this->formvars['sort']);
+		$this->main = 'pgobject.php';
 		$this->output();
 	}
 	
 	function connections_create() {
 		include_once(CLASSPATH . 'Connection.php');
-		$this->myobject = new Connection($this);
-		$this->myobject_create();
+		$this->pgobject = new Connection($this);
+		$this->pgobject_create();
 	}
 	
 	function connections_update() {
 		include_once(CLASSPATH . 'Connection.php');
-		$this->myobject = new Connection($this);
-		$this->myobject_update();
+		$this->pgobject = new Connection($this);
+		$this->pgobject_update();
 	}
 	
 	function connections_delete() {
 		include_once(CLASSPATH . 'Connection.php');
-		$this->myobject = new Connection($this);
-		$this->myobject_delete();
+		$this->pgobject = new Connection($this);
+		$this->pgobject_delete();
 	}
 	
 	function datasources_anzeigen() {
 		$this->class = 'DataSource';
 		include_once(CLASSPATH . "{$this->class}.php");
-		$this->myobjects = $this->class::find($this, '', $this->formvars['order'], $this->formvars['sort']);
-		$this->main = 'myobject.php';
+		$this->pgobjects = $this->class::find($this, '', $this->formvars['order'], $this->formvars['sort']);
+		$this->main = 'pgobject.php';
 		$this->output();
 	}
 	
 	function datasources_create() {
 		include_once(CLASSPATH . 'DataSource.php');
-		$this->myobject = new DataSource($this);
-		$this->myobject_create();
+		$this->pgobject = new DataSource($this);
+		$this->pgobject_create();
 	}
 	
 	function datasources_update() {
 		include_once(CLASSPATH . 'DataSource.php');
-		$this->myobject = new DataSource($this);
-		$this->myobject_update();
+		$this->pgobject = new DataSource($this);
+		$this->pgobject_update();
 	}
 	
 	function datasources_delete() {
 		include_once(CLASSPATH . 'DataSource.php');
-		$this->myobject = new DataSource($this);
-		$this->myobject_delete();
+		$this->pgobject = new DataSource($this);
+		$this->pgobject_delete();
 	}	
 	
-	function myobject_create() {
-		$this->myobject->data = formvars_strip($this->formvars, $this->myobject->getKeys(), 'keep');
-		$results = $this->myobject->validate();
+	function pgobject_create() {
+		$this->pgobject->data = formvars_strip($this->formvars, $this->pgobject->getKeys(), 'keep');
+		$results = $this->pgobject->validate();
 		if (count($results) > 0) {
 			$result = array(
 				'success' => false,
@@ -14490,7 +14490,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
 		}
 		else {
-			$results = $this->myobject->create();
+			$results = $this->pgobject->create();
 			$result = $results[0];
 		}
 		# return success and id of created connection or error and error msg in json format
@@ -14500,7 +14500,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}		
 	
-	function myobject_update() {
+	function pgobject_update() {
 		if ($this->formvars['id'] == '') {
 			$result = array(
 				'success' => false,
@@ -14508,16 +14508,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
 		}
 		else {
-			$this->myobject->find_by('id', $this->formvars['id']);
-			if ($this->myobject->get('id') != $this->formvars['id']) {
+			$this->pgobject->find_by('id', $this->formvars['id']);
+			if ($this->pgobject->get('id') != $this->formvars['id']) {
 				$result = array(
 					'success' => false,
 					'err_msg' => 'Der Datensatz mit der ID: '. $this->formvars['id'] . ' kann nicht aktualisiert werden, weil er in der Datenbank nicht existiert.'
 				);
 			}
 			else {
-				$this->myobject->data = formvars_strip($this->formvars, $this->myobject->getKeys(), 'keep');
-				$results = $this->myobject->validate();
+				$this->pgobject->data = formvars_strip($this->formvars, $this->pgobject->getKeys(), 'keep');
+				$results = $this->pgobject->validate();
 				if (count($results) > 0) {
 					$result = array(
 						'success' => false,
@@ -14533,17 +14533,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					);
 				}
 				else {
-					$results = $this->myobject->update($this->myobject->data, false);
+					$results = $this->pgobject->update($this->pgobject->data, false);
 					if ($results[0]['success']) {
 						$result = array(
 							'success' => true,
-							'msg' => 'Der Datensatz mit der ID: ' . $this->myobject->get('id') . ' konnte erfolgreich aktualisiert werden.'
+							'msg' => 'Der Datensatz mit der ID: ' . $this->pgobject->get('id') . ' konnte erfolgreich aktualisiert werden.'
 						);
 					}
 					else {
 						$result = array(
 							'success' => false,
-							'err_msg' => 'Fehler beim Aktualisieren des Datensatzes mit der ID: ' . $this->myobject->get('id') . ' Meldung: ' . $results[0]['err_msg']
+							'err_msg' => 'Fehler beim Aktualisieren des Datensatzes mit der ID: ' . $this->pgobject->get('id') . ' Meldung: ' . $results[0]['err_msg']
 						);
 					}
 
@@ -14557,7 +14557,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	function myobject_delete() {
+	function pgobject_delete() {
 		if ($this->formvars['id'] == '') {
 			$result = array(
 				'success' => false,
@@ -14565,34 +14565,34 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
 		}
 		else {
-			$this->myobject->find_by('id', $this->formvars['id']);
-			if ($this->myobject->get('id') != $this->formvars['id']) {
+			$this->pgobject->find_by('id', $this->formvars['id']);
+			if ($this->pgobject->get('id') != $this->formvars['id']) {
 				$result = array(
 					'success' => false,
 					'err_msg' => 'Der Datensatz mit der ID: '. $this->formvars['id'] . ' kann nicht gelöscht werden, weil er in der Datenbank nicht existiert.'
 				);
 			}
 			else {
-				$result = $this->myobject->delete();
-				if ($this->myobject->database->success) {
+				$result = $this->pgobject->delete();
+				if ($this->pgobject->database->success) {
 					$num_affected_rows = pg_affected_rows($result);
 					switch ($num_affected_rows) {
 						case (-1) : {
 							$result = array(
 								'success' => false,
-								'err_msg' => 'Fehler beim Löschen des Datensatzes mit der ID: ' . $this->myobject->get('id')
+								'err_msg' => 'Fehler beim Löschen des Datensatzes mit der ID: ' . $this->pgobject->get('id')
 							);
 						} break;
 						case (0) : {
 							$result = array(
 								'success' => false,
-								'err_msg' => 'Achtung! Es wurde kein Datensatz gelöscht. Der Datensatz mit der ID: ' . $this->myobject->get('id') . ' ist nicht mehr vorhanden.'
+								'err_msg' => 'Achtung! Es wurde kein Datensatz gelöscht. Der Datensatz mit der ID: ' . $this->pgobject->get('id') . ' ist nicht mehr vorhanden.'
 							);
 						} break;
 						case (1) : {
 							$result = array(
 								'success' => true,
-								'msg' => 'Datensatz mit der ID: ' . $this->myobject->get('id') . ' erfolgreich gelöscht.'
+								'msg' => 'Datensatz mit der ID: ' . $this->pgobject->get('id') . ' erfolgreich gelöscht.'
 							);
 						} break;
 						default : {
@@ -20330,7 +20330,7 @@ class db_mapObj{
 		foreach($formvars['layers'] as $i => $layer_id) {
 			$sql = "
 				UPDATE
-					layer
+					kvwmap.layer
 				SET
 					drawingorder = " . $formvars['orders'][$i] . "
 				WHERE
@@ -21584,9 +21584,9 @@ class db_mapObj{
 	function get_table_information($dbname, $tablename) {
 		$sql = "SELECT * FROM information_schema.tables WHERE table_schema = '" . $dbname."' AND table_name = '" . $tablename."'";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_table_information - Lesen der Metadaten der Tabelle " . $tablename." in db " . $dbname.":<br>" . $sql,4);
-		$this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		$metadata = $this->db->result->fetch_array();
+		$metadata = pg_fetch_array($ret[1]);
 		return $metadata;
 	}
 
@@ -22503,7 +22503,7 @@ class Document {
 	function delete_ausschnitt($stelle_id, $user_id, $id) {
 		$sql = "
 			DELETE FROM
-				druckausschnitte
+				kvwmap.druckausschnitte
 			WHERE
 				stelle_id = " . $stelle_id . " AND
 				user_id = " . $user_id . "
@@ -22516,9 +22516,11 @@ class Document {
 	function save_ausschnitt($stelle_id, $user_id, $name, $epsg_code, $center_x, $center_y, $print_scale, $angle, $frame_id){
 		$sql = "
 			INSERT INTO
-				druckausschnitte
-			SET
-				id = COALESCE(
+				kvwmap.druckausschnitte
+			VALUES (
+				" . $stelle_id . ",
+				" . $user_id . ",
+				COALESCE(
 					(
 						SELECT
 							new_id
@@ -22535,15 +22537,13 @@ class Document {
 					),
 					1
 				),
-				stelle_id = " . $stelle_id . ",
-				user_id = " . $user_id . ",
-				name = '" . $name . "',
-				epsg_code = '" . $epsg_code . "',
-				center_x = " . $center_x . ",
-				center_y = " . $center_y . ",
-				print_scale = " . $print_scale . ",
-				angle = " . $angle . ",
-				frame_id = " . $frame_id . "
+				'" . $name . "',
+				'" . $epsg_code . "',
+				" . $center_x . ",
+				" . $center_y . ",
+				" . $print_scale . ",
+				" . $angle . ",
+				" . $frame_id . "
 		";
 		$this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
 		$this->database->execSQL($sql,4, 1);
