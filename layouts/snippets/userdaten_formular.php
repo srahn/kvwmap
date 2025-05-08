@@ -190,7 +190,7 @@
 
 		<div class="form_formular-input form_formular-aic">
 			<div><? echo $strUserTitle;?></div>
-			<div><input name="Namenszusatz" type="text" value="<? echo $this->formvars['Namenszusatz']; ?>" maxlength="50"></div>
+			<div><input name="namenszusatz" type="text" value="<? echo $this->formvars['namenszusatz']; ?>" maxlength="50"></div>
 		</div>
 
 		<div class="form_formular-input form_formular-aic">

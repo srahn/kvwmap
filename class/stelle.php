@@ -840,12 +840,12 @@ class stelle {
 			SELECT
 				*
 			FROM
-				stellen_hierarchie
+				kvwmap.stellen_hierarchie
 		";
 		$this->debug->write("<p>file:stelle.php class:stelle->getStellenhierarchie - <br>" . $sql, 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
-		while($rs = $this->database->result->fetch_assoc()) {
+		while($rs = pg_fetch_assoc($ret[1])) {
 			$this->links[$rs['parent_id']][] = $rs['child_id'];
 		};
 		
@@ -1168,7 +1168,7 @@ class stelle {
 
 	function addParent($parent_id) {
 		$sql = "
-			INSERT INTO stellen_hierarchie (
+			INSERT INTO kvwmap.stellen_hierarchie (
 				parent_id,
 				child_id
 			)
@@ -1219,7 +1219,7 @@ class stelle {
 	
 	function addChild($child_id) {
 		$sql = "
-			INSERT INTO stellen_hierarchie (
+			INSERT INTO kvwmap.stellen_hierarchie (
 				parent_id,
 				child_id
 			)
@@ -2554,29 +2554,29 @@ class stelle {
 		$liste['eingeschr_gemarkung'] = Array();
 		$liste['ganze_flur'] = Array();
 		$liste['eingeschr_flur'] = Array();
-		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE stelle_id = '.$this->id;
+		$sql = 'SELECT gemeinde_id, gemarkung, flur, flurstueck FROM stelle_gemeinden WHERE stelle_id = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if ($this->database->result->num_rows > 0) {
-			while ($rs=$this->database->result->fetch_assoc()) {
-				if ($rs['Gemarkung'] != '') {
-					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
-					if ($rs['Flur'] != '') {
-						$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
-						if ($rs['Flurstueck'] != '') {
-							$liste['eingeschr_flur'][$rs['Gemarkung']][$rs['Flur']][] = $rs['Flurstueck'];
+		$ret = $this->database->execSQL($sql);
+		if (pg_num_rows($ret[1]) > 0) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
+				if ($rs['gemarkung'] != '') {
+					$liste['eingeschr_gemeinde'][$rs['gemeinde_id']] = NULL;
+					if ($rs['flur'] != '') {
+						$liste['eingeschr_gemarkung'][$rs['gemarkung']][] = $rs['flur'];
+						if ($rs['flurstueck'] != '') {
+							$liste['eingeschr_flur'][$rs['gemarkung']][$rs['flur']][] = $rs['flurstueck'];
 						}
 						else {
-							$liste['ganze_flur'][$rs['Gemarkung']][] = $rs['Flur'];
+							$liste['ganze_flur'][$rs['gemarkung']][] = $rs['flur'];
 						}
 					}
 					else {
-						$liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
+						$liste['ganze_gemarkung'][$rs['gemarkung']] = NULL;
 					}
 				}
 				else{
-					$liste['ganze_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+					$liste['ganze_gemeinde'][$rs['gemeinde_id']] = NULL;
 				}
 			}
 		}
@@ -2658,9 +2658,9 @@ class stelle {
 				id = " . $this->id . "
 		";
 		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->database->result->fetch_assoc();
+		$rs = pg_fetch_assoc($ret[1]);
 		return $rs;
 	}
 

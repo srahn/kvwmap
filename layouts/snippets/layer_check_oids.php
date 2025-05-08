@@ -191,13 +191,13 @@ switch ($this->formvars['action']) {
 			if ($this->formvars['check_' . $layer_id] AND $this->formvars['new_oid_' . $layer_id] != '') {
 				$sql = "
 					UPDATE
-						layer
+						kvwmap.layer
 					SET
 						oid = '" . $this->formvars['new_oid_' . $layer_id] . "'
 					WHERE
 						layer_id = " . $layer_id . "
 				";
-				$result = $this->database->execSQL($sql);
+				$result = $this->pgdatabase->execSQL($sql);
 			}
 		}
 	}break;
@@ -206,13 +206,13 @@ switch ($this->formvars['action']) {
 			if ($this->formvars['check_' . $layer_id] AND $this->formvars['new_query_' . $layer_id] != '') {
 				$sql = "
 					UPDATE
-						layer
+						kvwmap.layer
 					SET
 						pfad = '" . $this->formvars['new_query_' . $layer_id] . "'
 					WHERE
 						layer_id = " . $layer_id . "
 				";
-				$result = $this->database->execSQL($sql);
+				$result = $this->pgdatabase->execSQL($sql);
 			}
 		}
 	}break;
@@ -231,13 +231,13 @@ switch ($this->formvars['action']) {
 					if (trim($table_part[1]) == $this->formvars['maintable_' . $layer_id]) {
 						$sql = "
 							UPDATE
-								layer
+								kvwmap.layer
 							SET
 								Data = '" . $this->formvars['new_data_' . $layer_id] . "'
 							WHERE
 								layer_id = " . $layer_id . "
 						";
-						$result = $this->database->execSQL($sql);
+						$result = $this->pgdatabase->execSQL($sql);
 					}
 				}
 			}
@@ -257,10 +257,10 @@ $query = "
 		CONCAT('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as connectionstring,
 		g.Gruppenname
 	FROM 
-		`layer` 
-		LEFT JOIN used_layer ul ON ul.layer_id = layer.layer_id
-		LEFT JOIN	u_groups g ON layer.Gruppe = g.id 
-		LEFT JOIN	connections c ON c.id = connection_id
+		kvwmap.layer LEFT JOIN 
+		kvwmap.used_layer ul ON ul.layer_id = layer.layer_id LEFT JOIN 
+		kvwmap.u_groups g ON layer.gruppe = g.id LEFT JOIN 
+		kvwmap.connections c ON c.id = connection_id
 	WHERE
 		connectiontype = 6
 	ORDER BY " . $this->formvars['order'] . "
@@ -280,7 +280,7 @@ if ($without_layer_id != '') {
 }
 
 #echo '<br>get layer with sql: ' . $query;
-$result = $this->database->execSQL($query);
+$ret = $this->pgdatabase->execSQL($query);
 
 ?>
 
@@ -410,8 +410,8 @@ $umlaute=array("Ä","Ö","Ü");
 
 $oid_layer_count = 0;
 $i = 0;
-$layer_count = $this->database->result->num_rows;
-while ($layer = $this->database->result->fetch_assoc()) {
+$layer_count = pg_num_rows($ret[1]);
+while ($layer = pg_fetch_assoc($ret[1])) {
 	$class = '';
   $status = checkStatus($layer);
 	$result = array();

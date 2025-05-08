@@ -58,28 +58,28 @@
 	$GUI->ukos_new_doppikobjekt = function($schema_name, $table_name, $geometry_type) use ($GUI) {
 		$sql = "
 			SELECT
-				`layer_id`,
-				`Name`
+				layer_id,
+				name
 			FROM
-				`layer`
+				kvwmap.layer
 			WHERE
-				`schema` LIKE '%" . $schema_name . "%' AND
-				`maintable` = '" . $table_name . "' AND
-				`Datentyp` = " . $geometry_type . "
+				schema LIKE '%" . $schema_name . "%' AND
+				maintable = '" . $table_name . "' AND
+				datentyp = " . $geometry_type . "
 		";
 		# echo '<br>Sql: ' . $sql;
-		$ret = $GUI->database->execSQL($sql, 1, 4);
+		$ret = $GUI->pgdatabase->execSQL($sql, 1, 4);
 
 		$nix_gefunden = true;
-		if ($ret['success'] AND $GUI->database->result->num_rows() == 1) {
+		if ($ret['success'] AND pg_num_rows($ret[1]) == 1) {
 			$nix_gefunden = false;
-			$rs = $GUI->database->result->fetch_assoc();
+			$rs = pg_fetch_assoc($ret[1]);
 			$GUI->formvars['selected_layer_id'] = $rs['layer_id'];
 			$GUI->neuer_Layer_Datensatz();
 		}
 		else {
 			if ($schema_name == 'ukos_doppik' AND $table_name == 'strasse' AND $geometry_type == 2) {
-				while ($rs = $GUI->database->result->fetch_assoc()) {
+				while ($rs = pg_fetch_assoc($ret[1])) {
 					if ($rs['name'] == 'Straßen') {
 						$nix_gefunden = false;
 						$GUI->formvars['selected_layer_id'] = $rs['layer_id'];

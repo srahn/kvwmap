@@ -24,8 +24,8 @@
 $GUI->mobile_get_stellen = function () use ($GUI) {
 	$sql = "
 		SELECT DISTINCT
-			s.ID,
-			s.Bezeichnung,
+			s.id,
+			s.bezeichnung,
 			s.epsg_code,
 			s.minxmax,
 			s.minymax,
@@ -33,18 +33,18 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 			s.maxymax,
 			s.selectable_layer_params
 		FROM
-			rolle r JOIN
-			stelle s ON r.stelle_id = s.ID JOIN
-			used_layer ul ON s.ID = ul.stelle_id JOIN
-			layer l ON ul.layer_id = l.layer_id
+			kvwmap.rolle r JOIN
+			kvwmap.stelle s ON r.stelle_id = s.ID JOIN
+			kvwmap.used_layer ul ON s.ID = ul.stelle_id JOIN
+			kvwmap.layer l ON ul.layer_id = l.layer_id
 		WHERE
 			r.user_id = " . $GUI->user->id . " AND
-			l.sync = '1'
+			l.sync = true
 		ORDER BY
-			s.Bezeichnung
+			s.bezeichnung
 	";
 	// echo '<br>SQL zur Abfrage der mobilen Stellen des Nutzers: ' . $sql;
-	$ret = $GUI->database->execSQL($sql, 4, 0);
+	$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
 
 	if ($ret[0]) {
 		return array(
@@ -53,7 +53,7 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 		);
 	}
 	$stellen = array();
-	while ($rs = $ret['result']->fetch_assoc()) {
+	while ($rs = pg_fetch_assoc($ret[1])) {
 		$stellen[] = $GUI->mobile_reformat_stelle($rs, $GUI->user->rolle->get_layer_params($rs['selectable_layer_params'], $GUI->pgdatabase));
 	}
 
@@ -505,8 +505,8 @@ $GUI->mobile_sync_all_parameter_valide = function ($params) use ($GUI) {
 };
 
 $GUI->mobile_reformat_stelle = function ($stelle_settings, $layer_params) use ($GUI) {
-	$stelle['ID'] = $stelle_settings['ID'];
-	$stelle['Bezeichnung'] = $stelle_settings['Bezeichnung'];
+	$stelle['ID'] = $stelle_settings['id'];
+	$stelle['Bezeichnung'] = $stelle_settings['bezeichnung'];
 	$stelle['dbname'] = ((POSTGRES_DBNAME and POSTGRES_DBNAME != '') ? POSTGRES_DBNAME : 'kvmobile');
 	$projFROM = new projectionObj("init=epsg:" . $stelle_settings['epsg_code']);
 	$projTO = new projectionObj("init=epsg:4326");

@@ -1412,7 +1412,7 @@ class user {
 		$columns['name'] = "'" . $userdaten['nachname'] . "'";
 		$columns['vorname'] = "'" . $userdaten['vorname'] . "'";
 		$columns['login_name'] = "'" . trim($userdaten['loginname']) . "'";
-		$columns['namenszusatz'] = "'" . $userdaten['Namenszusatz'] . "'";
+		$columns['namenszusatz'] = "'" . $userdaten['namenszusatz'] . "'";
 		$columns['password'] = "kvwmap.sha1('" . pg_escape_string(trim($userdaten['password2'])) . "')";
 		$columns['password_setting_time'] = "CURRENT_TIMESTAMP";
 		$columns['password_expired'] = ($userdaten['password_expired'] ? '1' : '0');
@@ -1467,7 +1467,7 @@ class user {
 		$password_columns = '';
 		if ($userdaten['changepasswd'] == 1) {
 			$password_columns = ",
-				password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . "'),
+				password = kvwmap.sha1('" . pg_escape_string(trim($userdaten['password2'])) . "'),
 				password_setting_time = CURRENT_TIMESTAMP,
 				password_expired = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
 			";
@@ -1480,9 +1480,9 @@ class user {
 				name = '" . $userdaten['nachname'] . "',
 				vorname = '" . $userdaten['vorname'] . "',
 				login_name = '" . trim($userdaten['loginname']) . "',
-				namenszusatz = '" . $userdaten['Namenszusatz'] . "',
-				start = '" . ($userdaten['start'] ?: '0000-00-00') . "',
-				stop= '" . ($userdaten['stop'] ?: '0000-00-00') . "',
+				namenszusatz = '" . $userdaten['namenszusatz'] . "',
+				start = " . ($userdaten['start'] ? "'" . $userdaten['start'] . "'" : 'NULL') . ",
+				stop = " . ($userdaten['stop'] ? "'" . $userdaten['stop'] . "'" : 'NULL') . ",
 				archived= " . ($userdaten['archived']? "'" . $userdaten['archived'] . "'" : "NULL") . ",
 				id =  " . $userdaten['id'].",
 				phon = '" . $userdaten['phon']."',

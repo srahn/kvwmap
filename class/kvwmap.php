@@ -14231,9 +14231,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id, true);
 			$this->user_stelle = new stelle($this->userdaten[0]['stelle_id'], $this->pgdatabase);
 			$this->formvars['nachname'] 									= $this->userdaten[0]['name'];
-			$this->formvars['vorname'] 										= $this->userdaten[0]['Vorname'];
+			$this->formvars['vorname'] 										= $this->userdaten[0]['vorname'];
 			$this->formvars['loginname'] 									= $this->userdaten[0]['login_name'];
-			$this->formvars['Namenszusatz'] 							= $this->userdaten[0]['Namenszusatz'];
+			$this->formvars['Namenszusatz'] 							= $this->userdaten[0]['namenszusatz'];
 			$this->formvars['password_setting_time'] 			= $this->userdaten[0]['password_setting_time'];
 			$this->formvars['password_expired'] 					= $this->userdaten[0]['password_expired'];
 			$this->formvars['start'] 											= $this->userdaten[0]['start'];
@@ -18615,7 +18615,13 @@ class db_mapObj{
 	}
 
   function deleteFilter($stelle_id, $layer_id, $attributname){
-    $sql = 'DELETE FROM kvwmap.u_attributfilter2used_layer WHERE stelle_id = '.$stelle_id.' AND layer_id = '.$layer_id.' AND attributname = "'.$attributname.'"';
+    $sql = "
+			DELETE FROM 
+				kvwmap.u_attributfilter2used_layer 
+			WHERE 
+				stelle_id = " . $stelle_id . " AND 
+				layer_id = " . $layer_id . " AND 
+				attributname = '" . $attributname . "'";
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteFilter - Löschen eines Attribut-Filters eines used_layers:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
@@ -18644,19 +18650,24 @@ class db_mapObj{
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->write_filter - Speichern des Filterstrings:<br>" . $sql, 4);
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) {
-			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
-			echo $this->db->mysqli->error;
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4);
 			return false;
 		}
 		return true;
 	}
 
   function checkPolygon($poly_id){
-    $sql = 'SELECT * FROM u_attributfilter2used_layer WHERE attributvalue = "'.$poly_id.'" AND type = "geometry"';
+    $sql = "
+			SELECT 
+				* 
+			FROM 
+				kvwmap.u_attributfilter2used_layer 
+			WHERE 
+				attributvalue = '" . $poly_id . "' AND type = 'geometry'";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->checkPolygon - Testen ob Polygon_id noch in einem Filter benutzt wird:<br>" . $sql,4);
-    $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $rs = $this->db->result->fetch_assoc();
+    $ret = $this->db->execSQL($sql);
+    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4); return 0; }
+    $rs = pg_fetch_assoc($ret[1]);
     if($rs == NULL){
       return false;
     }
@@ -18666,12 +18677,19 @@ class db_mapObj{
   }
 
   function getPolygonID($stelle_id,$layer_id) {
-    $sql = 'SELECT attributvalue AS id FROM u_attributfilter2used_layer';
-    $sql.= ' WHERE stelle_id = "'.$stelle_id.'" AND layer_id = "'.$layer_id.'" AND type = "geometry"';
+    $sql = "
+			SELECT 
+				attributvalue AS id 
+			FROM 
+				kvwmap.u_attributfilter2used_layer
+    	WHERE 
+				stelle_id = " . $stelle_id . " AND 
+				layer_id = " . $layer_id . " AND 
+				type = 'geometry'";
     #echo $sql;
     $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $ret = $this->db->result->fetch_row();
+    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4); return 0; }
+    $ret = pg_fetch_row($ret[1]);
     $poly_id = $ret[0];
     return $poly_id;
   }
@@ -18679,22 +18697,30 @@ class db_mapObj{
 	function saveAttributeFilter($formvars) {
 		$sql = "
 			INSERT INTO 
-				u_attributfilter2used_layer 
-			SET
-				attributname = '" . $formvars['attributname'] . "',
-				attributvalue = '" . pg_escape_string($formvars['attributvalue']) . "',
-				operator = '" . $formvars['operator']. "',
-				type = '" . $formvars['type'] . "',
-				stelle_id = " . $formvars['stelle'] . ",
-				layer_id = " . $formvars['layer'] . "
-			ON DUPLICATE KEY UPDATE  
-				attributvalue = '" . pg_escape_string($formvars['attributvalue']) . "', 
-				operator = '" . $formvars['operator'] . "'";
+				kvwmap.u_attributfilter2used_layer (
+					attributname,
+					attributvalue,
+					operator,
+					type,
+					stelle_id,
+					layer_id
+				)
+				VALUES (
+					'" . $formvars['attributname'] . "',
+					'" . pg_escape_string($formvars['attributvalue']) . "',
+					'" . $formvars['operator']. "',
+					'" . $formvars['type'] . "',
+					" . $formvars['stelle'] . ",
+					" . $formvars['layer'] . "
+				)
+			ON CONFLICT (stelle_id, layer_id, attributname) DO UPDATE SET
+				attributvalue = EXCLUDED.attributvalue, 
+				operator = EXCLUDED.operator";
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->saveAttributeFilter - Speichern der Attribute-Filter-Parameter:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) {
-			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4);
 			return 0;
 		}
 	}
@@ -18705,16 +18731,16 @@ class db_mapObj{
 			SELECT
 				*
 			FROM
-				u_attributfilter2used_layer
+				kvwmap.u_attributfilter2used_layer
 			WHERE
 				stelle_id = " . $Stelle_ID . " AND
 				layer_id = " . $layer_id . "
 		";
 		# echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_attribute_filter - Lesen der Attribute-Filter-Parameter:<br>" . $sql, 4);
-		$this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__,4); return 0; }
-		while($rs = $this->db->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$filter[] = $rs;
 		}
 		return $filter;
@@ -21119,13 +21145,13 @@ class db_mapObj{
 			SELECT
 				*
 			FROM
-				datatypes
+				kvwmap.datatypes
 			" . $order_sql;
 
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Datatypes - Lesen aller Datentypen:<br>" . $sql , 4);
-		$this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		while($rs = $this->db->result->fetch_assoc()) {
+		while($rs = pg_fetch_assoc($ret[1])) {
 			/*
 			foreach($rs AS $key => $value) {
 				$datatypes[$key][] = $value;
@@ -22524,7 +22550,7 @@ class Document {
 	}
 
   function load_ausschnitte($stelle_id, $user_id, $id){
-    $sql = 'SELECT * FROM druckausschnitte WHERE ';
+    $sql = 'SELECT * FROM kvwmap.druckausschnitte WHERE ';
     $sql.= 'stelle_id = '.$stelle_id.' AND ';
     $sql.= 'user_id = '.$user_id;
     if($id != ''){
@@ -22533,7 +22559,7 @@ class Document {
     $this->debug->write("<p>file:kvwmap class:Document->load_ausschnitte :<br>" . $sql,4);
 		$ret1 = $this->database->execSQL($sql, 4, 1);
 		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs = $this->database->result->fetch_assoc()){
+		while($rs = pg_fetch_assoc($ret1[1])){
       $ausschnitte[] = $rs;
     }
     return $ausschnitte;

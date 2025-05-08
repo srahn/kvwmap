@@ -1,10 +1,10 @@
 <?php
-class LayerAttributeRolleSetting extends MyObject {
+class LayerAttributeRolleSetting extends PgObject {
 
 	static $write_debug = true;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'layer_attributes2rolle');
+		parent::__construct($gui, 'kvwmap', 'layer_attributes2rolle');
 		$this->identifier_type = 'array';
 		$this->identifier = array(
 			array('type' => 'int(11)', 'key' => 'layer_id'),
@@ -15,13 +15,13 @@ class LayerAttributeRolleSetting extends MyObject {
 	}
 
 	public static	function find_by_layer_rolle($layer_id, $stelle_id, $user_id) {
-		return $user->find_where('`layer_id` = ' . $layer_id . ' AND `stelle_id` = ' . $stelle_id . ' `user_id` = ' . $user_id);
+		return $user->find_where('layer_id = ' . $layer_id . ' AND stelle_id = ' . $stelle_id . ' user_id = ' . $user_id);
 	}
 
 	function resetSortOrder($layer_id, $stelle_id, $user_id) {
 		$sql = "
 			UPDATE
-				layer_attributes2rolle
+				kvwmap.layer_attributes2rolle
 			SET
 				sort_order = 0
 			WHERE
@@ -44,7 +44,7 @@ class LayerAttributeRolleSetting extends MyObject {
 			SELECT
 				*
 			FROM
-				layer_attributes2rolle
+				kvwmap.layer_attributes2rolle
 			WHERE
 				layer_id = " . $layer_id . " AND
 				user_id = " . $user_id . " AND
@@ -52,11 +52,11 @@ class LayerAttributeRolleSetting extends MyObject {
 		";
 		#echo '<p>SQL zum Abfragen der rollenbezogenen Layerattributeinstellungen: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes2rolle - Lesen der rollenbezogenen Layerattributeinstellungen:<br>" . $sql , 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			echo err_msg($this->script_name, __LINE__, $sql); return 0;
 		}
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rolle_attribute_settings[$rs['attributename']] = $rs;
 		}
 		return $rolle_attribute_settings;

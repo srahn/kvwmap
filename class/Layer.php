@@ -340,13 +340,13 @@ class Layer extends PgObject {
 		SELECT DISTINCT
 			la.layer_id,
 			la.name attribute_name,
-			SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
-l.Name AS sub_layer_name
+			split_part(la.options, ',', 1) AS sub_layer_id,
+			l.name AS sub_layer_name
 		FROM
-			`layer_attributes` la JOIN
-			`used_layer` ul ON la.layer_id = ul.layer_id JOIN
-			`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.stelle_id = las.stelle_id LEFT JOIN
-			`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.layer_id
+			kvwmap.layer_attributes la JOIN
+			kvwmap.used_layer ul ON la.layer_id = ul.layer_id JOIN
+			kvwmap.layer_attributes2stelle las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.stelle_id = las.stelle_id LEFT JOIN
+			kvwmap.layer l ON split_part(la.options, ',', 1)::integer = l.layer_id
 		WHERE
 			la.layer_id = " . $id . " AND
 			la.form_element_type = 'SubFormEmbeddedPK' AND
@@ -355,9 +355,9 @@ l.Name AS sub_layer_name
 			las.privileg = '1'
 		";
 		#echo '<br>SQL to find coupled sub_layer that are not in sync mode: ' . $sql;
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		$not_synced_sub_layers = array();
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$not_synced_sub_layers[] = $rs;
 		}
 		return $not_synced_sub_layers;
@@ -374,11 +374,11 @@ l.Name AS sub_layer_name
 		$sql = "
 			SELECT DISTINCT
 				la.name attribute_name,
-				SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
-				l.Name AS layer_name
+				split_part(la.options, ',', 1) AS sub_layer_id,
+				l.name AS layer_name
 			FROM
-				`layer_attributes` la LEFT JOIN
-				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.layer_id
+				kvwmap.layer_attributes la LEFT JOIN
+				kvwmap.layer l ON split_part(la.options, ',', 1)::integer = l.layer_id
 			WHERE
 				la.layer_id = " . $id . " AND
 				la.visible = 1 AND
@@ -386,9 +386,9 @@ l.Name AS sub_layer_name
 				l.layer_id IS NULL
 		";
 		#echo '<br>SQL to find coupled sublayer that not exists: ' . $sql;
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		$sublayers = array();
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$sublayers[] = $rs;
 		}
 		return $sublayers;
@@ -403,17 +403,17 @@ l.Name AS sub_layer_name
 		$sql = "
 			SELECT DISTINCT
 				la.name AS attribute_name,
-				SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
-				l.Name AS layer_name,
+				split_part(la.options, ',', 1) AS sub_layer_id,
+				l.name AS layer_name,
 				ul.stelle_id AS stelle_id,
-				s.Bezeichnung AS stelle_bezeichnung
+				s.bezeichnung AS stelle_bezeichnung
 			FROM
-				`layer_attributes` la JOIN
-				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.layer_id JOIN
-				`used_layer` ul ON la.layer_id = ul.layer_id JOIN
-				`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.stelle_id = las.stelle_id JOIN 
-				`stelle` s ON ul.stelle_id = s.ID LEFT JOIN
-				`used_layer` ul2 ON ul.stelle_id = ul2.stelle_id AND SUBSTRING_INDEX(la.options, ',', 1) = ul2.layer_id
+				kvwmap.layer_attributes la JOIN
+				kvwmap.layer l ON split_part(la.options, ',', 1)::integer = l.layer_id JOIN
+				kvwmap.used_layer ul ON la.layer_id = ul.layer_id JOIN
+				kvwmap.layer_attributes2stelle las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.stelle_id = las.stelle_id JOIN 
+				kvwmap.stelle s ON ul.stelle_id = s.ID LEFT JOIN
+				kvwmap.used_layer ul2 ON ul.stelle_id = ul2.stelle_id AND split_part(la.options, ',', 1) = ul2.layer_id
 			WHERE
 				la.layer_id = " . $id. " AND
 				la.form_element_type = 'SubFormEmbeddedPK' AND
@@ -421,9 +421,9 @@ l.Name AS sub_layer_name
 				ul2.layer_id IS NULL
 		";
 		#echo '<br>SQL to find sublayer that are not in same stelle: ' . $sql;
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		$sublayers = array();
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$sublayers[] = $rs;
 		}
 		return $sublayers;

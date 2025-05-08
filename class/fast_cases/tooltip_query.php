@@ -1303,24 +1303,24 @@ class rolle {
 		$this->loglevel = 0;
 	}
 
-  function read_disabled_class_expressions($layerset) {
+	function read_disabled_class_expressions($layerset) {
 		$sql = "
 			SELECT 
 				cl.layer_id,
 				cl.class_id,
-				cl.Expression,
+				cl.expression,
 				cl.classification
 			FROM 
-				classes as cl
-				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.class_id    
+				kvwmap.classes as cl
+				JOIN kvwmap.u_rolle2used_class as r2uc ON r2uc.class_id = cl.class_id
 			WHERE 
 				r2uc.status = 0 AND 
 				r2uc.user_id = " . $this->user_id . "	AND 
 				r2uc.stelle_id = " . $this->stelle_id . "
 		";
 		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
-		$this->database->execSQL($sql);
-    while ($row = $this->database->result->fetch_assoc()) {
+		$ret = $this->database->execSQL($sql);
+    while ($row = pg_fetch_assoc($ret[1])) {
 			if ($layerset['layer_ids'][$row['layer_id']]['classification'] == $row['classification']) {
   			$result[$row['layer_id']][] = $row;
 			}
@@ -1329,44 +1329,37 @@ class rolle {
   }	
 
   function readSettings() {
-		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql = "
 			SELECT
 				*
 			FROM
-				rolle
+				kvwmap.rolle
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo 'Read rolle settings mit sql: ' . $sql;
-    $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) {
-      $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
-      return 0;
-    }
-		if ($this->database->result->num_rows > 0){
-			$rs = $this->database->result->fetch_assoc();
+		#echo '<br>Read rolle settings mit sql: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if (pg_num_rows($ret[1]) > 0){
+			$rs = pg_fetch_assoc($ret[1]);
 			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
-			$this->nImageWidth=$rs['nImageWidth'];
-			$this->nImageHeight=$rs['nImageHeight'];			
+			$this->nImageWidth=$rs['nimagewidth'];
+			$this->nImageHeight=$rs['nimageheight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
 			$this->auto_map_resize=$rs['auto_map_resize'];
-			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
-			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
+			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nimagewidth'];
+			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nimageheight'];
 			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
-			$this->nZoomFactor=$rs['nZoomFactor'];
+			$this->nZoomFactor=$rs['nzoomfactor'];
 			$this->epsg_code=$rs['epsg_code'];
 			$this->epsg_code2=$rs['epsg_code2'];
 			$this->coordtype=$rs['coordtype'];
 			$this->last_time_id=$rs['last_time_id'];
 			$this->gui=$rs['gui'];
-			rolle::$language=$rs['language'];
-			$language = rolle::$language;
-			$this->hideMenue=$rs['hidemenue'];
-			$this->hideLegend=$rs['hidelegend'];
+			rolle::$language = $rs['language'];
+			$this->hideMenue = ($rs['hidemenue'] == 'f'? false : true);
+			$this->hideLegend = ($rs['hidelegend'] == 'f'? false : true);
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -1386,6 +1379,7 @@ class rolle {
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
+			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
@@ -1402,7 +1396,7 @@ class rolle {
 				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
 				#rolle::$hist_timestamp = '';
 			}
-			$this->selectedButton=$rs['selectedButton'];
+			$this->selectedButton = $rs['selectedbutton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);
@@ -1417,11 +1411,16 @@ class rolle {
 			$this->polyquery = in_array('polyquery', $buttons);
 			$this->touchquery = in_array('touchquery', $buttons);
 			$this->measure = in_array('measure', $buttons);
+			$this->punktfang = in_array('punktfang', $buttons);
 			$this->freepolygon = in_array('freepolygon', $buttons);
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
 			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
+			$this->redline_text_color = $rs['redline_text_color'];
+			$this->redline_font_family = $rs['redline_font_family'];
+			$this->redline_font_size = $rs['redline_font_size'];
+			$this->redline_font_weight = $rs['redline_font_weight'];
 			return 1;
 		}
 		else {
@@ -1430,100 +1429,103 @@ class rolle {
 	}
 
 	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
-		global $language;
+		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
 
 		# Abfragen der Layer in der Rolle
-		if ($language != 'german') {
+		if (rolle::$language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
-				ELSE l.`Name`
-			END AS Name";
+				WHEN l.name_" . rolle::$language . " != \"\" THEN l.name_" . rolle::$language . "
+				ELSE l.name
+			END AS name";
 		} else {
-			$name_column = "l.Name";
+			$name_column = "l.name";
 		}
 
 		if ($LayerName != '') {
 			if (is_numeric($LayerName)) {
 				$layer_name_filter .= " AND l.layer_id = " . $LayerName;
 			} else {
-				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
+				$layer_name_filter = " AND (l.name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
 			}
 			$privilegfk = ",
 				(
 					SELECT
 						max(las.privileg)
 					FROM
-						layer_attributes AS la,
-						layer_attributes2stelle AS las
+						kvwmap.layer_attributes AS la,
+						kvwmap.layer_attributes2stelle AS las
 					WHERE
 						la.layer_id = ul.layer_id AND
 						form_element_type = 'SubformFK' AND
 						las.stelle_id = ul.stelle_id AND
 						ul.layer_id = las.layer_id AND
-						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
+						las.attributename = split_part(split_part(la.options, ';', 1) , ',', -1)
 				) as privilegfk";
 		}
 
 		if ($only_active_or_requires) {
-			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
+			$active_filter = " AND (r2ul.aktivstatus = '1' OR ul.requires = 1)";
+		}
+		else {
+			$active_filter = '';
 		}
 
 		$sql = "
 			SELECT " .
 			$name_column . ",
 				l.layer_id,
-				l.alias, Datentyp, COALESCE(ul.group_id, Gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				l.alias, datentyp, COALESCE(ul.group_id, gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, tileindex, l.schema, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
-					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.user_id)
 					ELSE l.connection 
 				END as connection, 
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, terms_of_use_link, status, trigger_function, version,
-				ul.`queryable`,
-				l.`drawingorder`,
-				ul.`legendorder`,
-				ul.`minscale`,
-				ul.`maxscale`,
-				ul.`offsite`,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				ul.queryable,
+				l.drawingorder,
+				ul.legendorder,
+				ul.minscale,
+				ul.maxscale,
+				ul.offsite,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
-				l.`duplicate_from_layer_id`,
-				l.`duplicate_criterion`,
-				l.`shared_from`,
-				l.`geom_column`,
-				ul.`postlabelcache`,
-				`Filter`,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
+				l.shared_from,
+				l.geom_column,
+				ul.postlabelcache,
+				filter,
 				r2ul.gle_view,
-				ul.`template`,
-				`header`,
-				`footer`,
-				ul.`symbolscale`,
-				ul.`logconsume`,
-				ul.`requires`,
-				ul.`privileg`,
-				ul.`export_privileg`,
-				`start_aktiv`,
+				ul.template,
+				header,
+				footer,
+				ul.symbolscale,
+				ul.logconsume,
+				ul.requires,
+				ul.privileg,
+				ul.export_privileg,
+				start_aktiv,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
 				r2ul.geom_from_layer 
 				" . $privilegfk . "
-				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
-				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
-				" . ($this->gui_object->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.sync' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.vector_tile_url' : '') . "
+				" . ($this->gui_object->plugin_loaded('portal') ? ', l.cluster_option' : '') . "
 			FROM
-				layer AS l JOIN
-				used_layer AS ul ON l.layer_id=ul.layer_id JOIN
-				u_rolle2used_layer as r2ul ON r2ul.stelle_id = ul.stelle_id AND r2ul.layer_id = ul.layer_id LEFT JOIN
-				connections as c ON l.connection_id = c.id
+				kvwmap.layer AS l JOIN
+				kvwmap.used_layer AS ul ON l.layer_id = ul.layer_id JOIN
+				kvwmap.u_rolle2used_layer as r2ul ON r2ul.stelle_id = ul.stelle_id AND r2ul.layer_id = ul.layer_id LEFT JOIN
+				kvwmap.connections as c ON l.connection_id = c.id
 			WHERE
 				ul.stelle_id = " . $this->stelle_id . " AND
-				r2ul.User_ID = " . $this->user_id .
+				r2ul.user_id = " . $this->user_id .
 			$layer_name_filter . 
 			$active_filter . "
 			ORDER BY
@@ -1531,18 +1533,14 @@ class rolle {
 		";
 		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
-			return 0;
-		}
+		$ret = $this->database->execSQL($sql);
 		$i = 0;
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
-				if ($rs['Filter'] == '') {
-					$rs['Filter'] = '(' . $rs['rollenfilter'] . ')';
+				if ($rs['filter'] == '') {
+					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
 				} else {
-					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
+					$rs['filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['filter']);
 				}
 			}
 			if ($replace_params) {
@@ -1897,21 +1895,24 @@ class db_mapObj{
 	* @return array with integer connection_id and string schema name, return an empty array if no connection for layer_id found
 	*/
 	function get_layer_connection($layer_id) {
+		sanitize($layer_id, 'int');
+		#echo 'Class db_map Method get_layer_connection';
 		# $layer_id < 0 Rollenlayer else normal layer
 		$sql = "
 			SELECT
-				`connection_id`,
-				" . ($layer_id < 0 ? "'" . CUSTOM_SHAPE_SCHEMA . "' AS " : "") . "`schema`
+				connection_id,
+				" . ($layer_id < 0 ? "'" . CUSTOM_SHAPE_SCHEMA . "' AS " : "") . "schema
 			FROM
-				" . ($layer_id < 0 ? "rollenlayer" : "layer") . "
+				" . ($layer_id < 0 ? "kvwmap.rollenlayer" : "kvwmap.layer") . "
 			WHERE
 				" . ($layer_id < 0 ? "-id" : "layer_id") . " = " . $layer_id . " AND
-				`connectiontype` = 6
+				connectiontype = 6
 		";
+		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_layer_connection - Lesen der connection Daten des Layers:<br>" . $sql, 4);
-		$this->db->execSQL($sql);
-		if ($this->db->success) {
-			return $this->db->result->fetch_assoc();
+		$ret = $this->db->execSQL($sql);
+		if (!$ret[0]) {
+			return pg_fetch_assoc($ret[1]);
 		}
 		else {
 			$this->debug->write("<br>Abbruch beim Lesen der Layer connection in get_layer_connection, Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);

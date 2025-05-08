@@ -713,44 +713,37 @@ class rolle {
 	}
 
   function readSettings() {
-		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql = "
 			SELECT
 				*
 			FROM
-				rolle
+				kvwmap.rolle
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo 'Read rolle settings mit sql: ' . $sql;
-    $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) {
-      $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
-      return 0;
-    }
-		if ($this->database->result->num_rows > 0){
-			$rs = $this->database->result->fetch_assoc();
+		#echo '<br>Read rolle settings mit sql: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if (pg_num_rows($ret[1]) > 0){
+			$rs = pg_fetch_assoc($ret[1]);
 			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
-			$this->nImageWidth=$rs['nImageWidth'];
-			$this->nImageHeight=$rs['nImageHeight'];			
+			$this->nImageWidth=$rs['nimagewidth'];
+			$this->nImageHeight=$rs['nimageheight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
 			$this->auto_map_resize=$rs['auto_map_resize'];
-			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
-			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
+			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nimagewidth'];
+			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nimageheight'];
 			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
-			$this->nZoomFactor=$rs['nZoomFactor'];
+			$this->nZoomFactor=$rs['nzoomfactor'];
 			$this->epsg_code=$rs['epsg_code'];
 			$this->epsg_code2=$rs['epsg_code2'];
 			$this->coordtype=$rs['coordtype'];
 			$this->last_time_id=$rs['last_time_id'];
 			$this->gui=$rs['gui'];
-			rolle::$language=$rs['language'];
-			$language = rolle::$language;
-			$this->hideMenue=$rs['hidemenue'];
-			$this->hideLegend=$rs['hidelegend'];
+			rolle::$language = $rs['language'];
+			$this->hideMenue = ($rs['hidemenue'] == 'f'? false : true);
+			$this->hideLegend = ($rs['hidelegend'] == 'f'? false : true);
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -770,6 +763,7 @@ class rolle {
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
+			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
@@ -786,7 +780,7 @@ class rolle {
 				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
 				#rolle::$hist_timestamp = '';
 			}
-			$this->selectedButton=$rs['selectedButton'];
+			$this->selectedButton = $rs['selectedbutton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);
@@ -801,11 +795,16 @@ class rolle {
 			$this->polyquery = in_array('polyquery', $buttons);
 			$this->touchquery = in_array('touchquery', $buttons);
 			$this->measure = in_array('measure', $buttons);
+			$this->punktfang = in_array('punktfang', $buttons);
 			$this->freepolygon = in_array('freepolygon', $buttons);
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
 			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
+			$this->redline_text_color = $rs['redline_text_color'];
+			$this->redline_font_family = $rs['redline_font_family'];
+			$this->redline_font_size = $rs['redline_font_size'];
+			$this->redline_font_weight = $rs['redline_font_weight'];
 			return 1;
 		}
 		else {
@@ -860,21 +859,24 @@ class db_mapObj{
 	* @return array with integer connection_id and string schema name, return an empty array if no connection for layer_id found
 	*/
 	function get_layer_connection($layer_id) {
+		sanitize($layer_id, 'int');
+		#echo 'Class db_map Method get_layer_connection';
 		# $layer_id < 0 Rollenlayer else normal layer
 		$sql = "
 			SELECT
-				`connection_id`,
-				" . ($layer_id < 0 ? "'" . CUSTOM_SHAPE_SCHEMA . "' AS " : "") . "`schema`
+				connection_id,
+				" . ($layer_id < 0 ? "'" . CUSTOM_SHAPE_SCHEMA . "' AS " : "") . "schema
 			FROM
-				" . ($layer_id < 0 ? "rollenlayer" : "layer") . "
+				" . ($layer_id < 0 ? "kvwmap.rollenlayer" : "kvwmap.layer") . "
 			WHERE
 				" . ($layer_id < 0 ? "-id" : "layer_id") . " = " . $layer_id . " AND
-				`connectiontype` = 6
+				connectiontype = 6
 		";
+		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_layer_connection - Lesen der connection Daten des Layers:<br>" . $sql, 4);
-		$this->db->execSQL($sql);
-		if ($this->db->success) {
-			return $this->db->result->fetch_assoc();
+		$ret = $this->db->execSQL($sql);
+		if (!$ret[0]) {
+			return pg_fetch_assoc($ret[1]);
 		}
 		else {
 			$this->debug->write("<br>Abbruch beim Lesen der Layer connection in get_layer_connection, Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
@@ -1224,19 +1226,18 @@ class db_mapObj{
 			SELECT DISTINCT
 				dt.*
 			FROM
-				`layer_attributes` la JOIN
-				`datatypes` dt ON replace(la.type,'_', '') = dt.id
+				kvwmap.layer_attributes la JOIN
+				kvwmap.datatypes dt ON replace(la.type,'_', '') = dt.id::text
 			WHERE
 				la.layer_id IN (" . implode(', ', $layer_ids) . ")
 		";
-
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_datatypes - Lesen der Datentypen der Layer mit id (" . implode(', ', $layer_ids) . "):<br>" . $sql , 4);
-		$this->db->execSQL($sql);
-		if ($query == 0) {
+		$ret = $this->db->execSQL($sql);
+		if (!$ret['success']) {
 			$this->GUI->add_message('error', err_msg($this->script_name, __LINE__, $sql));
-			return 0;
+			return $datatypes;
 		}
-		while ($rs = $this->db->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$datatypes[] = $rs;
 		}
 		return $datatypes;
@@ -1249,13 +1250,13 @@ class db_mapObj{
 			SELECT
 				*
 			FROM
-				datatypes
+				kvwmap.datatypes
 			" . $order_sql;
 
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Datatypes - Lesen aller Datentypen:<br>" . $sql , 4);
-		$this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		while($rs = $this->db->result->fetch_assoc()) {
+		while($rs = pg_fetch_assoc($ret[1])) {
 			/*
 			foreach($rs AS $key => $value) {
 				$datatypes[$key][] = $value;
@@ -1265,7 +1266,6 @@ class db_mapObj{
 		}
 		return $datatypes;
 	}
-}
 
 class pgdatabase {
 	var $ist_Fortfuehrung;

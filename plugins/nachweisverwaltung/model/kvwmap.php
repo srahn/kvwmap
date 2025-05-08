@@ -461,14 +461,14 @@
 	$GUI->getNachweiseAuswahl = function($stelle_id, $user_id) use ($GUI){
 		$sql = '
 			SELECT * FROM 
-				rolle_nachweise_rechercheauswahl 
+				kvwmap.rolle_nachweise_rechercheauswahl 
 			WHERE
 				stelle_id = ' . $stelle_id . ' AND
 				user_id = ' . $user_id;
 		#echo $sql;
 		$GUI->debug->write("<p>getNachweiseAuswahl - abfragen der aktuellen Auswahl im Rechercheergebnis",4);
-		$GUI->database->execSQL($sql,4, 1);
-		while($rs = $GUI->database->result->fetch_assoc()){
+		$ret = $GUI->pgdatabase->execSQL($sql,4, 1);
+		while($rs = pg_fetch_assoc($ret[1])){
 			$nachweisauswahl[] = $rs['nachweis_id'];
 		}
 		return $nachweisauswahl;
@@ -477,51 +477,55 @@
 	$GUI->setNachweisOrder = function($stelle_id, $user_id, $order) use ($GUI){
 		$sql = "
 			UPDATE 
-				rolle_nachweise 
+				kvwmap.rolle_nachweise 
 			SET 
-				`order` = '" . $order . "' 
+				\"order\" = '" . $order . "' 
 			WHERE 
 				user_id = " . $user_id . " AND 
 				stelle_id = " . $stelle_id;
 		#echo $sql;
 		$GUI->debug->write("<p>setNachweisOrder - Setzen der aktuellen Order für die Nachweissuche",4);
-		$GUI->database->execSQL($sql,4, 1);
+		$GUI->pgdatabase->execSQL($sql,4, 1);
 		return 1;
 	};
 
 	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchfortfuehrung2,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $suchbemerkung, $flur_thematisch, $alle_der_messung, $order) use ($GUI){
 		if($suchhauptart == NULL)$suchhauptart = array();
 		if($suchunterart == NULL)$suchunterart = array();
-		$sql ='UPDATE rolle_nachweise SET ';
-		$sql.='suchhauptart="'.implode(',', $suchhauptart).'",';
-		$sql.='suchunterart="'.implode(',', $suchunterart).'",';
-		if ($abfrageart != '') { $sql.='abfrageart="'.$abfrageart.'",'; }
-		$sql.='suchgemarkung="'.$suchgemarkung.'",';
-		$sql.='suchflur="'.$suchflur.'",';
-		$sql.='suchstammnr="'.$stammnr.'",';
-		$sql.='suchstammnr2="'.$stammnr2.'",';
-		$sql.='suchrissnummer="'.$suchrissnummer.'",';
-		$sql.='suchrissnummer2="'.$suchrissnummer2.'",';
-		if($suchfortfuehrung == '')$suchfortfuehrung = 'NULL';
-		$sql.='suchfortfuehrung='.$suchfortfuehrung.',';
-		if($suchfortfuehrung2 == '')$suchfortfuehrung2 = 'NULL';
-		$sql.='suchfortfuehrung2='.$suchfortfuehrung2.',';
-		if ($suchpolygon!='') { $sql.='suchpolygon="'.$suchpolygon.'",'; }
-		if ($suchantrnr!='') { $sql.='suchantrnr="'.$suchantrnr.'",'; }
-		$sql.='sdatum="'.$sdatum.'",';
-		$sql.='sdatum2="'.$sdatum2.'",';
-		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
-		$sql.='suchbemerkung="'.$suchbemerkung.'",';
-		$sql.='flur_thematisch = '.($flur_thematisch ?: 0).',';
-		$sql.='alle_der_messung = ' . (int)$alle_der_messung . ',';
+		$sql = "
+			UPDATE 
+				kvwmap.rolle_nachweise 
+			SET 
+				suchhauptart = '" . implode(',', $suchhauptart) . "',
+				suchunterart = '" . implode(',', $suchunterart) . "',";
+		if ($abfrageart != '') { $sql .= "abfrageart = '" . $abfrageart . "',"; }
+		$sql.= "
+				suchgemarkung = '" . $suchgemarkung . "',
+				suchflur = '" . $suchflur . "',
+				suchstammnr = '" . $stammnr . "',
+				suchstammnr2 = '" . $stammnr2 . "',
+				suchrissnummer = '" . $suchrissnummer . "',
+				suchrissnummer2 = '" . $suchrissnummer2 . "',";
+		if ($suchfortfuehrung == '') {$suchfortfuehrung = 'NULL';}
+		$sql.= "suchfortfuehrung = " . $suchfortfuehrung . ",";
+		if ($suchfortfuehrung2 == '') {$suchfortfuehrung2 = 'NULL';}
+		$sql.= "suchfortfuehrung2 = " . $suchfortfuehrung2 . ",";
+		if ($suchpolygon!='') { $sql.= "suchpolygon = '" . $suchpolygon . "',"; }
+		if ($suchantrnr!='') { $sql.= "suchantrnr = '" . $suchantrnr . "',"; }
+		$sql.= "sdatum = '" . $sdatum . "',";
+		$sql.= "sdatum2 = '" . $sdatum2 . "',";
+		if ($svermstelle!='') { $sql.= "svermStelle = " . $svermstelle . ","; }else{$sql.='svermStelle = NULL,' ;}
+		$sql.= "suchbemerkung = '" . $suchbemerkung . "',";
+		$sql.= "flur_thematisch = " . ($flur_thematisch ?: 0) . ",";
+		$sql.= "alle_der_messung = " . (int)$alle_der_messung . ",";
 		if ($order != '') {
-			$sql.='`order`="'.$order.'",';
+			$sql.= "\"order\" = '" . $order ."',";
 		}
-		$sql .= 'user_id = '.$user_id;
-		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$sql .= 'user_id = ' . $user_id;
+		$sql.=' WHERE user_id = ' . $user_id . ' AND stelle_id = ' . $stelle_id;
 		#echo $sql;
 		$GUI->debug->write("<p>setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
-		$GUI->database->execSQL($sql,4, 1);
+		$GUI->pgdatabase->execSQL($sql,4, 1);
 		return 1;
 	};
 
@@ -530,7 +534,7 @@
 		if($markhauptart == NULL)$markhauptart = array();
 		$sql = "
 			UPDATE 
-				rolle_nachweise 
+				kvwmap.rolle_nachweise 
 			SET 
 				showhauptart = '" . implode(',', $showhauptart) . "', 
 				markhauptart = '" . implode(',', $markhauptart) . "', 
@@ -539,26 +543,31 @@
 				user_id = " . $user_id . " AND 
 				stelle_id = " . $stelle_id;
 		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisAnzeigeparameter - Setzen der aktuellen Anzeigeparameter für die Nachweissuche",4);
-		$GUI->database->execSQL($sql,4, 1);
+		$GUI->pgdatabase->execSQL($sql,4, 1);
 		return 1;
 	};
 
 	$GUI->getNachweisParameter = function($stelle_id, $user_id) use ($GUI){
-		$sql ='SELECT user_id FROM rolle_nachweise';
+		$sql ='SELECT user_id FROM kvwmap.rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-		$GUI->database->execSQL($sql,4, 1);
-		if ($GUI->database->result->num_rows == 0) {
-			$sql ='INSERT INTO rolle_nachweise ';
-			$sql.='SET user_id='.$user_id.', stelle_id='.$stelle_id;
+		$ret = $GUI->pgdatabase->execSQL($sql,4, 1);
+		if (pg_num_rows($ret[1]) == 0) {
+			$sql = "
+				INSERT INTO 
+					kvwmap.rolle_nachweise 
+				(user_id, stelle_id)
+				VALUES (
+					" . $user_id . ", 
+					" . $stelle_id . ")";
 			$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-			$GUI->database->execSQL($sql,4, 1);
+			$GUI->pgdatabase->execSQL($sql,4, 1);
 		}
-		$sql ='SELECT * FROM rolle_nachweise';
+		$sql ='SELECT * FROM kvwmap.rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-		$GUI->database->execSQL($sql,4, 1);
-		$rs = $GUI->database->result->fetch_assoc();
+		$ret = $GUI->pgdatabase->execSQL($sql,4, 1);
+		$rs = pg_fetch_assoc($ret[1]);
 		$rs['suchhauptart'] = array_filter(explode(',', $rs['suchhauptart']));
 		$rs['suchunterart'] = array_filter(explode(',', $rs['suchunterart']));
 		$rs['showhauptart'] = array_filter(explode(',', $rs['showhauptart']));
@@ -568,38 +577,40 @@
 	
 	$GUI->save_Dokumentauswahl = function($stelle_id, $user_id, $formvars) use ($GUI){
 		$sql ="
-			INSERT INTO rolle_nachweise_dokumentauswahl 
+			INSERT INTO kvwmap.rolle_nachweise_dokumentauswahl 
 				(stelle_id, user_id, name, suchhauptart, suchunterart) 
 			VALUES (
 			" . $stelle_id . ", 
 			" . $user_id . ",
 			'" . $formvars['dokauswahl_name'] . "', 
 			'" . implode(',', $formvars['suchhauptart']) . "', 
-			'" . implode(',', $formvars['suchunterart'] ?: []) . "')";
+			'" . implode(',', $formvars['suchunterart'] ?: []) . "')
+			RETURNING id";
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->save_Dokumentauswahl ",4);
-		$GUI->database->execSQL($sql,4, 1);
-		return $GUI->database->mysqli->insert_id;
+		$ret = $GUI->pgdatabase->execSQL($sql,4, 1);
+		$rs = pg_fetch_assoc($ret[1]);
+		return $rs['id'];
 	};
 	
 	$GUI->delete_Dokumentauswahl = function($id) use ($GUI){
 		$sql = "
 			DELETE FROM 
-				rolle_nachweise_dokumentauswahl 
+				kvwmap.rolle_nachweise_dokumentauswahl 
 			WHERE id = " . $id;
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->delete_Dokumentauswahl ",4);
-		$GUI->database->execSQL($sql,4, 1);
+		$GUI->pgdatabase->execSQL($sql,4, 1);
 	};
 		
 	$GUI->get_Dokumentauswahl = function($stelle_id, $user_id, $dokauswahl_id) use ($GUI){
-		$sql ='SELECT * FROM rolle_nachweise_dokumentauswahl ';
+		$sql ='SELECT * FROM kvwmap.rolle_nachweise_dokumentauswahl ';
 		$sql.='WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		if($dokauswahl_id != '')$sql.=' AND id = '.$dokauswahl_id;
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->get_Dokumentauswahl ",4);
-		$GUI->database->execSQL($sql,4, 1);
-		while($rs = $GUI->database->result->fetch_assoc()){
+		$ret = $GUI->pgdatabase->execSQL($sql,4, 1);
+		while($rs = pg_fetch_assoc($ret[1])){
 			$dokauswahlen[] = $rs;
 		}
 		return $dokauswahlen;
@@ -627,49 +638,49 @@
 	$GUI->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
 		$sql = "
 			INSERT INTO 
-				u_consumeNachweise 
+				kvwmap.u_consumenachweise 
 			SELECT
 				'" . $formvars['suchantrnr'] . "', 
 				" . $stelle_id . ", 
 				'" . date('Y-m-d H:i:s',time()) . "', 
-				`suchhauptart`, 
-				`suchunterart`, 
-				`abfrageart`, 
-				`suchgemarkung`, 
-				`suchflur`, 
-				`suchstammnr`, 
-				`suchstammnr2`, 
-				`suchrissnummer`, 
-				`suchrissnummer2`, 
-				`suchfortfuehrung`, 
-				`suchpolygon`, 
-				`suchantrnr`, 
-				`sdatum`, 
-				`sdatum2`, 
-				`sVermStelle`, " .
+				suchhauptart, 
+				suchunterart, 
+				abfrageart, 
+				suchgemarkung, 
+				suchflur, 
+				suchstammnr, 
+				suchstammnr2, 
+				suchrissnummer, 
+				suchrissnummer2, 
+				suchfortfuehrung, 
+				suchpolygon, 
+				suchantrnr, 
+				sdatum, 
+				sdatum2, 
+				svermstelle, " .
 				(($formvars['flur_thematisch'] != '') ? $formvars['flur_thematisch'] : "0") . "
 			FROM 
-				rolle_nachweise 
+				kvwmap.rolle_nachweise 
 			WHERE 
 				user_id = " . $user_id . " AND 
 				stelle_id = " . $stelle_id;
 		$GUI->debug->write("<p>file:users.php class:rolle->Suchparameter_loggen - Setzen der aktuellen Parameter für die Nachweissuche",4);
-		$GUI->database->execSQL($sql,4, 1);
+		$GUI->pgdatabase->execSQL($sql,4, 1);
 	};
 	
 	$GUI->Suchparameter_loeschen = function($antrag_nr, $stelle_id) use ($GUI){
-		$sql ="DELETE FROM u_consumeNachweise WHERE antrag_nr = '".$antrag_nr."' AND stelle_id = ".$stelle_id;
+		$sql ="DELETE FROM kvwmap.u_consumeNachweise WHERE antrag_nr = '".$antrag_nr."' AND stelle_id = ".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:rolle->Suchparameter_loeschen - Löschen der Parameter für die Nachweissuche",4);
-		$GUI->database->execSQL($sql,4, 1);
+		$GUI->pgdatabase->execSQL($sql,4, 1);
 	};
 	
 	$GUI->Suchparameter_abfragen = function($antrag_nr, $stelle_id) use ($GUI){		
 		$searches = array();
-		$sql = "SELECT * FROM u_consumeNachweise ";
+		$sql = "SELECT * FROM kvwmap.u_consumeNachweise ";
 		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);
-		$GUI->database->execSQL($sql,4, 1);
-		while($rs = $GUI->database->result->fetch_assoc()){
+		$ret = $GUI->pgdatabase->execSQL($sql,4, 1);
+		while($rs = pg_fetch_assoc($ret[1])){
 			$searches[] = $rs;
 		}
 		return $searches;
