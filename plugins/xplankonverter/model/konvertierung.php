@@ -2922,7 +2922,7 @@ class Konvertierung extends PgObject {
 		$md->set('id_cite_date', en_date($this->get_letztes_aktualisierungsdatum_gebietstabelle()));
 		
 		//Auf Wunsch von ArL's/GDI-NI wurde der Identifier für alle Pläne auf den Namespace Plandigital angepasst
-		$md->set('namespace', 'https://registry.gdi-de.org/id/de.ni.plandigital/');
+		$md->set('namespace', $md->get('stellendaten')['ows_namespace']);
 		
 		$md->set('version', $this->get_version_from_ns_uri(XPLAN_NS_URI));
 		$md->set('extents', $plan->extents);

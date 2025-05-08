@@ -220,11 +220,11 @@ class MetaDataCreator {
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
+			</gmd:pointOfContact>" . 
+			//<gmd:pointOfContact>
+				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			//</gmd:pointOfContact>
+			"<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'publisher') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
@@ -531,11 +531,11 @@ class MetaDataCreator {
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
+			</gmd:pointOfContact>".
+			//<gmd:pointOfContact>
+				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			//</gmd:pointOfContact>
+			"<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'publisher') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
@@ -856,11 +856,11 @@ class MetaDataCreator {
 				</gmd:abstract>
 				<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-				</gmd:pointOfContact>
-				<gmd:pointOfContact>
-					" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-				</gmd:pointOfContact>
-				<gmd:pointOfContact>
+				</gmd:pointOfContact>" .
+				//<gmd:pointOfContact>
+					//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+				//</gmd:pointOfContact>
+				"<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_content', 'publisher') . "
 				</gmd:pointOfContact>
 				<gmd:resourceMaintenance>
