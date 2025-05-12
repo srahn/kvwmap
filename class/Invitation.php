@@ -5,7 +5,7 @@ class Invitation extends PgObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'invitations', 'token', 'text');
+		parent::__construct($gui, 'kvwmap', 'invitations', 'token', 'text');
 		$this->validations = array(
 			array(
 				'attribute' => 'token',
@@ -31,9 +31,9 @@ class Invitation extends PgObject {
 	public static	function find_by_id($gui, $id) {
 		$invitation = new Invitation($gui);
 		$invitation = $invitation->find_by($invitation->identifier, $id);
-		$inviter = new MyObject($gui, 'user');
+		$inviter = new PgObject($gui, 'kvwmap', 'user');
 		$invitation->inviter = $inviter->find_by('id', $invitation->get('inviter_id'));
-		$stelle = new MyObject($gui, 'stelle');
+		$stelle = new PgObject($gui, 'kvwmap', 'stelle');
 		$invitation->stelle = $stelle->find_by('id', $invitation->get('stelle_id'));
 		return $invitation;
 	}

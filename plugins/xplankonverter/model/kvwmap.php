@@ -515,7 +515,7 @@
 		$GUI->formvars['only_layer_ids'] = implode(', ', array_map(function($layer) { return $layer['id']; }, $result['layers_with_content']));
 		$GUI->service_layernames = array_keys($result['layers_with_content']); // set layernames array for output in view show_service_data.php
 		$start_stelle_id = $GUI->Stelle_ID; // speichern für späteren Gebrauch
-		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
+		$admin_stelle = new Stelle($admin_stellen[0], $GUI->pgdatabase);
 		$GUI->Stelle_ID = $admin_stelle->id; // setze Stelle_ID von Adminstelle zur Erzeugung des MapFiles der Adminstelle
 		$GUI->loadMap('DataBase', array(), true); // Layer name immer aus Attribute Name
 
@@ -595,7 +595,7 @@
 
 		$GUI->xlog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
 
-		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
+		$admin_stelle = new Stelle($admin_stellen[0], $GUI->pgdatabase);
 		$bb = $admin_stelle->MaxGeorefExt;
 		$GUI->map->set('name', sonderzeichen_umwandeln(PUBLISHERNAME));
 		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);

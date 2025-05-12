@@ -26,7 +26,7 @@
 	}
 
 	function add() {
-		var row = $('#myobjects_head').next().clone().show();
+		var row = $('#pgobjects_head').next().clone().show();
 		$('.control').hide();
 		$('.mod').hide();
 		$('.btn-new.mod').show();
@@ -38,7 +38,7 @@
 				<a id="save_link_0" href="#" onclick="save(this, \'<? echo $this->class::$table_name; ?>\');" style="margin-left: 1px;" class="mod"><i class="fa fa-check fa_lg" style="color: #087e08;" title="Speichern"></i></a>\
 				<a id="quit_link_0" href="#" onclick="drop(this, \'<? echo $this->class::$table_name; ?>\');" style="margin-left: 5px;" class="mod"><i class="fa fa-times fa_lg" style="color: #b22222" title="Abbrechen"></i></a>\
 		');
-		$('#myobjects_head').after(row);
+		$('#pgobjects_head').after(row);
 		$('tr [id=0] td').each(makeEditable);
 	}
 
@@ -159,7 +159,7 @@
   <tr>
     <td align="center" colspan="7" style="height: 30px"><h2><? echo $this->class::$title[$lang]; ?></h2></td>
 	</tr>
-	<tr id="myobjects_head"><?
+	<tr id="pgobjects_head"><?
 		foreach ($this->class::$attributes AS $attribute) {
 			echo '<th>' . $attribute['alias'][$lang] . '</th>';
 		} ?>
@@ -185,24 +185,24 @@
 				<a id="quit_link_0" href="#" onclick="quit(this, '<? echo $this->class::$table_name; ?>');" style="margin-left: 5px; display: none" class="mod"><i class="fa fa-times fa_lg" title="Abbrechen"></i></a>
 			</td>
 	<tr><?
-	foreach ($this->myobjects AS $myobject) { ?>
-		<tr id="<?php echo $myobject->get('id'); ?>"><?
-			foreach ($myobject::$attributes as $attribute) {
+	foreach ($this->pgobjects AS $pgobject) { ?>
+		<tr id="<?php echo $pgobject->get('id'); ?>"><?
+			foreach ($pgobject::$attributes as $attribute) {
 				echo '
 				<td 
 					class="' . $attribute['privileg'] . '" 
 					name="' . $attribute['attribute'] . '" 
 					type="' . $attribute['type'] . '" 
 					size="' . $attribute['size'] . '"
-					' . ($attribute['type'] == 'password'? 'value="' . $myobject->get($attribute['attribute']) . '"' : '') . '
-				>' . ($attribute['type'] == 'password'? '****' : $myobject->get($attribute['attribute'])) . '</td>';
+					' . ($attribute['type'] == 'password'? 'value="' . $pgobject->get($attribute['attribute']) . '"' : '') . '
+				>' . ($attribute['type'] == 'password'? '****' : $pgobject->get($attribute['attribute'])) . '</td>';
 			}
 			echo '
 				<td width="40px">
-					<a id="edit_link_' . $myobject->get('id') . '" href="#" onclick="edit(this, \'' . $myobject->tableName . '\');" style="margin-left: 1px;" class="control"><i class="fa fa-pencil fa_lg" title="Ändern"></i></a>
-					<a id="drop_link_' . $myobject->get('id') . '" href="#" onclick="drop(this, \'' . $myobject->tableName . '\');" style="margin-left: 5px;" class="control"><i class="fa fa-trash-o fa_lg" title="Löschen"></i></a>
-					<a id="save_link_' . $myobject->get('id') . '" href="#" onclick="save(this, \'' . $myobject->tableName . '\');" style="margin-left: 1px; display: none" class="mod"><i class="fa fa-check fa_lg" style="color: #087e08;" title="Speichern"></i></a>
-					<a id="quit_link_' . $myobject->get('id') . '" href="#" onclick="quit(this, \'' . $myobject->tableName . '\');" style="margin-left: 5px; display: none" class="mod"><i class="fa fa-times fa_lg" title="Abbrechen"></i></a>
+					<a id="edit_link_' . $pgobject->get('id') . '" href="#" onclick="edit(this, \'' . $pgobject->tableName . '\');" style="margin-left: 1px;" class="control"><i class="fa fa-pencil fa_lg" title="Ändern"></i></a>
+					<a id="drop_link_' . $pgobject->get('id') . '" href="#" onclick="drop(this, \'' . $pgobject->tableName . '\');" style="margin-left: 5px;" class="control"><i class="fa fa-trash-o fa_lg" title="Löschen"></i></a>
+					<a id="save_link_' . $pgobject->get('id') . '" href="#" onclick="save(this, \'' . $pgobject->tableName . '\');" style="margin-left: 1px; display: none" class="mod"><i class="fa fa-check fa_lg" style="color: #087e08;" title="Speichern"></i></a>
+					<a id="quit_link_' . $pgobject->get('id') . '" href="#" onclick="quit(this, \'' . $pgobject->tableName . '\');" style="margin-left: 5px; display: none" class="mod"><i class="fa fa-times fa_lg" title="Abbrechen"></i></a>
 				</td>'; ?>
 		<tr><?
 	} ?>

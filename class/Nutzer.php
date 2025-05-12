@@ -79,14 +79,14 @@ class Nutzer extends PgObject {
 	public static function register($gui, $stelle_id) {
 		$gui->debug->show('Nutzer register', Nutzer::$write_debug);
 		$user = new Nutzer($gui);
-		$stelle = new stelle($stelle_id, $gui->database);
+		$stelle = new stelle($stelle_id, $gui->pgdatabase);
 		$results = $user->create(
 			array(
 				'login_name' => $gui->formvars['login_name'],
 				'name' => $gui->formvars['name'],
-				'Vorname' => $gui->formvars['Vorname'],
-				'Namenszusatz' => $gui->formvars['Namenszusatz'],
-				'password' => kvwmap.sha1($gui->formvars['new_password']),
+				'vorname' => $gui->formvars['Vorname'],
+				'namenszusatz' => $gui->formvars['Namenszusatz'],
+				'password' => sha1($gui->formvars['new_password']),
 				'phon' => $gui->formvars['phon'],
 				'email' => $gui->formvars['email'],
 				'stelle_id' => $stelle_id

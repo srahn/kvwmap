@@ -22629,44 +22629,54 @@ class Document {
   }
 
   function addfreetext($formvars){
-    $sql = 'INSERT INTO druckfreitexte SET';
-    $sql .= ' text = "",';
-    $sql .= ' posx = 0,';
-    $sql .= ' posy = 0,';
-    $sql .= ' size = 0,';
-    $sql .= ' font = "Helvetica.afm",'; // Ein Wert muss gesetzt werden, weil beim Layer-Export Null rauskommen würde und das darf für font nicht sein.
-    $sql .= ' angle = 0';
+    $sql = "
+			INSERT INTO kvwmap.druckfreitexte	(
+				text,
+				posx,
+				posy,
+				size,
+				font,
+				angle)
+			VALUES (
+    		'',
+    		0,
+    		0,
+    		0,
+    		'Helvetica.afm', // Ein Wert muss gesetzt werden, weil beim Layer-Export Null rauskommen würde und das darf für font nicht sein.
+    		0
+			) RETURNING id";
     $this->debug->write("<p>file:kvwmap class:Document->addfreetext :",4);
-    $this->database->execSQL($sql,4, 1);
-    $lastinsert_id = $this->database->mysqli->insert_id;
-    $sql = 'INSERT INTO druckrahmen2freitexte (druckrahmen_id, freitext_id) VALUES('.$formvars['aktiverRahmen'].', '.$lastinsert_id.')';
+    $ret = $this->database->execSQL($sql,4, 1);
+		$rs = pg_fetch_assoc($ret[1]);
+    $lastinsert_id = $rs['id'];
+    $sql = 'INSERT INTO kvwmap.druckrahmen2freitexte (druckrahmen_id, freitext_id) VALUES('.$formvars['aktiverRahmen'].', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:Document->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
   }
 
   function removefreetext($formvars){
-    $sql = 'DELETE FROM druckfreitexte WHERE id = '.$formvars['freitext_id'];
+    $sql = 'DELETE FROM kvwmap.druckfreitexte WHERE id = '.$formvars['freitext_id'];
     $this->debug->write("<p>file:kvwmap class:Document->removefreetext :",4);
     $this->database->execSQL($sql,4, 1);
-    $sql = 'DELETE FROM druckrahmen2freitexte WHERE freitext_id = '.$formvars['freitext_id'];
+    $sql = 'DELETE FROM kvwmap.druckrahmen2freitexte WHERE freitext_id = '.$formvars['freitext_id'];
     $this->debug->write("<p>file:kvwmap class:Document->removefreetext :",4);
     $this->database->execSQL($sql,4, 1);
   }
 
   function get_price($format){
-    $sql ='SELECT preis FROM druckrahmen WHERE format = \''.$format.'\'';
+    $sql ='SELECT preis FROM kvwmap.druckrahmen WHERE format = \''.$format.'\'';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:Document->get_price :<br>" . $sql,4);
-    $this->database->execSQL($sql,4, 1);
-    $rs = $this->database->result->fetch_row();
+    $ret = $this->database->execSQL($sql,4, 1);
+    $rs = pg_fetch_row($ret[1]);
     return $rs[0];
   }
 
   function delete_frame($selected_frame_id){
-    $sql ="DELETE FROM druckrahmen WHERE id = " . $selected_frame_id;
+    $sql ="DELETE FROM kvwmap.druckrahmen WHERE id = " . $selected_frame_id;
     $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
     $this->database->execSQL($sql,4, 1);
-    $sql ="DELETE FROM druckrahmen2stelle WHERE druckrahmen_id = " . $selected_frame_id;
+    $sql ="DELETE FROM kvwmap.druckrahmen2stelle WHERE druckrahmen_id = " . $selected_frame_id;
     $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
     $this->database->execSQL($sql,4, 1);
   }
@@ -22682,145 +22692,163 @@ class Document {
       }
       $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);
       $preis = $formvars['euro'] * 100 + $formvars['cent'];
-
-      $sql = "INSERT INTO druckrahmen";
-      $sql .= " SET Name = '" . $formvars['name']."'";
-			$sql .= ", dhk_call = '" . $formvars['dhk_call']."'";
-      $sql .= ", headposx = " . $formvars['headposx'];
-      $sql .= ", headposy = " . $formvars['headposy'];
-      $sql .= ", headwidth = " . $formvars['headwidth'];
-      $sql .= ", headheight = " . $formvars['headheight'];
-      $sql .= ", mapposx = " . $formvars['mapposx'];
-      $sql .= ", mapposy = " . $formvars['mapposy'];
-      $sql .= ", mapwidth = " . $formvars['mapwidth'];
-      $sql .= ", mapheight = " . $formvars['mapheight'];
-      if($formvars['refmapposx'] != ''){$sql .= ", refmapposx = " . $formvars['refmapposx'];}
-      if($formvars['refmapposy'] != ''){$sql .= ", refmapposy = " . $formvars['refmapposy'];}
-      if($formvars['refmapwidth'] != ''){$sql .= ", refmapwidth = " . $formvars['refmapwidth'];}
-      if($formvars['refmapheight'] != ''){$sql .= ", refmapheight = " . $formvars['refmapheight'];}
-      if($formvars['refposx'] != ''){$sql .= ", refposx = " . $formvars['refposx'];}
-      if($formvars['refposy'] != ''){$sql .= ", refposy = " . $formvars['refposy'];}
-      if($formvars['refwidth'] != ''){$sql .= ", refwidth = " . $formvars['refwidth'];}
-      if($formvars['refheight'] != ''){$sql .= ", refheight = " . $formvars['refheight'];}
-      if($formvars['refzoom'] != ''){$sql .= ", refzoom = " . $formvars['refzoom'];}
-      if($formvars['dateposx'] != ''){$sql .= ", dateposx = " . $formvars['dateposx'];}
-      if($formvars['dateposy'] != ''){$sql .= ", dateposy = " . $formvars['dateposy'];}
-      if($formvars['datesize'] != ''){$sql .= ", datesize = " . $formvars['datesize'];}
-      if($formvars['scaleposx'] != ''){$sql .= ", scaleposx = " . $formvars['scaleposx'];}
-      if($formvars['scaleposy'] != ''){$sql .= ", scaleposy = " . $formvars['scaleposy'];}
-      if($formvars['scalesize'] != ''){$sql .= ", scalesize = " . $formvars['scalesize'];}
-			if($formvars['scalebarposx'] != ''){$sql .= ", scalebarposx = " . $formvars['scalebarposx'];}
-      if($formvars['scalebarposy'] != ''){$sql .= ", scalebarposy = " . $formvars['scalebarposy'];}
-      if($formvars['oscaleposx'] != ''){$sql .= ", oscaleposx = " . $formvars['oscaleposx'];}
-      if($formvars['oscaleposy'] != ''){$sql .= ", oscaleposy = " . $formvars['oscaleposy'];}
-      if($formvars['oscalesize'] != ''){$sql .= ", oscalesize = " . $formvars['oscalesize'];}
-			if($formvars['lageposx'] != ''){$sql .= ", lageposx = " . $formvars['lageposx'];}
-      if($formvars['lageposy'] != ''){$sql .= ", lageposy = " . $formvars['lageposy'];}
-      if($formvars['lagesize'] != ''){$sql .= ", lagesize = " . $formvars['lagesize'];}
-			if($formvars['gemeindeposx'] != ''){$sql .= ", gemeindeposx = " . $formvars['gemeindeposx'];}
-      if($formvars['gemeindeposy'] != ''){$sql .= ", gemeindeposy = " . $formvars['gemeindeposy'];}
-      if($formvars['gemeindesize'] != ''){$sql .= ", gemeindesize = " . $formvars['gemeindesize'];}
-      if($formvars['gemarkungposx'] != ''){$sql .= ", gemarkungposx = " . $formvars['gemarkungposx'];}
-      if($formvars['gemarkungposy'] != ''){$sql .= ", gemarkungposy = " . $formvars['gemarkungposy'];}
-      if($formvars['gemarkungsize'] != ''){$sql .= ", gemarkungsize = " . $formvars['gemarkungsize'];}
-      if($formvars['flurposx'] != ''){$sql .= ", flurposx = " . $formvars['flurposx'];}
-      if($formvars['flurposy'] != ''){$sql .= ", flurposy = " . $formvars['flurposy'];}
-      if($formvars['flursize'] != ''){$sql .= ", flursize = " . $formvars['flursize'];}
-			if($formvars['flurstposx'] != ''){$sql .= ", flurstposx = " . $formvars['flurstposx'];}
-      if($formvars['flurstposy'] != ''){$sql .= ", flurstposy = " . $formvars['flurstposy'];}
-      if($formvars['flurstsize'] != ''){$sql .= ", flurstsize = " . $formvars['flurstsize'];}
-      if($formvars['legendposx'] != ''){$sql .= ", legendposx = " . $formvars['legendposx'];}
-      if($formvars['legendposy'] != ''){$sql .= ", legendposy = " . $formvars['legendposy'];}
-      if($formvars['legendsize'] != ''){$sql .= ", legendsize = " . $formvars['legendsize'];}
-      if($formvars['arrowposx'] != ''){$sql .= ", arrowposx = " . $formvars['arrowposx'];}
-      if($formvars['arrowposy'] != ''){$sql .= ", arrowposy = " . $formvars['arrowposy'];}
-      if($formvars['arrowlength'] != ''){$sql .= ", arrowlength = " . $formvars['arrowlength'];}
-      if($formvars['userposx'] != ''){$sql .= ", userposx = '" . $formvars['userposx']."'";}
-      if($formvars['userposy'] != ''){$sql .= ", userposy = '" . $formvars['userposy']."'";}
-      if($formvars['usersize'] != ''){$sql .= ", usersize = '" . $formvars['usersize']."'";}
-      if($formvars['watermark'] != ''){$sql .= ", watermark = '" . $formvars['watermark']."'";}
-      if($formvars['watermarkposx'] != ''){$sql .= ", watermarkposx = " . $formvars['watermarkposx'];}
-      if($formvars['watermarkposy'] != ''){$sql .= ", watermarkposy = " . $formvars['watermarkposy'];}
-      if($formvars['watermarksize'] != ''){$sql .= ", watermarksize = " . $formvars['watermarksize'];}
-      if($formvars['watermarkangle'] != ''){$sql .= ", watermarkangle = " . $formvars['watermarkangle'];}
-      if($formvars['watermarktransparency'] != ''){$sql .= ", watermarktransparency = '" . $formvars['watermarktransparency']."'";}
+			$columns = [
+      	'name' => "'" . $formvars['name'] . "'",
+				'dhk_call' => "'" . $formvars['dhk_call'] . "'",
+      	'headposx' => $formvars['headposx'],
+      	'headposy' => $formvars['headposy'],
+      	'headwidth' => $formvars['headwidth'],
+      	'headheight' => $formvars['headheight'],
+      	'mapposx' => $formvars['mapposx'],
+      	'mapposy' => $formvars['mapposy'],
+      	'mapwidth' => $formvars['mapwidth'],
+      	'mapheight' => $formvars['mapheight']
+			];
+      if($formvars['refmapposx'] != ''){$columns['refmapposx'] = $formvars['refmapposx'];}
+      if($formvars['refmapposy'] != ''){$columns['refmapposy'] = $formvars['refmapposy'];}
+      if($formvars['refmapwidth'] != ''){$columns['refmapwidth'] = $formvars['refmapwidth'];}
+      if($formvars['refmapheight'] != ''){$columns['refmapheight'] = $formvars['refmapheight'];}
+      if($formvars['refposx'] != ''){$columns['refposx'] = $formvars['refposx'];}
+      if($formvars['refposy'] != ''){$columns['refposy'] = $formvars['refposy'];}
+      if($formvars['refwidth'] != ''){$columns['refwidth'] = $formvars['refwidth'];}
+      if($formvars['refheight'] != ''){$columns['refheight'] = $formvars['refheight'];}
+      if($formvars['refzoom'] != ''){$columns['refzoom'] = $formvars['refzoom'];}
+      if($formvars['dateposx'] != ''){$columns['dateposx'] = $formvars['dateposx'];}
+      if($formvars['dateposy'] != ''){$columns['dateposy'] = $formvars['dateposy'];}
+      if($formvars['datesize'] != ''){$columns['datesize'] = $formvars['datesize'];}
+      if($formvars['scaleposx'] != ''){$columns['scaleposx'] = $formvars['scaleposx'];}
+      if($formvars['scaleposy'] != ''){$columns['scaleposy'] = $formvars['scaleposy'];}
+      if($formvars['scalesize'] != ''){$columns['scalesize'] = $formvars['scalesize'];}
+			if($formvars['scalebarposx'] != ''){$columns['scalebarposx'] = $formvars['scalebarposx'];}
+      if($formvars['scalebarposy'] != ''){$columns['scalebarposy'] = $formvars['scalebarposy'];}
+      if($formvars['oscaleposx'] != ''){$columns['oscaleposx'] = $formvars['oscaleposx'];}
+      if($formvars['oscaleposy'] != ''){$columns['oscaleposy'] = $formvars['oscaleposy'];}
+      if($formvars['oscalesize'] != ''){$columns['oscalesize'] = $formvars['oscalesize'];}
+			if($formvars['lageposx'] != ''){$columns['lageposx'] = $formvars['lageposx'];}
+      if($formvars['lageposy'] != ''){$columns['lageposy'] = $formvars['lageposy'];}
+      if($formvars['lagesize'] != ''){$columns['lagesize'] = $formvars['lagesize'];}
+			if($formvars['gemeindeposx'] != ''){$columns['gemeindeposx'] = $formvars['gemeindeposx'];}
+      if($formvars['gemeindeposy'] != ''){$columns['gemeindeposy'] = $formvars['gemeindeposy'];}
+      if($formvars['gemeindesize'] != ''){$columns['gemeindesize'] = $formvars['gemeindesize'];}
+      if($formvars['gemarkungposx'] != ''){$columns['gemarkungposx'] = $formvars['gemarkungposx'];}
+      if($formvars['gemarkungposy'] != ''){$columns['gemarkungposy'] = $formvars['gemarkungposy'];}
+      if($formvars['gemarkungsize'] != ''){$columns['gemarkungsize'] = $formvars['gemarkungsize'];}
+      if($formvars['flurposx'] != ''){$columns['flurposx'] = $formvars['flurposx'];}
+      if($formvars['flurposy'] != ''){$columns['flurposy'] = $formvars['flurposy'];}
+      if($formvars['flursize'] != ''){$columns['flursize'] = $formvars['flursize'];}
+			if($formvars['flurstposx'] != ''){$columns['flurstposx'] = $formvars['flurstposx'];}
+      if($formvars['flurstposy'] != ''){$columns['flurstposy'] = $formvars['flurstposy'];}
+      if($formvars['flurstsize'] != ''){$columns['flurstsize'] = $formvars['flurstsize'];}
+      if($formvars['legendposx'] != ''){$columns['legendposx'] = $formvars['legendposx'];}
+      if($formvars['legendposy'] != ''){$columns['legendposy'] = $formvars['legendposy'];}
+      if($formvars['legendsize'] != ''){$columns['legendsize'] = $formvars['legendsize'];}
+      if($formvars['arrowposx'] != ''){$columns['arrowposx'] = $formvars['arrowposx'];}
+      if($formvars['arrowposy'] != ''){$columns['arrowposy'] = $formvars['arrowposy'];}
+      if($formvars['arrowlength'] != ''){$columns['arrowlength'] = $formvars['arrowlength'];}
+      if($formvars['userposx'] != ''){$columns['userposx'] = $formvars['userposx'];}
+      if($formvars['userposy'] != ''){$columns['userposy'] = $formvars['userposy'];}
+      if($formvars['usersize'] != ''){$columns['usersize'] = $formvars['usersize'];}
+      if($formvars['watermark'] != ''){$columns['watermark'] = "'" . $formvars['watermark'] ."'";}
+      if($formvars['watermarkposx'] != ''){$columns['watermarkposx'] = $formvars['watermarkposx'];}
+      if($formvars['watermarkposy'] != ''){$columns['watermarkposy'] = $formvars['watermarkposy'];}
+      if($formvars['watermarksize'] != ''){$columns['watermarksize'] = $formvars['watermarksize'];}
+      if($formvars['watermarkangle'] != ''){$columns['watermarkangle'] = $formvars['watermarkangle'];}
+      if($formvars['watermarktransparency'] != ''){$columns['watermarktransparency'] = $formvars['watermarktransparency'];}
       if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
-      $sql .= ", variable_freetexts = " . $formvars['variable_freetexts'];
-      if($formvars['format']){$sql .= ", format = '" . $formvars['format']."'";}
-      if($preis){$sql .= ", preis = '" . $preis."'";}
-      if($formvars['font_date']){$sql .= ", font_date = '" . $formvars['font_date']."'";}
-      if($formvars['font_scale']){$sql .= ", font_scale = '" . $formvars['font_scale']."'";}
-			if($formvars['font_lage']){$sql .= ", font_lage = '" . $formvars['font_lage']."'";}
-			if($formvars['font_gemeinde']){$sql .= ", font_gemeinde = '" . $formvars['font_gemeinde']."'";}
-      if($formvars['font_gemarkung']){$sql .= ", font_gemarkung = '" . $formvars['font_gemarkung']."'";}
-      if($formvars['font_flur']){$sql .= ", font_flur = '" . $formvars['font_flur']."'";}
-			if($formvars['font_flurst']){$sql .= ", font_flurst = '" . $formvars['font_flurst']."'";}
-      if($formvars['font_legend']){$sql .= ", font_legend = '" . $formvars['font_legend']."'";}
-      if($formvars['font_user']){$sql .= ", font_user = '" . $formvars['font_user']."'";}
-      if($formvars['font_watermark']){$sql .= ", font_watermark = '" . $formvars['font_watermark']."'";}
+      $columns['variable_freetexts'] = $formvars['variable_freetexts'];
+      if($formvars['format']){$columns['format'] = "'" . $formvars['format'] ."'";}
+      if($preis){$columns['preis'] = $preis;}
+      if($formvars['font_date']){$columns['font_date'] = "'" . $formvars['font_date'] . "'";}
+      if($formvars['font_scale']){$columns['font_scale'] = "'" . $formvars['font_scale'] . "'";}
+			if($formvars['font_lage']){$columns['font_lage'] = "'" . $formvars['font_lage'] . "'";}
+			if($formvars['font_gemeinde']){$columns['font_gemeinde'] = "'" . $formvars['font_gemeinde'] . "'";}
+      if($formvars['font_gemarkung']){$columns['font_gemarkung'] = "'" . $formvars['font_gemarkung'] . "'";}
+      if($formvars['font_flur']){$columns['font_flur'] = "'" . $formvars['font_flur'] . "'";}
+			if($formvars['font_flurst']){$columns['font_flurst'] = "'" . $formvars['font_flurst'] . "'";}
+      if($formvars['font_legend']){$columns['font_legend'] = "'" . $formvars['font_legend'] . "'";}
+      if($formvars['font_user']){$columns['font_user'] = "'" . $formvars['font_user'] . "'";}
+      if($formvars['font_watermark']){$columns['font_watermark'] = "'" . $formvars['font_watermark'] . "'";}
 
       if($_files['headsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
         if (move_uploaded_file($_files['headsrc']['tmp_name'],$nachDatei)) {
             //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", headsrc = '" . $_files['headsrc']['name']."'";
+          $columns['headsrc'] = "'" . $_files['headsrc']['name'] . "'";
         }
         else {
             //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       else{
-        $sql .= ", headsrc = '" . $formvars['headsrc_save']."'";
+        $columns['headsrc'] = "'" . $formvars['headsrc_save'] . "'";
       }
       if($_files['refmapsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapsrc']['name'];
         if (move_uploaded_file($_files['refmapsrc']['tmp_name'],$nachDatei)) {
             //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", refmapsrc = '" . $_files['refmapsrc']['name']."'";
+          $columns['refmapsrc'] = "'" . $_files['refmapsrc']['name'] . "'";
         }
         else {
             //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       else{
-        $sql .= ", refmapsrc = '" . $formvars['refmapsrc_save']."'";
+        $columns['refmapsrc'] = "'" . $formvars['refmapsrc_save']."'";
       }
       if($_files['refmapfile']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapfile']['name'];
         if (move_uploaded_file($_files['refmapfile']['tmp_name'],$nachDatei)) {
             //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", refmapfile = '" . $_files['refmapfile']['name']."'";
+          $columns['refmapfile'] = "'" . $_files['refmapfile']['name'] . "'";
         }
         else {
             //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       else{
-        $sql .= ", refmapfile = '" . $formvars['refmapfile_save']."'";
+        $columns['refmapfile'] = "'" . $formvars['refmapfile_save'] . "'";
       }
+			$sql = "
+				INSERT INTO kvwmap.druckrahmen
+					(" . implode(', ', array_keys($columns)) . ")
+				VALUES 
+					(" . implode(', ', $columns) . ")
+				RETURNING id";
       $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
-      $this->database->execSQL($sql,4, 1);
-      $lastdruckrahmen_id = $this->database->mysqli->insert_id;
+      $ret = $this->database->execSQL($sql,4, 1);
+			$rs = pg_fetch_assoc($ret[1]);
+      $lastdruckrahmen_id = $rs['id'];
 
-      $sql = 'INSERT INTO druckrahmen2stelle (stelle_id, druckrahmen_id) VALUES('.$stelle_id.', '.$lastdruckrahmen_id.')';
+      $sql = 'INSERT INTO kvwmap.druckrahmen2stelle (stelle_id, druckrahmen_id) VALUES('.$stelle_id.', '.$lastdruckrahmen_id.')';
       $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
       $this->database->execSQL($sql,4, 1);
 
       for($i = 0; $i < $formvars['textcount']; $i++){
         $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
         $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
-        $sql = "INSERT INTO druckfreitexte SET text = '" . $formvars['text'.$i]."'";
-        $sql .= ", posx = " . $formvars['textposx'.$i];
-        $sql .= ", posy = " . $formvars['textposy'.$i];
-        $sql .= ", size = " . $formvars['textsize'.$i];
-        $sql .= ", angle = " . $formvars['textangle'.$i];
-        $sql .= ", font = '" . $formvars['textfont'.$i]."'";
+        $sql = "
+					INSERT INTO kvwmap.druckfreitexte	(
+						text,
+						posx,
+						posy,
+						size,
+						angle,
+						font)
+				VALUES (
+					'" . $formvars['text'.$i] . "',
+        	" . $formvars['textposx' . $i] . ",
+        	" . $formvars['textposy' . $i] . ",
+        	" . $formvars['textsize' . $i] . ",
+        	" . $formvars['textangle' . $i] .",
+        	'" . $formvars['textfont' . $i] . "'
+				) RETURNING id";
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
-        $this->database->execSQL($sql,4, 1);
-        $lastfreitext_id = $this->database->mysqli->insert_id;
+        $ret = $this->database->execSQL($sql,4, 1);
+				$rs = pg_fetch_assoc($ret[1]);
+    		$lastfreitext_id = $rs['id'];
 
-        $sql = 'INSERT INTO druckrahmen2freitexte (druckrahmen_id, freitext_id) VALUES('.$lastdruckrahmen_id.', '.$lastfreitext_id.')';
+        $sql = 'INSERT INTO kvwmap.druckrahmen2freitexte (druckrahmen_id, freitext_id) VALUES('.$lastdruckrahmen_id.', '.$lastfreitext_id.')';
         $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
         $this->database->execSQL($sql,4, 1);
       }
@@ -22833,7 +22861,7 @@ class Document {
       $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);
       $preis = $formvars['euro'] * 100 + $formvars['cent'];
 
-      $sql ="UPDATE druckrahmen";
+      $sql ="UPDATE kvwmap.druckrahmen";
       $sql .= " SET Name = '" . $formvars['name']."'";
 			$sql .= ", dhk_call = '" . $formvars['dhk_call']."'";
       $sql .= ", headposx = '" . $formvars['headposx']."'";
@@ -22948,7 +22976,7 @@ class Document {
       for($i = 0; $i < $formvars['textcount']; $i++){
         $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
         $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
-        $sql = "UPDATE druckfreitexte SET text = '" . $formvars['text'.$i]."'";
+        $sql = "UPDATE kvwmap.druckfreitexte SET text = '" . $formvars['text'.$i]."'";
         $sql .= ", posx = " . $formvars['textposx'.$i];
         $sql .= ", posy = " . $formvars['textposy'.$i];
         $sql .= ", size = " . $formvars['textsize'.$i];

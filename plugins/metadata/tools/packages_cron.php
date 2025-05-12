@@ -71,8 +71,8 @@
           break;
         }
 
-        $GUI->Stelle = new stelle($GUI->formvars['stelle_id'], $GUI->database);
-        $GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
+        $GUI->Stelle = new stelle($GUI->formvars['stelle_id'], $GUI->pgdatabase);
+        $GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase);
         $GUI->user->setRolle($GUI->formvars['stelle_id']);
         $msg = 'Create bundle package for stelle_id: ' . $GUI->formvars['stelle_id'];
         $response = $GUI->metadata_create_bundle_package($GUI->formvars['stelle_id']);

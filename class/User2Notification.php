@@ -41,7 +41,7 @@ class User2Notification extends PgObject {
 			WHERE
 				notification_id = " . $notification->get_id() . "
 		";
-		$user2notification->gui->database->execSQL($sql);
+		$user2notification->database->execSQL($sql);
 		if ($user2notification->database->success) {
 			$result = array(
 				'success' => true,
@@ -71,8 +71,8 @@ class User2Notification extends PgObject {
 				" . (empty($notification->get('user_filter')) ? '' : 'AND user_id IN (' . $notification->get('user_filter') . ')') . "
 				" . (empty($notification->get('stellen_filter')) ? '' : 'AND stelle_id IN (' . $notification->get('stellen_filter') . ')') . "
 		";
-		$user2notification->gui->database->execSQL($sql);
-		if ($user2notification->gui->database->success) {
+		$user2notification->database->execSQL($sql);
+		if ($user2notification->database->success) {
 			$result = array(
 				'success' => true,
 				'msg' => 'Zuordnungen der Benachichtungen zu den Nutzern erfolgreich angelegt.'

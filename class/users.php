@@ -85,26 +85,26 @@ class account {
 			if ($zeitraum=='month') {
 				if ($nutzung=='stelle'){
 					$this->Bezeichnung=$BezeichnungStelle->getName();
-					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.stelle_id','MONTH',$month_m, $year_m,$stelle,'');
-					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.stelle_id','MONTH',$month_m, $year_m,$stelle,'');
-					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.stelle_id','MONTH',$month_m, $year_m,$stelle,'');
-					$this->CSVNumbOfAccess=$this->getAccessToCSV($nutzung,$zeitraum,$date1,$date2,'u_consumeCSV.stelle_id','MONTH',$month_m, $year_m,$stelle,'');
-					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.stelle_id','MONTH',$month_m, $year_m,$stelle,'');
+					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.stelle_id', "date_part('month', ",$month_m, $year_m,$stelle,'');
+					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.stelle_id', "date_part('month', ", $month_m, $year_m,$stelle,'');
+					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.stelle_id', "date_part('month', ", $month_m, $year_m,$stelle,'');
+					$this->CSVNumbOfAccess=$this->getAccessToCSV($nutzung,$zeitraum,$date1,$date2,'u_consumeCSV.stelle_id', "date_part('month', ", $month_m, $year_m,$stelle,'');
+					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.stelle_id', "date_part('month', ", $month_m, $year_m,$stelle,'');
 				}
 				if ($nutzung=='nutzer') {
-					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.user_id','MONTH',$month_m,$year_m,$nutzer,'');
-					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.user_id','MONTH',$month_m,$year_m,$nutzer,'');
-					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.user_id','MONTH',$month_m, $year_m,$nutzer,'');
-					$this->CSVNumbOfAccess=$this->getAccessToCSV($nutzung,$zeitraum,$date1,$date2,'u_consumeCSV.user_id','MONTH',$month_m, $year_m,$nutzer,'');
-					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.user_id','MONTH',$month_m, $year_m,$nutzer,'');
+					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.user_id', "date_part('month', ", $month_m,$year_m,$nutzer,'');
+					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.user_id', "date_part('month', ", $month_m,$year_m,$nutzer,'');
+					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.user_id', "date_part('month', ", $month_m, $year_m,$nutzer,'');
+					$this->CSVNumbOfAccess=$this->getAccessToCSV($nutzung,$zeitraum,$date1,$date2,'u_consumeCSV.user_id', "date_part('month', ", $month_m, $year_m,$nutzer,'');
+					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.user_id', "date_part('month', ", $month_m, $year_m,$nutzer,'');
 				}
 				if ($nutzung=='stelle_nutzer') {
 					$this->Bezeichnung=$BezeichnungStelle->getName();
-					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.stelle_id, c.user_id','MONTH',$month_m,$year_m,$stelle,$nutzer);
-					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.stelle_id, u_consumeALK.user_id','MONTH',$month_m,$year_m,$stelle,$nutzer);
-					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.stelle_id, u_consumeALB.user_id','MONTH',$month_m,$year_m,$stelle,$nutzer);
-					$this->CSVNumbOfAccess=$this->getAccessToCSV($nutzung,$zeitraum,$date1,$date2,'u_consumeCSV.stelle_id, u_consumeCSV.user_id','MONTH',$month_m,$year_m,$stelle,$nutzer);
-					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.stelle_id, u_consumeShape.user_id','MONTH',$month_m, $year_m,$stelle,$nutzer);
+					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.stelle_id, c.user_id', "date_part('month', ", $month_m,$year_m,$stelle,$nutzer);
+					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.stelle_id, u_consumeALK.user_id', "date_part('month', ", $month_m,$year_m,$stelle,$nutzer);
+					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.stelle_id, u_consumeALB.user_id', "date_part('month', ", $month_m,$year_m,$stelle,$nutzer);
+					$this->CSVNumbOfAccess=$this->getAccessToCSV($nutzung,$zeitraum,$date1,$date2,'u_consumeCSV.stelle_id, u_consumeCSV.user_id', "date_part('month', ", $month_m,$year_m,$stelle,$nutzer);
+					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.stelle_id, u_consumeShape.user_id', "date_part('month', ", $month_m, $year_m,$stelle,$nutzer);
 				}
 			}
 			if ( $zeitraum=='week' ) {
@@ -198,25 +198,25 @@ class account {
 		if ($nutzung=='stelle_nutzer') {
 			$sql.=' ,s.Bezeichnung, u.Name';
 		}
-		$sql.=' FROM u_consume AS c,u_consume2layer AS c2l, layer AS l';
+		$sql.=' FROM kvwmap.u_consume AS c, kvwmap.u_consume2layer AS c2l, kvwmap.layer AS l';
 		if ($nutzung=='stelle'){
-			$sql.=' , stelle AS s';
+			$sql.=' , kvwmap.stelle AS s';
 		}
 		if ($nutzung=='nutzer') {
-			$sql.=' , user AS u';
+			$sql.=' , kvwmap.user AS u';
 		}
 		if ($nutzung=='stelle_nutzer') {
-			$sql.=' ,stelle AS s, user AS u';
+			$sql.=' , kvwmap.stelle AS s, kvwmap.user AS u';
 		}
 		$sql.=' WHERE c.user_id=c2l.user_id';
 		$sql.=' AND c2l.layer_id = l.layer_id';
 		$sql.=' AND c.time_id=c2l.time_id';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
-			$sql.=' AND '.$era.'(c.time_id)='.$date.' AND YEAR(c.time_id)='.$year;
+			$sql.=' AND ' . $era . 'c.time_id)=' . $date . " AND date_part('year', c.time_id) = " . $year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'(c.time_id))="'.$date.'"';
+			$sql.=' AND ('.$era.'c.time_id))="'.$date.'"';
 		}
 		if ($zeitraum=='era') {
 			$sql.=' AND ((DATE(c.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
@@ -224,21 +224,21 @@ class account {
 
 		if ($case=='c.stelle_id'){
 			$sql.=' AND c.stelle_id=s.ID AND s.ID='.$id;
-			$sql.=' GROUP BY (CONCAT(c2l.layer_id,c.stelle_id)) ORDER BY Name';
+			$sql.=' GROUP BY c2l.layer_id, c.stelle_id, l.name, s.bezeichnung ORDER BY Name';
 		}
 		if ($case=='c.user_id') {
 			$sql.=' AND c.user_id=u.ID AND u.ID='.$id;
-			$sql.=' GROUP BY (CONCAT(c2l.layer_id,c.user_id)) ORDER BY Name';
+			$sql.=' GROUP BY c2l.layer_id, c.user_id ORDER BY Name';
 		}
 		if ($case=='c.stelle_id, c.user_id'){
 			$sql.=' AND c.stelle_id=s.ID AND s.ID='.$id;
 			$sql.=' AND c.user_id=u.ID AND u.ID='.$id_2;
-			$sql.=' GROUP BY (CONCAT(c2l.layer_id,c.stelle_id,c.user_id)) ORDER BY Bezeichnung,lName,Name';
+			$sql.=' GROUP BY c2l.layer_id, c.stelle_id, c.user_id ORDER BY Bezeichnung,lName,Name';
 		}
 		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccessUser[]=$rs;
 		}
 		return $NumbOfAccessUser;
@@ -257,23 +257,23 @@ class account {
 		if ($nutzung=='stelle_nutzer') {
 			$sql.=' ,s.Bezeichnung, u.Name AS Username';
 		}
-		$sql.=' FROM u_consumeCSV';
+		$sql.=' FROM kvwmap.u_consumeCSV';
 		if ($nutzung=='stelle'){
-			$sql.=' , stelle AS s';
+			$sql.=' , kvwmap.stelle AS s';
 		}
 		if ($nutzung=='nutzer') {
-			$sql.=' , user AS u';
+			$sql.=' , kvwmap.user AS u';
 		}
 		if ($nutzung=='stelle_nutzer') {
-			$sql.=' ,stelle AS s, user AS u';
+			$sql.=' , kvwmap.stelle AS s, kvwmap.user AS u';
 		}
 		$sql.=' WHERE (1=1)';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
-			$sql.=' AND '.$era.'(u_consumeCSV.time_id)='.$date.' AND YEAR(u_consumeCSV.time_id)='.$year;
+			$sql.=' AND '.$era.'u_consumeCSV.time_id)='.$date." AND date_part('year', u_consumeCSV.time_id) = ".$year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'(u_consumeCSV.time_id))="'.$date.'"';
+			$sql.=' AND ('.$era.'u_consumeCSV.time_id))="'.$date.'"';
 		}
 		if ($zeitraum=='era') {
 			$sql.=' AND ((DATE(u_consumeCSV.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
@@ -281,31 +281,40 @@ class account {
 
 		if ($case=='u_consumeCSV.stelle_id'){
 			$sql.=' AND u_consumeCSV.stelle_id = s.ID AND s.ID='.$id;
-			$sql.=' GROUP BY (CONCAT(u_consumeCSV.art,u_consumeCSV.stelle_id)) ORDER BY art';
+			$sql.=' GROUP BY u_consumeCSV.art,u_consumeCSV.stelle_id';
 		}
 		if ($case=='u_consumeCSV.user_id') {
 			$sql.=' AND u_consumeCSV.user_id = u.ID AND u.ID='.$id;
-			$sql.=' GROUP BY (CONCAT(u_consumeCSV.art,u_consumeCSV.user_id)) ORDER BY art';
+			$sql.=' GROUP BY u_consumeCSV.art,u_consumeCSV.user_id';
 		}
 		if ($case=='u_consumeCSV.stelle_id, u_consumeCSV.user_id'){
 			$sql.=' AND u_consumeCSV.stelle_id = s.ID AND s.ID='.$id;
 			$sql.=' AND u_consumeCSV.user_id = u.ID AND u.ID='.$id_2;
-			$sql.=' GROUP BY (CONCAT(u_consumeCSV.art,u_consumeCSV.stelle_id,u_consumeCSV.user_id)) ORDER BY art';
+			$sql.=' GROUP BY u_consumeCSV.art,u_consumeCSV.stelle_id,u_consumeCSV.user_id';
 		}
+		if ($nutzung=='stelle') {
+			$sql.=' ,s.Bezeichnung';
+		}
+		if ($nutzung=='nutzer') {
+			$sql.=' ,u.Name';
+		}
+		if ($nutzung=='stelle_nutzer') {
+			$sql.=' ,s.Bezeichnung, u.Name';
+		}
+		$sql .= ' ORDER BY art';
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		$result = $this->database->result;
-		while ($rs = $result->fetch_array()) {
+		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccess[]=$rs;
-			$sql ='SELECT u_consumeCSV.time_id, concat(u.Vorname, " ", u.Name) as Name';
-			$sql.=' FROM user AS u, stelle AS s, u_consumeCSV';
+			$sql ='SELECT u_consumeCSV.time_id, concat(u.vorname, " ", u.name) as Name';
+			$sql.=' FROM kvwmap.user AS u, kvwmap.stelle AS s, kvwmap.u_consumeCSV';
 			$sql.=' WHERE 1=1';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
-				$sql.=' AND '.$era.'(u_consumeCSV.time_id)='.$date.' AND YEAR(u_consumeCSV.time_id)='.$year;
+				$sql.=' AND '.$era.'u_consumeCSV.time_id)='.$date." AND date_part('year', u_consumeCSV.time_id) = " . $year;
 			}
 			if ($zeitraum=='day'){
-				$sql.=' AND ('.$era.'(u_consumeCSV.time_id))="'.$date.'"';
+				$sql.=' AND ('.$era.'u_consumeCSV.time_id))="'.$date.'"';
 			}
 			if ($zeitraum=='era') {
 				$sql.=' AND ((DATE(u_consumeCSV.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
@@ -321,10 +330,10 @@ class account {
 			}
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
-			$query_array[] = $this->database->execSQL($sql);
+			$ret = $this->database->execSQL($sql);
 			if (!$this->database->success) { echo "<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $this->database->result->fetch_array()) {
+			while ($rs = pg_fetch_array($ret[1])) {
 				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -345,23 +354,23 @@ class account {
 		if ($nutzung=='stelle_nutzer') {
 			$sql.=' ,s.Bezeichnung, u.Name AS Username';
 		}
-		$sql.=' FROM u_consumeShape';
+		$sql.=' FROM kvwmap.u_consumeShape';
 		if ($nutzung=='stelle'){
-			$sql.=' , stelle AS s';
+			$sql.=' , kvwmap.stelle AS s';
 		}
 		if ($nutzung=='nutzer') {
-			$sql.=' , user AS u';
+			$sql.=' , kvwmap.user AS u';
 		}
 		if ($nutzung=='stelle_nutzer') {
-			$sql.=' ,stelle AS s, user AS u';
+			$sql.=' , kvwmap.stelle AS s, kvwmap.user AS u';
 		}
 		$sql.=' WHERE (1=1)';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
-			$sql.=' AND '.$era.'(u_consumeShape.time_id)='.$date.' AND YEAR(u_consumeShape.time_id)='.$year;
+			$sql.=' AND '.$era.'u_consumeShape.time_id)='.$date . " AND date_part('year', u_consumeShape.time_id) = " .$year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'(u_consumeShape.time_id))="'.$date.'"';
+			$sql.=' AND ('.$era.'u_consumeShape.time_id))="'.$date.'"';
 		}
 		if ($zeitraum=='era') {
 			$sql.=' AND ((DATE(u_consumeShape.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
@@ -369,31 +378,40 @@ class account {
 
 		if ($case=='u_consumeShape.stelle_id'){
 			$sql.=' AND u_consumeShape.stelle_id = s.ID AND s.ID='.$id;
-			$sql.=' GROUP BY (CONCAT(u_consumeShape.layer_id,u_consumeShape.stelle_id)) ORDER BY layer_id';
+			$sql.=' GROUP BY u_consumeShape.layer_id,u_consumeShape.stelle_id';
 		}
 		if ($case=='u_consumeShape.user_id') {
 			$sql.=' AND u_consumeShape.user_id = u.ID AND u.ID='.$id;
-			$sql.=' GROUP BY (CONCAT(u_consumeShape.layer_id,u_consumeShape.user_id)) ORDER BY layer_id';
+			$sql.=' GROUP BY u_consumeShape.layer_id,u_consumeShape.user_id';
 		}
 		if ($case=='u_consumeShape.stelle_id, u_consumeShape.user_id'){
 			$sql.=' AND u_consumeShape.stelle_id = s.ID AND s.ID='.$id;
 			$sql.=' AND u_consumeShape.user_id = u.ID AND u.ID='.$id_2;
-			$sql.=' GROUP BY (CONCAT(u_consumeShape.layer_id,u_consumeShape.stelle_id,u_consumeShape.user_id)) ORDER BY layer_id';
+			$sql.=' GROUP BY u_consumeShape.layer_id,u_consumeShape.stelle_id,u_consumeShape.user_id';
 		}
+		if ($nutzung=='stelle') {
+			$sql.=' ,s.Bezeichnung';
+		}
+		if ($nutzung=='nutzer') {
+			$sql.=' ,u.Name';
+		}
+		if ($nutzung=='stelle_nutzer') {
+			$sql.=' ,s.Bezeichnung, u.Name';
+		}
+		$sql .= ' ORDER BY layer_id';
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		$result = $this->database->result;
-		while ($rs = $result->fetch_array()) {
+		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccess[]=$rs;
-			$sql ='SELECT u_consumeShape.time_id, concat(u.Vorname, " ", u.Name) as Name';
-			$sql.=' FROM user AS u, stelle AS s, u_consumeShape';
+			$sql ='SELECT u_consumeShape.time_id, concat(u.Vorname, \' \', u.Name) as Name';
+			$sql.=' FROM kvwmap.user AS u, kvwmap.stelle AS s, kvwmap.u_consumeShape';
 			$sql.=' WHERE 1=1';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
-				$sql.=' AND '.$era.'(u_consumeShape.time_id)='.$date.' AND YEAR(u_consumeShape.time_id)='.$year;
+				$sql.=' AND '.$era.'u_consumeShape.time_id)='.$date . " AND date_part('year', u_consumeShape.time_id) = " .$year;
 			}
 			if ($zeitraum=='day'){
-				$sql.=' AND ('.$era.'(u_consumeShape.time_id))="'.$date.'"';
+				$sql.=' AND ('.$era.'u_consumeShape.time_id))="'.$date.'"';
 			}
 			if ($zeitraum=='era') {
 				$sql.=' AND ((DATE(u_consumeShape.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
@@ -409,10 +427,10 @@ class account {
 			}
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
-			$query_array[] = $this->database->execSQL($sql);
+			$ret = $this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $this->database->result->fetch_array()) {
+			while ($rs = pg_fetch_array($ret[1])) {
 				$NumbOfAccessTimeIDs[]=$rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -433,23 +451,23 @@ class account {
 		if ($nutzung=='stelle_nutzer') {
 			$sql.=' ,s.Bezeichnung, u.Name AS Username';
 		}
-		$sql.=' FROM u_consumeALB';
+		$sql.=' FROM kvwmap.u_consumeALB';
 		if ($nutzung=='stelle'){
-			$sql.=' , stelle AS s';
+			$sql.=' , kvwmap.stelle AS s';
 		}
 		if ($nutzung=='nutzer') {
-			$sql.=' , user AS u';
+			$sql.=' , kvwmap.user AS u';
 		}
 		if ($nutzung=='stelle_nutzer') {
-			$sql.=' ,stelle AS s, user AS u';
+			$sql.=' , kvwmap.stelle AS s, kvwmap.user AS u';
 		}
 		$sql.=' WHERE (1=1)';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
-			$sql.=' AND '.$era.'(u_consumeALB.time_id)='.$date.' AND YEAR(u_consumeALB.time_id)='.$year;
+			$sql.=' AND '.$era.'u_consumeALB.time_id)='.$date . " AND date_part('year', u_consumeALB.time_id) = " .$year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'(u_consumeALB.time_id))="'.$date.'"';
+			$sql.=' AND ('.$era.'u_consumeALB.time_id))="'.$date.'"';
 		}
 		if ($zeitraum=='era') {
 			$sql.=' AND ((DATE(u_consumeALB.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
@@ -457,33 +475,42 @@ class account {
 
 		if ($case=='u_consumeALB.stelle_id'){
 			$sql.=' AND u_consumeALB.stelle_id = s.ID AND s.ID='.$id;
-			$sql.=' GROUP BY (CONCAT(u_consumeALB.format,u_consumeALB.stelle_id)) ORDER BY format';
+			$sql.=' GROUP BY u_consumeALB.format,u_consumeALB.stelle_id ';
 		}
 		if ($case=='u_consumeALB.user_id') {
 			$sql.=' AND u_consumeALB.user_id = u.ID AND u.ID='.$id;
-			$sql.=' GROUP BY (CONCAT(u_consumeALB.format,u_consumeALB.user_id)) ORDER BY format';
+			$sql.=' GROUP BY u_consumeALB.format,u_consumeALB.user_id ';
 		}
 		if ($case=='u_consumeALB.stelle_id, u_consumeALB.user_id'){
 			$sql.=' AND u_consumeALB.stelle_id = s.ID AND s.ID='.$id;
 			$sql.=' AND u_consumeALB.user_id = u.ID AND u.ID='.$id_2;
-			$sql.=' GROUP BY (CONCAT(u_consumeALB.format,u_consumeALB.stelle_id,u_consumeALB.user_id)) ORDER BY format';
+			$sql.=' GROUP BY u_consumeALB.format,u_consumeALB.stelle_id,u_consumeALB.user_id ';
 		}
+		if ($nutzung=='stelle') {
+			$sql.=' ,s.Bezeichnung';
+		}
+		if ($nutzung=='nutzer') {
+			$sql.=' ,u.Name';
+		}
+		if ($nutzung=='stelle_nutzer') {
+			$sql.=' ,s.Bezeichnung, u.Name';
+		}
+		$sql .= ' ORDER BY format';
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
 		#echo $sql.'<br><br>';
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		$result = $this->database->result;
-		while ($rs = $result->fetch_array()) {
+		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccess[]=$rs;
-			$sql ='SELECT u_consumeALB.time_id, concat(u.Vorname, " ", u.Name) as Name';
-			$sql.=' FROM user AS u, stelle AS s, u_consumeALB';
+			$sql ='SELECT u_consumeALB.time_id, concat(u.vorname, \' \', u.name) as Name';
+			$sql.=' FROM kvwmap.user AS u, kvwmap.stelle AS s, kvwmap.u_consumeALB';
 			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALB.time_id AND c2l.user_id = u_consumeALB.user_id AND c2l.stelle_id = u_consumeALB.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
 			$sql.=' WHERE 1=1';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
-				$sql.=' AND '.$era.'(u_consumeALB.time_id)='.$date.' AND YEAR(u_consumeALB.time_id)='.$year;
+				$sql.=' AND '.$era.'u_consumeALB.time_id)='.$date . " AND date_part('year', u_consumeALB.time_id) = " .$year;
 			}
 			if ($zeitraum=='day'){
-				$sql.=' AND ('.$era.'(u_consumeALB.time_id))="'.$date.'"';
+				$sql.=' AND ('.$era.'u_consumeALB.time_id))="'.$date.'"';
 			}
 			if ($zeitraum=='era') {
 				$sql.=' AND ((DATE(u_consumeALB.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
@@ -502,10 +529,10 @@ class account {
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
 
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
-			$query_array[] = $this->database->execSQL($sql);
+			$ret = $this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $this->database->result->fetch_array()) {
+			while ($rs = pg_fetch_array($ret[1])) {
 				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -517,7 +544,7 @@ class account {
 		# Abfrage der Anzahl der PDF-Exporte mit Druckrahmen
 		# in Abhängigkeit von Stelle, Nutzer und Zeitraum
 		$sql ='SELECT u_consumeALK.druckrahmen_id,'.$case.',count(u_consumeALK.time_id) AS NumberOfAccess,';
-		if(LAYER_IDS_DOP) $sql.='c2l.layer_id, concat(druckrahmen.Name, \' \',ifnull(l.Name, \'\')) AS druckrahmenname';
+		if(LAYER_IDS_DOP) $sql.='c2l.layer_id, concat(druckrahmen.Name, \' \',l.Name) AS druckrahmenname';
 		else $sql.='druckrahmen.Name AS druckrahmenname';
 		$sql.=', druckrahmen.format AS Druckformat, druckrahmen.preis AS Preis';
 		if ($nutzung=='stelle') {
@@ -529,59 +556,62 @@ class account {
 		if ($nutzung=='stelle_nutzer') {
 			$sql.=' ,s.Bezeichnung, u.Name AS Username';
 		}
-		$sql.=' FROM druckrahmen';
+		$sql.=' FROM kvwmap.druckrahmen';
 		if ($nutzung=='stelle'){
-			$sql.=' , stelle AS s';
+			$sql.=' , kvwmap.stelle AS s';
 		}
 		if ($nutzung=='nutzer') {
-			$sql.=' , user AS u';
+			$sql.=' , kvwmap.user AS u';
 		}
 		if ($nutzung=='stelle_nutzer') {
-			$sql.=' ,stelle AS s, user AS u';
+			$sql.=' , kvwmap.stelle AS s, kvwmap.user AS u';
 		}
-		$sql.=', u_consumeALK';
-		if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
+		$sql.=', kvwmap.u_consumeALK';
+		if(LAYER_IDS_DOP) {
+			$sql.= " 
+				LEFT JOIN kvwmap.u_consume2layer c2l ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN (" . LAYER_IDS_DOP . ")
+				LEFT JOIN kvwmap.layer l ON l.layer_id = c2l.layer_id ";
+		}
 		$sql.=' WHERE u_consumeALK.druckrahmen_id = druckrahmen.id';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
-			$sql.=' AND '.$era.'(u_consumeALK.time_id)='.$date.' AND YEAR(u_consumeALK.time_id)='.$year;
+			$sql.=' AND '.$era.'u_consumeALK.time_id)='.$date . " AND date_part('year', u_consumeALK.time_id) = " .$year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'(u_consumeALK.time_id))="'.$date.'"';
+			$sql.=' AND ('.$era.'u_consumeALK.time_id))="'.$date.'"';
 		}
 		if ($zeitraum=='era') {
 			$sql.=' AND ((DATE(u_consumeALK.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
 		}
-		if(LAYER_IDS_DOP) $groupby = 'ifnull(c2l.layer_id, ""), ';
+		if(LAYER_IDS_DOP) $groupby = 'c2l.layer_id, ';
 		if ($case=='u_consumeALK.stelle_id'){
 			$sql.=' AND u_consumeALK.stelle_id = s.ID AND s.ID='.$id;
-			$sql.=' GROUP BY (CONCAT('.$groupby.'u_consumeALK.druckrahmen_id,u_consumeALK.stelle_id)) ORDER BY druckrahmen.Name';
+			$sql.=' GROUP BY ' . $groupby . 'u_consumeALK.druckrahmen_id,u_consumeALK.stelle_id, druckrahmen.Name, l.name, druckrahmen.format, druckrahmen.preis, s.bezeichnung ORDER BY druckrahmen.Name';
 		}
 		if ($case=='u_consumeALK.user_id') {
 			$sql.=' AND u_consumeALK.user_id = u.ID AND u.ID='.$id;
-			$sql.=' GROUP BY (CONCAT('.$groupby.'u_consumeALK.druckrahmen_id,u_consumeALK.user_id)) ORDER BY druckrahmen.Name';
+			$sql.=' GROUP BY ' . $groupby . 'u_consumeALK.druckrahmen_id,u_consumeALK.user_id, druckrahmen.Name, l.name, druckrahmen.format, druckrahmen.preis, s.bezeichnung ORDER BY druckrahmen.Name';
 		}
 		if ($case=='u_consumeALK.stelle_id, u_consumeALK.user_id'){
 			$sql.=' AND u_consumeALK.stelle_id = s.ID AND s.ID='.$id;
 			$sql.=' AND u_consumeALK.user_id = u.ID AND u.ID='.$id_2;
-			$sql.=' GROUP BY (CONCAT('.$groupby.'u_consumeALK.druckrahmen_id,u_consumeALK.stelle_id,u_consumeALK.user_id)) ORDER BY Bezeichnung,druckrahmen.Name,u.Name';
+			$sql.=' GROUP BY ' . $groupby . 'u_consumeALK.druckrahmen_id,u_consumeALK.stelle_id,u_consumeALK.user_id, druckrahmen.Name, l.name, druckrahmen.format, druckrahmen.preis, s.bezeichnung  ORDER BY Bezeichnung,druckrahmen.Name,u.Name';
 		}
 		#echo $sql.'<br><br>';
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		$result = $this->database->result;
-		while ($rs = $result->fetch_array()) {
+		$ret = $this->database->execSQL($sql);
+		if (!$this->database->success) { echo $sql;exit;$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccess[]=$rs;
-			$sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, " ", u.Name) as Name';
-			$sql.=' FROM druckrahmen, user AS u, stelle AS s, u_consumeALK';
-			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
+			$sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, \' \', u.Name) as Name';
+			$sql.=' FROM kvwmap.druckrahmen, kvwmap.user AS u, kvwmap.stelle AS s, kvwmap.u_consumeALK';
+			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN kvwmap.u_consume2layer c2l LEFT JOIN kvwmap.layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
 			$sql.=' WHERE u_consumeALK.druckrahmen_id = druckrahmen.id';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
-				$sql.=' AND '.$era.'(u_consumeALK.time_id)='.$date.' AND YEAR(u_consumeALK.time_id)='.$year;
+				$sql.=' AND '.$era.'u_consumeALK.time_id)='.$date . " AND date_part('year', u_consumeALK.time_id) = " .$year;
 			}
 			if ($zeitraum=='day'){
-				$sql.=' AND ('.$era.'(u_consumeALK.time_id))="'.$date.'"';
+				$sql.=' AND ('.$era.'u_consumeALK.time_id))="'.$date.'"';
 			}
 			if ($zeitraum=='era') {
 				$sql.=' AND ((DATE(u_consumeALK.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
@@ -598,10 +628,10 @@ class account {
 			if($rs['layer_id'] != '') $sql.= ' AND c2l.layer_id='.$rs['layer_id'];
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
-			$query_array[] = $this->database->execSQL($sql);
+			$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $this->database->result->fetch_array()) {
+			while ($rs = pg_fetch_array($ret[1])) {
 				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -615,14 +645,14 @@ class account {
 			SELECT
 				COUNT(layer_id) AS layers
 			FROM
-				layer
+				kvwmap.layer
 			WHERE
 				" . ($logged ? "logconsume = '1'" : "true") . "
 		";
 		$this->debug->write("<p>file:users.php class:user->getLayer:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
+		$rs = pg_fetch_array($ret[1]);
 		$this->AnzLayer = $rs;
 		return $this->AnzLayer;
 	} # END of function getLayer
@@ -639,13 +669,20 @@ class account {
 
 	function epoch(){
 		# Abfragen, für welchen Zeitraum die statistische Abfrage möglich ist
-		$sql ='SELECT day(MIN(time_id)) AS min_d, month(MIN(time_id)) AS min_m, year(MIN(time_id)) AS min_y' .
-		$sql.=' , day(MAX(time_id)) AS max_d, month(MAX(time_id)) AS max_m, year(MAX(time_id)) AS max_y';
-		$sql.=' FROM u_consume2layer';
+		$sql = "
+			SELECT 
+				date_part('day', MIN(time_id)) AS min_d, 
+				date_part('month', MIN(time_id)) AS min_m, 
+				date_part('year', MIN(time_id)) AS min_y , 
+				date_part('day', MAX(time_id)) AS max_d, 
+				date_part('month', MAX(time_id)) AS max_m, 
+				date_part('year', MAX(time_id)) AS max_y
+		FROM 
+			kvwmap.u_consume2layer";
 		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		while ($rs = pg_fetch_array($ret[1])) {
 			$epoch['min_d']=$rs['min_d'];
 			$epoch['min_m']=$rs['min_m'];
 			$epoch['min_y']=$rs['min_y'];
