@@ -27,13 +27,13 @@
     $GUI = new GUI('', '', '');
 
     if (!$GUI->is_tool_allowed('only_cli')) exit;
-    $userDb = new database();
-    $userDb->host = MYSQL_HOST;
-    $userDb->user = MYSQL_USER;
-    $userDb->passwd = MYSQL_PASSWORD;
-    $userDb->dbName = MYSQL_DBNAME;
-    $GUI->database = $userDb;
-    $GUI->database->open();
+    // $userDb = new database();
+    // $userDb->host = MYSQL_HOST;
+    // $userDb->user = MYSQL_USER;
+    // $userDb->passwd = MYSQL_PASSWORD;
+    // $userDb->dbName = MYSQL_DBNAME;
+    // $GUI->database = $userDb;
+    // $GUI->database->open();
     $GUI->pgdatabase = new pgdatabase();
     $GUI->pgdatabase->open(1);
 
@@ -129,8 +129,8 @@
 
         foreach ($packages AS $package) {
           // create stelle and user and set rolle for export and pack job
-          $GUI->Stelle = new stelle($package->get('stelle_id'), $GUI->database);
-          $GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
+          $GUI->Stelle = new stelle($package->get('stelle_id'), $GUI->pgdatabase);
+          $GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase);
           $GUI->user->setRolle($package->get('stelle_id'));
           // start packing
           $response = $GUI->metadata_create_data_package($package->get_id());

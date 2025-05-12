@@ -2481,12 +2481,12 @@ class user {
 			FROM
 				kvwmap.user
 			WHERE
-				ID= " . $this->id ."
+				id= " . $this->id ."
 		";
 		$this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
+		$rs = pg_fetch_array($ret[1]);
 		return $rs['stelle_id'];
 	}
 

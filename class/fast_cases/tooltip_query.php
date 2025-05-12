@@ -987,14 +987,14 @@ class user {
 			SELECT
 				stelle_id
 			FROM
-				user
+				kvwmap.user
 			WHERE
-				ID= " . $this->id ."
+				id= " . $this->id ."
 		";
 		$this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
+		$rs = pg_fetch_array($ret[1]);
 		return $rs['stelle_id'];
 	}
 
@@ -1006,34 +1006,47 @@ class user {
 		return 0;
 	}
 
-	function getStellen($stelle_ID) {
+	function getStellen($stelle_ID, $with_expired = false) {
+		global $language;
+		if ($language != '' AND $language != 'german') {
+			$name_column = "
+			CASE
+				WHEN s.bezeichnung_" . $language . " != \"\" THEN s.bezeichnung_" . $language . "
+				ELSE s.bezeichnung
+			END AS bezeichnung";
+		}
+		else {
+			$name_column = "s.bezeichnung";
+		}
 		$sql = "
 			SELECT
-				s.ID,
-				s.Bezeichnung
+				s.id,
+				" . $name_column . "
 			FROM
-				stelle AS s,
-				rolle AS r
+				kvwmap.stelle AS s,
+				kvwmap.rolle AS r
 			WHERE
-				s.ID = r.stelle_id AND
+				s.id = r.stelle_id AND
 				r.user_id = " . $this->id .
-				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . "
+				($stelle_ID > 0 ? " AND s.id = " . $stelle_ID : "") . 
+				(!$with_expired ? "
 				AND (
-					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
+					(
+						('" . date('Y-m-d h:i:s') . "' >= s.start OR s.start IS NULL) AND 
+						('" . date('Y-m-d h:i:s') . "' <= s.stop OR s.stop IS NULL)
+					)
 					OR
-					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
-				)
+					(s.start IS NULL AND s.stop IS NULL)
+				)" : "") . "
 			ORDER BY
-				Bezeichnung;
+				bezeichnung;
 		";
-
-		#echo '<br>sql: ' . $sql;
-		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
-			$stellen['ID'][]='id';
-			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
+		#debug_write('<br>sql: ', $sql, 1);
+		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$stellen['ID'][]=$rs['id'];
+			$stellen['Bezeichnung'][]=$rs['bezeichnung'];
 		}
 		return $stellen;
 	}
@@ -1090,18 +1103,18 @@ class stelle {
   function getName() {
     $sql ='SELECT ';
     if (rolle::$language != 'german' AND rolle::$language != ''){
-      $sql.='`Bezeichnung_'.rolle::$language.'` AS ';
+      $sql.='bezeichnung_'.rolle::$language.' AS ';
     }
-    $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
+    $sql.='bezeichnung FROM kvwmap.stelle WHERE id = '.$this->id;
     #echo $sql;
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
-		$rs = $this->database->result->fetch_array();
-    $this->Bezeichnung=$rs['Bezeichnung'];
-    return $rs['Bezeichnung'];
+		$rs = pg_fetch_array($ret[1]);
+    $this->Bezeichnung = $rs['bezeichnung'];
+    return $rs['bezeichnung'];
   }
 
 	function readDefaultValues() {
@@ -1109,80 +1122,83 @@ class stelle {
 		if ($language != '' AND $language != 'german') {
 			$name_column = "
 			CASE
-				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
-				ELSE s.`Bezeichnung`
-			END AS Bezeichnung";
+				WHEN s.bezeichnung_" . $language . " != \"\" THEN s.bezeichnung_" . $language . "
+				ELSE s.bezeichnung
+			END AS bezeichnung";
 		}
 		else {
-			$name_column = "s.`Bezeichnung`";
+			$name_column = "s.bezeichnung";
 		}
 
 		$sql = "
 			SELECT
-				`ID`," .
+				id," .
 				$name_column . ",
-				`start`,
-				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `referenzkarte_id`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`,
-				`ows_namespace`,
-				`ows_title`,
-				`wms_accessconstraints`,
-				`ows_abstract`,
-				`ows_updatesequence`,
-				`ows_geographicdescription`,
-				`ows_fees`,
-				`ows_srs`,
+				start,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, Authentifizierung, ALB_status, wappen, wappen_link, logconsume,
+				ows_namespace,
+				ows_title,
+				wms_accessconstraints,
+				ows_abstract,
+				ows_updatesequence,
+				ows_geographicdescription,
+				ows_fees,
+				ows_srs,
 
-				`ows_contactorganization`,
-				`ows_contacturl`,
-				`ows_contactaddress`,
-				`ows_contactpostalcode`,
-				`ows_contactcity`,
-				`ows_contactadministrativearea`,
-				`ows_contactemailaddress`,
-				`ows_contactperson`,
-				`ows_contactposition`,
-				`ows_contactvoicephone`,
-				`ows_contactfacsimile`,
+				ows_contactorganization,
+				ows_contacturl,
+				ows_contactaddress,
+				ows_contactpostalcode,
+				ows_contactcity,
+				ows_contactadministrativearea,
+				ows_contactemailaddress,
+				ows_contactperson,
+				ows_contactposition,
+				ows_contactvoicephone,
+				ows_contactfacsimile,
 
-				`ows_distributionorganization`,
-				`ows_distributionurl`,
-				`ows_distributionaddress`,
-				`ows_distributionpostalcode`,
-				`ows_distributioncity`,
-				`ows_distributionadministrativearea`,
-				`ows_distributionemailaddress`,
-				`ows_distributionperson`,
-				`ows_distributionposition`,
-				`ows_distributionvoicephone`,
-				`ows_distributionfacsimile`,
+				ows_distributionorganization,
+				ows_distributionurl,
+				ows_distributionaddress,
+				ows_distributionpostalcode,
+				ows_distributioncity,
+				ows_distributionadministrativearea,
+				ows_distributionemailaddress,
+				ows_distributionperson,
+				ows_distributionposition,
+				ows_distributionvoicephone,
+				ows_distributionfacsimile,
 
-				`ows_contentorganization`,
-				`ows_contenturl`,
-				`ows_contentaddress`,
-				`ows_contentpostalcode`,
-				`ows_contentcity`,
-				`ows_contentadministrativearea`,
-				`ows_contentemailaddress`,
-				`ows_contentperson`,
-				`ows_contentposition`,
-				`ows_contentvoicephone`,
-				`ows_contentfacsimile`,
+				ows_contentorganization,
+				ows_contenturl,
+				ows_contentaddress,
+				ows_contentpostalcode,
+				ows_contentcity,
+				ows_contentadministrativearea,
+				ows_contentemailaddress,
+				ows_contentperson,
+				ows_contentposition,
+				ows_contentvoicephone,
+				ows_contentfacsimile,
 
-				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `reset_password_text`, `invitation_text`
+				protected, check_client_ip::int, check_password_age, allowed_password_age, use_layer_aliases, selectable_layer_params, hist_timestamp, default_user_id,
+				style,
+				show_shared_layers,
+				reset_password_text,
+				invitation_text
 			FROM
-				stelle s
+				kvwmap.stelle s
 			WHERE
 				ID = " . $this->id . "
 		";
 		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
-		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return $ret;
-		}
-		$rs = $this->database->result->fetch_array();
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if(!$ret[0]) {
+      $rs = pg_fetch_assoc($ret[1]);
+    }
 		$this->data = $rs;
-		$this->Bezeichnung = $rs['Bezeichnung'];
+		$this->Bezeichnung = $rs['bezeichnung'];
 		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
 		$this->protected = $rs['protected'];
@@ -1246,28 +1262,38 @@ class stelle {
 	}
 
 	function get_attributes_privileges($layer_id) {
-		$sql = "
-			SELECT
-				`attributename`,
-				`privileg`,
-				`tooltip`
-			FROM
-				`layer_attributes2stelle`
-			WHERE
-				`stelle_id` = " . $this->id . " AND
-				`layer_id` = " . $layer_id;
-		#echo '<br>Sql: ' . $sql;
+		if ($layer_id > 0) {
+			$sql = "
+				SELECT
+					attributename,
+					privileg,
+					tooltip
+				FROM
+					kvwmap.layer_attributes2stelle
+				WHERE
+					stelle_id = " . $this->id . " AND
+					layer_id = " . $layer_id;
+		}
+		else {
+			$sql = "
+				SELECT 
+					name as attributename,
+					0 as privileg
+				FROM 
+					kvwmap.layer_attributes 
+				WHERE 
+					layer_id = " . $layer_id;
+		}
+		// echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$ret = $this->database->execSQL($sql);
+		while ($rs = pg_fetch_array($ret[1])) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
 			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
 			$privileges['attributenames'][] = $rs['attributename'];
 		}
 		return $privileges;
 	}
-}
 
 class rolle {
 	var $user_id;
@@ -1866,7 +1892,7 @@ class db_mapObj{
 		$this->script_name = 'db_MapObj.php';
 		$this->debug = $debug;
 		$this->GUI = $GUI;
-		$this->db = $GUI->database;
+		$this->db = $GUI->pgdatabase;
 		$this->Stelle_ID = $Stelle_ID;
 		$this->User_ID = $User_ID;
 		$this->rolle = new rolle($User_ID, $Stelle_ID, $this->db);

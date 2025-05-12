@@ -21,7 +21,7 @@
 
 	$GUI->zoom2bauakte = function() use ($GUI){
 		if($GUI->formvars['nummer'] != '' AND $GUI->formvars['jahr'] != ''){
-			$GUI->bau = new Bauauskunft($GUI->baudatabase);
+			$GUI->bau = new Bauauskunft($GUI->pgdatabase);
 			$GUI->bau->getbaudaten($GUI->formvars);
 			for($i = 0; $i < count_or_0($GUI->bau->baudata); $i++){
 				$flst = explode(', ', $GUI->bau->baudata[$i]['feld14']);
@@ -58,7 +58,7 @@
 	};
 	
 	$GUI->bauauskunftSuche = function() use ($GUI){
-    $GUI->bau = new Bauauskunft($GUI->baudatabase);
+    $GUI->bau = new Bauauskunft($GUI->pgdatabase);
     $GUI->bau->readvorhaben();
     $GUI->bau->readverfahrensart();
     $GUI->bau->readaktualitaet();
@@ -78,7 +78,7 @@
   };
 
 	$GUI->bauauskunftSucheSenden = function() use ($GUI){
-    $GUI->bau = new Bauauskunft($GUI->baudatabase);
+    $GUI->bau = new Bauauskunft($GUI->pgdatabase);
     if($GUI->bau->checkformdaten($GUI->formvars)){
       if(!$GUI->formvars['anzahl']){
         $GUI->formvars['anzahl'] = $GUI->bau->countbaudaten($GUI->formvars);
@@ -106,7 +106,7 @@
   };
 
 	$GUI->bauauskunftanzeige = function() use ($GUI){
-    $GUI->bau = new Bauauskunft($GUI->baudatabase);
+    $GUI->bau = new Bauauskunft($GUI->pgdatabase);
     $GUI->bau->getbaudaten($GUI->formvars);
     for($i = 0; $i < count_or_0($GUI->bau->baudata); $i++){
 			$flst = explode(', ', $GUI->bau->baudata[$i]['feld14']);

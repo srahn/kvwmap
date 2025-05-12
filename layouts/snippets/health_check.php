@@ -1,9 +1,5 @@
 <?
 
-# Test der Verbindung zur MySQL-DB
-$check['mysql_connection'] = $GUI->database->open();
-$output[] = 'Verbindung zur MySQL-DB: ' . ($check['mysql_connection']? 'ok' : 'fehlgeschlagen');
-
 # Test der Verbindung zur PostgreSQL-DB
 $GUI->pgdatabase = new pgdatabase();
 $check['postgres_connection'] = $GUI->pgdatabase->open(POSTGRES_CONNECTION_ID);

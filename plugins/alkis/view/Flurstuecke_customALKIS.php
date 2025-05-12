@@ -854,7 +854,7 @@ hide_versions = function(flst){
 												<td colspan="3">
 													<table>				<?
 													if ($flst->Buchungen[$b]['eigentuemerliste']) {
-														echo $flst->outputEigentuemer(key($flst->Buchungen[$b]['eigentuemerliste']), $flst->Buchungen[$b]['eigentuemerliste'], 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
+														echo $flst->outputEigentuemer(key($flst->Buchungen[$b]['eigentuemerliste']), $flst->Buchungen[$b]['eigentuemerliste'], 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->pgdatabase);
 													}
 											?>	</table>
 												</td>

@@ -26,7 +26,7 @@ else {
 }
 if (!DBWRITE) { echo '<br>Das Schreiben in die Datenbank wird unterdrückt!'; }
 
-$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
+$GUI->pgdatabase = new pgdatabase();
 if (!$GUI->pgdatabase->open()) {
 	echo $GUI->pgdatabase->err_msg;
 	exit;

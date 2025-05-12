@@ -32,13 +32,13 @@
     $GUI = new GUI('', '', ''); // übernimmt $debug aus globaler Variable
 
     // if (!$GUI->is_tool_allowed('only_cli')) exit;
-    $userDb = new database(); // übernimmt auch $debug aus globale Variable
-    $userDb->host = MYSQL_HOST;
-    $userDb->user = MYSQL_USER;
-    $userDb->passwd = MYSQL_PASSWORD;
-    $userDb->dbName = MYSQL_DBNAME;
-    $GUI->database = $userDb;
-    $GUI->database->open();
+    // $userDb = new database(); // übernimmt auch $debug aus globale Variable
+    // $userDb->host = MYSQL_HOST;
+    // $userDb->user = MYSQL_USER;
+    // $userDb->passwd = MYSQL_PASSWORD;
+    // $userDb->dbName = MYSQL_DBNAME;
+    // $GUI->database = $userDb;
+    // $GUI->database->open();
     $GUI->pgdatabase = new pgdatabase();
     $GUI->pgdatabase->open(1);
 

@@ -433,17 +433,17 @@
 	$GUI->nachweiseAuswahlSpeichern = function($stelle_id, $user_id, $nachweis_ids) use ($GUI){
 		$sql = '
 			DELETE FROM 
-				rolle_nachweise_rechercheauswahl 
+				kvwmap.rolle_nachweise_rechercheauswahl 
 			WHERE
 				stelle_id = ' . $stelle_id . ' AND
 				user_id = ' . $user_id;
 		#echo $sql;
 		$GUI->debug->write("<p>nachweiseAuswahlSpeichern - Speichern der aktuellen Auswahl im Rechercheergebnis",4);
-		$GUI->database->execSQL($sql,4, 1);
+		$GUI->pgdatabase->execSQL($sql,4, 1);
 		if (count_or_0($nachweis_ids) > 0) {
 			$sql = '
 				INSERT INTO 
-					rolle_nachweise_rechercheauswahl 
+					kvwmap.rolle_nachweise_rechercheauswahl 
 				VALUES ';
 			for ($i = 0; $i < count($nachweis_ids); $i++){
 				$sql .= ($i > 0? ',' : '') . '(
@@ -453,7 +453,7 @@
 			}
 			#echo $sql;
 			$GUI->debug->write("<p>nachweiseAuswahlSpeichern - Speichern der aktuellen Auswahl im Rechercheergebnis",4);
-			$GUI->database->execSQL($sql,4, 1);
+			$GUI->pgdatabase->execSQL($sql,4, 1);
 		}
 		return 1;
 	};

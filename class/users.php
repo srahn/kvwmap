@@ -775,7 +775,7 @@ class user {
 			SELECT
 				shared_from
 			FROM
-				layer
+				kvwmap.layer
 			WHERE
 				layer_id = " . $layer_id . " AND
 				shared_from = " . $user_id . "
@@ -786,7 +786,7 @@ class user {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0;
 		}
-		return (mysqli_num_rows($this->database->result) > 0);
+		return (pg_num_rows($ret[1]) > 0);
 	}
 
 	function clientIpIsValide($remote_addr) {
@@ -1597,7 +1597,7 @@ class user {
 			UPDATE
 				kvwmap.user
 			SET
-				password = kvwmap.sha1('" . $this->database->mysqli->real_escape_string($password) . "'),
+				password = kvwmap.sha1('" . pg_escape_string($password) . "'),
 				password_setting_time = '" . $password_setting_time . "',
 				password_expired = false
 			WHERE
