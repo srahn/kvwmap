@@ -1,7 +1,7 @@
 BEGIN;
 
   ALTER TABLE IF EXISTS metadata.ressources
-    ADD COLUMN IF NOT EXISTS upload_file character varying;
+    ADD COLUMN IF NOT EXISTS upload_file character varying,
     ADD COLUMN IF NOT EXISTS aenderungshinweise text,
     ADD COLUMN IF NOT EXISTS nutzungsberechtigte text,
     ADD COLUMN IF NOT EXISTS nutzungsbedingungen text,
