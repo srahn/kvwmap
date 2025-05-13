@@ -61,7 +61,7 @@ CREATE TABLE config (
 
 
 CREATE TABLE connections (
-  id bigint  NOT NULL ,
+  id serial,
   name varchar(150) NOT NULL DEFAULT 'kvwmapsp' ,
   host varchar(50) DEFAULT 'pgsql' ,
   port integer DEFAULT 5432 ,
@@ -72,7 +72,7 @@ CREATE TABLE connections (
 
 
 CREATE TABLE cron_jobs (
-  id bigint  NOT NULL,
+  id serial,
   bezeichnung varchar(255) NOT NULL,
   beschreibung text DEFAULT NULL,
   time varchar(25) NOT NULL DEFAULT '0 6 1 * *',
