@@ -16,15 +16,15 @@
     include(LAYOUTPATH . "snippets/Fehlermeldung.php");
   }
 ?>
-<div style="margin-left: 25px; text-align: left"><?php
+<div style="margin: 25px; text-align: left"><?php
   $last_dir_name = '';
   foreach ($this->files AS $file) {
     $path_parts = pathinfo($file);
     echo '<br>';
     if ($path_parts['dirname'] != $last_dir_name) {
       $last_dir_name = $path_parts['dirname'];
-      ?><span class="dir"><? echo str_replace($this->search_dir, '', $path_parts['dirname']) . '/'; ?></span><?
+      ?><span class="dir"><? echo str_replace($this->search_dir, '', $path_parts['dirname']) . '/'; ?></span><br><?
     } ?>
-    <br><span class="file"><? echo $path_parts['basename']; ?></span><?
+    <span class="file"><? echo $path_parts['basename']; ?></span><?
 	} ?>
 </div>
