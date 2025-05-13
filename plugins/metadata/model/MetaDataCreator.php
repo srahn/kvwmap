@@ -216,15 +216,15 @@ class MetaDataCreator {
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>Downloaddienst (WFS) " . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
+				<gco:CharacterString>" . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
+			</gmd:pointOfContact>" . 
+			//<gmd:pointOfContact>
+				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			//</gmd:pointOfContact>
+			"<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'publisher') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
@@ -527,15 +527,15 @@ class MetaDataCreator {
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>Darstellungsdienst (WMS) " . $this->md->get('id_abstract')['viewservice'] . "</gco:CharacterString>
+				<gco:CharacterString>" . $this->md->get('id_abstract')['viewservice'] . "</gco:CharacterString>
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
+			</gmd:pointOfContact>".
+			//<gmd:pointOfContact>
+				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			//</gmd:pointOfContact>
+			"<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'publisher') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
@@ -852,15 +852,15 @@ class MetaDataCreator {
           </gmd:CI_Citation>
         </gmd:citation>
 				<gmd:abstract>
-					<gco:CharacterString>Geodatensatz " . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
+					<gco:CharacterString>" . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
 				</gmd:abstract>
 				<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-				</gmd:pointOfContact>
-				<gmd:pointOfContact>
-					" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-				</gmd:pointOfContact>
-				<gmd:pointOfContact>
+				</gmd:pointOfContact>" .
+				//<gmd:pointOfContact>
+					//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+				//</gmd:pointOfContact>
+				"<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_content', 'publisher') . "
 				</gmd:pointOfContact>
 				<gmd:resourceMaintenance>

@@ -106,7 +106,7 @@ function quote($var, $type = '') {
 }
 
 function quote_or_null($var) {
-	return ($var == '' ? 'NULL' : quote($var));
+	return (($var === '' OR $var === null) ? 'NULL' : quote($var));
 }
 
 function append_slash($var) {
@@ -946,34 +946,37 @@ function password_erstellungs_hinweis($language) {
 * Vielen Dank an den Autor.
 *
 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-*
-* @return string ein achtstelliges Password
+*	@param Integer $passwordLength Die Länge des zu erzeugenden Passworts.
+* @param String $sonderzeichen Die Sonderzeichen, die im Passwort vorkommen dürfen. 
+* @return string ein Password der Länge $passwordLength, mindestens 8, maximal 24 Zeichen.
 *
 * @see    isPasswordValide(), checkPasswordAge, $GUI, $user, $stelle
 */
-function createRandomPassword($passwordLength) {
-	if ($passwordLength<8)
-		$passwordLength=8;
-	if ($passwordLength>16)
-	  $passwordLength=16;
-  $chars[0]= "abcdefghijkmnopqrstuvwxyz";
-  $chars[1]= "ABCDEFGHIJKMNOPQRSTUVWXYZ";
-  $chars[2]= "0234567890234567890234567";
-  $chars[3]= "()_+*-.:,;!§$%&=#()_+*-.:";
-  $password='';
-  $charListNumbers=array();
-  $charListNumber=rand(0,3);
-  $loops=0;
+function createRandomPassword($passwordLength, $sonderzeichen = "()_+*-.:,;!§$%&=#()_+*-.:") {
+	if ($passwordLength < 8) {
+		$passwordLength = 8;
+	}
+	if ($passwordLength > 24) {
+	  $passwordLength = 24;
+	}
+  $chars[0] = "abcdefghijkmnopqrstuvwxyz";
+  $chars[1] = "ABCDEFGHIJKMNOPQRSTUVWXYZ";
+  $chars[2] = "0234567890234567890234567";
+  $chars[3] = $sonderzeichen;
+  $password = '';
+  $charListNumbers = array();
+  $charListNumber = rand(0,3);
+  $loops = 0;
   while (strlen($password)<$passwordLength AND $loops++ < 100) {
   	while (count($charListNumbers)<4) {
   		if (!in_array($charListNumber,$charListNumbers)) { # wenn die charListNumber noch nicht in der Liste ist
-  			$charListNumbers[]=$charListNumber; # charListNumber in die Liste aufnehmen
-  			$char=substr($chars[$charListNumber],rand(0,24),1); # Character aus der Characterliste mit charListNumber entnehmen
+  			$charListNumbers[] = $charListNumber; # charListNumber in die Liste aufnehmen
+  			$char = substr($chars[$charListNumber], rand(0, 24), 1); # Character aus der Characterliste mit charListNumber entnehmen
   			#if ($char==' ') $char='_'; # darf nur auf keinen Fall ein Leerzeichen beinhalten
-  			$password.=$char;
+  			$password .= $char;
   			#echo '<br>'.strlen($password).' '.$password;
   		}
-  		$charListNumber=rand(0,3);
+  		$charListNumber = rand(0,3);
   	}
   	$charListNumbers = array();
   }
@@ -2614,7 +2617,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 		case 'int' :
 		case 'int4' :
 		case 'oid' :
-		case 'boolean':
+		case 'boolean' :
 		case 'int8' : {
 			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;
@@ -2759,7 +2762,7 @@ function getAllFiles($dir) {
 			$files = array_merge($files, getAllFiles($item));
 		}
 		else {
-			$files[] = $item;
+			$files[pathinfo($item, PATHINFO_EXTENSION)] = $item;
 		}
 	}
 

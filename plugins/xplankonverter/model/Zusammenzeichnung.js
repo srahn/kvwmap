@@ -252,7 +252,7 @@ class Zusammenzeichnung {
         simplify_fachdaten_geom: $('#simplify_fachdaten_geom').val()
       },
       success: (result) => {
-        //console.log('Response create_plaene: %o', result);
+        console.log('Response create_plaene: %o', result);
         if (result.success) {
           this.nextStep('create_plaene', 'ok')
         }
@@ -295,7 +295,7 @@ class Zusammenzeichnung {
         try {
           const result = JSON.parse(text);
           if (result.success) {
-            //console.log('Response reindex_gml_ids: %o', result);
+            console.log('Response reindex_gml_ids: %o', result);
             this.nextStep('reindex_gml_ids', 'ok', 'import_reindexed_zusammenzeichnung');
           }
           else {
@@ -555,7 +555,7 @@ class Zusammenzeichnung {
         }
         else {
           this.nextStep('check_class_completeness', 'error');
-          message([{ type: 'error', msg: 'Fehler bei der Prüfung der Planzeichenzuordnung.<br>' + result.msg + ' gesendet mit data: ' + data }]);
+          message([{ type: 'error', msg: 'Fehler bei der Prüfung der Planzeichenzuordnung.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -646,6 +646,7 @@ class Zusammenzeichnung {
     $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success] + '" aria-hidden="true" ></i>');
     if (success == 'ok' && nextFunction !== '') {
       console.log(`call next step function: ${this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]}()`);
+      console.log(`call next step function nextFunction: ${nextFunction}()`);
       this[nextFunction]();
     }
     else {

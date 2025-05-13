@@ -322,7 +322,7 @@ class Ressource extends PgObject {
 			if (!$result['success']) { return $result; }
 
 			// Update metadata document
-			$this->gui->formvars['aktivesLayout'] = 4;
+			$this->gui->formvars['aktivesLayout'] = METADATA_PRINT_LAYOUT_ID;
 			$this->gui->formvars['chosen_layer_id'] = METADATA_RESSOURCES_LAYER_ID;
 			$this->gui->formvars['oid'] = $this->get_id();
 			$this->gui->formvars['archivieren'] = 1;
@@ -448,7 +448,7 @@ class Ressource extends PgObject {
 					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
 				);
 			}
-			$download_path = $this->get_full_path($this->get('download_path'));;
+			$download_path = $this->get_full_path($this->get('download_path'));
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -507,14 +507,14 @@ class Ressource extends PgObject {
 	 * Download from WFS
 	 */
 	function download_wfs() {
-		// ToDo: implement on demand
 		$url = $this->get('download_url');
+		// ToDo: query first capabilites to check if epsg is available
 		$epsg = ($this->get('import_epsg') ? $this->get('import_epsg') : '25832');
 		$params = array(
 			'Service' => 'WFS',
-			'Version' => '2.0.0',
+			'Version' => $this->get_wfs_version($url, '1.1.0'),
 			'Request' => 'GetFeature',
-			'TypeNames' => $this->get('import_layer'),
+			'TypeName' => $this->get('import_layer'),
 			'SRS' => 'urn:ogc:def:crs:EPSG::' . $epsg
 		);
 
@@ -526,7 +526,7 @@ class Ressource extends PgObject {
 					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
 				);
 			}
-			$download_path = $this->get_full_path($this->get('download_path'));;
+			$download_path = $this->get_full_path($this->get('download_path'));
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -589,7 +589,7 @@ class Ressource extends PgObject {
 				);
 			}
 
-			$download_path = $this->get_full_path($this->get('download_path'));;
+			$download_path = $this->get_full_path($this->get('download_path'));
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -664,7 +664,7 @@ class Ressource extends PgObject {
 				);
 			}
 
-			$download_path = $this->get_full_path($this->get('download_path'));;
+			$download_path = $this->get_full_path($this->get('download_path'));
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -891,7 +891,7 @@ class Ressource extends PgObject {
 		else {
 			array_map('unlink', glob("$dest_path/*.*"));
 		}
-		$download_path = $this->get_full_path($this->get('download_path'));;
+		$download_path = $this->get_full_path($this->get('download_path'));
 
 		$err_msg = array();
 		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
@@ -983,7 +983,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = $this->get_full_path($this->get('download_path'));;
+		$download_path = $this->get_full_path($this->get('download_path'));
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				$fp_dest = fopen($dest_path, $entry, "w");
@@ -1052,7 +1052,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = $this->get_full_path($this->get('download_path'));;
+		$download_path = $this->get_full_path($this->get('download_path'));
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				if (!copy($download_path . $entry, $dest_path . $entry)) {
@@ -1101,7 +1101,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = $this->get_full_path($this->get('download_path'));;
+		$download_path = $this->get_full_path($this->get('download_path'));
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				if (!rename($download_path . $entry, $dest_path . $entry)) {
@@ -1195,6 +1195,68 @@ class Ressource extends PgObject {
 		return array(
 			'success' => true,
 			'msg' => $msg
+		);
+	}
+
+	function unpack_replace_xml_encoding() {
+		$this->debug->show('Starte Funktion unpack_replace_xml_encoding', true);
+		$encoding = $this->get('encoding') ?: 'UTF-8';
+		if ($this->get('dest_path') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein relatives Zielverzeichnis angegeben.'
+			);
+		}
+		$dest_path = $this->get_full_path($this->get('dest_path'));
+		if (strpos($dest_path, '/var/www/data/') !== 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Das Zielverzeichnis ' . $dest_path . ' fängt nicht mit /var/www/data/ an.'
+			);
+		}
+		if (!file_exists($dest_path)) {
+			$this->debug->show('Lege Zielverzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
+			mkdir($dest_path, 0777, true);
+		}
+
+		$err_msg = array(); 
+		$download_path = $this->get_full_path($this->get('download_path'));
+		forEach(scandir($download_path) AS $entry) {
+			$gml_path = $download_path . $entry;
+			if (is_file($gml_path) AND pathinfo($gml_path, PATHINFO_EXTENSION) == 'gml') {
+				$this->debug->show('Ersetze encoding in Datei: ' . $download_path . $entry, true);
+
+				// Read original content
+				$gml_content = file_get_contents($gml_path);
+				if ($gml_content === false) {
+					$err_msg[] = 'Konte GML-Datei ' . $gml_path . ' nicht öffnen um encoding zu schreiben.';
+				}
+
+				$updated_gml_content = preg_replace(
+					'/(encoding\s*=\s*")[^"]*(")/i',
+					'${1}UTF-8${2}',
+					$gml_content
+				);
+
+				$dest_gml_path = $dest_path . $entry;
+				if (file_put_contents($dest_gml_path, $updated_gml_content) === false) {
+					$err_msg[] = 'Konte GML-Datei ' . $dest_gml_path . ' mit geändertem Encoding ' . $encoding . ' nicht schreiben.';
+				}
+				// sed -i 's/encoding="ISO-8859-1"/encoding="UTF-8"/' filename.xml
+				$this->debug->show('encoding durch ' . $encoding . ' in GML-Datei ' . $dest_gml_path . ' ersetzt.', true);
+			}
+		};
+
+		if (count($err_msg) > 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Ersetzen des encodings der GML-Dateien für die Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Meldung: ' . implode(', ', $err_msg)
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'XML encoding in GML-Dateien erfolgreich auf ' . $encoding . ' geändert.'
 		);
 	}
 
@@ -1475,7 +1537,8 @@ class Ressource extends PgObject {
 				($first ? '-overwrite' : '-append'),
 				'UTF-8',
 				false,
-				$this->unlogged
+				$this->unlogged,
+				$this->get('force_nullable') == 't'
 			);
 			$first = false;
 			if ($result != '') {
@@ -1854,6 +1917,28 @@ class Ressource extends PgObject {
 		}
 	}
 
+	/**
+	 * Die Funktion ließt die Version des WFS aus dem Capabilities-Dokument,
+	 * welches von der $online_ressource gelesen werden kann oder die $default_version wenn
+	 * keine Version im abgefragten Text gefunden werden kann.
+	 * @param string $online_ressource
+	 * @param string $default_version
+	 * @return string $version
+	 */
+	function get_wfs_version($online_ressource, $default_version = '1.1.0') {
+		if (strpos($online_ressource, '?') !== false) {
+			$url_parts = explode('?', $online_ressource);
+			$online_ressource = $url_parts[0];
+		}
+		$download_url = $online_ressource . '?SERVICE=WFS&REQUEST=GetCapabilities';
+		$capabilities = file_get_contents($download_url);
+		if (preg_match('/<([a-zA-Z0-9]+:)?ServiceTypeVersion>([\d\.]+)<\/\1?ServiceTypeVersion>/i', $capabilities, $matches)) {
+			$version = $matches[2];
+		} else {
+			$version = $default_version;
+		}
+		return $version;
+	}
 }
 
 ?>
