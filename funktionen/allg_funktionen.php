@@ -1095,9 +1095,10 @@ if (!function_exists('str_split')) {
     }
 }
 
-function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite=true){
+function unzip($src_file, $dest_dir = false, $create_zip_name_dir = true, $overwrite = true){
 	# 1. Methode über unzip (nur Linux) rausgenommen, da Umlaute kaputt gehen
 	$entries = NULL;
+	$success = false;
 	if ($dest_dir === false) {
 		$dest_dir = dirname($src_file);
 	}
@@ -1106,10 +1107,13 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 		for ($i = 0; $i < $zip->numFiles; $i++) {
 			$entries[] = $zip->getNameIndex($i);
 		}
-		$zip->extractTo($dest_dir); 
+		$success = $zip->extractTo($dest_dir); 
 		$zip->close(); 
 	}
-	return $entries;
+	return array(
+		'success' => $success,
+		'files' => $entries
+	);
 }
 
 /**

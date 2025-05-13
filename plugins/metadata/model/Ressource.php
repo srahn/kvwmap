@@ -176,7 +176,7 @@ class Ressource extends PgObject {
 	 *  8 - Transformation gestartet
 	 *  9 - Transformation fertig
 	 */
-	public static function update_outdated($gui, $ressource_id = null, $method_only = '') {
+	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $only_missing = false) {
 		// $gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
 
 		$ressource = new Ressource($gui);
@@ -200,7 +200,7 @@ class Ressource extends PgObject {
 					echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
 				}
 				else {
-					$result = $ressource->run_update($method_only);
+					$result = $ressource->run_update($method_only, $only_missing);
 					$ressource->log($result, false);
 					return $result;
 				}
@@ -241,16 +241,16 @@ class Ressource extends PgObject {
 			$method_only == $method;
 	}
 
-	function run_update($method_only = '') {
+	function run_update($method_only = '', $only_missing = false) {
 		$this->debug->show('Update Ressource ' . $this->get_id(), true);
 		$this->update_status(1, $msg);
 
 		if ($this->must_be_executed('download', $method_only)) {
-			$result = $this->download();
+			$result = $this->download($only_missing);
 			if (!$result['success']) { return $result; }
 		}
 		if ($this->must_be_executed('unpack', $method_only)) {
-			$result = $this->unpack();
+			$result = $this->unpack($only_missing);
 			if (!$result['success']) { return $result; }
 		}
 		if ($this->must_be_executed('import', $method_only)) {
@@ -329,7 +329,7 @@ class Ressource extends PgObject {
 	####################
 	# Download methods #
 	####################
-	function download() {
+	function download($only_missing = false) {
 		// $this->debug->show('Starte Funktion download', true);
 		if ($this->get('download_method') != '') {
 			$method_name = 'download_' . $this->get('download_method');
@@ -341,6 +341,7 @@ class Ressource extends PgObject {
 			}
 
 			$this->update_status(2);
+			$this->only_missing = $only_missing;
 			$result = $this->${method_name}();
 			if (!$result['success']) { return $result; }
 
@@ -399,14 +400,13 @@ class Ressource extends PgObject {
 				$this->debug->show('Lege Verzeichnis ' . $download_path . ' an, weil es noch nicht existiert!', true);
 				mkdir($download_path, 0777, true);
 			}
-			$only_missing = ((array_key_exists('only_missing', $this->formvars) AND $this->formvars['only_missing']) ? true : false);
-			if ($only_missing) {
+			if ($this->only_missing) {
 				array_map('unlink', glob($download_path . "/*"));
 				$this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 			}
 
 			foreach ($download_urls AS $download_url) {
-				if (!($only_missing AND file_exists($download_path . basename($download_url)))) {
+				if ($this->only_missing === false OR !file_exists($download_path . basename($download_url))) {
 					$this->debug->show('Download from: ' . $download_url . ' to ' . $download_path, true);
 					copy($download_url, $download_path . basename($download_url));
 					// if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
@@ -558,9 +558,9 @@ class Ressource extends PgObject {
 			}
 
 			// Script aufrufen zum Download der Dateien in urls.txt
-			$cmd = $parallel_download_script . ' ' . $urls_file . ' ' . $download_path . ' 10';
+			$cmd = $parallel_download_script . ' ' . $urls_file . ' ' . $download_path . ' 10' . ($this->only_missing ? ' 1' : '');
 			$this->debug->show('Download Dateien aus urls.txt mit Befehl: ' . $cmd, true);
-			// Befehl z.B. /var/www/apps/kvwmap/plugins/metadata/tools/download_parallel.sh /var/www/data/fdm/ressourcen/dgm/dgm1/NS/urls.txt /var/www/data/fdm/ressourcen/dgm/dgm1/NS/downloads/ 10
+			// // Befehl z.B. /var/www/apps/kvwmap/plugins/metadata/tools/download_parallel.sh /var/www/data/fdm/ressourcen/dgm/dgm1/NS/urls.txt /var/www/data/fdm/ressourcen/dgm/dgm1/NS/downloads/ 10
 			$descriptorspec = [
 				0 => ["pipe", "r"],  // stdin
 				1 => ["pipe", "w"],  // stdout
@@ -709,7 +709,7 @@ class Ressource extends PgObject {
 	##################
 	# Unpack methods #
 	##################
-	function unpack() {
+	function unpack($only_missing = false) {
 		// $this->debug->show('Starte Funktion unpack', true);
 		if ($this->get('unpack_method') != '') {
 			$method_name = 'unpack_' . $this->get('unpack_method');
@@ -720,6 +720,7 @@ class Ressource extends PgObject {
 				);
 			}
 			$this->update_status(4);
+			$this->only_missing = $only_missing;
 			$result = $this->${method_name}();
 			if (!$result['success']) { return $result; }
 			$this->update_status(5);
@@ -761,22 +762,32 @@ class Ressource extends PgObject {
 		$err_msg = array();
 		foreach (glob($download_path . '*') as $filename) {
 			if (finfo_file($finfo, $filename) == 'application/zip') {
-				$cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
-				$this->debug->show('Packe ' . $filename . ' aus', true);
-				$descriptorspec = [
-					0 => ["pipe", "r"],  // stdin
-					1 => ["pipe", "w"],  // stdout
-					2 => ["pipe", "w"],  // stderr
-				];
-				$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
-				$line = __LINE__;
-				$stdout = stream_get_contents($pipes[1]);
-				fclose($pipes[1]);
-				$stderr = stream_get_contents($pipes[2]);
-				fclose($pipes[2]);
-				#    exec($cmd, $output, $return_var);
-				if ($stderr != '') {
-					$err_msg[] = 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr;
+				if ($this->only_missing == false OR !file_exists($dest_path . str_replace('.zip', '.tif', basename($filename)))) {
+					$result = unzip($filename, $dest_path);
+					if ($result['success']) {
+						$this->debug->show($filename . ' ausgepackt. ' . implode(', ', $result['files']), true);
+					}
+					else {
+						$err_msg[] = '<br>Fehler beim Auspacken der Datei ' . $filename . ' für Ressource ID: ' . $this->get_id() . ' Überprüfen Sie die Schreibrechte im Verzeichnis ' . $dest_path;
+					}
+					// $cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
+					// $descriptorspec = [
+					// 	0 => ["pipe", "r"],  // stdin
+					// 	1 => ["pipe", "w"],  // stdout
+					// 	2 => ["pipe", "w"],  // stderr
+					// ];
+					// $process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+					// $line = __LINE__;
+					// $stdout = stream_get_contents($pipes[1]);
+					// echo '<br>stdout: ' . $stdout;
+					// fclose($pipes[1]);
+					// $stderr = stream_get_contents($pipes[2]);
+					// echo '<br>stderr: ' . $sterr;
+					// fclose($pipes[2]);
+					#    exec($cmd, $output, $return_var);
+					// if ($stderr != '') {
+					// 	$err_msg[] = 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr;
+					// }
 				}
 			}
 		}

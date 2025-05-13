@@ -38,7 +38,7 @@ function go_switch_metadata($go){
 	switch($go) {
 		case 'metadata_cancel_data_package': {
 			$GUI->sanitize([
-				'package_id' => 'integer'
+				'package_id' => 'int'
 			]);
 			$response = $GUI->metadata_cancel_data_package($GUI->formvars['package_id']);
 			echo json_encode($response);
@@ -51,7 +51,7 @@ function go_switch_metadata($go){
 
 		case 'metadata_create_data_package': {
 			$GUI->sanitize([
-				'package_id' => 'integer'
+				'package_id' => 'int'
 			]);
 
 			$response = $GUI->metadata_create_data_package($GUI->formvars['package_id']);
@@ -60,7 +60,7 @@ function go_switch_metadata($go){
 
 		case 'metadata_create_metadata_document' : {
 			$GUI->sanitize([
-				'layer_id' => 'integer'
+				'layer_id' => 'int'
 			]);
 			$response = $GUI->metadata_create_metadata_document($GUI->formvars['layer_id']);
 			echo json_encode($response);
@@ -82,7 +82,7 @@ function go_switch_metadata($go){
 
 		case 'metadata_delete_data_package': {
 			$GUI->sanitize([
-				'package_id' => 'integer'
+				'package_id' => 'int'
 			]);
 			$response = $GUI->metadata_delete_data_package($GUI->formvars['package_id']);
 			echo json_encode($response);
@@ -109,7 +109,7 @@ function go_switch_metadata($go){
 
 		case 'metadata_download_data_package': {
 			$GUI->sanitize([
-				'package_id' => 'integer'
+				'package_id' => 'int'
 			]);
 			$result = $GUI->metadata_download_data_package($GUI->formvars['package_id']);
 
@@ -131,7 +131,7 @@ function go_switch_metadata($go){
 
 		case 'metadata_download_metadata_document' : {
 			$GUI->sanitize([
-				'layer_id' => 'integer'
+				'layer_id' => 'int'
 			]);
 			$response = $GUI->metadata_download_metadata_document($GUI->formvars['layer_id']);
 			if (!$result['success']) {
@@ -155,7 +155,7 @@ function go_switch_metadata($go){
 
 		case 'metadata_order_data_package': {
 			$GUI->sanitize([
-				'ressource_id' => 'integer'
+				'ressource_id' => 'int'
 			]);
 			$response = $GUI->metadata_order_data_package($GUI->formvars['ressource_id'], $GUI->Stelle->id);
 			echo json_encode($response);
@@ -163,7 +163,7 @@ function go_switch_metadata($go){
 
 		case 'metadata_reorder_data_packages' : {
 			$GUI->sanitize([
-				'ressource_id' => 'integer'
+				'ressource_id' => 'int'
 			]);
 			$response = $GUI->metadata_reorder_data_packages($GUI->formvars['ressource_id']);
 			echo json_encode($response);
@@ -171,8 +171,8 @@ function go_switch_metadata($go){
 
 		case 'metadata_set_ressource_status' : {
 			$GUI->sanitize([
-				'ressource_id' => 'integer',
-				'status_id' => 'integer'
+				'ressource_id' => 'int',
+				'status_id' => 'int'
 			]);
 			$response = $GUI->metadata_set_ressource_status($GUI->formvars['ressource_id'], $GUI->formvars['status_id']);
 			echo json_encode($response);
@@ -184,17 +184,21 @@ function go_switch_metadata($go){
 
 		case 'metadata_show_ressources_status' : {
 			$GUI->sanitize([
-				'ressource_id' => 'integer'
+				'ressource_id' => 'int'
 			]);
 			$GUI->metadata_show_ressources_status($GUI->formvars['ressource_id']);
 		} break;
 
 		case 'metadata_update_outdated' : {
 			$GUI->sanitize([
-				'ressource_id' => 'integer'
+				'ressource_id' => 'int',
 			]);
 			$GUI->checkCaseAllowed($go);
-			$result = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id'], $GUI->formvars['method_only']);
+			$result = Ressource::update_outdated(
+				$GUI, $GUI->formvars['ressource_id'],
+				$GUI->formvars['method_only'],
+				(array_key_exists('only_missing', $GUI->formvars) AND $GUI->formvars['only_missing'] != '') ? true : false
+			);
 			// header('Content-Type: application/json; charset=utf-8');
 			// echo json_encode($result);
 			echo $result['msg'];

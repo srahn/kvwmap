@@ -1609,7 +1609,7 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor_info_from_maintable' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->sanitize([
-					'connection_id' => 'integer',
+					'connection_id' => 'int',
 					'schema_name' => 'text',
 					'table_name' => 'text'
 				]);
@@ -1624,7 +1624,7 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor_get_maintables' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->sanitize([
-					'connection_id' => 'integer'
+					'connection_id' => 'int'
 				]);
 				if ($GUI->formvars['connection_id'] == '') {
 					$result = array(
