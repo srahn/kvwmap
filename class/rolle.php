@@ -37,6 +37,63 @@ class rolle {
 		$this->loglevel = 0;
 	}
 
+	/**
+	 * Function create a rolle for a user with $user_id and all relations to menues, layers and layergroups in stelle with $stelle_id.
+	 * If $default_user_id is given them settings will be used.
+	 * @param database $database MySQL-Database object from class database defined in classes/mysql.php
+	 * @param Integer $stelle_id
+	 * @param Integer $user_id
+	 * @param Integer $default_user_id Die id eines Default-Users.
+	 * @param Layer[] $layer Array with layer_ids to assign rolle to there groups.
+	 * @return Array Result with Boolean success and String $msg.
+	 */
+	public static	function create($database, $stelle_id, $user_id, $default_user_id = 0, $layer = array(), $parent_stelle_id = NULL) {
+		$rolle = new rolle($user_id, $stelle_id, $database);
+		# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der selektierten Obermenüs zur Rolle
+		if (!$rolle->setMenue($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen der Menüs der Stelle zum Nutzer.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der Layer zur Rolle
+		if (!$rolle->setLayer($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen des Layers zur Rolle.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+		if (!$rolle->setGroups($user_id, $stelle_id, $default_user_id, $layer)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Hinzufügen der Layergruppen der selektierten Layer zur Rolle.<br>' . $database->errormessage
+			);
+		};	
+
+		if (!$rolle->setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen von savedLayersFromDefaultUser.<br>' . $database->errormessage
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Anlegen der Rolle erfolgreich.'
+		);
+	}
+
 	/*
 	* Speichert den Status der Layergruppen
 	* @param $formvars array mit key group_<group_id> welcher den Status der Gruppe enthält 
@@ -330,13 +387,13 @@ class rolle {
 		return 1;
 	}
 
-	function switch_gle_view($layer_id) {
+	function switch_gle_view($layer_id, $mode) {
 		if ($layer_id > 0) {
 			$sql = "
 				UPDATE
 					u_rolle2used_layer
 				SET
-					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+					gle_view = " . $mode . "
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
@@ -348,7 +405,7 @@ class rolle {
 				UPDATE
 					rollenlayer
 				SET
-					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+					gle_view = " . $mode . "
 				WHERE
 					id = " . (-$layer_id) . "
 			";
@@ -1681,6 +1738,11 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Fügt die Rolle für den Nutzer $user_id in der Stelle $stelle_id hinzu.
+	 * Verwendet die Defaulteinstellungen der Rolle $default_user_id, falls übergeben
+	 * und anders als $user_id
+	 */
 	function setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id = NULL) {
 		# trägt die Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
@@ -1846,7 +1908,7 @@ class rolle {
 		$new_layer_params = array();
 		foreach (array_keys($layer_params) AS $key) {
 			$layer_param = LayerParam::find_by_key($this->gui_object, $key);
-			$options = $layer_param->get_options($this->user_id, $this->stelle_id);
+			$result = $layer_param->get_options($this->user_id, $this->stelle_id);
 			if (!$result['success']) {
 				return $result;
 			}
@@ -1856,10 +1918,10 @@ class rolle {
 					function($option) {
 						return $option['value'];
 					},
-					$options
+					$result['options']
 				)
 			)) {
-				$layer_params[$key] = $options[$value];
+				$layer_params[$key] = $result['options']['value'][0];
 			};
 		}
 		foreach ($layer_params AS $param_key => $value) {
@@ -2038,57 +2100,47 @@ class rolle {
 				WHERE
 					stelle_id = ".$stelle_id." AND
 					user_id = ".$default_user_id;
-			#echo '<br>Gruppen: '.$sql;
+			#echo '<br>SQL zum Zuordnen der Rolle zu den Layergruppen: '.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rolle:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			if (!$this->database->success) {
+				$msg = "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__;
+				$this->debug->write($msg, 4);
+				return 0;
+			}
 		}
 		else {
-			for($j = 0; $j < count_or_0($layerids); $j++){
+			for ($j = 0; $j < count_or_0($layerids); $j++){
 				$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
-					SELECT DISTINCT 
-						".$user_id.", 
-						".$stelle_id.", 
-						u_groups.id, 
-						0
-					FROM (
+					WITH RECURSIVE cte (group_id) AS (
 						SELECT 
-							@id AS id, 
-							@id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe
-						FROM 
-							u_groups, 
-							(SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = ".$layerids[$j].")) AS vars
-						WHERE @id IS NOT NULL
-					) AS dat
-					JOIN u_groups ON dat.id = u_groups.id";
+            	coalesce(ul.group_id, l.Gruppe) AS group_id
+						FROM
+          		used_layer ul JOIN
+            	layer l ON ul.`Layer_ID` = l.`Layer_ID`
+            WHERE 
+            	l.Layer_ID = " . $layerids[$j] . " AND
+            	ul.Stelle_ID = " . $stelle_id . "
+						UNION ALL
+						SELECT obergruppe FROM u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
+					)
+					SELECT 
+						" . $user_id . ", 
+						" . $stelle_id . ", 
+						group_id, 
+						0
+					FROM cte;";
 				#echo '<br>Gruppen: '.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 		}
 		return 1;
-	}
-
-	static function setGroupsForAll($database) {
-		$sql = "
-			INSERT IGNORE INTO u_groups2rolle 
-			SELECT DISTINCT 
-				r2ul.user_id,
-				r2ul.stelle_id,
-				g5.id,
-				0
-			FROM 
-				`u_rolle2used_layer` r2ul
-				JOIN layer l ON l.Layer_ID = r2ul.layer_id
-				JOIN u_groups g1 ON g1.id = l.Gruppe
-				LEFT JOIN u_groups g2 ON g2.id = g1.obergruppe
-				LEFT JOIN u_groups g3 ON g3.id = g2.obergruppe
-				LEFT JOIN u_groups g4 ON g4.id = g3.obergruppe
-				LEFT JOIN u_groups g5 ON (g5.id = g4.id OR g5.id = g3.id OR g5.id = g2.id OR g5.id = g1.id)";
-		#echo '<br>Gruppen: '.$sql;
-		$database->execSQL($sql);
 	}
 
 	function deleteGroups($user_id,$stellen) {
@@ -2098,69 +2150,102 @@ class rolle {
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			if (!$this->database->success) {
+				$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+				return 0;
+			}
 		}
 		return 1;
 	}
 
-	function updateGroups($user_id,$stelle_id, $layer_id) {
-		# überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe und deren Obergruppen in u_groups2rolle überflüssig sind
-		#
-		# Abfragen der Gruppe und der Obergruppen
-		$sql ='SELECT DISTINCT u_groups.id';
-		$sql.=' FROM (SELECT @id AS id, @id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe';
-		$sql.='       FROM u_groups, (SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = '.$layer_id.')) AS vars';
-		$sql.='       WHERE @id IS NOT NULL';
-		$sql.='	    ) AS dat';
-		$sql.='	JOIN u_groups ON dat.id = u_groups.id';
-		#echo '<br>'.$sql;
-		$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_row()) {
-			$gruppen_ids[] = $rs[0];
-		}
-		if($gruppen_ids != NULL){
-			# Test ob Layer in den Gruppen vorhanden sind
-			$sql ='SELECT DISTINCT Gruppe FROM layer, u_rolle2used_layer AS r2ul WHERE Gruppe IN ('.implode(',', $gruppen_ids).') AND ';
-			$sql.='r2ul.layer_id = layer.Layer_ID AND ';
-			$sql.='r2ul.user_id = '.$user_id.' AND ';
-			$sql.='r2ul.stelle_id = '.$stelle_id;
-			#echo '<br>'.$sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			while ($rs = $this->database->result->fetch_assoc()) {
-				$rs_layer[$rs['Gruppe']] = $rs['Gruppe'];		# ein Array mit den GruppenIDs, die noch Layer haben
-			}
-			
-			# Test ob Untergruppen in den Gruppen vorhanden sind
-			$sql ='SELECT u_groups.id, u_groups.obergruppe FROM u_groups, u_groups2rolle as r2g WHERE u_groups.id NOT IN ('.implode(',', $gruppen_ids).') AND u_groups.obergruppe IN ('.implode(',', $gruppen_ids).') AND ';
-			$sql.='r2g.id = u_groups.id AND ';
-			$sql.='r2g.user_id = '.$user_id.' AND ';
-			$sql.='r2g.stelle_id = '.$stelle_id;
-			#echo '<br>'.$sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			while ($rs = $this->database->result->fetch_assoc()) {
-				$rs_subgroups[$rs['obergruppe']] = $rs['obergruppe'];		# ein Array mit den GruppenIDs, die noch Untergruppen haben
-			}
-			
-			if($rs_layer[$gruppen_ids[0]] == '' AND $rs_subgroups[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers weder Layer noch Untergruppen hat, diese löschen
-				$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
-				$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-				if($rs_layer == '' AND empty($rs_subgroups)){				# wenn darüberhinaus keine Layer oder Untergruppen in den Gruppen darüber vorhanden sind, diese auch löschen
-					$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` IN ('.implode(',', $gruppen_ids).');';
-					$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-					$this->database->execSQL($sql);
-					if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-				}
-			}
-		}
-		return 1;
+	static function setGroupsForAll($database) {
+		$sql = "
+			INSERT IGNORE INTO u_groups2rolle 				
+			WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
+				SELECT DISTINCT
+						ul.`Stelle_ID` AS stelle_id,
+						r.user_id,
+						coalesce(ul.group_id, l.Gruppe) AS group_id
+				FROM
+						used_layer ul JOIN
+						layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
+						rolle r ON ul.`Stelle_ID` = r.stelle_id
+				UNION ALL
+				SELECT 
+						cte.stelle_id,
+						cte.user_id,
+						obergruppe AS group_id
+				FROM 
+						u_groups, cte 
+				WHERE 
+						cte.group_id = u_groups.id AND 
+						obergruppe IS NOT NULL
+			)
+			SELECT DISTINCT 
+				user_id,
+				stelle_id,
+				group_id,
+				0 
+			FROM cte";
+		#echo '<br>Gruppen: '.$sql;
+		$database->execSQL($sql);
+	}
+
+	static function clear_groups2rolle($database) {
+		$sql = "
+			DELETE
+				u_groups2rolle
+			FROM 
+				u_groups2rolle LEFT JOIN
+				(
+					SELECT DISTINCT
+						*
+					FROM
+						(
+							WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
+								(
+									SELECT DISTINCT
+										ul.`Stelle_ID` AS stelle_id,
+										r.user_id,
+										coalesce(ul.group_id, l.Gruppe) AS group_id
+									FROM
+										used_layer ul JOIN
+										layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
+										rolle r ON ul.`Stelle_ID` = r.stelle_id
+									UNION ALL
+									SELECT DISTINCT
+										stelle_id,
+										user_id,
+										Gruppe
+									FROM
+										rollenlayer
+								)
+								UNION ALL
+								SELECT 
+										cte.stelle_id,
+										cte.user_id,
+										obergruppe AS group_id
+								FROM 
+										u_groups, cte 
+								WHERE 
+										cte.group_id = u_groups.id AND 
+										obergruppe IS NOT NULL
+							)
+							SELECT * FROM cte
+						) sub
+					WHERE
+						group_id IS NOT NULL
+				) n ON 
+					u_groups2rolle.stelle_id = n.stelle_id AND 
+					u_groups2rolle.user_id = n.user_id AND 
+					u_groups2rolle.id = n.group_id
+			WHERE
+				n.stelle_id IS NULL AND
+				n.user_id IS NULL AND
+				n.group_id IS NULL
+		";
+		// echo '<br>SQL zum Löschen nicht mehr benötigter groups2rolle Eintragungen: ' . $sql . '<br>';
+		$database->execSQL($sql);
 	}
 
 	function set_one_Layer($user_id, $stelle_id, $layer_id,  $active) {

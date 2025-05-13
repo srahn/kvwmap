@@ -13,7 +13,8 @@ class Ressource extends PgObject {
 	public $has_subressources = false;
 	public $has_ressource_ranges = false;
 	public $sub_ressources = array();
-	public $layer_id = 8;
+	public $layer_id = METADATA_RESSOURCES_LAYER_ID;
+	public $unlogged = true;
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->$write_debug);
@@ -27,15 +28,32 @@ class Ressource extends PgObject {
 		// );
 	}
 
+	/**
+	 * Function append document files to $zip_file
+	 * @param Ressource $ressource
+	 * @param String $zip_file, The name of the ZIP-File on which the documents to be append.
+	 */
+	function append_docs($zip_file) {
+		$documents = arrStrToArr($this->get('documents'), ',', '{}');
+		foreach ($documents AS $document) {
+			$doc_file = explode('&original_name=' , $document)[0];
+			if (file_exists($doc_file)) {
+				// Put the document file into the $export_file.zip
+				$command = ZIP_PATH . ' -j ' . $zip_file . ' ' . $doc_file;
+				exec($command);
+			}
+		}
+	}
+
 	public static	function find($gui, $where, $order = '') {
 		$ressource = new Ressource($gui);
 		$select = "ampel_id, r.gruppe_id, r.bezeichnung, r.hinweise_auf, r.beschreibung, r.dateninhaber_id, r.ansprechperson, r.format_id, r.aktualitaet, r.url, r.datenguete_id, r.quelle, r.github, r.download_url, r.dest_path, r.download_method, r.id, r.download_path, r.last_updated_at, r.auto_update, r.update_interval, r.import_epsg, r.error_msg, r.relevanz, r.digital, r.flaechendeckend, r.bemerkung_prioritaet, r.inquiries_required, r.inquiries, r.inquiries_responses, r.inquiries_responsible, r.inquiries_to, r.check_required, r.created_at, r.created_from, r.updated_at, r.updated_from, r.use_for_datapackage, r.transform_command, r.unpack_method, r.import_method, r.transform_method, r.status_id, r.von_eneka, r.documents, r.import_layer, r.import_schema, r.import_table, r.layer_id, r.update_time, r.import_filter, r.import_file, r.metadata_document, r.gebietseinheit_id, r.next_update_at,
 		DATE(r.last_updated_at) + r.update_time + r.update_interval AS next_interval_date,
 		s.status,
-		status_id > -1 AND
+		(status_id IS NULL OR status_id = 0) AND
 		auto_update AND
 		(
-			last_updated_at IS NULL OR
+			last_updated_at IS NULL OR 
 			(
 				(
 					next_update_at IS NOT NULL AND
@@ -66,20 +84,36 @@ class Ressource extends PgObject {
 	}
 
 	/**
-	 * Function query outdated ressources if $ressource_id is set it
-	 * query only if this ressource is outdated
+	 * Function query outdated ressources.
+	 * The amount of results is limited by $limit.
+	 * If $ressource_id is set with a single id or an array of ids, it query only if these ressources are outdated.
+	 * A Ressource is outdated if
+	 *   - auto_update is true
+	 *   - status_id IS NULL, = 0 or > -1 wenn $force is true
+	 *   - von_eneka or use_for_datapackage is true
+	 *   - last_updated_at is null or
+	 *     - next_updated_at is not null and between last_updated_at and now() or
+	 *     - update_interval is not null and date of last_updated_at + update_time is < now
 	 * @param integer $ressource_id
 	 * @param integer $limit If limit is given only the amount of ressources will be replied
 	 * @return Ressource[] An Array of Ressources that are outdated
 	 */
-	public static function find_outdated($gui, $ressource_id = NULL, $limit = NULL) {
+	public static function find_outdated($gui, $ressource_id = NULL, $limit = NULL, $force = false) {
 		$ressources = array();
 		$ressource = new Ressource($gui);
-		// $ressource->show = true;
+		if ($force) {
+			// all with status > -1 find to be outdated
+			$status_condition = "> -1";
+		}
+		else {
+			// only ressouces with state Uptodate will be find as outdated
+			$status_condition = "= 0";
+		}
+		$ressource->show = true;
 		$ressources = $ressource->find_where(
 			"
 				(von_eneka OR use_for_datapackage) AND
-				(status_id IS NULL OR status_id > -1) AND
+				(status_id IS NULL OR status_id " . $status_condition . ") AND
 				auto_update AND
 				(
 					last_updated_at IS NULL OR
@@ -96,7 +130,7 @@ class Ressource extends PgObject {
 					)
 				)
 			" .
-			($ressource_id ? " AND id = " . $ressource_id : ""),
+			($ressource_id ? " AND id " . (is_array($ressource_id) ? "IN (" . implode(', ', $ressource_id) . ")" : "= " . $ressource_id) : ""),
 			"last_updated_at",
 			"*",
 			$limit
@@ -131,7 +165,15 @@ class Ressource extends PgObject {
 			return $next_update_at;
 		}
 	}
-		
+	
+	function get_sources() {
+		return Lineage::find_sources($this->gui, $this->get('id'));
+	}
+
+	function get_targets() {
+		return Lineage::find_targets($this->gui, $this->get('id'));
+	}
+
 	function get_subressources() {
 		$subresource = new SubRessource($this->gui);
 		$subressources = $subresource->find_by_ressource_id($this->get_id());
@@ -163,6 +205,10 @@ class Ressource extends PgObject {
 	 *   )
 	 * )
 	 * if $ressource_id is given force to update it also if it is not outdated!
+	 * @param GUI $gui
+	 * @param int $ressource_id
+	 * @param string $method_only
+	 * @param boolean $force Update not only ressources with update_state_id = 0, but also with > 0 and < 11
 	 * Status of ressources during update:
 	 * -1 - Abbruch wegen Fehler
 	 *  0 - Uptodate
@@ -176,7 +222,7 @@ class Ressource extends PgObject {
 	 *  8 - Transformation gestartet
 	 *  9 - Transformation fertig
 	 */
-	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $only_missing = false) {
+	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $only_missing = false, $force = false) {
 		// $gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
 
 		$ressource = new Ressource($gui);
@@ -188,22 +234,26 @@ class Ressource extends PgObject {
 				SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0 AND status_id < 11;
 			");
 			if ($results[0]['num_running'] < 10) {
-				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running']); // liefert nur die erste gefundene zurück
+				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running'], $force); // liefert nur die ersten 1 - 10 gefundenen zurück
 			}
 		}
 
 		if (count($ressources) > 0) {
 			$gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
 			foreach ($ressources AS $ressource) {
-				// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
-				if ($gui->formvars['dry_run'] == 1) {
-					echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
-				}
-				else {
-					$result = $ressource->run_update($method_only, $only_missing);
-					$ressource->log($result, false);
-					return $result;
-				}
+				// ToDo: A ressource shall only be updated when all its source ressources are uptodate yet.
+				// Test it with a stack of pending ressources.
+				// if ($this->all_source_ressources_uptodate($ressource->get_id())) {
+					// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
+					if ($gui->formvars['dry_run'] == 1) {
+						echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
+					}
+					else {
+						$result = $ressource->run_update($method_only, $only_missing);
+						$ressource->log($result, false);
+						return $result;
+					}
+				// }
 			}
 		}
 		else {
@@ -212,6 +262,16 @@ class Ressource extends PgObject {
 				'msg' => 'Nichts zu tun'
 			);
 		}
+	}
+
+	/**
+	 * Function count all source ressources of ressource with $ressource_id that are outdated
+	 * and return true if the number is 0 else false.
+	 */
+	function all_source_ressources_uptodate($ressource_id) {
+		// ToDo: to implement
+		$ressources = $this->find_outdated($this, Lineage::find_sources($ressource_id), NULL, false);
+		return (count($ressources) == 0);
 	}
 
 	function log($result, $show = false) {
@@ -262,7 +322,7 @@ class Ressource extends PgObject {
 			if (!$result['success']) { return $result; }
 
 			// Update metadata document
-			$this->gui->formvars['aktivesLayout'] = 4;
+			$this->gui->formvars['aktivesLayout'] = METADATA_PRINT_LAYOUT_ID;
 			$this->gui->formvars['chosen_layer_id'] = METADATA_RESSOURCES_LAYER_ID;
 			$this->gui->formvars['oid'] = $this->get_id();
 			$this->gui->formvars['archivieren'] = 1;
@@ -291,7 +351,7 @@ class Ressource extends PgObject {
 		if ($method_only == '') {
 			$this->update_status(0, ' Datum der letzten Aktualisierung gesetzt.');
 		}
-		$last_updated_at = date("Y-m-d");
+		$last_updated_at = date("Y-m-d H:i:s");
 		$this->update_status(0, '', $last_updated_at);
 		return array(
 			'success' => true,
@@ -357,7 +417,7 @@ class Ressource extends PgObject {
 	 * Download dataset or its subsets to download_path
 	 */
 	function download_urls() {
-		$this->debug->show('Starte Funktion download_urls', true);
+		// $this->debug->show('Starte Funktion download_urls', true);
 		$download_urls = array();
 		try {
 			if ($this->get('download_url') != '') {
@@ -389,7 +449,7 @@ class Ressource extends PgObject {
 					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
 				);
 			}
-			$download_path = $this->get_full_path($this->get('download_path'));;
+			$download_path = $this->get_full_path($this->get('download_path'));
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -447,14 +507,14 @@ class Ressource extends PgObject {
 	 * Download from WFS
 	 */
 	function download_wfs() {
-		// ToDo: implement on demand
 		$url = $this->get('download_url');
+		// ToDo: query first capabilites to check if epsg is available
 		$epsg = ($this->get('import_epsg') ? $this->get('import_epsg') : '25832');
 		$params = array(
 			'Service' => 'WFS',
-			'Version' => '2.0.0',
+			'Version' => $this->get_wfs_version($url, '1.1.0'),
 			'Request' => 'GetFeature',
-			'TypeNames' => $this->get('import_layer'),
+			'TypeName' => $this->get('import_layer'),
 			'SRS' => 'urn:ogc:def:crs:EPSG::' . $epsg
 		);
 
@@ -466,7 +526,7 @@ class Ressource extends PgObject {
 					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
 				);
 			}
-			$download_path = $this->get_full_path($this->get('download_path'));;
+			$download_path = $this->get_full_path($this->get('download_path'));
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -529,7 +589,7 @@ class Ressource extends PgObject {
 				);
 			}
 
-			$download_path = $this->get_full_path($this->get('download_path'));;
+			$download_path = $this->get_full_path($this->get('download_path'));
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -604,7 +664,7 @@ class Ressource extends PgObject {
 				);
 			}
 
-			$download_path = $this->get_full_path($this->get('download_path'));;
+			$download_path = $this->get_full_path($this->get('download_path'));
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -755,39 +815,36 @@ class Ressource extends PgObject {
 			$this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
 			mkdir($dest_path, 0777, true);
 		}
+		else {
+			array_map('unlink', glob("$dest_path/*.*"));
+		}
 
-		$download_path = $this->get_full_path($this->get('download_path'));;
+		if ($this->get('download_method') === 'upload') {
+			// Daten wurden manuell hochgeladen und liegen in Datei die in upload_file angegeben ist.
+			$this->debug->show('upload_file: ' . $this->get('upload_file'), true);
+			$zip_files = array(document_info($this->get('upload_file'), 'path'));
+			$this->debug->show('zipfiles: ' . implode(', ', $zip_files), true);
+		}
 
-		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
-		$err_msg = array();
-		foreach (glob($download_path . '*') as $filename) {
-			if (finfo_file($finfo, $filename) == 'application/zip') {
-				if ($this->only_missing == false OR !file_exists($dest_path . str_replace('.zip', '.tif', basename($filename)))) {
-					$result = unzip($filename, $dest_path);
+
+		else {
+			// Daten wurden runtergeladen und liegen in download_path
+			$download_path = $this->get_full_path($this->get('download_path'));;
+			$err_msg = array();
+			$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+			$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
+		}
+		$this->debug->show('Packe ZIP-Dateien ' . implode(', ', $zip_files) . ' aus nach ' . $dest_path, true);
+		foreach ($zip_files as $zip_file) {
+			if (finfo_file($finfo, $zip_file) == 'application/zip') {
+				if ($this->only_missing == false OR !file_exists($dest_path . str_replace('.zip', '.tif', basename($zip_file)))) {
+					$result = unzip($zip_file, $dest_path);
 					if ($result['success']) {
-						$this->debug->show($filename . ' ausgepackt. ' . implode(', ', $result['files']), true);
+						$this->debug->show($zip_file . ' ausgepackt. ' . implode(', ', $result['files']), true);
 					}
 					else {
-						$err_msg[] = '<br>Fehler beim Auspacken der Datei ' . $filename . ' für Ressource ID: ' . $this->get_id() . ' Überprüfen Sie die Schreibrechte im Verzeichnis ' . $dest_path;
+						$err_msg[] = '<br>Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ID: ' . $this->get_id() . ' Überprüfen Sie die Schreibrechte im Verzeichnis ' . $dest_path;
 					}
-					// $cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
-					// $descriptorspec = [
-					// 	0 => ["pipe", "r"],  // stdin
-					// 	1 => ["pipe", "w"],  // stdout
-					// 	2 => ["pipe", "w"],  // stderr
-					// ];
-					// $process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
-					// $line = __LINE__;
-					// $stdout = stream_get_contents($pipes[1]);
-					// echo '<br>stdout: ' . $stdout;
-					// fclose($pipes[1]);
-					// $stderr = stream_get_contents($pipes[2]);
-					// echo '<br>stderr: ' . $sterr;
-					// fclose($pipes[2]);
-					#    exec($cmd, $output, $return_var);
-					// if ($stderr != '') {
-					// 	$err_msg[] = 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr;
-					// }
 				}
 			}
 		}
@@ -805,7 +862,8 @@ class Ressource extends PgObject {
 	}
 
 	/**
-	 * Function unzip specific or all files of a directory to a destination directory,
+	 * Function create a new destination folder if not exists or remove all files if exists,
+	 * and than unzip specific or all files of a directory to a destination directory,
 	 * unzip the extracted files in destination directory when they are zip files
 	 * and remove the original zip files in destination directory
 	 */
@@ -828,33 +886,57 @@ class Ressource extends PgObject {
 			$this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
 			mkdir($dest_path, 0777, true);
 		}
-		$download_path = $this->get_full_path($this->get('download_path'));;
+		else {
+			array_map('unlink', glob("$dest_path/*.*"));
+		}
+		$download_path = $this->get_full_path($this->get('download_path'));
 
-		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
 		$err_msg = array();
-		foreach (glob($download_path . '*') as $filename) {
-			if (finfo_file($finfo, $filename) == 'application/zip') {
-				echo '<br>filename: ' . $filename;
-				$cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
-				$this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
-				$descriptorspec = [
-					0 => ["pipe", "r"],  // stdin
-					1 => ["pipe", "w"],  // stdout
-					2 => ["pipe", "w"],  // stderr
-				];
-				$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
-				$line = __LINE__;
-				$stdout = stream_get_contents($pipes[1]);
-				fclose($pipes[1]);
-				$stderr = stream_get_contents($pipes[2]);
-				fclose($pipes[2]);
-				#    exec($cmd, $output, $return_var);
-				if ($stderr != '') {
-					$err_msg[] = 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr;
-				}
+		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+		$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
+		$this->debug->show('Packe ZIP-Dateien aus: ' . implode(', ', $zip_files), true);
+		foreach ($zip_files as $zip_file) {
+			$cmd = 'unzip -j -o "' . $zip_file . '" -d ' . $dest_path;
+			$descriptorspec = [
+				0 => ["pipe", "r"],  // stdin
+				1 => ["pipe", "w"],  // stdout
+				2 => ["pipe", "w"],  // stderr
+			];
+			$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+			$line = __LINE__;
+			$stdout = stream_get_contents($pipes[1]);
+			fclose($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[2]);
+			if ($stderr != '') {
+				$err_msg[] = 'Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ' . $this->get_id() . ' Fehler: ' . $stderr;
 			}
 		}
 		finfo_close($finfo);
+
+		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+		$zip_files = array_filter(glob($dest_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
+		$this->debug->show('Packe ' . count($zip_files) . 'ZIP-Dateien in Verzeichnis ' . $dest_path . ' aus.', true);
+		foreach ($zip_files as $zip_file) {
+			$cmd = 'unzip -j -o "' . $zip_file . '" -d ' . $dest_path;
+			$descriptorspec = [
+				0 => ["pipe", "r"],  // stdin
+				1 => ["pipe", "w"],  // stdout
+				2 => ["pipe", "w"],  // stderr
+			];
+			$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+			$line = __LINE__;
+			$stdout = stream_get_contents($pipes[1]);
+			fclose($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[2]);
+			if ($stderr != '') {
+				$err_msg[] = 'Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ' . $this->get_id() . ' Fehler: ' . $stderr;
+			}
+			unlink($zip_file);
+		}
+		finfo_close($finfo);
+
 		if (count($err_msg) > 0) {
 			return array(
 				'success' => false,
@@ -899,7 +981,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = $this->get_full_path($this->get('download_path'));;
+		$download_path = $this->get_full_path($this->get('download_path'));
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				$fp_dest = fopen($dest_path, $entry, "w");
@@ -968,7 +1050,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = $this->get_full_path($this->get('download_path'));;
+		$download_path = $this->get_full_path($this->get('download_path'));
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				if (!copy($download_path . $entry, $dest_path . $entry)) {
@@ -1017,7 +1099,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = $this->get_full_path($this->get('download_path'));;
+		$download_path = $this->get_full_path($this->get('download_path'));
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				if (!rename($download_path . $entry, $dest_path . $entry)) {
@@ -1114,6 +1196,68 @@ class Ressource extends PgObject {
 		);
 	}
 
+	function unpack_replace_xml_encoding() {
+		$this->debug->show('Starte Funktion unpack_replace_xml_encoding', true);
+		$encoding = $this->get('encoding') ?: 'UTF-8';
+		if ($this->get('dest_path') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein relatives Zielverzeichnis angegeben.'
+			);
+		}
+		$dest_path = $this->get_full_path($this->get('dest_path'));
+		if (strpos($dest_path, '/var/www/data/') !== 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Das Zielverzeichnis ' . $dest_path . ' fängt nicht mit /var/www/data/ an.'
+			);
+		}
+		if (!file_exists($dest_path)) {
+			$this->debug->show('Lege Zielverzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
+			mkdir($dest_path, 0777, true);
+		}
+
+		$err_msg = array(); 
+		$download_path = $this->get_full_path($this->get('download_path'));
+		forEach(scandir($download_path) AS $entry) {
+			$gml_path = $download_path . $entry;
+			if (is_file($gml_path) AND pathinfo($gml_path, PATHINFO_EXTENSION) == 'gml') {
+				$this->debug->show('Ersetze encoding in Datei: ' . $download_path . $entry, true);
+
+				// Read original content
+				$gml_content = file_get_contents($gml_path);
+				if ($gml_content === false) {
+					$err_msg[] = 'Konte GML-Datei ' . $gml_path . ' nicht öffnen um encoding zu schreiben.';
+				}
+
+				$updated_gml_content = preg_replace(
+					'/(encoding\s*=\s*")[^"]*(")/i',
+					'${1}UTF-8${2}',
+					$gml_content
+				);
+
+				$dest_gml_path = $dest_path . $entry;
+				if (file_put_contents($dest_gml_path, $updated_gml_content) === false) {
+					$err_msg[] = 'Konte GML-Datei ' . $dest_gml_path . ' mit geändertem Encoding ' . $encoding . ' nicht schreiben.';
+				}
+				// sed -i 's/encoding="ISO-8859-1"/encoding="UTF-8"/' filename.xml
+				$this->debug->show('encoding durch ' . $encoding . ' in GML-Datei ' . $dest_gml_path . ' ersetzt.', true);
+			}
+		};
+
+		if (count($err_msg) > 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Ersetzen des encodings der GML-Dateien für die Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Meldung: ' . implode(', ', $err_msg)
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'XML encoding in GML-Dateien erfolgreich auf ' . $encoding . ' geändert.'
+		);
+	}
+
 	##################
 	# Import methods #
 	##################
@@ -1178,7 +1322,7 @@ class Ressource extends PgObject {
 	 */
 	function import_ogr2ogr_shape() {
 		$this->debug->show('Starte Funktion import_org2ogr_shape', true);
-		$shape_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$shape_path = $this->get_full_path($this->get('dest_path'));
 		$imported_shape_files = array();
 
 		if ($this->get('import_table') == '') {
@@ -1286,7 +1430,8 @@ class Ressource extends PgObject {
 			NULL,
 			'--config OGR_TRUNCATE YES',
 			'UTF-8',
-			false
+			false,
+			$this->unlogged
 		);
 
 		if ($result != 0) {
@@ -1307,7 +1452,7 @@ class Ressource extends PgObject {
 		$pathinfo = pathinfo($shape_file);
 		$result = required_shape_files_exists(glob($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.*'));
 		if (!$result['success']) { return $result; }
-		$import_table = strtolower(sonderzeichen_umwandeln($pathinfo['filename']));
+		$import_table = ($this->get('import_table') != '' ? $this->get('import_table') : strtolower(sonderzeichen_umwandeln($pathinfo['filename'])));
 		$this->debug->show('Importiere in Tabelle ' . ($this->get('import_schema') != '' ? $this->get('import_schema') : $import_table) . '.' . $import_table, true);
 		$result = $this->gui->data_import_export->ogr2ogr_import(
 			$this->get('import_schema') != '' ? $this->get('import_schema') : $import_table,
@@ -1319,7 +1464,8 @@ class Ressource extends PgObject {
 			NULL,
 			'-overwrite',
 			'UTF-8',
-			true
+			true,
+			$this->unlogged
 		);
 		return array(
 			'success' => ($result == 0),
@@ -1367,9 +1513,17 @@ class Ressource extends PgObject {
 		$err_msg = array();
 		$first = true;
 		$this->database->create_schema($this->get('import_schema'));
+		$result = $this->drop_import_table($this->get('import_schema'), $this->get('import_table'));
+		if (!$result['success']) {
+			return array(
+				'success' => false,
+				'msg' => $result['msg']
+			);
+		}
+		$this->debug->show('Importiere ' . count($gml_files) . ' GML-Dateien aus Verzeichnis: ' . $dest_path . ' in Tabelle: ' . $this->get('import_schema') . '.' . $this->get('import_table'), true);
 		foreach ($gml_files as $gml_file) {
-			$this->debug->show('Importiere Datei: ' . $dest_path . $gml_file, true);
-			// $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $gml_file, $this->database, $this->get('import_layer'), NULL, ($first ? '-overwrite' : '-append'), 'UTF-8', true);
+			// $this->debug->show('Importiere Datei: ' . $dest_path . $gml_file, true);
+			// $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $gml_file, $this->database, $this->get('import_layer'), NULL, ($first ? '-overwrite' : '-append'), 'UTF-8', true, $this->unlogged);
 			$result = $this->gui->data_import_export->ogr2ogr_import(
 				$this->get('import_schema'),
 				$this->get('import_table'),
@@ -1380,7 +1534,10 @@ class Ressource extends PgObject {
 				NULL,
 				($first ? '-overwrite' : '-append'),
 				'UTF-8',
-				false
+				false,
+				$this->unlogged,
+				false,
+				$this->get('force_nullable') == 't'
 			);
 			$first = false;
 			if ($result != '') {
@@ -1396,6 +1553,32 @@ class Ressource extends PgObject {
 		return array(
 			'success' => true,
 			'msg' => 'Anzahl erfolgreich gelesener GML-Dateien: ' . count($gml_files) . '.'
+		);
+	}
+
+	/**
+	 * Function drop the import table if it exists and all its dependencies.
+	 * @param string $table_schema, Name of the database schema containing the table.
+	 * @param string $table_name, Name of the table that shall be droped.
+	 * @return array (
+	 * 	boolean $success, True if table has been droped successfully.
+	 *  string $msg, Error or success message.
+	 * )
+	 */
+	function drop_import_table($table_schema, $table_name) {
+		$this->debug->show('Lösche Tabelle: ' . $table_schema . "." . $table_name, true);
+		$sql = "DROP TABLE IF EXISTS " . $table_schema . "." . $table_name . ' CASCADE';
+		// $this->debug->show('SQL zum löschen der Tabelle: ' . $sql, true);
+		$query = $this->execSQL($sql);
+		if (!$query) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Löschen der Tabelle ' . $table_schema . '.' . $table_name . ' Meldung; ' . pg_last_error($this->database->dbConn)
+			);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Tabelle ' . $table_schema . '.' . $table_name . ' erfolgreich gelöscht'
 		);
 	}
 
@@ -1733,6 +1916,28 @@ class Ressource extends PgObject {
 		}
 	}
 
+	/**
+	 * Die Funktion ließt die Version des WFS aus dem Capabilities-Dokument,
+	 * welches von der $online_ressource gelesen werden kann oder die $default_version wenn
+	 * keine Version im abgefragten Text gefunden werden kann.
+	 * @param string $online_ressource
+	 * @param string $default_version
+	 * @return string $version
+	 */
+	function get_wfs_version($online_ressource, $default_version = '1.1.0') {
+		if (strpos($online_ressource, '?') !== false) {
+			$url_parts = explode('?', $online_ressource);
+			$online_ressource = $url_parts[0];
+		}
+		$download_url = $online_ressource . '?SERVICE=WFS&REQUEST=GetCapabilities';
+		$capabilities = file_get_contents($download_url);
+		if (preg_match('/<([a-zA-Z0-9]+:)?ServiceTypeVersion>([\d\.]+)<\/\1?ServiceTypeVersion>/i', $capabilities, $matches)) {
+			$version = $matches[2];
+		} else {
+			$version = $default_version;
+		}
+		return $version;
+	}
 }
 
 ?>

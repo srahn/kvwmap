@@ -106,7 +106,7 @@ function quote($var, $type = '') {
 }
 
 function quote_or_null($var) {
-	return ($var == '' ? 'NULL' : quote($var));
+	return (($var === '' OR $var === null) ? 'NULL' : quote($var));
 }
 
 function append_slash($var) {
@@ -217,6 +217,47 @@ function url2filepath($url, $doc_path, $doc_url) {
 	}
 	$url_parts = explode($doc_url, $url);
 	return $doc_path . $url_parts[1];
+}
+
+/**
+ * Function return information about path to file named in $document_attribute_value.
+ * @param String $document_attribute_value The value of document attribute in the form /var/www/data/upload/test_125487.txt&original_name=test.txt
+ * @return Array  The result array contains dirname, basename, extension, filename and the original_basename, original_filename and original_extension.
+ */
+function document_info($document_attribute_value, $flag = NULL) {
+	$value_parts = explode('&original_name=', $document_attribute_value);
+	if ($flag === null) {
+		$document_info = pathinfo($value_parts[0]);
+		if (count($value_parts) > 1) {
+			$original_info = pathinfo($value_parts[1]);
+			$document_info['original_basename'] = $original_info['basename'];
+			$document_info['original_filename'] = $original_info['filename'];
+			$document_info['original_extension'] = $original_info['extension'];
+		}
+		else {
+			$document_info['original_basename'] = '';
+			$document_info['original_filename'] = '';
+			$document_info['original_extension'] = '';
+		}
+		return $document_info;
+	}
+	if (strpos($flag, 'original_') === 0) {
+		$path = (count($value_parts) > 1 ? $value_parts[1] : '');
+		$flag = str_replace('original_', '', $flag);
+	}
+	else {
+		$path = $value_parts[0];
+	}
+
+	switch ($flag) {
+		case 'path' : $document_info = $path; break;
+		case 'dirname' : $document_info =   pathinfo($path, PATHINFO_DIRNAME); break;
+		case 'basename' : $document_info =  pathinfo($path, PATHINFO_BASENAME); break;
+		case 'filename' : $document_info =  pathinfo($path, PATHINFO_FILENAME); break;
+		case 'extension' : $document_info = pathinfo($path, PATHINFO_EXTENSION); break;
+		default : $document_info = $path;
+	}
+	return $document_info;
 }
 
 function exif_identify_data($file) {
@@ -905,34 +946,37 @@ function password_erstellungs_hinweis($language) {
 * Vielen Dank an den Autor.
 *
 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-*
-* @return string ein achtstelliges Password
+*	@param Integer $passwordLength Die Länge des zu erzeugenden Passworts.
+* @param String $sonderzeichen Die Sonderzeichen, die im Passwort vorkommen dürfen. 
+* @return string ein Password der Länge $passwordLength, mindestens 8, maximal 24 Zeichen.
 *
 * @see    isPasswordValide(), checkPasswordAge, $GUI, $user, $stelle
 */
-function createRandomPassword($passwordLength) {
-	if ($passwordLength<8)
-		$passwordLength=8;
-	if ($passwordLength>16)
-	  $passwordLength=16;
-  $chars[0]= "abcdefghijkmnopqrstuvwxyz";
-  $chars[1]= "ABCDEFGHIJKMNOPQRSTUVWXYZ";
-  $chars[2]= "0234567890234567890234567";
-  $chars[3]= "()_+*-.:,;!§$%&=#()_+*-.:";
-  $password='';
-  $charListNumbers=array();
-  $charListNumber=rand(0,3);
-  $loops=0;
+function createRandomPassword($passwordLength, $sonderzeichen = "()_+*-.:,;!§$%&=#()_+*-.:") {
+	if ($passwordLength < 8) {
+		$passwordLength = 8;
+	}
+	if ($passwordLength > 24) {
+	  $passwordLength = 24;
+	}
+  $chars[0] = "abcdefghijkmnopqrstuvwxyz";
+  $chars[1] = "ABCDEFGHIJKMNOPQRSTUVWXYZ";
+  $chars[2] = "0234567890234567890234567";
+  $chars[3] = $sonderzeichen;
+  $password = '';
+  $charListNumbers = array();
+  $charListNumber = rand(0,3);
+  $loops = 0;
   while (strlen($password)<$passwordLength AND $loops++ < 100) {
   	while (count($charListNumbers)<4) {
   		if (!in_array($charListNumber,$charListNumbers)) { # wenn die charListNumber noch nicht in der Liste ist
-  			$charListNumbers[]=$charListNumber; # charListNumber in die Liste aufnehmen
-  			$char=substr($chars[$charListNumber],rand(0,24),1); # Character aus der Characterliste mit charListNumber entnehmen
+  			$charListNumbers[] = $charListNumber; # charListNumber in die Liste aufnehmen
+  			$char = substr($chars[$charListNumber], rand(0, 24), 1); # Character aus der Characterliste mit charListNumber entnehmen
   			#if ($char==' ') $char='_'; # darf nur auf keinen Fall ein Leerzeichen beinhalten
-  			$password.=$char;
+  			$password .= $char;
   			#echo '<br>'.strlen($password).' '.$password;
   		}
-  		$charListNumber=rand(0,3);
+  		$charListNumber = rand(0,3);
   	}
   	$charListNumbers = array();
   }
@@ -2053,12 +2097,12 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 * and return the elements of the string as array separated by the delimmiter.
 * The elements of the string will be replaced by slashes and timed from white spaces and ".
 */
-function arrStrToArr($str, $delimiter) {
+function arrStrToArr($str, $delimiter, $brackets = '[]') {
 #	if(is_string($delimiter) and in_array())
 #	echo gettype($delimiter);
-	$arr = explode($delimiter, trim($str, '[]'));
+	$arr = explode($delimiter, trim($str, $brackets));
 	foreach ($arr as &$value) {
-		$value = trim(stripslashes($value), '"[]"');
+		$value = trim(stripslashes($value), '"' . $brackets . '"');
 	}
 	return $arr;
 }
@@ -2573,10 +2617,11 @@ function sanitize(&$value, $type, $removeTT = false) {
 	}
 
 	switch ($type) {
+		case 'integer' :
 		case 'int' :
 		case 'int4' :
 		case 'oid' :
-		case 'boolean':
+		case 'boolean' :
 		case 'int8' : {
 			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;
@@ -2721,7 +2766,7 @@ function getAllFiles($dir) {
 			$files = array_merge($files, getAllFiles($item));
 		}
 		else {
-			$files[] = $item;
+			$files[pathinfo($item, PATHINFO_EXTENSION)] = $item;
 		}
 	}
 
