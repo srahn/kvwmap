@@ -2570,12 +2570,21 @@ class db_mapObj{
 		return $attributes;
 	}
 
-  function get_used_Layer($id) {
-    $sql ='SELECT * FROM used_layer WHERE layer_id = '.$id.' AND stelle_id = '.$this->Stelle_ID;
+	function get_used_Layer($id) {
+    $sql = '
+			SELECT 
+				l.oid, 
+				ul.* 
+			FROM 
+				kvwmap.layer as l,
+				kvwmap.used_layer as ul 
+			WHERE 
+				l.layer_id = ul.layer_id AND
+				l.layer_id = '.$id.' AND 
+				ul.stelle_id = '.$this->Stelle_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_Layer - Lesen eines Layers:<br>" . $sql,4);
-		$this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		$layer = $this->db->result->fetch_array();
+		$ret = $this->db->execSQL($sql);
+		$layer = pg_fetch_array($ret[1]);
 		return $layer;
   }
 }

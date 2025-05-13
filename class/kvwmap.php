@@ -10416,7 +10416,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else{
 			$name_column = "l.Name";
 		}
-		$sql = "SELECT count(z.layer_id) as count, z.layer_id, " . $name_column.", l.alias FROM kvwmap.zwischenablage as z, layer as l WHERE z.layer_id = l.layer_id AND user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." GROUP BY z.layer_id, l.name";
+		$sql = "SELECT count(z.layer_id) as count, z.layer_id, " . $name_column.", l.alias FROM kvwmap.zwischenablage as z, kvwmap.layer as l WHERE z.layer_id = l.layer_id AND user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." GROUP BY z.layer_id, l.name, l.alias";
 		#echo $sql.'<br>';
 		$ret = $this->pgdatabase->execSQL($sql,4, 1);
     $this->num_rows = pg_num_rows($ret[1]);
