@@ -84,8 +84,16 @@ class Ressource extends PgObject {
 	}
 
 	/**
-	 * Function query outdated ressources if $ressource_id is set it
-	 * query only if this ressource is outdated
+	 * Function query outdated ressources.
+	 * The amount of results is limited by $limit.
+	 * If $ressource_id is set with a single id or an array of ids, it query only if these ressources are outdated.
+	 * A Ressource is outdated if
+	 *   - auto_update is true
+	 *   - status_id IS NULL, = 0 or > -1 wenn $force is true
+	 *   - von_eneka or use_for_datapackage is true
+	 *   - last_updated_at is null or
+	 *     - next_updated_at is not null and between last_updated_at and now() or
+	 *     - update_interval is not null and date of last_updated_at + update_time is < now
 	 * @param integer $ressource_id
 	 * @param integer $limit If limit is given only the amount of ressources will be replied
 	 * @return Ressource[] An Array of Ressources that are outdated
@@ -122,7 +130,7 @@ class Ressource extends PgObject {
 					)
 				)
 			" .
-			($ressource_id ? " AND id = " . $ressource_id : ""),
+			($ressource_id ? " AND id " . (is_array($ressource_id) ? "IN (" . implode(', ', $ressource_id) . ")" : "= " . $ressource_id) : ""),
 			"last_updated_at",
 			"*",
 			$limit
@@ -233,15 +241,19 @@ class Ressource extends PgObject {
 		if (count($ressources) > 0) {
 			$gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
 			foreach ($ressources AS $ressource) {
-				// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
-				if ($gui->formvars['dry_run'] == 1) {
-					echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
-				}
-				else {
-					$result = $ressource->run_update($method_only);
-					$ressource->log($result, false);
-					return $result;
-				}
+				// ToDo: A ressource shall only be updated when all its source ressources are uptodate yet.
+				// Test it with a stack of pending ressources.
+				// if ($this->all_source_ressources_uptodate($ressource->get_id())) {
+					// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
+					if ($gui->formvars['dry_run'] == 1) {
+						echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
+					}
+					else {
+						$result = $ressource->run_update($method_only);
+						$ressource->log($result, false);
+						return $result;
+					}
+				// }
 			}
 		}
 		else {
@@ -250,6 +262,16 @@ class Ressource extends PgObject {
 				'msg' => 'Nichts zu tun'
 			);
 		}
+	}
+
+	/**
+	 * Function count all source ressources of ressource with $ressource_id that are outdated
+	 * and return true if the number is 0 else false.
+	 */
+	function all_source_ressources_uptodate($ressource_id) {
+		// ToDo: to implement
+		$ressources = $this->find_outdated($this, Lineage::find_sources($ressource_id), NULL, false);
+		return (count($ressources) == 0);
 	}
 
 	function log($result, $show = false) {
@@ -796,11 +818,20 @@ class Ressource extends PgObject {
 			array_map('unlink', glob("$dest_path/*.*"));
 		}
 
-		$download_path = $this->get_full_path($this->get('download_path'));
+		if ($this->get('download_method') === 'upload') {
+			// Daten wurden manuell hochgeladen und liegen in Datei die in upload_file angegeben ist.
+			$this->debug->show('upload_file: ' . $this->get('upload_file'), true);
+			$zip_files = array(document_info($this->get('upload_file'), 'path'));
+			$this->debug->show('zipfiles: ' . implode(', ', $zip_files), true);
+		}
+		else {
+			// Daten wurden runtergeladen und liegen in download_path
+			$download_path = $this->get_full_path($this->get('download_path'));;
+			$err_msg = array();
+			$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+			$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
+		}
 
-		$err_msg = array();
-		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
-		$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
 		$this->debug->show('Packe ZIP-Dateien ' . implode(', ', $zip_files) . ' aus nach ' . $dest_path, true);
 		foreach ($zip_files as $zip_file) {
 			$cmd = 'unzip -j -o "' . $zip_file . '" -d ' . $dest_path;
