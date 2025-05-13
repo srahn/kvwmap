@@ -1,4 +1,10 @@
 <?
+/**
+ * Script run Updates for outdated ressources
+ *   - See ressource method find_outdated for more details about when a ressource is outdated.
+ * ToDo: To implement in Ressource->update_outdated()
+ *   - A ressource will only be updated when all its source ressources are uptodate yet.
+ */
   //error_reporting(E_ALL);
   error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
 

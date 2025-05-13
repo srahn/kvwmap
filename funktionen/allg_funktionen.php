@@ -219,6 +219,47 @@ function url2filepath($url, $doc_path, $doc_url) {
 	return $doc_path . $url_parts[1];
 }
 
+/**
+ * Function return information about path to file named in $document_attribute_value.
+ * @param String $document_attribute_value The value of document attribute in the form /var/www/data/upload/test_125487.txt&original_name=test.txt
+ * @return Array  The result array contains dirname, basename, extension, filename and the original_basename, original_filename and original_extension.
+ */
+function document_info($document_attribute_value, $flag = NULL) {
+	$value_parts = explode('&original_name=', $document_attribute_value);
+	if ($flag === null) {
+		$document_info = pathinfo($value_parts[0]);
+		if (count($value_parts) > 1) {
+			$original_info = pathinfo($value_parts[1]);
+			$document_info['original_basename'] = $original_info['basename'];
+			$document_info['original_filename'] = $original_info['filename'];
+			$document_info['original_extension'] = $original_info['extension'];
+		}
+		else {
+			$document_info['original_basename'] = '';
+			$document_info['original_filename'] = '';
+			$document_info['original_extension'] = '';
+		}
+		return $document_info;
+	}
+	if (strpos($flag, 'original_') === 0) {
+		$path = (count($value_parts) > 1 ? $value_parts[1] : '');
+		$flag = str_replace('original_', '', $flag);
+	}
+	else {
+		$path = $value_parts[0];
+	}
+
+	switch ($flag) {
+		case 'path' : $document_info = $path; break;
+		case 'dirname' : $document_info =   pathinfo($path, PATHINFO_DIRNAME); break;
+		case 'basename' : $document_info =  pathinfo($path, PATHINFO_BASENAME); break;
+		case 'filename' : $document_info =  pathinfo($path, PATHINFO_FILENAME); break;
+		case 'extension' : $document_info = pathinfo($path, PATHINFO_EXTENSION); break;
+		default : $document_info = $path;
+	}
+	return $document_info;
+}
+
 function exif_identify_data($file) {
 	$lines = '';
 	$result = '';
