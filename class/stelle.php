@@ -2554,7 +2554,7 @@ class stelle {
 		$liste['eingeschr_gemarkung'] = Array();
 		$liste['ganze_flur'] = Array();
 		$liste['eingeschr_flur'] = Array();
-		$sql = 'SELECT gemeinde_id, gemarkung, flur, flurstueck FROM stelle_gemeinden WHERE stelle_id = '.$this->id;
+		$sql = 'SELECT gemeinde_id, gemarkung, flur, flurstueck FROM kvwmap.stelle_gemeinden WHERE stelle_id = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);

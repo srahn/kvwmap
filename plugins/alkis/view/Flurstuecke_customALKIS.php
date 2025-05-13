@@ -460,7 +460,7 @@ hide_versions = function(flst){
 											global $kvwmap_plugins;
 											if(in_array('probaug', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
 												include_once(PLUGINS.'probaug/model/bau.php');
-												$this->bau = new Bauauskunft($this->baudatabase);
+												$this->bau = new Bauauskunft($this->pgdatabase);
 												$searchvars['flurstkennz'] = $flst->Flurstkennz_alt;
 												$this->bau->getbaudaten($searchvars);
 												if(count_or_0($this->bau->baudata) != 0){

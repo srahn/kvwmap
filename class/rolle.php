@@ -2677,7 +2677,7 @@ class rolle {
 						'" . $log_number[$i] . "',
 						'" . $wz . "'
 					)
-					ON CONFLICT (user_id, stelle_id, time_id) DO NOTHING";
+					ON CONFLICT (user_id, stelle_id, time_id, log_number) DO NOTHING";
 				#echo $sql.'<br>';
 				$ret=$this->database->execSQL($sql,4, 1);
 				if ($ret[0]) {
@@ -2703,7 +2703,8 @@ class rolle {
 					" . $this->stelle_id . ",
 					'" . $time . "',
 					'" . $art . "',
-					" . $numdatasets;
+					" . $numdatasets . "
+				)";
 			#echo $sql;
 			$ret=$this->database->execSQL($sql,4, 1);
 			if ($ret[0]) {
