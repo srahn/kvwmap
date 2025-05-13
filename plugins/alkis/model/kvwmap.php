@@ -1392,8 +1392,7 @@
 
 	$GUI->flurstuecksAnzeigeByGrundbuecher = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
-    $flurstueck=new flurstueck('',$GUI->database);
-    $flurstueck->database=$GUI->pgdatabase;
+    $flurstueck=new flurstueck('',$GUI->pgdatabase);
     $gbarray = explode(', ', $GUI->formvars['selBlatt']);
     $Flurstuecke = $flurstueck->getFlurstByGrundbuecher($gbarray);
     if (count($Flurstuecke)==0) {
@@ -1413,8 +1412,7 @@
 
 	$GUI->flurstuecksSucheByGrundbuecher = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
-    $flurstueck=new flurstueck('',$GUI->database);
-    $flurstueck->database=$GUI->pgdatabase;
+    $flurstueck=new flurstueck('',$GUI->pgdatabase);
     $gbarray = explode(', ', $GUI->formvars['selBlatt']);
     $Flurstuecke = $flurstueck->getFlurstByGrundbuecher($gbarray);
     if(count($Flurstuecke)==0) {

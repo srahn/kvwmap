@@ -1,5 +1,12 @@
 <?
 
+/**
+* Function returns a readable message of sql errors optionally with word $find replaced by asterists *****
+*/
+function err_msg($file, $line, $msg, $find = '') {
+	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $msg) : $msg). "<p>" . INFO1;
+}
+
 function count_or_0($val) {
 	if (is_null($val) OR !is_array($val)) {
 		return 0;
@@ -904,33 +911,39 @@ class database {
 }
 
 class user {
+	# // TODO: Beim Anlegen eines neuen Benutzers müssen die Einstellungen für die Karte aus der Stellenbeschreibung als Anfangswerte übernommen werden
 
-  var $id;
-  var $Name;
-  var $Vorname;
-  var $login_name;
-  var $funktion;
-  var $dbConn;
-  var $Stellen;
-  var $nZoomFactor;
-  var $nImageWidth;
-  var $nImageHeight;
-  var $database;
-  var $remote_addr;
+	var $id;
+	var $Name;
+	var $Vorname;
+	var $login_name;
+	var $funktion;
+	var $dbConn; # Datenbankverbindungskennung
+	var $Stellen;
+	var $nZoomFactor;
+	var $nImageWidth;
+	var $nImageHeight;
+	var $database;
+	var $remote_addr;
+	var $has_logged_in;
+	var $language = 'german';
+	var $debug;
+	var $share_rollenlayer_allowed;
 
-	function __construct($login_name,$id,$database) {
+	/**
+	 * Create a user object
+	 * if only login_name is defined, find_by login_name only
+	 * if login_name and password is defined, find_by login_name and password
+	*/
+	function __construct($login_name, $id, $database, $password = '', $archived = false) {
 		global $debug;
-		$this->debug=$debug;
-		$this->database=$database;
-		if($login_name){
-			$this->login_name=$login_name;
-			$this->readUserDaten(0,$login_name);
-			$this->remote_addr=getenv('REMOTE_ADDR');
-		}
-		else{
-			$this->id = $id;
-			$this->readUserDaten($id,0);
-		}
+		$this->debug = $debug;
+		$this->database = $database;
+		$this->has_logged_in = false;
+		$this->login_name = $login_name;
+		$this->id = (int) $id;
+		$this->remote_addr = getenv('REMOTE_ADDR');
+		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
 	}
 
 	function readUserDaten($id, $login_name = '', $password = '', $archived) {
@@ -1294,6 +1307,7 @@ class stelle {
 		}
 		return $privileges;
 	}
+}
 
 class rolle {
 	var $user_id;
@@ -1685,25 +1699,28 @@ class pgdatabase {
 	* @param integer, $connection_id The id of the connection defined in mysql connections table, if 0 default connection will be used
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
-  function open($connection_id = 0) {
-		if ($connection_id == 0) {
-			# get credentials from object variables
-			$connection_string = $this->format_pg_connection_string($this->get_object_credentials());
+  function open($connection_id = 0, $flag = NULL) {
+		$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
+		$this->connection_id = $connection_id;
+		$connection_string = $this->get_connection_string();
+		try {
+			$this->dbConn = pg_connect($connection_string . ' connect_timeout=5', $flag);
 		}
-		else {
-			$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
-			$this->connection_id = $connection_id;
-			$connection_string = $this->get_connection_string();
+		catch (Exception $e) {
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
+				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; })) . '<br>Exception: ' . $e;
+			return false;
 		}
-		$this->dbConn = pg_connect($connection_string);
+
 		if (!$this->dbConn) {
-			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte nicht hergestellt werden';
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
+				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: successfully opend.", 4);
+			$this->debug->write("Database connection successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
-			$this->connection_id = $connection_id;
+			$this->connection_id = $connection_id ?: POSTGRES_CONNECTION_ID;
 			return true;
 		}
 	}
@@ -1716,15 +1733,21 @@ class pgdatabase {
 	*/
 	function get_credentials($connection_id) {
 		#echo '<p>get_credentials with connection_id: ' . $connection_id;
-		include_once(CLASSPATH . 'Connection.php');
-		$conn = Connection::find_by_id($this->gui, $connection_id);
-		return array(
-			'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
-			'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
-			'dbname' => 	($conn->get('dbname')   != '' ? $conn->get('dbname')   : 'kvwmapsp'),
-			'user' => 		($conn->get('user')     != '' ? $conn->get('user')     : 'kvwmap'),
-			'password' => ($conn->get('password') != '' ? $conn->get('password') : KVWMAP_INIT_PASSWORD)
-		);
+		if ($connection_id == 0) {
+			return $this->get_object_credentials();
+		}
+		else {
+			include_once(CLASSPATH . 'Connection.php');
+			$conn = Connection::find_by_id($this->gui, $connection_id);
+			$this->host = $conn->get('host');
+			return array(
+				'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
+				'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
+				'dbname' => 	($conn->get('dbname')   != '' ? $conn->get('dbname')   : 'kvwmapsp'),
+				'user' => 		($conn->get('user')     != '' ? $conn->get('user')     : 'kvwmap'),
+				'password' => ($conn->get('password') != '' ? $conn->get('password') : KVWMAP_INIT_PASSWORD)
+			);
+		}
 	}
 
 	/**
@@ -1742,8 +1765,12 @@ class pgdatabase {
 		return $connection_string;
 	}
 
-	function get_connection_string() {
-		return $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+	function get_connection_string($bash_escaping = false) {
+		$connection_string = $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+		if ($bash_escaping) {
+			$connection_string = str_replace('$', '\$', $connection_string);
+		}
+		return $connection_string;
 	}
 
 	/**
@@ -1762,11 +1789,11 @@ class pgdatabase {
 	*/
 	function get_object_credentials() {
 		return array(
-			'host'     => $this->host,
-			'port'     => $this->port,
-			'dbname'   => $this->dbName,
-			'user'     => $this->user,
-			'password' => $this->passwd
+			'host'     => $this->host ?: POSTGRES_HOST,
+			'port'     => $this->port ?: 5432,
+			'dbname'   => $this->dbName ?: POSTGRES_DBNAME,
+			'user'     => $this->user ?: POSTGRES_USER,
+			'password' => $this->passwd ?: POSTGRES_PASSWORD
 		);
 	}
 
@@ -2013,7 +2040,7 @@ class db_mapObj{
 			];
 	}
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value'), $attribute_values = []) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -2025,12 +2052,12 @@ class db_mapObj{
 			(!$all_languages AND $language != 'german') ?
 			"
 				CASE
-					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
-					ELSE `alias`
+					WHEN alias_" . $language. " != '' THEN alias_" . $language . "
+					ELSE alias
 				END AS alias
 			" :
 			"
-				`alias`
+				alias
 			"
 		);
 
@@ -2040,56 +2067,55 @@ class db_mapObj{
 
 		$sql = "
 			SELECT
-				`order`, " .
-				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
-				`layer_id`,
-				a.`name`,
-				`real_name`,
-				`tablename`,
-				`table_alias_name`,
-				a.`schema`,
-				`type`,
-				d.`name` as typename,
-				`geometrytype`,
-				`constraints`,
-				`saveable`,
-				`nullable`,
-				`length`,
-				`decimal_length`,
-				`default`,
-				`form_element_type`,
-				`options`,
-				`tooltip`,
-				`group`,
-				`tab`,
-				`arrangement`,
-				`labeling`,
-				`raster_visibility`,
-				`dont_use_for_new`,
-				`mandatory`,
-				`quicksearch`,
-				`visible`,
-				`vcheck_attribute`,
-				`vcheck_operator`,
-				`vcheck_value`,
-				`order`,
-				`privileg`,
-				`query_tooltip`
+				\"order\", " .
+				$alias_column . ", alias_low_german, alias_english, alias_polish, alias_vietnamese,
+				layer_id,
+				a.name,
+				real_name,
+				tablename,
+				table_alias_name,
+				a.schema,
+				type,
+				d.name as typename,
+				geometrytype,
+				constraints,
+				saveable,
+				nullable,
+				length,
+				decimal_length,
+				\"default\",
+				form_element_type,
+				options,
+				tooltip,
+				\"group\",
+				tab,
+				arrangement,
+				labeling,
+				raster_visibility,
+				dont_use_for_new,
+				mandatory,
+				quicksearch,
+				visible,
+				vcheck_attribute,
+				vcheck_operator,
+				vcheck_value,
+				\"order\",
+				privileg,
+				query_tooltip
 			FROM
-				`layer_attributes` as a LEFT JOIN
-				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+				kvwmap.layer_attributes as a LEFT JOIN
+				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
 			WHERE
-				`layer_id` = " . $layer_id .
+				layer_id = " . $layer_id .
 				$einschr . "
 			ORDER BY
-				`order`
+			\"order\"
 		";
-		#echo '<br>Sql read_layer_attributes: ' . $sql;
+		// echo '<br>Sql read_layer_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>",4);
 		$ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
-		while ($rs = $ret['result']->fetch_array()){
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$attributes['enum'][$i] = array();
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
@@ -2126,14 +2152,23 @@ class db_mapObj{
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];			
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
-						$attributes[$column][$i] = replace_params_rolle($attributes[$column][$i]);
+						$attributes[$column][$i] = 	replace_params_rolle(
+																					$attributes[$column][$i],
+																					((count($attribute_values) > 0 AND $replace_only == 'default') ? $attribute_values : NULL)
+																				);
 					}
 				}
 			}
+
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
@@ -2159,11 +2194,6 @@ class db_mapObj{
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
 			$attributes['visible'][$i] = $rs['visible'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
