@@ -204,6 +204,59 @@ class pgdatabase {
     return pg_close($this->dbConn);
   }
 
+	function create_new_gast($gast_stelle) {
+		$login_name = "";
+		$laenge = 10;
+		$string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		mt_srand((double)microtime() * 1000000);
+		for ($i = 1; $i <= $laenge; $i++) {
+			$login_name .= substr($string, mt_rand(0, strlen($string) - 1), 1);
+		}
+		# Gastnutzer anlegen
+		$sql = "
+			INSERT INTO kvwmap.user (
+				login_name,
+				name,
+				vorname,
+				namenszusatz,
+				password,
+				ips,
+				Funktion,
+				stelle_id
+			)
+			VALUES (
+				'" . $login_name . "',
+				'gast',
+				'gast',
+				'',
+				kvwmap.sha1('gast'),
+				'',
+				'gast',
+				" . $gast_stelle . "
+			) RETURNING id;
+		";
+		#echo '<br>sql: ' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		
+		$row = pg_fetch_row($ret[1]);
+		$new_user_id = $row[0];
+
+		include_once(CLASSPATH . 'stelle.php');
+		include_once(CLASSPATH . 'rolle.php');
+		$stelle = new stelle($gast_stelle, $this);
+		$rolle = new rolle($new_user_id, $gast_stelle, $this);
+		$layers = $stelle->getLayers(NULL);
+		$rolle->setRolle($new_user_id, $gast_stelle, $stelle->default_user_id);
+		$rolle->setMenue($new_user_id, $gast_stelle, $stelle->default_user_id);
+		$rolle->setLayer($new_user_id, $gast_stelle, $stelle->default_user_id);
+		$rolle->setGroups($new_user_id, $gast_stelle, $stelle->default_user_id, $layers['ID']);
+		$rolle->setSavedLayersFromDefaultUser($new_user_id, $gast_stelle, $stelle->default_user_id);
+
+		$gast['username'] = $login_name;
+		$gast['passwort'] = 'gast';
+		return $gast;
+	}
+
 	function getRow($select,$from,$where) {
 		$sql = "SELECT ".$select;
     $sql.= " FROM ".$from;
@@ -213,6 +266,88 @@ class pgdatabase {
     $ret[1] = pg_fetch_assoc($ret[1]);
     return $ret;
   }
+
+		/*
+	* Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table" 
+	* über $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird
+	* dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
+	*/
+	function create_insert_dump($table, $extra, $sql, $returning = ''){
+		#echo '<br>Create_insert_dump for table: ' . $table;
+		#echo '<br>sql: ' . $sql;
+		#echo '<br>extra: ' . $extra;
+		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>" . $sql, 4);
+		$ret = $this->execSQL($sql, 4, 0);
+		$dump = array(
+			'insert' => array(),
+			'extra'  => array()
+		);		
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			if ($rs['connectiontype'] == 6) {
+				$rs['connection_id'] = 'vars_connection_id';
+			}
+			$dump['extra'][] = $rs[$extra];
+			unset($rs[$extra]);
+			$insert = "
+				INSERT INTO " . $table . " 
+					(\"" . implode('", "', array_keys($rs)) . "\") 
+				VALUES 
+					(" . 
+					implode(
+						', ', 
+						array_map(
+							function ($value){
+								if (strpos($value, 'vars') === 0) {
+									return pg_escape_string($value);
+								}
+								else {
+									if ($value === null) {
+										return "NULL";
+									} else {
+										return "'" . pg_escape_string($value) . "'";
+									}
+								}
+							}, 
+							$rs
+						)
+					) . ")" . $returning . ';';
+			$dump['insert'][] = $insert;
+		}
+		#echo '<br>insert: ' . $insert;
+		return $dump;
+	}
+
+	function create_update_dump($table){
+		# Funktion erstellt zu einer Tabelle einen Update-Dump und liefert ihn als String zurück
+		$sql = 'SELECT * FROM '.$table;
+		$this->debug->write("<p>file:kvwmap class:database->create_update_dump :<br>".$sql,4);
+		$ret = $this->execSQL($sql, 4, 0);
+
+    $feld_anzahl = $this->result->field_count;
+    for($i = 0; $i < $feld_anzahl; $i++){
+    	$meta = $this->result->fetch_field_direct($i);
+    	# array mit feldnamen
+    	$felder[$i] = $meta->name;
+    	# array mit indizes der primary-keys
+    	if($meta->primary_key == 1){
+    		$keys[] = $i;
+    	}
+    }
+    while ($rs = $this->result->fetch_array()) {
+    	$update = 'UPDATE '.$table.' SET ';
+    	$update .= $felder[0].' = '.$rs[0];
+    	for($i = 1; $i < $feld_anzahl; $i++){
+    		$update .= ", ".$felder[$i]." = '".$rs[$i]."'";
+    	}
+    	$update .= ' WHERE ';
+    	for($i = 0; $i < count($keys); $i++){
+    		$update .= $felder[$keys[$i]].' = '.$rs[$keys[$i]].' AND ';
+    	}
+    	$update .= ' (1=1);';
+    	$dump .= "\n".$update;
+    }
+   return $dump;
+	}
 
 	/**
 	* Erzeugt SQL zum anlegen eines Layer in mysql

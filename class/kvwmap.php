@@ -19517,12 +19517,27 @@ class db_mapObj{
 
 	function create_layer_dumpfile($database, $layer_ids, $with_privileges = false, $with_datatypes = false) {
 		$success = true;
-		$dump_text .= "-- Layerdump aus kvwmap vom " . date("d.m.Y H:i:s");
-		$dump_text .= "\n-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,";
-		$dump_text .= "\n-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.";
-		$dump_text .= "\n\nSET @group_id = 1;";
-		$dump_text .= "\nSET @connection = '';";
-		$dump_text .= "\nSET @connection_id = '1';";
+		$dump_text = "
+-- Layerdump aus kvwmap vom " . date("d.m.Y H:i:s") . "
+-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,
+-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.
+
+DO $$
+	DECLARE 
+		vars_connection_id integer;
+		vars_group_id integer;
+		vars_last_layer_id integer;
+		vars_last_class_id integer;
+		vars_last_style_id integer;
+		vars_last_label_id integer;
+		vars_last_ddl_id integer;
+		vars_last_druckfreitexte_id integer;
+		vars_last_druckfreilinien_id integer;
+		vars_last_druckfreirechtecke_id integer;
+	BEGIN
+		vars_group_id := 1;
+		vars_connection_id := 1;
+		";
 
 		if ($with_privileges) {
 			# Frage Stellen der Layer ab
@@ -19551,7 +19566,7 @@ class db_mapObj{
 					);
 
 					$stelle = $database->create_insert_dump(
-						'stelle',
+						'kvwmap.stelle',
 						'id',
 						"
 							SELECT
@@ -19575,27 +19590,26 @@ class db_mapObj{
 
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			$layer = $database->create_insert_dump(
-				'layer',
+				'kvwmap.layer',
 				'',
-				'SELECT Name, Name_low-german, Name_english, Name_polish, Name_vietnamese, alias, Datentyp, \'@group_id\' AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, schema, geom_column, document_path, document_url, ddl_attribute, tileindex, tileitem, labelangleitem, labelitem, labelmaxscale, labelminscale, labelrequires, postlabelcache, connection, connection_id, printconnection, connectiontype, classitem, styleitem, classification, cluster_maxdistance, tolerance, toleranceunits, sizeunits, epsg_code, template, max_query_rows, queryable, use_geom, transparency, drawingorder, legendorder, minscale, maxscale, symbolscale, offsite, requires, ows_srs, wms_name, wms_keywordlist, wms_server_version, wms_format, wms_connectiontimeout, wms_auth_username, wms_auth_password, wfs_geom, write_mapserver_templates, selectiontype, querymap, logconsume, processing, kurzbeschreibung, datasource, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, icon, privileg, export_privileg, status, trigger_function, editable, listed, duplicate_from_layer_id, duplicate_criterion, shared_from, version, comment
+				'SELECT name, name_low_german, name_english, name_polish, name_vietnamese, alias, Datentyp, \'vars_group_id\' AS gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, schema, geom_column, document_path, document_url, ddl_attribute, tileindex, tileitem, labelangleitem, labelitem, labelmaxscale, labelminscale, labelrequires, postlabelcache, connection, connection_id, printconnection, connectiontype, classitem, styleitem, classification, cluster_maxdistance, tolerance, toleranceunits, sizeunits, epsg_code, template, max_query_rows, queryable, use_geom, transparency, drawingorder, legendorder, minscale, maxscale, symbolscale, offsite, requires, ows_srs, wms_name, wms_keywordlist, wms_server_version, wms_format, wms_connectiontimeout, wms_auth_username, wms_auth_password, wfs_geom, write_mapserver_templates, selectiontype, querymap, logconsume, processing, kurzbeschreibung, datasource, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, icon, privileg, export_privileg, status, trigger_function, editable, listed, duplicate_from_layer_id, duplicate_criterion, shared_from, version, comment
 				' . ($this->GUI->plugin_loaded('mobile') ? ', sync' : '') . '
 				' . ($this->GUI->plugin_loaded('mobile') ? ', vector_tile_url' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', cluster_option' : '') . '
-				FROM layer WHERE layer_id=' . $layer_ids[$i]
+				FROM kvwmap.layer WHERE layer_id=' . $layer_ids[$i],
+				'RETURNING layer_id INTO vars_last_layer_id'
 			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
-			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
-			$dump_text .= "\nSET " . $last_layer_id . "=LAST_INSERT_ID();";
 
 			if ($with_privileges) {
 				for ($s = 0; $s < count($stellen); $s++) {
 					# Zuordnung des Layers zur Stelle
 					$used_layer = $database->create_insert_dump(
-						'used_layer',
+						'kvwmap.used_layer',
 						'',
 						"
 							SELECT
-								'" . $last_layer_id . "' AS layer_id,
+								'vars_last_layer_id' AS layer_id,
 								'" . $stellen[$s]['var'] . "' AS stelle_id,
 								queryable,
 								drawingorder,
@@ -19604,7 +19618,7 @@ class db_mapObj{
 								start_aktiv,
 								use_geom
 							FROM
-								used_layer
+								kvwmap.used_layer
 							WHERE
 								layer_id = " . $layer_ids[$i] . " AND
 								stelle_id = " . $stellen[$s]['id'] . "
@@ -19616,18 +19630,18 @@ class db_mapObj{
 
 					# Attributfilter des Layers in der Stelle
 					$attributfilter2used_layer = $database->create_insert_dump(
-						'u_attributfilter2used_layer',
+						'kvwmap.u_attributfilter2used_layer',
 						'',
 						"
 							SELECT
 								'" . $stellen[$s]['var'] . "' AS stelle_id,
-								'" . $last_layer_id . "' AS layer_id,
+								'vars_last_layer_id' AS layer_id,
 								attributname,
 								attributvalue,
 								operator,
 								type
 							FROM
-								u_attributfilter2used_layer
+								kvwmap.u_attributfilter2used_layer
 							WHERE
 								layer_id = " . $layer_ids[$i] . " AND
 								stelle_id = " . $stellen[$s]['id'] . "
@@ -19640,11 +19654,10 @@ class db_mapObj{
 			}
 
 			$layer_attributes = $database->create_insert_dump(
-				'layer_attributes', 
-				'layer_attribut_id', 
+				'kvwmap.layer_attributes', 
+				'', 
 				'SELECT 
-					name AS layer_attribut_id, 
-					\''.$last_layer_id.'\' AS layer_id, 
+					\'vars_last_layer_id\' AS layer_id, 
 					name, 
 					real_name, 
 					tablename, 
@@ -19656,16 +19669,16 @@ class db_mapObj{
 					nullable, 
 					length, 
 					decimal_length, 
-					default, 
+					"default", 
 					form_element_type, 
 					options, 
 					alias, 
-					alias_low-german, 
+					alias_low_german, 
 					alias_english, 
 					alias_polish, 
 					alias_vietnamese, 
 					tooltip, 
-					group, 
+					"group", 
 					tab, 
 					arrangement, 
 					labeling, 
@@ -19677,11 +19690,11 @@ class db_mapObj{
 					vcheck_attribute, 
 					vcheck_operator, 
 					vcheck_value, 
-					order, 
+					"order", 
 					privileg, 
 					query_tooltip 
 				FROM 
-					layer_attributes 
+					kvwmap.layer_attributes 
 				WHERE 
 					layer_id = ' . $layer_ids[$i]
 			);
@@ -19694,17 +19707,17 @@ class db_mapObj{
 				for ($s = 0; $s < count($stellen); $s++) {
 					# Attributrechte in der Stelle
 					$layer_attributes2stelle = $database->create_insert_dump(
-						'layer_attributes2stelle',
+						'kvwmap.layer_attributes2stelle',
 						'',
 						"
 							SELECT
-								'". $last_layer_id . "' AS layer_id,
+								'vars_last_layer_id' AS layer_id,
 								'" . $stellen[$s]['var'] . "' AS stelle_id,
 								attributename,
 								privileg,
 								tooltip
 							FROM
-								layer_attributes2stelle
+								kvwmap.layer_attributes2stelle
 							WHERE
 								layer_id = " . $layer_ids[$i] . " AND
 								stelle_id = " . $stellen[$s]['id'] . "
@@ -19716,64 +19729,101 @@ class db_mapObj{
 				}
 			}
 
-			$classes = $database->create_insert_dump('classes', 'class_id', 'SELECT class_id, Name, \''.$last_layer_id.'\' AS layer_id, Expression, drawingorder, text FROM classes WHERE layer_id=' . $layer_ids[$i]);
+			$classes = $database->create_insert_dump(
+				'kvwmap.classes', 
+				'class_id', 
+				"SELECT class_id, name, 'vars_last_layer_id' AS layer_id, expression, drawingorder, text FROM kvwmap.classes WHERE layer_id = " . $layer_ids[$i],
+				'RETURNING class_id INTO vars_last_class_id'
+			);
 			for ($j = 0; $j < count_or_0($classes['insert']); $j++) {
 				$dump_text .= "\n\n-- Class " . $classes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $classes['insert'][$j];
-				$dump_text .= "\nSET @last_class_id=LAST_INSERT_ID();";
 
-				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, symbol,symbolname,size,color,outlinecolor, colorrange, datarange, rangeitem, opacity, minsize,maxsize, minscale, maxscale, angle,angleitem,width,minwidth,maxwidth, offsetx, offsety, polaroffset, pattern, geomtransform, gap, initialgap, linecap, linejoin, linejoinmaxsize FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND class_id='.$classes['extra'][$j].' ORDER BY drawingorder');
+				$styles = $database->create_insert_dump(
+					'kvwmap.styles', 
+					'style_id', 
+					'SELECT styles.style_id, symbol,symbolname,size,color,outlinecolor, colorrange, datarange, rangeitem, opacity, minsize,maxsize, minscale, maxscale, angle,angleitem,width,minwidth,maxwidth, offsetx, offsety, polaroffset, pattern, geomtransform, gap, initialgap, linecap, linejoin, linejoinmaxsize FROM kvwmap.styles, kvwmap.u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND class_id='.$classes['extra'][$j].' ORDER BY drawingorder',
+					'RETURNING style_id INTO vars_last_style_id'
+				);
 				for ($k = 0; $k < count_or_0($styles['insert']); $k++) {
 					$dump_text .= "\n\n-- Style " . $styles['extra'][$k] . " der Class " . $classes['extra'][$j];
-					$dump_text .= "\n" . $styles['insert'][$k] . "\nSET @last_style_id=LAST_INSERT_ID();";
+					$dump_text .= "\n" . $styles['insert'][$k];
 					$dump_text .= "\n-- Zuordnung Style " . $styles['extra'][$k] . " zu Class " . $classes['extra'][$j];
-					$dump_text .= "\nINSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, " . $k . ");";
+					$dump_text .= "\nINSERT INTO kvwmap.u_styles2classes (style_id, class_id, drawingorder) VALUES (vars_last_style_id, vars_last_class_id, " . $k . ");";
 				}
 
-				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND class_id='.$classes['extra'][$j]);
+				$labels = $database->create_insert_dump(
+					'kvwmap.labels', 
+					'label_id', 
+					'SELECT labels.label_id, font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM kvwmap.labels, kvwmap.u_labels2classes WHERE u_labels2classes.label_id = labels.label_id AND class_id='.$classes['extra'][$j],
+					'RETURNING label_id INTO vars_last_label_id'
+				);
 				for ($k = 0; $k < count_or_0($labels['insert']); $k++) {
 					$dump_text .= "\n\n-- Label " . $labels['extra'][$k] . " der Class " . $classes['extra'][$j];
-					$dump_text .= "\n" . $labels['insert'][$k] . "\nSET @last_label_id=LAST_INSERT_ID();";
+					$dump_text .= "\n" . $labels['insert'][$k];
 					$dump_text .= "\n-- Zuordnung Label " . $labels['extra'][$k] . " zu Class " . $classes['extra'][$j];
-					$dump_text .=	"\nINSERT INTO u_labels2classes (label_id, class_id) VALUES (@last_label_id, @last_class_id);";
+					$dump_text .=	"\nINSERT INTO kvwmap.u_labels2classes (label_id, class_id) VALUES (vars_last_label_id, vars_last_class_id);";
 				}
 			}
 
-			$ddls = $database->create_insert_dump('datendrucklayouts', 'id', 'SELECT id, name, \''.$last_layer_id.'\' AS layer_id, format, bgsrc, bgposx, bgposy, bgwidth, bgheight, dateposx, dateposy, datesize, userposx, userposy, usersize, font_date, font_user, type, margin_top, margin_bottom, margin_left, margin_right, gap, no_record_splitting, columns, filename, use_previews FROM datendrucklayouts WHERE layer_id = ' . $layer_ids[$i]);
+			$ddls = $database->create_insert_dump(
+				'kvwmap.datendrucklayouts', 
+				'id', 
+				"SELECT id, name, 'vars_last_layer_id' AS layer_id, format, bgsrc, bgposx, bgposy, bgwidth, bgheight, dateposx, dateposy, datesize, userposx, userposy, usersize, font_date, font_user, type, margin_top, margin_bottom, margin_left, margin_right, gap, no_record_splitting, columns, filename, use_previews FROM kvwmap.datendrucklayouts WHERE layer_id = " . $layer_ids[$i],
+				'RETURNING id INTO vars_last_ddl_id'
+			);
 			for ($j = 0; $j < count_or_0($ddls['insert']); $j++) {
 				$dump_text .= "\n\n-- Datendrucklayout " . $ddls['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $ddls['insert'][$j];
-				$dump_text .= "\nSET @last_ddl_id=LAST_INSERT_ID();\n";
 
-				$ddl_elemente = $database->create_insert_dump('ddl_elemente', '', 'SELECT \'@last_ddl_id\' AS ddl_id, name, xpos, ypos, offset_attribute, width, border, font, fontsize FROM ddl_elemente WHERE ddl_id = ' . $ddls['extra'][$j]);
+				$ddl_elemente = $database->create_insert_dump(
+					'kvwmap.ddl_elemente', 
+					'', 
+					"SELECT 'vars_last_ddl_id' AS ddl_id, name, xpos, ypos, offset_attribute, width, border, font, fontsize FROM kvwmap.ddl_elemente WHERE ddl_id = " . $ddls['extra'][$j]
+				);
 				for ($k = 0; $k < count_or_0($ddl_elemente['insert']); $k++) {
 					$dump_text .= "\n" . $ddl_elemente['insert'][$k];
 				}
 
-				$druckfreitexte = $database->create_insert_dump('druckfreitexte', 'id', 'SELECT id, text, posx, posy, offset_attribute, size, width, border, font, angle, type FROM druckfreitexte, ddl2freitexte WHERE freitext_id = id AND ddl_id = '.$ddls['extra'][$j]);
+				$druckfreitexte = $database->create_insert_dump(
+					'kvwmap.druckfreitexte', 
+					'id', 
+					'SELECT id, text, posx, posy, offset_attribute, size, width, border, font, angle, type FROM kvwmap.druckfreitexte, kvwmap.ddl2freitexte WHERE freitext_id = id AND ddl_id = '.$ddls['extra'][$j],
+					'RETURNING id INTO vars_last_druckfreitexte_id'
+				);
 				for ($k = 0; $k < count_or_0($druckfreitexte['insert']); $k++) {
-					$dump_text .= "\n" . $druckfreitexte['insert'][$k] . "\nSET @last_druckfreitexte_id=LAST_INSERT_ID();";
+					$dump_text .= "\n" . $druckfreitexte['insert'][$k];
 					$dump_text .= "\n-- Zuordnung Druckfreitext " . $druckfreitexte['extra'][$k] . " zu DDL " . $ddls['extra'][$j];
-					$dump_text .= "\nINSERT INTO ddl2freitexte (ddl_id, freitext_id) VALUES (@last_ddl_id, @last_druckfreitexte_id);";
+					$dump_text .= "\nINSERT INTO kvwmap.ddl2freitexte (ddl_id, freitext_id) VALUES (vars_last_ddl_id, vars_last_druckfreitexte_id);";
 				}
 
-				$druckfreilinien = $database->create_insert_dump('druckfreilinien', 'id', 'SELECT id, posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end, type FROM druckfreilinien, ddl2freilinien WHERE line_id = id AND ddl_id = '.$ddls['extra'][$j]);
+				$druckfreilinien = $database->create_insert_dump(
+					'kvwmap.druckfreilinien', 
+					'id', 
+					'SELECT id, posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end, type FROM kvwmap.druckfreilinien, kvwmap.ddl2freilinien WHERE line_id = id AND ddl_id = '.$ddls['extra'][$j],
+					'RETURNING id INTO vars_last_druckfreilinien_id'
+				);
 				for ($k = 0; $k < count_or_0($druckfreilinien['insert']); $k++) {
-					$dump_text .= "\n" . $druckfreilinien['insert'][$k] . "\nSET @last_druckfreilinien_id=LAST_INSERT_ID();";
+					$dump_text .= "\n" . $druckfreilinien['insert'][$k];
 					$dump_text .= "\n-- Zuordnung Druckfreilinie " . $druckfreilinien['extra'][$k] . " zu DDL " . $ddls['extra'][$j];
-					$dump_text .= "\nINSERT INTO ddl2freilinien (ddl_id, line_id) VALUES (@last_ddl_id, @last_druckfreilinien_id);";
+					$dump_text .= "\nINSERT INTO kvwmap.ddl2freilinien (ddl_id, line_id) VALUES (vars_last_ddl_id, vars_last_druckfreilinien_id);";
 				}
 
-				$druckfreirechtecke = $database->create_insert_dump('druckfreirechtecke', 'id', 'SELECT id, posx, posy, endposx, endposy, breite, color, offset_attribute_start, offset_attribute_end, type FROM druckfreirechtecke, ddl2freirechtecke WHERE rect_id = id AND ddl_id = '.$ddls['extra'][$j]);
+				$druckfreirechtecke = $database->create_insert_dump(
+					'kvwmap.druckfreirechtecke', 
+					'id', 
+					'SELECT id, posx, posy, endposx, endposy, breite, color, offset_attribute_start, offset_attribute_end, type FROM kvwmap.druckfreirechtecke, kvwmap.ddl2freirechtecke WHERE rect_id = id AND ddl_id = '.$ddls['extra'][$j],
+					'RETURNING id INTO vars_last_druckfreirechtecke_id'
+				);
 				for ($k = 0; $k < count_or_0($druckfreirechtecke['insert']); $k++) {
-					$dump_text .= "\n" . $druckfreirechtecke['insert'][$k] . "\nSET @last_druckfreirechtecke_id=LAST_INSERT_ID();";
+					$dump_text .= "\n" . $druckfreirechtecke['insert'][$k];
 					$dump_text .= "\n-- Zuordnung Druckfreirechteck " . $druckfreirechtecke['extra'][$k] . " zu DDL " . $ddls['extra'][$j];
-					$dump_text .= "\nINSERT INTO ddl2freirechtecke (ddl_id, rect_id) VALUES (@last_ddl_id, @last_druckfreirechtecke_id);";
+					$dump_text .= "\nINSERT INTO kvwmap.ddl2freirechtecke (ddl_id, rect_id) VALUES (vars_last_ddl_id, vars_last_druckfreirechtecke_id);";
 				}
 			}
 		}
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			$dump_text .= "\n\n-- Replace attribute options for Layer " . $layer_ids[$i];
-			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, 'layer_id=" . $layer_ids[$i]."', CONCAT('layer_id=', @last_layer_id" . $layer_ids[$i].")) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink') AND options regexp 'layer_id=" . $layer_ids[$i] . "( |$)';";
-			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i].",', CONCAT(@last_layer_id" . $layer_ids[$i].", ',')) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK') AND options LIKE '" . $layer_ids[$i] . ",%';";
+			$dump_text .= "\nUPDATE kvwmap.layer_attributes SET options = REPLACE(options, 'layer_id=" . $layer_ids[$i]."', CONCAT('layer_id=', @last_layer_id" . $layer_ids[$i].")) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink') AND options regexp 'layer_id=" . $layer_ids[$i] . "( |$)';";
+			$dump_text .= "\nUPDATE kvwmap.layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i].",', CONCAT(@last_layer_id" . $layer_ids[$i].", ',')) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK') AND options LIKE '" . $layer_ids[$i] . ",%';";
 		}
 
 		if ($with_datatypes) {
@@ -19817,6 +19867,9 @@ class db_mapObj{
 				$dump_text .= "\n\n-- Datatype_attributes " . $datatype['id'] . "\n" . $datatype_attributes_dump['insert'][0];
 			}
 		}
+		$dump_text .= "
+			END $$;
+		";
 
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH . $filename, 'w');

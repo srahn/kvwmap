@@ -98,7 +98,7 @@ else {
 				$GUI->formvars = set_width_or_height_default($GUI->formvars);
 			}
 			$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $GUI->echo);
-			$gast = $userDb->create_new_gast($GUI->formvars['gast']);
+			$gast = $GUI->pgdatabase->create_new_gast($GUI->formvars['gast']);
 			$GUI->formvars['login_name'] = $gast['username'];
 			$GUI->formvars['passwort'] = $gast['passwort'];
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase, $GUI->formvars['passwort']);
