@@ -58,15 +58,46 @@
       from maxvals;";
     $this->pgdatabase->execSQL($sql, 0, 0);
 
-    file_put_contents(
+    # credentials befüllen
+		$credentials = $this->pgdatabase->get_credentials(POSTGRES_CONNECTION_ID);
+		file_put_contents(
       'credentials.php', 
       "<?php
-    define('POSTGRES_DBNAME', '" . $this->pgdatabase->dbname . "');
-    define('POSTGRES_HOST', '" . $this->pgdatabase->host . "');
-    define('POSTGRES_PASSWORD', '" . $this->pgdatabase->password . "');    
-    define('POSTGRES_USER', '" . $this->pgdatabase->user . "');?>",
+    define('POSTGRES_DBNAME', '" . $credentials['dbname'] . "');
+    define('POSTGRES_HOST', '" . $credentials['host'] . "');
+    define('POSTGRES_PASSWORD', '" . $credentials['password'] . "');    
+    define('POSTGRES_USER', '" . $credentials['user'] . "');?>",
     FILE_APPEND
   );
+
+  # diese Zeilen aus config.php entfernen
+  $constants = ['POSTGRES_DBNAME', 'POSTGRES_HOST', 'POSTGRES_PASSWORD', 'POSTGRES_USER'];
+  $inputFile = 'config.php'; // Pfad zur Originaldatei
+  $tempFile = 'config_temp.php'; // Temporäre Datei
+
+  $handle = fopen($inputFile, 'r');
+  $tempHandle = fopen($tempFile, 'w');
+
+  if ($handle && $tempHandle) {
+    while (($line = fgets($handle)) !== false) {
+      $write = true;
+      foreach($constants as $constant) {
+        if (strpos($line, $constant) !== false) {
+          $write = false;
+        }
+      }
+      if ($write) {
+        fwrite($tempHandle, $line);
+      }
+    }
+    fclose($handle);
+    fclose($tempHandle);
+
+    rename($tempFile, $inputFile);
+  } 
+  else {
+      echo "Fehler beim Öffnen der Datei.\n";
+  }
 
     $result[0] = false; # Migration bestätigen
   }
