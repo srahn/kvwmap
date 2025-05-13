@@ -1293,7 +1293,7 @@ class Ressource extends PgObject {
 	 */
 	function import_ogr2ogr_shape() {
 		$this->debug->show('Starte Funktion import_org2ogr_shape', true);
-		$shape_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$shape_path = $this->get_full_path($this->get('dest_path'));
 		$imported_shape_files = array();
 
 		if ($this->get('import_table') == '') {
@@ -1507,6 +1507,7 @@ class Ressource extends PgObject {
 				'UTF-8',
 				false,
 				$this->unlogged,
+				false,
 				$this->get('force_nullable') == 't'
 			);
 			$first = false;
