@@ -58,6 +58,16 @@
       from maxvals;";
     $this->pgdatabase->execSQL($sql, 0, 0);
 
+    file_put_contents(
+      'credentials.php', 
+      "<?php
+    define('POSTGRES_DBNAME', '" . $this->pgdatabase->dbname . "');
+    define('POSTGRES_HOST', '" . $this->pgdatabase->host . "');
+    define('POSTGRES_PASSWORD', '" . $this->pgdatabase->password . "');    
+    define('POSTGRES_USER', '" . $this->pgdatabase->user . "');?>",
+    FILE_APPEND
+  );
+
     $result[0] = false; # Migration bestätigen
   }
   else {
