@@ -14625,7 +14625,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function cronjob_editieren() {
 		include_once(CLASSPATH . 'CronJob.php');
-		$this->cronjob = CronJob::find_by_id($this, $this->formvars['selected_cronjob_id']);
+		$this->cronjob = new CronJob($this);
+		if ($this->formvars['selected_cronjob_id']) {
+			$this->cronjob = $this->cronjob->find_by('id', $this->formvars['selected_cronjob_id']);
+		}
 		$this->main = 'cronjob_formular.php';
 		$this->output();
 	}
