@@ -10393,8 +10393,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 		}
 		$sql = 'DELETE FROM kvwmap.zwischenablage WHERE user_id = '.$this->user->id.' AND stelle_id = '.$this->Stelle->id;
-		if($this->formvars['chosen_layer_id'] != '')$sql.= ' AND layer_id = '.$this->formvars['chosen_layer_id'];
-		if(count_or_0($oids) > 0)$sql.= ' AND oid IN ('.implode(', ', $oids).')';
+		if ($this->formvars['chosen_layer_id'] != '') {
+			$sql.= ' AND layer_id = '.$this->formvars['chosen_layer_id'];
+		}
+		if (count_or_0($oids) > 0) {
+			$sql.= " AND oid IN ('" . implode("', '", $oids) . "')";
+		}
 		#echo $sql.'<br>';
 		$ret = $this->pgdatabase->execSQL($sql,4, 1);
 		if(count_or_0($oids) == 0){
