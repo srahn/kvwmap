@@ -16,9 +16,9 @@ class LayerAttribute extends PgObject {
 		$myObj = new MyObject($gui, 'layer_attributes');
 		return $myObj->find_by_sql(array(
 			'select' => 'la.name, la.alias',
-			'from' => '`kvwmap.layer_attributes` la JOIN `kvwmap.layer_attributes2stelle` AS ls ON la.layer_id = ls.layer_id AND la.name = ls.attributename',
+			'from' => 'kvwmap.layer_attributes la JOIN kvwmap.layer_attributes2stelle AS ls ON la.layer_id = ls.layer_id AND la.name = ls.attributename',
 			'where' => 'la.visible = 1 AND ls.stelle_id = ' . $stelle_id . ' AND la.layer_id = ' . $layer_id,
-			'order' => 'la.`order`'
+			'order' => 'la."order"'
 		));
 	}
 

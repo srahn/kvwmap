@@ -29,7 +29,7 @@ Daten: <?php echo print_r($this->qlayerset[0]['shape'], true); ?><p>//-->
 //trigger an alert message when the row is clicked
 table.on("rowClick", function(e, row) {
 	console.log("Row " + row.getData().uuid + " Clicked!!!!");
-  document.location = `index.php?go=Layer-Suche_Suchen&selected_layer_id=287&value_uuid=${row.getData().uuid}&operator_uuid==&csrf_token=<? echo $_SESSION['csrf_token']; ?>`;
+  document.location = 'index.php?go=Layer-Suche_Suchen&selected_layer_id=287&value_uuid=${row.getData().uuid}&operator_uuid==&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 });
 </script>
 

@@ -871,19 +871,19 @@ class db_mapObj{
 		}
 	}
 
-	function read_datatype_attributes($layer_id, $datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false, $replace = true){
+  function read_datatype_attributes($layer_id, $datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false, $replace = true){
 		global $language;
 
 		$alias_column = (
 			(!$all_languages AND $language != 'german') ?
 			"
 				CASE
-					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
-					ELSE `alias`
+					WHEN alias_" . $language. " != '' THEN alias_" . $language . "
+					ELSE alias
 				END AS alias
 			" :
 			"
-				`alias`
+				alias
 			"
 		);
 
@@ -893,55 +893,54 @@ class db_mapObj{
 
 		$sql = "
 			SELECT " .
-				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
-				`datatype_id`,
-				a.`name`,
-				`real_name`,
-				`tablename`,
-				`table_alias_name`,
-				`type`,
-				d.`name` as typename,
-				`geometrytype`,
-				`constraints`,
-				`nullable`,
-				`length`,
-				`decimal_length`,
-				`default`,
-				`form_element_type`,
-				`options`,
-				`tooltip`,
-				`group`,
-				`raster_visibility`,
-				`mandatory`,
-				`quicksearch`,
-				`order`,
-				`privileg`,
-				`query_tooltip`,
-				`visible`,
-				`vcheck_attribute`,
-				`vcheck_operator`,
-				`vcheck_value`,
-				`arrangement`,
-				`labeling`
+				$alias_column . ", alias_low_german, alias_english, alias_polish, alias_vietnamese,
+				datatype_id,
+				a.name,
+				real_name,
+				tablename,
+				table_alias_name,
+				type,
+				d.name as typename,
+				geometrytype,
+				constraints,
+				nullable,
+				length,
+				decimal_length,
+				\"default\",
+				form_element_type,
+				options,
+				tooltip,
+				\"group\",
+				raster_visibility,
+				mandatory,
+				quicksearch,
+				\"order\",
+				privileg,
+				query_tooltip,
+				visible,
+				vcheck_attribute,
+				vcheck_operator,
+				vcheck_value,
+				arrangement,
+				labeling
 			FROM
-				`datatype_attributes` as a LEFT JOIN
-				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+				kvwmap.datatype_attributes as a LEFT JOIN
+				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
 			WHERE
-				`layer_id` = " . $layer_id . " AND 
-				`datatype_id` = " . $datatype_id .
+				layer_id = " . $layer_id . " AND 
+				datatype_id = " . $datatype_id .
 				$einschr . "
 			ORDER BY
-				`order`
+				\"order\"
 		";
 		/* Attributes die fehlen im Vergleich zu layer_attributes
-		`dont_use_for_new`
+		dont_use_for_new
 		*/
 		#echo '<br>Sql read_datatype_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_datatype_attributes:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
-		while($rs = $ret['result']->fetch_array()){
+		while($rs = pg_fetch_array($ret[1])){
 			$attributes['datatype_id'][$i] = $rs['datatype_id'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
@@ -962,7 +961,7 @@ class db_mapObj{
 			$attributes['typename'][$i]= $rs['typename'];
 			$type = ltrim($rs['type'], '_');
 			if($recursive AND is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true);
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true, $replace);
 			}
 			if($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
@@ -1040,12 +1039,12 @@ class db_mapObj{
 			(!$all_languages AND $language != 'german') ?
 			"
 				CASE
-					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
-					ELSE `alias`
+					WHEN alias_" . $language. " != '' THEN alias_" . $language . "
+					ELSE alias
 				END AS alias
 			" :
 			"
-				`alias`
+				alias
 			"
 		);
 
@@ -1055,56 +1054,55 @@ class db_mapObj{
 
 		$sql = "
 			SELECT
-				`order`, " .
-				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
-				`layer_id`,
-				a.`name`,
-				`real_name`,
-				`tablename`,
-				`table_alias_name`,
-				a.`schema`,
-				`type`,
-				d.`name` as typename,
-				`geometrytype`,
-				`constraints`,
-				`saveable`,
-				`nullable`,
-				`length`,
-				`decimal_length`,
-				`default`,
-				`form_element_type`,
-				`options`,
-				`tooltip`,
-				`group`,
-				`tab`,
-				`arrangement`,
-				`labeling`,
-				`raster_visibility`,
-				`dont_use_for_new`,
-				`mandatory`,
-				`quicksearch`,
-				`visible`,
-				`vcheck_attribute`,
-				`vcheck_operator`,
-				`vcheck_value`,
-				`order`,
-				`privileg`,
-				`query_tooltip`
+				\"order\", " .
+				$alias_column . ", alias_low_german, alias_english, alias_polish, alias_vietnamese,
+				layer_id,
+				a.name,
+				real_name,
+				tablename,
+				table_alias_name,
+				a.schema,
+				type,
+				d.name as typename,
+				geometrytype,
+				constraints,
+				saveable,
+				nullable,
+				length,
+				decimal_length,
+				\"default\",
+				form_element_type,
+				options,
+				tooltip,
+				\"group\",
+				tab,
+				arrangement,
+				labeling,
+				raster_visibility,
+				dont_use_for_new,
+				mandatory,
+				quicksearch,
+				visible,
+				vcheck_attribute,
+				vcheck_operator,
+				vcheck_value,
+				\"order\",
+				privileg,
+				query_tooltip
 			FROM
-				`layer_attributes` as a LEFT JOIN
-				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+				kvwmap.layer_attributes as a LEFT JOIN
+				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
 			WHERE
-				`layer_id` = " . $layer_id .
+				layer_id = " . $layer_id .
 				$einschr . "
 			ORDER BY
-				`order`
+			\"order\"
 		";
 		// echo '<br>Sql read_layer_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>",4);
 		$ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
-		while ($rs = $ret['result']->fetch_array()){
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$attributes['enum'][$i] = array();
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];

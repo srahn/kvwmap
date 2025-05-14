@@ -60,49 +60,49 @@ class LayerGroup extends PgObject {
 		#echo '<br>find_top_parents for stelle_id: ' . $stelle_id;
 		$group = new LayerGroup($gui);
 		return $group->find_by_sql(array(
-			'select' => 'id, Gruppenname, icon, `order`',
+			'select' => 'id, Gruppenname, icon, "order"',
 			'from' => "(
 				SELECT DISTINCT
 					COALESCE(g3.id, g2.id, g1.id) AS group_id,
 					ul.Stelle_id
 				FROM
-					used_layer ul JOIN
-					layer l ON ul.layer_id = l.layer_id JOIN
-					u_groups g1 ON COALESCE(ul.group_id, l.gruppe) = g1.id LEFT JOIN
-					u_groups g2 ON g1.obergruppe = g2.id LEFT JOIN
-					u_groups g3 ON g2.obergruppe = g3.id
+					kvwmap.used_layer ul JOIN
+					kvwmap.layer l ON ul.layer_id = l.layer_id JOIN
+					kvwmap.u_groups g1 ON COALESCE(ul.group_id, l.gruppe) = g1.id LEFT JOIN
+					kvwmap.u_groups g2 ON g1.obergruppe = g2.id LEFT JOIN
+					kvwmap.u_groups g3 ON g2.obergruppe = g3.id
 				WHERE
 					l.selectiontype != 'radio'
 			) AS sub JOIN
-			u_groups g ON sub.group_id = g.id",
+			kvwmap.u_groups g ON sub.group_id = g.id",
 			'where' => 'sub.stelle_id = ' . $stelle_id,
-			'order' => '`order`'
+			'order' => '"order"'
 		));
 	}
 
 	public function find_sub_groups($stelle_id = null) {
 		if ($stelle_id == null) {
 			return $this->find_by_sql(array(
-				'select' => "child.`id`, child.`Gruppenname`, child.`icon`, child.`order`",
-				'from' => "`u_groups` parent JOIN `u_groups` child ON parent.`id` = child.`obergruppe`",
-				'where' => "parent.`id` = " . $this->get('id'),
-				'order' => "child.`order`"
+				'select' => "child.id, child.gruppenname, child.icon, child.order",
+				'from' => "kvwmap.u_groups parent JOIN kvwmap.u_groups child ON parent.id = child.obergruppe",
+				'where' => "parent.id = " . $this->get('id'),
+				'order' => 'child."order"'
 			));
 		}
 		else {
-			// z.B. SELECT DISTINCT child.`id`, child.`Gruppenname`, child.`icon`, child.`order` FROM `u_groups` parent JOIN `u_groups` child ON parent.`id` = child.`obergruppe` JOIN `layer` l ON child.`id` = l.`Gruppe` JOIN `used_layer` ul ON l.`layer_id` = ul.`layer_id` WHERE parent.`id` = 7 AND ul.stelle_id = 7 ORDER BY child.`order` 
+			// z.B. SELECT DISTINCT child.id, child.Gruppenname, child.icon, child.order FROM u_groups parent JOIN u_groups child ON parent.id = child.obergruppe JOIN layer l ON child.id = l.Gruppe JOIN used_layer ul ON l.layer_id = ul.layer_id WHERE parent.id = 7 AND ul.stelle_id = 7 ORDER BY child.order 
 
 			return $this->find_by_sql(array(
-				'select' => "DISTINCT child.`id`, child.`Gruppenname`, child.`icon`, child.`order`",
-				'from' => "`kvwmap.u_groups` parent JOIN `kvwmap.u_groups` child ON parent.`id` = child.`obergruppe`" . ($stelle_id != null ? " JOIN `kvwmap.layer` l ON child.`id` = l.`Gruppe` JOIN `kvwmap.used_layer` ul ON l.`layer_id` = ul.`layer_id`" : ''),
-				'where' => "parent.`id` = " . $this->get('id') . ($stelle_id != null ? " AND ul.stelle_id =" . $stelle_id : ''),
-				'order' => "child.`order`"
+				'select' => 'DISTINCT child.id, child.gruppenname, child.icon, child."order"',
+				'from' => "kvwmap.u_groups parent JOIN kvwmap.u_groups child ON parent.id = child.obergruppe" . ($stelle_id != null ? " JOIN kvwmap.layer l ON child.id = l.gruppe JOIN kvwmap.used_layer ul ON l.layer_id = ul.layer_id" : ''),
+				'where' => "parent.id = " . $this->get('id') . ($stelle_id != null ? " AND ul.stelle_id =" . $stelle_id : ''),
+				'order' => 'child."order"'
 			));
 		}
 	}
 
 	function get_layerdef($thema, $stelle_id = null) {
-		$thema = ($thema != '' ? $thema . '|' : '') . $this->get('Gruppenname');
+		$thema = ($thema != '' ? $thema . '|' : '') . $this->get('gruppenname');
 		#echo '<br>thema: ' . $thema;
 		$layerdef = (Object) array(
 			'thema' => $thema,
