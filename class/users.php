@@ -1250,6 +1250,7 @@ class user {
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
 			if($formvars['polyquery']){$buttons .= 'polyquery,';}
 			if($formvars['measure']){$buttons .= 'measure,';}
+			if($formvars['routing']){$buttons .= 'routing,';}
 			if($formvars['punktfang']){$buttons .= 'punktfang,';}
 			if (value_of($formvars, 'freepolygon')) { $buttons .= 'freepolygon,';}
 			if (value_of($formvars, 'freearrow')) { $buttons .= 'freearrow,';}

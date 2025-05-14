@@ -84,8 +84,16 @@ class Ressource extends PgObject {
 	}
 
 	/**
-	 * Function query outdated ressources if $ressource_id is set it
-	 * query only if this ressource is outdated
+	 * Function query outdated ressources.
+	 * The amount of results is limited by $limit.
+	 * If $ressource_id is set with a single id or an array of ids, it query only if these ressources are outdated.
+	 * A Ressource is outdated if
+	 *   - auto_update is true
+	 *   - status_id IS NULL, = 0 or > -1 wenn $force is true
+	 *   - von_eneka or use_for_datapackage is true
+	 *   - last_updated_at is null or
+	 *     - next_updated_at is not null and between last_updated_at and now() or
+	 *     - update_interval is not null and date of last_updated_at + update_time is < now
 	 * @param integer $ressource_id
 	 * @param integer $limit If limit is given only the amount of ressources will be replied
 	 * @return Ressource[] An Array of Ressources that are outdated
@@ -122,7 +130,7 @@ class Ressource extends PgObject {
 					)
 				)
 			" .
-			($ressource_id ? " AND id = " . $ressource_id : ""),
+			($ressource_id ? " AND id " . (is_array($ressource_id) ? "IN (" . implode(', ', $ressource_id) . ")" : "= " . $ressource_id) : ""),
 			"last_updated_at",
 			"*",
 			$limit
@@ -214,7 +222,7 @@ class Ressource extends PgObject {
 	 *  8 - Transformation gestartet
 	 *  9 - Transformation fertig
 	 */
-	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $force = false) {
+	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $only_missing = false, $force = false) {
 		// $gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
 
 		$ressource = new Ressource($gui);
@@ -233,15 +241,19 @@ class Ressource extends PgObject {
 		if (count($ressources) > 0) {
 			$gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
 			foreach ($ressources AS $ressource) {
-				// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
-				if ($gui->formvars['dry_run'] == 1) {
-					echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
-				}
-				else {
-					$result = $ressource->run_update($method_only);
-					$ressource->log($result, false);
-					return $result;
-				}
+				// ToDo: A ressource shall only be updated when all its source ressources are uptodate yet.
+				// Test it with a stack of pending ressources.
+				// if ($this->all_source_ressources_uptodate($ressource->get_id())) {
+					// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
+					if ($gui->formvars['dry_run'] == 1) {
+						echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
+					}
+					else {
+						$result = $ressource->run_update($method_only, $only_missing);
+						$ressource->log($result, false);
+						return $result;
+					}
+				// }
 			}
 		}
 		else {
@@ -250,6 +262,16 @@ class Ressource extends PgObject {
 				'msg' => 'Nichts zu tun'
 			);
 		}
+	}
+
+	/**
+	 * Function count all source ressources of ressource with $ressource_id that are outdated
+	 * and return true if the number is 0 else false.
+	 */
+	function all_source_ressources_uptodate($ressource_id) {
+		// ToDo: to implement
+		$ressources = $this->find_outdated($this, Lineage::find_sources($ressource_id), NULL, false);
+		return (count($ressources) == 0);
 	}
 
 	function log($result, $show = false) {
@@ -279,16 +301,16 @@ class Ressource extends PgObject {
 			$method_only == $method;
 	}
 
-	function run_update($method_only = '') {
+	function run_update($method_only = '', $only_missing = false) {
 		$this->debug->show('Update Ressource ' . $this->get_id(), true);
 		$this->update_status(1, $msg);
 
 		if ($this->must_be_executed('download', $method_only)) {
-			$result = $this->download();
+			$result = $this->download($only_missing);
 			if (!$result['success']) { return $result; }
 		}
 		if ($this->must_be_executed('unpack', $method_only)) {
-			$result = $this->unpack();
+			$result = $this->unpack($only_missing);
 			if (!$result['success']) { return $result; }
 		}
 		if ($this->must_be_executed('import', $method_only)) {
@@ -367,7 +389,7 @@ class Ressource extends PgObject {
 	####################
 	# Download methods #
 	####################
-	function download() {
+	function download($only_missing = false) {
 		// $this->debug->show('Starte Funktion download', true);
 		if ($this->get('download_method') != '') {
 			$method_name = 'download_' . $this->get('download_method');
@@ -379,6 +401,7 @@ class Ressource extends PgObject {
 			}
 
 			$this->update_status(2);
+			$this->only_missing = $only_missing;
 			$result = $this->${method_name}();
 			if (!$result['success']) { return $result; }
 
@@ -437,14 +460,13 @@ class Ressource extends PgObject {
 				$this->debug->show('Lege Verzeichnis ' . $download_path . ' an, weil es noch nicht existiert!', true);
 				mkdir($download_path, 0777, true);
 			}
-			$only_missing = ((array_key_exists('only_missing', $this->formvars) AND $this->formvars['only_missing']) ? true : false);
-			if ($only_missing) {
+			if ($this->only_missing) {
 				array_map('unlink', glob($download_path . "/*"));
 				$this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 			}
 
 			foreach ($download_urls AS $download_url) {
-				if (!($only_missing AND file_exists($download_path . basename($download_url)))) {
+				if ($this->only_missing === false OR !file_exists($download_path . basename($download_url))) {
 					$this->debug->show('Download from: ' . $download_url . ' to ' . $download_path, true);
 					copy($download_url, $download_path . basename($download_url));
 					// if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
@@ -596,9 +618,9 @@ class Ressource extends PgObject {
 			}
 
 			// Script aufrufen zum Download der Dateien in urls.txt
-			$cmd = $parallel_download_script . ' ' . $urls_file . ' ' . $download_path . ' 10';
+			$cmd = $parallel_download_script . ' ' . $urls_file . ' ' . $download_path . ' 10' . ($this->only_missing ? ' 1' : '');
 			$this->debug->show('Download Dateien aus urls.txt mit Befehl: ' . $cmd, true);
-			// Befehl z.B. /var/www/apps/kvwmap/plugins/metadata/tools/download_parallel.sh /var/www/data/fdm/ressourcen/dgm/dgm1/NS/urls.txt /var/www/data/fdm/ressourcen/dgm/dgm1/NS/downloads/ 10
+			// // Befehl z.B. /var/www/apps/kvwmap/plugins/metadata/tools/download_parallel.sh /var/www/data/fdm/ressourcen/dgm/dgm1/NS/urls.txt /var/www/data/fdm/ressourcen/dgm/dgm1/NS/downloads/ 10
 			$descriptorspec = [
 				0 => ["pipe", "r"],  // stdin
 				1 => ["pipe", "w"],  // stdout
@@ -747,7 +769,7 @@ class Ressource extends PgObject {
 	##################
 	# Unpack methods #
 	##################
-	function unpack() {
+	function unpack($only_missing = false) {
 		// $this->debug->show('Starte Funktion unpack', true);
 		if ($this->get('unpack_method') != '') {
 			$method_name = 'unpack_' . $this->get('unpack_method');
@@ -758,6 +780,7 @@ class Ressource extends PgObject {
 				);
 			}
 			$this->update_status(4);
+			$this->only_missing = $only_missing;
 			$result = $this->${method_name}();
 			if (!$result['success']) { return $result; }
 			$this->update_status(5);
@@ -796,27 +819,33 @@ class Ressource extends PgObject {
 			array_map('unlink', glob("$dest_path/*.*"));
 		}
 
-		$download_path = $this->get_full_path($this->get('download_path'));
+		if ($this->get('download_method') === 'upload') {
+			// Daten wurden manuell hochgeladen und liegen in Datei die in upload_file angegeben ist.
+			$this->debug->show('upload_file: ' . $this->get('upload_file'), true);
+			$zip_files = array(document_info($this->get('upload_file'), 'path'));
+			$this->debug->show('zipfiles: ' . implode(', ', $zip_files), true);
+		}
 
-		$err_msg = array();
-		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
-		$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
+
+		else {
+			// Daten wurden runtergeladen und liegen in download_path
+			$download_path = $this->get_full_path($this->get('download_path'));;
+			$err_msg = array();
+			$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+			$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
+		}
 		$this->debug->show('Packe ZIP-Dateien ' . implode(', ', $zip_files) . ' aus nach ' . $dest_path, true);
 		foreach ($zip_files as $zip_file) {
-			$cmd = 'unzip -j -o "' . $zip_file . '" -d ' . $dest_path;
-			$descriptorspec = [
-				0 => ["pipe", "r"],  // stdin
-				1 => ["pipe", "w"],  // stdout
-				2 => ["pipe", "w"],  // stderr
-			];
-			$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
-			$line = __LINE__;
-			$stdout = stream_get_contents($pipes[1]);
-			fclose($pipes[1]);
-			$stderr = stream_get_contents($pipes[2]);
-			fclose($pipes[2]);
-			if ($stderr != '') {
-				$err_msg[] = 'Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ' . $this->get_id() . ' Fehler: ' . $stderr;
+			if (finfo_file($finfo, $zip_file) == 'application/zip') {
+				if ($this->only_missing == false OR !file_exists($dest_path . str_replace('.zip', '.tif', basename($zip_file)))) {
+					$result = unzip($zip_file, $dest_path);
+					if ($result['success']) {
+						$this->debug->show($zip_file . ' ausgepackt. ' . implode(', ', $result['files']), true);
+					}
+					else {
+						$err_msg[] = '<br>Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ID: ' . $this->get_id() . ' Überprüfen Sie die Schreibrechte im Verzeichnis ' . $dest_path;
+					}
+				}
 			}
 		}
 		finfo_close($finfo);
@@ -1293,7 +1322,7 @@ class Ressource extends PgObject {
 	 */
 	function import_ogr2ogr_shape() {
 		$this->debug->show('Starte Funktion import_org2ogr_shape', true);
-		$shape_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$shape_path = $this->get_full_path($this->get('dest_path'));
 		$imported_shape_files = array();
 
 		if ($this->get('import_table') == '') {
@@ -1507,6 +1536,7 @@ class Ressource extends PgObject {
 				'UTF-8',
 				false,
 				$this->unlogged,
+				false,
 				$this->get('force_nullable') == 't'
 			);
 			$first = false;

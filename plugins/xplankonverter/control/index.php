@@ -2038,9 +2038,9 @@ function go_switch_xplankonverter($go) {
 
 			if (move_uploaded_file($upload_file['tmp_name'], $zip_file)) {
 				# extract zip
-				$shape_files = unzip($zip_file, false, false, true);
+				$result = unzip($zip_file, false, false, true);
 				# get shape file name
-				$first_file = explode('.', $shape_files[0]);
+				$first_file = explode('.', $result['files'][0]);
 				$shape_file_name = $first_file[0];
 
 				# get EPSG-Code aus prj-Datei
