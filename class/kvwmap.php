@@ -18290,17 +18290,6 @@ class db_mapObj{
 		return $groups;
 	}
 
-  // function read_Group($id) {
-    // $sql ='SELECT g2r.*, g.Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r';
-    // $sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID.' AND g2r.id = g.id AND g.id='.$id;
-    // $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Group - Lesen einer Gruppe der Rolle:<br>" . $sql,4);
-    // $ret = $this->db->execSQL($sql);
-    //if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql, $this->connection); return 0; }
-    // $rs = $this->db->result->fetch_array();
-    // return $rs;
-  // }
-
-
 	function read_ClassesbyClassid($class_id) {
 		global $language;
 
@@ -22168,17 +22157,17 @@ DO $$
 			SELECT
 				*
 			FROM
-				u_styles2classes
+				kvwmap.u_styles2classes
 			WHERE
 				class_id = " . $class_id . "
 			ORDER BY
 				drawingorder
 		";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->moveup_Style :<br>" . $sql,4);
-    $this->db->execSQL($sql);
+    $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
     $i = 0;
-    while ($rs = $this->db->result->fetch_array()) {
+    while ($rs = pg_fetch_assoc($ret[1])) {
       $styles[$i] = $rs;
       if ($rs['style_id'] == $style_id){
         $index = $i;
@@ -22187,7 +22176,7 @@ DO $$
     }
     $sql = "
 			UPDATE
-				u_styles2classes
+				kvwmap.u_styles2classes
 			SET
 				drawingorder = " . $styles[$index]['drawingorder'] . "
 			WHERE
@@ -22199,7 +22188,7 @@ DO $$
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
     $sql = "
 			UPDATE
-				u_styles2classes
+				kvwmap.u_styles2classes
 			SET
 				drawingorder = " . $styles[$index + 1]['drawingorder'] . "
 			WHERE
@@ -22216,17 +22205,17 @@ DO $$
 			SELECT
 				*
 			FROM
-				u_styles2classes
+				kvwmap.u_styles2classes
 			WHERE
 				class_id = " . $class_id . "
 			ORDER BY
 				drawingorder
 		";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->moveup_Style :<br>" . $sql,4);
-    $this->db->execSQL($sql);
+    $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
     $i = 0;
-    while ($rs = $this->db->result->fetch_array()) {
+    while ($rs = pg_fetch_assoc($ret[1])) {
       $styles[$i] = $rs;
       if ($rs['style_id'] == $style_id){
         $index = $i;
@@ -22235,7 +22224,7 @@ DO $$
     }
     $sql = "
 			UPDATE
-				u_styles2classes
+				kvwmap.u_styles2classes
 			SET
 				drawingorder = " . $styles[$index]['drawingorder'] . "
 			WHERE
@@ -22247,7 +22236,7 @@ DO $$
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
     $sql = "
 			UPDATE
-				u_styles2classes
+				kvwmap.u_styles2classes
 			SET
 				drawingorder = " . $styles[$index - 1]['drawingorder'] . "
 			WHERE
@@ -22314,7 +22303,7 @@ DO $$
   function updateStyle2Class_ClassID($old_class_id, $new_class_id){
     $sql = '
 			UPDATE 
-				u_styles2classes 
+				kvwmap.u_styles2classes 
 			SET
 				class_id = ' . $new_class_id . '
 			WHERE 
@@ -22518,16 +22507,6 @@ DO $$
       }
     }
     return $shape;
-  }
-
-  function getMaxMapExtent() {
-    $sql ='SELECT MIN(minxmax) AS minxmax, MIN(minymax) AS minymax';
-    $sql.=', MAX(maxxmax) AS maxxmax, MAX(maxymax) AS maxymax FROM stelle';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getMaxMapExtent - Lesen der Maximalen Kartenausdehnung:<br>" . $sql,4);
-    $this->db->execSQL($sql);
-    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
-    $rs = $this->db->result->fetch_array();
-    return $rs;
   }
 }
 

@@ -1148,18 +1148,19 @@ class stelle {
 				CASE WHEN m.menueebene = 1 THEN m.order ELSE om.order END as order1, 
 				CASE WHEN m.menueebene = 1 THEN m.id ELSE m.obermenue END as order2,
 				m.id
-			FROM u_menues as m 
-			LEFT JOIN u_menues as om ON om.id = m.obermenue
+			FROM 
+				kvwmap.u_menues as m 
+				LEFT JOIN kvwmap.u_menues as om ON om.id = m.obermenue
 			WHERE
 				m.id IN (' . implode(',', $menues) . ')
 			ORDER BY order1, order2, m.menueebene, m.order
 		';
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
-			while($rs=$this->database->result->fetch_array()) {
+		else {
+			while ($rs = pg_fetch_assoc($ret[1])) {
 				$result[] = $rs['id'];
 			}
 		}
@@ -2008,77 +2009,6 @@ class stelle {
 			return $layer;
 		}
 	}
-
-	// function getLayers($group, $order = 'legendorder, drawingorder desc', $return = '') {
-	// 	$layer = array(
-	// 		'ID' => array(),
-	// 		'Bezeichnung' => array(),
-	// 		'drawingorder' => array(),
-	// 		'gruppe' => array()
-	// 	);
-
-	// 	$condition = "
-	// 		stelle_id = " . $this->id .
-	// 		($group != NULL ? " AND layer.Gruppe = " . $group : "") . "
-	// 	";
-	// 	$order = ($order != NULL ? 'ORDER BY '.$order : 'ORDER BY legendorder, drawingorder desc');
-
-	// 	# Lesen der Layer zur Stelle
-	// 	$sql = "
-	// 		SELECT
-	// 			layer.layer_id,
-	// 			layer.Gruppe,
-	// 			Name,
-	// 			used_layer.drawingorder,
-	// 			used_layer.legendorder
-	// 		FROM
-	// 			used_layer JOIN
-	// 			layer ON used_layer.layer_id = layer.layer_id 
-	// 		WHERE" .
-	// 			$condition .
-	// 		$order . "
-	// 	";
-	// 	#echo '<br>stelle.php getLayers Sql:<br>' . $sql;
-	// 	$this->debug->write("<p>file:stelle.php class:stelle->getLayers - Lesen der Layer zur Stelle:<br>".$sql,4);
-	// 	$this->database->execSQL($sql);
-	// 	if (!$this->database->success) {
-	// 		$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
-	// 	}
-	// 	else {
-	// 		$i = 0;
-	// 		while ($rs = $this->database->result->fetch_assoc()) {
-	// 			$layer['ID'][] 						= $rs['layer_id'];
-	// 			$layer['Bezeichnung'][]		= $rs['name'];
-	// 			$layer['drawingorder'][]	= $rs['drawingorder'];
-	// 			$layer['legendorder'][]		= $rs['legendorder'];
-	// 			$layer['gruppe'][]				= $rs['gruppe'];
-	// 			$layer['layers_of_group'][$rs['gruppe']][] = $i;
-	// 			$i++;
-	// 		}
-	// 		if ($order == 'name') {
-	// 			// Sortieren der Layer unter Berücksichtigung von Umlauten
-	// 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-	// 			$sorted_layer['Bezeichnung'] = $sorted_arrays['array'];
-	// 			$sorted_layer['ID'] = $sorted_arrays['second_array'];
-				
-	// 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
-	// 			$sorted_layer['drawingorder'] = $sorted_arrays['second_array'];
-				
-	// 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['legendorder']);
-	// 			$sorted_layer['legendorder'] = $sorted_arrays['second_array'];
-				
-	// 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['gruppe']);
-	// 			$sorted_layer['gruppe'] = $sorted_arrays['second_array'];
-	// 			$layer = $sorted_layer;
-	// 		}
-	// 	}
-	// 	if ($return == 'only_ids') {
-	// 		return $layer['ID'];
-	// 	}
-	// 	else {
-	// 		return $layer;
-	// 	}
-	// }
 
 	function getqueryablePostgisLayers($privileg, $export_privileg = NULL, $no_subform_layers = false, $layer_id = NULL){
 		global $language;
