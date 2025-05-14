@@ -67,13 +67,15 @@ class Funktion extends PgObject {
 	 * ToDo: Use MyObject functions for CRUD
 	 */
 	function NeuAnlegen($formvars){
-		$sql = "INSERT INTO kvwmap.u_funktionen SET ";
-		if($formvars['id']){
-			$sql.= "id = ".(int)$formvars['id']."," ;
-		}
-		$sql.= "bezeichnung = '".$formvars['bezeichnung']."'";
-		$ret=$this->database->execSQL($sql,4, 1);
-		$ret[1] = $this->database->mysqli->insert_id;
+		$sql = "
+			INSERT INTO kvwmap.u_funktionen
+				(bezeichnung)
+			VALUES 
+				('" . $formvars['bezeichnung'] . "')
+			RETURNING id";
+		$result = $this->database->execSQL($sql,4, 1);
+		$rs = pg_fetch_assoc($result[1]);
+		$ret[1] = $rs['id'];
 		return $ret;
 	}
 

@@ -4,28 +4,24 @@
 CONFIG_FILE="$(dirname $0)/../credentials.php"
 #echo "CONFIG_FILE: ${CONFIG_FILE}"
 
-MYSQL_HOST=$(grep "MYSQL_HOST'," $CONFIG_FILE | cut -d "'" -f 4)
-#echo "MYSQL_HOST: ${MYSQL_HOST}"
+POSTGRES_HOST=$(grep "POSTGRES_HOST'," $CONFIG_FILE | cut -d "'" -f 4)
+#echo "POSTGRES_HOST: ${POSTGRES_HOST}"
 
-MYSQL_DATABASE=$(grep "MYSQL_DBNAME'" $CONFIG_FILE | cut -d "'" -f 4)
-#echo "MYSQL_DATABASE: ${MYSQL_DATABASE}"
+POSTGRES_DATABASE=$(grep "POSTGRES_DBNAME'" $CONFIG_FILE | cut -d "'" -f 4)
+#echo "POSTGRES_DATABASE: ${POSTGRES_DATABASE}"
 
-MYSQL_USER=$(grep "MYSQL_USER'" $CONFIG_FILE | cut -d "'" -f 4)
-#echo "MYSQL_USER: ${MYSQL_USER}"
+POSTGRES_USER=$(grep "POSTGRES_USER'" $CONFIG_FILE | cut -d "'" -f 4)
+#echo "POSTGRES_USER: ${POSTGRES_USER}"
 
-MYSQL_PASSWORD=$(grep "MYSQL_PASSWORD'" $CONFIG_FILE | cut -d "'" -f 4)
-#echo "MYSQL_PASSWORD: ${MYSQL_PASSWORD}"
+POSTGRES_PASSWORD=$(grep "POSTGRES_PASSWORD'" $CONFIG_FILE | cut -d "'" -f 4)
+#echo "POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}"
 
 CURRENT_TIME=$(date -d yesterday '+%Y-%m-%d %H:%M:%S')
 #echo "CURRENT_TIME: ${CURRENT_TIME}"
 
-SQL="DELETE FROM user WHERE Name LIKE 'gast' AND Vorname LIKE 'gast' AND password_setting_time < '${CURRENT_TIME}';
-SET @m = (SELECT MAX(id) + 1 FROM user); 
-SET @s = CONCAT('ALTER TABLE user AUTO_INCREMENT=', @m);
-PREPARE stmt1 FROM @s;
-EXECUTE stmt1;
-DEALLOCATE PREPARE stmt1;"
+SQL="DELETE FROM kvwmap.user WHERE name LIKE 'gast' AND vorname LIKE 'gast' AND password_setting_time < '${CURRENT_TIME}';
+SELECT setval('kvwmap.user_id_seq', (select max(id) from kvwmap.user), false);"
 #echo "SQL: ${SQL}"
 
-mysql --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} -e "${SQL}" ${MYSQL_DATABASE} > /dev/null 2>&1
-#echo "exec: mysql --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} -e \"${SQL}\" ${MYSQL_DATABASE} > /dev/null 2>&1"
+psql --host=${POSTGRES_HOST} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} -c "${SQL}" ${POSTGRES_DATABASE} > /dev/null 2>&1
+#echo "exec: psql --host=${POSTGRES_HOST} --user=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} -c \"${SQL}\" ${POSTGRES_DATABASE} > /dev/null 2>&1"

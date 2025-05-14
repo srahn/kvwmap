@@ -131,7 +131,6 @@ class GUI {
 	var $pdf;
 	var $addressliste;
 	var $debug;
-	var $mysqli;
 	var $flst;
 	var $formvars;
 	var $legende;
@@ -189,10 +188,6 @@ class GUI {
 		# Debugdatei setzen
 		global $debug;
 		$this->debug = $debug;
-
-		# Logdatei für Mysql setzen
-		global $log_mysql;
-		$this->log_mysql = $log_mysql;
 
 		# Logdatei für PostgreSQL setzten
 		global $log_postgres;
@@ -1594,9 +1589,9 @@ class stelle {
 
 	function __construct($id, $database) {
 		global $debug;
-		global $log_mysql;
+		global $log_postgres;
 		$this->debug = $debug;
-		$this->log = $log_mysql;
+		$this->log = $log_postgres;
 		$this->id = $id;
 		$this->database = $database;
 		$ret = $this->readDefaultValues();

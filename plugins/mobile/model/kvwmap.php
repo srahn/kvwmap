@@ -210,7 +210,7 @@ $GUI->mobile_sync = function () use ($GUI) {
 	$GUI->deblog = new LogFile($deblogdir . $deblogfile, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
 	include_once(CLASSPATH . 'synchronisation.php');
 	# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
-	# $selected_layer_id (existiert und ist in mysql-Datenbank?)
+	# $selected_layer_id (existiert und ist in Datenbank?)
 	# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
 	# $username muss eigentlich nicht geprüft werden, weil der ja immer da ist nach Anmeldung
 	# $client_time muss eigentlich auch nicht, wen interessiert das?
@@ -276,7 +276,7 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 
 	include_once(CLASSPATH . 'synchronisation.php');
 	# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
-	# $selected_layer_id (existiert und ist in mysql-Datenbank?)
+	# $selected_layer_id (existiert und ist in Datenbank?)
 	# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
 	# $client_time muss eigentlich auch nicht, wen interessiert das?
 	# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exception

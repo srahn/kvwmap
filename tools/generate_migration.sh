@@ -1,15 +1,11 @@
 #!/bin/bash
 DIR=`dirname "$0"`
-if [ "$1" != "m" -a "$1" != "p" ]; then
-	echo "generate_migration {m|p} {d|s} {kvwmap|<pluginname>} [migrationname]"
-	echo "(m: mysql, p: postgresql, d: data, s: schema)"
+if [ "$1" != "d" -a "$1" != "s" ]; then
+	echo "generate_migration {d|s} {kvwmap|<pluginname>} [migrationname]"
+	echo "(d: data, s: schema)"
 	exit 1
 else
-	if [ "$1" = "m" ]; then
-		type=mysql
-	else
-		type=postgresql
-	fi
+	type=postgresql
 	if [ "$2" = "d" ]; then
 		target=data
 	else

@@ -84,16 +84,9 @@ class administration{
 	function get_schema_migration_files() {
 		#echo '<br>Get Schema Migration Files';
 		global $kvwmap_plugins;
-		$migrations['kvwmap']['mysql'] = array_diff (scandir(LAYOUTPATH.'db/mysql/schema'), array('.', '..'));
-		sort($migrations['kvwmap']['mysql']);
 		$migrations['kvwmap']['postgresql'] = array_diff (scandir(LAYOUTPATH.'db/postgresql/schema'), array('.', '..'));
 		sort($migrations['kvwmap']['postgresql']);
 		for($i = 0; $i < count($kvwmap_plugins); $i++) {
-			$path = PLUGINS.$kvwmap_plugins[$i].'/db/mysql/schema';
-			if (file_exists($path)) {
-				$migrations[$kvwmap_plugins[$i]]['mysql'] = array_diff (scandir($path), array('.', '..'));
-				sort($migrations[$kvwmap_plugins[$i]]['mysql']);
-			}
 			$path = PLUGINS.$kvwmap_plugins[$i].'/db/postgresql/schema';
 			if (file_exists($path)) {
 				$migrations[$kvwmap_plugins[$i]]['postgresql'] = array_diff (scandir($path), array('.', '..'));
@@ -106,8 +99,8 @@ class administration{
 	function get_seed_files() {
 		global $kvwmap_plugins;
 		for($i = 0; $i < count($kvwmap_plugins); $i++) {
-			$path = PLUGINS.$kvwmap_plugins[$i].'/db/mysql/data';
-			if (file_exists($path))$seeds[$kvwmap_plugins[$i]]['mysql'] = array_diff (scandir($path), array('.', '..'));
+			$path = PLUGINS.$kvwmap_plugins[$i].'/db/postgresql/data';
+			if (file_exists($path))$seeds[$kvwmap_plugins[$i]]['postgresql'] = array_diff (scandir($path), array('.', '..'));
 		}
 		return $seeds;
 	}
@@ -152,31 +145,31 @@ class administration{
 		}
 		$err_msgs = array_merge($err_msgs, $this->execute_migrations('postgresql', $pg_migrations));
 
-		// foreach ($this->seeds_to_execute['mysql'] as $component => $component_seed) {
-		// 	$prepath = PLUGINS.$component.'/';
-		// 	foreach ($component_seed as $file) {
-		// 		$filepath = $prepath.'db/mysql/data/'.$file;
-		// 		#echo '<br>Execute SQL from seed file: ' . $filepath;
-		// 		$result = $this->database->exec_commands(
-		// 			file_get_contents($filepath),
-		// 			null, # Do not replace connection since we have connection_id's in layer defenitions ($this->pgdatabase->get_connection_string(),)
-		// 			$this->pgdatabase->connection_id,
-		// 			true
-		// 		); # replace known constants
-		// 		if ($result[0]) {
-		// 			echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
-		// 		}
-		// 		else{
-		// 			$sql = "
-		// 				INSERT INTO `migrations`
-		// 					(`component`, `type`, `filename`)
-		// 				VALUES ('" . $component . "', 'mysql', '" . $file . "');
-		// 			";
-		// 			#echo '<p>Register MySQL migration for component ' . $component . ' with sql: <br>' . $sql;
-		// 			$result=$this->database->execSQL($sql,0, 0);
-		// 		}
-		// 	}
-		// }
+		foreach ($this->seeds_to_execute['postgresql'] as $component => $component_seed) {
+			$prepath = PLUGINS.$component.'/';
+			foreach ($component_seed as $file) {
+				$filepath = $prepath.'db/postgresql/data/'.$file;
+				#echo '<br>Execute SQL from seed file: ' . $filepath;
+				$result = $this->database->exec_commands(
+					file_get_contents($filepath),
+					null, # Do not replace connection since we have connection_id's in layer defenitions ($this->pgdatabase->get_connection_string(),)
+					$this->pgdatabase->connection_id,
+					true
+				); # replace known constants
+				if ($result[0]) {
+					echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
+				}
+				else{
+					$sql = "
+						INSERT INTO kvwmap.migrations
+							(component, type, filename)
+						VALUES ('" . $component . "', 'postgresql', '" . $file . "');
+					";
+					#echo '<p>Register migration for component ' . $component . ' with sql: <br>' . $sql;
+					$result=$this->database->execSQL($sql,0, 0);
+				}
+			}
+		}
 		return $err_msgs;
 	}
 

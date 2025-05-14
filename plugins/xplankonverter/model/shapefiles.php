@@ -61,12 +61,12 @@ class ShapeFile extends PgObject {
 	}
 
 	/*
-	* Delete the Layer in mySQL tables
+	* Delete the Layer
 	* representing this shape file
 	*/
 	function deleteLayer() {
 		if ($this->get('layer_id') != '') {
-			$this->debug->show('<p>Delete Layer in mysql db: ' . $this->dataTableName(), false);
+			$this->debug->show('<p>Delete Layer in db: ' . $this->dataTableName(), false);
 			$this->gui->formvars['selected_layer_id'] = $this->get('layer_id');
 			$this->gui->LayerLoeschen();
 		}

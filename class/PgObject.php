@@ -31,10 +31,9 @@
 
 class PgObject {
 	/*
-	* Durch die Übergabe von gui besitzt das Object beide Datenbankverbindungen
+	* Durch die Übergabe von gui besitzt das Object die Datenbankverbindung
 	*	$this->database Postgres Datenbank
 	* $this->gui->pgdatabase PostgresDatenbank
-	* $this->gui->database MySQL Datenbank
 	*
 	*/
 	static $write_debug = false;

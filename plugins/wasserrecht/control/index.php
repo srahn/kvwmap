@@ -263,7 +263,7 @@ function go_switch_wasserrecht($go){
 
 				# update MySQL-Database
 				{
-					$mysqli = new mysqli("mysql", "kvwmap", "Laridae_Moewe1", "kvwmapdb_wr");
+					$mysqli = new mysqli("mysql", "kvwmap", "xxx", "kvwmapdb_wr");
 					if (mysqli_connect_errno()) {
 						$GUI->result['update_mysql'] = 'Datenbankverbindung fehlgeschlagen<br>' . mysqli_connect_error();
 						$GUI->main = PLUGINS . 'wasserrecht/view/deploy_results.php';

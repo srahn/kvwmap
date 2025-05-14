@@ -52,7 +52,7 @@
 			case ($fired == 'BEFORE' AND $event == 'DELETE') : {
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_shapes Funktion aus.', false);
 				$shapefile = ShapeFile::find_by_id($GUI, 'id', $oid);
-				# Delete the layerdefinition in mysql (rolleneinstellungen, layer, classes, styles, etc.)
+				# Delete the layerdefinition in (rolleneinstellungen, layer, classes, styles, etc.)
 				$shapefile->deleteLayer();
 				# Delete the postgis data table that hold the data of the shape file
 				$shapefile->deleteDataTable();
@@ -190,7 +190,7 @@
 
 	/**
 	* Trigger für Regeln
-	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
+	* @params $layer Array mit Angben des Layers aus der Datenbank
 	*/
 	$GUI->trigger_functions['handle_regel'] = function($fired, $event, $layer, $oid = 0, $old_dataset = array()) use ($GUI) {
 		$executed = true;

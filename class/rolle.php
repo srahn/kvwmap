@@ -40,7 +40,7 @@ class rolle {
 	/**
 	 * Function create a rolle for a user with $user_id and all relations to menues, layers and layergroups in stelle with $stelle_id.
 	 * If $default_user_id is given them settings will be used.
-	 * @param database $database MySQL-Database object from class database defined in classes/mysql.php
+	 * @param database $database PostgreSQL-Database object from class pgdatabase defined in classes/postgresql.php
 	 * @param Integer $stelle_id
 	 * @param Integer $user_id
 	 * @param Integer $default_user_id Die id eines Default-Users.
@@ -2037,7 +2037,7 @@ class rolle {
 				return 0;
 			}
 			else {
-				if ($this->database->mysqli->affected_rows > 0){
+				if (pg_affected_rows($ret[1]) > 0){
 					GUI::add_message_('notice', 'Achtung! Der Standardnutzer wurde von der Stelle entfernt.');
 				}
 			}

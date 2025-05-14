@@ -239,7 +239,6 @@ class GUI {
 	var $pdf;
 	var $addressliste;
 	var $debug;
-	var $mysqli;
 	var $flst;
 	var $formvars;
 	var $legende;
@@ -288,9 +287,6 @@ class GUI {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
-    # Logdatei für Mysql setzen
-    global $log_mysql;
-    $this->log_mysql=$log_mysql;
     # Logdatei für PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
@@ -2380,7 +2376,7 @@ class user {
 		";
 		$this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 		$rs = pg_fetch_array($ret[1]);
 		return $rs['stelle_id'];
 	}
@@ -2478,9 +2474,9 @@ class stelle {
 
 	function __construct($id, $database) {
 		global $debug;
-		global $log_mysql;
+		global $log_postgres;
 		$this->debug = $debug;
-		$this->log = $log_mysql;
+		$this->log = $log_postgres;
 		$this->id = $id;
 		$this->database = $database;
 		$ret = $this->readDefaultValues();
@@ -3446,7 +3442,7 @@ class pgdatabase {
 
 	/**
 	* Open the database connection based on the given connection_id
-	* @param integer, $connection_id The id of the connection defined in mysql connections table, if 0 default connection will be used
+	* @param integer, $connection_id The id of the connection defined in connections table, if 0 default connection will be used
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
   function open($connection_id = 0) {
@@ -3475,7 +3471,7 @@ class pgdatabase {
 	/**
 	* return the credential details as array from connections_table
 	* or default values if no exists for connection_id
-	* @param integer $connection_id The id of connection information in connection mysql table
+	* @param integer $connection_id The id of connection information in connection table
 	* @return array $credentials array with connection details
 	*/
 	function get_credentials($connection_id) {
@@ -3775,7 +3771,7 @@ class db_mapObj{
     $sql ='SELECT filter FROM kvwmap.used_layer WHERE layer_id = '.$layer_id.' AND stelle_id = '.$stelle_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getFilter - Lesen des Filter-Statements des Layers:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4); return 0; }
     $rs = pg_fetch_assoc($ret[1]);
     $filter = $rs['filter'];
     return $filter;
@@ -3998,7 +3994,7 @@ class db_mapObj{
 			return pg_fetch_assoc($ret[1]);
 		}
 		else {
-			$this->debug->write("<br>Abbruch beim Lesen der Layer connection in get_layer_connection, Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
+			$this->debug->write("<br>Abbruch beim Lesen der Layer connection in get_layer_connection, Zeile: " . __LINE__ . "<br>", 4);
 			return array();
 		}
 	}

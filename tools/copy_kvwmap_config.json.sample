@@ -3,7 +3,6 @@
     "app_name" : "kvwmap",
     "data_dir" : "data",
     "data_handler" : "none",
-    "mysql_dbname" : "kvwmapdb",
     "pgsql_dbname" : "kvwmapsp",
     "document_url" : "https://Meine-Domain.de/download/",
     "pgsql_update" : ""
@@ -12,7 +11,6 @@
     "app_name" : "kvwmap_dev",
     "data_dir" : "data_dev",
     "data_handler" : "link",
-    "mysql_dbname" : "kvwmapdb_dev",
     "pgsql_dbname" : "kvwmapsp_dev",
     "document_url" : "https://Meine-Domain.de/download/",
     "pgsql_update" : ""
@@ -21,7 +19,6 @@
     "app_name" : "kvwmap_demo",
     "data_dir" : "data_demo",
     "data_handler" : "none",
-    "mysql_dbname" : "kvwmapdb_demo",
     "pgsql_dbname" : "kvwmapsp_demo",
     "document_url" : "https://Meine-Domain.de/download_demo/",
     "pgsql_update" : ""
@@ -30,7 +27,6 @@
     "app_name" : "kvwmap_test",
     "data_dir" : "data_test",
     "data_handler" : "copy",
-    "mysql_dbname" : "kvwmapdb_test",
     "pgsql_dbname" : "kvwmapsp_test",
     "document_url" : "https://Meine-Domain.de/download_test/",
     "pgsql_update" : ""

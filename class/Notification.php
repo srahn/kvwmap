@@ -132,7 +132,7 @@ class Notification extends PgObject {
 		if ($notification->database->errormessage != '') {
 			return array(
 				'success' => false,
-				'err_msg' => $notification->database->mysqli->error
+				'err_msg' => $notification->database->errormessage
 			);
 		}
 		return array(

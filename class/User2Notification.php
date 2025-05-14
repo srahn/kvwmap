@@ -79,7 +79,7 @@ class User2Notification extends PgObject {
 			);
 		}
 		else {
-			$errormessage = $user2notification->database->mysqli->error;
+			$errormessage = $user2notification->database->errormessage;
 			$result = array(
 				'success' => false,
 				'msg' => $errormessage,

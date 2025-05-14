@@ -91,7 +91,7 @@ class Layer extends PgObject {
 
 	/**
 	* This function return the layer id's of the duplicates of a layer
-	* @param mysql_connection object
+	* @param database object
 	* @param int $duplicate_from_layer_id The layer id from witch the others are duplicates
 	* @param array(integer) The layer_ids of the duplicates
 	*/
@@ -483,25 +483,16 @@ class Layer extends PgObject {
 		$layers = $this->find_where("
 			(
 				(
-					`maintable` = '" . $this->get('maintable') . "' AND
-					`schema` = '" . $this->get('schema') . "'
+					maintable = '" . $this->get('maintable') . "' AND
+					schema = '" . $this->get('schema') . "'
 				) OR
-				`Data` LIKE '%" . $this->get('schema') . "." . $this->get('maintable') . "%'
+				data LIKE '%" . $this->get('schema') . "." . $this->get('maintable') . "%'
 			) AND
-			`layer_id` != " . $this->get($this->identifier) . "
+			layer_id != " . $this->get($this->identifier) . "
 		");
 		$this->data = $data;
 		return (count($layers) > 0);
 	}
-
-	// function delete() {
-	// 	#echo '<br>Class Layer Method delete';
-	// 	$ret = parent::delete();
-	// 	if (MYSQLVERSION > 412) {
-	// 		parent::reset_auto_increment();
-	// 	}
-	// 	return $ret;
-	// }
 
 	function get_subform_layers() {
 		include_once(CLASSPATH . 'LayerAttribute.php');

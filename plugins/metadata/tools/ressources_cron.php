@@ -22,7 +22,6 @@
     include(CLASSPATH . 'rolle.php');
     include(CLASSPATH . 'stelle.php');
     include(CLASSPATH . 'users.php');
-    include(CLASSPATH . 'mysql.php');
     include(CLASSPATH . 'postgresql.php');
 
     define('DBWRITE', DEFAULTDBWRITE);
@@ -31,20 +30,12 @@
     $debug->user_funktion = 'admin';
 
     if (LOG_LEVEL > 0) {
-      $log_mysql = new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: ' . date("Y:m:d H:i:s", time()));
       $log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
     }
 
     $GUI = new GUI('', '', ''); // übernimmt $debug aus globaler Variable
 
     // if (!$GUI->is_tool_allowed('only_cli')) exit;
-    // $userDb = new database(); // übernimmt auch $debug aus globale Variable
-    // $userDb->host = MYSQL_HOST;
-    // $userDb->user = MYSQL_USER;
-    // $userDb->passwd = MYSQL_PASSWORD;
-    // $userDb->dbName = MYSQL_DBNAME;
-    // $GUI->database = $userDb;
-    // $GUI->database->open();
     $GUI->pgdatabase = new pgdatabase();
     $GUI->pgdatabase->open(1);
 

@@ -92,9 +92,9 @@ class stelle {
 
 	function __construct($id, $database) {
 		global $debug;
-		global $log_mysql;
+		global $log_postgres;
 		$this->debug = $debug;
-		$this->log = $log_mysql;
+		$this->log = $log_postgres;
 		$this->id = $id;
 		$this->database = $database;
 		$ret = $this->readDefaultValues();
@@ -1495,11 +1495,10 @@ class stelle {
 	 * Function assign layers with $layer_ids to this stelle
 	 * ToDo sr: Beschreibung der 3 verschiedenen Fälle hinzufügen
 	 * - !$assign_default_values
-	 * - $assign_default_values OR $this->database->mysqli->affected_rows == 0
-	 * - !$assign_default_values AND $this->database->mysqli->affected_rows > 0
+	 * - $assign_default_values OR pg_affected_rows == 0
+	 * - !$assign_default_values AND pg_affected_rows > 0
 	 * If $assign_default_values are defined these will be used for used_layers table
 	 * @param Array{String} $layer_ids
-	 * @param Integer $drawinorder
 	 * @param String $filter
 	 * @param Boolean $assign_default_values
 	 * @param String $privileg default 'default'
@@ -2582,33 +2581,6 @@ class stelle {
 		}
 		return $liste;
 	}
-
-/*
-	function getGemeinden($database) {
-		if($database->type == 'mysql'){
-			$ret=$this->database->getGemeindebyID_Name($this->id);
-			if ($ret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-			if ($this->database->result->num_rows == 0) {
-				$GemeindeListe['ID'][0]=0;
-			}
-			else{
-				while ($rs = $this->database->result->fetch_array()) {
-					$GemeindeListe['ID'][]=$rs['ID'];
-					$GemeindeListe['name'][]=$rs['name'];
-				}
-			}
-		}
-		elseif($database->type == 'postgresql'){
-			$liste = $this->getGemeindeIDs();
-			for($i = 0; $i < count($liste); $i++){
-				$ret = $database->getGemeindeName($liste[$i]);
-				$GemeindeListe['ID'][]=$liste[$i];
-				$GemeindeListe['name'][]=$ret[1]['name'];
-			}
-		}
-		return $GemeindeListe;
-	}
-*/
 
 	function getUser($result = '') {
 		$user['ID'] = array();

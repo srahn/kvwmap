@@ -235,7 +235,7 @@ class account {
 		}
 		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccessUser[]=$rs;
 		}
@@ -302,7 +302,7 @@ class account {
 		$sql .= ' ORDER BY art';
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeCSV.time_id, concat(u.vorname, " ", u.name) as Name';
@@ -399,7 +399,7 @@ class account {
 		$sql .= ' ORDER BY layer_id';
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeShape.time_id, concat(u.Vorname, \' \', u.Name) as Name';
@@ -426,7 +426,7 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
 			$ret = $this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
 			while ($rs = pg_fetch_array($ret[1])) {
 				$NumbOfAccessTimeIDs[]=$rs;
@@ -497,7 +497,7 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
 		#echo $sql.'<br><br>';
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALB.time_id, concat(u.vorname, \' \', u.name) as Name';
@@ -528,7 +528,7 @@ class account {
 
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
 			$ret = $this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
 			while ($rs = pg_fetch_array($ret[1])) {
 				$NumbOfAccessTimeIDs[] = $rs;
@@ -598,7 +598,7 @@ class account {
 		#echo $sql.'<br><br>';
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { echo $sql;exit;$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { echo $sql;exit;$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, \' \', u.Name) as Name';
@@ -627,7 +627,7 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
 			$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
 			while ($rs = pg_fetch_array($ret[1])) {
 				$NumbOfAccessTimeIDs[] = $rs;
@@ -649,7 +649,7 @@ class account {
 		";
 		$this->debug->write("<p>file:users.php class:user->getLayer:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 		$rs = pg_fetch_array($ret[1]);
 		$this->AnzLayer = $rs;
 		return $this->AnzLayer;
@@ -669,7 +669,7 @@ class account {
 			kvwmap.u_consume2layer";
 		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 		while ($rs = pg_fetch_array($ret[1])) {
 			$epoch['min_d']=$rs['min_d'];
 			$epoch['min_m']=$rs['min_m'];
@@ -772,7 +772,7 @@ class user {
 		#echo '<br>sql zur Abfrage der Layer: ' . $sql;
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0;
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0;
 		}
 		return (pg_num_rows($ret[1]) > 0);
 	}
@@ -879,7 +879,7 @@ class user {
 		";
 		$this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 		$rs = pg_fetch_array($ret[1]);
 		return $rs['stelle_id'];
 	}
@@ -931,7 +931,7 @@ class user {
 
 		$this->debug->write("<p>file:kvwmap class:user->getall_Users - Lesen aller User:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . $sql . '<p>' . INFO1 . '<p>' . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . $sql . '<p>' . INFO1 . '<p>', 4); return 0; }
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$user['ID'][] = $rs['id'];
 			$user['Bezeichnung'][] = $rs['name'] . ', ' . $rs['vorname'];
@@ -965,7 +965,7 @@ class user {
 		$this->debug->write("<p>file:users.php class:user->get_Unassigned_Users - Lesen der User zur Stelle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4);
 			return 0;
 		}
 		else {
@@ -999,7 +999,7 @@ class user {
 		$this->debug->write("<p>file:users.php class:user->get_Expired_Users - Lesen der User zur Stelle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4);
 			return 0;
 		}
 		else {
@@ -1060,17 +1060,12 @@ class user {
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4);
 			return 0;
 		}
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$userdaten[] = $rs;
 		}
-		// if ($order == ' ORDER BY last_timestamp') {	# MySQL sortiert falsch
-		// 	usort($userdaten, function($a, $b) {
-		// 		return strcmp($a['last_timestamp'], $b['last_timestamp']);
-		// 	});
-		// }
 		return $userdaten;
 	}
 
@@ -1131,7 +1126,7 @@ class user {
 		";
 		$this->debug->write("<p>file:users.php class:user->updateStelleID - Setzen der aktuellen Stellen-ID für den User<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 		$this->debug->write('Stelle gewechselt, neue Stellen_ID: ' . $stelle_id, 4);
 	}
 
@@ -1146,7 +1141,7 @@ class user {
 		";
 		$this->debug->write("<p>file:users.php class:user->agreement_accepted - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 	}
 
 	function update_tokens($token) {
@@ -1160,7 +1155,7 @@ class user {
 		";
 		$this->debug->write("<p>file:users.php class:user->updateTokens - Speichern des Tokens.<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 	}
 
 	function setOptions($stelle_id, $formvars) {
@@ -1262,7 +1257,7 @@ class user {
 			#echo $sql;
 			$this->debug->write("<p>file:users.php class:user->setOptions - Setzen der Einstellungen für die Rolle des Users<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 			$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
 		}
 		return 1;

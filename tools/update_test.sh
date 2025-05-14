@@ -5,23 +5,15 @@ DUMP_DIR="${WWW_DIR}/backups"
 
 PRODUCTION_APP_NAME="webgis"
 PRODUCTION_DATA_DIR="${WWW_DIR}/data"
-PRODUCTION_MYSQL_DBNAME="kvwmapdb"
 PRODUCTION_PGSQL_DBNAME="kvwmapsp"
 
 TEST_APP_NAME="webgis_demo"
 TEST_DATA_DIR="${WWW_DIR}/data_demo"
 TEST_DATA_AS_LINK="yes"
-TEST_MYSQL_DBNAME="kvwmapdb_demo"
 TEST_PGSQL_DBNAME="kvwmapsp_demo"
 
 CREDENTIALS_FILE="${APPS_DIR}/${PRODUCTION_APP_NAME}/credentials.php"
 CONFIG_FILE="${APPS_DIR}/${PRODUCTION_APP_NAME}/config.php"
-
-MYSQL_SERVER="mysql"
-MYSQL_USER=$(grep MYSQL_USER $CREDENTIALS_FILE | cut -d "'" -f 2)
-#echo "MYSQL_USER: ${MYSQL_USER}"
-MYSQL_PASSWORD=$(grep MYSQL_PASSWORD $CREDENTIALS_FILE | cut -d "'" -f 2)
-#echo "MYSQL_PASSWORD: ${MYSQL_PASSWORD}"
 
 PGSQL_SERVER="pgsql"
 PGSQL_USER=$(grep POSTGRES_USER $CONFIG_FILE | cut -d "'" -f 4)
@@ -91,12 +83,8 @@ cp -R ${APPS_DIR}/${PRODUCTION_APP_NAME} ${APPS_DIR}/${TEST_APP_NAME}
 chown -R gisadmin.gisadmin ${APPS_DIR}/${TEST_APP_NAME}
 chmod -R g+w ${APPS_DIR}/${TEST_APP_NAME}
 
-echo "Ersetze Datenbankname ${PRODUCTION_MYSQL_DBNAME} durch ${TEST_MYSQL_DBNAME} in credentials.php und config.php"
-sed -i -e "s|${PRODUCTION_MYSQL_DBNAME}|${TEST_MYSQL_DBNAME}|g" ${APPS_DIR}/${TEST_APP_NAME}/credentials.php
-sed -i -e "s|${PRODUCTION_MYSQL_DBNAME}|${TEST_MYSQL_DBNAME}|g" ${APPS_DIR}/${TEST_APP_NAME}/config.php
-
-echo "Ersetze Datenbankname ${PRODUCTION_PGSQL_DBNAME} durch ${TEST_PGSQL_DBNAME} in config.php"
-sed -i -e "s|${PRODUCTION_PGSQL_DBNAME}|${TEST_PGSQL_DBNAME}|g" ${APPS_DIR}/${TEST_APP_NAME}/config.php
+echo "Ersetze Datenbankname ${PRODUCTION_PGSQL_DBNAME} durch ${TEST_PGSQL_DBNAME} in credentials.php"
+sed -i -e "s|${PRODUCTION_PGSQL_DBNAME}|${TEST_PGSQL_DBNAME}|g" ${APPS_DIR}/${TEST_APP_NAME}/credentials.php
 
 echo "Ersetze Web-Alias in config.php"
 sed -i -e "s|${PRODUCTION_APP_NAME}/|${TEST_APP_NAME}/|g" ${APPS_DIR}/${TEST_APP_NAME}/config.php

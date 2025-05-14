@@ -87,9 +87,8 @@ if (DEBUG_LEVEL > 0) {
 	$debug = new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
 }
 
-# Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL in den Klassen mysql und postgres ausgeführt werden.
+# Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL ausgeführt werden.
 if (LOG_LEVEL > 0) {
- $log_mysql = new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: ' . date("Y:m:d H:i:s", time()));
  $log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
 }
 $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '');
@@ -201,9 +200,6 @@ if (!CASE_COMPRESS AND FAST_CASE) {
 }
 else {
 	include_(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
-	if (!isset($userDb)) {
-		include_(CLASSPATH . 'mysql.php');
-	}
 	include_(CLASSPATH . 'kvwmap.php');
 	include_(CLASSPATH . 'Menue.php');
 	include_(CLASSPATH . 'postgresql.php');
@@ -879,7 +875,7 @@ function go_switch($go, $exit = false) {
 				$GUI->spatial_processing();
 			}break;
 
-			# Abfrage einer Zeile in der MySQL Datenbank
+			# Abfrage einer Zeile in der Datenbank
 			# Beliebige Tabelle, Einschränkung über c1,c2,c3 und v1,v2,v3 (Werte beliebig)
 			case 'getRow' : {
 				# Derzeit nur für die Tabelle Rolle

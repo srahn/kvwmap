@@ -63,12 +63,11 @@ function toggleGroup(group, show){
 					<td align="right"><span class="fett">Status</span></td>
 				</tr><?
 				foreach ($this->administration->schema_migration_files as $component => $component_migrations) {
-					$postgresql_counter = (array_key_exists($component, $this->administration->migrations_to_execute['postgresql']) ? count($this->administration->migrations_to_execute['postgresql'][$component]) : 0);
-					#$seed_counter = (array_key_exists($component, $this->administration->seeds_to_execute['mysql']) ? count($this->administration->seeds_to_execute['mysql'][$component]) : 0); ?>
+					$postgresql_counter = (array_key_exists($component, $this->administration->migrations_to_execute['postgresql']) ? count($this->administration->migrations_to_execute['postgresql'][$component]) : 0); ?>
 					<tr style="border:1px solid #C3C7C3;">
 						<td><?	echo $component; ?></td>
 						<td align="right"><?
-							if ($mysql_counter == 0 AND $postgresql_counter == 0) {
+							if ($postgresql_counter == 0) {
 								echo ' Schemata aktuell';
 							}
 							else {
@@ -87,7 +86,7 @@ function toggleGroup(group, show){
 				}
 				if ($this->administration->seed_files != '') {
 					foreach ($this->administration->seed_files as $component => $component_seeds) {			// die restlichen Plugins, die kein DB-Schema haben
-						if ($this->administration->schema_migration_files[$component] == NULL AND (array_key_exists($component, $this->administration->seeds_to_execute['mysql']) ? count($this->administration->seeds_to_execute['mysql'][$component]) : 0) > 0) { ?>
+						if ($this->administration->schema_migration_files[$component] == NULL AND (array_key_exists($component, $this->administration->seeds_to_execute['postgresql']) ? count($this->administration->seeds_to_execute['postgresql'][$component]) : 0) > 0) { ?>
 							<tr style="border:1px solid #C3C7C3;">
 								<td><?	echo $component; ?></td>
 								<td align="right">
@@ -259,7 +258,7 @@ function toggleGroup(group, show){
 								<div class="constant-box"><?php
 								foreach ($constants AS $constant => $value) { ?>
 									<label class="constant-name"><?php echo $constant; ?></label>
-									<div class="constant-value"><?php echo (($category == 'user' AND in_array($constant, array('MYSQL_PASSWORD', 'POSTGRES_PASSWORD', 'MAILSMTPPASSWORD'))) ? '*****' : $value); ?></div>
+									<div class="constant-value"><?php echo (($category == 'user' AND in_array($constant, array('POSTGRES_PASSWORD', 'MAILSMTPPASSWORD'))) ? '*****' : $value); ?></div>
 									<div style="clear: both"></div><?
 								} ?>
 								</div><?php

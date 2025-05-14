@@ -74,7 +74,7 @@ class pgdatabase {
 
 	/**
 	* Open the database connection based on the given connection_id
-	* @param integer, $connection_id The id of the connection defined in mysql connections table, if 0 default connection will be used
+	* @param integer, $connection_id The id of the connection defined in connections table, if 0 default connection will be used
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
   function open($connection_id = 0, $flag = NULL) {
@@ -106,7 +106,7 @@ class pgdatabase {
 	/**
 	* return the credential details as array from connections_table
 	* or default values if no exists for connection_id
-	* @param integer $connection_id The id of connection information in connection mysql table
+	* @param integer $connection_id The id of connection information in connection table
 	* @return array $credentials array with connection details
 	*/
 	function get_credentials($connection_id) {
@@ -350,7 +350,7 @@ class pgdatabase {
 	}
 
 	/**
-	* Erzeugt SQL zum anlegen eines Layer in mysql
+	* Erzeugt SQL zum anlegen eines Layers
 	*
 	* @params $geometrie_column, Name des Attributes der Tabelle, die abgefragt wird, die Geometrie beinhaltet.
 	* @params $geometrietyp String, Name des Attributes des Datentyps der Geometriespalte, welches die Geometrie beinhalten soll.

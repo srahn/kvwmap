@@ -8,7 +8,7 @@
  * - findBySQL
  * - close
  * 
- * @deprecated connections are in mysql table connections
+ * @deprecated connections are in table connections
  */
 class Databaserelation {
 	var $host = "localhost";

@@ -48,8 +48,7 @@ class GUI {
 	var $addressliste;
 	var $debug;
 	var $xlog;
-	var $database;
-	var $mysqli;
+	var $pgdatabase;
 	var $flst;
 	var $formvars = array();
 	var $legende;
@@ -101,7 +100,6 @@ class GUI {
 	var $queryrect;
 	var $notices;
 	var $layers_replace_scale = array();
-	var $log_mysql;
 	var $log_postgres;
 	static $messages = array();
 	var $t_visible;
@@ -117,10 +115,6 @@ class GUI {
 		# Debugdatei setzen
 		global $debug;
 		$this->debug = $debug;
-
-		# Logdatei für Mysql setzen
-		global $log_mysql;
-		$this->log_mysql = $log_mysql;
 
 		# Logdatei für PostgreSQL setzten
 		global $log_postgres;
@@ -5146,7 +5140,7 @@ echo '			</table>
 
   function rewriteLayer() {
     ## in Entwicklung Konzept noch nicht zuende gedacht pk
-    # Diese Funktion nimmt folgende Veränderungen in der MySQL Datenbank vor:
+    # Diese Funktion nimmt folgende Veränderungen in der Datenbank vor:
     # 1. löscht die vorhandenen Rollenlayer des Benutzers in der aktuellen Stelle
     # 2. trägt die im Formular übersendeten WMS Layer als Rollenlayer ein,
     # 3. ordnet diese der aktuellen Stelle und dem Benutzers zu
@@ -8345,7 +8339,7 @@ echo '			</table>
 	}
 
 	/**
-	* Erzeugt sql zum Anlegen eines Layers in MySQL mit all seinen zugehörigen Elementen wie
+	* Erzeugt sql zum Anlegen eines Layers in PostgreSQL mit all seinen zugehörigen Elementen wie
 	* Layerattribute mit Datentypen und Datentypeattributen falls vorhanden,
 	* Klassen, Styles und die Zugehörigkeit zwischen Styles und Klassen.
 	*/
@@ -8392,7 +8386,7 @@ END $$;
 	}
 
 	/**
-	* This function generate sql for a layer in mysql with all its attributes and
+	* This function generate sql for a layer with all its attributes and
 	* if they are from type datatype the datatypes and there attribtes.
 	* @params $table associatives Array mit Attribut name.
 	*/
@@ -8405,7 +8399,7 @@ END $$;
 	}
 
 	/**
-	* This function generate the sql for all attributes of a layer in mysql
+	* This function generate the sql for all attributes of a layer
 	*
 	*/
 	function generate_layer_attributes($schema, $table, $table_attributes) {
@@ -8420,7 +8414,7 @@ END $$;
 	}
 
 	/**
-	* This function generate sql for a layer attribute in mysql
+	* This function generate sql for a layer attribute
 	*
 	*/
 	function generate_layer_attribute($schema, $table, $table_attribute) {
@@ -8435,7 +8429,7 @@ END $$;
 	}
 
 	/**
-	* This function generate sql for a datatype definition and its attributes in mysql
+	* This function generate sql for a datatype definition and its attributes
 	*/
 	function generate_datatype($schema, $table_attribute) {
 		$sql .= $this->pgdatabase->generate_datatype($schema, $table_attribute);
@@ -9291,7 +9285,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
   function DatentypenAnzeigen() {
-    # Abfragen aller in mysql registrierten Datentypen
+    # Abfragen aller registrierten Datentypen
     $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     if($this->formvars['order'] == ''){
       $this->formvars['order'] = 'name';
@@ -13439,8 +13433,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['sellayouts'] = $ddl->load_layouts($this->formvars['selected_stelle_id'], NULL, NULL, NULL);
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'name');
       $this->formvars['selusers'] = $Stelle->getUser();
-			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY Bezeichnung"); // formatted mysql resultset, ordered by Bezeichnung
-			$this->formvars['selchildren'] = $Stelle->getChildren($this->formvars['selected_stelle_id'], "ORDER BY Bezeichnung"); // formatted mysql resultset, ordered by Bezeichnung
+			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY bezeichnung"); // formatted resultset, ordered by Bezeichnung
+			$this->formvars['selchildren'] = $Stelle->getChildren($this->formvars['selected_stelle_id'], "ORDER BY bezeichnung"); // formatted resultset, ordered by Bezeichnung
 			$this->formvars['default_user_id'] = $this->stellendaten['default_user_id'];
 			$this->formvars['show_shared_layers'] = $this->stellendaten['show_shared_layers'];
 			$this->formvars['version'] = $this->stellendaten['version'];
@@ -18633,7 +18627,7 @@ class db_mapObj{
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteFilter - Löschen eines Attribut-Filters eines used_layers:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4); return 0; }
   }
 
 	/**
@@ -18758,7 +18752,7 @@ class db_mapObj{
     $sql ='SELECT filter FROM kvwmap.used_layer WHERE layer_id = '.$layer_id.' AND stelle_id = '.$stelle_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getFilter - Lesen des Filter-Statements des Layers:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4); return 0; }
     $rs = pg_fetch_row($ret[1]);
     $filter = $rs[0];
     return $filter;
@@ -18779,7 +18773,7 @@ class db_mapObj{
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
 		if ($ret[0]) {
-			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>", 4);
 			return 0;
 		}
 		$rs = pg_fetch_assoc($ret[1]);
@@ -18893,7 +18887,7 @@ class db_mapObj{
 			return pg_fetch_assoc($ret[1]);
 		}
 		else {
-			$this->debug->write("<br>Abbruch beim Lesen der Layer connection in get_layer_connection, Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
+			$this->debug->write("<br>Abbruch beim Lesen der Layer connection in get_layer_connection, Zeile: " . __LINE__ . "<br>", 4);
 			return array();
 		}
 	}
@@ -19886,9 +19880,9 @@ DO $$
 	}
 
 	/*
-	* Delete layer in MySQL-Database and
+	* Delete layer in Database and
 	* delete also its maintable if delete_maintable is true
-	* @param $id integer The Layer id of the layer in MySQL-Database
+	* @param $id integer The Layer id of the layer in Database
 	* @param $delete_maintable boolean Delete the maintable of the layer or not
 	* @return boolean true if maintable has been deleted or false if not deleted or error
 	*/
