@@ -529,6 +529,7 @@ class rolle {
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
+			$this->routing = in_array('routing', $buttons);
 			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
 			$this->redline_text_color = $rs['redline_text_color'];
 			$this->redline_font_family = $rs['redline_font_family'];
