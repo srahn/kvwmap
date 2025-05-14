@@ -1,7 +1,59 @@
 <?
   ini_set('memory_limit', '8192M');
   global $GUI;
+
+  # credentials befüllen
+  $credentials = $this->pgdatabase->get_credentials(POSTGRES_CONNECTION_ID);
+  file_put_contents(
+    'credentials.php', 
+    "
+<?
+define('POSTGRES_DBNAME', '" . $credentials['dbname'] . "');
+define('POSTGRES_HOST', '" . $credentials['host'] . "');
+define('POSTGRES_PASSWORD', '" . $credentials['password'] . "');    
+define('POSTGRES_USER', '" . $credentials['user'] . "');
+?>",
+    FILE_APPEND
+  );
+
+  # diese Konstanten aus config.php und Tabelle config entfernen
+  $constants = ['POSTGRES_DBNAME', 'POSTGRES_HOST', 'POSTGRES_PASSWORD', 'POSTGRES_USER'];
+  $inputFile = 'config.php'; // Pfad zur Originaldatei
+  $tempFile = 'config_temp.php'; // Temporäre Datei
+
+  $handle = fopen($inputFile, 'r');
+  $tempHandle = fopen($tempFile, 'w');
+
+  if ($handle && $tempHandle) {
+    while (($line = fgets($handle)) !== false) {
+      $write = true;
+      foreach($constants as $constant) {
+        if (strpos($line, $constant) !== false) {
+          $write = false;
+        }
+      }
+      if ($write) {
+        fwrite($tempHandle, $line);
+      }
+    }
+    fclose($handle);
+    fclose($tempHandle);
+
+    rename($tempFile, $inputFile);
+
+    $sql = "
+      DELETE FROM 
+        config
+      WHERE 
+        name IN ('" . implode("', '", $constants) . "');
+    ";
+    $ret = $this->database->execSQL($sql,4, 1);
+  } 
+  else {
+      echo "Fehler beim Öffnen der Datei.\n";
+  }
 	
+  # Transfer von MySQL zu PostgreSQL
 	$sql = "
 		SELECT 
       table_name 
@@ -29,6 +81,7 @@
   ";
   $ret = $this->pgdatabase->execSQL($sql, 0, 0);
 
+  # Sequenzen auf Max-Werte setzen
   if ($ret['success']) {
     $sql = "
       with sequences as (
@@ -57,47 +110,6 @@
             setval(col_sequence, coalesce(max_val, 1)) --<< this will change the sequence
       from maxvals;";
     $this->pgdatabase->execSQL($sql, 0, 0);
-
-    # credentials befüllen
-		$credentials = $this->pgdatabase->get_credentials(POSTGRES_CONNECTION_ID);
-		file_put_contents(
-      'credentials.php', 
-      "<?php
-    define('POSTGRES_DBNAME', '" . $credentials['dbname'] . "');
-    define('POSTGRES_HOST', '" . $credentials['host'] . "');
-    define('POSTGRES_PASSWORD', '" . $credentials['password'] . "');    
-    define('POSTGRES_USER', '" . $credentials['user'] . "');?>",
-    FILE_APPEND
-  );
-
-  # diese Zeilen aus config.php entfernen
-  $constants = ['POSTGRES_DBNAME', 'POSTGRES_HOST', 'POSTGRES_PASSWORD', 'POSTGRES_USER'];
-  $inputFile = 'config.php'; // Pfad zur Originaldatei
-  $tempFile = 'config_temp.php'; // Temporäre Datei
-
-  $handle = fopen($inputFile, 'r');
-  $tempHandle = fopen($tempFile, 'w');
-
-  if ($handle && $tempHandle) {
-    while (($line = fgets($handle)) !== false) {
-      $write = true;
-      foreach($constants as $constant) {
-        if (strpos($line, $constant) !== false) {
-          $write = false;
-        }
-      }
-      if ($write) {
-        fwrite($tempHandle, $line);
-      }
-    }
-    fclose($handle);
-    fclose($tempHandle);
-
-    rename($tempFile, $inputFile);
-  } 
-  else {
-      echo "Fehler beim Öffnen der Datei.\n";
-  }
 
     $result[0] = false; # Migration bestätigen
   }
