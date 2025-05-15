@@ -1009,7 +1009,7 @@ class user {
 				LEFT JOIN rolle rall ON u.ID = rall.user_id
 				LEFT JOIN rolle radm ON radm.stelle_id = rall.stelle_id
 			";
-			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
+			$where[] = "(radm.user_id = ".$admin_id.")";
 		}
 
 		if ($id > 0) {
