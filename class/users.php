@@ -1031,7 +1031,7 @@ class user {
 				LEFT JOIN kvwmap.rolle rall ON u.id = rall.user_id
 				LEFT JOIN kvwmap.rolle radm ON radm.stelle_id = rall.stelle_id
 			";
-			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
+			$where[] = "(radm.user_id = ".$admin_id.")";
 		}
 
 		if ($id > 0) {
