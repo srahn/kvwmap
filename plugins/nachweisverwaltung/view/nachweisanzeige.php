@@ -584,7 +584,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 									<a href="javascript:add_to_order('blattnummer');" title="nach Blattnr. sortieren"><span class="fett">Blattnr.</span></a> <? 
 								} 
 								else { ?>
-									<span class="fett">Rissnr.</span> <?
+									<span class="fett">Blattnr.</span> <?
 								}
 								echo '</div>';
 							}
