@@ -2240,7 +2240,6 @@ class ddl {
 				" . $color . "
 			)
 			RETURNING id";
-	
 		#echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:ddl->addrectangle :",4);
 		$ret = $this->database->execSQL($sql,4, 1);
