@@ -460,11 +460,13 @@
 		);
 	};
 
+	//also rewrites Gml-id to always use GML_ and lowercase UUID (excludes uppercase UUIDs)
 	$GUI->xplankonverter_get_new_gml_id = function($gml_id) use ($GUI) {
-		if (! array_key_exists('GML_' . strtolower(ltrim($gml_id,'GML_')), $GUI->xplan_gml_ids)) {
-			$GUI->xplan_gml_ids[$gml_id] = 'GML_' . uuid();
+		$rewritten_gml_id = 'GML_' . strtolower(ltrim($gml_id,'GML_'));
+		if (! array_key_exists($rewritten_gml_id, $GUI->xplan_gml_ids)) {
+			$GUI->xplan_gml_ids[$rewritten_gml_id] = 'GML_' . uuid();
 		}
-		return $GUI->xplan_gml_ids[$gml_id];
+		return $GUI->xplan_gml_ids[$rewritten_gml_id];
 	};
 
 	$GUI->xplankonverter_reindex_gml_ids = function() use ($GUI) {

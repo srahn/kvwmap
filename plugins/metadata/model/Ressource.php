@@ -1532,7 +1532,7 @@ class Ressource extends PgObject {
 				$this->database,
 				$this->get('import_layer'),
 				NULL,
-				($first ? '-overwrite' : '-append'),
+				($first ? '-overwrite' : '-append') . ' -nlt MULTIPOLYGON',
 				'UTF-8',
 				false,
 				$this->unlogged,
