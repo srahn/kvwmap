@@ -11527,7 +11527,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function sachdaten_druck_editor_Liniehinzufuegen(){
 		$this->sachdaten_druck_editor_aendern();
-    $this->ddl->addline($this->formvars);
+		$i = $this->formvars['linecount'] - 1;
+		if($this->formvars['linebreite'.$i] != '')$breite = $this->formvars['linebreite'.$i];	else $breite = 1;
+		if($this->formvars['lineposx'.$i] != '')$posx = $this->formvars['lineposx'.$i]; else $posx = 70;
+		if($this->formvars['lineposy'.$i] != '')$posy = $this->formvars['lineposy'.$i]-20; else $posy = 0;
+		if($this->formvars['lineendposx'.$i] != '')$endposx = $this->formvars['lineendposx'.$i]; else $endposx = 520;
+		if($this->formvars['lineendposy'.$i] != '')$endposy = $this->formvars['lineendposy'.$i]-20; else $endposy = 0;
+    $this->ddl->addline($this->formvars['aktivesLayout'], $posx, $posy, $endposx, $endposy, $breite, $this->formvars['lineoffset_attribute_start'.$i], $this->formvars['lineoffset_attribute_end'.$i]);
 		$this->scrolldown = true;
 		$this->sachdaten_druck_editor();
 	}

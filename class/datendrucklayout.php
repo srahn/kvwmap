@@ -1511,59 +1511,78 @@ class ddl {
 
 	function save_layout($formvars, $attributes, $_files, $stelle_id){
     if ($formvars['name']) {
-    	if ($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
-			$sql = "
-				INSERT INTO
-					kvwmap.datendrucklayouts
-				SET
-					name = '" . $formvars['name'] . "',
-					layer_id = " . (int)$formvars['selected_layer_id'] . ",
-					format = '" . $formvars['format'] . "'";
-			if($formvars['bgposx'] != '')$sql .= ", bgposx = ".(int)$formvars['bgposx'];
-  		else $sql .= ", bgposx = NULL";
-      if($formvars['bgposy'] != '')$sql .= ", bgposy = ".(int)$formvars['bgposy'];
-      else $sql .= ", bgposy = NULL";
-      if($formvars['bgwidth'] != '')$sql .= ", bgwidth = ".(int)$formvars['bgwidth'];
-      else $sql .= ", bgwidth = NULL";
-      if($formvars['bgheight'] != '')$sql .= ", bgheight = ".(int)$formvars['bgheight'];
-      else $sql .= ", bgheight = NULL";
-      if($formvars['dateposx'] != '')$sql .= ", dateposx = ".(int)$formvars['dateposx'];
-      else $sql .= ", dateposx = NULL";
-      if($formvars['dateposy'] != '')$sql .= ", dateposy = ".(int)$formvars['dateposy'];
-      else $sql .= ", dateposy = NULL";
-      if($formvars['datesize'] != '')$sql .= ", datesize = ".(int)$formvars['datesize'];
-      else $sql .= ", datesize = NULL";
-      if($formvars['userposx'] != '')$sql .= ", userposx = ".(int)$formvars['userposx'];
-      else $sql .= ", userposx = NULL";
-      if($formvars['userposy'] != '')$sql .= ", userposy = ".(int)$formvars['userposy'];
-      else $sql .= ", userposy = NULL";
-      if($formvars['usersize'] != '')$sql .= ", usersize = ".(int)$formvars['usersize'];
-      else $sql .= ", usersize = NULL";
-      $sql .= ", font_date = '".$formvars['font_date']."'";
-      $sql .= ", font_user = '".$formvars['font_user']."'";
-			if($formvars['gap'] != '')$sql .= ", gap = ".(int)$formvars['gap'];
-      if($formvars['type'] != '')$sql .= ", type = ".(int)$formvars['type'];
-      else $sql .= ", type = NULL";
-			$sql .= ", margin_top = ".(int)$formvars['margin_top'];
-			$sql .= ", margin_bottom = ".(int)$formvars['margin_bottom'];
-			$sql .= ", margin_left = ".(int)$formvars['margin_left'];
-			$sql .= ", margin_right = ".(int)$formvars['margin_right'];
-			$sql .= ", dont_print_empty = " . (int)$formvars['dont_print_empty'];
-			$sql .= ", no_record_splitting = ".(int)$formvars['no_record_splitting'];
-			$sql .= ", use_previews = " . (int)$formvars['use_previews'];
-			$sql .= ", columns = ".(int)$formvars['columns'];
-			if($formvars['filename'])$sql .= ", filename = '".$formvars['filename']."'";
-      else $sql .= ", filename = NULL";			
-      if($_files['bgsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
+			$formvars['layer_id'] = $formvars['selected_layer_id'];
+			$columns_not_null = array_flip([
+				'name',
+				'layer_id'
+			]);
+			$columns_default = array_flip([
+				'format',
+				'type',
+				'font_date',
+				'font_user',
+				'type',
+				'margin_top',
+				'margin_bottom',
+				'margin_left',
+				'margin_right',
+				'gap',
+				'no_record_splitting',
+				'columns',
+				'filename',
+				'use_previews'
+			]);
+			$columns_null = array_flip([
+				'bgposx',
+				'bgposy',
+				'bgwidth',
+				'bgheight',
+				'dateposx',
+				'dateposy',
+				'datesize',
+				'userposx',
+				'userposy',
+				'usersize',
+				'bgposy',
+				'dont_print_empty'
+			]);
+			foreach ($columns_not_null as $key => $value) {
+				$columns_not_null[$key] = quote($formvars[$key]);
+			}
+			foreach ($columns_default as $key => $value) {
+				if ($formvars[$key] != '') {
+					$columns_default[$key] = quote($formvars[$key]);
+				}
+				else {
+					unset($columns_default[$key]);
+				}
+			}
+			foreach ($columns_null as $key => $value) {
+				$columns_null[$key] = ($formvars[$key] != '' ? quote($formvars[$key]) : 'NULL');
+			}
+			if ($_files['bgsrc']['name']) {
+        $nachDatei = DRUCKRAHMEN_PATH . $_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
-          $sql .= ", bgsrc = '".$_files['bgsrc']['name']."'";
+          $columns_default['bgsrc'] = $_files['bgsrc']['name'];
         }
       }
       else{
-        $sql .= ", bgsrc = '".$formvars['bgsrc_save']."'";
+        $columns_default['bgsrc'] = $formvars['bgsrc_save'];
       }
-			$sql .= "RETURNING id";
+			$sql = "
+				INSERT INTO
+					kvwmap.datendrucklayouts
+				(
+					" . (implode(', ', array_keys($columns_not_null))) . ",
+					" . (implode(', ', array_keys($columns_default))) . ",
+					" . (implode(', ', array_keys($columns_null))) . "
+				)
+				VALUES (
+					" . (implode(', ', $columns_not_null)) . ",
+					" . (implode(', ', $columns_default)) . ",
+					" . (implode(', ', $columns_null)) . "
+				)		
+			RETURNING id";
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $ret = $this->database->execSQL($sql,4, 1);
 			$rs = pg_fetch_assoc($ret[1]);
@@ -1643,35 +1662,12 @@ class ddl {
         $this->database->execSQL($sql,4, 1);
       }
 			
-			for($i = 0; $i < $formvars['linecount']; $i++){
-        $sql = "INSERT INTO kvwmap.druckfreilinien SET breite = '".$formvars['breite'.$i]."'";
-        if($formvars['lineposx'.$i] !== NULL)$sql .= ", posx = ".(int)$formvars['lineposx'.$i];
-        else $sql .= ", posx = NULL";
-        if($formvars['lineposy'.$i] !== NULL)$sql .= ", posy = ".(int)$formvars['lineposy'.$i];
-        else $sql .= ", posy = NULL";
-				if($formvars['lineendposx'.$i] !== NULL)$sql .= ", endposx = ".(int)$formvars['lineendposx'.$i];
-        else $sql .= ", endposx = NULL";
-        if($formvars['lineendposy'.$i] !== NULL)$sql .= ", endposy = ".(int)$formvars['lineendposy'.$i];
-        else $sql .= ", endposy = NULL";
-				if($formvars['lineoffset_attribute_start'.$i] !== NULL)$sql .= ", offset_attribute_start = '".$formvars['lineoffset_attribute_start'.$i]."'";
-        else $sql .= ", offset_attribute_start = NULL";
-				if($formvars['lineoffset_attribute_end'.$i] !== NULL)$sql .= ", offset_attribute_end = '".$formvars['lineoffset_attribute_end'.$i]."'";
-        else $sql .= ", offset_attribute_end = NULL";
-        if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
-        $sql .= ", type = '".$formvars['linetype'.$i]."'
-				RETURNING id";
-        #echo $sql;
-        $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
-        $ret = $this->database->execSQL($sql,4, 1);
-				$rs = pg_fetch_assoc($ret[1]);
-      	$lastline_id = $rs['id'];
-				
-				$sql = 'INSERT INTO kvwmap.ddl2freilinien (ddl_id, line_id) VALUES('.$lastddl_id.', '.$lastline_id.')';
-        $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
-        $this->database->execSQL($sql,4, 1);
+			for ($i = 0; $i < $formvars['linecount']; $i++) {
+				$this->addline($lastddl_id, $formvars['lineposx' . $i], $formvars['lineposy' . $i], $formvars['lineendposx' . $i], $formvars['lineendposy' . $i], $formvars['breite' . $i], $formvars['lineoffset_attribute_start' . $i], $formvars['lineoffset_attribute_end' . $i]);
       }
 			
-			for($i = 0; $i < $formvars['rectcount']; $i++){
+			for ($i = 0; $i < $formvars['rectcount']; $i++) {
+				$this->addrectangle($lastddl_id, $formvars['lineposx' . $i], $formvars['lineposy' . $i], $formvars['lineendposx' . $i], $formvars['lineendposy' . $i], $formvars['rectbreite' . $i], $formvars['rectoffset_attribute_start' . $i], $formvars['rectoffset_attribute_end' . $i]);
         $sql = "INSERT INTO kvwmap.druckfreirechtecke SET breite = '".$formvars['rectbreite'.$i]."'";
         if($formvars['rectposx'.$i] !== NULL)$sql .= ", posx = ".(int)$formvars['rectposx'.$i];
         else $sql .= ", posx = NULL";
@@ -2197,13 +2193,7 @@ class ddl {
     $this->database->execSQL($sql,4, 1);
   }
 	
-  function addline($formvars){
-		$i = $formvars['linecount'] - 1;
-		if($formvars['linebreite'.$i] != '')$breite = $formvars['linebreite'.$i];	else $breite = 1;
-		if($formvars['lineposx'.$i] != '')$posx = $formvars['lineposx'.$i]; else $posx = 70;
-		if($formvars['lineposy'.$i] != '')$posy = $formvars['lineposy'.$i]-20; else $posy = 0;
-		if($formvars['lineendposx'.$i] != '')$endposx = $formvars['lineendposx'.$i]; else $endposx = 520;
-		if($formvars['lineendposy'.$i] != '')$endposy = $formvars['lineendposy'.$i]-20; else $endposy = 0;
+  function addline($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end){
     $sql = "
 			INSERT INTO kvwmap.druckfreilinien 
 				(posx, posy, endposx, endposy, breite)
@@ -2212,14 +2202,16 @@ class ddl {
     		" . $posy . ",
 				" . $endposx . ",
     		" . $endposy . ",
-    		" . $breite . ")
+    		" . $breite . ",
+				" . ($offset_attribute_start ? "'" . $offset_attribute_start . "'" : 'NULL') . ",
+				" . ($offset_attribute_end ? "'" . $offset_attribute_end . "'" : 'NULL') . "))
 			RETURNING id";
     $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
     $ret = $this->database->execSQL($sql,4, 1);
 		$rs = pg_fetch_assoc($ret[1]);
 		$lastinsert_id = $rs['id'];
 
-    $sql = 'INSERT INTO kvwmap.ddl2freilinien (ddl_id, line_id) VALUES ('.$formvars['aktivesLayout'].', '.$lastinsert_id.')';
+    $sql = 'INSERT INTO kvwmap.ddl2freilinien (ddl_id, line_id) VALUES (' . $ddl_id . ', ' . $lastinsert_id . ')';
     $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
     $this->database->execSQL($sql,4, 1);
   }
@@ -2233,7 +2225,7 @@ class ddl {
     $this->database->execSQL($sql,4, 1);
   }
 	
-  function addrectangle($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end){
+  function addrectangle($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end, $color = NULL){
     $sql = "
 			INSERT INTO kvwmap.druckfreirechtecke 
 				(posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end)
@@ -2243,8 +2235,10 @@ class ddl {
 				" . $endposx . ",
     		" . $endposy . ",
     		" . $breite . ",
-				" . ($offset_attribute_start ? "'" . $offset_attribute_start . "'" : 'NULL') . "),
-				" . ($offset_attribute_end ? "'" . $offset_attribute_end . "'" : 'NULL') . ")
+				" . ($offset_attribute_start ? "'" . $offset_attribute_start . "'" : 'NULL') . ",
+				" . ($offset_attribute_end ? "'" . $offset_attribute_end . "'" : 'NULL') . ",
+				" . $color . "
+			)
 			RETURNING id";
 	
 		#echo $sql.'<br>';
