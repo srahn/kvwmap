@@ -330,8 +330,8 @@ update_require_attribute = function(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2" align="right"> 
 												      <?php 
-												        $FormatWerte = array('', 'mA');
-												        $FormatBez = array('-- Bitte wählen --','mit'); 
+												        $FormatWerte = array('', 'mA', 'oA');
+												        $FormatBez = array('-- Bitte wählen --', 'mit', 'ohne'); 
 												        $aufwuchs = new FormObject('aufwuchs','select',$FormatWerte,array($this->formvars['aufwuchs']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $aufwuchs->OutputHTML();
 												        echo $aufwuchs->html;
