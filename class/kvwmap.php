@@ -11514,7 +11514,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$font = ($this->formvars['font'] == '' ? 'Helvetica.afm' : $this->formvars['font']); # font darf nicht leer sein weil beim Export null rauskommen würde. ToDo: Warum kommt beim Layer-Export mit '' eigentlich null raus?
 		if($this->formvars['posx'] != '')$posx = $this->formvars['posx']; else $posx = 70;
 		if($this->formvars['posy'][$i] != '')$posy = $this->formvars['posy']-20; else $posy = 0;
-    $new_freetext_id = $this->ddl->addfreetext($this->formvars['aktivesLayout'], $this->formvars['texttext'.$i], $posx, $posy, $size, $font, $this->formvars['textoffset_attribute'.$i]);
+    $new_freetext_id = $this->ddl->addfreetext($this->formvars['aktivesLayout'], $this->formvars['texttext'.$i], $posx, $posy, $size, $font, $this->formvars['textoffset_attribute'.$i], NULL, NULL, NULL, NULL);
 		$text = $this->ddl->load_texts($this->formvars['aktivesLayout'], $new_freetext_id);
 		$this->ddl->output_freetext_form($text, $this->formvars['selected_layer_id'], $this->formvars['aktivesLayout']);
 	}
@@ -11570,7 +11570,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if($this->formvars['rectposy'.$i] != '')$posy = $this->formvars['rectposy'.$i]-20; else $posy = 50;
 		if($this->formvars['rectendposx'.$i] != '')$endposx = $this->formvars['rectendposx'.$i]; else $endposx = 520;
 		if($this->formvars['rectendposy'.$i] != '')$endposy = $this->formvars['rectendposy'.$i]-20; else $endposy = 150;
-    $this->ddl->addrectangle($this->formvars['aktivesLayout'], $posx, $posy, $endposx, $endposy, $breite, $this->formvars['rectoffset_attribute_start'.$i], $this->formvars['rectoffset_attribute_end'.$i]);
+    $this->ddl->addrectangle($this->formvars['aktivesLayout'], $posx, $posy, $endposx, $endposy, $breite, $this->formvars['rectoffset_attribute_start'.$i], $this->formvars['rectoffset_attribute_end'.$i], NULL);
 		$this->scrolldown = true;
 		$this->sachdaten_druck_editor();
 	}

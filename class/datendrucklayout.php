@@ -1503,7 +1503,7 @@ class ddl {
 		}
 		
 		for($r = 0; $r < count($rects); $r++){
-			$this->addrectangle($ddl_id, $rects[$r]['posx'], $rects[$r]['posy'], $rects[$r]['endposx'], $rects[$r]['endposy'], $rects[$r]['breite'], $rects[$r]['offset_attribute_start'], $rects[$r]['offset_attribute_end']);
+			$this->addrectangle($ddl_id, $rects[$r]['posx'], $rects[$r]['posy'], $rects[$r]['endposx'], $rects[$r]['endposy'], $rects[$r]['breite'], $rects[$r]['offset_attribute_start'], $rects[$r]['offset_attribute_end'], NULL);
 		}
 
 		return $ddl_id;
@@ -1563,11 +1563,11 @@ class ddl {
 			if ($_files['bgsrc']['name']) {
         $nachDatei = DRUCKRAHMEN_PATH . $_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
-          $columns_default['bgsrc'] = $_files['bgsrc']['name'];
+          $columns_default['bgsrc'] = quote($_files['bgsrc']['name']);
         }
       }
       else{
-        $columns_default['bgsrc'] = $formvars['bgsrc_save'];
+        $columns_default['bgsrc'] = quote($formvars['bgsrc_save']);
       }
 			$sql = "
 				INSERT INTO
@@ -1629,37 +1629,23 @@ class ddl {
       $this->database->execSQL($sql,4, 1);
 
       for($i = 0; $i < count_or_0($formvars['text']); $i++){
-        $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
+				$formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
         if($formvars['textfont'][$i] == 'NULL')$formvars['textfont'][$i] = NULL;
-        $sql = "INSERT INTO kvwmap.druckfreitexte SET text = '".$formvars['text'][$i]."'";
-        if($formvars['textposx'][$i] !== NULL)$sql .= ", posx = ".(int)$formvars['textposx'][$i];
-        else $sql .= ", posx = 0";
-        if($formvars['textposy'][$i] !== NULL)$sql .= ", posy = ".(int)$formvars['textposy'][$i];
-        else $sql .= ", posy = 0";
-				if($formvars['textoffset_attribute'][$i])$sql .= ", offset_attribute = '".$formvars['textoffset_attribute'][$i]."'";
-        else $sql .= ", offset_attribute = NULL";
-        if($formvars['textsize'][$i] !== NULL)$sql .= ", size = ".(int)$formvars['textsize'][$i];
-        else $sql .= ", size = 0";
-				if($formvars['textwidth'][$i] != NULL)$sql.= " ,width = ".(int)$formvars['textwidth'][$i];
-				else $sql.= " ,width = NULL";
-				if($formvars['textborder'][$i] != NULL)$sql.= " ,border = ".(int)$formvars['textborder'][$i];
-				else $sql.= " ,border = NULL";
-        if($formvars['textangle'][$i])$sql .= ", angle = ".(int)$formvars['textangle'][$i];
-        else $sql .= ", angle = NULL";
-        $sql .= ", font = '".$formvars['textfont'][$i]."'";
-        $sql .= ", type = '".$formvars['texttype'][$i]."'
-				RETURNING id";
-        #echo $sql;
-        $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
-				$ret = $this->database->execSQL($sql,4, 1);
-				$rs = pg_fetch_assoc($ret[1]);
-      	$lastfreitext_id = $rs['id'];
-
-        $sql = 'INSERT INTO kvwmap.ddl2freitexte (ddl_id, freitext_id) VALUES('.$lastddl_id.', '.$lastfreitext_id.')';
-        $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
-        $this->database->execSQL($sql,4, 1);
+				$this->addfreetext(
+					$lastddl_id, 
+					$formvars['text'][$i], 
+					$formvars['textposx'][$i], 
+					$formvars['textposy'][$i], 
+					$formvars['textsize'][$i], 
+					$formvars['textfont'][$i], 
+					$formvars['textoffset_attribute'][$i],
+					$formvars['textwidth'][$i],
+					$formvars['textborder'][$i],
+					$formvars['textangle'][$i],
+					$formvars['texttype'][$i]
+				);
       }
 			
 			for ($i = 0; $i < $formvars['linecount']; $i++) {
@@ -1667,34 +1653,7 @@ class ddl {
       }
 			
 			for ($i = 0; $i < $formvars['rectcount']; $i++) {
-				$this->addrectangle($lastddl_id, $formvars['lineposx' . $i], $formvars['lineposy' . $i], $formvars['lineendposx' . $i], $formvars['lineendposy' . $i], $formvars['rectbreite' . $i], $formvars['rectoffset_attribute_start' . $i], $formvars['rectoffset_attribute_end' . $i]);
-        $sql = "INSERT INTO kvwmap.druckfreirechtecke SET breite = '".$formvars['rectbreite'.$i]."'";
-        if($formvars['rectposx'.$i] !== NULL)$sql .= ", posx = ".(int)$formvars['rectposx'.$i];
-        else $sql .= ", posx = NULL";
-        if($formvars['rectposy'.$i] !== NULL)$sql .= ", posy = ".(int)$formvars['rectposy'.$i];
-        else $sql .= ", posy = NULL";
-				if($formvars['rectendposx'.$i] !== NULL)$sql .= ", endposx = ".(int)$formvars['rectendposx'.$i];
-        else $sql .= ", endposx = NULL";
-        if($formvars['rectendposy'.$i] !== NULL)$sql .= ", endposy = ".(int)$formvars['rectendposy'.$i];
-        else $sql .= ", endposy = NULL";
-				if($formvars['rectoffset_attribute_start'.$i] !== NULL)$sql .= ", offset_attribute_start = '".$formvars['rectoffset_attribute_start'.$i]."'";
-        else $sql .= ", offset_attribute_start = NULL";
-				if($formvars['rectoffset_attribute_end'.$i] !== NULL)$sql .= ", offset_attribute_end = '".$formvars['rectoffset_attribute_end'.$i]."'";
-        else $sql .= ", offset_attribute_end = NULL";
-        if($formvars['recttype'.$i] == '')$formvars['recttype'.$i] = 0;
-				if($formvars['rectcolor'.$i])$sql .= ", color = '".$formvars['rectcolor'.$i]."'";
-				else $sql .= ", color = NULL";
-				$sql .= ", type = '".$formvars['recttype'.$i]."'
-				RETURNING id";
-        #echo $sql;
-        $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
-        $ret = $this->database->execSQL($sql,4, 1);
-				$rs = pg_fetch_assoc($ret[1]);
-      	$lastrect_id = $rs['id'];
-				
-				$sql = 'INSERT INTO kvwmap.ddl2freirechtecke (ddl_id, rect_id) VALUES('.$lastddl_id.', '.$lastrect_id.')';
-        $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
-        $this->database->execSQL($sql,4, 1);
+				$this->addrectangle($lastddl_id, $formvars['rectposx' . $i], $formvars['rectposy' . $i], $formvars['rectendposx' . $i], $formvars['rectendposy' . $i], $formvars['rectbreite' . $i], $formvars['rectoffset_attribute_start' . $i], $formvars['rectoffset_attribute_end' . $i], $formvars['rectcolor' . $i]);
       }			
     }
     return $lastddl_id;
@@ -2160,18 +2119,22 @@ class ddl {
     return $rects;
   }		
   
-  function addfreetext($ddl_id, $text, $posx, $posy, $size, $font, $offset_attribute){		
+  function addfreetext($ddl_id, $text, $posx, $posy, $size, $font, $offset_attribute, $textwidth, $textborder, $textangle, $texttype){		
     $sql = "
 			INSERT INTO kvwmap.druckfreitexte 
-				(text, posx, posy, offset_attribute, size, font, angle)
+				(text, posx, posy, size, font, offset_attribute, width, border, angle, type)
 			VALUES (
     		'" . $text . "',
     		" . $posx . ",
     		" . $posy . ",
-				" . ($offset_attribute ? "'" . $offset_attribute . "'" : 'NULL') . ",
     		" . $size . ",
     		'" . $font . "',
-    		0)
+				" . ($offset_attribute ? "'" . $offset_attribute . "'" : 'NULL') . ",
+				" . ($textwidth ?: 'NULL') . ",
+				" . ($textborder ?: 'NULL') . ",
+				" . ($textangle ?: '0') . ",
+				" . ($texttype ?: 'NULL') . "
+			)
 			RETURNING id";
     $this->debug->write("<p>file:kvwmap class:ddl->addfreetext :",4);
 		$ret = $this->database->execSQL($sql,4, 1);
@@ -2196,7 +2159,7 @@ class ddl {
   function addline($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end){
     $sql = "
 			INSERT INTO kvwmap.druckfreilinien 
-				(posx, posy, endposx, endposy, breite)
+				(posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end)
 			VALUES (
     		" . $posx . ",
     		" . $posy . ",
@@ -2204,7 +2167,7 @@ class ddl {
     		" . $endposy . ",
     		" . $breite . ",
 				" . ($offset_attribute_start ? "'" . $offset_attribute_start . "'" : 'NULL') . ",
-				" . ($offset_attribute_end ? "'" . $offset_attribute_end . "'" : 'NULL') . "))
+				" . ($offset_attribute_end ? "'" . $offset_attribute_end . "'" : 'NULL') . ")
 			RETURNING id";
     $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
     $ret = $this->database->execSQL($sql,4, 1);
@@ -2225,10 +2188,10 @@ class ddl {
     $this->database->execSQL($sql,4, 1);
   }
 	
-  function addrectangle($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end, $color = NULL){
+  function addrectangle($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end, $color){
     $sql = "
 			INSERT INTO kvwmap.druckfreirechtecke 
-				(posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end)
+				(posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end, color)
 			VALUES (
     		" . $posx . ",
     		" . $posy . ",
@@ -2237,7 +2200,7 @@ class ddl {
     		" . $breite . ",
 				" . ($offset_attribute_start ? "'" . $offset_attribute_start . "'" : 'NULL') . ",
 				" . ($offset_attribute_end ? "'" . $offset_attribute_end . "'" : 'NULL') . ",
-				" . $color . "
+				" . ($color ?: 'NULL') . "
 			)
 			RETURNING id";
 		#echo $sql.'<br>';
