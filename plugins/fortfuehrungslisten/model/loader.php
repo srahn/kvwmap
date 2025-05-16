@@ -19,8 +19,8 @@ class NASLoader extends DOMDocument {
 		#echo '<br>Prüfe ob Datei: ' . $file['basename'] . ' eine Zip-Datei ist.';
 		if (strtolower($file['extension']) == 'zip') {
 			#echo '<br>Ja Datei ist eine Zipdatei. Versuche auszupacken.';
-			$unziped_files = unzip($file_name, false, false, true);
-			foreach ($unziped_files AS $unziped_file) {
+			$result = unzip($file_name, false, false, true);
+			foreach ($result['files'] AS $unziped_file) {
 				#echo '<br>Verarbeite ausgepackte Datei: ' . $unziped_file;
 				$pathinfo_unziped_file = pathinfo($unziped_file);
 				if (substr($pathinfo_unziped_file['filename'], -5) == '_2000') {

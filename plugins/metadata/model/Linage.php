@@ -30,6 +30,15 @@ class Lineage extends PgObject {
     return $ressources;
   }
 
+  public static	function find_source_ids($gui, $target_id) {
+    return array_map(
+      function($lineage) {
+        return $lineage->get('source_id');
+      },
+      $this->find_where('target_id = ' . $target_id)
+    );
+  }
+
   public static	function find_targets($gui, $souce_id) {
     $ressources = array();
     $lineages = $this->find_where('source_id = ' . $source_id);

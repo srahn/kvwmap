@@ -1060,7 +1060,8 @@ echo '			</table>
 
 	// 		if (move_uploaded_file($upload_file['tmp_name'], $zip_file)) {
 	// 			# ToDo: Shape in einem untergeordneten Ordner auspacken um Problemm mit gleichen Namen von hochgeladenen Dateien unterschiedlicher Anwender zu vermeiden.
-	// 			$shape_files = unzip($zip_file, false, false, true);
+	// 			$result = unzip($zip_file, false, false, true);
+	//			$shape_files = $result['files'];
 
 	// 			$msg .= 'file unziped';
 	// 			# get shape file name
@@ -9074,7 +9075,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($formvars['Data'] != '') {
 					$data_attributes = $mapDB->getDataAttributes($layerdb, $formvars['selected_layer_id'], ['assoc' => true]);
 					foreach ($formvars['labelitems_name'] ?: [] as $labelitem) {
-						if ($labelitem != '' AND !array_key_exists($labelitem, $data_attributes)) {
+						if ($labelitem != '' AND $labelitem != 'Cluster_FeatureCount' AND !array_key_exists($labelitem, $data_attributes)) {
 							$this->add_message('error', 'Das Attribut ' . $labelitem . ' wird nicht im Data-Feld abgefragt!');
 						}
 					}
@@ -9653,8 +9654,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				for ($m = 0; $m <= (value_of($this->formvars, 'searchmask_count') ?: 0); $m++){
 					if ($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 						$prefix = $m . '_';
-						sanitize('boolean_operator_' . $m, 'boolean');
-						$sql_where .= ' ' . $this->formvars['boolean_operator_'.$m] .' ';			// mit AND/OR verketten
+						sanitize($this->formvars['boolean_operator_' . $m], 'text');
+						$sql_where .= ' ' . $this->formvars['boolean_operator_' . $m] . ' ';			// mit AND/OR verketten
 					}
 					else {
 						$prefix = '';
@@ -12377,8 +12378,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$file_number = 1;
 					$dateityp = strtolower(array_pop(explode('.', $nachDatei)));
 					if ($dateityp == 'zip') {
-						$files = unzip($nachDatei, false, false, true);
-						foreach ($files as $file) {
+						$result = unzip($nachDatei, false, false, true);
+						foreach ($result['files'] as $file) {
 							$dateityp = strtolower(array_pop(explode('.', $file)));
 							if (!in_array($dateityp, array('dbf', 'shx'))) { // damit gezippte Shapes nur einmal bearbeitet werden
 								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action'], $this->formvars['chosen_layer_id']);
@@ -13731,8 +13732,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	*/
 	function role_edit() {
 		$this->sanitize([
-			'user_id' => 'integer',
-			'stelle_id' => 'integer'
+			'user_id' => 'int',
+			'stelle_id' => 'int'
 		]);
 		$this->role = Role::find_by_id($this, $this->formvars['user_id'], $this->formvars['stelle_id']);
 		$this->main = 'role_formular.php';
@@ -13742,8 +13743,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function role_update() {
 		// ToDo sanitize all formvars
 		$this->sanitize([
-			'user_id' => 'integer',
-			'stelle_id' => 'integer'
+			'user_id' => 'int',
+			'stelle_id' => 'int'
 		]);
 		$this->role = Role::find_by_id($this, $this->formvars['user_id'], $this->formvars['stelle_id']);
 		$this->role->setData($this->formvars);
@@ -19504,7 +19505,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `identifier_text`, `maintable_is_view`, `Data`, `schema`, `geom_column`, `document_path`, `document_url`, `ddl_attribute`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `max_query_rows`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `icon`, `privileg`, `export_privileg`, `status`, `trigger_function`, `sync`, `editable`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`, `version`, `comment`, `vector_tile_url`, `cluster_option`
+				'SELECT `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `identifier_text`, `maintable_is_view`, `Data`, `schema`, `geom_column`, `document_path`, `document_url`, `ddl_attribute`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `max_query_rows`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `icon`, `privileg`, `export_privileg`, `status`, `trigger_function`, `editable`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`, `version`, `comment`
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . '
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . '
@@ -21125,6 +21126,7 @@ class db_mapObj{
 		}
 
 		if (
+			!$only_listed AND # $only_listed ist true bei der Layer-Übersicht. Dann sollen alle Layer geladen werden (d.h. auch die, die der Nutzer gar nicht hat in seinen Stellen).
 			# Show non-admin users only layers that they self have shared
 			!$this->GUI->is_admin_user($this->GUI->user->id)
 		) {
