@@ -867,8 +867,8 @@ class data_import_export {
 			$this->formvars['zipfile'] = $_files['zipfile']['name'];
 			$nachDatei = UPLOADPATH.$_files['zipfile']['name'];
 			if (move_uploaded_file($_files['zipfile']['tmp_name'],$nachDatei)) {
-				$files = unzip($nachDatei, false, false, true);
-				$firstfile = explode('.', $files[0]);
+				$result = unzip($nachDatei, false, false, true);
+				$firstfile = explode('.', $result['files'][0]);
 				$this->formvars['epsg'] = $this->get_shp_epsg(UPLOADPATH.$firstfile[0], $pgdatabase);
 				$file = $firstfile[0].'.dbf';
 				if (!file_exists(UPLOADPATH.$file)){
