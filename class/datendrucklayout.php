@@ -1968,11 +1968,22 @@ class ddl {
     $this->debug->write("<p>file:kvwmap class:ddl->delete_layout :",4);
     $this->database->execSQL($sql,4, 1);
 
-		$sql = "DELETE FROM kvwmap.ddl_elemente WHERE ddl_id = ".(int)$formvars['selected_layout_id'];					
+		$sql = "DELETE FROM kvwmap.ddl_elemente WHERE ddl_id = ".(int)$formvars['selected_layout_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->delete_layout :",4);
     $this->database->execSQL($sql,4, 1);
 
-    $sql = "DELETE FROM kvwmap.druckfreitexte, kvwmap.ddl2freitexte USING druckfreitexte, ddl2freitexte WHERE ddl2freitexte.freitext_id = druckfreitexte.id AND ddl2freitexte.ddl_id = ".(int)$formvars['selected_layout_id'];
+    $sql = "
+			DELETE FROM 
+				kvwmap.druckfreitexte 
+			USING 
+				kvwmap.ddl2freitexte 
+			WHERE 
+				ddl2freitexte.freitext_id = druckfreitexte.id AND ddl2freitexte.ddl_id = " . $formvars['selected_layout_id'] . ";
+				
+			DELETE FROM 
+				kvwmap.ddl2freitexte
+			WHERE 
+				ddl2freitexte.ddl_id = " . $formvars['selected_layout_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->delete_layout :",4);
     $this->database->execSQL($sql,4, 1);
     
