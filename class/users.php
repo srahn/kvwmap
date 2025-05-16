@@ -1009,7 +1009,7 @@ class user {
 				LEFT JOIN rolle rall ON u.ID = rall.user_id
 				LEFT JOIN rolle radm ON radm.stelle_id = rall.stelle_id
 			";
-			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
+			$where[] = "(radm.user_id = ".$admin_id.")";
 		}
 
 		if ($id > 0) {
@@ -1227,6 +1227,7 @@ class user {
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
 			if($formvars['polyquery']){$buttons .= 'polyquery,';}
 			if($formvars['measure']){$buttons .= 'measure,';}
+			if($formvars['routing']){$buttons .= 'routing,';}
 			if($formvars['punktfang']){$buttons .= 'punktfang,';}
 			if (value_of($formvars, 'freepolygon')) { $buttons .= 'freepolygon,';}
 			if (value_of($formvars, 'freearrow')) { $buttons .= 'freearrow,';}

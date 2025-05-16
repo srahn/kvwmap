@@ -24,12 +24,11 @@ fi
 
 # Create a subdirectory for downloads
 mkdir -p "$DOWNLOAD_DIR"
-
 # Download files in parallel using xargs and wget
 cat "$URL_FILE" | while read url; do
   file="${DOWNLOAD_DIR}/$(basename $url)"
   if [ "$ONLY_MISSING" == 0 ] || [ ! -f $file ] ; then
-    echo "wget ${url} -q --show-progress -P ${DOWNLOAD_DIR}"
+    echo "wget \"${url}\" -q --show-progress -P ${DOWNLOAD_DIR}"
   fi
 done | xargs -I {} -P $PARALLEL_LIMIT bash -c '{}'
 wait
