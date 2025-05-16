@@ -9083,7 +9083,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($formvars['data'] != '') {
 					$data_attributes = $mapDB->getDataAttributes($layerdb, $formvars['selected_layer_id'], ['assoc' => true]);
 					foreach ($formvars['labelitems_name'] ?: [] as $labelitem) {
-						if ($labelitem != '' AND !array_key_exists($labelitem, $data_attributes)) {
+						if ($labelitem != '' AND $labelitem != 'Cluster_FeatureCount' AND !array_key_exists($labelitem, $data_attributes)) {
 							$this->add_message('error', 'Das Attribut ' . $labelitem . ' wird nicht im Data-Feld abgefragt!');
 						}
 					}
