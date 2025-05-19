@@ -1,5 +1,20 @@
 BEGIN;
 
+DO $$
+BEGIN
+  IF EXISTS(
+    SELECT
+      schema_name
+    FROM 
+      information_schema.schemata
+    WHERE 
+      schema_name = 'kvwmap'
+  )
+  THEN
+    EXECUTE 'ALTER SCHEMA kvwmap RENAME TO kvwmap_alt;';
+  END IF;
+END
+$$;
 
 CREATE SCHEMA kvwmap;
 
