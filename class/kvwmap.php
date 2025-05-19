@@ -9662,8 +9662,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				for ($m = 0; $m <= (value_of($this->formvars, 'searchmask_count') ?: 0); $m++){
 					if ($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 						$prefix = $m . '_';
-						sanitize('boolean_operator_' . $m, 'boolean');
-						$sql_where .= ' ' . $this->formvars['boolean_operator_'.$m] .' ';			// mit AND/OR verketten
+						sanitize($this->formvars['boolean_operator_' . $m], 'text');
+						$sql_where .= ' ' . $this->formvars['boolean_operator_' . $m] . ' ';			// mit AND/OR verketten
 					}
 					else {
 						$prefix = '';
@@ -18211,10 +18211,12 @@ class db_mapObj{
 
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'name' : 'alias'];
 			$rs['id'] = $i;
-			$rs['alias_link'] = replace_params_link(
-				$rs['Name_or_alias'],
-				rolle::$layer_params,
-				$rs['layer_id']
+			$rs['alias_link'] = replace_params_rolle(
+				replace_params_link(
+					$rs['Name_or_alias'],
+					rolle::$layer_params,
+					$rs['layer_id']
+				)
 			);
 			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data') AS $key) {
 				$rs[$key] = replace_params_rolle(
