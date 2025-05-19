@@ -160,8 +160,8 @@ class administration{
 				$pg_migrations[] = $migration;
 			}
 		}
-		$err_msgs = array_merge($err_msgs, $this->execute_migrations('mysql', $my_migrations));
 		$err_msgs = array_merge($err_msgs, $this->execute_migrations('postgresql', $pg_migrations));
+		$err_msgs = array_merge($err_msgs, $this->execute_migrations('mysql', $my_migrations));
 
 		foreach ($this->seeds_to_execute['mysql'] as $component => $component_seed) {
 			$prepath = PLUGINS.$component.'/';
