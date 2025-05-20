@@ -397,7 +397,12 @@ class GUI {
 					if ($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy) {
 						$show = true;
 						$name = $result[$features_key][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
-						$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'">'.$name.'</a></li>';
+						$zoom_link = 'index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name;
+						if ($this->formvars['zoom']) {
+							header('location:' . $zoom_link);
+							exit;
+						}
+						$output .= '<li><a href="' . $zoom_link . '">'.$name.'</a></li>';
 					}
 				}
 				else {		# json (wie bei search.geobasis-bb.de)
