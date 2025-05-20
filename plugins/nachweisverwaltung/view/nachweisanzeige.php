@@ -261,7 +261,7 @@ function save_bearbeitungshinweis(id){
 <? 
 	function build_order_links($orderstring, $richtung){
 		if($orderstring != ''){
-			$orderaliases = array('gemarkung' => 'Gemarkung', 'flur' => 'Flur', 'stammnr' => 'Antragsnr.', 'rissnummer' => 'Rissnr.', 'art' => 'Dokumentart', 'blattnummer' => 'Blattnr.', 'datum' => 'Datum', 'fortfuehrung' => 'Fortfuehrung', 'vermst' => 'Vermstelle', 'gueltigkeit' => 'Gueltigkeit', 'geprueft' => 'geprueft', 'format' => 'Format');
+			$orderaliases = array('gemarkung' => 'Gemarkung', 'flur' => 'Flur', 'stammnr' => 'Antragsnr.', 'rissnummer' => 'Rissnr.', 'art' => 'Dokumentart', 'blattnummer' => 'Blattnr.', 'datum' => 'Datum', 'fortfuehrung' => 'Fortfuehrung', 'vermstelle' => 'Vermstelle', 'gueltigkeit' => 'Gueltigkeit', 'geprueft' => 'geprueft', 'format' => 'Format');
 			$orders = explode(',', $orderstring);
 			foreach($orders as $order){
 				$orderlinks[] = '<a href="javascript:remove_from_order(\''.$order.'\');" title="'.$orderaliases[$order].' aus Sortierung entfernen">'.$orderaliases[$order].'</a>';
