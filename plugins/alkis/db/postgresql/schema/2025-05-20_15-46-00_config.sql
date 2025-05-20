@@ -1,0 +1,38 @@
+BEGIN;
+
+INSERT INTO kvwmap.config (name, prefix, value, description, type, "group", plugin, saved, editable) VALUES
+('LANDKREIS', '', 'Landkreis XY', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('AMT', '', 'Kataster-/Vermessungsamt ', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('STRASSE', '', 'Strasse', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('STRASSE2', '', 'Strasse2', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('PLZ', '', 'PLZ', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('ORT', '', 'Ort', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('POSTANSCHRIFT', '', 'Postanschrift', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('POSTANSCHRIFT_STRASSE', '', 'Postanschrift Strasse', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('POSTANSCHRIFT_PLZ', '', 'Postanschrift PLZ', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('POSTANSCHRIFT_ORT', '', 'Postanschrift Ort', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('BEARBEITER', '', 'false', 'definiert, ob Nutzername im ALB-Auszug 30 angezeigt wird, oder nicht\r\n', 'boolean', 'Plugins/alkis', 'alkis', 0, 2),
+('GUTACHTERAUSSCHUSS', '', '12345', 'Gutachterausschuss BORIS\r\n', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('katasterfuehrendestelle', '', '{\r\n    \"132845\": \"0019\",\r\n    \"132846\": \"0021\"\r\n}', 'katasterführende Stellen ALB\r\nbei zwei katasterführenden Stellen in einer kvwmap-DB (Nur für Adressänderungen wichtig, sonst auskommentieren)\r\nerste Stelle bis einschließlich GBBZ-Schlüssel, zweite Stelle bis einschließlich GBBZ-Schlüssel, ....\r\nwer nur eine katasterführende Stelle hat, kann das Array weglassen oder auskommentieren\r\n', 'array', 'Plugins/alkis', 'alkis', 0, 2),
+('HAUSNUMMER_TYPE', '', 'LOWER', 'Legt fest, ob die Hausnummernzusätze groß oder klein dargestellt werden\r\n', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAGEBEZEICHNUNGSART', '', 'Flurbezeichnung', 'Auswahl der Art der Lagebezeichung für den aktuell angezeigten Kartenausschnitt\r\nJe nach dem was hier eingetragen wird wird ein Fall zur Anzeige der Lage verwendet\r\nDie Unterscheidung wird in der Funkiton getLagebezeichnung in kvwmap.php vorgenommen\r\nVarianten:\r\nFlurbezeichnung: bedeutet Ausgabe von Gemeinde, Gemarkung und Flur, soweit in ALK tabellen vorhanden\r\nWenn kein Wert gesetzt wird, erfolgt keine Anzeige einer Lagebezeichung\r\n', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('EPSGCODE', '', '2398', 'EPSG-Code dem die Koordinaten der Flurstücke zugeordnet werden sollen in den Tabellen\r\nalb_flurstuecke und alb_x_flurstuecke wenn man postgres verwendet\r\ndie Geometriespalte muß auch mit dieser EPSG Nummer angelegt sein.\r\n', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('EPSGCODE_ALKIS', '', '25833', 'EPSG-Code der ALKIS-Daten\r\n', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('DHK_CALL_URL', '', 'http://dhkserver/call?form=login', 'DHK-Call-Schnittstelle\r\n', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('DHK_CALL_USER', '', '12345', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('DHK_CALL_PASSWORD', '', '6789', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('DHK_CALL_ANTRAGSNUMMER', '', 'BWAPK_0000002', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('DHK_CALL_PROFILKENNUNG', '', 'mvaaa', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAYERNAME_FLURSTUECKE', '', 'Flurstücke', 'Name des Flurstückslayers\r\n', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAYERNAME_GEBAEUDE', '', 'Gebaeude', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAYERNAME_NUTZUNGEN', '', 'Nutzung', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAYERNAME_AUSGESTALTUNGEN', '', 'Ausgestaltung', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAYERNAME_GEMARKUNGEN', '', 'Gemeinde', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAYERNAME_GEMEINDEN', '', 'Gemarkung', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAYERNAME_FLUR', '', 'Flur', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAYER_ID_ADRESSAENDERUNGEN_PERSON', '', '827', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('LAYER_ID_ADRESSAENDERUNGEN_ANSCHRIFT', '', '162', '', 'string', 'Plugins/alkis', 'alkis', 0, 2),
+('layer_ids_flst_auszuege', '', '[]', 'In diesem Array können die Layer-IDs von eigenen Flurstückslayern angegeben werden, deren Sachdatendrucklayouts als zusätzliche Flurstücksauszüge angeboten werden sollen.', 'array', 'Plugins/alkis', 'alkis', 0, 2),
+('STRASSENNAMEN_EINDEUTIG', '', 'true', 'Dieser Parameter kann auf true gesetzt werden, wenn die Strassennamen pro Gemeinde eindeutig sind.', 'boolean', 'Plugins/alkis', 'alkis', 0, 2);
+
+COMMIT;

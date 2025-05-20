@@ -15,7 +15,7 @@ CREATE TABLE anliegerbeitraege_bereiche
   kommentar character varying(255),
   CONSTRAINT anliegerbeitraege_bereiche_pkey PRIMARY KEY (id)
 ) 
-WITH OIDS;
+;
 SELECT AddGeometryColumn('anliegerbeitraege', 'anliegerbeitraege_bereiche','the_geom',2398,'GEOMETRY', 2);
 
 CREATE TABLE anliegerbeitraege_strassen
@@ -23,7 +23,7 @@ CREATE TABLE anliegerbeitraege_strassen
   id serial NOT NULL,
   CONSTRAINT anliegerbeitraege_strassen_pkey PRIMARY KEY (id)
 ) 
-WITH OIDS;
+;
 SELECT AddGeometryColumn('anliegerbeitraege', 'anliegerbeitraege_strassen','the_geom',2398,'GEOMETRY', 2);
 
 COMMIT;
