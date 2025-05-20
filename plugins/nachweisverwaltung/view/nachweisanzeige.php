@@ -284,7 +284,7 @@ function save_bearbeitungshinweis(id){
 	}
 
 	.nw_treffer_table td {
-		padding: 5 0 5 0;
+		padding: 5 0 5 8;
 	}
 	
 	.nw_treffer_table td:first-child {
