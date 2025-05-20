@@ -84,14 +84,13 @@ function install() {
 	include(CLASSPATH . 'log.php');
 	if (DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);
 	if (LOG_LEVEL > 0) {
-	 $log_mysql = new LogFile(LOGFILE_MYSQL, 'text', 'Log-Datei MySQL' , '#------v: ' . date("Y:m:d H:i:s", time()));
 	 $log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei-Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
 	} ?>
 	<h1>Teste Verbindung zu MySQL mit Nutzer root</h1><?php
 	#
 	# Teste ob MySQL-Server läuft
 	#
-
+/*
 	include(CLASSPATH . 'mysql.php');
 	$mysqlRootDb = new database();
 	$mysqlRootDb->host = MARIADB_HOST;
@@ -146,7 +145,9 @@ function install() {
 		Die MySQL Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert nicht oder die Verbindung kann mit dem Nutzer <?php echo $mysqlRootDb->user; ?> nicht hergestellt werden.<br>
 		<h1>Installiere kvwmap Datenbank auf MySQL-Server</h1><?php
 		$kvwmapdb_installed = install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb);
-	} ?>
+	} 
+	*/
+	?>
 
 	<h1>Teste Verbindung zu PostgreSQL mit Nutzer postgres</h1><?php
 	#
@@ -212,10 +213,9 @@ function install() {
 		$kvwmapsp_installed = install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb);
 	}
 
-	if ($kvwmapdb_installed and $kvwmapsp_installed) { ?>
-		<h1>Datenbanken kvwmapdb und kvwmapsp stehen jetzt zur Verfügung</h1>
-		Verbindungen zu MySQL und PostgreSQL Datenbanken von kvwmap herstellen und Migration ausführen.<br> <?php
-		$mysqlKvwmapDb->open();
+	if ($kvwmapsp_installed) { ?>
+		<h1>Datenbank kvwmapsp steht jetzt zur Verfügung</h1>
+		Verbindung zu PostgreSQL Datenbank von kvwmap herstellen und Migration ausführen.<br> <?php
 		$pgsqlKvwmapDb->open(); ?>
 
 		Erzeuge die PostGIS Erweiterung in der kvwmapsp Datenbank falls noch nicht vorhanden.<br><?php
