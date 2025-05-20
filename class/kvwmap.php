@@ -19533,6 +19533,7 @@ DO $$
 		vars_connection_id integer;
 		vars_group_id integer;
 		vars_last_layer_id integer;
+		" . (implode("\n\t\t", array_map(function ($layer_id){return 'vars_last_layer_id' . $layer_id . ' integer;';}, $layer_ids))) . "
 		vars_last_class_id integer;
 		vars_last_style_id integer;
 		vars_last_label_id integer;
@@ -19603,7 +19604,7 @@ DO $$
 				' . ($this->GUI->plugin_loaded('mobile') ? ', vector_tile_url' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', cluster_option' : '') . '
 				FROM kvwmap.layer WHERE layer_id=' . $layer_ids[$i],
-				'RETURNING layer_id INTO vars_last_layer_id'
+				'RETURNING layer_id INTO vars_last_layer_id' . $layer_ids[$i]
 			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 
@@ -19615,7 +19616,7 @@ DO $$
 						'',
 						"
 							SELECT
-								'vars_last_layer_id' AS layer_id,
+								'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id,
 								'" . $stellen[$s]['var'] . "' AS stelle_id,
 								queryable,
 								drawingorder,
@@ -19641,7 +19642,7 @@ DO $$
 						"
 							SELECT
 								'" . $stellen[$s]['var'] . "' AS stelle_id,
-								'vars_last_layer_id' AS layer_id,
+								'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id,
 								attributname,
 								attributvalue,
 								operator,
@@ -19663,7 +19664,7 @@ DO $$
 				'kvwmap.layer_attributes', 
 				'', 
 				'SELECT 
-					\'vars_last_layer_id\' AS layer_id, 
+					\'vars_last_layer_id' . $layer_ids[$i] . '\' AS layer_id, 
 					name, 
 					real_name, 
 					tablename, 
@@ -19717,7 +19718,7 @@ DO $$
 						'',
 						"
 							SELECT
-								'vars_last_layer_id' AS layer_id,
+								'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id,
 								'" . $stellen[$s]['var'] . "' AS stelle_id,
 								attributename,
 								privileg,
@@ -19738,7 +19739,7 @@ DO $$
 			$classes = $database->create_insert_dump(
 				'kvwmap.classes', 
 				'class_id', 
-				"SELECT class_id, name, 'vars_last_layer_id' AS layer_id, expression, drawingorder, text FROM kvwmap.classes WHERE layer_id = " . $layer_ids[$i],
+				"SELECT class_id, name, 'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id, expression, drawingorder, text FROM kvwmap.classes WHERE layer_id = " . $layer_ids[$i],
 				'RETURNING class_id INTO vars_last_class_id'
 			);
 			for ($j = 0; $j < count_or_0($classes['insert']); $j++) {
@@ -19774,7 +19775,7 @@ DO $$
 			$ddls = $database->create_insert_dump(
 				'kvwmap.datendrucklayouts', 
 				'id', 
-				"SELECT id, name, 'vars_last_layer_id' AS layer_id, format, bgsrc, bgposx, bgposy, bgwidth, bgheight, dateposx, dateposy, datesize, userposx, userposy, usersize, font_date, font_user, type, margin_top, margin_bottom, margin_left, margin_right, gap, no_record_splitting, columns, filename, use_previews FROM kvwmap.datendrucklayouts WHERE layer_id = " . $layer_ids[$i],
+				"SELECT id, name, 'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id, format, bgsrc, bgposx, bgposy, bgwidth, bgheight, dateposx, dateposy, datesize, userposx, userposy, usersize, font_date, font_user, type, margin_top, margin_bottom, margin_left, margin_right, gap, no_record_splitting, columns, filename, use_previews FROM kvwmap.datendrucklayouts WHERE layer_id = " . $layer_ids[$i],
 				'RETURNING id INTO vars_last_ddl_id'
 			);
 			for ($j = 0; $j < count_or_0($ddls['insert']); $j++) {
@@ -19828,8 +19829,8 @@ DO $$
 		}
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			$dump_text .= "\n\n-- Replace attribute options for Layer " . $layer_ids[$i];
-			$dump_text .= "\nUPDATE kvwmap.layer_attributes SET options = REPLACE(options, 'layer_id=" . $layer_ids[$i]."', CONCAT('layer_id=', @last_layer_id" . $layer_ids[$i].")) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink') AND options regexp 'layer_id=" . $layer_ids[$i] . "( |$)';";
-			$dump_text .= "\nUPDATE kvwmap.layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i].",', CONCAT(@last_layer_id" . $layer_ids[$i].", ',')) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK') AND options LIKE '" . $layer_ids[$i] . ",%';";
+			$dump_text .= "\nUPDATE kvwmap.layer_attributes SET options = REPLACE(options, 'layer_id=" . $layer_ids[$i]."', CONCAT('layer_id=', vars_last_layer_id" . $layer_ids[$i].")) WHERE layer_id IN (vars_last_layer_id" . implode(', vars_last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink') AND options ~ 'layer_id=" . $layer_ids[$i] . "( |$)';";
+			$dump_text .= "\nUPDATE kvwmap.layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i].",', CONCAT(vars_last_layer_id" . $layer_ids[$i].", ',')) WHERE layer_id IN (vars_last_layer_id" . implode(', vars_last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK') AND options LIKE '" . $layer_ids[$i] . ",%';";
 		}
 
 		if ($with_datatypes) {
