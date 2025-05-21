@@ -290,7 +290,7 @@ class Konvertierung extends PgObject {
 					$layer->set('data', $result['data_sql']);
 					if (strpos($layer->data, 'xplankonverter.konvertierungen k') !== false) {
 						$layer->set('data', str_ireplace(' WHERE ', ' WHERE (', $layer->data));
-						$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data)); 
+						$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data));
 					}
 				}
 				else {
