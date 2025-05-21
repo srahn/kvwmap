@@ -397,7 +397,12 @@ class GUI {
 					if ($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy) {
 						$show = true;
 						$name = $result[$features_key][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
-						$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'">'.$name.'</a></li>';
+						$zoom_link = 'index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name;
+						if ($this->formvars['zoom']) {
+							header('location:' . $zoom_link);
+							exit;
+						}
+						$output .= '<li><a href="' . $zoom_link . '">'.$name.'</a></li>';
 					}
 				}
 				else {		# json (wie bei search.geobasis-bb.de)
@@ -1543,7 +1548,7 @@ echo '			</table>
 								}
 							}
 							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-							if($s > 0 OR $class->status == MS_OFF){
+							if($s > 0 OR $class->status == MS_ON){
 								$width = $height = '';
 								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
@@ -1601,7 +1606,16 @@ echo '			</table>
 									$status = 1;
 								}
 								# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
-								$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.', ' . $maplayer->type . ')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
+								if ($maplayer->type < 3) {
+									$legend .= '
+									<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'">
+									<a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.', ' . $maplayer->type . ')">';
+								}
+								$legend .= '
+										<img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'">';
+								if ($maplayer->type < 3) {
+									$legend .= '</a>';
+								}
 							}
 							$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 						}
@@ -18198,10 +18212,12 @@ class db_mapObj{
 
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'Name' : 'alias'];
 			$rs['id'] = $i;
-			$rs['alias_link'] = replace_params_link(
-				$rs['Name_or_alias'],
-				rolle::$layer_params,
-				$rs['Layer_ID']
+			$rs['alias_link'] = replace_params_rolle(
+				replace_params_link(
+					$rs['Name_or_alias'],
+					rolle::$layer_params,
+					$rs['Layer_ID']
+				)
 			);
 			foreach (array('Name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params_rolle(
