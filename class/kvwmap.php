@@ -154,6 +154,74 @@ class GUI {
 		}
 	}
 
+	/**
+	 * Function add a background job to the database table
+	 */
+	function add_background_job($name = '', $script = 'index.php', $arguments = array()) {
+		global $GUI;
+		include_once(CLASSPATH . 'BackgroundJob.php');
+		$job = new BackgroundJob($GUI);
+		$job->create(array(
+			'name' => $name,
+			'script' => $script,
+			'arguments' => $arguments,
+			'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name
+		));
+		// echo '<br>Background job ' . $job->get_id() . ' angelegt.';
+	}
+
+	/**
+	 * This function only starts a task to run the background jobs in the background.
+	 * It will not wait for the finish of that jobs.
+	 */
+	function start_background_task() {
+		$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' go=run_background_jobs >> ' . LOGPATH . 'background_jobs.htm 2>&1 &';
+		shell_exec($command);
+		// echo '<br>Background Task mit Komando: ' . $command . ' gestartet. Log in ' . LOGPATH . 'background_jobs.log';
+	}
+
+	/**
+	 * Function run all background jobs syncroniously found in the database table
+	 * After finishing the jobs in the loop it asks again for jobs to do.
+	 * It finaly finish if there are no more jobs left to do.
+	 */
+	function run_background_jobs() {
+		include_once(CLASSPATH . 'BackgroundJob.php');
+		// Find jobs already running
+		$jobs = BackgroundJob::find($this, 'job_started_at IS NOT NULL AND job_finished_at IS NULL');
+		if (count($jobs) > 0) {
+			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Backgroundjobs already running.', FILE_APPEND);
+			return 0;
+		}
+		else {
+			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine laufenden Jobs gefunden! Suche nach neuen.', FILE_APPEND);
+		}
+		// Find new jobs to run
+		$jobs = BackgroundJob::find($this, 'job_started_at IS NULL', 'created_at');
+		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>' . count($jobs) . ' Jobs gefunden.', FILE_APPEND);
+		if (count($jobs) > 0) {
+			foreach($jobs AS $job) {
+				$query = $job->get('arguments');
+				$job->update_attr(array('job_started_at = now()'));
+				parse_str($query, $args);
+				$cliArgs = [];
+				foreach ($args AS $key => $value) {
+					$cliArgs[] = sprintf('%s=%s', escapeshellarg($key), escapeshellarg($value));
+				}
+				$cliString = implode(' ', $cliArgs);
+				$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' background_job=' . $job->get_id() . ' only_main=1 ' . implode(' ', $cliArgs) . ' >> ' . LOGPATH . 'background_jobs.htm 2>&1';
+				file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Run command: ' . $command, FILE_APPEND);
+				shell_exec($command);
+				$job->update_attr(array("job_finished_at = now()", "job_status = 'ok'"));
+			}
+			// Search if there are more new jobs to run
+			$this->run_background_jobs();
+		}
+		// noting to do
+		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine Jobs gefunden.', FILE_APPEND);
+		return 0;
+	}
+
 	function write_xlog($msg) {
 		if (!empty($this->xlog)) {
 			$this->xlog->write($msg);
@@ -19463,9 +19531,75 @@ class db_mapObj{
 		$dump_text .= "-- Layerdump aus kvwmap vom " . date("d.m.Y H:i:s");
 		$dump_text .= "\n-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,";
 		$dump_text .= "\n-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.";
-		$dump_text .= "\n\nSET @group_id = 1;";
 		$dump_text .= "\nSET @connection = '';";
 		$dump_text .= "\nSET @connection_id = '1';";
+
+		$sql = "
+			WITH RECURSIVE cte (group_id, level) AS (
+				SELECT 
+					l.Gruppe AS group_id,
+					1 as level
+				FROM
+					layer l 
+				WHERE 
+					l.Layer_ID IN (" . implode(', ', $layer_ids) . ")
+				UNION ALL
+				SELECT 
+					obergruppe,
+					level + 1 as level
+				FROM 
+					u_groups, 
+					cte 
+				WHERE 
+					cte.group_id = u_groups.id AND 
+					obergruppe IS NOT NULL
+			)
+			SELECT DISTINCT 
+				group_id
+			FROM 
+				cte
+			ORDER BY level desc;
+		";
+		#echo '<br>Sql: ' . $sql;
+		$ret = $database->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			$success = false;
+			$err_msg = $ret[1];
+		}
+		else {
+			$result = $database->result;
+			while ($rs = $result->fetch_assoc()) {
+				$group_id_var = '@group_id_' . $rs['group_id'];
+
+				$group = $database->create_insert_dump(
+					'u_groups',
+					'id',
+					"
+						SELECT
+							`Gruppenname`, 
+							`Gruppenname_low-german`, 
+							`Gruppenname_english`, 
+							`Gruppenname_polish`, 
+							`Gruppenname_vietnamese`, 
+							CASE WHEN `obergruppe` IS NOT NULL THEN concat('@group_id_', `obergruppe`) ELSE NULL END as `obergruppe` , 
+							`order`, 
+							`selectable_for_shared_layers`, 
+							`icon`
+						FROM
+							`u_groups`
+						WHERE
+							`id` = " . $rs['group_id'] . "
+					"
+				);
+				# Stelle
+				$dump_text .= "\n\n-- Gruppe " . $rs['Gruppenname'] . " (id=" . $rs['id'] . ")";
+				$dump_text .= "\n" . $group['insert'][0];
+
+				# Variable für Stelle
+				$dump_text .= "\n-- Falls Gruppe schon existiert, INSERT mit /* */ auskommentieren und statt LAST_INSERT_ID() die vorhandene Gruppen-ID eintragen.";
+				$dump_text .= "\nSET " . $group_id_var . " = LAST_INSERT_ID();";
+			}
+		}
 
 		if ($with_privileges) {
 			# Frage Stellen der Layer ab
@@ -19521,7 +19655,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `identifier_text`, `maintable_is_view`, `Data`, `schema`, `geom_column`, `document_path`, `document_url`, `ddl_attribute`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `max_query_rows`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `icon`, `privileg`, `export_privileg`, `status`, `trigger_function`, `editable`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`, `version`, `comment`
+				'SELECT `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `alias`, `Datentyp`, concat(\'@group_id_\', `Gruppe`) AS `Gruppe`, `pfad`, `maintable`, `oid`, `identifier_text`, `maintable_is_view`, `Data`, `schema`, `geom_column`, `document_path`, `document_url`, `ddl_attribute`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `max_query_rows`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `icon`, `privileg`, `export_privileg`, `status`, `trigger_function`, `editable`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`, `version`, `comment`
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . '
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . '

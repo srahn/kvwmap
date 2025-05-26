@@ -244,7 +244,7 @@ class wfs{
 				if ($this->objects[$i][$j]["type"] == 'complete' AND $this->objects[$i][$j]["tag"] != $geomtag) {
 					# alle kompletten Tags und keine Geometrie-Tags
 					# evtl. Namespace davor entfernen
-					$this->objects[$i][$j]["tag"] = str_replace($this->namespace . ':', '', $this->objects[$i][$j]["tag"]);
+					$this->objects[$i][$j]["tag"] = array_pop(explode(':', $this->objects[$i][$j]["tag"]));
 		  		$features[$i]['value'][$this->objects[$i][$j]["tag"]] = $this->objects[$i][$j]["value"];
 				}				
 			}
