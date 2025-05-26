@@ -154,6 +154,74 @@ class GUI {
 		}
 	}
 
+	/**
+	 * Function add a background job to the database table
+	 */
+	function add_background_job($name = '', $script = 'index.php', $arguments = array()) {
+		global $GUI;
+		include_once(CLASSPATH . 'BackgroundJob.php');
+		$job = new BackgroundJob($GUI);
+		$job->create(array(
+			'name' => $name,
+			'script' => $script,
+			'arguments' => $arguments,
+			'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name
+		));
+		// echo '<br>Background job ' . $job->get_id() . ' angelegt.';
+	}
+
+	/**
+	 * This function only starts a task to run the background jobs in the background.
+	 * It will not wait for the finish of that jobs.
+	 */
+	function start_background_task() {
+		$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' go=run_background_jobs >> ' . LOGPATH . 'background_jobs.htm 2>&1 &';
+		shell_exec($command);
+		// echo '<br>Background Task mit Komando: ' . $command . ' gestartet. Log in ' . LOGPATH . 'background_jobs.log';
+	}
+
+	/**
+	 * Function run all background jobs syncroniously found in the database table
+	 * After finishing the jobs in the loop it asks again for jobs to do.
+	 * It finaly finish if there are no more jobs left to do.
+	 */
+	function run_background_jobs() {
+		include_once(CLASSPATH . 'BackgroundJob.php');
+		// Find jobs already running
+		$jobs = BackgroundJob::find($this, 'job_started_at IS NOT NULL AND job_finished_at IS NULL');
+		if (count($jobs) > 0) {
+			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Backgroundjobs already running.', FILE_APPEND);
+			return 0;
+		}
+		else {
+			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine laufenden Jobs gefunden! Suche nach neuen.', FILE_APPEND);
+		}
+		// Find new jobs to run
+		$jobs = BackgroundJob::find($this, 'job_started_at IS NULL', 'created_at');
+		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>' . count($jobs) . ' Jobs gefunden.', FILE_APPEND);
+		if (count($jobs) > 0) {
+			foreach($jobs AS $job) {
+				$query = $job->get('arguments');
+				$job->update_attr(array('job_started_at = now()'));
+				parse_str($query, $args);
+				$cliArgs = [];
+				foreach ($args AS $key => $value) {
+					$cliArgs[] = sprintf('%s=%s', escapeshellarg($key), escapeshellarg($value));
+				}
+				$cliString = implode(' ', $cliArgs);
+				$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' background_job=' . $job->get_id() . ' only_main=1 ' . implode(' ', $cliArgs) . ' >> ' . LOGPATH . 'background_jobs.htm 2>&1';
+				file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Run command: ' . $command, FILE_APPEND);
+				shell_exec($command);
+				$job->update_attr(array("job_finished_at = now()", "job_status = 'ok'"));
+			}
+			// Search if there are more new jobs to run
+			$this->run_background_jobs();
+		}
+		// noting to do
+		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine Jobs gefunden.', FILE_APPEND);
+		return 0;
+	}
+
 	function write_xlog($msg) {
 		if (!empty($this->xlog)) {
 			$this->xlog->write($msg);
