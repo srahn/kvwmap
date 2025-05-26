@@ -41,6 +41,7 @@ class PgObject {
 	public $select;
 	public $from;
 	public $where;
+	public $show;
 
 	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);

@@ -148,6 +148,74 @@ class GUI {
 		}
 	}
 
+	/**
+	 * Function add a background job to the database table
+	 */
+	function add_background_job($name = '', $script = 'index.php', $arguments = array()) {
+		global $GUI;
+		include_once(CLASSPATH . 'BackgroundJob.php');
+		$job = new BackgroundJob($GUI);
+		$job->create(array(
+			'name' => $name,
+			'script' => $script,
+			'arguments' => $arguments,
+			'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name
+		));
+		// echo '<br>Background job ' . $job->get_id() . ' angelegt.';
+	}
+
+	/**
+	 * This function only starts a task to run the background jobs in the background.
+	 * It will not wait for the finish of that jobs.
+	 */
+	function start_background_task() {
+		$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' go=run_background_jobs >> ' . LOGPATH . 'background_jobs.htm 2>&1 &';
+		shell_exec($command);
+		// echo '<br>Background Task mit Komando: ' . $command . ' gestartet. Log in ' . LOGPATH . 'background_jobs.log';
+	}
+
+	/**
+	 * Function run all background jobs syncroniously found in the database table
+	 * After finishing the jobs in the loop it asks again for jobs to do.
+	 * It finaly finish if there are no more jobs left to do.
+	 */
+	function run_background_jobs() {
+		include_once(CLASSPATH . 'BackgroundJob.php');
+		// Find jobs already running
+		$jobs = BackgroundJob::find($this, 'job_started_at IS NOT NULL AND job_finished_at IS NULL');
+		if (count($jobs) > 0) {
+			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Backgroundjobs already running.', FILE_APPEND);
+			return 0;
+		}
+		else {
+			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine laufenden Jobs gefunden! Suche nach neuen.', FILE_APPEND);
+		}
+		// Find new jobs to run
+		$jobs = BackgroundJob::find($this, 'job_started_at IS NULL', 'created_at');
+		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>' . count($jobs) . ' Jobs gefunden.', FILE_APPEND);
+		if (count($jobs) > 0) {
+			foreach($jobs AS $job) {
+				$query = $job->get('arguments');
+				$job->update_attr(array('job_started_at = now()'));
+				parse_str($query, $args);
+				$cliArgs = [];
+				foreach ($args AS $key => $value) {
+					$cliArgs[] = sprintf('%s=%s', escapeshellarg($key), escapeshellarg($value));
+				}
+				$cliString = implode(' ', $cliArgs);
+				$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' background_job=' . $job->get_id() . ' only_main=1 ' . implode(' ', $cliArgs) . ' >> ' . LOGPATH . 'background_jobs.htm 2>&1';
+				file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Run command: ' . $command, FILE_APPEND);
+				shell_exec($command);
+				$job->update_attr(array("job_finished_at = now()", "job_status = 'ok'"));
+			}
+			// Search if there are more new jobs to run
+			$this->run_background_jobs();
+		}
+		// noting to do
+		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine Jobs gefunden.', FILE_APPEND);
+		return 0;
+	}
+
 	function write_xlog($msg) {
 		if (!empty($this->xlog)) {
 			$this->xlog->write($msg);
@@ -19523,31 +19591,72 @@ class db_mapObj{
 
 	function create_layer_dumpfile($database, $layer_ids, $with_privileges = false, $with_datatypes = false) {
 		$success = true;
-		$dump_text = "
--- Layerdump aus kvwmap vom " . date("d.m.Y H:i:s") . "
--- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,
--- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.
+		$groups = [];
+		$stellen = [];
 
-DO $$
-	DECLARE 
-		vars_connection_id integer;
-		vars_group_id integer;
-		vars_last_layer_id integer;
-		" . (implode("\n\t\t", array_map(function ($layer_id){return 'vars_last_layer_id' . $layer_id . ' integer;';}, $layer_ids))) . "
-		vars_last_class_id integer;
-		vars_last_style_id integer;
-		vars_last_label_id integer;
-		vars_last_ddl_id integer;
-		vars_last_druckfreitexte_id integer;
-		vars_last_druckfreilinien_id integer;
-		vars_last_druckfreirechtecke_id integer;
-	BEGIN
-		vars_group_id := 1;
-		vars_connection_id := 1;
+		# Gruppen abfragen
+		$sql = "
+			WITH RECURSIVE cte (group_id, level) AS (
+				SELECT 
+					l.gruppe AS group_id,
+					1 as level
+				FROM
+				kvwmap.layer l 
+				WHERE 
+					l.layer_id IN (" . implode(', ', $layer_ids) . ")
+				UNION ALL
+				SELECT 
+					obergruppe,
+					level + 1 as level
+				FROM 
+					kvwmap.u_groups, 
+					cte 
+				WHERE 
+					cte.group_id = u_groups.id AND 
+					obergruppe IS NOT NULL
+			)
+			SELECT DISTINCT 
+				group_id,
+				level
+			FROM 
+				cte
+			ORDER BY level desc;
 		";
+		#echo '<br>Sql: ' . $sql;
+		$ret = $database->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			$success = false;
+			$err_msg = $ret[1];
+		}
+		else {
+			while ($rs = pg_fetch_assoc($ret[1])) {
+				$groups[] = $database->create_insert_dump(
+					'kvwmap.u_groups',
+					'id',
+					"
+						SELECT
+							id,
+							gruppenname, 
+							gruppenname_low_german, 
+							gruppenname_english, 
+							gruppenname_polish, 
+							gruppenname_vietnamese, 
+							'vars_group_id_' || obergruppe as obergruppe , 
+							\"order\", 
+							selectable_for_shared_layers, 
+							icon
+						FROM
+							kvwmap.u_groups
+						WHERE
+							id = " . $rs['group_id'] . "
+					",
+					'RETURNING id INTO vars_group_id_' . $rs['group_id']
+				);
+			}
+		}
 
+		# Stellen abfragen
 		if ($with_privileges) {
-			# Frage Stellen der Layer ab
 			$sql = "
 				SELECT DISTINCT
 					id,
@@ -19566,13 +19675,7 @@ DO $$
 			}
 			else {
 				while ($rs = pg_fetch_assoc($ret[1])) {
-					$stelle_id_var = '@stelle_id_' . $rs['id'];
-					$stellen[] = array(
-						'id' => $rs['id'],
-						'var' => $stelle_id_var
-					);
-
-					$stelle = $database->create_insert_dump(
+					$stellen[] = $database->create_insert_dump(
 						'kvwmap.stelle',
 						'id',
 						"
@@ -19582,25 +19685,49 @@ DO $$
 								kvwmap.stelle
 							WHERE
 								id = " . $rs['id'] . "
-						"
+						",
+						"RETURNING id INTO vars_stelle_id_" . $rs['id']
 					);
-					# Stelle
-					$dump_text .= "\n\n-- Stelle " . $rs['Bezeichnung'] . " (id=" . $rs['id'] . ")";
-					$dump_text .= "\n" . $stelle['insert'][0];
-
-					# Variable für Stelle
-					$dump_text .= "\n-- Falls Stelle schon existiert, INSERT mit /* */ auskommentieren und statt LAST_INSERT_ID() die vorhandene Stellen-ID eintragen.";
-					$dump_text .= "\nSET " . $stelle_id_var . " = LAST_INSERT_ID();";
 				}
 			}
+		}
+
+		$dump_text = "
+-- Layerdump aus kvwmap vom " . date("d.m.Y H:i:s") . "
+-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,
+-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.
+
+DO $$
+	DECLARE 
+		vars_connection_id integer;
+		" . (implode("\n\t\t", array_map(function ($stelle){return 'vars_stelle_id_' . $stelle['extra'][0] . ' integer;';}, $stellen))) . "
+		" . (implode("\n\t\t", array_map(function ($group){return 'vars_group_id_' . $group['extra'][0] . ' integer;';}, $groups))) . "
+		" . (implode("\n\t\t", array_map(function ($layer_id){return 'vars_last_layer_id' . $layer_id . ' integer;';}, $layer_ids))) . "
+		vars_last_class_id integer;
+		vars_last_style_id integer;
+		vars_last_label_id integer;
+		vars_last_ddl_id integer;
+		vars_last_druckfreitexte_id integer;
+		vars_last_druckfreilinien_id integer;
+		vars_last_druckfreirechtecke_id integer;
+	BEGIN
+		vars_connection_id := 1;
+		";
+
+		foreach ($groups as $group) {
+			$dump_text .= "\n" . $group['insert'][0];
+		}
+
+		foreach ($stellen as $stelle) {
+			$dump_text .= "\n" . $stelle['insert'][0];
 		}
 
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			$layer = $database->create_insert_dump(
 				'kvwmap.layer',
 				'',
-				'SELECT name, name_low_german, name_english, name_polish, name_vietnamese, alias, Datentyp, \'vars_group_id\' AS gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, schema, geom_column, document_path, document_url, ddl_attribute, tileindex, tileitem, labelangleitem, labelitem, labelmaxscale, labelminscale, labelrequires, postlabelcache, connection, connection_id, printconnection, connectiontype, classitem, styleitem, classification, cluster_maxdistance, tolerance, toleranceunits, sizeunits, epsg_code, template, max_query_rows, queryable, use_geom, transparency, drawingorder, legendorder, minscale, maxscale, symbolscale, offsite, requires, ows_srs, wms_name, wms_keywordlist, wms_server_version, wms_format, wms_connectiontimeout, wms_auth_username, wms_auth_password, wfs_geom, write_mapserver_templates, selectiontype, querymap, logconsume, processing, kurzbeschreibung, datasource, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, icon, privileg, export_privileg, status, trigger_function, editable, listed, duplicate_from_layer_id, duplicate_criterion, shared_from, version, comment
-				' . ($this->GUI->plugin_loaded('mobile') ? ', sync' : '') . '
+				"SELECT name, name_low_german, name_english, name_polish, name_vietnamese, alias, Datentyp, 'vars_group_id_' || gruppe AS gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, schema, geom_column, document_path, document_url, ddl_attribute, tileindex, tileitem, labelangleitem, labelitem, labelmaxscale, labelminscale, labelrequires, postlabelcache, connection, connection_id, printconnection, connectiontype, classitem, styleitem, classification, cluster_maxdistance, tolerance, toleranceunits, sizeunits, epsg_code, template, max_query_rows, queryable, use_geom, transparency, drawingorder, legendorder, minscale, maxscale, symbolscale, offsite, requires, ows_srs, wms_name, wms_keywordlist, wms_server_version, wms_format, wms_connectiontimeout, wms_auth_username, wms_auth_password, wfs_geom, write_mapserver_templates, selectiontype, querymap, logconsume, processing, kurzbeschreibung, datasource, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, icon, privileg, export_privileg, status, trigger_function, editable, listed, duplicate_from_layer_id, duplicate_criterion, shared_from, version, comment
+				" . ($this->GUI->plugin_loaded('mobile') ? ', sync' : '') . '
 				' . ($this->GUI->plugin_loaded('mobile') ? ', vector_tile_url' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', cluster_option' : '') . '
 				FROM kvwmap.layer WHERE layer_id=' . $layer_ids[$i],
@@ -19617,10 +19744,9 @@ DO $$
 						"
 							SELECT
 								'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id,
-								'" . $stellen[$s]['var'] . "' AS stelle_id,
+								'vars_stelle_id_" . $stellen[$s]['extra'][0] . "' AS stelle_id,
 								queryable,
-								drawingorder,
-								legendorder, minscale, maxscale, offsite, transparency, postlabelcache, Filter,
+								legendorder, minscale, maxscale, offsite, transparency, postlabelcache, filter,
 								template, header, footer, symbolscale, requires, logconsume, privileg, export_privileg,
 								start_aktiv,
 								use_geom
@@ -19628,11 +19754,11 @@ DO $$
 								kvwmap.used_layer
 							WHERE
 								layer_id = " . $layer_ids[$i] . " AND
-								stelle_id = " . $stellen[$s]['id'] . "
+								stelle_id = " . $stellen[$s]['extra'][0] . "
 						"
 					);
 					if (count($used_layer['insert']) > 0) {
-						$dump_text .= "\n\n-- Zuordnung Layer " . $layer_ids[$i] . " zu Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $used_layer['insert']);
+						$dump_text .= "\n\n-- Zuordnung Layer " . $layer_ids[$i] . " zu Stelle " . $stellen[$s]['extra'][0] . "\n" . implode("\n", $used_layer['insert']);
 					}
 
 					# Attributfilter des Layers in der Stelle
@@ -19641,7 +19767,7 @@ DO $$
 						'',
 						"
 							SELECT
-								'" . $stellen[$s]['var'] . "' AS stelle_id,
+								'vars_stelle_id_" . $stellen[$s]['extra'][0] . "' AS stelle_id,
 								'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id,
 								attributname,
 								attributvalue,
@@ -19651,11 +19777,11 @@ DO $$
 								kvwmap.u_attributfilter2used_layer
 							WHERE
 								layer_id = " . $layer_ids[$i] . " AND
-								stelle_id = " . $stellen[$s]['id'] . "
+								stelle_id = " . $stellen[$s]['extra'][0] . "
 						"
 					);
 					if (count($attributfilter2used_layer['insert']) > 0) {
-						$dump_text .= "\n\n-- Zuordnung der Attributfilter des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $attributfilter2used_layer['insert']);
+						$dump_text .= "\n\n-- Zuordnung der Attributfilter des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['extra'][0] . "\n" . implode("\n", $attributfilter2used_layer['insert']);
 					}
 				}
 			}
@@ -19719,7 +19845,7 @@ DO $$
 						"
 							SELECT
 								'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id,
-								'" . $stellen[$s]['var'] . "' AS stelle_id,
+								'vars_stelle_id_" . $stellen[$s]['extra'][0] . "' AS stelle_id,
 								attributename,
 								privileg,
 								tooltip
@@ -19727,11 +19853,11 @@ DO $$
 								kvwmap.layer_attributes2stelle
 							WHERE
 								layer_id = " . $layer_ids[$i] . " AND
-								stelle_id = " . $stellen[$s]['id'] . "
+								stelle_id = " . $stellen[$s]['extra'][0] . "
 						"
 					);
 					if (count($layer_attributes2stelle['insert']) > 0) {
-						$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
+						$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['extra'][0] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
 					}
 				}
 			}

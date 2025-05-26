@@ -122,10 +122,8 @@ else {
 
 		if (is_login($GUI->formvars)) {
 			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4, $GUI->echo);
-			/**
-				This set the passwort with the sha1 method before each login
-				if not allready exists and only if it matches with the old md5 method.
-			*/
+			// This set the passwort with the sha1 method before each login
+			// if not allready exists and only if it matches with the old md5 method.
 			if (prepare_sha1(trim(pg_escape_string($GUI->formvars['login_name'])), trim(pg_escape_string($GUI->formvars['passwort'])))) {
 				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase);
 				$GUI->debug->write('Nutzer mit login_name ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);

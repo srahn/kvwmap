@@ -62,12 +62,27 @@ include('credentials.php');
 include('config.php');
 
 # Session
-if(!isset($_SESSION)){
+if (!isset($_SESSION)) {
 	$maxlifetime = 0;
 	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER) AND $_SERVER['CONTEXT_PREFIX'] != '') ? $_SERVER['CONTEXT_PREFIX'] : '/';
 	$samesite = 'strict';
 	session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
 	session_start();
+}
+
+if (
+	php_sapi_name() === 'cli' AND
+	array_key_exists('login_name', $_REQUEST) AND $_REQUEST['login_name'] != '' AND
+	array_key_exists('csrf_token', $_REQUEST) AND $_REQUEST['csrf_token'] != '' AND
+	array_key_exists('stelle_id', $_REQUEST) AND $_REQUEST['stelle_id'] != ''
+) {
+	$_SESSION = array(
+		'angemeldet' => true,
+		'login_name' => $_REQUEST['login_name'],
+		'login_routines' => null,
+		'csrf_token' => $_REQUEST['csrf_token'],
+		'stelle_angemeldet' => $_REQUEST['stelle_id']
+	);
 }
 
 # Laden der Plugins config.phps
@@ -2283,6 +2298,18 @@ function go_switch($go, $exit = false) {
 			*/
 			case 'get_user_notifications' : {
 				$GUI->get_user_notifications();
+			} break;
+
+			case 'start_background_task' : {
+				$GUI->start_background_task();
+			} break;
+
+			case 'run_background_jobs' : {
+				$GUI->run_background_jobs();
+			} break;
+
+			case 'show_background_jobs_log' : {
+				readfile(LOGPATH . 'background_jobs.htm');
 			} break;
 
 			default : {
