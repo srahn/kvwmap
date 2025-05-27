@@ -21099,27 +21099,26 @@ class db_mapObj{
 	*/
 	function get_datatypes($layer_ids, $with_subdatatypes = false) {
 		$datatypes = array();
-		$sql = "
-			SELECT DISTINCT * FROM (
-				SELECT
-					dt.*
-				FROM
-					`layer_attributes` la JOIN
-					`datatypes` dt ON replace(la.type,'_', '') = dt.id
-				WHERE
-					la.layer_id IN (" . implode(', ', $layer_ids) . ")
-					" . ($with_subdatatypes ? "
-				UNION ALL
+		if (!$with_subdatatypes) {
+			$sql = "
+				SELECT DISTINCT 
+						dt.*
+					FROM
+						`layer_attributes` la JOIN
+						`datatypes` dt ON replace(la.type,'_', '') = dt.id
+					WHERE
+						la.layer_id IN (" . implode(', ', $layer_ids) . ")";
+		}
+		else {
+			$sql = "
 				SELECT
 					dt.*
 				FROM
 					`datatype_attributes` da JOIN
-					`datatypes` dt ON replace(da.type,'_', '') = dt.id
+					`datatypes` dt ON da.datatype_id = dt.id
 				WHERE
-					da.layer_id IN (" . implode(', ', $layer_ids) . ")
-				" : "") . "
-			) as foo
-		";
+					da.layer_id IN (" . implode(', ', $layer_ids) . ")";
+		}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_datatypes - Lesen der Datentypen der Layer mit id (" . implode(', ', $layer_ids) . "):<br>" . $sql , 4);
 		$ret = $this->db->execSQL($sql);
 		if (!$ret['success']) {
