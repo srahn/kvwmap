@@ -1,6 +1,7 @@
 <?
   ini_set('memory_limit', '8192M');
   global $GUI;
+	global $kvwmap_plugins;
 
   # credentials befüllen
   $credentials = $this->pgdatabase->get_credentials(POSTGRES_CONNECTION_ID);
@@ -52,6 +53,76 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
   else {
       echo "Fehler beim Öffnen der Datei.\n";
   }
+
+  # Plugin-Migrationen eintragen
+	$plugin_migrations = [
+		'alkis' => [
+			'2025-05-20_15-46-00_config.sql'
+		],
+		'anliegerbetraege' => [
+			'2025-05-20_15-46-00_layer.sql',
+			'2025-05-20_15-46-00_menues.sql'
+		],
+		'bodenrichtwerte' => [
+			'2025-05-20_15-46-00_config.sql',
+			'2025-05-20_15-46-00_layer.sql',
+			'2025-05-20_15-46-00_menues.sql'
+		],
+		'dbak' => [
+			'2025-05-20_15-46-00_config.sql'
+		],
+		'fortfuehrungslisten' => [
+			'2025-05-20_15-46-00_config.sql',
+			'2025-05-20_15-46-00_layer.sql',
+			'2025-05-20_15-46-00_menues.sql'
+		],
+		'jagdkataster' => [
+			'2025-05-20_15-46-00_config.sql',
+			'2025-05-20_15-46-00_layer.sql',
+			'2025-05-20_15-46-00_menues.sql'
+		],
+		'kolibri' => [
+			'2025-05-20_15-46-00_u_funktionen.sql'
+		],
+		'metadata' => [
+			'2025-05-20_15-46-00_config.sql',
+			'2025-05-20_15-46-00_layer.sql',
+			'2025-05-20_15-46-00_u_funktionen.sql'
+		],
+		'nachweisverwaltung' => [
+			'2025-05-20_15-46-00_config.sql',
+			'2025-05-20_15-46-00_layer.sql',
+			'2025-05-20_15-46-00_menues.sql'
+		],
+		'portal' => [
+			'2025-05-20_15-46-00_config.sql'
+		],
+		'probaug' => [
+			'2025-05-20_15-46-00_config.sql',
+			'2025-05-20_15-46-00_layer.sql',
+			'2025-05-20_15-46-00_menues.sql'
+		],
+		'ukos' => [
+			'2025-05-20_15-46-00_menues.sql'
+		],
+		'xplankonverter' => [
+			'2025-05-20_15-46-00_config.sql',
+			'2025-05-20_15-46-00_layer.sql',
+			'2025-05-20_15-46-00_menues.sql'
+		]
+	];
+ 
+	foreach ($kvwmap_plugins as $plugin) {
+		foreach ($plugin_migrations[$plugin] as $migration) {
+			$sql = "
+				INSERT INTO migrations
+					(component, type, filename)
+				VALUES 
+					('" . $plugin . "', 'postgresql', '" . $migration . "')
+			";
+			$ret = $this->database->execSQL($sql,4, 1);
+		}
+	}  
 	
   # Transfer von MySQL zu PostgreSQL
 	$sql = "
