@@ -19807,8 +19807,8 @@ class db_mapObj{
 		if ($with_datatypes) {
 			foreach ($datatypes AS $datatype) {
 				$dump_text .= "\n\n-- Replace attribute type for Datatype " . $datatype[$id];
-				$dump_text .= "\nUPDATE layer_attributes SET type = REPLACE(type, '" . $datatype[$id] . "', CONCAT('@last_datatype_id" . $datatype[$id] . "));";
-				$dump_text .= "\nUPDATE datatype_attributes SET type = REPLACE(type, '" . $datatype[$id] . "', CONCAT('@last_datatype_id" . $datatype[$id] . "));";
+				$dump_text .= "\nUPDATE layer_attributes SET type = REPLACE(type, '" . $datatype[$id] . "', @last_datatype_id" . $datatype[$id] . ");";
+				$dump_text .= "\nUPDATE datatype_attributes SET type = REPLACE(type, '" . $datatype[$id] . "', @last_datatype_id" . $datatype[$id] . ");";
 			}
 		}
 		
