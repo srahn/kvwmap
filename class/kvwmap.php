@@ -19559,7 +19559,7 @@ class db_mapObj{
 
 		if ($with_datatypes) {
 			# Frage Datatypes der Layer ab
-			$datatypes = $this->get_datatypes($layer_ids);
+			$datatypes = $this->get_datatypes($layer_ids, true);
 
 			foreach ($datatypes AS $datatype) {
 				$datatype_dump = $database->create_insert_dump(
@@ -21097,16 +21097,28 @@ class db_mapObj{
 	/*
 	* Returns a list of datatypes used by layer, given in layer_ids array
 	*/
-	function get_datatypes($layer_ids) {
+	function get_datatypes($layer_ids, $with_subdatatypes = false) {
 		$datatypes = array();
 		$sql = "
-			SELECT DISTINCT
-				dt.*
-			FROM
-				`layer_attributes` la JOIN
-				`datatypes` dt ON replace(la.type,'_', '') = dt.id
-			WHERE
-				la.layer_id IN (" . implode(', ', $layer_ids) . ")
+			SELECT DISTINCT * FROM (
+				SELECT
+					dt.*
+				FROM
+					`layer_attributes` la JOIN
+					`datatypes` dt ON replace(la.type,'_', '') = dt.id
+				WHERE
+					la.layer_id IN (" . implode(', ', $layer_ids) . ")
+					" . ($with_subdatatypes ? "
+				UNION ALL
+				SELECT
+					dt.*
+				FROM
+					`datatype_attributes` da JOIN
+					`datatypes` dt ON replace(da.type,'_', '') = dt.id
+				WHERE
+					da.layer_id IN (" . implode(', ', $layer_ids) . ")
+				" : "") . "
+			) as foo
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_datatypes - Lesen der Datentypen der Layer mit id (" . implode(', ', $layer_ids) . "):<br>" . $sql , 4);
 		$ret = $this->db->execSQL($sql);
