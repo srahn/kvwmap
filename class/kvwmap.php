@@ -19804,6 +19804,13 @@ class db_mapObj{
 			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, 'layer_id=" . $layer_ids[$i]."', CONCAT('layer_id=', @last_layer_id" . $layer_ids[$i].")) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink') AND options regexp 'layer_id=" . $layer_ids[$i] . "( |$)';";
 			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i].",', CONCAT(@last_layer_id" . $layer_ids[$i].", ',')) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK') AND options LIKE '" . $layer_ids[$i] . ",%';";
 		}
+		if ($with_datatypes) {
+			foreach ($datatypes AS $datatype) {
+				$dump_text .= "\n\n-- Replace attribute type for Datatype " . $datatype[$id];
+				$dump_text .= "\nUPDATE layer_attributes SET type = REPLACE(type, '" . $datatype[$id] . "', CONCAT('@last_datatype_id" . $datatype[$id] . "));";
+				$dump_text .= "\nUPDATE datatype_attributes SET type = REPLACE(type, '" . $datatype[$id] . "', CONCAT('@last_datatype_id" . $datatype[$id] . "));";
+			}
+		}
 		
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH . $filename, 'w');
