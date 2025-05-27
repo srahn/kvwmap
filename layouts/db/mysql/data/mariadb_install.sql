@@ -1822,7 +1822,7 @@ CREATE TABLE `styles` (
   `maxsize` varchar(50) DEFAULT NULL,
   `minscale` int(11) UNSIGNED DEFAULT NULL,
   `maxscale` int(11) UNSIGNED DEFAULT NULL,
-  `angle` int(11) DEFAULT NULL,
+  `angle` varchar(11) DEFAULT NULL,
   `angleitem` varchar(255) DEFAULT NULL,
   `width` varchar(50) DEFAULT NULL,
   `minwidth` decimal(5,2) DEFAULT NULL,
@@ -2555,8 +2555,8 @@ CREATE TABLE `u_rolle2used_layer` (
 --
 
 INSERT INTO `u_rolle2used_layer` (`user_id`, `stelle_id`, `layer_id`, `aktivStatus`, `queryStatus`, `gle_view`, `showclasses`, `logconsume`, `transparency`, `drawingorder`, `labelitem`, `geom_from_layer`, `rollenfilter`) VALUES
-(1, 1, 1, '1', '0', 1, 1, '', NULL, NULL, NULL, 0, NULL),
-(1, 1, 2, '0', '0', 1, 1, '', NULL, NULL, NULL, 0, NULL);
+(1, 1, 1, '1', '0', 1, 1, '0', NULL, NULL, NULL, 0, NULL),
+(1, 1, 2, '0', '0', 1, 1, '0', NULL, NULL, NULL, 0, NULL);
 
 -- --------------------------------------------------------
 
