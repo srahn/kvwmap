@@ -19899,11 +19899,11 @@ class db_mapObj{
 			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i].",', CONCAT(@last_layer_id" . $layer_ids[$i].", ',')) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK') AND options LIKE '" . $layer_ids[$i] . ",%';";
 		}
 		if ($with_datatypes) {
-			usort($datatypes, function ($a, $b){return $b['id'] <=> $a['id'];});
+			usort($datatypes, function ($a, $b){return $a['id'] <=> $b['id'];});
 			foreach ($datatypes AS $datatype) {
 				$dump_text .= "\n\n-- Replace attribute type for Datatype " . $datatype['id'];
-				$dump_text .= "\nUPDATE layer_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', @last_datatype_id" . $datatype['id'] . ");";
-				$dump_text .= "\nUPDATE datatype_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', @last_datatype_id" . $datatype['id'] . ");";
+				$dump_text .= "\nUPDATE layer_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', @last_datatype_id" . $datatype['id'] . ") WHERE replace(type,'_', '') = '" . $datatype['id'] . "';";
+				$dump_text .= "\nUPDATE datatype_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', @last_datatype_id" . $datatype['id'] . ") WHERE replace(type,'_', '') = '" . $datatype['id'] . "';";
 			}
 		}
 		
