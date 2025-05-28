@@ -110,7 +110,9 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
 		'probaug' => [
 			'2025-05-20_15-46-00_config.sql',
 			'2025-05-20_15-46-00_layer.sql',
-			'2025-05-20_15-46-00_menues.sql'
+			'2025-05-20_15-46-00_menues.sql',
+      'bau_verfahrensart.sql',
+      'bau_vorhaben.sql'
 		],
 		'ukos' => [
 			'2025-05-20_15-46-00_menues.sql'
