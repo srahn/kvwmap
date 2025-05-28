@@ -19666,7 +19666,7 @@ class db_mapObj{
 					'id',
 					"
 						SELECT
-							*
+							id, name, schema, 'vars_connection_id'
 						FROM
 							kvwmap.datatypes
 						WHERE
