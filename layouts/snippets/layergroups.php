@@ -56,7 +56,7 @@
 							<a name="group_<?php echo $this->layergruppen[$i]->get('id'); ?>" style="color: black;"><?php echo $this->layergruppen[$i]->get('id'); ?></a>
 						</td>
 						<td>
-							<span><?php echo $this->layergruppen[$i]->get('Gruppenname') ?></span>
+							<span><?php echo $this->layergruppen[$i]->get('gruppenname') ?></span>
 						</td>
 						<td>
 							<span><?php echo $this->layergruppen[$i]->get('obergruppe'); ?></span>
