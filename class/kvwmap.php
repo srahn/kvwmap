@@ -19593,6 +19593,7 @@ class db_mapObj{
 		$success = true;
 		$groups = [];
 		$stellen = [];
+		$datatype_dumps = [];
 
 		# Gruppen abfragen
 		$sql = "
@@ -19655,6 +19656,27 @@ class db_mapObj{
 			}
 		}
 
+		# Frage Datatypes der Layer ab
+		if ($with_datatypes) {
+			$datatypes = $this->get_datatypes($layer_ids, true);
+
+			foreach ($datatypes AS $datatype) {
+				$datatype_dumps[] = $database->create_insert_dump(
+					'kvwmap.datatypes',
+					'id',
+					"
+						SELECT
+							*
+						FROM
+							kvwmap.datatypes
+						WHERE
+							id = " . $datatype['id'] . "
+					",
+					'RETURNING id INTO vars_datatype_id_' . $rs['id']
+				);
+			}
+		}
+
 		# Stellen abfragen
 		if ($with_privileges) {
 			$sql = "
@@ -19702,6 +19724,7 @@ DO $$
 		vars_connection_id integer;
 		" . (implode("\n\t\t", array_map(function ($stelle){return 'vars_stelle_id_' . $stelle['extra'][0] . ' integer;';}, $stellen))) . "
 		" . (implode("\n\t\t", array_map(function ($group){return 'vars_group_id_' . $group['extra'][0] . ' integer;';}, $groups))) . "
+		" . (implode("\n\t\t", array_map(function ($datatype){return 'vars_group_id_' . $datatype['extra'][0] . ' integer;';}, $datatype_dumps))) . "
 		" . (implode("\n\t\t", array_map(function ($layer_id){return 'vars_last_layer_id' . $layer_id . ' integer;';}, $layer_ids))) . "
 		vars_last_class_id integer;
 		vars_last_style_id integer;
@@ -19716,6 +19739,10 @@ DO $$
 
 		foreach ($groups as $group) {
 			$dump_text .= "\n" . $group['insert'][0];
+		}
+
+		foreach ($datatype_dumps as $datatype) {
+			$dump_text .= "\n" . $datatype['insert'][0];
 		}
 
 		foreach ($stellen as $stelle) {
@@ -19898,6 +19925,27 @@ DO $$
 				}
 			}
 
+			if ($with_datatypes) {
+				$datatype_attributes_dump = $database->create_insert_dump(
+					'kvwmap.datatype_attributes',
+					'',
+					"
+						SELECT
+							'vars_last_layer_id" . $layer_ids[$i] . "' as layer_id,
+							'vars_datatype_id_' || datatype_id AS datatype_id,
+							name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, default, form_element_type,
+							options, alias, alias_low-german, alias_english, alias_polish, alias_vietnamese, tooltip, group, raster_visibility, mandatory, quicksearch,
+							order, privileg, query_tooltip, visible, vcheck_attribute, vcheck_operator, vcheck_value, arrangement, labeling
+						FROM
+							kvwmap.datatype_attributes
+						WHERE
+							layer_id = " . $layer_ids[$i]
+				);
+				for ($k = 0; $k < count_or_0($datatype_attributes_dump['insert']); $k++) {
+					$dump_text .= "\n\n-- Datatype_attributes \n" . $datatype_attributes_dump['insert'][$k];
+				}
+			}
+
 			$ddls = $database->create_insert_dump(
 				'kvwmap.datendrucklayouts', 
 				'id', 
@@ -19958,52 +20006,15 @@ DO $$
 			$dump_text .= "\nUPDATE kvwmap.layer_attributes SET options = REPLACE(options, 'layer_id=" . $layer_ids[$i]."', CONCAT('layer_id=', vars_last_layer_id" . $layer_ids[$i].")) WHERE layer_id IN (vars_last_layer_id" . implode(', vars_last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink') AND options ~ 'layer_id=" . $layer_ids[$i] . "( |$)';";
 			$dump_text .= "\nUPDATE kvwmap.layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i].",', CONCAT(vars_last_layer_id" . $layer_ids[$i].", ',')) WHERE layer_id IN (vars_last_layer_id" . implode(', vars_last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK') AND options LIKE '" . $layer_ids[$i] . ",%';";
 		}
-
 		if ($with_datatypes) {
-			# Frage Datatypes der Layer ab
-			$datatypes = $this->get_datatypes($layer_ids);
-
+			usort($datatypes, function ($a, $b){return $a['id'] <=> $b['id'];});
 			foreach ($datatypes AS $datatype) {
-				$datatype_dump = $database->create_insert_dump(
-					'datatypes',
-					'id',
-					"
-						SELECT
-							*
-						FROM
-							datatypes
-						WHERE
-							id = " . $datatype['id'] . "
-					"
-				);
-
-				$dump_text .= "\n\n-- Datatype " . $datatype['id'] . "\n" . $datatype_dump['insert'][0];
-				$last_datatype_id = '@last_datatype_id' . $datatype['id'];
-				$dump_text .= "\nSET " . $last_datatype_id . "=LAST_INSERT_ID();";
-
-				$datatype_attributes_dump = $database->create_insert_dump(
-					'datatype_attributes',
-					'',
-					"
-						SELECT
-							'" . $last_datatype_id . "' AS datatype_id,
-							name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, default, form_element_type,
-							options, alias, alias_low-german, alias_english, alias_polish, alias_vietnamese, tooltip, group, raster_visibility, mandatory, quicksearch,
-							order, privileg, query_tooltip, visible, vcheck_attribute, vcheck_operator, vcheck_value, arrangement, labeling
-						FROM
-							datatype_attributes
-						WHERE
-							datatype_id = " . $datatype['id'] . "
-					"
-				);
-
-				$dump_text .= "\n\n-- Datatype_attributes " . $datatype['id'] . "\n" . $datatype_attributes_dump['insert'][0];
+				$dump_text .= "\n\n-- Replace attribute type for Datatype " . $datatype['id'];
+				$dump_text .= "\nUPDATE layer_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', vars_datatype_id_" . $datatype['id'] . ") WHERE replace(type,'_', '') = '" . $datatype['id'] . "';";
+				$dump_text .= "\nUPDATE datatype_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', vars_datatype_id_" . $datatype['id'] . ") WHERE replace(type,'_', '') = '" . $datatype['id'] . "';";
 			}
 		}
-		$dump_text .= "
-			END $$;
-		";
-
+		
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH . $filename, 'w');
 		fwrite($fp, $dump_text);
@@ -21308,17 +21319,28 @@ DO $$
 	/*
 	* Returns a list of datatypes used by layer, given in layer_ids array
 	*/
-	function get_datatypes($layer_ids) {
+	function get_datatypes($layer_ids, $with_subdatatypes = false) {
 		$datatypes = array();
-		$sql = "
-			SELECT DISTINCT
-				dt.*
-			FROM
-				kvwmap.layer_attributes la JOIN
-				kvwmap.datatypes dt ON replace(la.type,'_', '') = dt.id::text
-			WHERE
-				la.layer_id IN (" . implode(', ', $layer_ids) . ")
-		";
+		if (!$with_subdatatypes) {
+			$sql = "
+				SELECT DISTINCT 
+						dt.*
+					FROM
+						kvwmap.layer_attributes la JOIN
+						kvwmap.datatypes dt ON replace(la.type,'_', '') = dt.id
+					WHERE
+						la.layer_id IN (" . implode(', ', $layer_ids) . ")";
+		}
+		else {
+			$sql = "
+				SELECT DISTINCT
+					dt.*
+				FROM
+					kvwmap.datatype_attributes da JOIN
+					kvwmap.datatypes dt ON da.datatype_id = dt.id
+				WHERE
+					da.layer_id IN (" . implode(', ', $layer_ids) . ")";
+		}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_datatypes - Lesen der Datentypen der Layer mit id (" . implode(', ', $layer_ids) . "):<br>" . $sql , 4);
 		$ret = $this->db->execSQL($sql);
 		if (!$ret['success']) {

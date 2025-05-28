@@ -926,7 +926,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<span data-tooltip="<?php echo $strOwsContactUrlHint; ?>"></span>
 				</th>
 				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
-						<input name="ows_contenturl" type="text" value="<?php echo $this->formvars['ows_contenturl']; ?>">
+						<input name="ows_contacturl" type="text" value="<?php echo $this->formvars['ows_contacturl']; ?>">
 				</td>
 			</tr>
 
@@ -1049,7 +1049,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<span data-tooltip="<?php echo $strOwsContactUrlHint; ?>"></span>
 				</th>
 				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
-						<input name="ows_contacturl" type="text" value="<?php echo $this->formvars['ows_contacturl']; ?>">
+						<input name="ows_contenturl" type="text" value="<?php echo $this->formvars['ows_contenturl']; ?>">
 				</td>
 			</tr>
 

@@ -2900,7 +2900,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nds_titel {
 	font-family: SourceSansPro3;
 	font-size: 20px;
-	margin-bottom: 0px;
+	margin-bottom: 20px;
 	margin-top: 10px;
 }
 
