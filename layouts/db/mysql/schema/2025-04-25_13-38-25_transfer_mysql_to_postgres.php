@@ -59,8 +59,11 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
 		'alkis' => [
 			'2025-05-20_15-46-00_config.sql'
 		],
-		'anliegerbetraege' => [
+		'anliegerbeitraege' => [
 			'2025-05-20_15-46-00_layer.sql',
+			'2025-05-20_15-46-00_menues.sql'
+		],
+    'bauleitplanung' => [
 			'2025-05-20_15-46-00_menues.sql'
 		],
 		'bodenrichtwerte' => [
