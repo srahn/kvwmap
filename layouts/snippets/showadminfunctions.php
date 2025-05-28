@@ -63,7 +63,8 @@ function toggleGroup(group, show){
 					<td align="right"><span class="fett">Status</span></td>
 				</tr><?
 				foreach ($this->administration->schema_migration_files as $component => $component_migrations) {
-					$postgresql_counter = (array_key_exists($component, $this->administration->migrations_to_execute['postgresql']) ? count($this->administration->migrations_to_execute['postgresql'][$component]) : 0); ?>
+					$postgresql_counter = (array_key_exists($component, $this->administration->migrations_to_execute['postgresql']) ? count($this->administration->migrations_to_execute['postgresql'][$component]) : 0);
+					$seed_counter = (array_key_exists($component, $this->administration->seeds_to_execute['postgresql']) ? count($this->administration->seeds_to_execute['postgresql'][$component]) : 0); ?>
 					<tr style="border:1px solid #C3C7C3;">
 						<td><?	echo $component; ?></td>
 						<td align="right"><?
@@ -71,7 +72,7 @@ function toggleGroup(group, show){
 								echo ' Schemata aktuell';
 							}
 							else {
-								$title.= @implode('&#10;', $this->administration->migrations_to_execute['postgresql'][$component] ?: []);
+								$title = @implode('&#10;', $this->administration->migrations_to_execute['postgresql'][$component] ?: []);
 								echo '<span class="fett red" title="'.$title.'">';
 								$update_necessary = true;
 								if($postgresql_counter > 0)echo 'PostgreSQL-Schema ';
