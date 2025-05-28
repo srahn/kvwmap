@@ -64,7 +64,14 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
 			'2025-05-20_15-46-00_menues.sql'
 		],
     'bauleitplanung' => [
-			'2025-05-20_15-46-00_menues.sql'
+			'aemter.sql',
+      'gebietstypen_fnp.sql',
+      'gebietstypen.sql',
+      'gemeinden.sql',
+      'konkretisierungen.sql',
+      'kreise.sql',
+      'planungsregionen.sql',
+      'stadtumlandraum.sql'
 		],
 		'bodenrichtwerte' => [
 			'2025-05-20_15-46-00_config.sql',
