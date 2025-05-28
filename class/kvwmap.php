@@ -19672,7 +19672,7 @@ class db_mapObj{
 						WHERE
 							id = " . $datatype['id'] . "
 					",
-					'RETURNING id INTO vars_datatype_id_' . $rs['id']
+					'RETURNING id INTO vars_datatype_id_' . $datatype['id']
 				);
 			}
 		}
@@ -20010,10 +20010,11 @@ DO $$
 			usort($datatypes, function ($a, $b){return $a['id'] <=> $b['id'];});
 			foreach ($datatypes AS $datatype) {
 				$dump_text .= "\n\n-- Replace attribute type for Datatype " . $datatype['id'];
-				$dump_text .= "\nUPDATE layer_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', vars_datatype_id_" . $datatype['id'] . ") WHERE replace(type,'_', '') = '" . $datatype['id'] . "';";
-				$dump_text .= "\nUPDATE datatype_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', vars_datatype_id_" . $datatype['id'] . ") WHERE replace(type,'_', '') = '" . $datatype['id'] . "';";
+				$dump_text .= "\nUPDATE kvwmap.layer_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', vars_datatype_id_" . $datatype['id'] . "::text) WHERE replace(type,'_', '') = '" . $datatype['id'] . "';";
+				$dump_text .= "\nUPDATE kvwmap.datatype_attributes SET type = REPLACE(type, '" . $datatype['id'] . "', vars_datatype_id_" . $datatype['id'] . "::text) WHERE replace(type,'_', '') = '" . $datatype['id'] . "';";
 			}
 		}
+		$dump_text .= "\nEND $$";
 		
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH . $filename, 'w');
