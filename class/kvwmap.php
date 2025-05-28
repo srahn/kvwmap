@@ -21337,7 +21337,7 @@ DO $$
 					dt.*
 				FROM
 					kvwmap.datatype_attributes da JOIN
-					kvwmap.datatypes dt ON da.datatype_id = dt.id::text
+					kvwmap.datatypes dt ON da.datatype_id = dt.id
 				WHERE
 					da.layer_id IN (" . implode(', ', $layer_ids) . ")";
 		}
