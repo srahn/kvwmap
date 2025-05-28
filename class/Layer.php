@@ -149,7 +149,7 @@ class Layer extends PgObject {
 					'layer_id' => $this->get_id(),
 					'name' => $names[$i],
 					'alias' => $aliases[$i],
-					'"order"' => $i + 1
+					'order' => $i + 1
 				));
 			}
 		}

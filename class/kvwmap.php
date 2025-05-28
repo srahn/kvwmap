@@ -19724,7 +19724,7 @@ DO $$
 		vars_connection_id integer;
 		" . (implode("\n\t\t", array_map(function ($stelle){return 'vars_stelle_id_' . $stelle['extra'][0] . ' integer;';}, $stellen))) . "
 		" . (implode("\n\t\t", array_map(function ($group){return 'vars_group_id_' . $group['extra'][0] . ' integer;';}, $groups))) . "
-		" . (implode("\n\t\t", array_map(function ($datatype){return 'vars_group_id_' . $datatype['extra'][0] . ' integer;';}, $datatype_dumps))) . "
+		" . (implode("\n\t\t", array_map(function ($datatype){return 'vars_datatype_id_' . $datatype['extra'][0] . ' integer;';}, $datatype_dumps))) . "
 		" . (implode("\n\t\t", array_map(function ($layer_id){return 'vars_last_layer_id' . $layer_id . ' integer;';}, $layer_ids))) . "
 		vars_last_class_id integer;
 		vars_last_style_id integer;
@@ -19933,9 +19933,9 @@ DO $$
 						SELECT
 							'vars_last_layer_id" . $layer_ids[$i] . "' as layer_id,
 							'vars_datatype_id_' || datatype_id AS datatype_id,
-							name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, default, form_element_type,
-							options, alias, alias_low-german, alias_english, alias_polish, alias_vietnamese, tooltip, group, raster_visibility, mandatory, quicksearch,
-							order, privileg, query_tooltip, visible, vcheck_attribute, vcheck_operator, vcheck_value, arrangement, labeling
+							name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, \"default\", form_element_type,
+							options, alias, alias_low_german, alias_english, alias_polish, alias_vietnamese, tooltip, \"group\", raster_visibility, mandatory, quicksearch,
+							\"order\", privileg, query_tooltip, visible, vcheck_attribute, vcheck_operator, vcheck_value, arrangement, labeling
 						FROM
 							kvwmap.datatype_attributes
 						WHERE
