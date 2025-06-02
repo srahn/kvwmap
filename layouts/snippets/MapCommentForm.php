@@ -1,6 +1,6 @@
 <?php
   include(LAYOUTPATH.'languages/MapCommentForm_'.rolle::$language.'.php');
-	$timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $this->user->rolle->newtime);
+	$timestamp = $this->user->rolle->newtime;
 ?>
 
 <h2><?php echo $strTitleExtent; ?></h2><br>
@@ -8,7 +8,7 @@
 <table cellspacing="0" cellpadding="2">
 	<tr>
 		<td align="center">
-			<?php echo $strTime.$timestamp->format('d.m.Y H:i:s'); ?><br><br>
+			<?php echo $strTime.$timestamp; ?><br><br>
 			<textarea name="comment" autofocus cols="35" rows="4" wrap="VIRTUAL" placeholder="<? echo $this->strComment; ?>"><?php echo $this->formvars['comment']; ?></textarea><br><br>
 			<input type="checkbox" value="1" name="public"> <? echo $strPublic; ?><br><br>
 			<input type="hidden" name="go" value="Kartenkommentar">

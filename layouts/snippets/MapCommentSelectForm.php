@@ -16,7 +16,7 @@
   for ($i=0;$i<$anzMapComments;$i++) {
   	?>
   <tr>
-    <td><a href="index.php?go=Kartenkommentar_Zoom&storetime=<?php echo $this->mapComments[$i]['time_id']; ?>&user_id=<?php echo $this->mapComments[$i]['user_id']; ?>"><?php echo DateTime::createFromFormat('Y-m-d H:i:s', $this->mapComments[$i]['time_id'])->format('d.m.Y H:i:s'); ?></a></td>
+    <td><a href="index.php?go=Kartenkommentar_Zoom&storetime=<?php echo $this->mapComments[$i]['time_id']; ?>&user_id=<?php echo $this->mapComments[$i]['user_id']; ?>"><?php echo $this->mapComments[$i]['time_id']; ?></a></td>
 		<td><? echo $this->mapComments[$i]['Vorname'].' '.$this->mapComments[$i]['name']; ?></td>
     <td><?php echo $this->mapComments[$i]['comment']; ?></td>
     <td>

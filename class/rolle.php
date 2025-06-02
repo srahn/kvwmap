@@ -2501,8 +2501,8 @@ class rolle {
 	}	
 
 	function getMapComments($consumetime, $public = false, $order) {
-		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.name, u.vorname FROM kvwmap.u_consume2comments as c, user as u WHERE c.user_id = u.id AND (';
-		if($public)$sql.=' c.public OR';
+		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.name, u.vorname FROM kvwmap.u_consume2comments as c, kvwmap.user as u WHERE c.user_id = u.id AND (';
+		if($public)$sql.=' c.public = 1 OR';
 		$sql.=' c.user_id='.$this->user_id;
 		$sql.=') AND c.stelle_id='.$this->stelle_id;
 		if ($consumetime!='') {
