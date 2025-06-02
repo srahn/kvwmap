@@ -9,7 +9,7 @@
       <div id="' . $group['id'] . '" class="llr_group dragObject closed" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
         <div class="groupname">
           <a href="javascript:void(0)" onclick="this.parentNode.parentNode.classList.toggle(\'closed\')">&nbsp;&nbsp;&nbsp;&nbsp;</a>
-          ' . $group['Gruppenname'] . '
+          ' . $group['gruppenname'] . '
           <a title="bearbeiten" class="llr_edit_link" href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '"><i class="fa fa-pencil" style="padding: 3px"></i></a>
         </div>
         <div class="group_content">

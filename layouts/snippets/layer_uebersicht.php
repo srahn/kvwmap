@@ -19,7 +19,7 @@
 			$upper_groups[] = $group['id'];
 			if ($group['untergruppen'] != '') {
 				foreach ($group['untergruppen'] as $untergruppe) {
-					$subgroup = $GUI->outputGroup($GUI->groups[$untergruppe], $indent + 15, $prefix . ' ' . $group['Gruppenname'] . ' / ', $upper_groups);
+					$subgroup = $GUI->outputGroup($GUI->groups[$untergruppe], $indent + 15, $prefix . ' ' . $group['gruppenname'] . ' / ', $upper_groups);
 					$output_groups .= $subgroup['output'];
 					$group_keywords = array_merge($group_keywords, $subgroup['keywords']);
 				}
@@ -37,7 +37,7 @@
 					</td>
 					<td colspan="5" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett"">
 						<div style="margin-left: ' . $indent . 'px;" class="layer-column">
-							' . ($indent > 0 ? '<img src="graphics/pfeil_unten-rechts.gif">' : '') . ' ' . $prefix . ' ' . $group['Gruppenname'] . '
+							' . ($indent > 0 ? '<img src="graphics/pfeil_unten-rechts.gif">' : '') . ' ' . $prefix . ' ' . $group['gruppenname'] . '
 						</div>
 					</td>
 				</tr>

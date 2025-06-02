@@ -752,7 +752,7 @@ class GUI {
 		$layer->metadata->set('wms_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
-		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['Gruppenname']));
+		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format'] ?: ''); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version'] ?: ''); #Mapserver8
@@ -778,7 +778,7 @@ class GUI {
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
 		$layer->type = $layerset['datentyp'];
-		$layer->group = sonderzeichen_umwandeln($layerset['Gruppenname']);
+		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivstatus'] = 0;
@@ -1431,7 +1431,7 @@ class GUI {
 	function create_group_legend($group_id, $status = NULL){
 		$layerlist = $this->layerset['list'];
 		if (@$this->groupset[$group_id]['untergruppen'] == NULL AND @$this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
-    $groupname = $this->groupset[$group_id]['Gruppenname'];
+    $groupname = $this->groupset[$group_id]['gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
     $legend =  '
 	  <div id="groupdiv_'.$group_id.'" style="width:100%">
@@ -2845,7 +2845,7 @@ class db_mapObj {
 		$groups = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$groups[$rs['id']]['status'] = value_of($rs, 'status');
-			$groups[$rs['id']]['Gruppenname'] = $rs['gruppenname'];
+			$groups[$rs['id']]['gruppenname'] = $rs['gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
 			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];

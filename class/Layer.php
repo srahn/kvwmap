@@ -553,10 +553,10 @@ class Layer extends PgObject {
 		$group = LayerGroup::find_by_id($this->gui, $this->get('gruppe'));
 		if ($group->get('obergruppe') != '') {
 			$obergroup = LayerGroup::find_by_id($this->gui, $group->get('obergruppe'));
-			return $obergroup->get('Gruppenname') . '|' . $group->get('Gruppenname');
+			return $obergroup->get('gruppenname') . '|' . $group->get('gruppenname');
 		}
 		else {
-			return $group->get('Gruppenname');
+			return $group->get('gruppenname');
 		}
 	}
 

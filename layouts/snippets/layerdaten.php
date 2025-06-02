@@ -97,7 +97,7 @@
 									<a href="index.php?go=Layer_Anzeigen&order=Datentyp&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strDataType; ?></a>
 								</th>
 								<th align="left">
-									<a href="index.php?go=Layer_Anzeigen&order=Gruppenname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strGroup; ?></a>
+									<a href="index.php?go=Layer_Anzeigen&order=gruppenname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strGroup; ?></a>
 								</th><?
 								if ($has_sync_layer) { ?>
 									<th align="left">

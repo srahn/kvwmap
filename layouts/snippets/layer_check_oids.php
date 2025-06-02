@@ -255,7 +255,7 @@ $query = "
 		layer.*,
 		ul.layer_id as used_layer_layer_id,
 		CONCAT('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as connectionstring,
-		g.Gruppenname
+		g.gruppenname
 	FROM 
 		kvwmap.layer LEFT JOIN 
 		kvwmap.used_layer ul ON ul.layer_id = layer.layer_id LEFT JOIN 
@@ -435,7 +435,7 @@ while ($layer = pg_fetch_assoc($ret[1])) {
 					echo '<a class="nav_link menu abc" name="'.$first.'">'.$first.'</a>';
 				}
 	echo '<div style="float: right; margin-top: 0px;">
-					' . $layer["Gruppenname"] . '
+					' . $layer["gruppenname"] . '
 				</div>
 				<div style="width: 200px; margin-top: 40px;">
 					<input type="hidden" name="layer_id[]" value="' . $layer["layer_id"] . '">
@@ -489,7 +489,7 @@ echo '</tbody></table></div>';
 					Sortierung: 
 					<select name="order" onchange="document.GUI.submit();">
 						<option value="Name" <? if($this->formvars['order'] == 'name')echo 'selected'; ?>>Name</option>
-						<option value="Gruppenname" <? if($this->formvars['order'] == 'Gruppenname')echo 'selected'; ?>>Gruppe</option>
+						<option value="gruppenname" <? if($this->formvars['order'] == 'gruppenname')echo 'selected'; ?>>Gruppe</option>
 					</select>
 					<div id="nav_bar"><? echo $nav_bar; ?></div>
 				</td>

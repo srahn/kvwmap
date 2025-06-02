@@ -40,7 +40,7 @@
 			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 				<tr>
 					<th><a href="index.php?go=Layergruppen_Anzeigen&order=id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
-					<th><a href="index.php?go=Layergruppen_Anzeigen&order=Gruppenname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
+					<th><a href="index.php?go=Layergruppen_Anzeigen&order=gruppenname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
 					<th><a href="index.php?go=Layergruppen_Anzeigen&order=obergruppe&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Obergruppe</th>
 					<th><a href="index.php?go=Layergruppen_Anzeigen&order=order&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Order</a></th>
 					<th>Anzahl Layer</th><?

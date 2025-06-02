@@ -591,12 +591,12 @@ class GUI {
 													value="' . $group['id'] . '"
 													style="vertical-align: text-top"
 													onchange="$(\'#shared_layer_schema_name\').val(sonderzeichen_umwandeln($(this).next().text().toLowerCase()));"
-												><span>' . $group['Gruppenname'] . '</span>';
+												><span>' . $group['gruppenname'] . '</span>';
 											},
 											array_filter(
 												$selectable_layer_groups,
 												function($group) {
-													return array_key_exists('Gruppenname', $group);
+													return array_key_exists('gruppenname', $group);
 												}
 											)
 										)
@@ -1259,7 +1259,7 @@ echo '			</table>
 	function create_group_legend($group_id, $status = NULL){
 		$layerlist = $this->layerset['list'];
 		if (@$this->groupset[$group_id]['untergruppen'] == NULL AND @$this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
-    $groupname = $this->groupset[$group_id]['Gruppenname'];
+    $groupname = $this->groupset[$group_id]['gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
     $legend =  '
 	  <div id="groupdiv_'.$group_id.'" style="width:100%">
@@ -2353,7 +2353,7 @@ echo '			</table>
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
 		$layer->type = $layerset['datentyp'];
-		$layer->group = sonderzeichen_umwandeln($layerset['Gruppenname']);
+		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivstatus'] = 0;
@@ -9451,7 +9451,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$this->layergruppe = new LayerGroup($this);
 		$this->layergruppe->data = formvars_strip($this->formvars, $this->layergruppe->setKeysFromTable(), 'keep');
-		$this->layergruppe->set('Gruppenname', $this->formvars['Gruppenname']);
+		$this->layergruppe->set('gruppenname', $this->formvars['gruppenname']);
 		if (!$this->layergruppe->get('obergruppe')) {
 			$this->layergruppe->set('obergruppe', '');
 		}
@@ -9464,7 +9464,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich angelegt.');
-			$this->formvars['order'] = 'Gruppenname';
+			$this->formvars['order'] = 'gruppenname';
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
@@ -14856,7 +14856,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     # Abfragen aller Layer
     $this->layers = $mapDB->getall_Layer($this->formvars['order'], true);
 		$this->layers_in_stelle = $mapDB->read_Layer(0);
-		$this->groups = $mapDB->read_Groups(true, 'Gruppenname');
+		$this->groups = $mapDB->read_Groups(true, 'gruppenname');
     $this->output();
   }
 
@@ -18368,7 +18368,7 @@ class db_mapObj{
 		$groups = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$groups[$rs['id']]['status'] = value_of($rs, 'status');
-			$groups[$rs['id']]['Gruppenname'] = $rs['gruppenname'];
+			$groups[$rs['id']]['gruppenname'] = $rs['gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
 			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];
@@ -21433,7 +21433,7 @@ DO $$
 		$sql = "
 			SELECT DISTINCT " .
 				$name_column . " AS Name," .
-				$gruppenname_column . " AS Gruppenname,
+				$gruppenname_column . " AS gruppenname,
 				l.layer_id,
 				l.gruppe,
 				l.datentyp,
@@ -21828,7 +21828,7 @@ DO $$
   function newGroup($groupname, $order){
     $sql = "
 			INSERT INTO kvwmap.u_groups 
-				(Gruppenname, order) 
+				(gruppenname, order) 
 			VALUES 
 				('" . $groupname . "', '" . $order ."')
 			RETURNING id";
@@ -21841,7 +21841,7 @@ DO $$
   }
 
   function get_Groups($layergruppen = NULL) {
-		$this->groupset = $this->read_Groups(true, 'Gruppenname');
+		$this->groupset = $this->read_Groups(true, 'gruppenname');
 		if ($layergruppen == NULL) {	# alle abfragen
 			$layergruppen['ID'] = array_unique(array_keys($this->groupset));
 		}
@@ -21864,7 +21864,7 @@ DO $$
 		if($groupid != ''){
 			$lastgroupid = '';
 			while($groupid != '' AND $lastgroupid != $groupid){
-				$uppergroups[] = $this->groupset[$groupid]['Gruppenname'];
+				$uppergroups[] = $this->groupset[$groupid]['gruppenname'];
 				$lastgroupid = $groupid;
 				$groupid = $this->groupset[$groupid]['obergruppe'];
 			}

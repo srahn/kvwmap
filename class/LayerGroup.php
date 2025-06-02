@@ -60,7 +60,7 @@ class LayerGroup extends PgObject {
 		#echo '<br>find_top_parents for stelle_id: ' . $stelle_id;
 		$group = new LayerGroup($gui);
 		return $group->find_by_sql(array(
-			'select' => 'id, Gruppenname, icon, "order"',
+			'select' => 'id, gruppenname, icon, "order"',
 			'from' => "(
 				SELECT DISTINCT
 					COALESCE(g3.id, g2.id, g1.id) AS group_id,
@@ -90,7 +90,7 @@ class LayerGroup extends PgObject {
 			));
 		}
 		else {
-			// z.B. SELECT DISTINCT child.id, child.Gruppenname, child.icon, child.order FROM u_groups parent JOIN u_groups child ON parent.id = child.obergruppe JOIN layer l ON child.id = l.Gruppe JOIN used_layer ul ON l.layer_id = ul.layer_id WHERE parent.id = 7 AND ul.stelle_id = 7 ORDER BY child.order 
+			// z.B. SELECT DISTINCT child.id, child.gruppenname, child.icon, child.order FROM u_groups parent JOIN u_groups child ON parent.id = child.obergruppe JOIN layer l ON child.id = l.Gruppe JOIN used_layer ul ON l.layer_id = ul.layer_id WHERE parent.id = 7 AND ul.stelle_id = 7 ORDER BY child.order 
 
 			return $this->find_by_sql(array(
 				'select' => 'DISTINCT child.id, child.gruppenname, child.icon, child."order"',

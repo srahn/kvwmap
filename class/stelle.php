@@ -2093,7 +2093,7 @@ class stelle {
 				CASE WHEN l." . $language_layer_name . " != '' THEN l." . $language_layer_name . " ELSE l.Name END AS Name,
 				l.alias,
 				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
-				CASE WHEN g." . $language_group_name . " != '' THEN g." . $language_group_name . " ELSE g.Gruppenname END AS Gruppenname,
+				CASE WHEN g." . $language_group_name . " != '' THEN g." . $language_group_name . " ELSE g.gruppenname END AS gruppenname,
 				l.connection,
 				ul.export_privileg,
 				COALESCE(NULLIF(alias, ''), name) as alias_or_name
@@ -2157,7 +2157,7 @@ class stelle {
 				$layer['ID'][] = $rs['layer_id'];
 				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
 				$layer['gruppe'][] = $rs['gruppe'];
-				$layer['Gruppenname'][] = $rs['Gruppenname'];
+				$layer['gruppenname'][] = $rs['gruppenname'];
 				$layer['export_privileg'][] = $rs['export_privileg'];
 			}
 		}

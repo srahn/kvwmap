@@ -569,7 +569,7 @@ class GUI {
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
 		$layer->type = $layerset['datentyp'];
-		$layer->group = sonderzeichen_umwandeln($layerset['Gruppenname']);
+		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivstatus'] = 0;

@@ -2191,14 +2191,14 @@ class Konvertierung extends PgObject {
 		if (empty($layer_group_id)) {
 			$layer_group = new MyObject($this->gui, 'u_groups');
 			if ($layer_type == 'GML') {
-				$layer_group = $layer_group->find_by('Gruppenname', 'XPlanung');
+				$layer_group = $layer_group->find_by('gruppenname', 'XPlanung');
 				$layer_group->create(array(
-					'Gruppenname' => 'XPlanung'
+					'gruppenname' => 'XPlanung'
 				));
 			}
 			else {
 				$layer_group->create(array(
-					'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
+					'gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
 				));
 			}
 			$this->set(strtolower($layer_type) . '_layer_group_id', $layer_group->get($this->identifier));
