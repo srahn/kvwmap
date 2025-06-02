@@ -5543,7 +5543,7 @@ echo '			</table>
 		switch ($this->formvars['func']) {
 			case "switch_branch" : {
 				$result = $this->administration->switch_branch($this->formvars['branch']);
-			}break;
+			}
 			case "switch_branch" : case "update_code_and_databases" : {
 				$result = $this->administration->update_code();
 			} 
