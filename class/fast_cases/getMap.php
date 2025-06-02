@@ -1971,6 +1971,16 @@ class pgdatabase {
 		);
 	}
 
+	function get_object_credentials() {
+		return array(
+			'host'     => $this->host ?: POSTGRES_HOST,
+			'port'     => $this->port ?: 5432,
+			'dbname'   => $this->dbName ?: POSTGRES_DBNAME,
+			'user'     => $this->user ?: POSTGRES_USER,
+			'password' => $this->passwd ?: POSTGRES_PASSWORD
+		);
+	}	
+
 	function format_pg_connection_string($credentials) {
 		$connection_string = "" .
 			"host='" .		 $credentials['host'] 		. "' " .
