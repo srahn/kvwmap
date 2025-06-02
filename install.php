@@ -86,69 +86,6 @@ function install() {
 	if (LOG_LEVEL > 0) {
 	 $log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei-Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
 	} ?>
-	<h1>Teste Verbindung zu MySQL mit Nutzer root</h1><?php
-	#
-	# Teste ob MySQL-Server läuft
-	#
-/*
-	include(CLASSPATH . 'mysql.php');
-	$mysqlRootDb = new database();
-	$mysqlRootDb->host = MARIADB_HOST;
-	$mysqlRootDb->user = 'root';
-	$mysqlRootDb->passwd = MARIADB_ROOT_PASSWORD;
-	$mysqlRootDb->dbName = 'mysql'; ?>
-	Verbindungsdaten für Zugang zu MySQL root Nutzer wie folgt gesetzt:<br>
-	Host: <?php echo $mysqlRootDb->host; ?><br>
-	User: <?php echo $mysqlRootDb->user; ?><br>
-	Password: <?php #echo $mysqlRootDb->passwd; ?><br>
-	Datenbankname: <?php echo $mysqlRootDb->dbName; ?><br><?php
-
-	if (mariadb_exists($mysqlRootDb)) { ?>
-		MySQL-Server läuft, Verbindung hergestellt zu Host: <?php echo $mysqlRootDb->host; ?> Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?>!<br><?php
-	}
-	else { ?>
-		Es kann keine Verbindung zu Host: <?php echo $mysqlRootDb->host; ?> MySQL Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?> hergestellt werden!<br>
-		Fehlermeldung: <?php echo $mariadb_error; ?><br>
-		Das kann folgende Gründe haben:
-		<ul>
-			<li><b>MySQL ist noch nicht installiert:</b> => Installieren sie MySQL</li>
-			<li><b>Der MySQL server host ist nicht korrekt angegeben:</b> => Setzen Sie den richtigen hostnamen in der Datei config.php in der Konstante <b>MARIADB_HOST</b>. In Docker Containern muss der Name mysql oder mysql-server heißen, sonst in der Regel localhost oder 172.0.0.1. Nur wenn sich die Datenbank auf einem anderem Rechner befindet geben Sie hier die entsprechende IP oder den Rechnername an.</li>
-			<li><b>Das Passwort des Datenbanknutzers root ist nicht richtig gesetzt:</b> => standardmäßig wird es aus der Umgebungsvariablen MARIADB_ROOT_PASSWORD genommen.</li>
-		</ul>
-		<input type="button" value="Script neu starten" onclick="window.location.reload()">
-		<?php
-		return false;
-	} ?>
-
-	<h1>Teste Verbindung zu MySQL mit Nutzer <?php echo MARIADB_USER; ?></h1><?php
-	#
-	# Teste ob kvwmap Datenbank auf MySQL-Server läuft
-	# und richte ggf. Nutzer und eine neue leere kvwmap Datenbank ein.
-	#
-	$mysqlKvwmapDb = new database();
-	$mysqlKvwmapDb->host = MARIADB_HOST;
-	$mysqlKvwmapDb->user = MARIADB_USER;
-	$mysqlKvwmapDb->passwd = MARIADB_PASSWORD;
-	$mysqlKvwmapDb->dbName = MARIADB_DBNAME; ?>
-	Verbindungsdaten für Zugang zu MySQL kvwmap Nutzer wie folgt gesetzt:<br>
-	Host: <?php echo $mysqlKvwmapDb->host; ?><br>
-	User: <?php echo $mysqlKvwmapDb->user; ?><br>
-	Password: <?php #echo $mysqlKvwmapDb->passwd; ?><br>
-	Datenbankname: <?php echo $mysqlKvwmapDb->dbName; ?><br>
-	Debugfilename: <?php echo $mysqlKvwmapDb->debug->filename; ?><br>
-	Logfilename: <?php echo $mysqlKvwmapDb->logfile->name; ?><br><?php
-	if (kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb)) { ?>
-		kvwmap Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert schon auf MySQL-Server.<br><?php
-		$kvwmapdb_installed = true;
-	}
-	else { ?>
-		Die MySQL Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert nicht oder die Verbindung kann mit dem Nutzer <?php echo $mysqlRootDb->user; ?> nicht hergestellt werden.<br>
-		<h1>Installiere kvwmap Datenbank auf MySQL-Server</h1><?php
-		$kvwmapdb_installed = install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb);
-	} 
-	*/
-	?>
-
 	<h1>Teste Verbindung zu PostgreSQL mit Nutzer postgres</h1><?php
 	#
 	# Teste PostgreSQL-Server läuft
@@ -294,17 +231,17 @@ function install() {
 		";
 		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
 
-		<h1>Lege MariaDB Tabellen und Inhalte für die Administration an.</h1><?
-		$mariadb_install_file = $installpath . LAYOUTPATH . 'db/mysql/data/mariadb_install.sql';
-		$sql = file_get_contents($mariadb_install_file);
-		$result = $mysqlKvwmapDb->exec_commands($sql, NULL, NULL, false, true);
+		<h1>Lege Tabellen und Inhalte für die Administration an.</h1><?
+		$kvwmap_install_file = $installpath . LAYOUTPATH . 'db/postgresql/data/kvwmap_install.sql';
+		$sql = file_get_contents($kvwmap_install_file);
+		$result = $pgsqlKvwmapDb->execSQL($sql, 0, 1);
 		if (!$result['success']) {
-			?>Fehler beim Ausführen der Datei <?php echo $mariadb_install_file; ?><br><?
+			?>Fehler beim Ausführen der Datei <?php echo $kvwmap_install_file; ?><br><?
 			echo '<br>result: ' . print_r($result, true);
 			$error = true;
 		}
 		else { ?>
-			Datei <? echo $mariadb_install_file; ?> erfolgreich ausgeführt!
+			Datei <? echo $kvwmap_install_file; ?> erfolgreich ausgeführt!
 
 			<h1>Migrationen für kvwmap Schemas in MySQL und PostgreSQL ausführen</h1><?php
 			#
@@ -419,13 +356,6 @@ function init_config() {
 	$installpath = dirname($rest) . '/';
 	$formvars = $_REQUEST;
 
-	define('MARIADB_HOST', ($formvars['MARIADB_HOST'] != '' ? $formvars['MARIADB_HOST'] : 'mysql'));
-	define('MARIADB_USER', ($formvars['MARIADB_USER'] != '' ? $formvars['MARIADB_USER'] : 'kvwmap'));
-	define('MARIADB_PASSWORD', ($formvars['MARIADB_PASSWORD'] != '' ? $formvars['MARIADB_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
-	define('MARIADB_DBNAME', ($formvars['MARIADB_DBNAME'] != '' ? $formvars['MARIADB_DBNAME'] : 'kvwmapdb'));
-	define('MARIADB_ROOT_PASSWORD', ($formvars['MARIADB_ROOT_PASSWORD'] != '' ? $formvars['MARIADB_ROOT_PASSWORD'] : getenv('MARIADB_ROOT_PASSWORD')));
-	define('MARIADB_HOSTS_ALLOWED', getenv('MARIADB_HOSTS_ALLOWED'));
-	define('MARIADB_CHARSET', 'UTF8');
 	define('DEFAULTDBWRITE', 1);
 	define('DBWRITE', 1);
 	define('POSTGRES_HOST', ($formvars['POSTGRES_HOST'] != '' ? $formvars['POSTGRES_HOST'] : 'pgsql'));
@@ -646,23 +576,18 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) {
 /**
 * 
 */
-function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
-	$mysqlKvwmapDb->execSQL("SET NAMES 'UTF8'",0,0);
-	$administration = new administration($mysqlKvwmapDb, $pgsqlKvwmapDb);
+function migrate_database($pgsqlKvwmapDb) {
+	$administration = new administration($pgsqlKvwmapDb);
 	echo '<br>Frage Datenbankstati ab.';
 	$administration->get_database_status();
-	echo '<br>Aktualisiere Datenbanken.';
+	echo '<br>Aktualisiere Datenbank.';
 	$err_msgs = $administration->update_databases();
-	echo '<br>Datenbanken aktualisiert:<br>' . implode('<br>', $err_msgs);
+	echo '<br>Datenbank aktualisiert:<br>' . implode('<br>', $err_msgs);
 	$administration->get_database_status();
-	if (count($administration->migrations_to_execute['mysql']) == 0 AND count($administration->migrations_to_execute['postgresql']) == 0) { ?>
+	if (count($administration->migrations_to_execute['postgresql']) == 0) { ?>
 		Anlegen der Datenbank-Schemata erfolgreich.<br><?php
 	}
 	else {
-		if (count($administration->migrations_to_execute['mysql']) > 0) { ?>
-			<br>Es konnten nicht alle MySQL-Migrationen ausgeführt werden.<br><?php
-			echo '<br>Folgende wurden noch nicht ausgeführt: <ul><li>' . implode('</li><li>', $administration->migrations_to_execute['mysql']['kvwmap']) . '</li></ul>';
-		}
 		if (count($administration->migrations_to_execute['postgresql']) > 0) { ?>
 			<br>Anlegen des PostgreSQL-Schemas fehlgeschlagen.<br><?php
 			echo '<br>Folgende wurden noch nicht ausgeführt: <ul><li>' . implode('</li><li>', $administration->migrations_to_execute['postgresql']['kvwmap']) . '</li></ul>';
@@ -670,21 +595,6 @@ function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
 	}
 }
 
-/**
-* Prüft ob schon eine Admin stelle in kvwmapdb existiert
-*/
-function admin_stelle_exists($mysqlKvwmapDb) {
-	$sql = "
-		SELECT
-			1
-		FROM
-			`stelle`
-		WHERE
-			`Bezeichnung` = 'Administration'
-	";
-	$ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
-	return (mysqli_num_rows($mysqlKvwmapDb->result) > 0) ? true : false;
-}
 
 function settings() { ?>
 	<h1>Installation von kvwmap</h1>
@@ -693,26 +603,6 @@ function settings() { ?>
 	Die MySQL-Zugangsdaten können nachträglich in der Datei credentials.php geändert werden, und alle anderen Einstellungen in der Adminoberfläche bzw. der MySQL Nutzerdatenbank in der Tabelle config.<br><br>
 	<form method="POST" target="install.php">
 		<table>
-			<tr>
-				<td>MARIADB_HOST:</td>
-				<td><input type="text" name="MARIADB_HOST" value="<?php echo MARIADB_HOST; ?>" size="35"></td>
-			</tr>
-			<tr>
-				<td>MARIADB_DBNAME:</td>
-				<td><input type="text" name="MARIADB_DBNAME" value="<?php echo MARIADB_DBNAME; ?>" size="35"></td>
-			</tr>
-			<tr>
-				<td>MARIADB_USER:</td>
-				<td><input type="text" name="MARIADB_USER" value="<?php echo MARIADB_USER; ?>" size="35"></td>
-			</tr>
-			<tr>
-				<td>MARIADB_PASSWORD:</td>
-				<td><input id="mariadb_password" type="password" name="MARIADB_PASSWORD" value="<?php echo MARIADB_PASSWORD; ?>" size="35"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#mariadb_password').attr('type') == 'text') { $('#mariadb_password').attr('type', 'password') } else { $('#mariadb_password').attr('type', 'text'); }"></i></td>
-			</tr>
-			<tr>
-				<td>MARIADB_ROOT_PASSWORD:</td>
-				<td><input id="mariadb_root_password" type="password" name="MARIADB_ROOT_PASSWORD" value="<?php echo MARIADB_ROOT_PASSWORD; ?>" size="35"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#mariadb_root_password').attr('type') == 'text') { $('#mariadb_root_password').attr('type', 'password') } else { $('#mariadb_root_password').attr('type', 'text'); }"></i></td>
-			</tr>
 			<tr>
 				<td>POSTGRES_HOST:</td>
 				<td><input type="text" name="POSTGRES_HOST" value="<?php echo POSTGRES_HOST; ?>" size="35"></td>
