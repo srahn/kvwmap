@@ -29,7 +29,7 @@
 ###################################################################
 
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
-$debug; $log_mysql; $log_postgres;
+$debug; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
 
 class GUI {
@@ -79,7 +79,7 @@ function output_footer() { ?>
 }
 
 function install() {
-	global $debug, $log_mysql, $log_postgres;
+	global $debug, $log_postgres;
 
 	include(CLASSPATH . 'log.php');
 	if (DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);
@@ -243,11 +243,11 @@ function install() {
 		else { ?>
 			Datei <? echo $kvwmap_install_file; ?> erfolgreich ausgeführt!
 
-			<h1>Migrationen für kvwmap Schemas in MySQL und PostgreSQL ausführen</h1><?php
+			<h1>Migrationen für kvwmap Schema in PostgreSQL ausführen</h1><?php
 			#
 			# Führe alle Migration aus und richte damit die aktuellen Datenbankschemas ein.
 			#
-			migrate_databases($pgsqlKvwmapDb);
+			migrate_database($pgsqlKvwmapDb);
 
 			if (file_exists('credentials.php')) { ?>
 				credentials.php existiert schon.<?php
@@ -279,39 +279,39 @@ function install() {
 				echo $pgsqlKvwmapDb->errormessage;
 			}
 
-			?>Setze Password für Postgres Nutzer "kvwmap" in MariaDB connections table...<?php
+			?>Setze Password für Postgres Nutzer "kvwmap" in connections table...<?php
 			$sql = "
-				UPDATE connections
+				UPDATE kvwmap.connections
 				SET password = '" . POSTGRES_PASSWORD . "'
 				WHERE id = 1
 			";
-			$ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
+			$ret = $pgsqlKvwmapDb->execSQL($sql, 0, 1);
 			if ($ret['success']) { ?>
 				... fertig<?
 			}
 			else {?>
-				<br>Fehler beim Einstellen des Passwortes für Nutzer <?php echo $mysqlKvwmapDb->user; ?> in der Datenbank <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
+				<br>Fehler beim Einstellen des Passwortes für Nutzer <?php echo $pgsqlKvwmapDb->user; ?> in der Datenbank <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
 				$error = true;
-				echo $mysqlKvwmapDb->errormessage;
+				echo $pgsqlKvwmapDb->errormessage;
 			}
 
-			?>Setze Password für kvwmap Nutzer "kvwmap" in MariaDB Tabelle user...<?php
+			?>Setze Password für kvwmap Nutzer "kvwmap" in Tabelle user...<?php
 			$sql = "
 				UPDATE
-					user
+					kvwmap.user
 				SET
 					password = kvwmap.sha1('" . KVWMAP_INIT_PASSWORD . "')
 				WHERE
 					login_name = 'kvwmap'
 			";
-			$ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
+			$ret = $pgsqlKvwmapDb->execSQL($sql, 0, 1);
 			if ($ret['success']) { ?>
 				... fertig<?
 			}
 			else { ?>
-				Fehler beim Einstellen des Passwortes für user <?php echo $mysqlKvwmapDb->user; ?> in der Datenbank <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
+				Fehler beim Einstellen des Passwortes für user <?php echo $pgsqlKvwmapDb->user; ?> in der Datenbank <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
 				$error = true;
-				echo $mysqlKvwmapDb->errormessage;
+				echo $pgsqlKvwmapDb->errormessage;
 			}
 
 			if (file_exists('config.php')) { ?>
@@ -319,16 +319,12 @@ function install() {
 			}
 			else { ?>
 				Lege config.php Datei an ...<?php
-				$administration = new administration($mysqlKvwmapDb, $pgsqlKvwmapDb);
+				$administration = new administration($pgsqlKvwmapDb);
 				$administration->write_config_file(''); ?><br>
 				...fertig<p><?php
 			}
 		} ?>
 
-		Schließe Verbindung zur Datenbank: <?php echo $mysqlRootDb->dbName; ?><br><?php
-		$mysqlRootDb->close(); ?>
-		Schließe Verbindung zur Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
-		$mysqlKvwmapDb->close(); ?>
 		Schließe Verbindung zur Datenbank: <?php echo $pgsqlPostgresDb->dbName; ?><br><?php
 		$pgsqlPostgresDb->close(); ?>
 		Schließe Verbindung zur Datenbank: <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
@@ -340,7 +336,7 @@ function install() {
 		}
 		else { ?>
 			Die Anmeldung bei kvwmap kann jetzt mit folgenden Zugangsdaten erfolgen:<br>
-			Nutzername: <? echo $mysqlKvwmapDb->user; ?><br>
+			Nutzername: <? echo $pgsqlKvwmapDb->user; ?><br>
 			Passwort: <?php echo KVWMAP_INIT_PASSWORD; ?><br>
 			<br>
 			<a href="index.php">Login</a><?php
@@ -373,7 +369,6 @@ function init_config() {
 	define('LOGPATH', $installpath . 'logs/kvwmap/');
 	define('DEBUG_LEVEL', 1);
 	define('DEBUGFILE', 'install.log');
-	define('LOGFILE_MYSQL', LOGPATH . 'install.log');
 	define('LOGFILE_POSTGRES', LOGPATH . 'install.log');
 	define('WWWROOT', $installpath.$wwwpath);
 	define('APPLVERSION', $applversion . '/');
@@ -402,87 +397,6 @@ function show_constants() { ?>
 	</table><?php
 }
 
-/**
-* Testet ob es schon eine mysql-Datenbank gibt
-*/
-function mariadb_exists($mysqlKvwmapDb) { ?>
-	Prüfe ob Datenbank mysql schon existiert<br><?php
-	return $mysqlKvwmapDb->open();
-}
-
-/**
-* Testet ob es schon eine kvwmapdb gibt
-*/
-function kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb) { ?>
-	Prüfe ob kvwmapdb schon existiert<br><?php
-	$sql = "
-		SELECT
-			SCHEMA_NAME
-		FROM
-			INFORMATION_SCHEMA.SCHEMATA
-		WHERE
-			SCHEMA_NAME = '" . $mysqlKvwmapDb->dbName . "'
-	";
-	$ret = $mysqlRootDb->execSQL($sql, 0, 1);
-	return (mysqli_num_rows($mysqlRootDb->result) > 0);
-}
-
-/**
-* Installiert kvwmap-Datenbank
-*/
-function install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb) {
-	# Abfragen ob user mysqlKvwmapDb->user existiert
-	$sql = "
-		SELECT
-			User
-		FROM
-			user
-		WHERE
-			User = '" . $mysqlKvwmapDb->user . "' AND
-			Host = '" . MARIADB_HOSTS_ALLOWED . "'
-	";
-	$ret = $mysqlRootDb->execSQL($sql, 0, 1);
-	if ($ret[0]) { ?>
-		Fehler beim Abfragen ob User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MARIADB_HOSTS_ALLOWED; ?> schon in MySQL existiert.<br><?php
-		return false;
-	}
-	if (mysqli_num_rows($mysqlRootDb->result) > 0 ) { ?>
-		User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MARIADB_HOSTS_ALLOWED; ?> existiert schon in Datenbank. <?php
-	}
-	else	{ ?>
-		Erzeuge Nutzer: <?php echo $mysqlKvwmapDb->user; ?><br><?php
-		$sql = "
-			CREATE USER '" . $mysqlKvwmapDb->user . "'@'" . MARIADB_HOSTS_ALLOWED . "'
-			IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "'
-		";
-		$mysqlRootDb->execSQL($sql, 0, 1);
-	} ?>
-	
-	Erzeuge Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
-	$sql = "
-		CREATE DATABASE " . $mysqlKvwmapDb->dbName . "
-		CHARACTER SET utf8
-		COLLATE utf8_general_ci
-	";
-	$mysqlRootDb->execSQL($sql, 0, 1); ?>
-
-	Setze Rechte für Nutzer: <?php echo $mysqlKvwmapDb->user; ?><br><?php	
-	$sql = "	
-		GRANT ALL PRIVILEGES
-		ON *.*
-		TO '" . $mysqlKvwmapDb->user . "'@'" . MARIADB_HOSTS_ALLOWED . "'
-		IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "';
-	";
-	$ret = $mysqlRootDb->execSQL($sql, 0, 1);
-	if ($ret[0]) { ?>
-		Fehler beim installieren der Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
-		return false;
-	}
-	else { ?>
-		Anlegen der Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?> erfolgreich.<br><?php
-		return true;
-	}
-}
 
 /**
 * Testet ob die postgre Datenbank auf PostgreSQL-Server läuft
@@ -598,9 +512,9 @@ function migrate_database($pgsqlKvwmapDb) {
 
 function settings() { ?>
 	<h1>Installation von kvwmap</h1>
-	Mit diesem Script wird der Datenbanknutzer sowie die MySQL Nutzerdatenbank kvwmap und die PostgreSQL Geo-Datenbank kvwmapsp angelegt.<br>
+	Mit diesem Script wird der Datenbanknutzer die PostgreSQL Geo-Datenbank kvwmapsp angelegt.<br>
 	Anschließend werden alle Migrationen ausgeführt.<br>
-	Die MySQL-Zugangsdaten können nachträglich in der Datei credentials.php geändert werden, und alle anderen Einstellungen in der Adminoberfläche bzw. der MySQL Nutzerdatenbank in der Tabelle config.<br><br>
+	Die Zugangsdaten können nachträglich in der Datei credentials.php geändert werden, und alle anderen Einstellungen in der Adminoberfläche bzw. der in der Tabelle config.<br><br>
 	<form method="POST" target="install.php">
 		<table>
 			<tr>
