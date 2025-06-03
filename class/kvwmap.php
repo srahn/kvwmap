@@ -5534,18 +5534,14 @@ echo '			</table>
 		$this->administration->get_database_status();
 		$this->administration->get_config_params();
 		switch ($this->formvars['func']) {
-			case "update_code_and_databases" : {
+			case "switch_branch" : {
+				$result = $this->administration->switch_branch($this->formvars['branch']);
+			}	# break fehlt mit Absicht
+			case "switch_branch" : case "update_code_and_databases" : {
 				$result = $this->administration->update_code();
+			} # break fehlt mit Absicht
+			case "switch_branch" : case "update_code_and_databases" : case "update_databases" : {
 				$this->administration->get_database_status();
-				$err_msgs = $this->administration->update_databases();
-				if (count($err_msgs) > 0) {
-					$this->add_message('error', implode('<br>', $err_msgs));
-				}
-				$this->administration->get_database_status();
-				$this->administration->get_config_params();
-				$this->showAdminFunctions();
-			} break;			
-			case "update_databases" : {
 				$err_msgs = $this->administration->update_databases();
 				if (count($err_msgs) > 0) {
 					$this->add_message('error', implode('<br>', $err_msgs));
