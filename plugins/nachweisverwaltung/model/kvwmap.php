@@ -2200,7 +2200,7 @@
     $back=$VermStObj->getVermStelleListe();
     if ($back[0]=='') {
       # Fehlerfreie Datenabfrage
-      $FormObjVermStelle=new FormObject($name,'select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0,NULL);
+      $FormObjVermStelle=new FormObject($name,'select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0, 260, NULL, '', false);
     }
     else {
       $FormObjVermStelle=new FormObject($name,'text',array($back[0]),'','',25,255,0,NULL);
