@@ -249,14 +249,15 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		$msg_zusatz = '';
 
 		if (
-			!empty($GUI->formvars['suppress_ticket_and_notification']) AND
+			// empty as ticketbox can be false or ticket box might not exist(variable is not set) for most users
+			empty($GUI->formvars['suppress_ticket_and_notification']) AND
 			$create_ticket
 		) {
 			$ticket = create_ticket($msg);
 			$msg_zusatz .= "\n\nEs wurde ein Ticket angelegt (" . URL . APPLVERSION . "index.php?go=Layer-Suche_Suchen&selected_layer_id=258&value_id=" . $ticket->get_id() . "&operator_id==) Falls der Fehler durch das Testportal PlanDigital verursacht wurde und nicht in der XPlanGML begründet liegt, werden Sie über den Stand der Behebung informiert.";
 		}
 		if (
-			!empty($GUI->formvars['suppress_ticket_and_notification']) AND
+			empty($GUI->formvars['suppress_ticket_and_notification']) AND
 			$send_notification
 		) {
 			# if konvertierung vorhanden
@@ -323,16 +324,18 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	$GUI->plan_oid_name = $GUI->konvertierung->config['plan_oid_name'];
 	
 	//TEMP
-	$GUI->title = 'Flächennutzungsplan';
-	$GUI->plan_short_title = 'F-Plan';
-	$GUI->plan_class = 'FP_Plan';
-	$GUI->plan_abk = 'fplan';
-	$GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
-	$GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
-	$GUI->plan_table_name = 'fp_plan';
-	
-	$GUI->plan_table_name = strtolower($GUI->plan_class);
-	$GUI->plan_oid_name = $GUI->plan_table_name . '_oid';
+	if($GUI->formvars['planart'] == 'FP-Plan') {
+		$GUI->title = 'Flächennutzungsplan';
+		$GUI->plan_short_title = 'F-Plan';
+		$GUI->plan_class = 'FP_Plan';
+		$GUI->plan_abk = 'fplan';
+		$GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
+		$GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
+		$GUI->plan_table_name = 'fp_plan';
+		
+		$GUI->plan_table_name = strtolower($GUI->plan_class);
+		$GUI->plan_oid_name = $GUI->plan_table_name . '_oid';
+	}
 	// TEMP END
 }
 
@@ -409,7 +412,7 @@ function go_switch_xplankonverter($go) {
 						$msg = 'Es wurden ' . $num_unclassified . ' Objekte gefunden, die keinem Planzeichen zugeordnet werden konnten.<br>Rufen Sie den Plan auf, klappen den Abschnitt "Planzeichen (Objektklassen)" auf und klicken auf "Lade Objektklassen". Dort werden die Klassen angezeigt, die Objekte ohne Zuordnung enthalten und ein Link zu den Objekten. Nehmen Sie Kontakt auf mit Ihrem Dienstleister um die fehlenden Klassen zu ergänzen oder bestehende so anzupassen, dass die Objekte fachlich korrekt zugeordnet werden können.';
 					}
 
-					if (!empty($GUI->formvars['suppress_ticket_and_notification'])) {
+					if (empty($GUI->formvars['suppress_ticket_and_notification'])) {
 						$GUI->create_ticket($msg);
 						$result = $GUI->konvertierung->send_notification('Hinweis zur Zusammenzeichnung ' . $GUI->konvertierung->get('bezeichnung') . ' id: ' . $GUI->konvertierung->get_id() . $msg);
 						if (! $result['success']) {
@@ -1025,6 +1028,7 @@ function go_switch_xplankonverter($go) {
 				"id" => $GUI->formvars['konvertierung_id'],
 				"veroeffentlichungsdatum" => $GUI->formvars['veroeffentlichungsdatum']
 			);
+			
 			$GUI->konvertierung->update();
 			$response['success'] = true;
 			$response['veroeffentlichungsdatum'] = $GUI->formvars['veroeffentlichungsdatum'];
@@ -1786,7 +1790,7 @@ function go_switch_xplankonverter($go) {
 				}
 			}
 
-			if (!empty($GUI->formvars['suppress_ticket_and_notification'])) {
+			if (empty($GUI->formvars['suppress_ticket_and_notification'])) {
 				$GUI->debug->write('Sende Benachrichtigung.');
 				$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . ' ist von dem Nutzer ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . ' (login: ' . $GUI->user->login_name . ") aktualisiert worden.\n\nDiese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_konvertierung_anzeigen&planart=" . $GUI->formvars['planart'] . "}\n\nIhr Team von " . TITLE);
 				if (!$result['success']) {
