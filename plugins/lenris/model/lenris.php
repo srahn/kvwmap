@@ -413,8 +413,8 @@ class LENRIS {
 					" . ($n['aenderungsnummer'] ? "'" . $n['aenderungsnummer'] . "'" : 'NULL') . ", 
 					" . ($n['antragsnummer_alt'] ? "'" . $n['antragsnummer_alt'] . "'" : 'NULL') . ", 
 					" . ($n['rissfuehrer_id'] ?: 'NULL') . ", 
-					" . ($n['messungszahlen'] ?: 'NULL') . ", 
-					" . ($n['bov_ersetzt'] ?: 'NULL') . ", 
+					" . (in_array($n['messungszahlen'], ['t', 'f'])? "'" . $n['messungszahlen'] . "'" : 'NULL') . ", 
+					" . (in_array($n['bov_ersetzt'], ['t', 'f'])? "'" . $n['bov_ersetzt'] . "'" : 'NULL') . ", 
 					" . ($n['zeit_geprueft'] ? "'" . $n['zeit_geprueft'] . "'" : 'NULL') . ", 
 					" . ($n['freigegeben'] ? "'" . $n['freigegeben'] . "'" : 'false') . "
 					)
