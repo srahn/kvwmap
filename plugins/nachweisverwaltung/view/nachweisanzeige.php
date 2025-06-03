@@ -261,7 +261,7 @@ function save_bearbeitungshinweis(id){
 <? 
 	function build_order_links($orderstring, $richtung){
 		if($orderstring != ''){
-			$orderaliases = array('gemarkung' => 'Gemarkung', 'flur' => 'Flur', 'stammnr' => 'Antragsnr.', 'rissnummer' => 'Rissnr.', 'art' => 'Dokumentart', 'blattnummer' => 'Blattnr.', 'datum' => 'Datum', 'fortfuehrung' => 'Fortfuehrung', 'vermst' => 'Vermstelle', 'gueltigkeit' => 'Gueltigkeit', 'geprueft' => 'geprueft', 'format' => 'Format');
+			$orderaliases = array('gemarkung' => 'Gemarkung', 'flur' => 'Flur', 'stammnr' => 'Antragsnr.', 'rissnummer' => 'Rissnr.', 'art' => 'Dokumentart', 'blattnummer' => 'Blattnr.', 'datum' => 'Datum', 'fortfuehrung' => 'Fortfuehrung', 'vermstelle' => 'Vermstelle', 'gueltigkeit' => 'Gueltigkeit', 'geprueft' => 'geprueft', 'format' => 'Format');
 			$orders = explode(',', $orderstring);
 			foreach($orders as $order){
 				$orderlinks[] = '<a href="javascript:remove_from_order(\''.$order.'\');" title="'.$orderaliases[$order].' aus Sortierung entfernen">'.$orderaliases[$order].'</a>';
@@ -284,7 +284,7 @@ function save_bearbeitungshinweis(id){
 	}
 
 	.nw_treffer_table td {
-		padding: 5 0 5 0;
+		padding: 5 0 5 8;
 	}
 	
 	.nw_treffer_table td:first-child {
@@ -584,7 +584,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 									<a href="javascript:add_to_order('blattnummer');" title="nach Blattnr. sortieren"><span class="fett">Blattnr.</span></a> <? 
 								} 
 								else { ?>
-									<span class="fett">Rissnr.</span> <?
+									<span class="fett">Blattnr.</span> <?
 								}
 								echo '</div>';
 							}

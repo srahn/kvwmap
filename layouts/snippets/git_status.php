@@ -1,4 +1,5 @@
 <?
+	include_once(CLASSPATH.'FormObject.php');
 	$folder = WWWROOT . APPLVERSION;
 	$ex = exec("sudo -u gisadmin git status -uno", $ausgabe, $ret);
 	if ($ret != 0) {
@@ -7,8 +8,27 @@
 	else {
 		$explosion = explode(' ', $ausgabe[0]);
 		$branch = array_pop($explosion);
-		echo '<table><tr><td>Branch:</td><td>'.$branch.'</td></tr>';
-		echo '<tr><td>Status:</td><td>';
+		$branch_select = FormObject::createSelectField(
+			'branch',
+			$branches,
+			$branch,
+			1,
+			"",
+			"document.GUI.func.value='switch_branch';document.GUI.submit();",
+			'',
+			'',
+			'',
+			''
+		);
+		echo '
+			<table>
+				<tr>
+					<td>Branch:</td>
+					<td>' . $branch_select . '</td>
+				</tr>
+				<tr>
+					<td>Status:</td>
+					<td>';
 		$diverged = (strpos($ausgabe[1], "Your branch and 'origin/develop' have diverged") !== false);
 
 		if (strpos($ausgabe[1], 'Your branch is behind') !== false OR $diverged) {

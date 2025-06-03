@@ -161,7 +161,7 @@ class MetaDataCreator {
 		return $element;
 	}
 
-	public function createMetaDataDownload() {
+	public function createMetadataDownload() {
 		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
 	<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
 	<gmd:fileIdentifier>
@@ -216,15 +216,12 @@ class MetaDataCreator {
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>Downloaddienst (WFS) " . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
-			</gmd:abstract>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
+				<gco:CharacterString>" . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
+			</gmd:abstract>" . 
+			//<gmd:pointOfContact>
+				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			//</gmd:pointOfContact>
+			"<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'publisher') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
@@ -472,7 +469,7 @@ class MetaDataCreator {
 		return $sb;
 	}
 
-	public function createMetaDataView() {
+	public function createMetadataView() {
 		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
 		<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
 	<gmd:fileIdentifier>
@@ -491,7 +488,7 @@ class MetaDataCreator {
 		<gco:CharacterString>Service</gco:CharacterString>
 	</gmd:hierarchyLevelName>
 	<gmd:contact>
-		" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
+		" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 	</gmd:contact>
 	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
@@ -527,15 +524,12 @@ class MetaDataCreator {
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>Darstellungsdienst (WMS) " . $this->md->get('id_abstract')['viewservice'] . "</gco:CharacterString>
-			</gmd:abstract>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
+				<gco:CharacterString>" . $this->md->get('id_abstract')['viewservice'] . "</gco:CharacterString>
+			</gmd:abstract>" .
+			//<gmd:pointOfContact>
+				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			//</gmd:pointOfContact>
+			"<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'publisher') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
@@ -810,7 +804,7 @@ class MetaDataCreator {
 			<gmd:MD_ScopeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode\" codeListValue=\"dataset\">dataset</gmd:MD_ScopeCode>
 		</gmd:hierarchyLevel>
 		<gmd:contact>
-			" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
+			" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 		</gmd:contact>
 		<gmd:dateStamp>
 			<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
@@ -852,15 +846,15 @@ class MetaDataCreator {
           </gmd:CI_Citation>
         </gmd:citation>
 				<gmd:abstract>
-					<gco:CharacterString>Geodatensatz " . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
+					<gco:CharacterString>" . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
 				</gmd:abstract>
 				<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-				</gmd:pointOfContact>
-				<gmd:pointOfContact>
-					" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-				</gmd:pointOfContact>
-				<gmd:pointOfContact>
+				</gmd:pointOfContact>" .
+				//<gmd:pointOfContact>
+					//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+				//</gmd:pointOfContact>
+				"<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_content', 'publisher') . "
 				</gmd:pointOfContact>
 				<gmd:resourceMaintenance>

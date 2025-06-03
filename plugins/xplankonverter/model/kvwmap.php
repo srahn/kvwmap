@@ -428,10 +428,16 @@
 			$GUI->user->rolle->epsg_code,
 			$GUI->formvars['planart'],
 			$GUI->Stelle->id,
-			$GUI->user->id
+			$GUI->user->id,
+			$upload_validation_result['plan_file_name']
 		);
+		if ($konvertierung_id === -1) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Anlegen der Konvertierung. ' . pg_last_error()
+			);
+		}
 		$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
-
 		$konvertierung->create_directories();
 
 		# move files from tmp to upload folder from konvertierung
@@ -454,11 +460,13 @@
 		);
 	};
 
+	//also rewrites Gml-id to always use GML_ and lowercase UUID (excludes uppercase UUIDs)
 	$GUI->xplankonverter_get_new_gml_id = function($gml_id) use ($GUI) {
-		if (! array_key_exists(strtolower($gml_id), $GUI->xplan_gml_ids)) {
-			$GUI->xplan_gml_ids[$gml_id] = 'GML_' . uuid();
+		$rewritten_gml_id = 'GML_' . strtolower(ltrim($gml_id,'GML_'));
+		if (! array_key_exists($rewritten_gml_id, $GUI->xplan_gml_ids)) {
+			$GUI->xplan_gml_ids[$rewritten_gml_id] = 'GML_' . uuid();
 		}
-		return $GUI->xplan_gml_ids[$gml_id];
+		return $GUI->xplan_gml_ids[$rewritten_gml_id];
 	};
 
 	$GUI->xplankonverter_reindex_gml_ids = function() use ($GUI) {
@@ -467,8 +475,8 @@
 		if (! file_exists($reindexed_xplan_gml_path)) {
 			mkdir($reindexed_xplan_gml_path, 0777);
 		}
-		$read_handle = fopen($uploaded_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "r");
-		$write_handle = fopen($reindexed_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "w");
+		$read_handle = fopen($uploaded_xplan_gml_path . $GUI->konvertierung->get_plan_file_name(), "r");
+		$write_handle = fopen($reindexed_xplan_gml_path . $GUI->konvertierung->get_plan_file_name(), "w");
 		$GUI->xplan_gml_ids = array();
 		if ($read_handle) {
 			while (($line = fgets($read_handle)) !== false) {
@@ -484,12 +492,12 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}${$GUI->konvertierung->config['plan_file_name']} zum Umbenennen der gml_id's."
+				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}${$GUI->konvertierung->get_plan_file_name()} zum Umbenennen der gml_id's."
 			);
 		}
 		return array(
 			'success' => true,
-			'msg' => "GML-ID's in GML-Datei erfolgreich umbennannt."
+			'msg' => 'GML-IDs in GML-Datei ' . $reindexed_xplan_gml_path . $GUI->konvertierung->get_plan_file_name() . 'erfolgreich umbennannt.'
 		);
 	};
 
@@ -711,16 +719,19 @@
 		$md->set('date_de', date('d.m.Y', $current_time));
 		$md->set('id_cite_date', date('Y-m-d', $current_time));
 		if ($GUI->konvertierung->get('planart') == 'FP-Plan') {
-			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst. Die Daten wurden im Rahmen des Projektes PlanDigital zusammengestellt und durch das testportal-plandigital.de bereitgestellt.';
+			//$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst. Die Daten wurden im Rahmen des Projektes PlanDigital zusammengestellt und durch das testportal-plandigital.de bereitgestellt.';
 		}
 		else {
 			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '.';
 		}
 
 		$md->set('id_abstract', array(
-			'dataset' => $admin_stelle->ows_abstract . $abstract_zusatz,
-			'viewservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
-			'downloadservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			//'dataset' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			//'viewservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			//'downloadservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			'dataset' => defined('XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DATASET') ? XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DATASET : ($admin_stelle->ows_abstract . $abstract_zusatz),
+			'viewservice' => defined('XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_VIEWSERVICE') ? XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_VIEWSERVICE : ($admin_stelle->ows_abstract . $abstract_zusatz),
+			'downloadservice' =>  defined('XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DOWNLOADSERVICE') ? XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DOWNLOADSERVICE : ($admin_stelle->ows_abstract . $abstract_zusatz)
 		));
 		$md->set('version', floatval(implode('.', array_slice(explode('/', XPLAN_NS_URI), -2))));
 		$md->set('extents', $plan_object->extents);
@@ -734,8 +745,8 @@
 		$metaDataCreator = new MetaDataCreator($md);
 		return array(
 			'metaDataGeodatensatz' => $metaDataCreator->createMetadataGeodatensatz(),
-			'metaDataDownload' => $metaDataCreator->createMetaDataDownload(),
-			'metaDataView' =>  $metaDataCreator->createMetaDataView()
+			'metaDataDownload' => $metaDataCreator->createMetadataDownload(),
+			'metaDataView' =>  $metaDataCreator->createMetadataView()
 		);
 	};
 

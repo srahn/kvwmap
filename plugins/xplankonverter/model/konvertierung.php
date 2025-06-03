@@ -69,10 +69,10 @@ class Konvertierung extends PgObject {
 						'create_plaene',
 						'convert_zusammenzeichnung',
 						'gml_generieren',
-						'check_class_completeness',
-						'replace_zusammenzeichnung'
+						'check_class_completeness'
 					)
 				);
+				// ToDo 'replace_zusammenzeichnung' noch nicht bei B-Plänen. Erst das optionale Überschreiben oder nicht in Dialog beim Upload einbauen, siehe Konzept bplan-Server.
 				if (XPLANKONVERTER_CREATE_SERVICE) {
 					array_merge(
 						$config['upload_steps'],
@@ -104,7 +104,7 @@ class Konvertierung extends PgObject {
 					'plan_abk' => 'fplan',
 					'plan_abk_plural' => 'fplaene',
 					'plan_layer_id' => XPLANKONVERTER_FP_PLAENE_LAYER_ID,
-					'plan_attribut_aktualitaet' => 'wirksamkeitsdatum, aenderungenbisdatum, genehmigungsdatum',
+					'plan_attribut_aktualitaet' => 'wirksamkeitsdatum, aenderungenbisdatum','genehmigungsdatum',
 					'plan_file_name' => 'Zusammenzeichnung.gml',
 					'mapfile_name' => 'zusammenzeichnung.map',
 					'upload_steps' => array(
@@ -290,7 +290,7 @@ class Konvertierung extends PgObject {
 					$layer->set('data', $result['data_sql']);
 					if (strpos($layer->data, 'xplankonverter.konvertierungen k') !== false) {
 						$layer->set('data', str_ireplace(' WHERE ', ' WHERE (', $layer->data));
-						$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data)); 
+						$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data));
 					}
 				}
 				else {
@@ -690,36 +690,48 @@ class Konvertierung extends PgObject {
 		$this->gui->xlog->write('ZIP-File closed');
 	}
 	/**
-	 *Anlegen einer Konvertierung
+	 * Anlegen einer Konvertierung
+	 * @param string $anzeige_name, Der Name mit dem die Konvertierung angezeigt werden soll
+	 * @param string $epsg_code, EPSG-Code der Konvertierung
+	 * @param string $epsg_code, EPSG-Code der importierten Daten
+	 * @param string $planart, Die Planart der Konvertierung
+	 * @param string $stelle_id, Die Id der Stelle zu der die Konvertierung gehören soll
+	 * @param string $user_id, Die Id des Nutzers der die Konvertierung angelegt hat.
+	 * @param string $uploaded_xplan_gml_file_name, Der Name der XPlanGml-Datei des Plans die hoch geladen wurde.
+	 * @return int id of new konvertierung if success, else -1
 	 */
-	function create($anzeige_name = '', $epsg_code = '', $input_epsg_code = '', $planart = '', $stelle_id = '', $user_id = '') {
+	function create($anzeige_name = '', $epsg_code = '', $input_epsg_code = '', $planart = '', $stelle_id = '', $user_id = '', $uploaded_xplan_gml_file_name = '') {
 		$sql = "
 			INSERT INTO " . $this->schema . "." . $this->tableName . " (
 				bezeichnung,
-				--status,
 				geom_precision,
 				gml_layer_group_id,
 				epsg,
 				input_epsg,
 				output_epsg,
 				planart,
+				uploaded_xplan_gml_file_name,
 				stelle_id,
 				user_id
-			) VALUES ( 
+			) VALUES (
 				'" . $anzeige_name . "',
-				--'erfasst',
 				15,
 				null,
 				'" . $epsg_code . "'::xplankonverter.epsg_codes,
 				'" . $input_epsg_code . "'::xplankonverter.epsg_codes,
 				'" . $epsg_code . "'::xplankonverter.epsg_codes,
 				'" . $planart . "',
+				'" . ($uploaded_xplan_gml_file_name ?: $this->config['plan_file_name']) . "',
 				" . $stelle_id . ",
-				" . $user_id . ")
+				" . $user_id . "
+			)
 			RETURNING " . $this->identifier . "
 		";
 		$this->debug->show('Create new konvertierung with sql: ' . $sql, Konvertierung::$write_debug);
 		$query = pg_query($this->database->dbConn, $sql);
+		if ($query === false) {
+			return -1;
+		}
 		$row = pg_fetch_assoc($query);
 		$oid = $row[$this->identifier];
 		#echo '<br>oid: ' . $oid;
@@ -741,7 +753,6 @@ class Konvertierung extends PgObject {
 			$this->set($this->identifier, $row[$this->identifier]);
 		}
 		$this->debug->show('Konvertierung created with ' . $this->identifier . ': '. $this->get($this->identifier), Konvertierung::$write_debug);
-		#echo '<br>return identifier: ' . $this->identifier . ': ' . $this->get($this->identifier);
 		return $this->get($this->identifier);
 	}
 
@@ -1171,6 +1182,10 @@ class Konvertierung extends PgObject {
 		return $this->plan;
 	}
 
+	function get_plan_file_name() {
+		return ($this->get('uploaded_xplan_gml_file_name') ?: $this->config['plan_file_name']);
+	}
+
 	/**
 	 * Diese Funktion liefert das Datum der Aktualität des Plans.
 	 * Wenn das Datum aus dem Attriubt $this->plan_attribut_aktualitaet nicht vorhanden ist,
@@ -1308,16 +1323,61 @@ class Konvertierung extends PgObject {
 			case ('BP-Plan') : {
 				$sql .= "
 					INSERT INTO xplan_gml." . strtolower($plan_class) . " (
-						gml_id, user_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
-						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz, auslegungsenddatum, gemeinde,
-						status, plangeber, rechtsstand, auslegungsstartdatum, traegerbeteiligungsstartdatum, aenderungenbisdatum, traegerbeteiligungsenddatum, verfahren,
-						sonstplanart, planart, aufstellungsbeschlussdatum, technischerplanersteller, veraenderungssperre, inkrafttretensdatum, durchfuehrungsvertrag,
-						staedtebaulichervertrag, erschliessungsvertrag, rechtsverordnungsdatum, ausfertigungsdatum, satzungsbeschlussdatum, versionbaunvodatum, versionbaunvotext,
-						versionbaugbdatum, versionbaugbtext, versionsonstrechtsgrundlagedatum, versionsonstrechtsgrundlagetext, hoehenbezug, gruenordnungsplan
+						gml_id,
+						user_id,
+						konvertierung_id,
+						name,
+						nummer,
+						internalid,
+						beschreibung,
+						kommentar,
+						technherstelldatum,
+						genehmigungsdatum,
+						untergangsdatum,
+						aendert,
+						wurdegeaendertvon,
+						erstellungsmassstab,
+						bezugshoehe,
+						raeumlichergeltungsbereich,
+						verfahrensmerkmale,
+						externereferenz,
+						auslegungsenddatum,
+						gemeinde,
+						status,
+						plangeber,
+						rechtsstand,
+						auslegungsstartdatum,
+						traegerbeteiligungsstartdatum,
+						aenderungenbisdatum,
+						traegerbeteiligungsenddatum,
+						verfahren,
+						sonstplanart,
+						planart,
+						aufstellungsbeschlussdatum,
+						technischerplanersteller,
+						veraenderungssperre,
+						veraenderungssperrebeschlussdatum,
+						veraenderungssperredatum,
+						veraenderungssperreenddatum,
+						inkrafttretensdatum,
+						durchfuehrungsvertrag,
+						staedtebaulichervertrag,
+						erschliessungsvertrag,
+						rechtsverordnungsdatum,
+						ausfertigungsdatum,
+						satzungsbeschlussdatum,
+						versionbaunvodatum,
+						versionbaunvotext,
+						versionbaugbdatum,
+						versionbaugbtext,
+						versionsonstrechtsgrundlagedatum,
+						versionsonstrechtsgrundlagetext,
+						hoehenbezug,
+						gruenordnungsplan
 					)
 					SELECT
 						trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid AS gml_id,
-						" . $this->user->id . " AS user_id,
+						" . $this->gui->user->id . " AS user_id,
 						k.id AS konvertierung_id,
 						gmlas.xplan_name AS name,
 						gmlas.nummer AS nummer,
@@ -1355,7 +1415,7 @@ class Konvertierung extends PgObject {
 							WHEN count_gemeinde > 0
 							THEN gemeindelink.gemeinde
 							ELSE NULL
-							END AS gemeinde,
+						END AS gemeinde,
 						(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
 						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
@@ -1365,11 +1425,13 @@ class Konvertierung extends PgObject {
 						NULLIF(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsenddatum,
 						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
 						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
-						gmlas.planart::xplan_gml." . strtolower($plan_class) . "art AS planart,
+						gmlas.planart::xplan_gml." . strtolower($plan_class) . "art[] AS planart,
 						to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum,
 						gmlas.technischerplanersteller AS technischerplanersteller,
-						gmlas.veraenderungssperredatum AS traegerbeteiligungsenddatum,
 						gmlas.veraenderungssperre AS veraenderungssperre,
+						gmlas.veraenderungssperrebeschlussdatum AS veraenderungssperrebeschlussdatum,
+						gmlas.veraenderungssperredatum AS veraenderungssperredatum,
+						gmlas.veraenderungssperreenddatum AS veraenderungssperreenddatum,
 						gmlas.inkrafttretensdatum AS inkrafttretensdatum,
 						gmlas.durchfuehrungsvertrag AS durchfuehrungsvertrag,
 						gmlas.staedtebaulichervertrag AS staedtebaulichervertrag,
@@ -1415,10 +1477,11 @@ class Konvertierung extends PgObject {
 										e_sub.referenzname,
 										e_sub.referenzurl,
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-										e_sub.beschreibung,
+										COALESCE(e_sub.beschreibung, e_sub.referenzname, e_sub.art, 'Dokument'),
 										to_char(e_sub.datum, 'DD.MM.YYYY'),
-										e_sub.typ::xplan_gml.xp_externereferenztyp
-									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+										e_sub.typ::xplan_gml.xp_externereferenztyp,
+										false
+									)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
 							FROM
 								" . $table_schema . "." . strtolower($plan_class) . "_externereferenz externereferenzlink_sub LEFT JOIN
 								" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -2306,19 +2369,23 @@ class Konvertierung extends PgObject {
 		if ($this->get('planart') == 'RP-Plan') {
 			$uploaded_xplangml_file = current($uploaded_files); // get the first file only
 			if ($uploaded_xplangml_file != $upload_path . $this->config['plan_file_name']) {
+				// ToDo: Umstellen, so dass auch der Name von $uploaded_xplangml_file verwendet werden kann
+				// und nicht mehr umbenannt werden muss
 				rename($uploaded_xplangml_file, $upload_path . $this->config['plan_file_name']);
 			}
 		}
 
 		if (!file_exists($upload_path . $this->config['plan_file_name'])) {
 			// Suche eine GML-Datei im upload_path.
+			// ToDo: Wenn es möglich ist einen beliebigen plan_file_name zu vergeben,
+			// bräuchte man auch keinen Standardmäßigen plan_file_name in config mehr.
 			$gml_files = glob($upload_path . '*.gml');
 			if (count($gml_files) > 0) {
 				$plan_file_name = basename($gml_files[0]);
 			}
 			else {
-				// Weder $this->config['plan_file_name'] noch eine Datei mit .gml gefunden
-				$plan_file_name = $this->config['plan_file_name'];
+				// Weder $this->get_plan_file_name() noch eine Datei mit .gml gefunden
+				$plan_file_name = $this->get_plan_file_name();
 				return array(
 					'success' => false,
 					'msg' => 'Die hochgeladene ZIP-Datei enthält keine Datei mit dem Namen: '. $plan_file_name
@@ -2843,21 +2910,43 @@ class Konvertierung extends PgObject {
 		$md->set('date_title', 'Datum');
 		$md->set('id_cite_title', $md->get('stellendaten')['ows_title'] . ' (Zusammenzeichnung)');
 		//$md->set('id_cite_title', $plan->get('name'));
+		
+		$abstract_dataset = 'Dieser Geodatensatz beinhaltet den Flächennutzungsplan der in der Überschrift angegebenen Kommune des Landes Niedersachsen in einem standardisierten Format. Eine rechtlich verbindliche Auskunft zur Flächennutzungsplanung erteilt jedoch ausschließlich die zuständige Einheits- oder Samtgemeinde als Trägerin der Flächennutzungsplanung. Die Daten beinhalten mindestens einen Layer pro XPlanung-Klasse, basierend auf dem Datenaustauschformat XPlanGML. 
+
+Die hier vorliegende Zusammenzeichnung beinhaltet den aktuellen Stand der rechtswirksamen Flächennutzungsplanung, der gegebenenfalls in den ursprünglich aufgestellten Flächennutzungsplan alle inzwischen rechtswirksam erfolgten Änderungen und Berichtigungen einarbeitet, so dass es ein Gesamtplanwerk ergibt. Die XPlanGML-Dateien wurden im Rahmen des Projektes PlanDigital erstellt bzw. veröffentlicht und werden über die Plattform PlanDigital (https://testportal-plandigital.de/kvwmap/index.php) für die Träger der Flächennutzungsplanung zugangsbeschränkt bereitgestellt. Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die letzte technische Aktualisierung des Geodatensatzes bzw. der Dienste, die möglicherweise keine Änderung der Inhalte bedeutet. Die Veröffentlichung aktualisierter Daten sollte mindestens einmal jährlich erfolgen. 
+In der Plattform/Testportal PlanDigital wurde in den Dienstmetadaten von der zuständigen Kommune folgende Aktualität angegeben: ';
+		$abstract_dataset .= $md->get('stellendaten')['ows_abstract'];
+		$abstract_dataset .= '. Das angegebene Veröffentlichungsdatum soll das Datum der Rechtskraft des Plans oder der letzten Änderung sein; diese Information wird der XPlanGML entnommen.';
+			
+		$abstract_viewservice = 'Dieser Darstellungsdienst (Web Map Service oder kurz WMS) stellt die Zusammenzeichnung des Flächennutzungsplans der in der Überschrift angegebenen Kommune des Landes Niedersachsen in einer landesweit einheitlichen Visualisierung bereit.
+Eine rechtlich verbindliche Auskunft erteilt jedoch ausschließlich die zuständige Einheits- oder Samtgemeinde als Trägerin der Flächennutzungsplanung. Hierbei handelt es sich um einen Gebrauchsdienst der Zusammenzeichnungen von Planelementen des Flächennutzungsplans der in der Überschrift angegebenen Kommune mit mindestens einem Layer pro XPlanung-Klasse, basierend auf dem Datenaustauschformat XPlanGML. Es handelt sich explizit nicht um einen XPlanung-konformen Dienst, da er nicht dem XPlanung-Schema entspricht. Stattdessen wird ein eigenes, abgeflachtes Schema verwendet. 
+
+Die Zusammenzeichnung beinhaltet den aktuellen Stand der rechtswirksamen Flächennutzungs-planung, der in den ursprünglich aufgestellten Flächennutzungsplan alle inzwischen rechtswirksam erfolgten Änderungen und Berichtigungen einarbeitet, so dass es ein Gesamtplanwerk ergibt. Die Grenzen der Geltungsbereiche von Flächennutzungsplan-Änderungen und Berichtigungen sind im Layer „Geltungsbereiche“ zusammengefasst. Die Daten wurden im Rahmen des Projektes PlanDigital erstellt bzw. veröffentlicht und werden durch die Plattform PlanDigital (https://testportal-plandigital.de/kvwmap/index.php) für die Träger der Flächennutzungsplanung zugangsbeschränkt bereitgestellt. 
+Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die letzte technische Aktualisierung des Geodatensatzes bzw. der Dienste, die möglicherweise keine Änderung der Inhalte bedeutet. Die Veröffentlichung aktualisierter Daten sollte mindestens einmal jährlich erfolgen. In der Plattform/Testportal PlanDigital wurde in den Dienstmetadaten von der zuständigen Kommune folgende Aktualität angegeben: ';
+		$abstract_viewservice .= $md->get('stellendaten')['ows_abstract'];
+		$abstract_viewservice .= '. Das angegebene Veröffentlichungsdatum soll das Datum der Rechtskraft des Plans oder der letzten Änderung sein; diese Information wird der XPlanGML entnommen.';
+		
+		$abstract_downloadservice = 'Dieser Downloaddienst (Web Feature Service oder kurz WFS) stellt die Zusammenzeichnung des Flächennutzungsplans der in der Überschrift angegebenen Kommune des Landes Niedersachsen in einer landesweit einheitlichen Visualisierung bereit.
+Eine rechtlich verbindliche Auskunft erteilt jedoch ausschließlich die zuständige Einheits- oder Samtgemeinde als Trägerin der Flächennutzungsplanung. Hierbei handelt es sich um einen an XPlanung angelehnten Gebrauchsdienst der Zusammenzeichnungen von Planelementen des Flächennutzungsplans der in der Überschrift angegebenen Kommune mit mindestens einem Layer pro XPlanung-Klasse. Es handelt sich explizit nicht um einen XPlanung-konformen Dienst, da er nicht dem XPlanung-Schema entspricht. Stattdessen wird ein eigenes, abgeflachtes Schema verwendet. 
+
+Die Zusammenzeichnung beinhaltet den aktuellen Stand der rechtswirksamen Flächennutzungs-planung, der in den ursprünglich aufgestellten Flächennutzungsplan alle inzwischen rechtswirksam erfolgten Änderungen und Berichtigungen einarbeitet, so dass es ein Gesamtplanwerk ergibt. Die Grenzen der Geltungsbereiche von Flächennutzungsplan-Änderungen und Berichtigungen sind im Layer „Geltungsbereiche“ zusammengefasst. Die Daten wurden im Rahmen des Projektes PlanDigital erstellt bzw. veröffentlicht und werden durch die Plattform PlanDigital (www.testportal-plandigital.de) bereitgestellt. 
+Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die letzte technische Aktualisierung des Geodatensatzes bzw. der Dienste, die möglicherweise keine Änderung der Inhalte bedeutet. Die Veröffentlichung aktualisierter Daten sollte mindestens einmal jährlich erfolgen. In der Plattform/Testportal PlanDigital wurde in den Dienstmetadaten von der zuständigen Kommune folgende Aktualität angegeben: ';
+		$abstract_downloadservice .= $md->get('stellendaten')['ows_abstract'];
+		$abstract_downloadservice .= '. Das angegebene Veröffentlichungsdatum soll das Datum der Rechtskraft des Plans oder der letzten Änderung sein; diese Information wird der XPlanGML entnommen.';
+		
 		$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist der " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
 		$md->set('id_abstract', array(
-			'dataset' => ' des Plans ' . $plan->get('name') . $abstract_zusatz,
-			//'viewservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
-			//'downloadservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
-			'viewservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
-			'downloadservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
+			'dataset' => $abstract_dataset,
+			'viewservice' => $abstract_viewservice,
+			'downloadservice' => $abstract_downloadservice
 		));
 		$md->set('date_title', $this->get_plan_attribut_aktualitaet());
-		//$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));
+		$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));
 		// id_cite_date should be set to aktualisierungsdatum for metadataportal niedersachsen
-		$md->set('id_cite_date', en_date($this->get_letztes_aktualisierungsdatum_gebietstabelle()));
+		//$md->set('id_cite_date', en_date($this->get_letztes_aktualisierungsdatum_gebietstabelle()));
 		
 		//Auf Wunsch von ArL's/GDI-NI wurde der Identifier für alle Pläne auf den Namespace Plandigital angepasst
-		$md->set('namespace', 'https://registry.gdi-de.org/id/de.ni.plandigital/');
+		$md->set('namespace', $md->get('stellendaten')['ows_namespace']);
 		
 		$md->set('version', $this->get_version_from_ns_uri(XPLAN_NS_URI));
 		$md->set('extents', $plan->extents);
@@ -2877,8 +2966,8 @@ class Konvertierung extends PgObject {
 		$metaDataCreator = new MetaDataCreator($md);
 		return array(
 			'metaDataGeodatensatz' => $metaDataCreator->createMetadataGeodatensatz(),
-			'metaDataDownload' => $metaDataCreator->createMetaDataDownload(),
-			'metaDataView' =>  $metaDataCreator->createMetaDataView()
+			'metaDataDownload' => $metaDataCreator->createMetadataDownload(),
+			'metaDataView' =>  $metaDataCreator->createMetadataView()
 		);
 	}
 
@@ -2895,9 +2984,9 @@ class Konvertierung extends PgObject {
 
 	function set_metadata_uuid($type) {
 		$uuid = uuid();
-		$this->update_attr(array("metadata_" . $type . "_uuid = '" . $uuid . "'"));
+		$result = $this->update_attr(array("metadata_" . $type . "_uuid = '" . $uuid . "'"));
 		$this->set('metadata_' . $type . '_uuid', $uuid);
-		return $uuid;
+		return $result;
 	}
 
 	function set_metadata_uuids($uuids) {
@@ -2906,7 +2995,14 @@ class Konvertierung extends PgObject {
 			$attributes[] = $key . " = '" . $value . "'";
 			$this->set($key, $value);
 		}
-		$this->update_attr($attributes);
+		$result = $this->update_attr($attributes);
+		return $result;
+	}
+
+	function set_uploaded_xplan_gml_file_name($uploaded_xplan_gml_file_name) {
+		$result = $this->update_attr(array("uploaded_xplan_gml_file_name = '" . $uploaded_xplan_gml_file_name . "'"));
+		$this->set('uploaded_xplan_gml_file_name', $uploaded_xplan_gml_file_name);
+		return $result;
 	}
 
 	function get_arl_email() {
@@ -3000,7 +3096,7 @@ class Konvertierung extends PgObject {
 		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
 		return $ret;
 	}
-	
+
 	/*
 	* Checks if the geometry of the plan-geltungsbereich is similar to the geometry (95% area equality)
 	* in gebietseinheiten in the temporary_gmlas_table
@@ -3043,7 +3139,5 @@ class Konvertierung extends PgObject {
 		}
 		*/
 	}
-	
-	
 }
 ?>
