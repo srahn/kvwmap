@@ -1395,6 +1395,14 @@ class data_import_export {
 					$where .= " AND st_intersects(".$layerset[0]['attributes']['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 				}
 			}
+
+			$where .= " AND " . $GUI->pgdatabase->get_extent_filter(
+				$GUI->Stelle->MaxGeorefExt,
+				$user->rolle->epsg_code,
+				$layerset[0]['attributes']['the_geom'],
+				$layerset[0]['epsg_code']
+			);
+
 			if ($this->formvars['export_format'] == 'GPX' AND $layerset[0]['datentyp'] == 2) {	# bei GPX Polygone in Linien umwandeln
 				$query_parts['select'] = str_replace(
 					$layerset[0]['attributes']['the_geom'], 
@@ -1411,7 +1419,7 @@ class data_import_export {
 				. $where
 				. $query_parts['orderby'] . "
 			";
-			// echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
+			echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
 			$data_sql = $sql;
 
 			$temp_table = 'shp_export_'.rand(1, 1000000);

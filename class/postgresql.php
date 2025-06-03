@@ -1251,7 +1251,35 @@ FROM
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];    
   }
-  
+
+	/**
+	 * Function return the WHERE Expression-String to filter by $extent and if $null_geom true not the NULL-Geometries.
+	 * @param rectObj $extent A MapServer Rect-Object with the extent used to create the envelope.
+	 * @param Integer $extent_epsg The EPSG-Code of the extent in Rect-Object $extent.
+	 * @param String $geom_column The name of the geometry column used for the filter.
+	 * @param Integer $geom_column_epsg The EPSG-Code of the geometries in the geometry column
+	 * @param String $geom_column_tablealias An optional alias name of the table that has the geometry column.
+	 * @param Boolean $null_geom Optional parameter to append OR $geom_column IS NULL, if $null_geom is true, to the expression string.
+	 * @return String The resulting Expression-String enclosed in round brackets ().
+	 */
+	function get_extent_filter($extent, $extent_epsg, $geom_column, $geom_column_epsg, $geom_column_table_alias = NULL, $null_geom = true) {
+		$sql_envelope = "ST_MakeEnvelope(
+			" . $extent->minx . ", " . $extent->miny . ", " . $extent->maxx . ", " . $extent->maxy . ",
+			" . $extent_epsg . "
+		)";
+		if ($extent_epsg != $geom_column_epsg) {
+			$sql_envelope = "ST_Transform(
+				" . $sql_envelope . ",
+				" . $geom_column_epsg . "
+			)";
+		}
+		$extent_filter = $sql_envelope . " && " . ($geom_column_table_alias ? $geom_column_table_alias . "." : "") . $geom_column;
+		$null_filter = ($null_geom ? " OR " . $geom_column . " IS NULL" : "");
+		$sql = "(" . $extent_filter . $null_filter . ")";
+		// echo '<br>SQL-Extent-Filter: ' . $sql;
+		return $sql;
+	}
+
 	function pg_field_schema($table_oid){
 		if($table_oid != ''){
 			$sql = "select nspname as schema from pg_class c, pg_namespace ns

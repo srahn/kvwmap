@@ -164,7 +164,7 @@
 				);
 			}
 
-			$package->update_attr(array('pack_status_id = 3'));
+			$package->update_attr(array('pack_status_id = 3')); // in Arbeit
 			$GUI->formvars['selected_layer_id'] = $package->get('layer_id');
 			$GUI->formvars['epsg'] = $package->layer->get('epsg_code');
 			$export_path = $package->get_export_path();
@@ -669,15 +669,20 @@
 			$where = "";
 			if (in_array($package->layer->get('datentyp'), array(0, 1, 2, 7, 8))) {
 				// Nur für Vektorlayer
-				$where = "WHERE
-						ST_MakeEnvelope(
-							" . $GUI->Stelle->MaxGeorefExt->minx . ",
-							" . $GUI->Stelle->MaxGeorefExt->miny . ",
-							" . $GUI->Stelle->MaxGeorefExt->maxx . ",
-							" . $GUI->Stelle->MaxGeorefExt->maxy . ",
-							25832
-						) && query." . $package->layer->get('geom_column') . "
-				";
+				$where = "WHERE " . $GUI->pgdatabase->get_extent_filter(
+					$GUI->Stelle->MaxGeorefExt,
+					$GUI->user->rolle->epsg_code,
+					$package->layer->get('geom_column'),
+					$package->layer->get('epsg_code')
+				);
+				// $where = "WHERE ST_Transform(ST_MakeEnvelope(
+				// 			" . $GUI->Stelle->MaxGeorefExt->minx . ",
+				// 			" . $GUI->Stelle->MaxGeorefExt->miny . ",
+				// 			" . $GUI->Stelle->MaxGeorefExt->maxx . ",
+				// 			" . $GUI->Stelle->MaxGeorefExt->maxy . ",
+				// 			" . $GUI->Stelle->epsg_code . "
+				// 		), " . $package->layer->get('epsg_code') . ") && query." . $package->layer->get('geom_column') . "
+				// ";
 			}
 			$sql = "
 				SET search_path = " . $package->layer->get('schema') . ", public;
