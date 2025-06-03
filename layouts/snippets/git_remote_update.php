@@ -3,7 +3,8 @@
 $branches = [
 	'kvwmap',
 	'develop',
-	'transfer_mysql_to_postgres'
+	'transfer_mysql_to_postgres',
+	'master'
 ];
 
 	$folder = getcwd();
