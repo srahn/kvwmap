@@ -2312,7 +2312,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'show_background_jobs_log' : {
-				readfile(LOGPATH . 'background_jobs.htm');
+				readfile(LOGPATH . 'background_jobs_log.htm');
 			} break;
 
 			default : {
