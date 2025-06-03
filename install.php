@@ -247,7 +247,7 @@ function install() {
 			#
 			# Führe alle Migration aus und richte damit die aktuellen Datenbankschemas ein.
 			#
-			migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb);
+			migrate_databases($pgsqlKvwmapDb);
 
 			if (file_exists('credentials.php')) { ?>
 				credentials.php existiert schon.<?php
@@ -255,28 +255,28 @@ function install() {
 			else { ?>
 				Lege credentials.php Datei an ...<?php
 				file_put_contents('credentials.php', "<?php
-				define('MYSQL_HOST', 'mysql');
-				define('MYSQL_USER', 'kvwmap');
-				define('MYSQL_PASSWORD', '" . MARIADB_PASSWORD . "');
-				define('MYSQL_DBNAME', 'kvwmapdb');
-				define('MYSQL_HOSTS_ALLOWED', '" . MARIADB_HOSTS_ALLOWED . "');?>"); ?><br>
+				define('POSTGRES_HOST', 'pgsql');
+				define('POSTGRES_USER', 'kvwmap');
+				define('POSTGRES_PASSWORD', '" . POSTGRES_PASSWORD . "');
+				define('POSTGRES_DBNAME', 'kvwmapsp');
+				?>"); ?><br>
 				... fertig<p><?php
 			}
 
 			?>Setze URL Konstante ...<?php
 			$sql = "
-				UPDATE config
+				UPDATE kvwmap.config
 				SET value = '" . $_SERVER['HTTP_HOST'] . "'
 				WHERE name = 'URL'
 			";
-			$ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
+			$ret = $pgsqlKvwmapDb->execSQL($sql, 0, 1);
 			if ($ret['success']) { ?>
 				... fertig<?
 			}
 			else {?>
-				<br>Fehler beim Einstellen der URL des Servers in der Datenbank <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
+				<br>Fehler beim Einstellen der URL des Servers in der Datenbank <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
 				$error = true;
-				echo $mysqlKvwmapDb->errormessage;
+				echo $pgsqlKvwmapDb->errormessage;
 			}
 
 			?>Setze Password für Postgres Nutzer "kvwmap" in MariaDB connections table...<?php
