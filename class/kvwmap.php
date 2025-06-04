@@ -175,9 +175,9 @@ class GUI {
 	 * It will not wait for the finish of that jobs.
 	 */
 	function start_background_task() {
-		$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' go=run_background_jobs >> ' . LOGPATH . 'background_jobs.htm 2>&1 &';
+		$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' go=run_background_jobs >> ' . LOGPATH . 'background_jobs_log.htm 2>&1 &';
 		shell_exec($command);
-		// echo '<br>Background Task mit Komando: ' . $command . ' gestartet. Log in ' . LOGPATH . 'background_jobs.log';
+		// echo '<br>Background Task mit Komando: ' . $command . ' gestartet. Log in ' . LOGPATH . 'background_jobs_log.log';
 	}
 
 	/**
@@ -190,15 +190,15 @@ class GUI {
 		// Find jobs already running
 		$jobs = BackgroundJob::find($this, 'job_started_at IS NOT NULL AND job_finished_at IS NULL');
 		if (count($jobs) > 0) {
-			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Backgroundjobs already running.', FILE_APPEND);
+			file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>Backgroundjobs already running.', FILE_APPEND);
 			return 0;
 		}
 		else {
-			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine laufenden Jobs gefunden! Suche nach neuen.', FILE_APPEND);
+			file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>Keine laufenden Jobs gefunden! Suche nach neuen.', FILE_APPEND);
 		}
 		// Find new jobs to run
 		$jobs = BackgroundJob::find($this, 'job_started_at IS NULL', 'created_at');
-		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>' . count($jobs) . ' Jobs gefunden.', FILE_APPEND);
+		file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>' . count($jobs) . ' Jobs gefunden.', FILE_APPEND);
 		if (count($jobs) > 0) {
 			foreach($jobs AS $job) {
 				$query = $job->get('arguments');
@@ -209,16 +209,16 @@ class GUI {
 					$cliArgs[] = sprintf('%s=%s', escapeshellarg($key), escapeshellarg($value));
 				}
 				$cliString = implode(' ', $cliArgs);
-				$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' background_job=' . $job->get_id() . ' only_main=1 ' . implode(' ', $cliArgs) . ' >> ' . LOGPATH . 'background_jobs.htm 2>&1';
-				file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Run command: ' . $command, FILE_APPEND);
+				$command = 'php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' background_job_id=' . $job->get_id() . ' only_main=1 ' . implode(' ', $cliArgs) . ' >> ' . LOGPATH . 'background_jobs_log.htm 2>&1';
+				file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>Run command: ' . $command, FILE_APPEND);
 				shell_exec($command);
-				$job->update_attr(array("job_finished_at = now()", "job_status = 'ok'"));
+				$job->update_attr(array("job_finished_at = now()"));
 			}
 			// Search if there are more new jobs to run
 			$this->run_background_jobs();
 		}
 		// noting to do
-		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine Jobs gefunden.', FILE_APPEND);
+		file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>Keine Jobs gefunden.', FILE_APPEND);
 		return 0;
 	}
 
@@ -5541,18 +5541,16 @@ echo '			</table>
 		$this->administration->get_database_status();
 		$this->administration->get_config_params();
 		switch ($this->formvars['func']) {
-			case "update_code_and_databases" : {
+			case "switch_branch" : {
+				$result = $this->administration->switch_branch($this->formvars['branch']);
+			}	# break fehlt mit Absicht
+			case "switch_branch" : case "update_code_and_databases" : {
 				$result = $this->administration->update_code();
 				$this->administration->get_database_status();
-				$err_msgs = $this->administration->update_databases();
-				if (count($err_msgs) > 0) {
-					$this->add_message('error', implode('<br>', $err_msgs));
-				}
-				$this->administration->get_database_status();
-				$this->administration->get_config_params();
 				$this->showAdminFunctions();
-			} break;			
-			case "update_databases" : {
+			} break;
+			case "update_code_and_databases" : case "update_databases" : {
+				$this->administration->get_database_status();
 				$err_msgs = $this->administration->update_databases();
 				if (count($err_msgs) > 0) {
 					$this->add_message('error', implode('<br>', $err_msgs));
@@ -9874,7 +9872,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							}
 							# Suche nur im Stellen-Extent
-							$spatial_sql_where.=' AND ('.$layerset[0]['attributes']['the_geom'].' && st_transform(st_geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
+							$spatial_sql_where .= " AND " . $this->pgdatabase->get_extent_filter(
+								$this->Stelle->MaxGeorefExt,
+								$this->user->rolle->epsg_code,
+								$layerset[0]['attributes']['the_geom'],
+								$layerset[0]['epsg_code']
+							);
+							// $spatial_sql_where .= ' AND ('.$layerset[0]['attributes']['the_geom'].' && st_transform(st_geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
 						}
 					}
 					$sql_where .= ')';		// Klammer von der boolschen Verkettung wieder zu
