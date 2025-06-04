@@ -43,7 +43,7 @@ class Menue extends PgObject {
 
 	public static	function find($gui, $where, $order = '', $sort_direction = '') {
 		$menue = new Menue($gui);
-		return $menue->find_where($where, $order, $sort_direction);
+		return $menue->find_where($where, $order);
 	}
 
 	public static function loadMenue($gui, $type) {
