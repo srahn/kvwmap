@@ -21592,9 +21592,9 @@ DO $$
 	}	
 
 	function save_all_layer_params($formvars) {
-		$sql = "TRUNCATE layer_parameter";
+		$sql = "TRUNCATE kvwmap.layer_parameter";
 		$this->db->execSQL($sql);
-		$sql = "INSERT INTO layer_parameter VALUES ";
+		$sql = "INSERT INTO kvwmap.layer_parameter VALUES ";
 		for ($i = 0; $i < count($formvars['key']); $i++) {
 			if ($formvars['key'][$i] != '') {
 				if ($formvars['id'][$i] == '') {
