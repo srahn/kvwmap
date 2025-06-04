@@ -305,7 +305,7 @@ class account {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>", 4); return 0; }
 		while ($rs = pg_fetch_array($ret[1])) {
 			$NumbOfAccess[]=$rs;
-			$sql ='SELECT u_consumeCSV.time_id, concat(u.vorname, " ", u.name) as Name';
+			$sql ='SELECT u_consumeCSV.time_id, concat(u.vorname, \' \', u.name) as Name';
 			$sql.=' FROM kvwmap.user AS u, kvwmap.stelle AS s, kvwmap.u_consumeCSV';
 			$sql.=' WHERE 1=1';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
@@ -319,7 +319,7 @@ class account {
 			}
 			$sql.=' AND u_consumeCSV.stelle_id = s.ID';
 			$sql.=' AND u_consumeCSV.user_id = u.ID';
-			$sql.= ' AND art="'.$rs['art'].'"';
+			$sql.= ' AND art = \'' . $rs['art'] . '\'';
 			if($rs['stelle_id'] != ''){
 				$sql.= ' AND u_consumeCSV.stelle_id='.$rs['stelle_id'];
 			}
@@ -416,7 +416,7 @@ class account {
 			}
 			$sql.=' AND u_consumeShape.stelle_id = s.ID';
 			$sql.=' AND u_consumeShape.user_id = u.ID';
-			$sql.= ' AND u_consumeShape.layer_id="'.$rs['layer_id'].'"';
+			$sql.= ' AND u_consumeShape.layer_id = ' . $rs['layer_id'];
 			if($rs['stelle_id'] != ''){
 				$sql.= ' AND u_consumeShape.stelle_id='.$rs['stelle_id'];
 			}
@@ -502,7 +502,7 @@ class account {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALB.time_id, concat(u.vorname, \' \', u.name) as Name';
 			$sql.=' FROM kvwmap.user AS u, kvwmap.stelle AS s, kvwmap.u_consumeALB';
-			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALB.time_id AND c2l.user_id = u_consumeALB.user_id AND c2l.stelle_id = u_consumeALB.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
+			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN kvwmap.u_consume2layer c2l LEFT JOIN kvwmap.layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALB.time_id AND c2l.user_id = u_consumeALB.user_id AND c2l.stelle_id = u_consumeALB.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
 			$sql.=' WHERE 1=1';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
 				$sql.=' AND '.$era.'u_consumeALB.time_id)='.$date . " AND date_part('year', u_consumeALB.time_id) = " .$year;
