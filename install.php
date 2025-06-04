@@ -146,8 +146,8 @@ function install() {
 	}
 	else { ?>
 		Es kann keine Verbindung zur Postgres Datenbank <?php echo $pgsqlKvwmapDb->dbName; ?> mit Nutzer <?php echo $pgsqlKvwmapDb->user; ?> und host: <?php echo $pgsqlKvwmapDb->host; ?> hergestellt werden.<br>
-		<h1>Installiere kvwmap Datenbank auf PostgreSQL-Server</h1><?php
-		$kvwmapsp_installed = install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb);
+		<!--h1>Installiere kvwmap Datenbank auf PostgreSQL-Server</h1--><?php
+		#$kvwmapsp_installed = install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb);		# passiert ab PG16 Container schon vorher
 	}
 
 	if ($kvwmapsp_installed) { ?>
@@ -155,7 +155,9 @@ function install() {
 		Verbindung zu PostgreSQL Datenbank von kvwmap herstellen und Migration ausführen.<br> <?php
 		$pgsqlKvwmapDb->open(); ?>
 
-		Erzeuge die PostGIS Erweiterung in der kvwmapsp Datenbank falls noch nicht vorhanden.<br><?php
+		<?php
+		# folgendes passiert ab PG16 Container schon vorher
+		/*
 		$sql = "
 			CREATE EXTENSION IF NOT EXISTS postgis
 		";
@@ -228,9 +230,10 @@ function install() {
 				'+proj=tmerc +towgs84=0,0,0 +lat_0=0 +lon_0=15 +k=0.9996 +x_0=3500000 +y_0=0 +ellps=GRS80 +units=m +no_defs <>'
 				)
 			*/
+			/*
 		";
 		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
-
+		*/
 		<h1>Lege Tabellen und Inhalte für die Administration an.</h1><?
 		$kvwmap_install_file = $installpath . LAYOUTPATH . 'db/postgresql/data/kvwmap_install.sql';
 		$sql = file_get_contents($kvwmap_install_file);
