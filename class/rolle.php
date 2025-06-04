@@ -2232,7 +2232,7 @@ class rolle {
 	function deleteGroups($user_id,$stellen) {
 		# löscht die Gruppen der übergebenen Stellen für einen Benutzer.
 		for ($i = 0; $i < count_or_0($stellen); $i++) {
-			$sql ='DELETE FROM u_groups2rolle WHERE user_id = '.$user_id.' AND stelle_id = '.$stellen[$i];
+			$sql ='DELETE FROM kvwmap.u_groups2rolle WHERE user_id = '.$user_id.' AND stelle_id = '.$stellen[$i];
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 			$this->database->execSQL($sql);

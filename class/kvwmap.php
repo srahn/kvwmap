@@ -22738,7 +22738,7 @@ class Document {
 							SELECT
 								max(id) + 1 AS new_id
 							FROM
-								druckausschnitte
+								kvwmap.druckausschnitte
 							WHERE
 								stelle_id = " . $stelle_id . " AND
 								user_id = " . $user_id . "
@@ -22753,6 +22753,7 @@ class Document {
 				" . $print_scale . ",
 				" . $angle . ",
 				" . $frame_id . "
+			)
 		";
 		$this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
 		$this->database->execSQL($sql,4, 1);

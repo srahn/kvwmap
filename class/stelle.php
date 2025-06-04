@@ -1197,7 +1197,7 @@ class stelle {
 
 	function dropParent($drop_parent_id) {
 		$sql = "
-			DELETE FROM stellen_hierarchie
+			DELETE FROM kvwmap.stellen_hierarchie
 			WHERE
 				parent_id = " . $drop_parent_id . " AND
 				child_id = " . $this->id . "
@@ -1248,7 +1248,7 @@ class stelle {
 	
 	function dropChild($drop_child_id) {
 		$sql = "
-			DELETE FROM stellen_hierarchie
+			DELETE FROM kvwmap.stellen_hierarchie
 			WHERE
 				parent_id = " . $this->id . " AND
 				child_id = " . $drop_child_id . "
@@ -1621,17 +1621,17 @@ class stelle {
 					if ($assign_default_values){
 						$sql .= "
 						UPDATE SET
-							queryable = l.queryable, 
-							use_geom = l.use_geom, 
-							legendorder = l.legendorder, 
-							minscale = l.minscale, 
-							maxscale = l.maxscale, 
-							symbolscale = l.symbolscale, 
-							offsite = l.offsite, 
-							transparency = l.transparency, 
-							template = l.template, 
-							postlabelcache = l.postlabelcache,
-							requires = l.requires
+							queryable = EXCLUDED.queryable, 
+							use_geom = EXCLUDED.use_geom, 
+							legendorder = EXCLUDED.legendorder, 
+							minscale = EXCLUDED.minscale, 
+							maxscale = EXCLUDED.maxscale, 
+							symbolscale = EXCLUDED.symbolscale, 
+							offsite = EXCLUDED.offsite, 
+							transparency = EXCLUDED.transparency, 
+							template = EXCLUDED.template, 
+							postlabelcache = EXCLUDED.postlabelcache,
+							requires = EXCLUDED.requires
 						";
 					}
 					else {
@@ -2537,7 +2537,7 @@ class stelle {
 		else{
 			while ($rs = pg_fetch_array($ret[1])) {
 				$user['ID'][] = $rs['id'];
-				$user['Bezeichnung'][] = $rs['name'].', '.$rs['norname'];
+				$user['Bezeichnung'][] = $rs['name'].', '.$rs['vorname'];
 				$user['position'][] = $rs['position'];
 				$user['email'][] = $rs['email'];
 			}

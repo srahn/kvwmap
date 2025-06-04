@@ -1329,13 +1329,13 @@ if ($this->formvars['go'] != 'Dienstmetadaten') { ?>
 
 	<input
 		name="selparents"
-		value="<?php echo implode(', ', array_map(function($parent) { return $parent['ID']; }, $this->formvars['selparents'])); ?>"
+		value="<?php echo implode(', ', array_map(function($parent) { return $parent['id']; }, $this->formvars['selparents'])); ?>"
 		type="hidden"
 	>
 
 	<input
 		name="selchildren"
-		value="<?php echo implode(', ', array_map(function($child) { return $child['ID']; }, $this->formvars['selchildren'])); ?>"
+		value="<?php echo implode(', ', array_map(function($child) { return $child['id']; }, $this->formvars['selchildren'])); ?>"
 		type="hidden"
 	><?
 } ?>
