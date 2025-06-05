@@ -435,7 +435,7 @@ class PgObject {
 			},
 			$this->getValues()
 		);
-		echo $sql = "
+		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
 				" . implode(', ', array_map(function ($key) {return '"' . $key . '"';}, $this->getKeys())) . "
 			)

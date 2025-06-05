@@ -2,7 +2,7 @@
 	$language = (in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese')) ? $_REQUEST['language'] : 'german');
 	include_once(LAYOUTPATH . 'languages/' . $language . '.php');
 	include_once(LAYOUTPATH . 'languages/login_registration_' . $language . '.php');
-	$bezeichnung_attribute = 'Bezeichnung' . ($language != 'german' ? '_' . $language : '');
+	$bezeichnung_attribute = 'bezeichnung' . ($language != 'german' ? '_' . $language : '');
 ?><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
 	<? include(SNIPPETS . 'login_head.php'); ?>
 	<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="load()">
@@ -22,7 +22,7 @@
 							<tr>
 								<td colspan="2"><? echo $strWelcomRegistration . ' ' . TITLE; ?>.
 									<p>
-									<b><? echo $this->invitation->inviter->get('Vorname') . ' ' . $this->invitation->inviter->get('name'); ?><b> <?php echo $strInvitationToTask; ?>: <? echo $this->invitation->stelle->get($bezeichnung_attribute); ?><br>
+									<b><? echo $this->invitation->inviter->get('vorname') . ' ' . $this->invitation->inviter->get('name'); ?><b> <?php echo $strInvitationToTask; ?>: <? echo $this->invitation->stelle->get($bezeichnung_attribute); ?><br>
 									<?php echo $strNameAndContact; ?>
 									<p>
 									<? echo password_erstellungs_hinweis($language); ?>
@@ -32,7 +32,7 @@
 									<? echo $strRequests; ?> <?
 									if ($this->invitation->inviter->get('email') != '') { ?>
 										<? echo $strPerEMail; ?> <a href="mailto:<? echo $this->invitation->inviter->get('email'); ?>"><?
-										echo $this->invitation->inviter->get('Vorname') . ' ' . $this->invitation->inviter->get('name'); ?></a><?
+										echo $this->invitation->inviter->get('vorname') . ' ' . $this->invitation->inviter->get('name'); ?></a><?
 									}
 									if ($this->invitation->inviter->get('phon') != '') { ?>
 										<? echo $strOrCall; ?> <? echo $this->invitation->inviter->get('phon') . '.';
@@ -55,13 +55,13 @@
 							<tr>
 								<td><span class="px16"><? echo $this->strForeName; ?>: </span></td>
 								<td>
-									<input style="width: 200px" type="text" value="<? echo $this->formvars['Vorname']; ?>" name="Vorname" />
+									<input style="width: 200px" type="text" value="<? echo $this->formvars['vorname']; ?>" name="vorname" />
 								</td>
 							</tr>
 							<tr>
 								<td><span class="px16"><? echo $this->strNameSuffix; ?>: </span></td>
 								<td>
-									<input style="width: 200px" type="text" value="<? echo $this->formvars['Namenszusatz']; ?>" name="Namenszusatz" />
+									<input style="width: 200px" type="text" value="<? echo $this->formvars['namenszusatz']; ?>" name="namenszusatz" />
 								</td>
 							</tr>
 							<tr>

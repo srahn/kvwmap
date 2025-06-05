@@ -203,11 +203,10 @@ else {
 
 					if (is_registration_valid($new_registration_err)) {
 						$GUI->debug->write('Registrierung ist valide.', 4, $GUI->echo);
-
-						$result = Nutzer::register($GUI, $GUI->formvars['Stelle_ID']);
+						$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
+						$result = Nutzer::register($GUI, $invitation->get('stelle_id'));
 
 						if ($result['success']) {
-							$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
 							$invitation->set('completed', date("Y-m-d H:i:s"));
 							$invitation->update();
 							$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase);
@@ -732,7 +731,7 @@ function is_temporary_password_expired($user){
 }
 
 function is_registration($formvars) {
-	return array_key_exists('go', $formvars) AND strpos($formvars['go'], 'invitation') === false AND array_key_exists('token', $formvars) AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['Stelle_ID'] != '';
+	return array_key_exists('go', $formvars) AND strpos($formvars['go'], 'invitation') === false AND array_key_exists('token', $formvars) AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['stelle_id'] != '';
 }
 
 function checkRegistration($gui) {
@@ -792,6 +791,12 @@ function checkRegistration($gui) {
 		$check = 1;
 	}
 
+	# Prüft ob Einladung schon abgelaufen ist
+	if ($check == 0 AND DateTime::createFromFormat('d.m.Y', $invitation->get('stop'))->format('Y-m-d') < date('Y-m-d')) {
+		$registration_errors[] = 'Einladung zu token: ' . $params['token'] . ' ist am: ' . $invitation->get('stop') . ' abgelaufen.';
+		$check = 1;
+	}	
+
 	# Prüft ob eine korrekte email übergeben wurde
 	$email_errors = emailcheck($params['email']);
 
@@ -813,7 +818,7 @@ function checkRegistration($gui) {
 	}
 
 	# Prüft ob stelle_id zum token passt
-	if ($check == 0 AND $params['stelle_id'] != $invitation->get('stelle_id')) {
+	if ($check == 0 AND $params['stelle_id'] != $invitation->get('stelle_id')[0]) {
 		$registration_errors[] = 'stelle_id: ' . $params['stelle_id'] . ' passt nicht zu<br>token: ' . $params['token'] . '.';
 		$check = 1;
 	}
