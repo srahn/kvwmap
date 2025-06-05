@@ -10,7 +10,6 @@ ALTER TABLE kvwmap.invitations
 
 ALTER TABLE kvwmap.invitations
     ADD COLUMN created_at date default now(),
-    ADD COLUMN start date,
     ADD COLUMN stop date;
 
 COMMIT;

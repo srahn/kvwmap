@@ -9521,6 +9521,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				'vorname' => $this->invitation->get('vorname'),
 				'loginname' => $this->invitation->get('loginname'),
 				'stelle_id' => $this->invitation->get('stelle_id'),
+				'stop' => $this->invitation->get('stop'),
 				'inviter_id' => $this->invitation->get('inviter_id')
 			));
 		}
@@ -9599,6 +9600,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					'vorname' => $this->formvars['vorname'],
 					'loginname' => $this->formvars['loginname'],
 					'stelle_id' => $this->formvars['stelle_id'],
+					'stop' => $this->formvars['stop'],
 					'inviter_id' => $this->formvars['inviter_id']
 				),
 				false

@@ -3,7 +3,7 @@
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <div class="center-outerdiv">
-	<div class="input-form">
+	<div class="input-form" style="text-align: left">
 		<h2><? echo ($this->formvars['selected_invitation_id'] != '' ? $strTitelEdit : $strTitelNew); ?></h2>
 		<em><span class="px13"><? echo $this->strAsteriskRequired; ?></span></em><br>
 		<input name="token" type="hidden" value="<? echo $this->formvars['token']; ?>">
@@ -30,7 +30,10 @@
 		<div class="clear"></div>
 		<label class="fetter" for="stelle_id"><? echo $this->strTask; ?> *</label>
 		<? echo FormObject::createSelectField('stelle_id', $this->invitation->stellen, $this->invitation->get('stelle_id'), 10, 'width: 370px', '', '', true); ?>
-		<div class="clear"></div><?
+		<div class="clear"></div>
+		<label class="fetter" for="stop "><? echo $strStop; ?></label>
+		<input name="stop" type="text" value="<? echo $this->formvars['stop']; ?>">
+		<div class="clear"></div>		<?
 		if ($this->formvars['selected_invitation_id'] != '') { ?>
 			<label class="fetter" for="email"><? echo $strToken; ?>:</label>
 			<div style="float: left"><? echo $this->formvars['token']; ?></div>

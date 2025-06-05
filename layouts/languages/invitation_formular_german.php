@@ -8,4 +8,5 @@
 	$this->strSalutation="Anrede";
 	$this->strMister="Herr";
 	$this->strMisses="Frau";
+	$strStop="gültig bis";
 ?>

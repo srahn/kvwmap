@@ -435,7 +435,7 @@ class PgObject {
 			},
 			$this->getValues()
 		);
-		$sql = "
+		echo $sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
 				" . implode(', ', array_map(function ($key) {return '"' . $key . '"';}, $this->getKeys())) . "
 			)
@@ -521,7 +521,11 @@ class PgObject {
 		return $this->get('id');
 	} */
 
-	function update() {
+	function update($data = array()) {
+		$results = array();
+		if (!empty($data)) {
+			$this->data = array_merge($this->data, $data);
+		}
 		$results = [];
 		$sql = "
 			UPDATE

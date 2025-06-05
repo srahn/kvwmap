@@ -59,7 +59,7 @@ class Invitation extends PgObject {
 		$link = URL . (substr(URL, -1) != '/' ? '/' : '') . APPLVERSION .
 			'index.php?go=logout&token=' . $this->get('token') .
 			'&email=' . $this->get('email') .
-			'&Stelle_ID=' . $this->get('stelle_id') .
+			'&Stelle_ID=' . $this->get('stelle_id')[0] .
 			'&Name=' . urlencode($this->get('name')) .
 			'&Vorname=' . urlencode($this->get('vorname')) .
 			'&login_name=' . urlencode($this->get('loginname')) .
