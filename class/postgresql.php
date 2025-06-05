@@ -2441,7 +2441,7 @@ FROM
 	}
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR, $without_temporal_filter = false) {
-    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, array_to_string(p.hat, ',') as hat, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.beschreibung as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.beschreibung) as zusatz_eigentuemer ";
+    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, p.sterbedatum::date, array_to_string(p.hat, ',') as hat, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.beschreibung as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.beschreibung) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -2489,6 +2489,7 @@ FROM
 			$Eigentuemer->namensbestandteil = $rs['namensbestandteil'];
 			$Eigentuemer->akademischergrad = $rs['akademischergrad'];
       $Eigentuemer->geburtsdatum = $rs['geburtsdatum'];
+			$Eigentuemer->sterbedatum = $rs['sterbedatum'];
 			$Eigentuemer->geburtsname = $rs['geburtsname'];
 			
 			$anschriften_gml_ids = explode(',', $rs['hat']);

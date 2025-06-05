@@ -479,6 +479,9 @@ class flurstueck {
 			$Eigentuemer .= ' ';
 			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
 			$Eigentuemer .= $eigentuemer->geburtsdatum;
+			if ($eigentuemer->sterbedatum != '') {
+				$Eigentuemer .= ' &#10015;' . $eigentuemer->sterbedatum;
+			}
 			foreach($eigentuemer->anschriften as $anschrift){
 				$Eigentuemer .= ' '.$anschrift['strasse'].' '.$anschrift['hausnummer'].' ';
 				$Eigentuemer .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'].' ';
@@ -506,6 +509,9 @@ class flurstueck {
 		$Eigentuemer .= ' ';
 		if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
 		$Eigentuemer .= $eigentuemer->geburtsdatum;
+		if ($eigentuemer->sterbedatum != '') {
+			$Eigentuemer .= ' &#10015;' . $eigentuemer->sterbedatum;
+		}
 		$Eigentuemer .= '</a>';
 		if($eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
@@ -534,6 +540,9 @@ class flurstueck {
 			$Eigentuemer .= '</a><br>';
 			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
 			$Eigentuemer .= $eigentuemer->geburtsdatum;
+			if ($eigentuemer->sterbedatum != '') {
+				$Eigentuemer .= '<br>&#10015;' . $eigentuemer->sterbedatum;
+			}
 			if($eigentuemer->anschriften){
 				foreach($eigentuemer->anschriften as $anschrift){
 					$Eigentuemer .= '<table style="margin-top: 2px" cellspacing="0" cellpadding="0">

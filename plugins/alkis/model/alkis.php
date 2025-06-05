@@ -1355,6 +1355,9 @@ class ALKIS {
 		if($eigentuemer->akademischergrad != '')$namenszeilen[0] .= ', '.$eigentuemer->akademischergrad;
 		if($eigentuemer->geburtsname != '')$namenszeilen[1] .= 'geb. '.$eigentuemer->geburtsname.' ';
 		$namenszeilen[1] .= $eigentuemer->geburtsdatum;
+		if ($eigentuemer->sterbedatum != '') {
+			$namenszeilen[1] .=  ' +' . $eigentuemer->sterbedatum;
+		}
 		$namenszeilen[2] .= $eigentuemer->anschriften[0]['strasse'].' '.$eigentuemer->anschriften[0]['hausnummer'];
 		$namenszeilen[3] .= $eigentuemer->anschriften[0]['postleitzahlpostzustellung'].' '.$eigentuemer->anschriften[0]['ort_post'].' '.$eigentuemer->anschriften[0]['ortsteil'];		
 		$anzNamenszeilen= count_or_0($namenszeilen);
