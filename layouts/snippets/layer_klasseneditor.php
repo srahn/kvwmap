@@ -122,7 +122,7 @@
 				<span data-tooltip="Wird hier der Name einer Grafikdatei aus dem Ordner custom/graphics angegeben, wird diese Grafik an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt. Außerdem kann hier die Höhe und Breite der Legendengrafik angegeben werden."></span>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strOrder; ?>&nbsp;
-					<span style="--left: -400px" data-tooltip="Hier kann die Zeichenreihenfolge in der Karte und optional eine abweichende Reihenfolge für die Legende festgelegt werden."></span>
+					<span style="--left: -400px" data-tooltip="Hier kann die Klassifizierungsreihenfolge in der Karte und optional eine abweichende Reihenfolge für die Legende festgelegt werden. Die Klassifizierungsreihenfolge ist die Reihenfolge, in der der Mapserver für ein Objekt überprüft, in welche Klasse es fällt. Es ist keine Zeichenreihenfolge. Um zu bestimmen, in welcher Reihenfolge Objekte in der Karte gezeichnet werden, muss im Data-Feld ein ORDER BY-Ausdruck verwendet werden."></span>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i></td>
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>	-->
