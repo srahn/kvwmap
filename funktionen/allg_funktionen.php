@@ -1937,7 +1937,7 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 	$stripped_formvars = array();
 
 	foreach($formvars AS $key => $value) {
-
+		$pos = false;
 		if ($strip_type == 'remove') {
 			# strip key if in strip_list
 			$strip = in_array($key, $strip_array);
@@ -1949,12 +1949,17 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 
 		if (!$strip) {
 			#echo "<br>Keep {$key} in formvars.";
-			$pos = strpos($value, '[');
-			if ($pos !== false AND $pos == 0) {
-				$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
+			if (is_string($value)) {
+				$pos = strpos($value, '[');
+				if ($pos !== false AND $pos == 0) {
+					$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
+				}
+				else {
+					$stripped_formvars[$key] = stripslashes($value);
+				}
 			}
 			else {
-				$stripped_formvars[$key] = stripslashes($value);
+				$stripped_formvars[$key] = $value;
 			}
 		}
 		else {

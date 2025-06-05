@@ -34,13 +34,23 @@ class Invitation extends PgObject {
 		$inviter = new PgObject($gui, 'kvwmap', 'user');
 		$invitation->inviter = $inviter->find_by('id', $invitation->get('inviter_id'));
 		$stelle = new PgObject($gui, 'kvwmap', 'stelle');
-		$invitation->stelle = $stelle->find_by('id', $invitation->get('stelle_id'));
+		$invitation->stelle = $stelle->find_by('id', $invitation->get('stelle_id')[0]);
 		return $invitation;
 	}
 
 	public static	function find($gui, $where, $order) {
 		$invitation = new Invitation($gui);
 		return $invitation->find_where($where, $order);
+	}
+
+	function get($attribute) {
+		if (is_string($this->data[$attribute]) AND strpos($this->data[$attribute], '{') === 0) {
+			$value = explode(',', trim($this->data[$attribute], '{}'));
+		}
+		else {
+			$value = $this->data[$attribute];
+		}
+		return $value;
 	}
 
 	function mailto_text() {

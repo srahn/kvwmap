@@ -29,7 +29,7 @@
 		<div style="float: left"><? echo $strWhereShallBeWorked; ?></div>
 		<div class="clear"></div>
 		<label class="fetter" for="stelle_id"><? echo $this->strTask; ?> *</label>
-		<? echo FormObject::createSelectField('stelle_id', $this->invitation->stellen, $this->invitation->get('stelle_id')); ?>
+		<? echo FormObject::createSelectField('stelle_id', $this->invitation->stellen, $this->invitation->get('stelle_id'), 10, 'width: 370px', '', '', true); ?>
 		<div class="clear"></div><?
 		if ($this->formvars['selected_invitation_id'] != '') { ?>
 			<label class="fetter" for="email"><? echo $strToken; ?>:</label>

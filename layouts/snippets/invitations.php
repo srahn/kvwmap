@@ -47,7 +47,7 @@
 							<span><?php echo $this->invitations[$i]->get('email') ?></span>
 						</td>
 						<td>
-							<span><?php echo $this->invitations[$i]->get('stelle_id'); ?></span>
+							<span><?php echo implode(',', $this->invitations[$i]->get('stelle_id')); ?></span>
 						</td>
 						<td>
 							<span><?php echo $this->invitations[$i]->get('vorname') . ' ' . $this->invitations[$i]->get('name'); ?></span>

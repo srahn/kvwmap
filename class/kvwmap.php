@@ -9553,7 +9553,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->invitation->stellen = array_map(
 			function($stelle) {
 				return array(
-					'value' => $stelle->get('ID'),
+					'value' => $stelle->get('id'),
 					'output' => $stelle->get('bezeichnung')
 				);
 			},

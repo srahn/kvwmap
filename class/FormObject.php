@@ -107,7 +107,10 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 			$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben
 		}
 		if ($multiple != '') {
-			$selected = (in_array(strval($option['value']), explode(',', $value)) ? ' selected' : '');
+			if (!is_array($value)) {
+				$value = explode(',', $value);
+			}
+			$selected = (in_array(strval($option['value']), $value) ? ' selected' : '');
 		}
 		else {
 			$selected = (strval($option['value']) === strval($value) ? ' selected' : '');

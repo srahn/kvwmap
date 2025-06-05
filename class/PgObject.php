@@ -107,6 +107,9 @@ class PgObject {
 				"' . $attribute . '" = \'' . $value . '\'';
 		$this->debug->show('find_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
+		if (!$query) {
+			echo $sql;exit;
+		}
 		$this->data = pg_fetch_assoc($query);
 		return $this;
 	}
