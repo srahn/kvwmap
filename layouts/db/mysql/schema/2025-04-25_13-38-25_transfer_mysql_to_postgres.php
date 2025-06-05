@@ -7,8 +7,7 @@
   $credentials = $this->pgdatabase->get_credentials(POSTGRES_CONNECTION_ID);
   file_put_contents(
     'credentials.php', 
-    "
-<?
+    "<?
 define('POSTGRES_DBNAME', '" . $credentials['dbname'] . "');
 define('POSTGRES_HOST', '" . $credentials['host'] . "');
 define('POSTGRES_PASSWORD', '" . $credentials['password'] . "');    
