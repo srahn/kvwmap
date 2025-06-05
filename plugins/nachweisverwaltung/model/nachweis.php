@@ -74,6 +74,8 @@ class Nachweis {
 	}
 	
 	function LENRIS_get_new_nachweise(){
+    ini_set('memory_limit', '8192M');
+		set_time_limit(1800);
 		$sql = "
 			SELECT 
 				a.*
@@ -95,6 +97,8 @@ class Nachweis {
 	}
 	
 	function LENRIS_get_changed_nachweise(){
+    ini_set('memory_limit', '8192M');
+		set_time_limit(1800);
 		$sql = "
 			SELECT DISTINCT
 				a.*
@@ -116,6 +120,8 @@ class Nachweis {
 	}
 	
 	function LENRIS_get_deleted_nachweise(){
+    ini_set('memory_limit', '8192M');
+		set_time_limit(1800);
 		$sql = "
 			SELECT 
 				id_nachweis
