@@ -2584,6 +2584,7 @@ FROM
 				p.akademischergrad, 
 				p.geburtsname, 
 				p.geburtsdatum, 
+				p.sterbedatum,
 				array_to_string(p.hat, ',') as hat, 
 				anschrift.strasse, 
 				anschrift.hausnummer, 
@@ -2686,7 +2687,12 @@ FROM
 				if($rs['namensbestandteil'] != '')$namen[$i]['name1'] .= ', '.$rs['namensbestandteil']; 
 				if($rs['akademischergrad'] != '')$namen[$i]['name1'] .= ', '.$rs['akademischergrad']; 				
 	      $namen[$i]['name2'] = $rs['geburtsdatum'];
-				if($rs['geburtsname'] != '')$namen[$i]['name2'] .= ' geb. '.$rs['geburtsname'];
+				if ($rs['geburtsname'] != '') {
+					$namen[$i]['name2'] .= ' geb. '.$rs['geburtsname'];
+				}
+				if ($rs['sterbedatum'] != '') {
+					$namen[$i]['name2'] .= ' &#10015;'.$rs['sterbedatum'];
+				}
 				
 				$anschriften_gml_ids = explode(',', $rs['hat']);
 				$anschriften = array();
