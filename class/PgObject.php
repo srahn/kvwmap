@@ -38,9 +38,10 @@ class PgObject {
 	*
 	*/
 
-	private $select;
-	private $from;
-	private $where;
+	public $select;
+	public $from;
+	public $where;
+	public $show;
 
 	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
@@ -151,12 +152,11 @@ class PgObject {
 	 * @return array PgObject An array with all found object
 	 */
 	function find_where($where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
-		// echo '<br>PgObject->find_where';
 		$select = (empty($select) ? $this->select : $select);
-		$from = (empty($from) ? $this->schema . '."' . $this->tableName . '"' : $from);
-		$where = (empty($where) ? "true" : $where);
-		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
-		$limit = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
+		$from   = (empty($from) ? $this->schema . ".\"" . $this->tableName . "\"" : $from);
+		$where  = (empty($where) ? "true" : $where);
+		$order  = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
+		$limit  = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
 		$sql = "
 			SELECT
 				" . $select . "
@@ -164,13 +164,13 @@ class PgObject {
 				" . $from . "
 			WHERE
 				" . $where . "
-				" . $order . "
-				" . $limit . "
+			" . $order . "
+			" . $limit . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$results = array();
-		while($this->data = pg_fetch_assoc($query)) {
+		while ($this->data = pg_fetch_assoc($query)) {
 			$results[] = clone $this;
 		}
 		return $results;
@@ -229,6 +229,21 @@ class PgObject {
 			}
 		}
 		return $this->extent;
+	}
+
+	function exists($where) {
+		$sql = "
+			SELECT
+				count(*) num_rows
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				" . $where . "
+		";
+		$this->debug->show('find_by_id sql: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		$result = pg_fetch_assoc($query);
+		return ($result['num_rows'] > 0);
 	}
 
 	function delete_by($attribute, $value) {
@@ -308,6 +323,7 @@ class PgObject {
 	}
 
 	function get($attribute) {
+		// return (array_key_exists($attriubte, $this->data) ? $this->data[$attribute] : NULL);
 		return $this->data[$attribute];
 	}
 

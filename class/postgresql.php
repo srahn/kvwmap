@@ -800,7 +800,35 @@ FROM
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];    
   }
-  
+
+	/**
+	 * Function return the WHERE Expression-String to filter by $extent and if $null_geom true not the NULL-Geometries.
+	 * @param rectObj $extent A MapServer Rect-Object with the extent used to create the envelope.
+	 * @param Integer $extent_epsg The EPSG-Code of the extent in Rect-Object $extent.
+	 * @param String $geom_column The name of the geometry column used for the filter.
+	 * @param Integer $geom_column_epsg The EPSG-Code of the geometries in the geometry column
+	 * @param String $geom_column_tablealias An optional alias name of the table that has the geometry column.
+	 * @param Boolean $null_geom Optional parameter to append OR $geom_column IS NULL, if $null_geom is true, to the expression string.
+	 * @return String The resulting Expression-String enclosed in round brackets ().
+	 */
+	function get_extent_filter($extent, $extent_epsg, $geom_column, $geom_column_epsg, $geom_column_table_alias = NULL, $null_geom = true) {
+		$sql_envelope = "ST_MakeEnvelope(
+			" . $extent->minx . ", " . $extent->miny . ", " . $extent->maxx . ", " . $extent->maxy . ",
+			" . $extent_epsg . "
+		)";
+		if ($extent_epsg != $geom_column_epsg) {
+			$sql_envelope = "ST_Transform(
+				" . $sql_envelope . ",
+				" . $geom_column_epsg . "
+			)";
+		}
+		$extent_filter = $sql_envelope . " && " . ($geom_column_table_alias ? $geom_column_table_alias . "." : "") . $geom_column;
+		$null_filter = ($null_geom ? " OR " . $geom_column . " IS NULL" : "");
+		$sql = "(" . $extent_filter . $null_filter . ")";
+		// echo '<br>SQL-Extent-Filter: ' . $sql;
+		return $sql;
+	}
+
 	function pg_field_schema($table_oid){
 		if($table_oid != ''){
 			$sql = "select nspname as schema from pg_class c, pg_namespace ns
@@ -935,7 +963,7 @@ FROM
 					$fields[$i]['nullable'] = $attr_info['nullable']; 
 					$fields[$i]['length'] = $attr_info['length'];
 					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
-					$fields[$i]['default'] = $attr_info['default'];
+					$fields[$i]['default'] = ($attr_info['generated'] == '' ? $attr_info['default'] : '');
 					$fields[$i]['type_type'] = $attr_info['type_type'];
 					$fields[$i]['type_schema'] = $attr_info['type_schema'];
 					$fields[$i]['is_array'] = $attr_info['is_array'];
@@ -971,7 +999,7 @@ FROM
 						}
 					}
 					$fields[$i]['constraints'] = $constraintstring;
-					$fields[$i]['saveable'] = 1;
+					$fields[$i]['saveable'] = ($attr_info['generated'] == '' ? 1 : 0);
 				}
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
 					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
@@ -1023,6 +1051,7 @@ FROM
 				c.relkind,
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
+				" . (POSTGRESVERSION >= 1300 ? 'a.attgenerated as generated' : 'NULL as generated') . ",
 				a.attnum AS ordinal_position,
 				pg_get_expr(ad.adbin, ad.adrelid) as default,
 				t.typname AS type_name,
@@ -1091,13 +1120,11 @@ FROM
 				}
 				if ($attr_info['decimal_length'] == '') {
 					$attr_info['decimal_length'] = 'NULL';
-				}
-				/*
+				}/*
 				if (strpos($attr_info['type_name'], 'xp_spezexternereferenzauslegung') !== false) {
 					$attr_info['type_name'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type_name']);
 					$attr_info['type'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type']);
-				}
-				*/
+				}*/
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
@@ -1162,9 +1189,10 @@ FROM
 	
 	function writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
+		$attribute_names = [];
 		for($i = 1; $i < count($attr_info)+1; $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
-			$fields[$i]['name'] = $attr_info[$i]['name'];
+			$attribute_names[] = $fields[$i]['name'] = $attr_info[$i]['name'];
 			$fieldtype = $attr_info[$i]['type_name'];
 			$fields[$i]['nullable'] = $attr_info[$i]['nullable']; 
 			$fields[$i]['length'] = $attr_info[$i]['length'];
@@ -1215,6 +1243,16 @@ FROM
 			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
+		$sql = "
+			DELETE FROM
+				datatype_attributes
+			WHERE
+				layer_id = " . $layer_id . " AND
+				datatype_id = " . $datatype_id . " AND
+				name NOT IN ('" . implode("', '", $attribute_names) . "')";
+		#echo "<br>Löschen der alten Datentyp-Attribute: " . $sql;
+		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 	}
 
 	/*

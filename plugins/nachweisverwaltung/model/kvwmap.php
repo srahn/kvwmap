@@ -302,7 +302,7 @@
 # 2016-11-03 H.Riedel - pkz durch pkn ersetzt
       # Zusammenstellen der Einmessungsskizzen der Festpunkte
       $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-      $ret=$festpunkte->getFestpunkte('',array('TP','AP','SiP','SVP'),'','','',$antr_selected,$stelle_id,'','pkn');
+      $ret=$festpunkte->getFestpunkte('',array('TP','AP','SiP','SVP','OP'),'','','',$antr_selected,$stelle_id,'','pkn');
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
@@ -1859,7 +1859,7 @@
 
     # 2) Abfragen der zu prüfenden Festpunkte
     $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-    $festpunkte->getFestpunkte($abgefragtefestpunkte,array('TP','AP','SiP','SVP'),'','','','','','','pkn');
+    $festpunkte->getFestpunkte($abgefragtefestpunkte,array('TP','AP','SiP','SVP','OP'),'','','','','','','pkn');
     # 3) Übernehmen der Punkte in eine Liste, die mindestens eine Datei/Blatt haben.
     for ($i=0;$i<$festpunkte->anzPunkte;$i++) {
       $festpunkte->liste[$i]['skizze']=$festpunkte->checkSkizzen($festpunkte->liste[$i]['pkn']);
@@ -2200,7 +2200,7 @@
     $back=$VermStObj->getVermStelleListe();
     if ($back[0]=='') {
       # Fehlerfreie Datenabfrage
-      $FormObjVermStelle=new FormObject($name,'select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0,NULL);
+      $FormObjVermStelle=new FormObject($name,'select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0, 260, NULL, '', false);
     }
     else {
       $FormObjVermStelle=new FormObject($name,'text',array($back[0]),'','',25,255,0,NULL);

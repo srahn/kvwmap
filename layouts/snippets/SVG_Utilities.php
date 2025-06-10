@@ -298,12 +298,18 @@ SCRIPTDEFINITIONS;
 		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 		enclosingForm.last_doing.value = "zoomin"; 
 	  document.getElementById("canvas").setAttribute("cursor", "crosshair");
+		if(measurefunctions == true){
+			save_measure_path();
+		}
 	}
 
 	function zoomout(){
 		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 		enclosingForm.last_doing.value = "zoomout";
 	  document.getElementById("canvas").setAttribute("cursor", "crosshair");
+		if(measurefunctions == true){
+			save_measure_path();
+		}
 	}
 
 	function zoomall(){
@@ -730,6 +736,9 @@ SCRIPTDEFINITIONS;
 	}
 	
 	function mousewheelchange(evt) {
+		if(measurefunctions == true){
+			save_measure_path();
+		}
 		if (!evt) {
 			evt = window.event; // For IE
 		}
@@ -1220,12 +1229,12 @@ function mouseup(evt){
 
 	function highlightbyid(id){
 		if(id != ''){			
-			if(document.querySelector('.active')){
-				//document.querySelector('.active').classList.remove('active');		// kann der IE nicht
-				document.querySelector('.active').className.baseVal = 'navbutton_frame';	// deswegen dieser workaround
+			if(document.querySelector('.active_navbutton')){
+				//document.querySelector('.active_navbutton').classList.remove('active_navbutton');		// kann der IE nicht
+				document.querySelector('.active_navbutton').className.baseVal = 'navbutton_frame';	// deswegen dieser workaround
 			}
-			//document.getElementById(id).classList.add('active');						// kann der IE nicht
-			document.getElementById(id).className.baseVal += ' active';				// deswegen dieser workaround
+			//document.getElementById(id).classList.add('active_navbutton');						// kann der IE nicht
+			document.getElementById(id).className.baseVal += ' active_navbutton';				// deswegen dieser workaround
 		  if(polygonfunctions == true){
 				remove_vertices();
 				remove_in_between_vertices();
@@ -4002,6 +4011,7 @@ $measurefunctions = '
 			}
 			enclosingForm.str_pathx.value = str_pathx;
 			enclosingForm.str_pathy.value = str_pathy;
+			console.log(enclosingForm.str_pathx.value);
 			top.document.GUI.measured_distance.value = measured_distance;
 		}
 	}

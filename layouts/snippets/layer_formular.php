@@ -740,7 +740,7 @@ from
 										<th class="fetter">&nbsp;Attribut:</th>
 										<th class="fetter">&nbsp;Alias:</th>
 									</tr>
-									<? for ($l = -1; $l < count($this->formvars['labelitems']); $l++) { 
+									<? for ($l = -1; $l < count_or_0($this->formvars['labelitems']); $l++) { 
 											if ($l != -1) {
 												$name = $this->formvars['labelitems'][$l]->get('name');
 												$alias = $this->formvars['labelitems'][$l]->get('alias');
@@ -1046,7 +1046,7 @@ from
 										},
 										$datasources
 									),
-									implode(',', $this->layerdata['datasource_ids']),
+									implode(',', $this->layerdata['datasource_ids'] ?: []),
 									1,
 									'display: none;
 									width: 93%',
@@ -1076,7 +1076,7 @@ from
 									$selectable_datasources = array_filter(
 										$datasources,
 										function ($datasource) {
-											return !in_array($datasource->get('id'), $this->layerdata['datasource_ids']);
+											return !in_array($datasource->get('id'), $this->layerdata['datasource_ids'] ?: []);
 										}
 									);
 									foreach ($selectable_datasources AS $datasource) { ?>

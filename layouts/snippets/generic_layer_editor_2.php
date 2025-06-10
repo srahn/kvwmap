@@ -94,10 +94,9 @@ if ($doit == true) {
 							echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']) . '" target="' . $target . '" title="' . $strbackToSearch . '"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 						} ?>
 					</td>
-					<td width="99%" align="center"><h2 id="layername"><? echo $layer_name; ?></h2></td><?
+					<td width="99%" align="center"></td><?
 						if (!$this->user->rolle->visually_impaired AND $anzObj > 0 AND value_of($this->formvars, 'printversion') == '') { ?>
 						<td valign="top" style="padding: 0 10 0 0" class="layer_header">
-							<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer switch-gle-view-columns" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
 						</td>
 						<td>
 						</td><?
@@ -105,20 +104,32 @@ if ($doit == true) {
 				</tr>
 			</table><?
 		}
-		$table_id = rand(0, 100000);
-		echo value_of($layer, 'paging'); ?>
-		<table id="<? echo $table_id; ?>" style="width: 100%" border="0" cellspacing="0" cellpadding="2"><?
-			if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
-				include('dataset_operations.php');
-			}
+		$table_id = rand(0, 100000); 
+		
+		if ($this->new_entry != true) {	?>
+			<div style="display: flex; justify-content: space-between;">
+				<div style="position: sticky; left: calc(50% - 225px); min-width: 450px"> 
+					<h2 id="layername"><? echo $layer_name; ?></h2><?
+					echo value_of($layer, 'paging'); ?>
+				</div>
+				<div class="gle-view">	<?
+					$s = ($layer['template'] == ''? 0 : 1);
+					for ($g = $s; $g < 3; $g++) {
+						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['Layer_ID'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+					}	?>
+				</div>
+			</div> <?
+		}
+
+		if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
+			include('dataset_operations.php');
+		}		?>
+		<div id="<? echo $table_id; ?>" class="records" style="width: 100%; padding:2; <? if ($layer['gle_view'] == 2){echo 'display: flex;';} ?>"><?
 			for ($k; $k<$anzObj; $k++) {
 				$table = array();
 				$nl = false;
 				$next_row = array();
 				$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID'].'|'; ?>
-				<tr>
-					<td>
-						<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 						<div id="datensatz_<? echo $layer['Layer_ID'].'_'.$k; ?>" class="datensatz"
 							<?
 							if ($this->new_entry != true AND $this->user->rolle->tooltipquery == 1 AND $this->user->rolle->querymode == 1 AND $layer['attributes']['the_geom'] != '') { ?>
@@ -416,25 +427,23 @@ if ($doit == true) {
 							<? if ($this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
 						</table>
 						</div>
-						<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
-					</td>
-				</tr><?
+						<?
 					$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 					$privileg = $layer['attributes']['privileg'][$index];
 				}
-				if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {
-					include('dataset_operations.php');
-				} ?>
-			<tr style="display: none">
-				<td><?
+				?>
+			<div style="display: none">
+				<?
 					if (value_of($invisible_attributes, $layer['Layer_ID'])){
 						for ($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
 							echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 						}
 					} ?>
-				</td>
-			</tr>
-		</table><?
+			</div>
+		</div><?
+		if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {
+			include('dataset_operations.php');
+		}
 		if (array_key_exists('charts', $layer) AND count($layer['charts']) > 0) {
 			include(SNIPPETS . 'layer_charts.php');
 		} ?>

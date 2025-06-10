@@ -184,10 +184,8 @@ else {
 
 		if (is_login($GUI->formvars)) {
 			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4, $GUI->echo);
-			/**
-				This set the passwort with the sha1 method before each login
-				if not allready exists and only if it matches with the old md5 method.
-			*/
+			// This set the passwort with the sha1 method before each login
+			// if not allready exists and only if it matches with the old md5 method.
 			if (prepare_sha1(trim($GUI->database->mysqli->real_escape_string($GUI->formvars['login_name'])), trim($GUI->database->mysqli->real_escape_string($GUI->formvars['passwort'])))) {
 				if ($GUI->database->mysqli->affected_rows > 0) {
 					$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
@@ -284,7 +282,7 @@ else {
 							set_session_vars($GUI->formvars);
 							unset($GUI->formvars['Stelle_ID']);
 							unset($GUI->formvars['token']);
-							unset($GUI->fromvars['passwort']);
+							unset($GUI->formvars['passwort']);
 							unset($GUI->formvars['new_password']);
 							unset($GUI->formvars['new_password_2']);
 							unset($GUI->formvars['email']);

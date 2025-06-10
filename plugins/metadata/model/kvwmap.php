@@ -164,7 +164,7 @@
 				);
 			}
 
-			$package->update_attr(array('pack_status_id = 3'));
+			$package->update_attr(array('pack_status_id = 3')); // in Arbeit
 			$GUI->formvars['selected_layer_id'] = $package->get('layer_id');
 			$GUI->formvars['epsg'] = $package->layer->get('epsg_code');
 			$export_path = $package->get_export_path();
@@ -213,14 +213,16 @@
 			// Metadatendatei erzeugen und in ZIP packen
 			// von Ressource des Datenpaketes
 			$export_file = $package->get_export_file();
-			// Put the metadata document into the $xport_file.zip
+			// Put the metadata document into the $export_file.zip
 			$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf';
 			exec($command);
+
 			// An Ressourcen hängende Dokumente in ZIP packen
 			$ressource = Ressource::find_by_id($GUI, 'id', $package->get('ressource_id'));
-			#echo '<br>ressources documents: ' . print_r($ressource->get('documents'), true);
-
+			$ressource->append_docs($export_file);
 			// Metadaten und Dokumente von an Ressourcen hängenden Quellen
+			
+
 
 			// Wenn ZIP-Datei existiert und etwas drin ist, chgrp www-data, chmod g+w und Verzeichnis löschen. (Aufräumen)
 			$package->delete_export_path();
@@ -573,19 +575,26 @@
 		// echo '<p>metadata_order_data_package ressource_id: ' . $ressource_id . ' in stelle_id: ' . $stelle_id;
 		try {
 			$package = new DataPackage($GUI);
-			$new_package_id = $package->create(array(
-				'stelle_id' => $stelle_id,
-				'ressource_id' => $GUI->formvars['ressource_id'],
-				'pack_status_id' => 2, // Paketerstellung beauftragt
-				'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name
-			), true);
-			$package = $package->find_by_id($GUI, $new_package_id);
+			$packages = $package->find_where("stelle_id = " . $stelle_id . " AND ressource_id = " . $ressource_id);
+			if (count($packages) > 0) {
+				// Dieses Paket gibt es schon. Setze es auf 2 (beauftragt)
+				$packages[0]->update_attr(array('status_id' => 2));
+			}
+			else {
+				$new_package_id = $package->create(array(
+					'stelle_id' => $stelle_id,
+					'ressource_id' => $GUI->formvars['ressource_id'],
+					'pack_status_id' => 2, // Paketerstellung beauftragt
+					'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name
+				), true);
+				$package = $package->find_by_id($GUI, $new_package_id);
 
-			return array(
-				'success' => true,
-				'package' => $package->data,
-				'msg' => 'Download-Paket mit id: ' . $new_package_id . ' angelegt. Packen für Ressource ID: ' . $package->get('ressource_id') . ' beauftragt.'
-			);
+				return array(
+					'success' => true,
+					'package' => $package->data,
+					'msg' => 'Download-Paket mit id: ' . $new_package_id . ' angelegt. Packen für Ressource ID: ' . $package->get('ressource_id') . ' beauftragt.'
+				);
+			}
 		}
 		catch (Exception $e) {
 			return array(
@@ -658,17 +667,22 @@
 		foreach ($all_packages AS $package) {
 			$pfad = replace_params_rolle($package->layer->get('pfad'));
 			$where = "";
-			if ($package->layer->get('Datentyp') != 5) {
-				$where = "
-					WHERE
-						ST_MakeEnvelope(
-							" . $GUI->Stelle->MaxGeorefExt->minx . ",
-							" . $GUI->Stelle->MaxGeorefExt->miny . ",
-							" . $GUI->Stelle->MaxGeorefExt->maxx . ",
-							" . $GUI->Stelle->MaxGeorefExt->maxy . ",
-							25832
-						) && query." . $package->layer->get('geom_column') . "
-				";
+			if (in_array($package->layer->get('Datentyp'), array(0, 1, 2, 7, 8))) {
+				// Nur für Vektorlayer
+				$where = "WHERE " . $GUI->pgdatabase->get_extent_filter(
+					$GUI->Stelle->MaxGeorefExt,
+					$GUI->user->rolle->epsg_code,
+					$package->layer->get('geom_column'),
+					$package->layer->get('epsg_code')
+				);
+				// $where = "WHERE ST_Transform(ST_MakeEnvelope(
+				// 			" . $GUI->Stelle->MaxGeorefExt->minx . ",
+				// 			" . $GUI->Stelle->MaxGeorefExt->miny . ",
+				// 			" . $GUI->Stelle->MaxGeorefExt->maxx . ",
+				// 			" . $GUI->Stelle->MaxGeorefExt->maxy . ",
+				// 			" . $GUI->Stelle->epsg_code . "
+				// 		), " . $package->layer->get('epsg_code') . ") && query." . $package->layer->get('geom_column') . "
+				// ";
 			}
 			$sql = "
 				SET search_path = " . $package->layer->get('schema') . ", public;
@@ -677,8 +691,8 @@
 				FROM
 					(
 						" . $pfad . "
-					) AS query" .
-				$where . "
+					) AS query
+				" . $where . "
 			";
 			// echo '<br>SQL zum Filtern der Daten ' . $package->get('bezeichnung') . ' im Datenpaket: ' . $sql;
 			$query = pg_query($sql);
@@ -688,14 +702,15 @@
 				$package->num_feature = $num_feature;
 				$GUI->metadata_data_packages[] = $package;
 			}
-
+			// else {
+			// 	echo '<br>Ressource: ' . $package->get('ressource_id') . ' Paket: ' . $package->get('id') . ' ' . $package->get('bezeichnung') . ' Layer-ID: ' . $package->get('layer_id') . ' Datentyp: ' . $package->layer->get('Datentyp') . ' geom_column: ' . $package->layer->get('geom_column') . ' hat keine Daten in dieser Stelle Abfrage:<br><textarea cols="60" rows="10">' . $sql . '</textarea>';
+			// }
 		}
 		$GUI->output();
 	};
 
 	$GUI->metadata_show_ressources_status = function($ressource_id) use ($GUI) {
 		$GUI->metadata_ressources = Ressource::find($GUI, "von_eneka OR use_for_datapackage", "auto_update, status_id");
-		$GUI->metadata_outdated_ressources = Ressource::find_outdated($GUI);
 		$command = "ps aux | grep -i 'ressources_cron.php' | grep -v grep";
 		$output = '';
 		$result_code = '';

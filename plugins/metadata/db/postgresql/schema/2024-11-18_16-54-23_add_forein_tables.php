@@ -2,8 +2,8 @@
   $sql = "
     CREATE EXTENSION IF NOT EXISTS mysql_fdw;
     CREATE SCHEMA IF NOT EXISTS kvwmap;
-    CREATE SERVER IF NOT EXISTS mysql_kvwmapdb FOREIGN DATA WRAPPER mysql_fdw OPTIONS (host 'mysql', port '3306');
-    CREATE USER MAPPING IF NOT EXISTS FOR kvwmap SERVER mysql_kvwmapdb OPTIONS (username 'kvwmap', password '" . MYSQL_PASSWORD . "');
+    CREATE SERVER mysql_kvwmapdb FOREIGN DATA WRAPPER mysql_fdw OPTIONS (host 'mysql', port '3306');
+    CREATE USER MAPPING FOR kvwmap SERVER mysql_kvwmapdb OPTIONS (username 'kvwmap', password '" . MYSQL_PASSWORD . "');
     CREATE FOREIGN TABLE IF NOT EXISTS kvwmap.layer(
       layer_id integer,
       gruppe integer,

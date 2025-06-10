@@ -28,19 +28,31 @@ else {
           <td>  
             <div align="left">
               <input name="antr_nr" type="text" value="<?php echo $this->formvars['antr_nr']?>" size="10" maxlength="10">&nbsp;
-          </div></td>
-          <td><div align="center"> 
-          <?php $this->FormObjVermStelle->outputHTML(); echo $this->FormObjVermStelle->html; ?>            <div align="left"></div></td>
-          <td>            <?php $this->FormObjVermArt->outputHTML(); echo $this->FormObjVermArt->html; ?>   
-            <div align="left"></div></td>
-          <td width="100"><div align="left"><em><font size="2">Tag.Monat.Jahr</font></em><br>
+            </div>
+          </td>
+          <td>
+            <div align="center"> 
+              <? $this->FormObjVermStelle->outputHTML(); echo $this->FormObjVermStelle->html; ?>            
+            </div>
+          </td>
+          <td>
+            <div align="left">
+              <? $this->FormObjVermArt->outputHTML(); echo $this->FormObjVermArt->html; ?>   
+            </div>
+          </td>
+          <td width="100">
+            <div align="left">
+              <em><font size="2">Tag.Monat.Jahr</font></em><br>
               <input name="datum" type="text" value="<?php echo $this->formvars['datum']; ?>" size="11"> 
-          </div></td>
+            </div>
+          </td>
         </tr>
       </table></td>
   </tr>
   <tr> 
     <td align="right"><input type="submit" name="submit" value="Senden">
-      <input type="hidden" name="go" value="<?php echo $this->formvars['go']; ?>"></td>
+      <input type="hidden" name="go" value="<?php echo $this->formvars['go']; ?>">
+      <input type="hidden" name="stelle_id" value="<?php echo $this->formvars['stelle_id']; ?>">
+    </td>
   </tr>
 </table>

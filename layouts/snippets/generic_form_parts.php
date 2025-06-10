@@ -19,7 +19,7 @@
 				for($i = 0; $i < $cell_count; $i++) {
 					$cell = $row['cells'][$i];
 					if ($row['contains_attribute_names']) {
-						if ($cell['properties'] == 'class="gle-attribute-name"') {
+						if ($cell_count > 1 AND $cell['properties'] == 'class="gle-attribute-name"') {
 							$width = 'width="' . ($i == 0 ? '10%' : '1%') . '"';
 						}
 						else {
@@ -1202,7 +1202,8 @@
 				if ($value != NULL AND $enum_key == $value) {
 					$datapart .= 'selected ';
 				}
-				$datapart .= 'value="' . $enum_key . '">' . $enum['output'] . '</option>';
+				$title = $enum['output'] . ($enum['output'] != $enum_key ? ' (' . $enum_key . ')' : '');
+				$datapart .= 'value="' . $enum_key . '" title="' . $title . '">' . $enum['output'] . '</option>';
 			}
 			$datapart .= '</select>';
 			if($subform_layer_id != ''){

@@ -1,0 +1,5 @@
+BEGIN;
+
+	ALTER TABLE `stelle` MODIFY COLUMN `ows_abstract` TEXT;
+
+COMMIT;
