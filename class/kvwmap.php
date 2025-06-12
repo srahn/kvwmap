@@ -21550,7 +21550,7 @@ DO $$
 			$layer['layers_of_group'][$rs['gruppe']][] = $i;
 			$layer['shared_from'][] = $rs['shared_from'];
 			if ($this->GUI->plugin_loaded('mobile')) {
-				$layer['sync'][] = $rs['sync'];
+				$layer['sync'][] = ($rs['sync'] == 't');
 				$layer['vector_tile_url'] = $rs['vector_tile_url'];
 			}
 			if ($this->GUI->plugin_loaded('portal')) {
