@@ -5806,6 +5806,16 @@ echo '			</table>
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
+
+		if ($this->queryable_vector_layers['gruppe']) {
+			$this->layergruppen['ID'] = array_values(array_unique($this->queryable_vector_layers['gruppe']));
+		}
+		$this->layergruppen = $mapDB->get_Groups($this->layergruppen); # Gruppen mit Pfaden versehen
+		# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
+		if (value_of($this->formvars, 'selected_group_id') AND $this->formvars['selected_layer_id'] == '') {
+			$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id'], NULL, NULL, true, true);
+		}
+
 		$multigeomeditor = new multigeomeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		if (
 			!$this->formvars['edit_other_object'] AND
@@ -5924,6 +5934,15 @@ echo '			</table>
 			}
 			$this->formvars['CMD'] = '';
 			$this->MultiGeomEditor();
+		}
+	}
+
+	function getqueryableVectorLayers() {
+		$this->sanitize(['group_id' => 'int']);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['group_id'], NULL, NULL, true, true);
+		echo '<option value="0"> - alle - </option>';
+		for ($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++) {
+			echo '<option value="' . $this->queryable_vector_layers['ID'][$i] . '">' . $this->queryable_vector_layers['Bezeichnung'][$i] . '</option>';
 		}
 	}
 
@@ -13627,6 +13646,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     if ($this->formvars['stelle'] != '') {
       $stelle = new stelle($this->formvars['stelle'], $this->pgdatabase);
       $this->layerdaten = $stelle->getLayers(NULL, 'name');
+
+			if ($this->layerdaten['gruppe']) {
+				$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['gruppe']));
+			}
+			$this->layergruppen = $this->mapDB->get_Groups($this->layergruppen); # Gruppen mit Pfaden versehen
+			# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
+			if (value_of($this->formvars, 'selected_group_id') AND $this->formvars['selected_layer_id'] == '') {
+				$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
+			}
+
       if ($this->formvars['selected_layers'] != '') {
         $this->selected_layers = explode(', ', $this->formvars['selected_layers']);
         $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);

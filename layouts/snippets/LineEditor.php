@@ -128,6 +128,18 @@ function buildwktlinefromsvgpath(svgpath){
 					<td>
 						<div style="padding: 0 3px 0 3px">
 							<? echo $strGeomFrom; ?>:<br>
+							<select size="1" name="selected_group_id" style="width: 244px" onchange="ahah('index.php', 'go=getqueryableVectorLayers&group_id=' + this.value, [document.GUI.geom_from_layer], ['sethtml']);" <?php if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
+								<option value="">  -- <?php echo $this->strGroup; ?> --  </option>
+								<?
+								for($i = 0; $i < count($this->layergruppen['ID']); $i++){         
+									echo '<option';
+									if($this->layergruppen['ID'][$i] == $this->formvars['selected_group_id']){
+										echo ' selected';
+									}
+									echo ' value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
+								}
+							?>
+							</select>
 							<select name="geom_from_layer" style="width: 244px" onchange="geom_from_layer_change(<? echo $this->formvars['selected_layer_id']; ?>);">
 								<option value="0"> - alle - </option>
 								<?

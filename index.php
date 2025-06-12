@@ -2142,6 +2142,10 @@ function go_switch($go, $exit = false) {
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
+
+			case "getqueryableVectorLayers" : {
+				$GUI->getqueryableVectorLayers();
+			} break;
 			
 			case "get_copyrights" : {
 				echo $GUI->get_copyrights();

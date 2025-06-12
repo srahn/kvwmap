@@ -88,7 +88,7 @@ function showmap(){
   </tr>
   <tr> 
     <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><?php echo $this->strTask; ?></td>
-    <td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="4"><?php echo $this->strLayer; ?></td>
+    <td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="4"><?php echo $this->strGroup; ?></td>
   </tr>
   <tr> 
     <td valign="top" style="border-bottom:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3"> 
@@ -105,8 +105,21 @@ function showmap(){
     	?>
       </select>
 		</td>
-    <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="4"> 
-      <select style="width:400px" multiple size="5"  name="layer" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';" <?php if(count_or_0($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+		<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="4">
+			<select size="1" style="width:400px" name="selected_group_id" onchange="document.GUI.layer.value='';document.GUI.submit();" <?php if(count_or_0($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
+				<option value="">  -- <?php echo $this->strPleaseSelect; ?> --  </option>
+<?
+				for($i = 0; $i < count_or_0($this->layergruppen['ID']); $i++){         
+					echo '<option';
+					if($this->layergruppen['ID'][$i] == $this->formvars['selected_group_id']){
+						echo ' selected';
+					}
+					echo ' value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
+				}
+?>
+			</select>
+			<div style="padding: 8 0;"><? echo $this->strLayer; ?></div>
+			<select style="width:400px" multiple size="5"  name="layer" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';" <?php if(count_or_0($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <?
     		for($i = 0; $i < count_or_0($this->layerdaten['ID']); $i++){
     			echo '<option value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
