@@ -931,11 +931,28 @@ function overlay_link(data, start, target){
 	}
 }
 
+var listener;
+
+function handleCustomSelectKeyDown(event, dropdown) {
+	[].some.call(dropdown.children, function(option) {
+		if (event.key == option.dataset.value.substring(0, 1).toLowerCase()) {
+			option.scrollIntoView({behavior: "smooth", block: "center"});
+			return true;
+		}
+	});
+}
 
 function toggle_custom_select(id) {
 	var custom_select_div = document.getElementById('custom_select_' + id);
 	var dropdown = custom_select_div.querySelector('.dropdown');
 	custom_select_div.classList.toggle('active');
+	if (custom_select_div.classList.contains('active')) {
+		listener = (event) => handleCustomSelectKeyDown(event, dropdown);
+		window.addEventListener('keydown', listener, true);
+	}
+	else {
+		window.removeEventListener('keydown', listener, true);
+	}
 	custom_select_hover(custom_select_div.querySelector('li.selected')); 
 	if (dropdown.getBoundingClientRect().bottom > 900) {
 		dropdown.classList.add('upward');
