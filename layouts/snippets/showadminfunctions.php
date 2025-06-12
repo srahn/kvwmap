@@ -266,7 +266,15 @@ function toggleGroup(group, show){
 							} ?>
 						</div>
 					</td>
-				</tr>
+				</tr><?php
+				if ($this->plugin_loaded('mobile')) { ?>
+					<tr style="border:1px solid #C3C7C3;">
+						<td align="center">
+							<span class="fett"><a href="index.php?go=mobile_list_logs&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strShowMobileLog; ?></a></span>
+						</td>
+					</tr><?php
+				}
+				?>
 			</table>
 		</td>
 	</tr>

@@ -3870,6 +3870,11 @@ echo '			</table>
 		}
 	}
 
+	/**
+	 * This function checks if the given plugin is loaded
+	 * @param string $plugin The name of the plugin
+	 * @return boolean true if the plugin is loaded, false otherwise
+	 */
 	function plugin_loaded($plugin) {
 		global $kvwmap_plugins;
 		return in_array($plugin, $kvwmap_plugins);
@@ -7362,7 +7367,7 @@ echo '			</table>
 				$pathinfo = pathinfo($dateipfad);
 				if ($doc_type == '') {
 					$type = strtolower($pathinfo['extension']);
-					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf', 'heic', 'heif'))) {
 						$doc_type = 'local_img';
 					}
 					else {
@@ -11315,13 +11320,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 				}
 				$form_fields = explode('|', $this->formvars['form_field_names']);
-				for ($i = 0; $i < count($form_fields); $i++) {
-					if ($form_fields[$i] != '') {
-						$element = explode(';', $form_fields[$i]);
-						$this->sanitize([$form_fields[$i] => $element[6]], true);
-						$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
-					}
-				}
+				// for ($i = 0; $i < count($form_fields); $i++) {
+				// 	if ($form_fields[$i] != '') {
+				// 		$element = explode(';', $form_fields[$i]);
+				// 		$this->sanitize([$form_fields[$i] => $element[6]], true);
+				// 		$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
+				// 	}
+				// }
 
 				######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
 				if ($this->formvars['chosen_layer_id'] OR $this->formvars['weiter_erfassen']) {
@@ -21268,9 +21273,9 @@ DO $$
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
 						$attributes[$column][$i] = 	replace_params_rolle(
-																					$attributes[$column][$i],
-																					((count($attribute_values) > 0 AND $replace_only == 'default') ? $attribute_values : NULL)
-																				);
+							$attributes[$column][$i],
+							((count($attribute_values) > 0 AND in_array('default', $replace_only)) ? $attribute_values : NULL)
+						);
 					}
 				}
 			}
