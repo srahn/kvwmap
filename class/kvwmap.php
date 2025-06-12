@@ -17904,7 +17904,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 														'', 																													# option_style
 														'', 																													# option_class
 														'',																														# onclick
-														($hover_preview ? "if (document.SVG.getSVGDocument().getElementById('mapimg3') == null) {custom_select_register_keydown();add_split_mapimgs();get_map(mapimg3, 'not_layer_id=" . $layer_id . "');}" : ""),				# onmouseenter
+														($hover_preview ? "if (document.SVG.getSVGDocument().getElementById('mapimg3') == null) {add_split_mapimgs();get_map(mapimg3, 'not_layer_id=" . $layer_id . "');}" : ""),				# onmouseenter
 														($hover_preview ? "get_map(mapimg0, 'only_layer_id=" . $layer_id . "&layer_params[" . $param['key'] . "]=' + this.dataset.value); get_layer_legend(" . $layer_id . ", '&layer_params[" . $param['key'] . "]=' + this.dataset.value);" : "")		# option_onmouseenter
 													)
 												).'

@@ -934,12 +934,30 @@ function overlay_link(data, start, target){
 var listener;
 
 function handleCustomSelectKeyDown(event, dropdown) {
-	[].some.call(dropdown.children, function(option) {
-		if (event.key == option.dataset.value.substring(0, 1).toLowerCase()) {
-			option.scrollIntoView({behavior: "smooth", block: "center"});
-			return true;
+	var selected_option = dropdown.querySelector('li.selected');
+	if ([38, 40, 13].includes(event.keyCode)) {
+		// Pfeiltasten und Enter
+		switch (event.keyCode) {
+			case 38 : {
+				selected_option.previousElementSibling.onmouseenter();
+			}break;
+			case 40 : {
+				selected_option.nextElementSibling.onmouseenter();
+			}break;
+			case 13 : {
+				selected_option.onclick();
+			}break;
 		}
-	});
+	}
+	else {
+		// Zeichen
+		[].some.call(dropdown.children, function(option) {
+			if (event.key == option.dataset.value.substring(0, 1).toLowerCase()) {
+				option.scrollIntoView({behavior: "smooth", block: "center"});
+				return true;
+			}
+		});
+	}
 }
 
 function toggle_custom_select(id) {
@@ -959,25 +977,6 @@ function toggle_custom_select(id) {
 	}
 	else {
 		dropdown.classList.remove('upward');
-	}
-}
-
-function custom_select_register_keydown(){
-	document.onkeydown = custom_select_keydown;
-}
-
-function custom_select_keydown(evt){
-	var selected_option = document.querySelector('.custom-select.active li.selected');
-	switch (evt.keyCode) {
-		case 38 : {
-			selected_option.previousElementSibling.onmouseenter();
-		}break;
-		case 40 : {
-			selected_option.nextElementSibling.onmouseenter();
-		}break;
-		case 13 : {
-			selected_option.onclick();
-		}break;
 	}
 }
 
