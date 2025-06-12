@@ -11224,13 +11224,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 				}
 				$form_fields = explode('|', $this->formvars['form_field_names']);
-				for ($i = 0; $i < count($form_fields); $i++) {
-					if ($form_fields[$i] != '') {
-						$element = explode(';', $form_fields[$i]);
-						$this->sanitize([$form_fields[$i] => $element[6]], true);
-						$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
-					}
-				}
+				// for ($i = 0; $i < count($form_fields); $i++) {
+				// 	if ($form_fields[$i] != '') {
+				// 		$element = explode(';', $form_fields[$i]);
+				// 		$this->sanitize([$form_fields[$i] => $element[6]], true);
+				// 		$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
+				// 	}
+				// }
 
 				######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
 				if ($this->formvars['chosen_layer_id'] OR $this->formvars['weiter_erfassen']) {
