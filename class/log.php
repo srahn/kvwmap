@@ -101,16 +101,17 @@ class LogFile {
 
 	# öffnet die Logdatei
 	function __construct($filename, $format, $title, $headline, $with_timestamp = false) {
+		$file_is_new = !file_exists($filename);
+		$this->fp = fopen($filename, "a");
 		$this->name = $filename;
-		$this->fp = fopen($filename,"a");
 		$this->format = $format;
 		$this->with_timestamp = $with_timestamp;
+		$title = $title ?: 'Logdatei';
     $ret = true;
 		if ($format == "html") {
-			# fügt HEML header ein zum loggen in einer HTML-Datei
-			# Wenn title gesetzt ist wird er als Titel im header gesetzt, sonst default.
-			if ($title == "") { $title=="Logdatei"; }
-			fwrite($this->fp, "<html>\n<head>\n<title>" . $title . "</title>\n</head>\n<body>");
+			if ($file_is_new) {
+				fwrite($this->fp, "<html>\n<head>\n<title>" . $title . "</title>\n</head>\n<body>");
+			}
 			if ($headline != "") {
 				$ret = @fwrite($this->fp, "<h1>" . $headline . "</h1>");
 			}

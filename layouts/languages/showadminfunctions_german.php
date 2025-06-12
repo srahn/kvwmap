@@ -1,13 +1,14 @@
-<?php
-	$strTitle="Administrationsfunktionen";
-	$strUpdateCode="Aktualisierung des Quellcodes und der Datenbanken";
-	$strUpdateDBs="Aktualisierung der Datenbanken";
-	$strComponent="Komponente";
-	$strConfigParams="Konfigurationsparameter";
-	$strValue="Wert";
-	$strUpdate="Aktualisieren";
-	$strFurtherOptions="weitere Funktionen";
-	$strCreateRandomPassword="Erzeuge zufälliges Passwort";
-	$strSaveAllLayerAttributes="Alle Layerattribute speichern";
-	$strCreateInsertsFromDataset="Erzeuge INSERTS vom Datensatz und allen über fkey abhängigen Datensätzen";
+<?
+	$strComponent = "Komponente";
+	$strConfigParams = "Konfigurationsparameter";
+	$strCreateInsertsFromDataset = "Erzeuge INSERTS vom Datensatz und allen über fkey abhängigen Datensätzen";
+	$strCreateRandomPassword = "Erzeuge zufälliges Passwort";
+	$strFurtherOptions = "weitere Funktionen";
+	$strSaveAllLayerAttributes = "Alle Layerattribute speichern";
+	$strShowMobileLog  =  "Zeige kvmobile Logfiles";
+	$strTitle = "Administrationsfunktionen";
+	$strUpdate = "Aktualisieren";
+	$strUpdateCode = "Aktualisierung des Quellcodes und der Datenbanken";
+	$strUpdateDBs = "Aktualisierung der Datenbanken";
+	$strValue = "Wert";
 ?>
