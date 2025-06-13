@@ -974,7 +974,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$hauptart,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $unterart = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL, $geprueft = NULL, $alle_der_messung = NULL, $format = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$hauptart,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $unterart = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL, $geprueft = NULL, $alle_der_messung = NULL, $format = NULL, $lea_id = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -1345,19 +1345,26 @@ class Nachweis {
         }
       } break;
 
-      case "antr_nr" : {
+      case "antr_nr" : case "lea_id" :{
         # Suche nach Antragsnummer
         # echo '<br>Suche nach Antragsnummer.';
+        if ($abfrage_art == 'antr_nr') {
+          $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+          $where = " AND n2a.antrag_id = '" . $antr_nr . "'
+				             AND stelle_id " . ($stelle_id == ''? "IS NULL" : "= " . $stelle_id);
+        }
+        else {
+          $n2a = 'lenris.lea_nachweise2antrag';
+          $where = " AND n2a.lea_id = " . $lea_id;
+        }
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
 				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*, substr(flurid::text, 1, 6) as gemarkung, substr(flurid::text, 7, 3) as flur, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
-        $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
+        $sql.=" FROM " . $n2a . " AS n2a, nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";				
-        $sql.=" WHERE n.id=n2a.nachweis_id";
-        $sql.=" AND n2a.antrag_id='".$antr_nr."'";				
-				if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
-				else $sql.=" AND stelle_id=".$stelle_id;
+        $sql.=" WHERE n.id = n2a.nachweis_id";
+        $sql.= $where;
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
 				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
 				if(!empty($hauptart)){
