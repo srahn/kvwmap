@@ -21530,6 +21530,11 @@ DO $$
 			$layer['cluster_option'] = array();
 		}
 		while ($rs = pg_fetch_assoc($ret[1])) {
+			foreach (array('name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data', 'metalink') as $key) {
+				$rs[$key] = replace_params_rolle(
+					$rs[$key]
+				);
+			}
 			$layer['ID'][] = $rs['layer_id'];
 			$layer['Bezeichnung'][] = $rs['name'];
 			$layer['gruppe'][] = $rs['gruppenname'];

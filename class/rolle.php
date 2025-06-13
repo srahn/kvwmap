@@ -254,7 +254,7 @@ class rolle {
 				}
 			}
 			if ($replace_params) {
-				foreach (array('name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data') as $key) {
+				foreach (array('name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data', 'metalink') as $key) {
 					$rs[$key] = replace_params_rolle(
 						$rs[$key],
 						['duplicate_criterion' => $rs['duplicate_criterion']]
