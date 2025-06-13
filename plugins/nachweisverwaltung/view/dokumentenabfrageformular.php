@@ -165,6 +165,10 @@ function delete_dokauswahl(){
 	#attribut_form td{
 		height: 27px;
 	}
+
+	#backlink{
+		margin: 10px 0 -10 10px;
+	}
 </style>
 
 <?php
@@ -179,6 +183,9 @@ else {
 <table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td colspan="3" style="height: 30px">
+			<? if ($this->formvars['lea_layer_id'] != '') { ?>
+				<div id="backlink"><a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->formvars['lea_layer_id']; ?>&value_lea_id=<? echo $this->formvars['lea_id'] ?>&operator_lea_id=="><span class="fett">zurück zum Antrag</span></a></div>
+			<? } ?>
 			<div align="center"><h2><?php echo $this->titel; ?></h2></div>
 		</td>
   </tr>
@@ -484,6 +491,7 @@ else {
 		<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 		<INPUT TYPE="HIDDEN" NAME="order" VALUE="<? echo $this->formvars['order']; ?>">
 		<INPUT TYPE="HIDDEN" NAME="lea_id" VALUE="<? echo $this->formvars['lea_id']; ?>">
+		<INPUT TYPE="HIDDEN" NAME="lea_layer_id" VALUE="<? echo $this->formvars['lea_layer_id']; ?>">
     <input type="hidden" name="imgxy" value="300 300"> 
     <input type="hidden" name="imgbox" value="-1 -1 -1 -1">
     <input type="hidden" name="art_markieren" value="111" >
