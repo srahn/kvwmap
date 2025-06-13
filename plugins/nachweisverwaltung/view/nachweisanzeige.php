@@ -97,7 +97,7 @@ function zum_Auftrag_hinzufuegen(){
 }
 
 function aus_Auftrag_entfernen(){
-	if (window.confirm("Möchten sie wirklich Dokumente von der Antragsnummer: " + currentform.suchantrnr.value + " entfernen!?")){
+	if (window.confirm("Möchten sie wirklich Dokumente von der Antragsnummer " + (currentform.suchantrnr?.value ?? '') + " entfernen!?")){
 		currentform.go_plus.value='aus_Auftrag_entfernen';
 		overlay_submit(currentform, false);
 	}
@@ -841,6 +841,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						<td valign="top" style="padding: 5px;">
 							<table cellspacing="4">
 								<tr> 
+							<?	if ($this->formvars['lea_id'] == '') { ?>
 									<td colspan="2" align="center"><span class="fett">Vorbereitungsnummer</span></td>
 								</tr>
 								<tr>
@@ -849,6 +850,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 										<? $this->FormObjAntr_nr->outputHTML();
 											echo $this->FormObjAntr_nr->html;?>
 										</span>
+							<?	}
+									else { ?>
+										<td>
+											<INPUT TYPE="HIDDEN" NAME="lea_id" VALUE="<? echo $this->formvars['lea_id']; ?>">
+							<?	} ?>
 									</td>
 									<td valign="top">
 										<br>
