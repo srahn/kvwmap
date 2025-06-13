@@ -1394,12 +1394,28 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachw2Antr($antr_nr,$stelle_id){
+  function getNachw2Antr($antr_nr, $stelle_id, $lea_id = NULL){
     # Funktion liefert alle recherchierten Nachweis-IDs zurück, die zu einer 
     # Antragsnummer abgelegt wurde.
-    $sql="SELECT * FROM nachweisverwaltung.n_nachweise2antraege WHERE antrag_id='".$antr_nr."'";
-		if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
-		else $sql.=" AND stelle_id=".$stelle_id;
+    if ($lea_id == NULL) {
+      $sql = "
+        SELECT 
+          * 
+        FROM 
+          nachweisverwaltung.n_nachweise2antraege 
+        WHERE 
+          antrag_id = '" . $antr_nr . "'";
+      $sql .= " AND stelle_id " . ($stelle_id == ''? "IS NULL" : "= " . $stelle_id);
+    }
+    else {
+      $sql = "
+        SELECT 
+          * 
+        FROM 
+          lenris.lea_nachweise2antrag
+        WHERE 
+          lea_id = " . $lea_id;
+    }
     # echo '<br>'.$sql;
     $queryret=$this->database->execSQL($sql,4, 0);
     $this->debug->write("<br>nachweis.php Recherche nach den Nachweisen, die zu einer Antrnr gespeichert wurden.<br>".$sql,4);    
@@ -1449,41 +1465,37 @@ class Nachweis {
     return $errmsg;
   }
   
-  function zum_Auftrag_hinzufuegen($antrag_id,$stelle_id,$nachweis_id){
+  function zum_Auftrag_hinzufuegen($antrag_id, $stelle_id, $nachweis_id, $lea_id = NULL){
     #echo '<br>Start der Funktion zum_Autrag_hinzufuegen';
-    # Umsortierung der übergebenen ids
-    $idselected=$nachweis_id;
-    for ($i=0;$i<count($idselected);$i++) {
-      # Abfragen ob die Zuordnung schon existiert.
-      $sql ="SELECT * FROM nachweisverwaltung.n_nachweise2antraege";
-      $sql.=" WHERE nachweis_id=".(int)$idselected[$i]." AND antrag_id='".$antrag_id."'";
-			if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
-			else $sql.=" AND stelle_id=".$stelle_id;
-      $ret=$this->database->execSQL($sql,4, 0);
-      if ($ret[0]) { # Fehler bei der Abfrage
-        $errmsg='Fehler beim Abfragen, ob Eintrag existiert.';
+    if ($stelle_id == '') {
+      $stelle_id = 'NULL';
+    }
+    $idselected = $nachweis_id;
+    for ($i = 0; $i < count($idselected); $i++) {
+      if ($lea_id == NULL) {
+        $sql = "
+          INSERT INTO nachweisverwaltung.n_nachweise2antraege 
+            (nachweis_id, antrag_id, stelle_id)
+          VALUES 
+            (" . $idselected[$i] . ", '" . $antrag_id . "', " . $stelle_id . ")
+          ON CONFLICT (nachweis_id, antrag_id, stelle_id) DO NOTHING";
       }
       else {
-        # 
-        if (pg_num_rows($ret[1])>0) {
-          # Die Zuordnung existiert schon, nicht neu hinzufügen
-          #echo '<br>Dokument mit id: '.$idselected[$i].' ist schon zu Antrag id: '.$antrag_id.' zugeordnet.';
-        }
-        else {
-          # Zuordnung in Datenbank schreiben
-          $sql ="INSERT INTO nachweisverwaltung.n_nachweise2antraege (nachweis_id,antrag_id,stelle_id)";
-					if($stelle_id == '')$stelle_id = 'NULL';
-          $sql.=" VALUES (".$idselected[$i].",'".$antrag_id."',".$stelle_id.")";
-          $ret=$this->database->execSQL($sql,4, 1);    
-          if ($ret[0]) {
-            $this->debug->write("<br>Fehler beim hinzufuegen der Dokumente zur Auftragsnummer: ".__LINE__,4);
-            $errmsg='Fehler beim hinzufuegen der Dokumente zur Auftragsnummer';
-          }
-          else {
-            #echo '<br>Dokument mit id: '.$idselected[$i].' zu Antrag id: '.$antrag_id.' zugeordnet.';
-          }
-        } # ende Zuordnung in Datenbank schreiben
-      } # ende Abfrag ob schon vorhanden in Ordnung
+        $sql = "
+          INSERT INTO lenris.lea_nachweise2antrag 
+            (nachweis_id, lea_id)
+          VALUES 
+            (" . $idselected[$i] . ", " . $lea_id . ")
+          ON CONFLICT (nachweis_id, lea_id) DO NOTHING";
+      }
+      $ret = $this->database->execSQL($sql,4, 1);    
+      if ($ret[0]) {
+        $this->debug->write("<br>Fehler beim hinzufuegen der Dokumente zur Auftragsnummer: ".__LINE__,4);
+        $errmsg='Fehler beim hinzufuegen der Dokumente zur Auftragsnummer';
+      }
+      else {
+        #echo '<br>Dokument mit id: '.$idselected[$i].' zu Antrag id: '.$antrag_id.' zugeordnet.';
+      }
     } # ende Schleife
     if ($errmsg!='') {
       $ret[0]=1; $ret[1]=$errmsg;
@@ -1494,14 +1506,27 @@ class Nachweis {
     return $ret;
   }
 
-  function aus_Auftrag_entfernen($antr_nr,$stelle_id,$id){
+  function aus_Auftrag_entfernen($antr_nr, $stelle_id, $id, $lea_id = NULL){
     #Funktion löscht Nachweise, die unter einer Antragsnummer recherchiert wurde. 
     $idselected=$id;
-    for ($i=0;$i<count($idselected);$i++) {
-      $sql ="DELETE FROM nachweisverwaltung.n_nachweise2antraege";
-      $sql.=" WHERE antrag_id='".$antr_nr."' AND nachweis_id='".$idselected[$i]."'";
-			if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
-			else $sql.=" AND stelle_id=".$stelle_id;
+    for ($i =0; $i < count($idselected); $i++) {
+      if ($lea_id == NULL) {
+        $sql = "
+          DELETE FROM 
+            nachweisverwaltung.n_nachweise2antraege
+          WHERE 
+            antrag_id = '" . $antr_nr . "' AND 
+            nachweis_id = " . $idselected[$i];
+          $sql .= " AND stelle_id " . ($stelle_id == ''? "IS NULL" : "= " . $stelle_id);
+      }
+      else {
+        $sql = "
+          DELETE FROM 
+            lenris.lea_nachweise2antrag
+          WHERE 
+            lea_id = " . $lea_id . " AND 
+            nachweis_id = " . $idselected[$i];
+      }
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {
         $this->debug->write("<br>Fehler beim entfernen der Dokumente zur Auftragsnummer: ".__LINE__,4);
