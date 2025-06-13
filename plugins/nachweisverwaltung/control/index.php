@@ -86,6 +86,7 @@ function go_switch_nachweisverwaltung($go){
 
 	  case 'Antraganzeige_Zugeordnete_Dokumente_Anzeigen' : {
 			$GUI->sanitize(['antr_selected' => 'text']);
+			$GUI->sanitize(['lea_id' => 'int']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->checkCaseAllowed($go);
 			$GUI->DokumenteZuAntraegeAnzeigen();

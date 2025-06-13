@@ -427,7 +427,7 @@
 	$GUI->DokumenteZuAntraegeAnzeigen = function() use ($GUI){
 		if(strpos($GUI->formvars['antr_selected'], '~') == false)$GUI->formvars['antr_selected'] = str_replace('|', '~', $GUI->formvars['antr_selected']); # für Benutzung im GLE
     $GUI->formvars['suchantrnr']=$GUI->formvars['antr_selected'];
-    $GUI->formvars['abfrageart']='antr_nr';
+    $GUI->formvars['abfrageart'] = ($GUI->formvars['lea_id'] ? 'lea_id' : 'antr_nr');
     $GUI->nachweiseRecherchieren();
   };
 	
@@ -765,7 +765,7 @@
 		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft'], $GUI->formvars['alle_der_messung'], $GUI->formvars['suchformat']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft'], $GUI->formvars['alle_der_messung'], $GUI->formvars['suchformat'], $GUI->formvars['lea_id']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
