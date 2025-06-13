@@ -735,7 +735,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<td style="width: 30">
 						<?
 							if ($i == 0) {
-								echo '<div style="padding-left: 70px;" class="fett scrolltable_header">' . $this->nachweis->erg_dokumente.' Treffer</div>';
+								echo '<div style="right: 20px;" class="fett scrolltable_header">' . $this->nachweis->erg_dokumente.' Treffer</div>';
 							}
 						?>
 						<table cellspacing="0" cellpadding="0">
