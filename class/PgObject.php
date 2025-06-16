@@ -846,7 +846,6 @@ class PgObject {
 	}
 
 	function validate_greater_or_equal($key, $msg, $option) {
-		$this->debug->show('MyObject validate if ' . $key . ' = ' . $this->get($key) . ' is grater than ' . $option['other_key'] . '=' . $this->data[$option['other_key']], MyObject::$write_debug);
 		if ($this->get($key) >= $this->get($option['other_key'])) {
 			return '';
 		}
