@@ -728,7 +728,15 @@
 						$datapart .= $attributes['options'][$j];
 					}
 					else {
-						$datapart .= htmlspecialchars(basename($value));
+						if (strpos($value, '&/') !== false) {
+							$datapart .= htmlspecialchars(basename($value));
+						}
+						else {
+							if (strlen($value) > 85){
+								$value = substr($value, 0, 40) . ' ... ' . substr($value, -40);
+							}
+							$datapart .= htmlspecialchars($value);
+						}
 					}
 					$datapart .= '</a></div>';
 				}
