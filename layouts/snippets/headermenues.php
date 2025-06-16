@@ -22,6 +22,14 @@
 					<div style="margin-top: 2px; width: 100%; text-align: center;"><input id="notification_delete_checkbox_<? echo $notification['id']; ?>" type="checkbox"/> nicht mehr anzeigen</div>
 				</div><?
 			}
+			if (AFTER_LOGIN) {
+				if (count_or_0($result['notifications']) > 0) {
+					echo "<script>
+									message([{ type: 'info', msg: 'Es sind neue Benachrichtigungen vorhanden.'}]);
+									$('#user_notifications').show('swing');
+								</script>";
+				}				
+			}
 		} ?>
 	</div>
 </div>
