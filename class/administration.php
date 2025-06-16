@@ -155,23 +155,18 @@ class administration{
 			foreach ($component_seed as $file) {
 				$filepath = $prepath.'db/postgresql/data/'.$file;
 				#echo '<br>Execute SQL from seed file: ' . $filepath;
-				$result = $this->database->exec_commands(
-					file_get_contents($filepath),
-					null, # Do not replace connection since we have connection_id's in layer defenitions ($this->pgdatabase->get_connection_string(),)
-					$this->pgdatabase->connection_id,
-					true
-				); # replace known constants
+				$result = $this->pgdatabase->execSQL(file_get_contents($filepath)); # replace known constants
 				if ($result[0]) {
 					echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
 				}
-				else{
+				else {
 					$sql = "
 						INSERT INTO kvwmap.migrations
 							(component, type, filename)
 						VALUES ('" . $component . "', 'postgresql', '" . $file . "');
 					";
 					#echo '<p>Register migration for component ' . $component . ' with sql: <br>' . $sql;
-					$result=$this->database->execSQL($sql,0, 0);
+					$result=$this->pgdatabase->execSQL($sql,0, 0);
 				}
 			}
 		}
