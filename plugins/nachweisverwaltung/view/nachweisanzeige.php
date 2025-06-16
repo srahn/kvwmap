@@ -735,7 +735,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<td style="width: 30">
 						<?
 							if ($i == 0) {
-								echo '<div style="padding-left: 70px;" class="fett scrolltable_header">' . $this->nachweis->erg_dokumente.' Treffer</div>';
+								echo '<div style="right: 20px;" class="fett scrolltable_header">' . $this->nachweis->erg_dokumente.' Treffer</div>';
 							}
 						?>
 						<table cellspacing="0" cellpadding="0">
@@ -854,13 +854,18 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 									else { ?>
 										<td>
 											<INPUT TYPE="HIDDEN" NAME="lea_id" VALUE="<? echo $this->formvars['lea_id']; ?>">
+											<INPUT TYPE="HIDDEN" NAME="lea_layer_id" VALUE="<? echo $this->formvars['lea_layer_id']; ?>">
 							<?	} ?>
 									</td>
 									<td valign="top">
 										<br>
-										<a href="javascript:zum_Auftrag_hinzufuegen();"><span class="fett">zu Auftrag hinzufügen</span></a>
+										<a href="javascript:zum_Auftrag_hinzufuegen();"><span class="fett">zu Antrag hinzufügen</span></a>
 										<br><br>
-										<a href="javascript:aus_Auftrag_entfernen();"><span class="fett">aus Auftrag entfernen</span></a>
+										<a href="javascript:aus_Auftrag_entfernen();"><span class="fett">aus Antrag entfernen</span></a>
+										<? if ($this->formvars['lea_layer_id'] != '') { ?>
+											<br><br><br><br>
+											<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->formvars['lea_layer_id']; ?>&value_lea_id=<? echo $this->formvars['lea_id'] ?>&operator_lea_id=="><span class="fett">zurück zum Antrag</span></a>
+										<? } ?>
 									</td>
 								</tr>							
 							</table>
