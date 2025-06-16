@@ -49,7 +49,7 @@ function send(zoom){
 
 <table style="border-bottom: 1px solid grey; border-collapse: separate; width: 100%" border="0" cellpadding="0" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td>
+    <td valign="top">
 			<table cellspacing="0" cellpadding="0">
 				<tr>
 					<td colspan="6">
