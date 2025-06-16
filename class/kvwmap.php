@@ -11466,6 +11466,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						#-----Polygoneditor, Linieneditor oder Multipointeditor ---#
 						$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 
+						if ($this->queryable_vector_layers['gruppe']) {
+							$this->layergruppen['ID'] = array_values(array_unique($this->queryable_vector_layers['gruppe']));
+						}
+						$this->layergruppen = $mapDB->get_Groups($this->layergruppen); # Gruppen mit Pfaden versehen
+						# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
+						if (value_of($this->formvars, 'selected_group_id') AND $this->formvars['selected_layer_id'] == '') {
+							$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id'], NULL, NULL, true, true);
+						}
+
 						if ($this->formvars['chosen_layer_id'] AND $privileges[$this->qlayerset[0]['attributes']['the_geom']] == 1) {			# für neuen Datensatz verwenden -> Geometrie abfragen
 							include_once (CLASSPATH.'multigeomeditor.php');
 							$polygoneditor = new multigeomeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
