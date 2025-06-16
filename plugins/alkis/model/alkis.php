@@ -2477,8 +2477,8 @@ class ALKIS {
     return $ret;
   }
     
-  function getMERfromFlurstuecke($flstliste, $epsgcode) {
-    $ret=$this->database->getMERfromFlurstuecke($flstliste, $epsgcode);
+  function getMERfromFlurstuecke($flstliste, $epsgcode, $without_temporal_filter = 0) {
+    $ret=$this->database->getMERfromFlurstuecke($flstliste, $epsgcode, $without_temporal_filter);
     if ($ret[0]==0) {
       $rect = rectObj(
       	$ret[1]['minx'],

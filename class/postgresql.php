@@ -3236,12 +3236,18 @@ FROM
     return $rs['wkt'];
   }	
 	
-  function getMERfromFlurstuecke($flurstkennz, $epsgcode) {
+  function getMERfromFlurstuecke($flurstkennz, $epsgcode, $without_temporal_filter = 0) {
     $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flurstï¿½cke",4);
-    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
-    $sql.=" FROM alkis.ax_flurstueck AS f";
-    $sql.=" WHERE 1=1";
+    $sql = "
+			SELECT 
+				MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,
+				MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx,
+				MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,
+				MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy,
+				bool_and(endet IS NOT NULL) as hist
+			FROM 
+				alkis.ax_flurstueck AS f
+			WHERE 1=1";
     $anzflst = count_or_0($flurstkennz);
     if ($anzflst>0) {
       $sql.=" AND f.flurstueckskennzeichen IN ('".$flurstkennz[0]."'";
@@ -3250,7 +3256,9 @@ FROM
       }
       $sql.=")";
     }
-		$sql.= $this->build_temporal_filter(array('f'));
+		if (!$without_temporal_filter) {
+			$sql.= $this->build_temporal_filter(array('f'));
+		}
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Flurstücke.<br>'.$ret[1];
@@ -3259,9 +3267,12 @@ FROM
       $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
-        $ret[1]='Flurstïück nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
+        $ret[1]='Flurstück nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
       }
       else {
+				if ($rs['hist'] == 't') {
+					$this->gui->add_message('info', 'Achtung! Zoom auf historische Flurstücke!');
+				}
         $ret[1]=$rs;
       }
     }

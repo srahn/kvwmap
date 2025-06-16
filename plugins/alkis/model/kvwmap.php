@@ -184,7 +184,7 @@
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$dbmap = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 		$alkis = new ALKIS($GUI->pgdatabase);
-    $ret=$alkis->getMERfromFlurstuecke($FlurstListe, $GUI->user->rolle->epsg_code);
+    $ret=$alkis->getMERfromFlurstuecke($FlurstListe, $GUI->user->rolle->epsg_code, 1);
     if ($ret[0]) {
       $GUI->Fehlermeldung='Es konnten keine Flurstücke gefunden werden.<br>'.$ret[1];
       $rect=$GUI->user->rolle->oGeorefExt;
