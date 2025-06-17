@@ -827,8 +827,7 @@ class user {
 				kvwmap.user
 			WHERE
 				" . implode(" AND ", $where);
-		#echo '<br>SQL to read user data: ' . $sql;
-
+		// echo '<br>SQL to read user data: ' . $sql;
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
 		$ret = $this->database->execSQL($sql, 4, 0, true);
 		if(!$ret[0]) {
@@ -847,7 +846,7 @@ class user {
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
-		$this->funktion = $rs['Funktion'];
+		$this->funktion = $rs['funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'];
