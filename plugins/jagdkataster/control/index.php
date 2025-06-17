@@ -97,6 +97,13 @@ function go_switch_jagdkataster($go){
 			$GUI->jagdkatastereditor_listeigentuemer_csv();
 	  }break;
 
+		# Jagdkatastereditor
+	  case 'jagdkatastereditor_Eigentuemer_Anschriften_Listen_csv' : {
+			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
+			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
+			$GUI->jagdkatastereditor_listeigentuemer_anschriften_csv();
+	  }break;		
+
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_Paechter_Listen' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
@@ -105,7 +112,7 @@ function go_switch_jagdkataster($go){
 	  }break;
 		
 		default : {
-			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgefï¿½hrt
 		}
 	}
 }

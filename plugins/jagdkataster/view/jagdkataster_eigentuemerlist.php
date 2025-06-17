@@ -6,6 +6,11 @@ function csv_export(){
 	document.GUI.submit();
 }
 
+function csv_export_anschriften(){
+	document.GUI.go.value = 'jagdkatastereditor_Eigentuemer_Anschriften_Listen_csv';
+	document.GUI.submit();
+}
+
 -->
 </script>
 
@@ -53,6 +58,9 @@ function csv_export(){
   <? } ?>
 	<tr>
   	<td align="center"><a href="javascript:csv_export();">CSV-Export</a></td>
+  </tr>
+  <tr>
+  	<td align="center"><a href="javascript:csv_export_anschriften();">CSV-Export Anschriften</a></td>
   </tr>
   <tr>
   	<td align="center"><a href="javascript:hideMenue();javascript:print();">Drucken</a></td>

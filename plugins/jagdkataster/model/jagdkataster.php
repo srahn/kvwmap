@@ -278,7 +278,12 @@ class jagdkataster {
 		else{				# ein Jagdbezirk
 			$oids[] = $formvars['oid']; 
 		}
-		$ret = $this->getEigentuemerListeFromJagdbezirke($oids);
+		if ($formvars['anschriften']) {
+			$ret = $this->getEigentuemerListeFromJagdbezirke_anschriften($oids);
+		}
+		else {
+			$ret = $this->getEigentuemerListeFromJagdbezirke($oids);
+		}
 		while($rs = pg_fetch_array($ret[1])){
 			$summe = $summe + $rs['albflaeche'];
 			$eigentuemer[] = $rs;
@@ -422,6 +427,36 @@ class jagdkataster {
 			group by 
 				eigentuemer, 
 				j_flaeche";
+		return $this->database->execSQL($sql, 4, 0);
+	}
+
+	function getEigentuemerListeFromJagdbezirke_anschriften($oids){
+		$sql = "
+			SELECT 
+				p.nachnameoderfirma, 
+				p.vorname,
+				a.strasse, 
+				a.hausnummer, 
+				a.postleitzahlpostzustellung, 
+				a.ort_post, 
+				'OT '||a.ortsteil as ortsteil, 
+				a.bestimmungsland
+			FROM 
+				jagdkataster.jagdbezirke, 
+				alkis.ax_flurstueck AS f
+				LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id::char] <@ s.verweistauf OR ARRAY[f.istgebucht] <@ s.an 
+				LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk 
+				LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id 
+				LEFT JOIN alkis.ax_anschrift a ON a.gml_id = p.hat[1]
+			WHERE 
+				n.laufendenummernachdin1421 IS NOT NULL 
+				" . $this->database->build_temporal_filter(array('f', 's', 'b', 'n', 'p', 'a')) . " AND 
+				jagdbezirke." . $this->oid_column . " IN (".implode(',', $oids).") AND 
+				st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AND 
+				st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1
+			";
 		return $this->database->execSQL($sql, 4, 0);
 	}
 		

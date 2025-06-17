@@ -249,45 +249,71 @@
     $GUI->output();
   };
 	
-	$GUI->jagdkatastereditor_listeigentuemer_csv = function() use ($GUI){
-		$GUI->sanitize(['checkbox_names' => 'text', 'oid' => 'int']);
-  	$layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
-    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
-  	$GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
-  	for($i = 0; $i < count($GUI->eigentuemer)-1; $i++){          	
-    	$csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['eigentuemer']).';';
-			$csv .= str_replace('.', ',', $GUI->eigentuemer[$i]['anteil_alk']).';';
-      $csv .= str_replace('.', ',', round($GUI->eigentuemer[$i]['albflaeche']*100/$GUI->eigentuemer['albsumme'], 1)).';';
-      $csv .= str_replace('.', ',', $GUI->eigentuemer[$i]['albflaeche']).';';
-     	$csv .= chr(10);  
-    }
-    $csv = 'Eigentümer;geometrischer Anteil;Anteil nach amtl. Fläche[%];Anteil nach amtl. Fläche[m²]'.chr(10).$csv;
-    ob_end_clean();
-    header("Content-type: application/vnd.ms-excel");
-    header("Content-disposition:  inline; filename=eigentuemer.csv");
-    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-    header('Pragma: public');
-    print utf8_decode($csv);
-  };
+$GUI->jagdkatastereditor_listeigentuemer_csv = function() use ($GUI){
+  $GUI->sanitize(['checkbox_names' => 'text', 'oid' => 'int']);
+  $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+  $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
+  $GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
+  for($i = 0; $i < count($GUI->eigentuemer)-1; $i++){          	
+    $csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['eigentuemer']).';';
+    $csv .= str_replace('.', ',', $GUI->eigentuemer[$i]['anteil_alk']).';';
+    $csv .= str_replace('.', ',', round($GUI->eigentuemer[$i]['albflaeche']*100/$GUI->eigentuemer['albsumme'], 1)).';';
+    $csv .= str_replace('.', ',', $GUI->eigentuemer[$i]['albflaeche']).';';
+    $csv .= chr(10);  
+  }
+  $csv = 'Eigentümer;geometrischer Anteil;Anteil nach amtl. Fläche[%];Anteil nach amtl. Fläche[m²]'.chr(10).$csv;
+  ob_end_clean();
+  header("Content-type: application/vnd.ms-excel");
+  header("Content-disposition:  inline; filename=eigentuemer.csv");
+  header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+  header('Pragma: public');
+  print utf8_decode($csv);
+};
+
+$GUI->jagdkatastereditor_listeigentuemer_anschriften_csv = function() use ($GUI){
+  $GUI->sanitize(['checkbox_names' => 'text', 'oid' => 'int']);
+  $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+  $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
+  $GUI->formvars['anschriften'] = true;
+  $GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
+  for($i = 0; $i < count($GUI->eigentuemer)-1; $i++){          	
+    $csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['nachnameoderfirma']).';';
+    $csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['vorname']).';';
+    $csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['strasse']).';';
+    $csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['hausnummer']).';';
+    $csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['postleitzahlpostzustellung']).';';
+    $csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['ort_post']).';';
+    $csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['ortsteil']).';';
+    $csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['bestimmungsland']).';';
+    $csv .= chr(10);  
+  }
+  $csv = 'Name;Vorname;Strasse;Hausnummer;PLZ;Ort;Ortsteil;Bestimmungsland'.chr(10).$csv;
+  ob_end_clean();
+  header("Content-type: application/vnd.ms-excel");
+  header("Content-disposition:  inline; filename=eigentuemer.csv");
+  header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+  header('Pragma: public');
+  print utf8_decode($csv);
+};
 	
-	$GUI->jagdkatastereditor_listeigentuemer = function() use ($GUI){
-		$GUI->sanitize(['checkbox_names' => 'text', 'oid' => 'int']);
-    $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_eigentuemerlist.php';
-    $GUI->titel='Eigentümer im Jagdbezirk '.$GUI->formvars['name'];
-    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
-    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
-    $GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
-    $GUI->output();
-  };
-  
-	$GUI->jagdkatastereditor_listpaechter = function() use ($GUI){
-		$GUI->sanitize(['oid' => 'int']);
-    $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_paechterlist.php';
-    $GUI->titel='P&auml;chter im Jagdbezirk '.$GUI->formvars['name'].'';
-    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
-    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
-    $GUI->paechter = $GUI->jagdkataster->get_paechter($GUI->formvars['oid']);
-    $GUI->output();
-  };
+$GUI->jagdkatastereditor_listeigentuemer = function() use ($GUI){
+  $GUI->sanitize(['checkbox_names' => 'text', 'oid' => 'int']);
+  $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_eigentuemerlist.php';
+  $GUI->titel='Eigentümer im Jagdbezirk '.$GUI->formvars['name'];
+  $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+  $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
+  $GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
+  $GUI->output();
+};
+
+$GUI->jagdkatastereditor_listpaechter = function() use ($GUI){
+  $GUI->sanitize(['oid' => 'int']);
+  $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_paechterlist.php';
+  $GUI->titel='P&auml;chter im Jagdbezirk '.$GUI->formvars['name'].'';
+  $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+  $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
+  $GUI->paechter = $GUI->jagdkataster->get_paechter($GUI->formvars['oid']);
+  $GUI->output();
+};
 
 ?>
