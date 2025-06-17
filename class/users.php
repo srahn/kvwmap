@@ -954,12 +954,12 @@ class user {
 				archived IS NULL AND 
 				ID NOT IN (
 					SELECT DISTINCT 
-						user.id
+						"user".id
 					FROM 
 						kvwmap.user, 
 						kvwmap.rolle 
 					WHERE 
-						rolle.user_id = user.id
+						rolle.user_id = "user".id
 				) 
 			ORDER BY Name';
 		$this->debug->write("<p>file:users.php class:user->get_Unassigned_Users - Lesen der User zur Stelle:<br>".$sql,4);
@@ -986,16 +986,16 @@ class user {
 
 	function get_Expired_Users(){
 		# Lesen der User, die abgelaufen sind
-		$sql ='
+		$sql = "
 			SELECT 
 				* 
 			FROM 
 				kvwmap.user 
 			WHERE 
 				archived IS NULL AND 
-				stop != "0000-00-00 00:00:00" AND 
-				"'.date('Y-m-d h:i:s').'" > stop 
-			ORDER BY Name';
+				stop IS NOT NULL AND 
+				'" . date('Y-m-d h:i:s') . "' > stop 
+			ORDER BY Name";
 		$this->debug->write("<p>file:users.php class:user->get_Expired_Users - Lesen der User zur Stelle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
