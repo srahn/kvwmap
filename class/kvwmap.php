@@ -10906,7 +10906,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 			}
 		}
-		$formfieldstring = '&form_field_names=' . $this->formvars['form_field_names'];
+		$formfieldstring .= '&form_field_names=' . $this->formvars['form_field_names'];
 
 		# Dokumente speichern
 		if (count_or_0($document_attributes) > 0) {
