@@ -985,7 +985,7 @@ a.menuered:hover {
 	flex-direction: column;
 }
 
-.legend_layer_highlight{
+.short_highlight{
 	background-color: none;
 	animation: highlight 3s ease-in-out;
 }

@@ -43,7 +43,7 @@
 
 	function highlight_line(id){
 		var form = document.getElementById('line_form_'+id);
-		form.classList.add('legend_layer_highlight');
+		form.classList.add('short_highlight');
 		svg_line = document.getElementById('line_'+id)
 		if(svg_line){	
 			svg_line.classList.add('line_highlight');
@@ -52,7 +52,7 @@
 
 	function de_highlight_line(id){
 		var form = document.getElementById('line_form_'+id);
-		form.classList.remove('legend_layer_highlight');
+		form.classList.remove('short_highlight');
 		svg_line = document.getElementById('line_'+id)
 		if(svg_line){	
 			svg_line.classList.remove('line_highlight');
@@ -66,7 +66,7 @@
 
 	function highlight_rect(id){
 		var form = document.getElementById('rect_form_'+id);
-		form.classList.add('legend_layer_highlight');
+		form.classList.add('short_highlight');
 		svg_rect = document.getElementById('rect_'+id)
 		if(svg_rect){	
 			svg_rect.classList.add('line_highlight');
@@ -75,7 +75,7 @@
 
 	function de_highlight_rect(id){
 		var form = document.getElementById('rect_form_'+id);
-		form.classList.remove('legend_layer_highlight');
+		form.classList.remove('short_highlight');
 		svg_rect = document.getElementById('rect_'+id)
 		if(svg_rect){	
 			svg_rect.classList.remove('line_highlight');
