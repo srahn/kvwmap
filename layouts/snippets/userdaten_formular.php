@@ -226,6 +226,13 @@
 			<div><input name="position" type="text" value="<? echo $this->formvars['position']; ?>" maxlength="255"></div>
 		</div>
 
+		<div class="form_formular-input form_formular-aic">
+			<div style="align-self: flex-start; margin-top: 3;"><? echo $this->strComment;?></div>
+			<div>
+				<textarea style="width: 300px; height: 60px" name="comment"><? echo $this->formvars['comment']; ?></textarea>
+			</div>
+		</div>
+
 		<div class="form_formular-input">
 			<div><? echo $strPassword;?>&nbsp;*</div>
 			<div class="udf_eingabe-pw"><?

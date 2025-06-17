@@ -1449,6 +1449,9 @@ class user {
 		if ($userdaten['position']!='') {
 			$columns['position'] = "'" . $userdaten['position'] . "'";
 		}
+		if ($userdaten['comment']!='') {
+			$columns['comment'] = "'" . $userdaten['comment'] . "'";
+		}
 		if ($userdaten['start'] != '') {
 			$columns['start'] = ($userdaten['start'] ? "'" . $userdaten['start'] . "'" : 'NULL');
 		}
@@ -1510,6 +1513,7 @@ class user {
 				email = '" . $userdaten['email']."',
 				organisation = '" . $userdaten['organisation']."',
 				position = '" . $userdaten['position']."',
+				comment = '" . $userdaten['comment']."',
 				ips = '" . $userdaten['ips'] . "',
 				agreement_accepted = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
 				share_rollenlayer_allowed = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
