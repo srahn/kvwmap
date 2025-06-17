@@ -280,7 +280,7 @@ hide_versions = function(flst){
 											</tr>
 									<? }
 									$both = ($privileg_['forstname'] AND $privileg_['forstschluessel']);
-									if($privileg_['forstname'] OR $privileg_['forstschluessel']){
+									if(false and ($privileg_['forstname'] OR $privileg_['forstschluessel'])){
 									?>
 											<tr>
 												<td align="right"><span class="fett">Forstamt&nbsp;</span></td>
