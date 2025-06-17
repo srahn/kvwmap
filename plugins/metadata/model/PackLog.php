@@ -5,7 +5,6 @@
 
 class PackLog extends PgObject {
 
-	public $write_debug = false;
 	static $schema = 'metadata';
 	static $tableName = 'pack_logs';
 	public $layer;

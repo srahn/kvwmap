@@ -644,7 +644,7 @@ class PgObject {
 
 
 	function setKeysFromTable() {
-		#$this->debug->show('setKeysFromTable', MyObject::$write_debug);
+		#$this->debug->show('setKeysFromTable', PgObject::$write_debug);
 		$columns = $this->get_attribute_types();
 		foreach($columns AS $column => $type) {
 			$this->set($column, NULL);
@@ -653,7 +653,7 @@ class PgObject {
 	}
 
 	function setKeysFromFormvars($formvars) {
-		$this->debug->show('setKeysFromFormvars', MyObject::$write_debug);
+		$this->debug->show('setKeysFromFormvars', PgObject::$write_debug);
 		$this->data = array_map(function($attribute) { return null; }, array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable()))));
 	}
 
@@ -852,6 +852,7 @@ class PgObject {
 	}
 
 	function validate_greater_or_equal($key, $msg, $option) {
+		$this->debug->show('PgObject validate if ' . $key . ' = ' . $this->get($key) . ' is grater than ' . $option['other_key'] . '=' . $this->data[$option['other_key']], PgObject::$write_debug);
 		if ($this->get($key) >= $this->get($option['other_key'])) {
 			return '';
 		}

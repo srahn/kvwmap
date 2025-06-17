@@ -8,7 +8,6 @@ class DataPackage extends PgObject {
 
 	static $schema = 'metadata';
 	static $tableName = 'data_packages';
-	public $write_debug = false;
 	public $layer;
 	public $export_format;
 	public $datatype;

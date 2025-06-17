@@ -8,7 +8,6 @@ class SubRessource extends PgObject {
 	
 	static $schema = 'metadata';
 	static $tableName = 'subressources';
-	public $write_debug = false;
   public $download_urls = array();
   public $has_ranges = false;
 

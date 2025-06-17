@@ -2,14 +2,13 @@
 #############################
 # Klasse Ressource #
 #############################
-include_once(CLASSPATH . 'PgObject.php');
+include_once(CLASSPATH . 'PgObject.php');	
 include_once(PLUGINS . 'metadata/model/SubRessource.php');
 
 class Ressource extends PgObject {
 
 	static $schema = 'metadata';
 	static $tableName = 'ressources';
-	public $write_debug = false;
 	public $has_subressources = false;
 	public $has_ressource_ranges = false;
 	public $sub_ressources = array();
