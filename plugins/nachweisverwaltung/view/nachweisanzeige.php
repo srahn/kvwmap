@@ -864,7 +864,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 										<a href="javascript:aus_Auftrag_entfernen();"><span class="fett">aus Antrag entfernen</span></a>
 										<? if ($this->formvars['lea_layer_id'] != '') { ?>
 											<br><br><br><br>
-											<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->formvars['lea_layer_id']; ?>&value_lea_id=<? echo $this->formvars['lea_id'] ?>&operator_lea_id=="><span class="fett">zurück zum Antrag</span></a>
+											<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->formvars['lea_layer_id']; ?>&value_lea_id=<? echo $this->formvars['lea_id'] ?>&operator_lea_id==&opentab=4"><span class="fett">zurück zum Antrag</span></a>
 										<? } ?>
 									</td>
 								</tr>							
