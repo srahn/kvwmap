@@ -1421,20 +1421,19 @@ function handleDragEnd(e){
 // --- html5 Drag and Drop der Layer im drawingOrderForm --- //
  
 function jumpToLayer(searchtext){
-	if(searchtext.length > 1){
+	if (searchtext.length > 1) {
 		found = false;
 		legend_top = document.getElementById('scrolldiv').getBoundingClientRect().top;
-		for(var i = 0; i < layernames.length; i++){
-			if(layernames[i].toLowerCase().search(searchtext.toLowerCase()) != -1){
-				layer = document.getElementById(layernames[i].replace('-', '_'));
-				layer.classList.remove('legend_layer_highlight');
-				void layer.offsetWidth;
-				layer.classList.add('legend_layer_highlight');
-				if(!found){
-					document.getElementById('scrolldiv').style.scrollBehavior = 'smooth';		// erst hier und nicht im css, damit das Scrollen beim Laden nicht animiert wird
-					document.getElementById('scrolldiv').scrollTop = document.getElementById('scrolldiv').scrollTop + (layer.getBoundingClientRect().top - legend_top);
+		for (var layername in layernames) {
+			for (var key in layernames[layername]) {
+				let layer_id = layernames[layername][key];
+				layer = document.getElementById('legend_' + layer_id);						
+				if (layername.toLowerCase().search(searchtext.toLowerCase()) != -1) {
+					layer.classList.remove('hidden');
 				}
-				found = true;
+				else {
+					layer.classList.add('hidden');
+				}
 			}
 		}
 	}

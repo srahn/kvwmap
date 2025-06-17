@@ -1511,7 +1511,7 @@ class GUI {
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
 		if ($visible) {
-			$legend = '<tr><td valign="top">';
+			$legend = '<tr id="legend_' . $layer['layer_id'] . '"><td valign="top">';
 
 			$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"><div class="layerOptions" id="options_content_'.$layer['layer_id'].'"></div></div>';
 
@@ -1620,7 +1620,7 @@ class GUI {
 		# unsichtbare Layer
 		if (!$visible) {
 			$legend .=  '
-						<tr>
+						<tr id="legend_' . $layer['layer_id'] . '">
 							<td valign="top">';
 			if($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2){
 				$style = ((
@@ -1661,7 +1661,7 @@ class GUI {
 				$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
 			}
 			$legend .= 'class="invisiblelayerlink boldhover" href="javascript:void(0)">';
-			$legend .= '<span class="legend_layer_hidden" id="'.str_replace('-', '_', $layer['Name_or_alias']).'"';
+			$legend .= '<span class="legend_layer_hidden" ';
 			if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
 				$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 			}
@@ -1696,7 +1696,7 @@ class GUI {
 		else {
 			$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
 		}
-		$legend .= '<span id="'.str_replace('"', '', str_replace("'", '', str_replace('-', '_', $layer['Name_or_alias']))).'"';
+		$legend .= '<span ';
 		if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 			$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 		}
