@@ -138,7 +138,9 @@
 				echo '
 			<tr style="background-color:'.$tr_color.'">
 				<td style="border-bottom:1px solid #C3C7C3">
-					<img src="' . TEMPPATH_REL . $this->getlegendimage($this->layerdata, $this->classes[$i], NULL) . '">
+					<a href="index.php?go=Style_Label_Editor&selected_layer_id=' . $this->formvars['selected_layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '&class_id=' . $this->classes[$i]['class_id'] . '">
+						<img src="' . TEMPPATH_REL . $this->getlegendimage($this->layerdata, $this->classes[$i], NULL) . '">
+					</a>
 				</td>
 				<td style="border-bottom:1px solid #C3C7C3">
 					<input type="text" size="6" name="new_class_id['.$this->classes[$i]['class_id'].']" value="'.$this->classes[$i]['class_id'].'">					

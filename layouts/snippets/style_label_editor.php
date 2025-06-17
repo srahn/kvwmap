@@ -549,6 +549,15 @@ function navigate(params) {
 <input type="hidden" name="neuladen" value="">
 <script type="text/javascript">
 <!--
+
+<?
+	if ($this->formvars['class_id'] != '') {
+		echo '
+		document.GUI.class_1.value = ' . $this->formvars['class_id'] . ';
+		document.GUI.class_1.onchange();';
+	}
+?>
+
 browser_check();
 -->
 </script>
