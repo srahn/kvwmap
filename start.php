@@ -446,6 +446,7 @@ else {
 
 	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->user->stelle_id . ' zu.', 4, $GUI->echo);
 	$GUI->user->setRolle($GUI->user->stelle_id);
+	$GUI->debug->user_funktion = $GUI->user->funktion;
 
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	if (new_options_sent($GUI->formvars)) {
