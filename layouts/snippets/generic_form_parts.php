@@ -302,7 +302,7 @@
 				}
 				if($attribute_privileg == '0'){ // nur lesbares Attribut
 					if($size == 16){		// spaltenweise
-						$datapart .= htmlspecialchars($value);
+						$datapart .= '<pre>' . htmlspecialchars($value) . '</pre>';
 					}
 					else{								// zeilenweise
 						$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3;"><pre>' . $value . '</pre></div>';
