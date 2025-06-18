@@ -3006,6 +3006,7 @@ class db_mapObj {
 			if ($rs['minscale'] > 0) {
 				$rs['minscale'] = $rs['minscale'] - 0.3;
 			}
+			$rs['queryable'] = ($rs['queryable'] == 't');
 			$layer['list'][$i] = $rs;
 			# Pointer auf requires-Array
 			$layer['list'][$i]['required'] =& $requires_layer[$rs['layer_id']];
