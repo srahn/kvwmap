@@ -11264,10 +11264,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         case 'SubFormEmbeddedPK' : {
 					if ($this->success) {
 						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-							echo 'currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+							echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
 						}
 						else{
-							echo 'reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+							echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
 						}
 					}
 					if(!empty(GUI::$messages)){
