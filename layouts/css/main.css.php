@@ -1558,8 +1558,8 @@ a.menuered:hover {
 }
 
 #legendcontrol{
-	margin-top: 5px;
-	margin-bottom: 8px;
+	margin-top: 4px;
+	margin-bottom: 5px;
 	display: flex; 
 	flex-direction: row;
 	justify-content: space-around;
