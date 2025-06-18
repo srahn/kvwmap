@@ -20432,7 +20432,8 @@ DO $$
 			# Scheibt alle unterstützten Language Attribute, außer german dafür heißt das Attribut nur Name
 			foreach($supportedLanguages as $language) {
 				if ($language != 'german') {
-					$attribute_sets[] = "name_" . $language . " = '" . $formvars['name_'.str_replace('-', '_', $language)] . "'";
+					$language = str_replace('-', '_', $language);
+					$attribute_sets[] = "name_" . $language . " = '" . $formvars['name_' . $language] . "'";
 				}
 			}
 		}
@@ -20966,6 +20967,7 @@ DO $$
 				$alias_rows = ["alias" => "'" . $formvars['alias_' . $attributes['name'][$i]] . "'"];
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') {
+						$language = str_replace('-', '_', $language);
 						$alias_rows["alias_" . $language] = "'" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
 					}
 				}
