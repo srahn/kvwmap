@@ -3081,12 +3081,12 @@ class rolle {
 			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'layer_id'));
 			if($query_status !== ''){	
 				if($this->layerset[$i]['layer_id'] > 0){
-					$sql ='UPDATE kvwmap.u_rolle2used_layer set queryStatus="'.$query_status.'"';
+					$sql ='UPDATE kvwmap.u_rolle2used_layer set queryStatus='.$query_status;
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND layer_id='.$this->layerset[$i]['layer_id'];
 				}
 				else{		# Rollenlayer
-					$sql ='UPDATE kvwmap.rollenlayer set queryStatus="'.$query_status.'"';
+					$sql ='UPDATE kvwmap.rollenlayer set queryStatus='.$query_status;
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND id='.-$this->layerset[$i]['layer_id'];
 				}
