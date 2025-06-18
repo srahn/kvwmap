@@ -36,25 +36,51 @@
 					if ($this->user->rolle->singlequery < 2) { ?>
 		<a href="index.php?go=reset_querys">
 			<div>
-				<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
+				<div class="button tool_info" title="<? echo $strClearAllQuerys; ?>"></div>
 			</div>
 		</a>
 				<? } ?>
 		<a href="index.php?go=reset_layers">
 			<div>
-				<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
+				<div class="button layer" title="<? echo $strDeactivateAllLayer; ?>"></div>
 			</div>
 		</a>
 		<? } ?>
-		<input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin: auto; transform: <? if(!$this->simple_legend){ echo 'translateX(15px);'; } ?>">
+
+		<div title="<?php echo $strLoadNew; ?>" style="flex-grow: 3; text-align: -webkit-center;">
+			<a href="javascript:void(0)" name="neuladen_button" onclick="neuLaden();">
+				<div class="button"><i class="fa fa-refresh" style="font-size: 28px; margin: 5px; color: #5c88a8;" aria-hidden="true"></i></div>
+			</a>
+		</div>
+
 		<? if(!$this->simple_legend){ ?>
-		<i id="legendOptionsIcon" class="fa fa-bars pointer button" title="<? echo $strLegendOptions; ?>" onclick="openLegendOptions();"></i>
+
+		<? if ($this->user->rolle->legendtype == 0) { ?>
+			<div title="<? echo $strLegendTypeAlphabetical; ?>">
+				<a href="javascript:void(0)" onclick="changeLegendType(1);">
+					<div class="button in_groups"></div>
+				</a>
+			</div>
+		<? }else { ?>
+			<div title="<? echo $strLegendTypeGroups; ?>">
+				<a href="javascript:void(0)" onclick="changeLegendType(0);">
+					<div class="button alphabetical"></div>
+				</a>
+		</div>
+		<? } ?>
+
+		<div id="legendOptionsIcon" title="<? echo $strDrawingOrder; ?>">
+			<a href="javascript:void(0)" onclick="toggleDrawingOrderForm();">
+				<div class="button drawingorder"></div>
+			</a>
+		</div>
+		
 		<div id="legendOptions">
-			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLegendOptions(159);" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
+			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:toggleDrawingOrderForm();" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
 			<table cellspacing="0" cellpadding="0" style="padding: 0 5 8 0">
 				<tr>
 					<td id="legendOptionsHeader">
-						<span class="fett"><? echo $strLegendOptions; ?></span>
+						<span class="fett"><? echo $strDrawingOrder; ?></span>
 					</td>
 				</tr>
 				<tr>
@@ -62,18 +88,6 @@
 						<div style="overflow-y: auto; max-height: <? echo ($legend_height - 80); ?>px">
 							<ul>
 								<li>
-									<span><? echo $strLegendType; ?>:</span><br>
-									<label><input type="radio" name="legendtype" value="0" <? if($this->user->rolle->legendtype == 0)echo 'checked'; ?>><? echo $strLegendTypeGroups; ?></label><br>
-									<label><input type="radio" name="legendtype" value="1" <? if($this->user->rolle->legendtype == 1)echo 'checked'; ?>><? echo $strLegendTypeAlphabetical; ?></label>
-								</li>
-								<li>
-									<a href="index.php?go=delete_rollenlayer&type=import"><? echo $strRemoveAllImportLayers; ?></a>
-								</li>
-								<li>
-									<a href="index.php?go=delete_rollenlayer&type=search"><? echo $strRemoveAllSearchLayers; ?></a>
-								</li>
-								<li>
-									<a href="javascript:toggleDrawingOrderForm();"><? echo $strDrawingOrder; ?></a>
 									<div id="drawingOrderForm"></div>
 								</li>
 							</ul>
@@ -85,10 +99,10 @@
 						<table cellspacing="0" cellpadding="0">
 							<tr>
 								<td>
-									<input type="button" onmouseup="resetLegendOptions()" value="<? echo $this->strReset; ?>">
+									<input type="button" onmouseup="resetDrawingorder()" value="<? echo $this->strReset; ?>">
 								</td>
 								<td>
-									<input type="button" onmouseup="saveLegendOptions()" value="<? echo $this->strSave; ?>">
+									<input type="button" onmouseup="saveDrawingorder()" value="<? echo $this->strSave; ?>">
 								</td>
 							</tr>
 						</table>
@@ -122,3 +136,4 @@ if ($show_legend_graphic) { ?>
 
 <input type="hidden" name="delete_rollenlayer" value="">
 <input type="hidden" name="delete_rollenlayer_type" value="">
+<input type="hidden" name="legendtype" value="<? echo $this->user->rolle->legendtype; ?>">

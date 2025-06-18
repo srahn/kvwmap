@@ -1335,6 +1335,26 @@ a.menuered:hover {
 	background-image: url(<? echo GRAPHICSPATH; ?>layer.png);
 }
 
+.alphabetical{
+	background-image: url(<? echo GRAPHICSPATH; ?>alphabetical.png);
+}
+
+.alphabetical:hover{
+	background-image: url(<? echo GRAPHICSPATH; ?>in_groups.png);
+}
+
+.in_groups{
+	background-image: url(<? echo GRAPHICSPATH; ?>in_groups.png);
+}
+
+.in_groups:hover{
+	background-image: url(<? echo GRAPHICSPATH; ?>alphabetical.png);
+}
+
+.drawingorder{
+	background-image: url(<? echo GRAPHICSPATH; ?>drawingorder.png);
+}
+
 .button_background{
 	background: linear-gradient(#fdfdfd, #DAE4EC);
 	box-shadow: 0px 1px 0px #bbb;
@@ -1542,8 +1562,8 @@ a.menuered:hover {
 	margin-bottom: 8px;
 	display: flex; 
 	flex-direction: row;
-	justify-content: flex-start;
-	padding-left: 7px;
+	justify-content: space-around;
+	padding: 0 5px 0 3px;
 }
 
 #drawingOrderForm{
@@ -2596,15 +2616,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	width: 14px;
 	padding: 3px;
 	margin-left: -4;
-}
-
-#legendOptionsIcon{
-
-	font-size: <? echo $font_size_factor * 18; ?>px;
-	margin: 0 5px 0 42px;
-	height: 16px;
-	width: 16px;
-	padding: 5px;
 }
 
 #legendOptions{

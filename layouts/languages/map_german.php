@@ -40,7 +40,6 @@
 	$strRotationAngle="Richtungswinkel";
 	$strNoLayer="Es wurde kein Thema zur Sachdatenabfrage ausgewählt!";
 	$strLayerSearch="Themensuche";
-	$strLegendOptions="Legenden-Optionen";
 	$strLegendType="Themendarstellung";
 	$strLegendTypeGroups="Themen in Gruppen";
 	$strLegendTypeAlphabetical="Themen alphabetisch";

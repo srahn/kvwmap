@@ -43,7 +43,6 @@
 	$strRotationAngle="Angle";
 	$strNoLayer="Please select a layer for the data query!";
 	$strLayerSearch="Search Layer";
-	$strLegendOptions="Legend-Options";
 	$strLegendType="Legend Type";
 	$strLegendTypeGroups="layers in groups";
 	$strLegendTypeAlphabetical="layers alphabetical";

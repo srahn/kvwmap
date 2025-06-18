@@ -959,26 +959,30 @@ echo '			</table>
 		$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 	}
 
-	function saveLegendOptions(){
+	function changeLegendType(){
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$layerset = $mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL);     # class_load_level: 0 = keine Klassen laden
-		$this->user->rolle->saveLegendOptions($layerset, $this->formvars);
+		$this->user->rolle->changeLegendType($this->formvars);
 		$this->resizeMap2Window();
 		$this->user->rolle->readSettings();
 		$this->neuLaden();
-		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		// $this->drawMap();
-		// $this->saveMap('');
 		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
-	function resetLegendOptions(){
+	function saveDrawingorder(){
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerset = $mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL);     # class_load_level: 0 = keine Klassen laden
+		$this->user->rolle->saveDrawingorder($layerset, $this->formvars);
+		$this->resizeMap2Window();
+		$this->user->rolle->readSettings();
+		$this->neuLaden();
+		$this->legende = $this->create_dynamic_legend();
+		$this->output();
+	}
+
+	function resetDrawingorder(){
 		$this->user->rolle->removeDrawingOrders();
 		$this->neuLaden();
-		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		// $this->drawMap();
-		// $this->saveMap('');
 		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}

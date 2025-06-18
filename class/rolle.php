@@ -1484,20 +1484,8 @@ class rolle {
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 	}
-	
-	function saveLegendOptions($layerset, $formvars){
-		$sql ="
-			UPDATE
-				kvwmap.rolle
-			SET 
-				legendtype = " . $formvars['legendtype'] . "
-			WHERE
-				user_id = " . $this->user_id . " AND
-				stelle_id = " . $this->stelle_id . "
-		";;
-		#echo $sql;
-		$this->debug->write("<p>file:rolle.php class:rolle function:saveLegendOptions - :",4);
-		$this->database->execSQL($sql,4, $this->loglevel);
+
+	function saveDrawingorder($layerset, $formvars){
 		if($formvars['active_layers'] != ''){
 			$active_layers = $formvars['active_layers'];		// $active_layers ist ein Array mit den Layer-IDs der aktiven Layern in der neuen Reihenfolge
 			$active_layer_count = count($active_layers);
@@ -1533,11 +1521,26 @@ class rolle {
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . "
 					";
-					$this->debug->write("<p>file:rolle.php class:rolle function:saveLegendOptions - :",4);
+					$this->debug->write("<p>file:rolle.php class:rolle function:saveDrawingorder - :",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
 			}
 		}
+	}
+	
+	function changeLegendType($formvars){
+		$sql ="
+			UPDATE
+				kvwmap.rolle
+			SET 
+				legendtype = " . $formvars['legendtype'] . "
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";;
+		#echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:changeLegendType - :",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
 	function removeDrawingOrders() {

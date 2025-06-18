@@ -1334,30 +1334,30 @@ function resetLayerOptions(layer_id){
 	document.GUI.submit();
 }
 
-function openLegendOptions(){
-	document.getElementById('legendOptions').style.display = 'inline-block';
-}
-
-function closeLegendOptions(){
-	document.getElementById('legendOptions').style.display = 'none';
-}
-
-function saveLegendOptions(){
-	document.GUI.go.value = 'saveLegendOptions';
+function changeLegendType(type){
+	document.GUI.go.value = 'changeLegendType';
+	document.GUI.legendtype.value = type;
 	document.GUI.submit();
 }
 
-function resetLegendOptions(){
-	document.GUI.go.value = 'resetLegendOptions';
+function saveDrawingorder(){
+	document.GUI.go.value = 'saveDrawingorder';
+	document.GUI.submit();
+}
+
+function resetDrawingorder(){
+	document.GUI.go.value = 'resetDrawingorder';
 	document.GUI.submit();
 }
 
 function toggleDrawingOrderForm(){
+	document.getElementById('legendOptions').style.display = 'inline-block';
 	drawingOrderForm = document.getElementById('drawingOrderForm');
 	if(drawingOrderForm.innerHTML == ''){
 		ahah('index.php', 'go=loadDrawingOrderForm', new Array(drawingOrderForm), new Array('sethtml'));
 	}
 	else{
+		document.getElementById('legendOptions').style.display = 'none';
 		drawingOrderForm.innerHTML = '';
 	}
 }
@@ -1421,19 +1421,17 @@ function handleDragEnd(e){
 // --- html5 Drag and Drop der Layer im drawingOrderForm --- //
  
 function jumpToLayer(searchtext){
-	if (searchtext.length > 1) {
-		found = false;
-		legend_top = document.getElementById('scrolldiv').getBoundingClientRect().top;
-		for (var layername in layernames) {
-			for (var key in layernames[layername]) {
-				let layer_id = layernames[layername][key];
-				layer = document.getElementById('legend_' + layer_id);						
-				if (layername.toLowerCase().search(searchtext.toLowerCase()) != -1) {
-					layer.classList.remove('hidden');
-				}
-				else {
-					layer.classList.add('hidden');
-				}
+	found = false;
+	legend_top = document.getElementById('scrolldiv').getBoundingClientRect().top;
+	for (var layername in layernames) {
+		for (var key in layernames[layername]) {
+			let layer_id = layernames[layername][key];
+			layer = document.getElementById('legend_' + layer_id);						
+			if (searchtext.length == 0 || layername.toLowerCase().search(searchtext.toLowerCase()) != -1) {
+				layer.classList.remove('hidden');
+			}
+			else {
+				layer.classList.add('hidden');
 			}
 		}
 	}

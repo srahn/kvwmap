@@ -424,15 +424,19 @@ function go_switch($go, $exit = false) {
 				$GUI->resetLayerOptions();
 			} break;
 
-			case 'saveLegendOptions' : {
+			case 'changeLegendType' : {
 				$GUI->sanitize([
 					'legendtype' => 'int'
 				]);
-				$GUI->saveLegendOptions();
+				$GUI->changeLegendType();
 			} break;
 
-			case 'resetLegendOptions' : {
-				$GUI->resetLegendOptions();
+			case 'saveDrawingorder' : {
+				$GUI->saveDrawingorder();
+			} break;
+
+			case 'resetDrawingorder' : {
+				$GUI->resetDrawingorder();
 			} break;
 
 			case 'switch_gle_view' : {
