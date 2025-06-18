@@ -1509,12 +1509,11 @@ class GUI {
 	function create_layer_legend($layer){
 		if (value_of($layer, 'requires') != '' )return;
 		$visible = $this->check_layer_visibility($layer);
+		$legend = '<tr id="legend_' . $layer['layer_id'] . '"><td valign="top">';
+		$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"><div class="layerOptions" id="options_content_'.$layer['layer_id'].'"></div></div>';
+
 		# sichtbare Layer
 		if ($visible) {
-			$legend = '<tr id="legend_' . $layer['layer_id'] . '"><td valign="top">';
-
-			$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"><div class="layerOptions" id="options_content_'.$layer['layer_id'].'"></div></div>';
-
 			if (!empty($layer['shared_from'])) {
 				$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
 				$legend .= ' <a
@@ -1619,9 +1618,6 @@ class GUI {
 
 		# unsichtbare Layer
 		if (!$visible) {
-			$legend .=  '
-						<tr id="legend_' . $layer['layer_id'] . '">
-							<td valign="top">';
 			if($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2){
 				$style = ((
 						$this->user->rolle->query or
