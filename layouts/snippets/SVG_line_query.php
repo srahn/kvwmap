@@ -40,7 +40,8 @@
 	<input name="lastcoordy" type="hidden" value="">
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
-  <input type="hidden" name="vertices" id="vertices" value="">	
+  <input type="hidden" name="vertices" id="vertices" value="">
+	<input type="hidden" name="ortho_point_vertices" id="ortho_point_vertices" value="<? echo $this->formvars['ortho_point_vertices']; ?>">
 
 <?php
 #
@@ -62,8 +63,9 @@ $svg .= $basicfunctions;				# Basisfunktionen
 $svg .= $SVGvars_navscript;			# Funktionen zur Navigation
 $svg .= $linefunctions;					# Funktionen zum Zeichnen einer Linie
 $svg .= $vertex_catch_functions;# Punktfangfunktionen
-$svg .= $flurstqueryfunctions;	# Funktionen zum Hinzuf�gen und Entfernen von Polygonen
+$svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
+$svg .= $ortho_point_functions;	# Funktionen zum Erstellen von orthogonalen Fangpunkten
 $svg .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
 $svg .= $measurefunctions;
 if($this->user->rolle->gps){
@@ -95,6 +97,7 @@ $buttons_fs .= flurstquerybuttons();
 $buttons_fs .= linebuttons2($strSplitLine, $strReverse);
 $buttons_fs .= transform_buttons($strMoveGeometry, $strRotateGeometry);
 $buttons_fs .= vertex_edit_buttons($strCornerPoint);
+if(in_array('ortho_point', $this->user->rolle->geom_buttons))$buttons_fs .= ortho_point_buttons();
 $buttons_fs .= coord_input_buttons();
 if($this->user->rolle->gps){
 	$buttons_fs .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
