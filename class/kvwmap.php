@@ -175,9 +175,9 @@ class GUI {
 	 * It will not wait for the finish of that jobs.
 	 */
 	function start_background_task() {
-		$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' go=run_background_jobs >> ' . LOGPATH . 'background_jobs.htm 2>&1 &';
+		$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' go=run_background_jobs >> ' . LOGPATH . 'background_jobs_log.htm 2>&1 &';
 		shell_exec($command);
-		// echo '<br>Background Task mit Komando: ' . $command . ' gestartet. Log in ' . LOGPATH . 'background_jobs.log';
+		// echo '<br>Background Task mit Komando: ' . $command . ' gestartet. Log in ' . LOGPATH . 'background_jobs_log.log';
 	}
 
 	/**
@@ -190,15 +190,15 @@ class GUI {
 		// Find jobs already running
 		$jobs = BackgroundJob::find($this, 'job_started_at IS NOT NULL AND job_finished_at IS NULL');
 		if (count($jobs) > 0) {
-			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Backgroundjobs already running.', FILE_APPEND);
+			file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>Backgroundjobs already running.', FILE_APPEND);
 			return 0;
 		}
 		else {
-			file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine laufenden Jobs gefunden! Suche nach neuen.', FILE_APPEND);
+			file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>Keine laufenden Jobs gefunden! Suche nach neuen.', FILE_APPEND);
 		}
 		// Find new jobs to run
 		$jobs = BackgroundJob::find($this, 'job_started_at IS NULL', 'created_at');
-		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>' . count($jobs) . ' Jobs gefunden.', FILE_APPEND);
+		file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>' . count($jobs) . ' Jobs gefunden.', FILE_APPEND);
 		if (count($jobs) > 0) {
 			foreach($jobs AS $job) {
 				$query = $job->get('arguments');
@@ -209,16 +209,16 @@ class GUI {
 					$cliArgs[] = sprintf('%s=%s', escapeshellarg($key), escapeshellarg($value));
 				}
 				$cliString = implode(' ', $cliArgs);
-				$command = 'nohup php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' background_job=' . $job->get_id() . ' only_main=1 ' . implode(' ', $cliArgs) . ' >> ' . LOGPATH . 'background_jobs.htm 2>&1';
-				file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Run command: ' . $command, FILE_APPEND);
+				$command = 'php ' . WWWROOT.APPLVERSION . 'index.php login_name=' . $_SESSION['login_name'] . ' csrf_token=' . $_SESSION['csrf_token'] . ' stelle_id=' . $this->Stelle->id . ' background_job_id=' . $job->get_id() . ' only_main=1 ' . implode(' ', $cliArgs) . ' >> ' . LOGPATH . 'background_jobs_log.htm 2>&1';
+				file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>Run command: ' . $command, FILE_APPEND);
 				shell_exec($command);
-				$job->update_attr(array("job_finished_at = now()", "job_status = 'ok'"));
+				$job->update_attr(array("job_finished_at = now()"));
 			}
 			// Search if there are more new jobs to run
 			$this->run_background_jobs();
 		}
 		// noting to do
-		file_put_contents(LOGPATH . 'background_jobs.htm', '<br>Keine Jobs gefunden.', FILE_APPEND);
+		file_put_contents(LOGPATH . 'background_jobs_log.htm', '<br>Keine Jobs gefunden.', FILE_APPEND);
 		return 0;
 	}
 
@@ -3876,6 +3876,11 @@ echo '			</table>
 		}
 	}
 
+	/**
+	 * This function checks if the given plugin is loaded
+	 * @param string $plugin The name of the plugin
+	 * @return boolean true if the plugin is loaded, false otherwise
+	 */
 	function plugin_loaded($plugin) {
 		global $kvwmap_plugins;
 		return in_array($plugin, $kvwmap_plugins);
@@ -7371,7 +7376,7 @@ echo '			</table>
 				$pathinfo = pathinfo($dateipfad);
 				if ($doc_type == '') {
 					$type = strtolower($pathinfo['extension']);
-					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf', 'heic', 'heif'))) {
 						$doc_type = 'local_img';
 					}
 					else {
@@ -10872,6 +10877,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 			}
 		}
+		$formfieldstring .= '&form_field_names=' . $this->formvars['form_field_names'];
 
 		# Dokumente speichern
 		if (count_or_0($document_attributes) > 0) {
@@ -11305,13 +11311,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 				}
 				$form_fields = explode('|', $this->formvars['form_field_names']);
-				for ($i = 0; $i < count($form_fields); $i++) {
-					if ($form_fields[$i] != '') {
-						$element = explode(';', $form_fields[$i]);
-						$this->sanitize([$form_fields[$i] => $element[6]], true);
-						$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
-					}
-				}
+				// for ($i = 0; $i < count($form_fields); $i++) {
+				// 	if ($form_fields[$i] != '') {
+				// 		$element = explode(';', $form_fields[$i]);
+				// 		$this->sanitize([$form_fields[$i] => $element[6]], true);
+				// 		$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
+				// 	}
+				// }
 
 				######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
 				if ($this->formvars['chosen_layer_id'] OR $this->formvars['weiter_erfassen']) {
@@ -14387,7 +14393,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $stellen = array_filter(explode(', ', $this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->database);
-					rolle::create($this->database, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL));
+					rolle::create($this->database, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
 					// $this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -14420,7 +14426,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$stellen = array_filter(explode(', ',$this->formvars['selstellen']));
 			for ($i = 0; $i < count($stellen); $i++) {
 				$stelle = new stelle($stellen[$i], $this->database);
-				rolle::create($this->database, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id);
+				rolle::create($this->database, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
 				// $this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				// $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				// $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -21147,9 +21153,9 @@ class db_mapObj{
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
 						$attributes[$column][$i] = 	replace_params_rolle(
-																					$attributes[$column][$i],
-																					((count($attribute_values) > 0 AND $replace_only == 'default') ? $attribute_values : NULL)
-																				);
+							$attributes[$column][$i],
+							((count($attribute_values) > 0 AND in_array('default', $replace_only)) ? $attribute_values : NULL)
+						);
 					}
 				}
 			}
