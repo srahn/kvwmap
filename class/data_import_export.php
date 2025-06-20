@@ -1419,7 +1419,7 @@ class data_import_export {
 				. $where
 				. $query_parts['orderby'] . "
 			";
-			echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
+			// echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
 			$data_sql = $sql;
 
 			$temp_table = 'shp_export_'.rand(1, 1000000);

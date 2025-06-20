@@ -4,6 +4,7 @@
 #############################
 include_once(CLASSPATH . 'PgObject.php');
 include_once(PLUGINS . 'metadata/model/SubRessource.php');
+include_once(PLUGINS . 'metadata/model/Lineage.php');
 
 class Ressource extends PgObject {
 
@@ -109,7 +110,7 @@ class Ressource extends PgObject {
 			// only ressouces with state Uptodate will be find as outdated
 			$status_condition = "= 0";
 		}
-		$ressource->show = true;
+		$ressource->show = false;
 		$ressources = $ressource->find_where(
 			"
 				(von_eneka OR use_for_datapackage) AND
@@ -1305,7 +1306,7 @@ class Ressource extends PgObject {
 		if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Einlesen des Mastr!'
+				'msg' => 'Fehler beim Einlesen des Mastr!' . $output
 			);
 		}
 		else {

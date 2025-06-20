@@ -210,19 +210,44 @@
 				$data_import_export->zip_export_path($export_path);
 			}
 
-			// Metadatendatei erzeugen und in ZIP packen
-			// von Ressource des Datenpaketes
 			$export_file = $package->get_export_file();
-			// Put the metadata document into the $export_file.zip
+
+			// Metadatendatei der Ressouce erzeugen
+			$GUI->formvars['aktivesLayout'] = METADATA_PRINT_LAYOUT_ID;
+			$GUI->formvars['chosen_layer_id'] = METADATA_RESSOURCES_LAYER_ID;
+			$GUI->formvars['oid'] = $package->get('ressource_id');
+			$GUI->formvars['archivieren'] = 1;
+			$result = $GUI->generischer_sachdaten_druck_createPDF(
+				NULL, // pdfobject
+				NULL, // offsetx
+				NULL, // offsety
+				true, // output
+				false // append
+			);
+			$GUI->outputfile = basename($result['pdf_file']);
+			$GUI->pdf_archivieren(METADATA_RESSOURCES_LAYER_ID, $package->get('ressource_id'), $result['pdf_file']);
+
+			// Metadatendatei der Ressource in ZIP packen
 			$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf';
 			exec($command);
 
 			// An Ressourcen hängende Dokumente in ZIP packen
 			$ressource = Ressource::find_by_id($GUI, 'id', $package->get('ressource_id'));
 			$ressource->append_docs($export_file);
-			// Metadaten und Dokumente von an Ressourcen hängenden Quellen
-			
 
+			// Metadaten von Quellressourcen in ZIP packen
+			$sources = $ressource->get_sources();
+			foreach($sources AS $source) {
+				$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $source->get_id() . '.pdf';
+				exec($command);
+			}
+
+			// Metadaten von Zielressourcen in ZIP packen
+			$targets = $ressource->get_targets();
+			foreach($targets AS $target) {
+				$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $target->get_id() . '.pdf';
+				exec($command);
+			}
 
 			// Wenn ZIP-Datei existiert und etwas drin ist, chgrp www-data, chmod g+w und Verzeichnis löschen. (Aufräumen)
 			$package->delete_export_path();
@@ -240,6 +265,10 @@
 			);
 		}
 		catch (Exception $e) {
+			$package->log($e->message);
+			// Fehlerstatus setzen
+			$package->update_attr(array('pack_status_id = -1'));
+
 			return array(
 				'success' => false,
 				'msg' => 'Fehler: ' . print_r($e, true)
@@ -384,12 +413,15 @@
 				);
 			}
 
-			if (!$GUI->formvars['force'] != '' AND $package->get('pack_status_id') == 3) {
-				return array(
-					'success' => true,
-					'msg' => 'Der Auftrag wird abgebrochen, weil ein anderer Prozess gerade das Paket befüllt.'
-				);
-			}
+			// Das löschen von Paketen die in Arbeit sind wird auch unterstützt, weil wir davon ausgehen,
+			// das der Status in Arbeit nach einem Fehler stehen geblieben ist und solche Pakete auch zurück
+			// gesetzt werden können müssen.
+			// if (!$GUI->formvars['force'] != '' AND $package->get('pack_status_id') == 3) {
+			// 	return array(
+			// 		'success' => true,
+			// 		'msg' => 'Der Auftrag wird abgebrochen, weil ein anderer Prozess gerade das Paket befüllt.'
+			// 	);
+			// }
 
 			if (!$package->layer) {
 				return array(
@@ -675,14 +707,6 @@
 					$package->layer->get('geom_column'),
 					$package->layer->get('epsg_code')
 				);
-				// $where = "WHERE ST_Transform(ST_MakeEnvelope(
-				// 			" . $GUI->Stelle->MaxGeorefExt->minx . ",
-				// 			" . $GUI->Stelle->MaxGeorefExt->miny . ",
-				// 			" . $GUI->Stelle->MaxGeorefExt->maxx . ",
-				// 			" . $GUI->Stelle->MaxGeorefExt->maxy . ",
-				// 			" . $GUI->Stelle->epsg_code . "
-				// 		), " . $package->layer->get('epsg_code') . ") && query." . $package->layer->get('geom_column') . "
-				// ";
 			}
 			$sql = "
 				SET search_path = " . $package->layer->get('schema') . ", public;
