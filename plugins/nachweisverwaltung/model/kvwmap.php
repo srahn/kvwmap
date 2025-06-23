@@ -880,122 +880,184 @@
 	};
   
 	$GUI->erzeugenUebersicht_HTML = function($path, $light) use ($GUI){
-		$html = "
-<html>
-	<head>
-		<meta http-equiv=Content-Type content=\"text/html; charset=UTF-8\">
-		<style>
-			body{
-				font-family: \"Trebuchet MS\", Helvetica, sans-serif;
-			}
-			table{
-				border-collapse: collapse;
-			}
-			td, th{
-				border: 1px solid #aaaaaa;
-				border-left: 1px solid #dddddd;
-				border-right: 1px solid #dddddd;
-				padding: 2px;
-				font-size: 15px;
-				}
-			th{
-				background: rgba(0, 0, 0, 0) linear-gradient(rgb(218, 228, 236) 0%, lightsteelblue 100%);
-			}
-			input[type=\"text\"]{
-				font-size: 15px;
-				line-height: 15px;
-			}			
-			select{
-				height: 20px;
-			}
-			a{
-				border: medium none;
-				color: firebrick;
-				font-size: 15px;
-				outline: medium none;
-				text-decoration: none;
-			}
-			a:hover{
-				color: black;
-			}
-			#order_div, #nachweise_table, #filter_div, #head_div {
-				margin: 10px;
-			}
-			#nachweise_table{
-				border: 1px solid #aaaaaa;
-				display: inline-block;
-			}				
-			#head_div {
-				font-weight: bold;
-				font-size: 14px;
-			}
-			#head_div #lk {
-				font-size: 20px;
-				margin-bottom: 5px;
-			}
-			#filter_div div{
-				border: 1px solid grey;
-				width: 800px;
-				padding: 3px;
-			}
-			.removeFilter{
-				float: right;
-				cursor: pointer;
-			}
-			#order_output{
-				width: 400px;
-				border: none;
-			}
-			#preview_image{
-				position: fixed;
-				top: 30px;
-				left: 30px;
-			}
-			#preview_image img{
-				max-width: 600px;
-				box-shadow: 10px 9px 11px #777;
-			}
-			.options{
-				margin: 4 2 5 10;
-				padding: 1px;
-				color: grey;
-				border: 1px solid lightgrey;
-				border-radius: 3px;
-				font-size: 10px;
-				line-height: 10px;
-				float: right;
-			}
-			.options:hover{
-				border: 1px solid grey;
-				color: black;
-				cursor: pointer;
-			}
-			#filterform{
-				padding: 0px;
-				background-color: white;
-				border: 1px solid grey;
-				position: absolute;
-				box-shadow: 10px 9px 11px #777;
-			}
-			#filterform .headline{
-				padding: 2 5;
-				color: black;
-				background: rgba(0, 0, 0, 0) linear-gradient(rgb(218, 228, 236) 0%, lightsteelblue 100%);
-				line-height: 20px;
-			}
-			#filterform .content{
-				padding: 5px;
-			}
-			#filterform .close{
-				float: right;
-				cursor: pointer;
-			}
-			.filter_button{
-				margin-top: 10px;
-			}
-		</style>
-		<SCRIPT TYPE=\"text/javascript\">
-			var nachweise = new Array();\n";
+		$html = '
+		<!DOCTYPE html>
+		<html lang="de">
+			<head>
+				<meta http-equiv=Content-Type content="text/html; charset=UTF-8">
+				<title>Nachweisrecherche ' . $GUI->antrag->antragsliste[0]['antr_nr'] . '</title>
+				<style>
+					body{
+						font-family: Helvetica, sans-serif;
+						font-size: 13px;
+						margin: 1em;
+					}
+					table{
+						border-collapse: collapse;
+						font-size: 1em;
+					}
+					td, th{
+						padding: 0.5em 0.35em;
+						text-align: left;
+						font-weight: normal;
+					}
+					tr>td:first-child{
+						padding-left: 0.4em;
+					}
+					th{
+						white-space: nowrap;
+						height: 6.2em;
+						vertical-align: bottom;
+					}
+					th:not(:nth-last-child(-n+2)) {
+						padding-left: 0.8em;
+						transform: rotate(-30deg);
+						transform-origin: bottom left;
+					}
+					th:first-child {
+						padding-left: 1.2em;
+					}
+					th:last-child {
+						cursor: default;
+					}
+					tr:not(:first-child):hover{
+						background: #e9f0f7;
+					}
+					td>div{
+						display: flex;
+						align-items: center;
+					}
+					table>tr>td:nth-child(6), table>tr>td:nth-child(9){
+						min-width: 10em;
+						word-break: break-word;
+						hyphens: auto;
+						-webkit-hyphens: auto;
+						-moz-hyphens: auto;
+						-ms-hyphens: auto;
+					}
+					table>tr>th:last-child, table>tr>td:last-child{
+						padding-left: 0.8em;
+					}
+					input[type="text"]{
+						line-height: 1em;
+					}			
+					select{
+						height: 1.5em;
+					}
+					a{
+						border: medium none;
+						color: firebrick;
+						outline: medium none;
+						text-decoration: none;
+					}
+					#order_div, #nachweise_table, #filter_div, #head_div {
+						margin: 0.8em 0 0 0;
+					}
+					#order_div, #order_div input, #filter_div {
+						cursor: default;
+					}
+					#nachweise_table {
+						margin: 0;
+					}
+					#nachweise_table{
+						display: inline-block;
+					}				
+					#head_div {
+						font-weight: bold;
+						font-size: 1.1em;
+					}
+					#head_div #lk {
+						font-size: 1.5em;
+						margin-bottom: 0.4em;
+					}
+					#filter_div {
+						display: flex;
+						flex-flow: column nowrap;
+						align-items: flex-start;
+						justify-content: space-between;
+						gap: 0.8em;
+					}
+					#filter_div>div:not(.filter_div_titel){
+						display: flex;
+						align-items: center;
+						justify-content: space-between;
+						flex-flow: row nowrap;
+						gap: 3.5em;
+						border: 1px solid grey;
+						border-radius: 3px;
+						width: fit-content;
+						padding: 0.25em;
+						background: #f3f5f2;
+					}
+					.removeFilter{
+						cursor: pointer;
+					}
+					#order_output{
+						width: 80%;
+						border: none;
+					}
+					#preview_image{
+						position: fixed;
+						top: 2.3em;
+						left: 2.3em;
+					}
+					#preview_image img{
+						max-width: 46em;
+						box-shadow: 0.77em 0.69em 0.85em #777;
+					}
+					.options{
+						order: -1;
+						margin-right: 0.15em;
+						padding: 1px;
+						color: grey;
+						background-color: #fff;
+						border: 1px solid #e7e7e7;
+						border-radius: 3px;
+						font-size: 0.8em;
+						line-height: 0.8em;
+						cursor: pointer;
+					}
+					.options:hover{
+						border: 1px solid #aaa;
+						color: black;
+					}
+					#filterform{
+						padding: 0px;
+						background-color: white;
+						border: 1px solid grey;
+						position: absolute;
+						box-shadow: 0.77em 0.69em 0.85em #777;
+						cursor: default;
+					}
+					#filterform .headline{
+						display: flex;
+						justify-content: space-between;
+						align-items: center;
+						padding: 0.15em 0.4em;
+						color: black;
+						background: rgba(0, 0, 0, 0) linear-gradient(rgb(218 228 236 / 50%) 0%, rgb(176 196 222 / 50%) 100%);
+						line-height: 1.5em;
+					}
+					#filterform .content{
+						display: flex;
+						justify-content: space-between;
+						align-items: center;
+						gap: 0.4em;
+						padding: 0.8em 0.4em;
+					}
+					#filterform .button{
+						display: flex;
+						justify-content: center;
+						align-items: center;
+						padding: 0 0  0.8em 0;
+					}
+					#filterform .content select, #filterform .button input, #filterform .close {
+						cursor: pointer;
+					}
+				</style>
+		<SCRIPT TYPE="text/javascript">
+			var nachweise = new Array();
+			';
 			
 		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
 			$GUI->nachweis->Dokumente[$i]['bearbeitungshinweis'] = 'mailto:' . $GUI->nachweis->Dokumente[$i]['email'] . '?subject=Bearbeitungshinweis zum Nachweis ' . $GUI->nachweis->Dokumente[$i]['client_nachweis_id'];
@@ -1026,17 +1088,29 @@
 					_tr_ = document.createElement('tr'),
 					_th_ = document.createElement('th'),
 					_td_ = document.createElement('td');
+					_div_ = document.createElement('div');
 								
 			function buildHtmlTable(arr) {
 				var table = _table_.cloneNode(false);
 				var tr = _tr_.cloneNode(false);
 				for(var key in columns){		// Ueberschriften
 					var th = _th_.cloneNode(false);
-					a = document.createElement('a');
-					a.href = 'javascript:changeOrder(\''+key+'\');';
-					a.title = 'sortieren nach '+columns[key];
-					a.innerHTML = columns[key];
-					th.appendChild(a);
+					if(key != 'bearbeitungshinweis'){
+						a = document.createElement('a');
+						a.href = 'javascript:changeOrder(\''+key+'\');';
+						if (order_columns && order_columns.includes(key)) {
+							a.title = 'Sortierung '+columns[key]+' entfernen';
+						} else {
+							a.title = 'sortieren nach '+columns[key];
+						}
+						a.innerHTML = columns[key]; 
+						th.appendChild(a);            
+					}
+					else {
+						s = document.createElement('span');
+						s.innerHTML = columns[key];
+						th.appendChild(s);
+					}
 					tr.appendChild(th);
 					table.appendChild(tr);
 				}
@@ -1047,6 +1121,7 @@
 							var value = arr[i][key];
 							var td = _td_.cloneNode(false);
 							options = null;
+							var div = _div_.cloneNode(false);
 							if(key == 'dokument_path' && value != null){
 								path_parts = value.split('/');
 								filename = path_parts[path_parts.length-1];
@@ -1075,9 +1150,10 @@
 								options.setAttribute('onclick', \"showFilterForm(this.parentNode, '\"+key+\"', '\"+value+\"')\");
 								options.value= '\u25BD';	// 2630
 							}
-							td.appendChild(cellcontent);
-							if (options != null)td.appendChild(options);
-							tr.appendChild(td);
+							div.appendChild(cellcontent);
+							if (options != null)div.appendChild(options);
+							td.appendChild(div);
+              tr.appendChild(td);
 						}
 						table.appendChild(tr);
 					}
@@ -1095,12 +1171,14 @@
 				document.getElementById('preview_image').innerHTML = '';
 			}
 			
-			function changeOrder(column){
+			var order_columns = new Array();
+      function changeOrder(column){
 				var found = false;
 				var orderstring = document.getElementById('order').value;
 				var order_output = new Array();
-				if(orderstring == '')var order_columns = new Array();
-				else var order_columns = orderstring.split(';');
+				if(orderstring != ''){
+				  order_columns = orderstring.split(';');
+        }
 				for(var i = 0; i < order_columns.length; i++){
 					if(order_columns[i] == column){	// wenn schon im order-String vorhanden -> entfernen
 						order_columns.splice(i, 1);
@@ -1117,13 +1195,56 @@
 				output();
 			}
 			
-			function sortByColumns(order_columns){
-				return function(a, b){
-					for(var col in order_columns){
-						var ax = a[order_columns[col]];
-						var bx = b[order_columns[col]];
-						if(ax != bx)return (ax < bx) ? -1 : 1;
+			function parseRissnummer(str) {
+				// RegExp: ^(\d+)([a-zA-Z]+)?(\d+)?$
+				// Gruppe 1: führende Zahl
+				// Gruppe 2: Buchstaben (optional)
+				// Gruppe 3: Zahl nach Buchstaben (optional)
+				const match = /^(\d+)([a-zA-Z]+)?(\d+)?$/.exec(str);
+				if (!match) return [0, '', 0];
+				return [
+						parseInt(match[1], 10),
+						match[2] ? match[2] : '',
+						match[3] ? parseInt(match[3], 10) : 0
+				];
+			}
+
+			function compareRissnummer(a, b) {
+				const pa = parseRissnummer(a);
+				const pb = parseRissnummer(b);
+
+				if (pa[0] !== pb[0]) return pa[0] - pb[0];
+				if (pa[1] !== pb[1]) return pa[1].localeCompare(pb[1]);
+				return pa[2] - pb[2];
+			}
+
+			function parseDeutschesDatum(dateStr) {
+				if (!dateStr) return new Date(0);
+				const [day, month, year] = dateStr.split('.');
+				return new Date(`${year}-${month}-${day}`);
+			}			
+
+			function sortByColumns(order_columns) {
+				return function(a, b) {
+					for (var i = 0; i < order_columns.length; i++) {
+						var col = order_columns[i];
+						var ax = a[col];
+						var bx = b[col];
+
+						if (col === 'datum') {
+								var dateA = parseDeutschesDatum(ax);
+								var dateB = parseDeutschesDatum(bx);
+								if (dateA < dateB) return -1;
+								if (dateA > dateB) return 1;
+						} else if (col === 'rissnummer') {
+								var cmp = compareRissnummer(ax, bx);
+								if (cmp !== 0) return cmp;
+						} else {
+								if (ax < bx) return -1;
+								if (ax > bx) return 1;
+						}
 					}
+					return 0;
 				}
 			}
 								
@@ -1131,7 +1252,10 @@
 				hideFilterForm();			
 				div = document.createElement('div');
 				div.id = 'filterform';
-				div.innerHTML = '<div class=\"headline\">Zeilen filtern<a class=\"close\" onclick=\"hideFilterForm();\">\u274C</a></div><div class=\"content\"><input id=\"filter_key\" value=\"'+key+'\" type=\"hidden\">'+columns[key]+' <select id=\"filter_operator\"><option value=\"=\">=</option><option value=\"!=\">!=</option></select><input id=\"filter_value\" type=\"text\" value=\"'+value+'\"><br><input class=\"filter_button\" type=\"button\" value=\"Filtern\" onclick=\"addFilter()\"></div>';
+				if (value == 'null') {
+					value = 'leer';
+				}
+				div.innerHTML = '<div class=\"headline\"><div>Zeilen filtern nach...</div><div><a class=\"close\" onclick=\"hideFilterForm();\">\u274C</a></div></div><div class=\"content\"><div><input id=\"filter_key\" value=\"'+key+'\" type=\"hidden\">'+columns[key]+'</div> <div><select id=\"filter_operator\"><option value=\"=\">=</option><option value=\"!=\">!=</option></select></div><div><input id=\"filter_value\" type=\"text\" value=\"'+value+'\"></div></div><div class=\"button\"><input class=\"filter_button\" type=\"button\" value=\"Filter setzen\" onclick=\"addFilter()\"></div>';
 				td.appendChild(div);
 			}
 			
@@ -1149,8 +1273,8 @@
 				filters.push(filter);
 				filter_output = document.createElement('div');
 				filter_output.id = filter['id'];
-				filter_output.innerHTML = columns[filter['key']]+' '+filter['operator']+' '+filter['value'];
-				filter_remove = document.createElement('a');
+				filter_output.innerHTML = '<div>'+columns[filter['key']]+' '+filter['operator']+' '+filter['value']+'</div>';
+        filter_remove = document.createElement('a');
 				filter_remove.innerHTML = '\u274C';
 				filter_remove.title = 'Filter entfernen';
 				filter_remove.className = 'removeFilter';
@@ -1182,9 +1306,14 @@
 							for(var j=0; j < filters.length; j++){	// Filter
 								if(filters[j]['key'] == key){
 									match = false;
+									if (filters[j]['value'] == 'leer') {
+										filters[j]['value'] = null;
+									}
 									switch(filters[j]['operator']){
 										case '=':
-											if(filters[j]['value'] == arr[i][key])match = true;
+											if(filters[j]['value'] == arr[i][key]) {
+												match = true;
+											}
 										break;
 										case '!=':
 											if(filters[j]['value'] != arr[i][key])match = true;
