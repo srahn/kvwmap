@@ -1484,8 +1484,8 @@ function go_switch($go, $exit = false) {
 				}
 				else {
 					$chart = new LayerChart($GUI);
-					$result = $GUI->layer_chart_Speichern($chart);
 				}
+				$result = $GUI->layer_chart_Speichern($chart);
 				if ($result['success']) {
 					$GUI->add_message('notice', $result['msg']);
 					$GUI->layer_charts_Anzeigen();

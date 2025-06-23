@@ -14,6 +14,7 @@
   $strPan="Verschieben / Pan";
   $strCoordinatesZoom="Koordinatenzoom";
 	$strCoordinatesQuery="Koordinatenabfrage";
+  $strElevationProfile="Höhenprofil";
   $strInfo="Informationsabfrage";
   $strTouchInfo="Informationsabfrage auf angrenzende Objekte";
   $strInfoWithRadius="Informationsabfrage mit Suchradius";

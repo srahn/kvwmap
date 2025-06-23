@@ -296,14 +296,15 @@ if ($this->Fehlermeldung!='') {
 											<div title="<? echo $strZoomOut; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo zoomout($strZoomOut); ?></svg></div><input type="checkbox" name="zoomout" value="1" <? if($this->user->rolle->zoomout){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strZoomToFullExtent; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo zoomall($strZoomToFullExtent); ?></svg></div><input type="checkbox" name="zoomall" value="1" <? if($this->user->rolle->zoomall){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strPan; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo recentre($strPan); ?></svg></div><input type="checkbox" name="recentre" value="1" <? if($this->user->rolle->recentre){echo 'checked="true"';} ?>>
-											<br>
+
 											<div title="<? echo $strCoordinatesZoom; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo coords1($strCoordinatesZoom); ?></svg></div><input type="checkbox" name="jumpto" value="1" <? if($this->user->rolle->jumpto){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strCoordinatesQuery; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo coords2($strCoordinatesQuery); ?></svg></div><input type="checkbox" name="coord_query" value="1" <? if($this->user->rolle->coord_query){echo 'checked="true"';} ?>>&nbsp;
+											<div title="<? echo $strElevationProfile; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo elevation_profile($strElevationProfile); ?></svg></div><input type="checkbox" name="elevation_profile" value="1" <? if($this->user->rolle->elevation_profile){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strInfo; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo ppquery($strInfo); ?></svg></div><input type="checkbox" name="query" value="1" <? if($this->user->rolle->query){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strTouchInfo; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo touchquery($strTouchInfo); ?></svg></div><input type="checkbox" name="touchquery" value="1" <? if($this->user->rolle->touchquery){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strInfoWithRadius; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo pquery($strInfoWithRadius); ?></svg></div><input type="checkbox" name="queryradius" value="1" <? if($this->user->rolle->queryradius){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strInfoInPolygon; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo polygonquery($strInfoInPolygon); ?></svg></div><input type="checkbox" name="polyquery" value="1" <? if($this->user->rolle->polyquery){echo 'checked="true"';} ?>>&nbsp;
-											<br>
+
 											<div title="<? echo $strRuler; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo dist($strRuler); ?></svg></div><input type="checkbox" name="measure" value="1" <? if($this->user->rolle->measure){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strPunktfang; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo punktfang($strPunktfang); ?></svg></div><input type="checkbox" name="punktfang" value="1" <? if($this->user->rolle->punktfang){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strFreePolygon; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freepolygon($strFreePolygon); ?></svg></div><input type="checkbox" name="freepolygon" value="1" <? if($this->user->rolle->freepolygon){echo 'checked="true"';} ?>>&nbsp;
@@ -311,7 +312,7 @@ if ($this->Fehlermeldung!='') {
 											<div title="<? echo $strFreeArrow; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freearrow($strFreeArrow); ?></svg></div><input type="checkbox" name="freearrow" value="1" <? if($this->user->rolle->freearrow){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strGPS; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo gps_follow($strGPS, 'on'); ?></svg></div><input type="checkbox" name="gps" value="1" <? if($this->user->rolle->gps){echo 'checked="true"';} ?>>&nbsp;
 											<? if (ROUTING_URL != '') { ?>
-											<br>
+
 											<div title="<? echo $strRouting; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo routing($strRouting); ?></svg></div><input type="checkbox" name="routing" value="1" <? if($this->user->rolle->routing){echo 'checked="true"';} ?>>&nbsp;
 											<? } ?>
 											<div style="margin: 10px;">

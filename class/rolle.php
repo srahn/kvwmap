@@ -566,6 +566,7 @@ class rolle {
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
 			$this->coord_query = in_array('coord_query', $buttons);
+			$this->elevation_profile = in_array('elevation_profile', $buttons);
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);

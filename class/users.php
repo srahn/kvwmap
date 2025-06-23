@@ -1239,6 +1239,7 @@ class user {
 			if($formvars['recentre']){$buttons .= 'recentre,';}
 			if($formvars['jumpto']){$buttons .= 'jumpto,';}
 			if($formvars['coord_query']){$buttons .= 'coord_query,';}
+			if($formvars['elevation_profile']){$buttons .= 'elevation_profile,';}			
 			if($formvars['query']){$buttons .= 'query,';}
 			if($formvars['touchquery']){$buttons .= 'touchquery,';}
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}

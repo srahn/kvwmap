@@ -14,6 +14,7 @@
   $strPan="Pan";
   $strCoordinatesZoom="Zoom to coordinates";
 	$strCoordinatesQuery="Query coordinates";
+  $strElevationProfile="Elevation Profile";
   $strInfo="Info";
   $strTouchInfo="Info on surrounding objects";
   $strInfoWithRadius="Info with radius";

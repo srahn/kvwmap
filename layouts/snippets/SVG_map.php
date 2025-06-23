@@ -194,6 +194,14 @@
 				overlay_submit(document.GUI, true);
 			}
 			break;
+			case "elevation_profile": {
+				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[1] + "," + pathy[1];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.go.value = "create_elevation_profile";
+				document.GUI.submit();
+			}
+			break;
 			default: {
 				path = pathx[0] + "," + pathy[0];
 				alert("Keine Bearbeitung moeglich! \nUebergebene Daten: " + cmd + ", " + path);
@@ -727,6 +735,11 @@ function showcoords(){
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
+function elevation_profile(){
+	doing = "elevation_profile";
+  document.getElementById("canvas").setAttribute("cursor", "crosshair");
+}
+
 function ppquery(){
   top.document.GUI.last_button.value = doing = "ppquery";
   document.getElementById("canvas").setAttribute("cursor", "help");
@@ -841,7 +854,7 @@ function measure(){
 	}
   doing = "measure";
 	if(top.document.GUI.previous_button.value == "measure" && top.document.GUI.str_pathx.value != ""){
-		measuring = true;	
+		measuring = true;
 		top.document.GUI.str_pathx.value = "";
 		top.document.GUI.str_pathy.value = "";
 	}
@@ -1025,6 +1038,10 @@ function mousedown(evt){
 			case "showcoords":
 	  		top.show_coords(evt, null);
 	  	break;
+			case "elevation_profile":
+				measuring = true;
+	  		startPoint(evt);
+	  	break;
 	  	case "pquery":
 	  		startPoint(evt);
 	  	break;
@@ -1108,6 +1125,14 @@ function mousemove(evt){
 		document.getElementById("suchkreis").setAttribute("cx", clientx);
 		document.getElementById("suchkreis").setAttribute("cy", clienty);
 	 break;
+
+	case "elevation_profile":
+		if (measuring) {
+			addpoint(evt);
+			redrawPL();
+			deletelast(evt);
+		}
+	break;
 	
 	 case "touchquery":
 	 break;
@@ -1136,6 +1161,10 @@ function mouseup(evt){
 		break;
 		case "drawarrow":
 		 finisharrowdraw();
+		break;
+		case "elevation_profile":
+			addpoint(evt);
+			sendpath(doing, pathx, pathy);
 		break;
 		default:
 		hide_tooltip();
