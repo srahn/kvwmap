@@ -11809,6 +11809,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['oid'] = '';
 			$this->formvars['no_output'] = false;
 			$this->formvars['anzahl'] = 10;
+			$this->last_query = $this->user->rolle->get_last_query();
 			$this->GenerischeSuche_Suchen();
 		}
 		else {
@@ -11953,7 +11954,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		";
 		#echo '<p>Sql zum Update des Dokumentattributes:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 1);
-		$this->last_query = $this->user->rolle->get_last_query();
 		if (!$ret['success']) {
 			$this->add_message('error', $ret[2]);
 		}
