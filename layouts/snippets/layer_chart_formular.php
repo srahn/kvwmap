@@ -78,6 +78,7 @@ else { ?>
 				<option value="bar"<? echo ($this->layer_chart->get('type') == 'bar' ? ' selected' : ''); ?>>Balken</option>
 				<option value="pie"<? echo ($this->layer_chart->get('type') == 'pie' ? ' selected' : ''); ?>>Torten</option>
 				<option value="doughnut"<? echo ($this->layer_chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
+				<option value="line"<? echo ($this->layer_chart->get('type') == 'line' ? ' selected' : ''); ?>>Linien</option>
 			</select>
 			<div style="clear: both"></div>
 

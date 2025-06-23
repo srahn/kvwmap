@@ -1473,14 +1473,17 @@ function go_switch($go, $exit = false) {
 					'breite' => 'text'
 				]);
 				include_once(CLASSPATH . 'LayerChart.php');
-				$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
-				if ($GUI->formvars['id'] != '' AND $chart->get_id() == '') {
-					$result = array(
-						'success' => false,
-						'err_msg' => 'Das Layer-Diagramm mit der ID: ' . $GUI->formvars['id'] . ' konnte nicht gefunden werden!'
-					);
+				if ($GUI->formvars['id'] != '') {
+					$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
+					if ($chart->get_id() == '') {
+						$result = array(
+							'success' => false,
+							'err_msg' => 'Das Layer-Diagramm mit der ID: ' . $GUI->formvars['id'] . ' konnte nicht gefunden werden!'
+						);
+					}
 				}
 				else {
+					$chart = new LayerChart($GUI);
 					$result = $GUI->layer_chart_Speichern($chart);
 				}
 				if ($result['success']) {

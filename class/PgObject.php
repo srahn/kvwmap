@@ -428,7 +428,7 @@ class PgObject {
 		if (!empty($data)) {
 			$this->data = $data;
 		}
-
+		unset($this->data[$this->identifier]);
 		$values = array_map(
 			function($value) {
 				return (is_array($value) ? "{" . implode(", ", $value) . "}" : $value);

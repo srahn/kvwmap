@@ -171,6 +171,7 @@
 								<option value="bar"<? echo ($chart->get('type') == 'bar' ? ' selected' : ''); ?>>Balken</option>
 								<option value="pie"<? echo ($chart->get('type') == 'pie' ? ' selected' : ''); ?>>Torten</option>
 								<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
+								<option value="line"<? echo ($chart->get('type') == 'line' ? ' selected' : ''); ?>>Linien</option>
 							</select><?
 							if (
 								$this->Stelle->isMenueAllowed('Layereditor') 
@@ -186,13 +187,14 @@
 						let labels_<? echo $id; ?> = [];
 						let data_<? echo $id; ?> = [];
 						for (let i = 0; i < names_<? echo $id; ?>.length; i++) {
+							value = values_<? echo $id; ?>[i].replace(',', '.');
 							if (labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i]) == -1) {
 								// Die Klasse kommt zum ersten mal vor. Setze labels_$id und data_$id
 								labels_<? echo $id; ?>.push(names_<? echo $id; ?>[i]);
-								data_<? echo $id; ?>.push(parseFloat(values_<? echo $id; ?>[i]));
+								data_<? echo $id; ?>.push(parseFloat(value));
 							}
 							else {
-								data_<? echo $id; ?>[labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i])] += parseFloat(values_<? echo $id; ?>[i]);
+								data_<? echo $id; ?>[labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i])] += parseFloat(value);
 							}
 						}
 						let chart_<? echo $id; ?> = new Chart(
