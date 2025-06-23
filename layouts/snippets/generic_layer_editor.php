@@ -589,5 +589,5 @@ if ($doit == true) {
 	</div><?
 }
 elseif($layer['requires'] == ''){
-	$this->noMatchLayers[$layer['layer_id']] = $layer['name'];
+	$this->noMatchLayers[$layer['layer_id']] = $layer_name;
 } ?>
