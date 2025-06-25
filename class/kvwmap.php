@@ -16201,7 +16201,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->queryrect = $rect;
 		# Abfragen der Layer, die zur Stelle gehören
 		$layer = $this->user->rolle->getLayer('', true);
-		$rollenlayer = $this->user->rolle->getRollenLayer('', 'import');
+		$rollenlayer = $this->user->rolle->getRollenLayer('');
 		$layerset = array_merge($layer, $rollenlayer);
 		$anzLayer = count($layerset);
 		$disabled_class_expressions = $this->user->rolle->read_disabled_class_expressions($layerset);
@@ -17711,6 +17711,103 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 
+	function create_elevation_profile(){
+		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
+		$corners = explode(';', $this->formvars['INPUT_COORD']);
+		$lo = explode(',', $corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
+		$ru = explode(',', $corners[1]); # rechte untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
+		$minx = $this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$lo[0]; # x Wert
+		$miny = $this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*$lo[1]; # y Wert
+		$maxx = $this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$ru[0]; # x Wert
+		$maxy = $this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*$ru[1]; # y Wert
+
+		$layerset = $this->user->rolle->getLayer(1079);
+    $layerdb = $dbmap->getlayerdatabase(1079, $this->Stelle->pgdbhost);
+		$geom_column = explode(' ', $layerset[0]['data'])[0];
+		$height_column = 'height';
+		$res = 5;
+
+		$sql = "
+			WITH path AS (
+				SELECT ST_SetSRID(ST_Segmentize(
+						ST_MakeLine(
+								ST_MakePoint(" . $minx . ", " . $miny . "), 
+								ST_MakePoint(" . $maxx . ", " . $maxy . ")) 
+						, " . $res . ")
+				, " . $layerset[0]['epsg_code'] . " ) AS geog
+			),
+			points AS (
+					SELECT 
+					(ST_DumpPoints(geog)).geom,
+					(ST_DumpPoints(geog)).path 
+				FROM path
+			)
+			SELECT
+				d." . $height_column . ",
+				--round(d.dist) AS dist,
+				d.geom AS elevation_pt,
+				points.geom AS path_pt,
+			(points.path[1] - 1) * " . $res . " AS distance
+			FROM points
+			CROSS JOIN LATERAL (
+				SELECT
+					d." . $height_column . ", d." . $geom_column . ",
+					points.geom <-> d." . $geom_column . " AS dist
+				FROM " . $layerset[0]['schema'] . "." . $layerset[0]['maintable'] . " d
+				ORDER BY dist
+				LIMIT 1
+			) d
+		";
+
+		$query = "select * from	(" . $sql . ") foo where true	order by distance";
+		$data = "path_pt from (" . $sql . ") as foo using unique distance using srid=" . $layerset[0]['epsg_code'];
+		
+		$group = $dbmap->getGroupbyName('eigene Abfragen');
+		if($group != ''){
+			$groupid = $group['id'];
+		}
+		else{
+			$groupid = $dbmap->newGroup('eigene Abfragen', 0);
+		}
+		$this->formvars['user_id'] = $this->user->id;
+		$this->formvars['stelle_id'] = $this->Stelle->id;
+		$this->formvars['aktivstatus'] = 1;
+		$this->formvars['name'] = 'Höhenprofil ' . " (".date('d.m. H:i',time()).")";
+		$this->formvars['gruppe'] = $groupid;
+		$this->formvars['typ'] = 'search';
+		$this->formvars['data'] = $data;
+		$this->formvars['query'] = $query;
+		$this->formvars['queryable'] = 1;
+		$this->formvars['datentyp'] = 0;
+		$this->formvars['connectiontype'] = 6;
+		$this->formvars['connection_id'] = $layerdb->connection_id;
+		$this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
+		$this->formvars['transparency'] = 100;
+
+		$layer_id = $dbmap->newRollenLayer($this->formvars);
+		$attributes = $dbmap->load_attributes($layerdb, $query);
+		$dbmap->save_postgis_attributes($layerdb, -$layer_id, $attributes, '', '');
+		$dbmap->addRollenLayerStyling($layer_id, $layerset[0]['datentyp'], $this->formvars['labelitem'], $this->user, 'zoom');
+		$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1); # der Rolle die Gruppe zuordnen
+
+		include_once(CLASSPATH . 'LayerChart.php');
+		$chart = new LayerChart($this);
+		$chart->data = [
+			'layer_id' => -$layer_id, 
+			'title' => 'Höhenprofil', 
+			'type' => 'line', 
+			'aggregate_function' => 'average', 
+			'value_attribute_name' => $height_column, 
+			'label_attribute_name' => 'distance', 
+			'beschreibung' => 'Höhenprofil', 
+			'breite' => '700px'];
+		$chart->create();
+
+		$this->loadMap('DataBase');
+		$this->legende = $this->create_dynamic_legend();
+		$this->output();
+	}
+
   function zoomToRefExt() {
     # Zoomen auf den in der Referenzkarte gesetzten Punkt
     # Berechnen der Koordinaten des angeklickten Punktes in der Referencekarte
@@ -18181,7 +18278,7 @@ class db_mapObj{
 				g.gruppenname,
 				-l.id AS layer_id,
 				1 as showclasses,
-				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
+				1 as queryable,
 				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter,
 				'' as wms_name,
 				'' as wms_format,

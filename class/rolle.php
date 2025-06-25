@@ -1269,7 +1269,7 @@ class rolle {
 				4 as tolerance,
 				-l.id as layer_id,
 				l.query as pfad,
-				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
+				1 as queryable,
 				gle_view,
 				'(' || rollenfilter || ')' as filter
 			FROM

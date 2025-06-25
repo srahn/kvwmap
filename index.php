@@ -864,6 +864,10 @@ function go_switch($go, $exit = false) {
 				$GUI->queryMap();
 			}break;
 
+			case 'create_elevation_profile' : {
+				$GUI->create_elevation_profile();
+			}break;
+
 			# Export der geloggten Zugriffe in eine Georg-Datei
 			case 'georg_export' : {
 				$GUI->export_georg($GUI->formvars);

@@ -195,7 +195,7 @@
 			}
 			break;
 			case "elevation_profile": {
-				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				if (!checkForUnsavedChanges()) break;
 				path = pathx[0] + "," + pathy[0] + ";" + pathx[1] + "," + pathy[1];
 				document.GUI.INPUT_COORD.value = path;
 				document.GUI.go.value = "create_elevation_profile";
