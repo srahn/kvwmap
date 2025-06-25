@@ -17521,7 +17521,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 				}
 				$extent = new rectObj($ll[0], $ll[1], $ur[0], $ur[1]);
-				$rasterProjection = new projectionObj("init=epsg:".$layer[0]['epsg_code']);
+				$rasterProjection = new projectionObj("init=epsg:".$layer['epsg_code']);
 				$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 				$extent->project($rasterProjection, $userProjection);
 				$rs['minx'] = $extent->minx;

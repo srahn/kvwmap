@@ -1,5 +1,19 @@
 <?
 
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+	if ($last) {
+		$word_pos = strripos($str, $word);
+	}
+	else {
+		$word_pos = stripos($str, $word);
+	}
+	if ($word_pos !== false) {
+		$str_from_word_pos = substr($str, $word_pos + strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return trim($parts[0]);
+	}
+}
+
 function count_or_0($val) {
 	if (is_null($val) OR !is_array($val)) {
 		return 0;
@@ -346,21 +360,7 @@ class GUI {
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}
-	
-	function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
-		if ($last) {
-			$word_pos = strripos($str, $word);
-		}
-		else {
-			$word_pos = stripos($str, $word);
-		}
-		if ($word_pos !== false) {
-			$str_from_word_pos = substr($str, $word_pos + strlen($word));
-			$parts = explode($delim2, trim($str_from_word_pos, $delim1));
-			return trim($parts[0]);
-		}
-	}
-	
+		
 	/**
 	 * Function zoom to maximum extent of Layer with $layer_id in current map object $this->map
 	 * @param int $layer_id Id of layer or rollenlayer to zoom to
@@ -481,7 +481,7 @@ class GUI {
 				}
 				$extent = new rectObj();
 				$extent->setextent($ll[0], $ll[1], $ur[0], $ur[1]);
-				$rasterProjection = new projectionObj("init=epsg:".$layer[0]['epsg_code']);
+				$rasterProjection = new projectionObj("init=epsg:".$layer['epsg_code']);
 				$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 				$extent->project($rasterProjection, $userProjection);
 				$rs['minx'] = $extent->minx;
