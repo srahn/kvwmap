@@ -376,7 +376,7 @@ if ($doit == true) {
 															if ($privileg == 1) { ?>
 																<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strEditGeom; ?>" target="root" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&selected_layer_id=<? echo $layer['layer_id'];?>&dimension=<? echo $dimension; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div class="button edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 															} 
-															if ($layer['shape'][$k][$layer['attributes']['the_geom']]){ ?>
+															if ($layer['shape'][$k][$layer['attributes']['the_geom']] AND $layer['maintable'] != ''){ ?>
 																<td>
 																	<a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['layer_id'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer		['maintable'].'_oid']; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 																</td><?

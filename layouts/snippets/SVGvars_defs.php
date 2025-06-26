@@ -403,8 +403,8 @@ $SVGvars_defs = '
 	function elevation_profile($strElevationProfile){
 		global $last_x;global $events;
 		$coords2 ='
-      <g id="e_profile" transform="translate('.$last_x.' 0)">
-				<rect id="e_profile0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strElevationProfile.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="elevation_profile();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
+      <g id="elevation_profile" transform="translate('.$last_x.' 0)">
+				<rect id="elevation_profile0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strElevationProfile.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="elevation_profile();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M2,25 L28,25 C28.6,25 29,24.6 29,24 C29,23.4 28.6,23 28,23 L2,23 C1.4,23 1,23.4 1,24 C1,24.6 1.4,25 2,25"/>
 					<path d="M7,28 L7,2 C7,1.4 6.6,1 6,1 C5.4,1 5,1.4 5,2 L5,28 C5,28.6 5.4,29 6,29 C6.6,29 7,28.6 7,28"/>

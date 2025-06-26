@@ -152,14 +152,14 @@
 			font-weight: bold;
 		">
 			<a href="javascript:void(0);" onclick="$('#diagramms, .diagram_group_img').toggle()">
-				<img class="diagram_group_img" src="graphics//plus.gif" border="0">
-				<img class="diagram_group_img" src="graphics//minus.gif" border="0" style="display: none">
+				<img class="diagram_group_img" src="graphics//plus.gif" border="0" style="display: none">
+				<img class="diagram_group_img" src="graphics//minus.gif" border="0">
 			</a> Diagramme
 		</td>
 	</tr>
 	<tr>
 		<td colspan="2">
-			<div id="diagramms" style="display: none"><?
+			<div id="diagramms"><?
 				foreach ($layer['charts'] AS $chart) {
 					$id = $chart->get($chart->identifier);
 					#echo 'Chart: ' . $id; ?>

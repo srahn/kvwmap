@@ -67,6 +67,11 @@
 
 		<script type="text/javascript">
 			document.addEventListener("scroll", save_scrollposition);
+
+			<? if ($this->hide_records) { ?>
+				document.querySelector('.records').style.display = 'none';
+			<? } ?>
+
 		</script>
 
 	</body>

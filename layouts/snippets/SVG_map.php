@@ -199,7 +199,7 @@
 				path = pathx[0] + "," + pathy[0] + ";" + pathx[1] + "," + pathy[1];
 				document.GUI.INPUT_COORD.value = path;
 				document.GUI.go.value = "create_elevation_profile";
-				document.GUI.submit();
+				overlay_submit(document.GUI, true);
 			}
 			break;
 			default: {
@@ -209,7 +209,9 @@
 			break;
 		}
 		document.GUI.go.value = "neu Laden";
-		document.GUI.legendtouched.value = 0; // nach dem Submit kann das legendtouched-flag wieder auf 0 gesetzt werden
+		if (cmd != 'elevation_profile') {
+			document.GUI.legendtouched.value = 0; // nach dem Submit kann das legendtouched-flag wieder auf 0 gesetzt werden
+		}
 	}
 	-->
 </SCRIPT>
@@ -1163,8 +1165,11 @@ function mouseup(evt){
 		 finisharrowdraw();
 		break;
 		case "elevation_profile":
+			top.document.GUI.legendtouched.value = 1;
 			addpoint(evt);
 			sendpath(doing, pathx, pathy);
+			dragging  = false;
+			noMeasuring();
 		break;
 		default:
 		hide_tooltip();

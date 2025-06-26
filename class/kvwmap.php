@@ -10189,7 +10189,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if (value_of($this->formvars, 'printversion') == '' AND ($this->user->rolle->querymode == 1 OR $this->formvars['go_next'] != '')) {
 				# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
 				$this->loadMap('DataBase');
-				if ($geometries_found) {
+				if ($layerset[0]['maintable'] != '' AND $layerset[0]['oid'] != '' AND $geometries_found) {
 					# wenn was mit Geometrie gefunden wurde, auf Datensätze zoomen
 					$this->zoomed = true;
 					switch ($layerset[0]['connectiontype']) {
@@ -17711,6 +17711,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 
+	function get_elevation_resolution($layerdb, $schema, $table, $geom_column, $id_column){
+		$sql = "
+			select 
+				st_distance(d1." . $geom_column . ", d2." . $geom_column . ") as res
+			from
+				" . $schema . "." . $table . " d1
+				JOIN " . $schema . "." . $table . " d2 ON d2." . $id_column . " = d1." . $id_column . " + 1
+			LIMIT 1";
+		$ret = $layerdb->execSQL($sql);
+		$rs = pg_fetch_assoc($ret[1]);
+		return $rs['res'];
+	}
+
 	function create_elevation_profile(){
 		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
 		$corners = explode(';', $this->formvars['INPUT_COORD']);
@@ -17721,11 +17734,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$maxx = $this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$ru[0]; # x Wert
 		$maxy = $this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*$ru[1]; # y Wert
 
-		$layerset = $this->user->rolle->getLayer(1079);
-    $layerdb = $dbmap->getlayerdatabase(1079, $this->Stelle->pgdbhost);
+		$layerset = $this->user->rolle->getLayer(DGM_LAYER_ID);
+    $layerdb = $dbmap->getlayerdatabase(DGM_LAYER_ID, $this->Stelle->pgdbhost);
 		$geom_column = explode(' ', $layerset[0]['data'])[0];
-		$height_column = 'height';
-		$res = 5;
+		$height_column = DGM_HEIGHT_ATTRIBUTE;
+		$res = $this->get_elevation_resolution($layerdb, $layerset[0]['schema'], $layerset[0]['maintable'], $geom_column,$layerset[0]['oid']);
 
 		$sql = "
 			WITH path AS (
@@ -17760,7 +17773,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		";
 
 		$query = "select * from	(" . $sql . ") foo where true	order by distance";
-		$data = "path_pt from (" . $sql . ") as foo using unique distance using srid=" . $layerset[0]['epsg_code'];
+		#$data = "path_pt from (" . $sql . ") as foo using unique distance using srid=" . $layerset[0]['epsg_code'];
+		$data = "line from (select st_makeline(path_pt) as line, 1 as id from (" . $sql . ") as foo) as fooo using unique id using srid=" . $layerset[0]['epsg_code'];
 		
 		$group = $dbmap->getGroupbyName('eigene Abfragen');
 		if($group != ''){
@@ -17778,7 +17792,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->formvars['data'] = $data;
 		$this->formvars['query'] = $query;
 		$this->formvars['queryable'] = 1;
-		$this->formvars['datentyp'] = 0;
+		$this->formvars['datentyp'] = 1;
 		$this->formvars['connectiontype'] = 6;
 		$this->formvars['connection_id'] = $layerdb->connection_id;
 		$this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
@@ -17787,14 +17801,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 		$attributes = $dbmap->load_attributes($layerdb, $query);
 		$dbmap->save_postgis_attributes($layerdb, -$layer_id, $attributes, '', '');
-		$dbmap->addRollenLayerStyling($layer_id, $layerset[0]['datentyp'], $this->formvars['labelitem'], $this->user, 'zoom');
+		$dbmap->addRollenLayerStyling($layer_id, 1, $this->formvars['labelitem'], $this->user, 'zoom');
 		$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1); # der Rolle die Gruppe zuordnen
 
 		include_once(CLASSPATH . 'LayerChart.php');
 		$chart = new LayerChart($this);
 		$chart->data = [
 			'layer_id' => -$layer_id, 
-			'title' => 'Höhenprofil', 
+			'title' => '', 
 			'type' => 'line', 
 			'aggregate_function' => 'average', 
 			'value_attribute_name' => $height_column, 
@@ -17803,9 +17817,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'breite' => '700px'];
 		$chart->create();
 
-		$this->loadMap('DataBase');
-		$this->legende = $this->create_dynamic_legend();
-		$this->output();
+		$this->formvars['selected_layer_id'] = -$layer_id;
+		$this->formvars['anzahl'] = 1000;
+		$this->zoomed = true;
+		$this->hide_records = true;
+		$this->GenerischeSuche_Suchen();
 	}
 
   function zoomToRefExt() {

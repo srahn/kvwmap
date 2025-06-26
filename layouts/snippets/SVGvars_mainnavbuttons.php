@@ -8,7 +8,7 @@ if($this->user->rolle->zoomin){$SVGvars_mainnavbuttons .= zoomin($strZoomIn);}
 if($this->user->rolle->zoomout){$SVGvars_mainnavbuttons .= zoomout($strZoomOut);}
 if($this->user->rolle->jumpto){$SVGvars_mainnavbuttons .= coords1($strCoordinatesZoom);}
 if($this->user->rolle->coord_query){$SVGvars_mainnavbuttons .= coords2($strCoordinatesQuery);}
-if($this->user->rolle->elevation_profile){$SVGvars_mainnavbuttons .= elevation_profile($strElevationProfile);}
+if($this->user->rolle->elevation_profile AND DGM_LAYER_ID != ''){$SVGvars_mainnavbuttons .= elevation_profile($strElevationProfile);}
 if($this->user->rolle->query){$SVGvars_mainnavbuttons .= ppquery($strInfo);}
 if($this->user->rolle->touchquery){$SVGvars_mainnavbuttons .= touchquery($strTouchInfo);}
 if($this->user->rolle->queryradius){$SVGvars_mainnavbuttons .= pquery($strInfoWithRadius);}
