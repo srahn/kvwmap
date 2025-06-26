@@ -440,15 +440,20 @@ class PgObject {
 				" . implode(', ', array_map(function ($key) {return '"' . $key . '"';}, $this->getKeys())) . "
 			)
 			VALUES (" .
-				"'" . implode(
-					"', '",
+				implode(
+					", ",
 					array_map(
 						function($value) {
-							return pg_escape_string($value);
+							if ($value == '') {
+								return 'NULL';
+							}
+							else {
+								return "'" . pg_escape_string($value) . "'";
+							}
 						},
 						$values
 					)
-				) . "'
+				) . "
 			)
 			" . ($this->identifier != ''? "RETURNING " . $this->identifier : '');
 		$this->debug->show('Create new dataset with sql: ' . $sql, $this->show);
