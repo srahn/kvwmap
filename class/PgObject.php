@@ -446,7 +446,7 @@ class PgObject {
 					", ",
 					array_map(
 						function($value) {
-							if ($value === '' OR $value == NULL) {
+							if ($value === '' OR $value === NULL) {
 								return 'NULL';
 							}
 							else {
