@@ -13491,6 +13491,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->allstellendaten = $this->Stelle->getStellen('');
       $this->formvars['bezeichnung'] = $this->stellendaten['bezeichnung'];
 			if ($language != 'german') {
+				$language = str_replace('-', '_', $language);
 				$this->formvars['bezeichnung_' . $language] = $this->stellendaten['bezeichnung_' . $language];
 			}
       $this->formvars['minxmax'] = $this->stellendaten['minxmax'];
@@ -18335,6 +18336,7 @@ class db_mapObj{
 		global $language;
 
 		if ($language != 'german') {
+			$language = str_replace('-', '_', $language);
 			$name_column = "
 			CASE
 				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "
@@ -18501,6 +18503,7 @@ class db_mapObj{
 	function read_Groups($all = false, $order = '', $where = 'true') {
 		global $language;
 		if ($language != 'german') {
+			$language = str_replace('-', '_', $language);
 			$gruppenname_column = "
 			CASE
 				WHEN g.gruppenname_" . $language . " != \"\" THEN g.gruppenname_" . $language . "
@@ -20306,6 +20309,7 @@ DO $$
 		$attrib['name'] = ' ';
 		foreach ($supportedLanguages as $language) {
 			if ($language != 'german') {
+				$language = str_replace('-', '_', $language);
 				$attrib['name_' . $language] = ' ';
 			}
 		}
@@ -21004,6 +21008,7 @@ DO $$
 
 		foreach ($supportedLanguages as $language){
 			if ($language != 'german') {
+				$language = str_replace('-', '_', $language);
 				$language_columns[] = "alias_" . $language . " = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
 			}
 		}
@@ -21552,6 +21557,7 @@ DO $$
 		$where = array();
 
 		if ($language != 'german') {
+			$language = str_replace('-', '_', $language);
 			$name_column = "
 			CASE
 				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "
@@ -22247,6 +22253,7 @@ DO $$
 				(name, ';
 			foreach ($supportedLanguages as $language) {
 				if ($language != 'german') {
+					$language = str_replace('-', '_', $language);
 					$sql.= 'name_'.$language.', ';
 				}
 			}
