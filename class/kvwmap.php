@@ -20839,16 +20839,16 @@ DO $$
 					" . quote($formvars['tileindex']) . ",
 					" . quote($formvars['tileitem']) . ",
 					" . quote($formvars['labelangleitem']) . ",
-					" . quote($formvars['labelitem']) . ", -- labelitem
+					" . quote($formvars['labelitem']) . ", 
 					" . quote_or_null($formvars['labelmaxscale']) . ",
 					" . quote_or_null($formvars['labelminscale']) . ",
 					" . quote($formvars['labelrequires']) . ",
 					" . ($formvars['postlabelcache'] == '' ? '0' :  $formvars['postlabelcache']) . ",
-					" . quote(trim($formvars['connection'])) . ", -- connection
+					" . quote(trim($formvars['connection'])) . ", 
 					" . quote_or_null($formvars['connection_id']) . ",
 					" . quote($formvars['printconnection']) . ",
 					" . ($formvars['connectiontype'] == '' ? '6' : $formvars['connectiontype']) . ",
-					" . quote($formvars['classitem']) . ", -- classitem
+					" . quote($formvars['classitem']) . ", 
 					" . quote($formvars['styleitem']) . ",
 					" . quote($formvars['layer_classification']) . ",
 					" . quote_or_null($formvars['cluster_maxdistance']) . ",
@@ -20877,8 +20877,8 @@ DO $$
 					" . quote($formvars['wms_auth_password']) . ",
 					" . quote($formvars['wfs_geom']) . ",
 					" . quote(($formvars['write_mapserver_templates'] == '' ? '0' : $formvars['write_mapserver_templates']), 'text') . ",
-					" . quote($formvars['selectiontype']) . ", -- selectiontype
-					" . quote(($formvars['querymap'] == '' ? '0' : $formvars['querymap']), 'text') . ", -- querymap
+					" . quote($formvars['selectiontype']) . ", 
+					" . quote(($formvars['querymap'] == '' ? '0' : $formvars['querymap']), 'text') . ",
 					" . quote($formvars['processing']) . ",
 					" . quote(pg_escape_string($formvars['kurzbeschreibung'])) . ",
 					" . quote($formvars['dataowner_name']) . ",
