@@ -18549,7 +18549,7 @@ class db_mapObj{
 
 	function read_ClassesbyClassid($class_id) {
 		global $language;
-
+		$language = str_replace('-', '_', $language);
 		$sql = "
 			SELECT " .
 				((!$all_languages AND $language != 'german') ? "
@@ -22355,31 +22355,33 @@ DO $$
 			', ',
 			array_map(
 				function($language) use ($attrib) {
-					if($language != 'german')return "Name_" . $language . " = '" . $attrib['name_' . $language] . "'";
-					else return "Name = '" . $attrib['name']."'";
+					if ($language != 'german') {
+						$language = str_replace('-', '_', $language);
+						return "name_" . $language . " = '" . $attrib['name_' . $language] . "'";
+					}
+					else return "name = '" . $attrib['name']."'";
 				},
 				$supportedLanguages
 			)
 		);
 
-		$sql = '
+		$sql = "
 			UPDATE
 				kvwmap.classes
 			SET
-				class_id = ' . $attrib['new_class_id'] . ',
-				'.$names.',
-				layer_id = ' . $attrib['layer_id'] . ',
-				expression = "' . str_replace('\\', '\\\\', $attrib['expression']) . '",
-				text = "' . $attrib['text'] . '",
-				classification = "' . $attrib['classification'] . '",
-				legendgraphic= "' . $attrib['legendgraphic'] . '",
-				legendimagewidth= ' . $attrib['legendimagewidth'] . ',
-				legendimageheight= ' . $attrib['legendimageheight'] . ',
-				drawingorder = ' . $attrib['order'] . ',
-				legendorder = '. $attrib['legendorder'] . '
+				class_id = " . $attrib['new_class_id'] . ",
+				".$names.",
+				layer_id = " . $attrib['layer_id'] . ",
+				expression = '" . str_replace('\\', '\\\\', $attrib['expression']) . "',
+				text = '" . $attrib['text'] . "',
+				classification = '" . $attrib['classification'] . "',
+				legendgraphic= '" . $attrib['legendgraphic'] . "',
+				legendimagewidth= " . $attrib['legendimagewidth'] . ",
+				legendimageheight= " . $attrib['legendimageheight'] . ",
+				drawingorder = " . $attrib['order'] . ",
+				legendorder = ". $attrib['legendorder'] . "
 			WHERE
-				class_id = ' . $attrib['class_id'] . '
-		';
+				class_id = " . $attrib['class_id'];
 
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->update_Class - Aktualisieren einer Klasse:<br>" . $sql,4);
