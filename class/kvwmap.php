@@ -20735,8 +20735,9 @@ DO $$
 			$names = '';
 			foreach ($supportedLanguages as $language) {
 				if ($language != 'german') {
-					$name_columns .= "Name_" . $language.", ";
-					$names .= quote($formvars['Name_' . $language]) . ", ";
+					$language = str_replace('-', '_', $language);
+					$name_columns .= "name_" . $language.", ";
+					$names .= quote($formvars['name_' . $language]) . ", ";
 				}
 			}
 
