@@ -428,7 +428,7 @@ class PgObject {
 		if (!empty($data)) {
 			$this->data = $data;
 		}
-		if ($this->data[$this->identifier] == '') {
+		if ($this->data[$this->identifier] == '' OR $this->data[$this->identifier] == 0) {
 			unset($this->data[$this->identifier]);
 		}
 		$values = array_map(
