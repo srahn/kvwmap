@@ -770,12 +770,13 @@ class rolle {
 			# function setzt eine ALK-PDF-EXportaktivität
 			$sql = "
 				INSERT INTO
-					kvwmap.u_consumeALK
-				SET
-					user_id = " . $this->user_id . ",
-					stelle_id = " . $this->stelle_id . ",
-					time_id = '" . $time . "',
-					druckrahmen_id = '" . $druckrahmen_id . "'
+					kvwmap.u_consumealk
+				VALUES (
+					" . $this->user_id . ",
+					" . $this->stelle_id . ",
+					'" . $time . "',
+					'" . $druckrahmen_id . "'
+				)
 			";
 			#echo $sql;
 			$ret=$this->database->execSQL($sql,4, 1);
