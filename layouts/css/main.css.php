@@ -1856,6 +1856,9 @@ a:hover .preview_image{
 .raster_record_open .preview_image{width: 125px;transition: all 0.25s ease;}
 .raster_record_open .preview_image:hover{width: 125px;transition: all 0.25s ease;}
 
+.records:has(td[id*="_ep__height"]) {
+	display: none;
+}
 
 #layer	h2{
 	font-weight: bold;

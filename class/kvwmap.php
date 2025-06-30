@@ -17757,11 +17757,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				FROM path
 			)
 			SELECT
-				d." . $height_column . ",
+				d." . $height_column . " as ep__height,
 				--round(d.dist) AS dist,
 				d.geom AS elevation_pt,
 				points.geom AS path_pt,
-			(points.path[1] - 1) * " . $res . " AS distance
+			(points.path[1] - 1) * " . $res . " AS ep__distance
 			FROM points
 			CROSS JOIN LATERAL (
 				SELECT
@@ -17773,7 +17773,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			) d
 		";
 
-		$query = "select * from	(" . $sql . ") foo where true	order by distance";
+		$query = "select * from	(" . $sql . ") foo where true	order by ep__distance";
 		#$data = "path_pt from (" . $sql . ") as foo using unique distance using srid=" . $layerset[0]['epsg_code'];
 		$data = "line from (select st_makeline(path_pt) as line, 1 as id from (" . $sql . ") as foo) as fooo using unique id using srid=" . $layerset[0]['epsg_code'];
 		
@@ -17812,8 +17812,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'title' => '', 
 			'type' => 'line', 
 			'aggregate_function' => 'average', 
-			'value_attribute_name' => $height_column, 
-			'label_attribute_name' => 'distance', 
+			'value_attribute_name' => 'ep__height', 
+			'label_attribute_name' => 'ep__distance', 
 			'beschreibung' => 'Höhenprofil', 
 			'breite' => '700px'];
 		$chart->create();
@@ -17821,7 +17821,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->formvars['selected_layer_id'] = -$layer_id;
 		$this->formvars['anzahl'] = 1000;
 		$this->zoomed = true;
-		$this->hide_records = true;
 		$this->GenerischeSuche_Suchen();
 	}
 
