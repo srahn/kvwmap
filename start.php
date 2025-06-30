@@ -793,7 +793,7 @@ function checkRegistration($gui) {
 	}
 
 	# Prüft ob Einladung schon abgelaufen ist
-	if ($check == 0 AND DateTime::createFromFormat('d.m.Y', $invitation->get('stop'))->format('Y-m-d') < date('Y-m-d')) {
+	if ($check == 0 AND $invitation->get('stop') != NULL AND DateTime::createFromFormat('d.m.Y', $invitation->get('stop'))->format('Y-m-d') < date('Y-m-d')) {
 		$registration_errors[] = 'Einladung zu token: ' . $params['token'] . ' ist am: ' . $invitation->get('stop') . ' abgelaufen.';
 		$check = 1;
 	}	
