@@ -4,7 +4,23 @@
  * Formular zur Bearbeitung von Diagrammdefinitionen
  */
 include(LAYOUTPATH . 'languages/layer_chart_' . rolle::$language . '.php');
-include_once(CLASSPATH . 'FormObject.php') ?>
+include_once(CLASSPATH . 'FormObject.php');
+
+$attributes = array_filter(
+								array_map(
+									function($attribute) {
+										if ($attribute->get('type') != 'geometry') {
+											return array(
+												'value' => $attribute->get('name'),
+												'output' => ($attribute->get('alias') != '' ? $attribute->get('alias') : $attribute->get('name'))
+											);
+										}
+									},
+									$this->layer->attributes
+								)
+							);
+
+?>
 
 <h2 style="margin-top: 20px"><? echo $strLayerChartTitle; ?></h2><?
 if ($this->formvars['layer_id'] == '') {
@@ -82,7 +98,7 @@ else { ?>
 			</select>
 			<div style="clear: both"></div>
 
-			<label class="fetter form-label" for="value_attribute_label">Beschriftung Balken:</label>
+			<label class="fetter form-label" for="value_attribute_label">Beschriftung Legende:</label>
 			<input class="form-field" type="text" name="value_attribute_label" value="<? echo $this->layer_chart->get('value_attribute_label'); ?>">
 			<div style="clear: both"></div>
 
@@ -98,15 +114,7 @@ else { ?>
 			<label class="fetter form-label" for="value_attribute_name">Werteattribut (Hochwert):</label><?
 			echo FormObject::createSelectField(
 				'value_attribute_name',
-				array_map(
-					function($attribute) {
-						return array(
-							'value' => $attribute->get('name'),
-							'output' => ($attribute->get('alias') != '' ? $attribute->get('alias') : $attribute->get('name'))
-						);
-					},
-					$this->layer->attributes
-				),
+				$attributes,
 				$this->layer_chart->get('value_attribute_name'),
 				1, '', '', '', '',
 				'diagram_form_elem_' . $id
@@ -116,15 +124,7 @@ else { ?>
 			<label class="fetter form-label" for="label_attribute_name">Beschriftungsattribut (Rechtswert):</label><?
 			echo FormObject::createSelectField(
 				'label_attribute_name',
-				array_map(
-					function($attribute) {
-						return array(
-							'value' => $attribute->get('name'),
-							'output' => ($attribute->get('alias') != '' ? $attribute->get('alias') : $attribute->get('name'))
-						);
-					},
-					$this->layer->attributes
-				),
+				$attributes,
 				$this->layer_chart->get('label_attribute_name'),
 				1, '', '', '', '',
 				'diagram_form_elem_' . $id

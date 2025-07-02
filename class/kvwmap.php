@@ -12014,7 +12014,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	function layer_chart_Editor() {
+	function layer_chart_editor() {
 		include_once(CLASSPATH . 'Layer.php');
 
 		if ($this->formvars['id'] != '') {
@@ -12026,7 +12026,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			# new
 			$this->layer_chart = new LayerChart($this);
 			$this->layer_chart->setKeysFromTable();
-			$this->layer_chart->set('layer_id', $this->formvars['layer_id']);
+			$this->layer_chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite'), 'keep');
 		}
 		$this->layer = Layer::find_by_id($this, $this->formvars['layer_id']);
 		$this->main = 'layer_chart_formular.php';

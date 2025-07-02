@@ -36,7 +36,7 @@ function create_chart(chart_div_id, layer_id, options = []) {
 			datasets: [{
 				label: options['value_attribute_label'],
 				data: data,
-				backgroundColor: (chart_type == 'bar' ? 'lightblue' : COLORS),
+				backgroundColor: (['bar', 'line'].indexOf(chart_type) != -1 ? 'lightblue' : COLORS),
 			//backgroundColor: COLORS,
 				borderWidth: 1
 			}]

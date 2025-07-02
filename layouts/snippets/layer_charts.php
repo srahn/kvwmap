@@ -26,7 +26,14 @@
 
 	function change_chart_type(chart, chart_type) {
 		chart.config.type = chart_type;
-		chart.config.data.datasets[0].backgroundColor = (chart_type == 'bar' ? 'lightblue' : COLORS);
+		if (['bar', 'line'].indexOf(chart_type) != -1) {
+			chart.config.data.datasets[0].backgroundColor = 'lightblue';
+			chart.config.options.plugins.legend.display = false;
+		}
+		else {
+			chart.config.data.datasets[0].backgroundColor = COLORS;
+			chart.config.options.plugins.legend.display = true;
+		}
 		chart.update();
 	}
 
@@ -205,7 +212,7 @@
 								datasets: [{
 									label: '<? echo $chart->get('value_attribute_label'); ?>',
 									data: data_<? echo $id; ?>,
-									backgroundColor: (chart_type_<? echo $id; ?> == 'bar' ? 'lightblue' : COLORS),
+									backgroundColor: (['bar', 'line'].indexOf(chart_type_<? echo $id; ?>) != -1 ? 'lightblue' : COLORS),
 								//backgroundColor: COLORS,
 									borderWidth: 1
 								}]
@@ -219,11 +226,18 @@
 											size: '20px'
 										},
 										text: '<? echo $chart->get('title'); ?>'
+									},
+            			legend: {
+                		display: (['bar', 'line'].indexOf(chart_type_<? echo $id; ?>) != -1 ? false : true),
 									}
 								},
 								scales: {
+									x: {
+										display: 'auto'
+									},
 									y: {
-										beginAtZero: true
+										beginAtZero: true,
+										display: 'auto'
 									}
 								}
 							}

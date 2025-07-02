@@ -52,7 +52,7 @@ else { ?>
 						<th><a href="index.php?go=layer_charts_Anzeigen&order=id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
 						<th><a href="index.php?go=layer_charts_Anzeigen&order=title&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Titel</a></th>
 						<th><a href="index.php?go=layer_charts_Anzeigen&order=type&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Typ</th>
-						<th><a href="index.php?go=layer_charts_Anzeigen&order=aggregate_function&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Funktion</a></th>
+						<th><a href="index.php?go=layer_charts_Anzeigen&order=beschreibung&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Beschreibung</a></th>
 						<td colspan="2" align="right"><a class="btn btn-new" href="index.php?go=layer_chart_Editor&layer_id=<? echo $this->layer->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="<? echo $strCreateNewLayerChartTitle; ?>" class="fa fa-plus" style="color: white; margin-bottom: 10px"></i></a></td>
 					</tr><?php
 					foreach ($this->layer->charts AS $chart) { ?>
@@ -67,7 +67,7 @@ else { ?>
 								<span><?php echo $chart->get('type'); ?></span>
 							</td>
 							<td>
-								<span><?php echo $chart->get('aggregate_function'); ?></span>
+								<span><?php echo $chart->get('beschreibung'); ?></span>
 							</td>
 							<td align="right">
 								<a
