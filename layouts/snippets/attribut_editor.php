@@ -356,7 +356,7 @@ function set_all(column){
 				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 162); ?>px">
 		<?	if ((count($this->attributes))!=0) { 
 					for ($i = 0; $i < count_or_0($this->attributes['type']); $i++){ ?>
-						<tr class="listen-tr">
+						<tr class="listen-tr" title="<? echo $this->attributes['name'][$i]; ?>">
 							<td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
 						  	<input type="text"
