@@ -376,7 +376,7 @@ function go_switch($go, $exit = false) {
 					'zoom_to_layer_extent' => 'boolean'
 				]);
 				$GUI->activate_layer_only($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
-				// $GUI->saveMap('');
+				$GUI->saveMap('');
 				// $currenttime = date('Y-m-d H:i:s',time());
 				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				// $GUI->drawMap();
