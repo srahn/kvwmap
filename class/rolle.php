@@ -37,6 +37,63 @@ class rolle {
 		$this->loglevel = 0;
 	}
 
+	/**
+	 * Function create a rolle for a user with $user_id and all relations to menues, layers and layergroups in stelle with $stelle_id.
+	 * If $default_user_id is given them settings will be used.
+	 * @param database $database MySQL-Database object from class database defined in classes/mysql.php
+	 * @param Integer $stelle_id
+	 * @param Integer $user_id
+	 * @param Integer $default_user_id Die id eines Default-Users.
+	 * @param Layer[] $layer Array with layer_ids to assign rolle to there groups.
+	 * @return Array Result with Boolean success and String $msg.
+	 */
+	public static	function create($database, $stelle_id, $user_id, $default_user_id = 0, $layer = array(), $parent_stelle_id = NULL) {
+		$rolle = new rolle($user_id, $stelle_id, $database);
+		# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der selektierten Obermenüs zur Rolle
+		if (!$rolle->setMenue($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen der Menüs der Stelle zum Nutzer.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der Layer zur Rolle
+		if (!$rolle->setLayer($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen des Layers zur Rolle.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+		if (!$rolle->setGroups($user_id, $stelle_id, $default_user_id, $layer)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Hinzufügen der Layergruppen der selektierten Layer zur Rolle.<br>' . $database->errormessage
+			);
+		};	
+
+		if (!$rolle->setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen von savedLayersFromDefaultUser.<br>' . $database->errormessage
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Anlegen der Rolle erfolgreich.'
+		);
+	}
+
 	/*
 	* Speichert den Status der Layergruppen
 	* @param $formvars array mit key group_<group_id> welcher den Status der Gruppe enthält 
@@ -529,6 +586,7 @@ class rolle {
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
+			$this->routing = in_array('routing', $buttons);
 			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
 			$this->redline_text_color = $rs['redline_text_color'];
 			$this->redline_font_family = $rs['redline_font_family'];
@@ -1681,6 +1739,11 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Fügt die Rolle für den Nutzer $user_id in der Stelle $stelle_id hinzu.
+	 * Verwendet die Defaulteinstellungen der Rolle $default_user_id, falls übergeben
+	 * und anders als $user_id
+	 */
 	function setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id = NULL) {
 		# trägt die Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
@@ -1846,7 +1909,7 @@ class rolle {
 		$new_layer_params = array();
 		foreach (array_keys($layer_params) AS $key) {
 			$layer_param = LayerParam::find_by_key($this->gui_object, $key);
-			$options = $layer_param->get_options($this->user_id, $this->stelle_id);
+			$result = $layer_param->get_options($this->user_id, $this->stelle_id);
 			if (!$result['success']) {
 				return $result;
 			}
@@ -1856,10 +1919,10 @@ class rolle {
 					function($option) {
 						return $option['value'];
 					},
-					$options
+					$result['options']
 				)
 			)) {
-				$layer_params[$key] = $options[$value];
+				$layer_params[$key] = $result['options']['value'][0];
 			};
 		}
 		foreach ($layer_params AS $param_key => $value) {
@@ -2038,13 +2101,17 @@ class rolle {
 				WHERE
 					stelle_id = ".$stelle_id." AND
 					user_id = ".$default_user_id;
-			#echo '<br>Gruppen: '.$sql;
+			#echo '<br>SQL zum Zuordnen der Rolle zu den Layergruppen: '.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rolle:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			if (!$this->database->success) {
+				$msg = "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__;
+				$this->debug->write($msg, 4);
+				return 0;
+			}
 		}
 		else {
-			for($j = 0; $j < count_or_0($layerids); $j++){
+			for ($j = 0; $j < count_or_0($layerids); $j++){
 				$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
 					WITH RECURSIVE cte (group_id) AS (
@@ -2068,7 +2135,10 @@ class rolle {
 				#echo '<br>Gruppen: '.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 		}
 		return 1;
@@ -2081,7 +2151,10 @@ class rolle {
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			if (!$this->database->success) {
+				$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+				return 0;
+			}
 		}
 		return 1;
 	}
@@ -2131,14 +2204,23 @@ class rolle {
 					FROM
 						(
 							WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
-								SELECT DISTINCT
+								(
+									SELECT DISTINCT
 										ul.`Stelle_ID` AS stelle_id,
 										r.user_id,
 										coalesce(ul.group_id, l.Gruppe) AS group_id
-								FROM
+									FROM
 										used_layer ul JOIN
 										layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
 										rolle r ON ul.`Stelle_ID` = r.stelle_id
+									UNION ALL
+									SELECT DISTINCT
+										stelle_id,
+										user_id,
+										Gruppe
+									FROM
+										rollenlayer
+								)
 								UNION ALL
 								SELECT 
 										cte.stelle_id,

@@ -104,20 +104,22 @@ if ($doit == true) {
 				</tr>
 			</table><?
 		}
-		$table_id = rand(0, 100000); ?>
-
-		<div style="display: flex; justify-content: space-between;">
-			<div style="position: sticky; left: calc(50% - 225px); min-width: 450px"> 
-				<h2 id="layername"><? echo $layer_name; ?></h2><?
-				echo value_of($layer, 'paging'); ?>
-			</div>
-			<div class="gle-view">	<?
-				$s = ($layer['template'] == ''? 0 : 1);
-				for ($g = $s; $g < 3; $g++) {
-					echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['Layer_ID'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
-				}	?>
-			</div>
-		</div> <?
+		$table_id = rand(0, 100000); 
+		
+		if ($this->new_entry != true) {	?>
+			<div style="display: flex; justify-content: space-between;">
+				<div style="position: sticky; left: calc(50% - 225px); min-width: 450px"> 
+					<h2 id="layername"><? echo $layer_name; ?></h2><?
+					echo value_of($layer, 'paging'); ?>
+				</div>
+				<div class="gle-view">	<?
+					$s = ($layer['template'] == ''? 0 : 1);
+					for ($g = $s; $g < 3; $g++) {
+						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['Layer_ID'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+					}	?>
+				</div>
+			</div> <?
+		}
 
 		if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
 			include('dataset_operations.php');

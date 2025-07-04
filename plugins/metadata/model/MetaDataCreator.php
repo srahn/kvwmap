@@ -12,6 +12,9 @@ class MetaDataCreator {
   }
 
 	function get_transfer_option($online_function_code) {
+		/* according to feedback, the codelistvalue should either only 
+		   ever be download for direct download links or information (e.g. also for searchable pages) */
+		$onlinefunctioncode_codelistvalue = ($online_function_code == 'download') ? 'download' : 'information';
     if (array_key_exists($online_function_code . '_url', $this->md->data) AND $this->md->get($online_function_code . '_url') != '') {
       return "
     <gmd:transferOptions>
@@ -25,7 +28,7 @@ class MetaDataCreator {
               <gco:CharacterString>" . $this->md->get($online_function_code . '_name') . "</gco:CharacterString>
             </gmd:name>
             <gmd:function>
-              <gmd:CI_OnLineFunctionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode\" codeListValue=\"information\">" . $online_function_code . "</gmd:CI_OnLineFunctionCode>
+              <gmd:CI_OnLineFunctionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode\" codeListValue=\"" . $onlinefunctioncode_codelistvalue . "\">" . $onlinefunctioncode_codelistvalue . "</gmd:CI_OnLineFunctionCode>
             </gmd:function>
           </gmd:CI_OnlineResource>
         </gmd:onLine>
@@ -37,82 +40,120 @@ class MetaDataCreator {
     }
   }
 
-	function getReferenzSysteme() {
+	/* for dataset, this should return only the actual value of the dataset, e.g. 25832, not other EPSG-system supported by the service */
+	function getReferenzSysteme($is_dataset) {
 		$sb = "
-		<gmd:referenceSystemInfo>
-			<gmd:MD_ReferenceSystem>
-				<gmd:referenceSystemIdentifier>
-					<gmd:RS_Identifier>
-						<gmd:code>
-							<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/" . $this->md->get('stellendaten')['epsg_code'] . "\">EPSG " . $this->md->get('stellendaten')['epsg_code'] . ": ETRS89 / UTM Zone " . substr($this->md->get('stellendaten')['epsg_code'], -2) . "N</gmx:Anchor>
-						</gmd:code>
-					</gmd:RS_Identifier>
-				</gmd:referenceSystemIdentifier>
-			</gmd:MD_ReferenceSystem>
-		</gmd:referenceSystemInfo>
-		<gmd:referenceSystemInfo>
-			<gmd:MD_ReferenceSystem>
-				<gmd:referenceSystemIdentifier>
-					<gmd:RS_Identifier>
-						<gmd:code>
-							<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/4258\">EPSG 4258: ETRS89 / geographisch</gmx:Anchor>
-						</gmd:code>
-					</gmd:RS_Identifier>
-				</gmd:referenceSystemIdentifier>
-			</gmd:MD_ReferenceSystem>
-		</gmd:referenceSystemInfo>
-		<gmd:referenceSystemInfo>
-			<gmd:MD_ReferenceSystem>
-				<gmd:referenceSystemIdentifier>
-					<gmd:RS_Identifier>
-						<gmd:code>
-							<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/4326\">EPSG 4326: WGS84 geographic coordinates</gmx:Anchor>
-						</gmd:code>
-					</gmd:RS_Identifier>
-				</gmd:referenceSystemIdentifier>
-			</gmd:MD_ReferenceSystem>
-		</gmd:referenceSystemInfo>";
+			<gmd:referenceSystemInfo>
+				<gmd:MD_ReferenceSystem>
+					<gmd:referenceSystemIdentifier>
+						<gmd:RS_Identifier>
+							<gmd:code>
+								<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/" . $this->md->get('stellendaten')['epsg_code'] . "\">EPSG " . $this->md->get('stellendaten')['epsg_code'] . ": ETRS89 / UTM Zone " . substr($this->md->get('stellendaten')['epsg_code'], -2) . "N</gmx:Anchor>
+							</gmd:code>
+						</gmd:RS_Identifier>
+					</gmd:referenceSystemIdentifier>
+				</gmd:MD_ReferenceSystem>
+			</gmd:referenceSystemInfo>";
+		if(!$is_dataset) {
+			$sb .= "
+			<gmd:referenceSystemInfo>
+				<gmd:MD_ReferenceSystem>
+					<gmd:referenceSystemIdentifier>
+						<gmd:RS_Identifier>
+							<gmd:code>
+								<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/4258\">EPSG 4258: ETRS89 / geographisch</gmx:Anchor>
+							</gmd:code>
+						</gmd:RS_Identifier>
+					</gmd:referenceSystemIdentifier>
+				</gmd:MD_ReferenceSystem>
+			</gmd:referenceSystemInfo>
+			<gmd:referenceSystemInfo>
+				<gmd:MD_ReferenceSystem>
+					<gmd:referenceSystemIdentifier>
+						<gmd:RS_Identifier>
+							<gmd:code>
+								<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/4326\">EPSG 4326: WGS84 geographic coordinates</gmx:Anchor>
+							</gmd:code>
+						</gmd:RS_Identifier>
+					</gmd:referenceSystemIdentifier>
+				</gmd:MD_ReferenceSystem>
+			</gmd:referenceSystemInfo>";
+		}
 		return $sb;
 	}
 
 	function getResponsibleParty($ows_var, $role) {
+		// certain elements and subelements should only be filled if they actually exist
+		$person = $this->md->get('stellendaten')[$ows_var . 'person'];
+		$organization = $this->md->get('stellendaten')[$ows_var . 'organization'];
+		$voicephone = $this->md->get('stellendaten')[$ows_var . 'voicephone'];
+		$facsimile = $this->md->get('stellendaten')[$ows_var . 'facsimile'];
+		$address = $this->md->get('stellendaten')[$ows_var . 'address'];
+		$city = $this->md->get('stellendaten')[$ows_var . 'city'];
+		$postalcode = $this->md->get('stellendaten')[$ows_var . 'postalcode'];
+		$emailadress = $this->md->get('stellendaten')[$ows_var . 'emailaddress'];
 		$sb = "
 					<gmd:CI_ResponsibleParty>
 						<gmd:individualName>
-							<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'person'] . "</gco:CharacterString>
+							<gco:CharacterString>" . $person . "</gco:CharacterString>
 						</gmd:individualName>
 						<gmd:organisationName>
-							<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'organization'] . "</gco:CharacterString>
+							<gco:CharacterString>" . $organization . "</gco:CharacterString>
 						</gmd:organisationName>
 						<gmd:contactInfo>
-							<gmd:CI_Contact>
+							<gmd:CI_Contact>";
+		if(!empty($voicephone) or !empty($facsimile)) {
+			$sb .= "
 								<gmd:phone>
-									<gmd:CI_Telephone>
+									<gmd:CI_Telephone>";
+			if(!empty($voicephone)) {
+				$sb .= "
 										<gmd:voice>
-											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'voicephone'] . "</gco:CharacterString>
-										</gmd:voice>
+											<gco:CharacterString>" . $voicephone . "</gco:CharacterString>
+										</gmd:voice>";
+			}
+			if(!empty($facsimile)) {
+				$sb .= "
 										<gmd:facsimile>
-											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'facsimile'] . "</gco:CharacterString>
-										</gmd:facsimile>
+											<gco:CharacterString>" . $facsimile . "</gco:CharacterString>
+										</gmd:facsimile>";
+			}
+			$sb .= "
 									</gmd:CI_Telephone>
-								</gmd:phone>
+								</gmd:phone>";
+		}
+		$sb .= "				
 								<gmd:address>
-									<gmd:CI_Address>
+									<gmd:CI_Address>";
+		if(!empty($address)) {
+			$sb .= "
 										<gmd:deliveryPoint>
-											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'address'] . "</gco:CharacterString>
-										</gmd:deliveryPoint>
+											<gco:CharacterString>" . $address . "</gco:CharacterString>
+										</gmd:deliveryPoint>";
+		}
+		if(!empty($city)) {
+			$sb .= "
 										<gmd:city>
-											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'city'] . "</gco:CharacterString>
-										</gmd:city>
+											<gco:CharacterString>" . $city . "</gco:CharacterString>
+										</gmd:city>";
+		}
+		if(!empty($postalcode)) {
+			$sb .= "
 										<gmd:postalCode>
-											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'postalcode'] . "</gco:CharacterString>
-										</gmd:postalCode>
+											<gco:CharacterString>" . $postalcode . "</gco:CharacterString>
+										</gmd:postalCode>";
+		}
+		$sb .= "
 										<gmd:country>
-											<gco:CharacterString>DEU</gco:CharacterString>
-										</gmd:country>
+											<gco:CharacterString>Deutschland</gco:CharacterString>
+										</gmd:country>";
+		if(!empty($emailadress)) {
+			$sb .= "
 										<gmd:electronicMailAddress>
-											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'emailaddress'] . "</gco:CharacterString>
-										</gmd:electronicMailAddress>
+											<gco:CharacterString>" . $emailadress . "</gco:CharacterString>
+										</gmd:electronicMailAddress>";
+		}
+		$sb .= "
 									</gmd:CI_Address>
 								</gmd:address>
 								<gmd:onlineResource>
@@ -161,9 +202,11 @@ class MetaDataCreator {
 		return $element;
 	}
 
-	public function createMetaDataDownload() {
+	public function createMetadataDownload() {
+		// old XSD: http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd
+		// changed because GDI-NI (and GDI-DE) validate against APISO schema
 		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
-	<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
+	<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd\">
 	<gmd:fileIdentifier>
 		<gco:CharacterString>" . $this->md->get('uuids')['metadata_downloadservice_uuid'] . "</gco:CharacterString>
 	</gmd:fileIdentifier>
@@ -185,7 +228,7 @@ class MetaDataCreator {
 	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
 	</gmd:dateStamp>
-	" . $this->getReferenzSysteme() . "
+	" . $this->getReferenzSysteme(false) . "
 	<gmd:identificationInfo xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<srv:SV_ServiceIdentification>
 			<gmd:citation>
@@ -216,16 +259,13 @@ class MetaDataCreator {
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>Downloaddienst (WFS) " . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
-			</gmd:abstract>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_content', 'publisher') . "
+				<gco:CharacterString>" . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
+			</gmd:abstract>" . 
+			//<gmd:pointOfContact>
+				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			//</gmd:pointOfContact>
+			"<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
 				<gmd:MD_BrowseGraphic>
@@ -472,9 +512,9 @@ class MetaDataCreator {
 		return $sb;
 	}
 
-	public function createMetaDataView() {
+	public function createMetadataView() {
 		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
-		<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
+		<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd\">
 	<gmd:fileIdentifier>
 		<gco:CharacterString>" . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
 	</gmd:fileIdentifier>
@@ -491,12 +531,12 @@ class MetaDataCreator {
 		<gco:CharacterString>Service</gco:CharacterString>
 	</gmd:hierarchyLevelName>
 	<gmd:contact>
-		" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
+		" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 	</gmd:contact>
 	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
 	</gmd:dateStamp>
-	" . $this->getReferenzSysteme() . "
+	" . $this->getReferenzSysteme(false) . "
 	<gmd:identificationInfo xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<srv:SV_ServiceIdentification>
 			<gmd:citation>
@@ -527,16 +567,13 @@ class MetaDataCreator {
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>Darstellungsdienst (WMS) " . $this->md->get('id_abstract')['viewservice'] . "</gco:CharacterString>
-			</gmd:abstract>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>
-			<gmd:pointOfContact>
-				" . $this->getResponsibleParty('ows_content', 'publisher') . "
+				<gco:CharacterString>" . $this->md->get('id_abstract')['viewservice'] . "</gco:CharacterString>
+			</gmd:abstract>" .
+			//<gmd:pointOfContact>
+				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			//</gmd:pointOfContact>
+			"<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
 				<gmd:MD_BrowseGraphic>
@@ -796,7 +833,7 @@ class MetaDataCreator {
 
 	public function createMetadataGeodatensatz() {
 		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
-	<gmd:MD_Metadata xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:igctx=\"https://www.ingrid-oss.eu/schemas/igctx\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
+	<gmd:MD_Metadata xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:igctx=\"https://www.ingrid-oss.eu/schemas/igctx\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd\">
 		<gmd:fileIdentifier>
 			<gco:CharacterString>" . $this->md->get('uuids')['metadata_dataset_uuid'] . "</gco:CharacterString>
 		</gmd:fileIdentifier>
@@ -810,7 +847,7 @@ class MetaDataCreator {
 			<gmd:MD_ScopeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode\" codeListValue=\"dataset\">dataset</gmd:MD_ScopeCode>
 		</gmd:hierarchyLevel>
 		<gmd:contact>
-			" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
+			" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 		</gmd:contact>
 		<gmd:dateStamp>
 			<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
@@ -821,12 +858,12 @@ class MetaDataCreator {
 		<gmd:metadataStandardVersion>
 			<gco:CharacterString>2003/Cor.1:2006</gco:CharacterString>
 		</gmd:metadataStandardVersion>
-		" . $this->getReferenzSysteme() . "
-    <gmd:identificationInfo>
-      <gmd:MD_DataIdentification uuid=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\">
-        <gmd:citation>
-          <gmd:CI_Citation>
-            <gmd:title>
+		" . $this->getReferenzSysteme(true) . "
+		<gmd:identificationInfo>
+			<gmd:MD_DataIdentification uuid=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\">
+				<gmd:citation>
+					<gmd:CI_Citation>
+						<gmd:title>
 							<gco:CharacterString>Geodatensatz " . $this->md->get('id_cite_title') . "</gco:CharacterString>
 						</gmd:title>
 						<gmd:date>
@@ -849,19 +886,19 @@ class MetaDataCreator {
 						<gmd:citedResponsibleParty>
 							" . $this->getResponsibleParty('ows_content', 'owner') . "
 						</gmd:citedResponsibleParty>
-          </gmd:CI_Citation>
-        </gmd:citation>
+					</gmd:CI_Citation>
+				</gmd:citation>
 				<gmd:abstract>
-					<gco:CharacterString>Geodatensatz " . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
+					<gco:CharacterString>" . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
 				</gmd:abstract>
 				<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-				</gmd:pointOfContact>
-				<gmd:pointOfContact>
-					" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-				</gmd:pointOfContact>
-				<gmd:pointOfContact>
-					" . $this->getResponsibleParty('ows_content', 'publisher') . "
+				</gmd:pointOfContact>" .
+				//<gmd:pointOfContact>
+					//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+				//</gmd:pointOfContact>
+				"<gmd:pointOfContact>
+					" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 				</gmd:pointOfContact>
 				<gmd:resourceMaintenance>
 					<gmd:MD_MaintenanceInformation>
@@ -1011,12 +1048,12 @@ class MetaDataCreator {
         <gmd:language>
           <gmd:LanguageCode codeList=\"http://www.loc.gov/standards/iso639-2/\" codeListValue=\"ger\"/>
         </gmd:language>
-        <gmd:characterSet>
-          <gmd:MD_CharacterSetCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_CharacterSetCode\" codeListValue=\"utf8\"/>
-        </gmd:characterSet>
-        <gmd:topicCategory>
-          <gmd:MD_TopicCategoryCode>planningCadastre</gmd:MD_TopicCategoryCode>
-        </gmd:topicCategory>
+				<gmd:characterSet>
+					<gmd:MD_CharacterSetCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_CharacterSetCode\" codeListValue=\"utf8\"/>
+				</gmd:characterSet>
+				<gmd:topicCategory>
+					<gmd:MD_TopicCategoryCode>planningCadastre</gmd:MD_TopicCategoryCode>
+				</gmd:topicCategory>
 				<gmd:extent>
 					<gmd:EX_Extent>
 						<gmd:geographicElement>
@@ -1067,9 +1104,9 @@ class MetaDataCreator {
 						$this->getResponsibleParty('ows_distribution', 'distributor') . "
 					</gmd:distributorContact>
 				</gmd:MD_Distributor>" .
-        $this->download_transfer_option .
-        $this->search_transfer_option . "
-        <gmd:transferOptions>
+					$this->download_transfer_option .
+					$this->search_transfer_option . "
+				<gmd:transferOptions>
 					<gmd:MD_DigitalTransferOptions>
 						<gmd:onLine>
 							<gmd:CI_OnlineResource>

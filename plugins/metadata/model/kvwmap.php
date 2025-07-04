@@ -164,7 +164,7 @@
 				);
 			}
 
-			$package->update_attr(array('pack_status_id = 3'));
+			$package->update_attr(array('pack_status_id = 3')); // in Arbeit
 			$GUI->formvars['selected_layer_id'] = $package->get('layer_id');
 			$GUI->formvars['epsg'] = $package->layer->get('epsg_code');
 			$export_path = $package->get_export_path();
@@ -667,39 +667,44 @@
 		foreach ($all_packages AS $package) {
 			$pfad = replace_params_rolle($package->layer->get('pfad'));
 			$where = "";
-			if (!in_array($package->layer->get('Datentyp'), array(3, 5))) {
+			if (in_array($package->layer->get('Datentyp'), array(0, 1, 2, 7, 8))) {
 				// Nur für Vektorlayer
-				$where = "WHERE
-						ST_MakeEnvelope(
-							" . $GUI->Stelle->MaxGeorefExt->minx . ",
-							" . $GUI->Stelle->MaxGeorefExt->miny . ",
-							" . $GUI->Stelle->MaxGeorefExt->maxx . ",
-							" . $GUI->Stelle->MaxGeorefExt->maxy . ",
-							25832
-						) && query." . $package->layer->get('geom_column') . "
-				";
-				$sql = "
-					SET search_path = " . $package->layer->get('schema') . ", public;
-					SELECT
-						count(*) AS anzahl
-					FROM
-						(
-							" . $pfad . "
-						) AS query
-					" . $where . "
-				";
-				// echo '<br>SQL zum Filtern der Daten ' . $package->get('bezeichnung') . ' im Datenpaket: ' . $sql;
-				$query = pg_query($sql);
-				$num_feature = pg_fetch_assoc($query)['anzahl'];
-				if ( $num_feature > 0) {
-					// echo '<br>Anzahl Datensätze: ' . $num_feature;
-					$package->num_feature = $num_feature;
-					$GUI->metadata_data_packages[] = $package;
-				}
-				// else {
-				// 	echo '<br>Ressource: ' . $package->get('ressource_id') . ' Paket: ' . $package->get('id') . ' ' . $package->get('bezeichnung') . ' Layer-ID: ' . $package->get('layer_id') . ' Datentyp: ' . $package->layer->get('Datentyp') . ' geom_column: ' . $package->layer->get('geom_column') . ' hat keine Daten in dieser Stelle Abfrage:<br><textarea cols="60" rows="10">' . $sql . '</textarea>';
-				// }
+				$where = "WHERE " . $GUI->pgdatabase->get_extent_filter(
+					$GUI->Stelle->MaxGeorefExt,
+					$GUI->user->rolle->epsg_code,
+					$package->layer->get('geom_column'),
+					$package->layer->get('epsg_code')
+				);
+				// $where = "WHERE ST_Transform(ST_MakeEnvelope(
+				// 			" . $GUI->Stelle->MaxGeorefExt->minx . ",
+				// 			" . $GUI->Stelle->MaxGeorefExt->miny . ",
+				// 			" . $GUI->Stelle->MaxGeorefExt->maxx . ",
+				// 			" . $GUI->Stelle->MaxGeorefExt->maxy . ",
+				// 			" . $GUI->Stelle->epsg_code . "
+				// 		), " . $package->layer->get('epsg_code') . ") && query." . $package->layer->get('geom_column') . "
+				// ";
 			}
+			$sql = "
+				SET search_path = " . $package->layer->get('schema') . ", public;
+				SELECT
+					count(*) AS anzahl
+				FROM
+					(
+						" . $pfad . "
+					) AS query
+				" . $where . "
+			";
+			// echo '<br>SQL zum Filtern der Daten ' . $package->get('bezeichnung') . ' im Datenpaket: ' . $sql;
+			$query = pg_query($sql);
+			$num_feature = pg_fetch_assoc($query)['anzahl'];
+			if ( $num_feature > 0) {
+				// echo '<br>Anzahl Datensätze: ' . $num_feature;
+				$package->num_feature = $num_feature;
+				$GUI->metadata_data_packages[] = $package;
+			}
+			// else {
+			// 	echo '<br>Ressource: ' . $package->get('ressource_id') . ' Paket: ' . $package->get('id') . ' ' . $package->get('bezeichnung') . ' Layer-ID: ' . $package->get('layer_id') . ' Datentyp: ' . $package->layer->get('Datentyp') . ' geom_column: ' . $package->layer->get('geom_column') . ' hat keine Daten in dieser Stelle Abfrage:<br><textarea cols="60" rows="10">' . $sql . '</textarea>';
+			// }
 		}
 		$GUI->output();
 	};

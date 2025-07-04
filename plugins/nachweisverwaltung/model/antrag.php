@@ -285,20 +285,22 @@ class antrag {
     return $pdf;
   }
   	    
-  function getAntraege($id,$nr,$richtung,$order,$current_stelle_id) {
+  function getAntraege($id, $lea_id, $richtung, $order, $current_stelle_id) {
 		global $admin_stellen;
-    $sql ="SELECT a.*,a.vermstelle,va.art AS vermart, a.vermart as verm_art, vs.name AS vermst";
-    $sql.=" ,SUBSTRING(a.antr_nr from 1 for 2) AS antr_nr_a";
-    $sql.=" ,SUBSTRING(a.antr_nr from 4 for 4) AS antr_nr_b";
-    $sql.=" FROM nachweisverwaltung.n_antraege AS a";
-		$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle vs ON a.vermstelle=vs.id";
-    $sql.=" LEFT JOIN nachweisverwaltung.n_vermart va ON a.vermart=va.id WHERE 1=1";
-    if ($id[0]!='') {
-      $sql.=" AND a.antr_nr IN ('".$id[0]."'";
-      for ($i=1;$i<count($id);$i++) {
-        $sql.=",'".$id[$i]."'";
-      }
-      $sql.=")";
+    $sql = "
+      SELECT 
+        a.*,
+        va.art AS vermart, 
+        a.vermart as verm_art, 
+        vs.name AS vermst,
+        SUBSTRING(a.antr_nr from 1 for 2) AS antr_nr_a,
+        SUBSTRING(a.antr_nr from 4 for 4) AS antr_nr_b
+      FROM 
+        " . ($lea_id? 'lenris.lea_vermessungsantrag' : 'nachweisverwaltung.n_antraege') . " AS a
+        LEFT JOIN nachweisverwaltung.n_vermstelle vs ON a.vermstelle = vs.id
+        LEFT JOIN nachweisverwaltung.n_vermart va ON a.vermart=va.id WHERE 1=1";
+    if ($lea_id == '' AND $id[0] != '') {
+      $sql .= " AND a.antr_nr IN ('" . implode("', '", $id) . "')";
     }
 		if(!in_array($current_stelle_id, $admin_stellen))$sql.= " AND stelle_id = ".$current_stelle_id;
     if ($order=='') {

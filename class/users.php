@@ -1009,7 +1009,7 @@ class user {
 				LEFT JOIN rolle rall ON u.ID = rall.user_id
 				LEFT JOIN rolle radm ON radm.stelle_id = rall.stelle_id
 			";
-			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
+			$where[] = "(radm.user_id = ".$admin_id.")";
 		}
 
 		if ($id > 0) {
@@ -1227,6 +1227,7 @@ class user {
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
 			if($formvars['polyquery']){$buttons .= 'polyquery,';}
 			if($formvars['measure']){$buttons .= 'measure,';}
+			if($formvars['routing']){$buttons .= 'routing,';}
 			if($formvars['punktfang']){$buttons .= 'punktfang,';}
 			if (value_of($formvars, 'freepolygon')) { $buttons .= 'freepolygon,';}
 			if (value_of($formvars, 'freearrow')) { $buttons .= 'freearrow,';}
@@ -1362,6 +1363,16 @@ class user {
 		return $ret;
 	}
 
+	/**
+	 * Check the data in $userdaten
+	 * - Check if $userdaten['id'] exists in table users column ID with function exists
+	 * - Check if nachname, vorname or loginname is missing in $userdaten
+	 * - If loginname exists check if it exists in users table.
+	 * - If changepasswd is set, check if password1 and password2 exists and are equal.
+	 * - If phon is set check the length.
+	 * - If email is set check if it is valid with function emailcheck
+	 * @return Array $ret If $ret[0] = 1 $ret[1] returns the message about missing or failed userdata, else $ret[0] is 0 which indicates no problems. 
+	 */
 	function checkUserDaten($userdaten) {
 		$Meldung='';
 		# Prüfen ob die user_id schon existiert
