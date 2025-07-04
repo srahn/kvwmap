@@ -112,19 +112,27 @@ if ($doit == true) {
 					<h2 id="layername"><? echo $layer_name; ?></h2><?
 					echo value_of($layer, 'paging'); ?>
 				</div>
+				<? if ($layer['records_status'] !== '0') { ?>
 				<div class="gle-view">	<?
 					$s = ($layer['template'] == ''? 0 : 1);
 					for ($g = $s; $g < 3; $g++) {
 						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
 					}	?>
 				</div>
+				<? } ?>
 			</div> <?
 		}
 
 		if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
 			include('dataset_operations.php');
 		}		?>
-		<div id="<? echo $table_id; ?>" class="records" style="width: 100%; padding:2; <? if ($layer['gle_view'] == 2){echo 'display: flex;';} ?>"><?
+		<div id="<? echo $table_id; ?>" class="records" style="width: 100%; padding:2; <? 
+			if ($layer['records_status'] === '0') {
+				echo 'display: none;';
+			}
+			elseif ($layer['gle_view'] == 2){
+				echo 'display: flex;';
+			} ?>"><?
 			for ($k; $k<$anzObj; $k++) {
 				$table = array();
 				$nl = false;

@@ -54,8 +54,6 @@
 					layer_id: <? echo $layer['layer_id']; ?>,
 					title: $('.diagram_form_elem_' + id + '[name="diagram_title"]').val(),
 					type: $('.diagram_form_elem_' + id + '[name="diagram_type"]').val(),
-					value_attribute_label: $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_label"]').val(),
-					aggregate_function: $('.diagram_form_elem_' + id + '[name="diagram_aggregate_function"]').val(),
 					value_attribute_name: $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_name"]').val(),
 					label_attribute_name: $('.diagram_form_elem_' + id + '[name="diagram_label_attribute_name"]').val(),
 					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
@@ -88,8 +86,6 @@
 					id: id,
 					title: $('.diagram_form_elem_' + id + '[name="diagram_title"]').val(),
 					type: $('.diagram_form_elem_' + id + '[name="diagram_type"]').val(),
-					value_attribute_label: $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_label"]').val(),
-					aggregate_function: $('.diagram_form_elem_' + id + '[name="diagram_aggregate_function"]').val(),
 					value_attribute_name: $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_name"]').val(),
 					label_attribute_name: $('.diagram_form_elem_' + id + '[name="diagram_label_attribute_name"]').val(),
 					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
@@ -159,14 +155,14 @@
 			font-weight: bold;
 		">
 			<a href="javascript:void(0);" onclick="$('#diagramms, .diagram_group_img').toggle()">
-				<img class="diagram_group_img" src="graphics//plus.gif" border="0" style="display: none">
-				<img class="diagram_group_img" src="graphics//minus.gif" border="0">
+				<img class="diagram_group_img" src="graphics/plus.gif" border="0" <? if ($layer['charts_status'] == 2) {echo 'style="display: none"';} ?>>
+				<img class="diagram_group_img" src="graphics/minus.gif" border="0" <? if ($layer['charts_status'] != 2) {echo 'style="display: none"';} ?>>
 			</a> Diagramme
 		</td>
 	</tr>
 	<tr>
 		<td colspan="2">
-			<div id="diagramms"><?
+			<div id="diagramms" <? if ($layer['charts_status'] != 2) {echo 'style="display: none"';} ?>><?
 				foreach ($layer['charts'] AS $chart) {
 					$id = $chart->get($chart->identifier);
 					#echo 'Chart: ' . $id; ?>
@@ -210,7 +206,7 @@
 							data: {
 								labels: labels_<? echo $id; ?>,
 								datasets: [{
-									label: '<? echo $chart->get('value_attribute_label'); ?>',
+									label: '',
 									data: data_<? echo $id; ?>,
 									backgroundColor: (['bar', 'line'].indexOf(chart_type_<? echo $id; ?>) != -1 ? 'lightblue' : COLORS),
 								//backgroundColor: COLORS,

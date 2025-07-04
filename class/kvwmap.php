@@ -12026,7 +12026,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			# new
 			$this->layer_chart = new LayerChart($this);
 			$this->layer_chart->setKeysFromTable();
-			$this->layer_chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite'), 'keep');
+			$this->layer_chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite'), 'keep');
 		}
 		$this->layer = Layer::find_by_id($this, $this->formvars['layer_id']);
 		$this->main = 'layer_chart_formular.php';
@@ -12035,7 +12035,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function layer_chart_Speichern($chart) {
 		include(LAYOUTPATH . 'languages/layer_chart_' . rolle::$language . '.php');
-		$chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite'), 'keep');
+		$chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite'), 'keep');
 		$results = $chart->validate();
 		if (empty($results)) {
 			if ($chart->get_id() == '') {
@@ -17798,6 +17798,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->formvars['connection_id'] = $layerdb->connection_id;
 		$this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
 		$this->formvars['transparency'] = 100;
+		$this->formvars['records_status'] = 0;
+		$this->formvars['charts_status'] = 2;
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 		$attributes = $dbmap->load_attributes($layerdb, $query);
@@ -17811,7 +17813,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'layer_id' => -$layer_id, 
 			'title' => '', 
 			'type' => 'line', 
-			'aggregate_function' => 'average', 
 			'value_attribute_name' => 'ep__height', 
 			'label_attribute_name' => 'ep__distance', 
 			'beschreibung' => 'Höhenprofil', 
@@ -20410,7 +20411,9 @@ DO $$
 				labelitem,
 				classitem,
 				wms_auth_username,
-				wms_auth_password
+				wms_auth_password,
+				records_status,
+				charts_status
 			)
 			VALUES (
 				" . ($formvars['original_layer_id'] ?: 'NULL') . ",
@@ -20432,7 +20435,9 @@ DO $$
 				'" . $formvars['labelitem'] . "',
 				'" . $formvars['classitem'] . "',
 				'" . $formvars['wms_auth_username'] . "',
-				'" . $formvars['wms_auth_password'] . "'
+				'" . $formvars['wms_auth_password'] . "',
+				" . ($formvars['records_status'] ?? '2') . ",
+				" . ($formvars['charts_status'] ?? '1') . "
 			)
 			RETURNING id
 		";

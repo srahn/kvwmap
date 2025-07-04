@@ -98,19 +98,6 @@ else { ?>
 			</select>
 			<div style="clear: both"></div>
 
-			<label class="fetter form-label" for="value_attribute_label">Beschriftung Legende:</label>
-			<input class="form-field" type="text" name="value_attribute_label" value="<? echo $this->layer_chart->get('value_attribute_label'); ?>">
-			<div style="clear: both"></div>
-
-			<label class="fetter form-label" for="aggregate_function">Aggregationsfunktion:</label>
-			<select class="form-field" name="aggregate_function">
-				<option value="sum"<? echo ($this->layer_chart->get('aggregate_function') == 'sum' ? ' selected' : ''); ?>>Summe</option>
-				<option value="average"<? echo ($this->layer_chart->get('aggregate_function') == 'average' ? ' selected' : ''); ?>>Durchschnitt</option>
-				<option value="min"<? echo ($this->layer_chart->get('aggregate_function') == 'min' ? ' selected' : ''); ?>>Minimalwert</option>
-				<option value="max"<? echo ($this->layer_chart->get('aggregate_function') == 'max' ? ' selected' : ''); ?>>Maximalwert</option>
-			</select>
-			<div style="clear: both"></div>
-
 			<label class="fetter form-label" for="value_attribute_name">Werteattribut (Hochwert):</label><?
 			echo FormObject::createSelectField(
 				'value_attribute_name',
