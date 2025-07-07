@@ -18928,7 +18928,12 @@ class db_mapObj{
 				$type_attributes = $attributes['type_attributes'][$i];
 				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
 					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $query_result[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
-					@$datatype_query_result = json_decode($json, true);
+						if (is_string($json)){
+							@$datatype_query_result = json_decode($json, true);
+						}
+						else {
+							$datatype_query_result = $json;
+						}
 					if (!empty($datatype_query_result) AND $type == $attributes['type'][$i]) {	# kein Array von Datentypen --> zur weiteren einheitlichen Verarbeitung num. Array draus machen
 						$datatype_query_result = [$datatype_query_result];
 					}
