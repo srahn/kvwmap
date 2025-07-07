@@ -910,6 +910,7 @@ SCRIPTDEFINITIONS;
 		}
 		if(linefunctions == true){
 			redrawfirstline();
+			redrawsecondline();
 			if(enclosingForm.firstline.value == 'true')linelength();
 		}
 		if(multipointfunctions == true){
