@@ -23,4 +23,5 @@
 	$strUndo = "R\u00fcckg\u00e4ngig";
 	$strCircle = "Kreis hinzuf\u00fcgen";
 	$strCreateRectangle = "Rechteck aufziehen";
+	$strParallelLine = "parallele Linie erzeugen";
 ?>

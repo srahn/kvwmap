@@ -18,4 +18,5 @@
 	$strEditOther="edit other object";
   $strCircle = "add circle";
   $strCreateRectangle = "create rectangle";
+  $strParallelLine = "create parallel line";
 ?>  

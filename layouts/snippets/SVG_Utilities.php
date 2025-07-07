@@ -56,6 +56,10 @@
 	function add_parallel_polygon_submit(){
 		SVG.add_parallel_polygon_submit();
 	}	
+
+	function add_parallel_line_submit(){
+		SVG.add_parallel_line_submit();
+	}		
 	
 	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
 		SVG.add_ortho_point(world_x, world_y, local_x, local_y, deactivate);
@@ -861,9 +865,9 @@ SCRIPTDEFINITIONS;
 		}
 		if(linefunctions == true){
 			if(enclosingForm.always_draw.checked && !geomload){
-				enclosingForm.last_button.value = 'line0';
+				if(enclosingForm.last_doing2.value != '')enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
 				if(enclosingForm.secondline.value == 'true'){
-					enclosingForm.last_doing.value = 'draw_second_line';
+					if(enclosingForm.last_doing2.value == 'add_parallel_line')enclosingForm.last_button.value = 'parallel_line0';
 					if(pathx_second.length == 1){				// ersten Punkt darstellen
 						document.getElementById('startvertex').setAttribute('cx', (pathx_second[0]-minx)/scale);
 						document.getElementById('startvertex').setAttribute('cy', (pathy_second[0]-miny)/scale);
@@ -1063,6 +1067,14 @@ SCRIPTDEFINITIONS;
 					top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=add_parallel_polygon&width='+enclosingForm.bufferwidth.value+'&side='+enclosingForm.bufferside.value+'&subtract='+enclosingForm.buffersubtract.value+'&geotype=line&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 				}				
 			break;
+			case 'add_parallel_line':
+				addlinepoint_second(world_x, world_y);
+				if(pathx_second.length > 1){
+					enclosingForm.firstline.value = 'true';
+					enclosingForm.secondline.value = true;
+					top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=add_parallel_line&width='+enclosingForm.bufferwidth.value+'&side='+enclosingForm.bufferside.value+'&geotype=line&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
+				}				
+			break;			
 			case 'add_buffer_within_polygon':
 				pathx_second.push(world_x);
 				pathy_second.push(world_y);
@@ -2621,6 +2633,33 @@ function mouseup(evt){
 	  		enclosingForm.linelength.value = "0.0";
 	  	}
 	  }
+	}
+
+	function add_parallel_line(){
+		enclosingForm.last_doing.value = "add_parallel_line";			
+		var Msg = top.$("#message_box");
+		Msg.show();
+		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+		content+= \'<div style="width:320px;height: 30px">parallele Linie erzeugen</div>\';
+		content+= \'<table style="padding: 5px;width: 100%"><tr><td align="right" class="px15">Abstand:</td><td><input style="width: 110px" type="text" id="buffer_width" name="buffer_width" value="\'+enclosingForm.bufferwidth.value+\'">&nbsp;m</td></tr>\';
+		content+= \'<tr><td align="right">Seite:&nbsp;</td><td><select name="buffer_side" id="buffer_side" style="width: 110px"><option value="left">links</option><option value="right">rechts</option></select></td></tr></table>\';
+		content+= \'<br><input type="button" value="OK" onclick="add_parallel_line_submit()">\';
+		Msg.html(content);
+		if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
+			enclosingForm.pathwkt.value = buildwktlinefromsvgpath(enclosingForm.newpath.value);
+		}
+		else{
+			if(enclosingForm.newpathwkt.value != ""){
+				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
+			}
+		}
+		applylines();
+	}
+	
+	function add_parallel_line_submit(){
+		enclosingForm.bufferwidth.value = enclosingForm.buffer_width.value;
+		enclosingForm.bufferside.value = enclosingForm.buffer_side.value;
+		top.$(\'#message_box\').hide();
 	}
 
 	';
@@ -4404,7 +4443,7 @@ $measurefunctions = '
 		return $linebuttons;
 	}
 		
-	function linebuttons2($strSplitLine, $strReverse){
+	function linebuttons2($strSplitLine, $strReverse, $strParallelLine){
 		global $last_x;
 		$linebuttons = '				
 				<g id="line" onmousedown="split_geometry();highlightbyid(\'split0\');" transform="translate('.$last_x.' 0 )">
@@ -4436,6 +4475,20 @@ $measurefunctions = '
 						</g>
 					</g>
 				</g>
+		';
+		$last_x += 36;
+		$linebuttons.= '
+			<g id="parallel_line" transform="translate('.$last_x.' 0)">
+				<rect id="parallel_line0" onmouseover="show_tooltip(\'' . $strParallelLine . '\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'parallel_line0\');add_parallel_line();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(4 4) scale(1)">
+					<g transform="translate(0 0)">
+						<polyline class="navbutton_stroke navbutton_nofill" style="stroke-width:1.7;stroke-dasharray:2,1.5;" points="5.3 24 14 12 27 12" />
+					</g>
+					<g transform="translate(-2.5 -6)">
+						<polyline class="navbutton_stroke navbutton_nofill" style="stroke-width:1.7;" points="3 27 14 12 29 12" />
+					</g>
+				</g>
+			</g>
 		';
 		$last_x += 36;
 		return $linebuttons;

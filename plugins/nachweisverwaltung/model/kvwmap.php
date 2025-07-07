@@ -908,8 +908,6 @@
 						white-space: nowrap;
 						height: 6.2em;
 						vertical-align: bottom;
-					}
-					th:not(:nth-last-child(-n+2)) {
 						padding-left: 0.8em;
 						transform: rotate(-30deg);
 						transform-origin: bottom left;

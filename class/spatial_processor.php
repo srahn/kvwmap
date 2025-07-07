@@ -391,6 +391,10 @@ class spatial_processor {
 			case 'add_parallel_polygon':{
 				$result = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width'] ?: 50, $formvars['side'], $formvars['subtract']);
 			}break;
+
+			case 'add_parallel_line':{
+				$result = $this->add_parallel_line($polywkt1, $polywkt2, $formvars['width'] ?: 50, $formvars['side']);
+			}break;
 		
 			case 'split':{
 				$result = $this->split($polywkt1, $polywkt2);
@@ -638,6 +642,35 @@ class spatial_processor {
 							 ,3)
 							) as geom
 							FROM (SELECT ".$reverse."(ST_OffsetCurve(the_geom, ".$width.", 'join=round')) as offset_line, the_geom 
+										FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) as foo
+							) as fooo
+						) as foooo";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
+    }
+  }
+
+	function add_parallel_line($geom_1, $geom_2, $width, $side){
+		if($geom_1 == ''){
+			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
+		}
+		$operation = 'ST_Union';
+		if($side == 'right'){
+			$width = -1 * $width;
+		}
+		$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg 
+						FROM (
+							SELECT ".$operation."(
+								st_geomfromtext('".$geom_1."'), 
+								offset_line
+							) as geom
+							FROM (SELECT ST_OffsetCurve(the_geom, ".$width.", 'join=mitre') as offset_line, the_geom 
 										FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) as foo
 							) as fooo
 						) as foooo";

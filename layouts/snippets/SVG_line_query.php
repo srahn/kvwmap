@@ -17,6 +17,8 @@
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
 	<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">
+	<input type="hidden" name="bufferwidth" value="<? if($this->formvars['bufferwidth'])echo $this->formvars['bufferwidth']; else echo '10'; ?>">
+	<input type="hidden" name="bufferside" value="<? if($this->formvars['bufferside'])echo $this->formvars['bufferside']; else echo 'left'; ?>">
 	<?
 	if($this->formvars['last_button'] == '' or $this->formvars['last_doing'] == ''){
 		$this->formvars['last_button'] = 'line0';
@@ -94,7 +96,7 @@ $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmous
 $buttons_fs .= deletebuttons($strUndo, $strDelete);
 $buttons_fs .= linebuttons($strDrawLine, $strDelLine);
 $buttons_fs .= flurstquerybuttons();
-$buttons_fs .= linebuttons2($strSplitLine, $strReverse);
+$buttons_fs .= linebuttons2($strSplitLine, $strReverse, $strParallelLine);
 $buttons_fs .= transform_buttons($strMoveGeometry, $strRotateGeometry);
 $buttons_fs .= vertex_edit_buttons($strCornerPoint);
 if(in_array('ortho_point', $this->user->rolle->geom_buttons))$buttons_fs .= ortho_point_buttons();
