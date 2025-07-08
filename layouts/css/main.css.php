@@ -1376,8 +1376,8 @@ a.menuered:hover {
 	position: absolute;
 	height: calc(100% - 2px);
 	width: calc(100% - 2px);
-	left: 0;
-	top: 1;
+	left: 1;
+	top: 2;
 }
 
 .button:active{
