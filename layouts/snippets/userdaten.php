@@ -32,6 +32,12 @@
 	</tr>
 	<tr>
 		<td style="float: right; margin-right: 50px"><input type="checkbox" onclick="toggle_archived_users();" id="archived" name="archived"> archivierte Nutzer anzeigen</td>
+		<td style="float: right; margin-right: 50px;">
+			<div>
+				Filter:
+				<input type="text" autocomplete="off" id="layer_search" onkeyup="filterRows(this.value);" value="">
+			</div>
+		</td>
   </tr>
   <? if (in_array($this->formvars['order'], ['name', 'name,vorname'])) { ?>
   <tr height="50px" valign="bottom">

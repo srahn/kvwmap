@@ -6,6 +6,7 @@
 	function toggleSharedLayer() {
 		$('.no-shared').toggle();
 	}
+
 </script>
 
 <?php
@@ -46,6 +47,13 @@
 		},
 		0
 	);
+
+	$filterfield = '
+		<div style="float: right; margin-right: 50px;">
+			Filter:
+			<input type="text" autocomplete="off" id="layer_search" onkeyup="filterRows(this.value);" value="">
+		</div>
+	';
 ?><table border="0" cellpadding="5" cellspacing="0" width="1000px">
 	<tr align="center">
 		<td><h2><?php echo $this->titel; ?></h2></td>
@@ -66,8 +74,15 @@
 						$first=strtolower(mb_substr($anzeigename,0,1));
 					}
 				} ?>
+				<? echo $filterfield; ?>
 			</td>
 		</tr><?
+	}
+	else {
+		echo '
+			<tr>
+				<td>' . $filterfield . '</td>
+			</tr>';
 	} ?>
 	<tr>
 		<td>

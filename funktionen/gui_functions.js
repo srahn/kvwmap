@@ -1421,8 +1421,6 @@ function handleDragEnd(e){
 // --- html5 Drag and Drop der Layer im drawingOrderForm --- //
  
 function jumpToLayer(searchtext){
-	found = false;
-	legend_top = document.getElementById('scrolldiv').getBoundingClientRect().top;
 	for (var layername in layernames) {
 		for (var key in layernames[layername]) {
 			let layer_id = layernames[layername][key];
@@ -1435,6 +1433,19 @@ function jumpToLayer(searchtext){
 			}
 		}
 	}
+}
+
+function filterRows(searchtext){
+	var rows = document.querySelectorAll('.listen-tr');
+	[].forEach.call(rows, function (row) {
+		layername = row.querySelector('a').innerHTML;
+		if (searchtext.length == 0 || layername.toLowerCase().search(searchtext.toLowerCase()) != -1) {
+			row.classList.remove('hidden');
+		}
+		else {
+			row.classList.add('hidden');
+		}
+	});
 }
 
 function slide_legend_in(evt) {
