@@ -1252,6 +1252,7 @@ class db_mapObj{
 		}
 		return $datatypes;
 	}
+}
 
 class pgdatabase {
 	var $ist_Fortfuehrung;
