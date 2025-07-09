@@ -1580,10 +1580,12 @@ function mouseup(evt){
 		point_y.name="ortho_point_y[]";
 		point_x.type = point_y.type = "text";
 		point_x.oninput = point_y.oninput = function(){change_ortho_point(point_number)};
+		point_y.onkeyup = function(evt){if (evt.keyCode === 13) {add_ortho_point(null, null, 0, 0, false);}};
 		point_x.autocomplete = point_y.autocomplete = "off";
 		point_div.appendChild(point_x);
 		point_div.appendChild(point_y);
 		top.document.getElementById("ortho_points").appendChild(point_div);
+		point_x.focus();
 		if(point_number == 1){
 			calculate_transformation_parameters();
 			top.document.getElementById("ortho_points").appendChild(top.document.createTextNode("2. Sie können nun weitere Punkte hinzufügen."));
@@ -1596,6 +1598,8 @@ function mouseup(evt){
 		var vertex = document.getElementById(id);
 		var local_x = top.document.getElementsByName("ortho_point_x[]")[point_number].value;
 		var local_y = top.document.getElementsByName("ortho_point_y[]")[point_number].value;
+		o_p_local_x[point_number] = local_x;
+		o_p_local_y[point_number] = local_y;
 		if(point_number > 1){																																			// ein Kleinpunkt wird veraendert
 			world = get_world_ortho_point_coord(local_x, local_y);
 			vertex.setAttribute("x", world[0]);
