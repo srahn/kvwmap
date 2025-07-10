@@ -23,5 +23,6 @@ SQL="DELETE FROM kvwmap.user WHERE name LIKE 'gast' AND vorname LIKE 'gast' AND 
 SELECT setval('kvwmap.user_id_seq', (select max(id) from kvwmap.user), false);"
 #echo "SQL: ${SQL}"
 
-psql --host=${POSTGRES_HOST} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} -c "${SQL}" ${POSTGRES_DATABASE} > /dev/null 2>&1
+#psql --host=${POSTGRES_HOST} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} -c "${SQL}" ${POSTGRES_DATABASE} > /dev/null 2>&1
+PGPASSWORD="${POSTGRES_PASSWORD}" psql --host=${POSTGRES_HOST} --username=${POSTGRES_USER} -d ${POSTGRES_DATABASE} -c "${SQL}" > /dev/null 2>&1
 #echo "exec: psql --host=${POSTGRES_HOST} --user=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} -c \"${SQL}\" ${POSTGRES_DATABASE} > /dev/null 2>&1"
