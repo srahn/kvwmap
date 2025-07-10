@@ -227,7 +227,7 @@ err() {
 # Load and set config params
 SCRIPT_PATH=$(dirname $(realpath $0))
 CONFIG_PATH=$(realpath ${SCRIPT_PATH}/../config)
-CONFIG_PHP=$(realpath ${SCRIPT_PATH}/../../../config.php)
+CONFIG_PHP=$(realpath ${SCRIPT_PATH}/../../../credentials.php)
 
 if [ -e "${CONFIG_PATH}/config.sh" ] ; then
   source ${CONFIG_PATH}/config.sh
