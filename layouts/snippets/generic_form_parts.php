@@ -505,14 +505,8 @@
 				$datapart .= '<table width="98%" cellpadding="0" cellspacing="0"><tr><td>';
 				$attribute_foreign_keys = $attributes['subform_fkeys'][$j];	# die FKeys des aktuellen Attributes
 				for($f = 0; $f < count($attribute_foreign_keys); $f++){
-					if (strpos($attribute_foreign_keys[$f], ':')) {
-						$exp = explode(':', $attribute_foreign_keys[$f]);
-						$key = $exp[0];			# Verknüpfungsattribut in diesem Layer
-						$oberkey = $exp[1];	# Verknüpfungsattribut im Ober-Layer
-					}
-					else {
-						$key = $oberkey = $attribute_foreign_keys[$f];
-					}
+					$key = $attribute_foreign_keys[$f]['key'];
+					$oberkey = $attribute_foreign_keys[$f]['oberkey'];
 					$linkParams .= '&value_'.$oberkey.'='.$dataset[$key];
 					$linkParams .= '&operator_'.$oberkey.'==';
 
