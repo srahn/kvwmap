@@ -1727,13 +1727,13 @@ class GUI {
 								}
 								else{		# Punktlayer
 									if($style->size > 14 OR $style->size == -1){
-										$style->set('size', 14);
+										$style->size = 14;
 									}
-									$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-									$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+									$style->maxsize = $style->size;		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+									$style->minsize = $style->size;		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 									if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
-										$style->set('offsety', 0);
-										$style->set('offsetx', 0);
+										$style->offsety = 0;
+										$style->offsetx = 0;
 									}
 								}
 							}
