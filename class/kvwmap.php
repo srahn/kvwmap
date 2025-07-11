@@ -3779,7 +3779,8 @@ echo '			</table>
 		$attributenames[0] = $this->formvars['attribute'];
 		$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		# value und output ermitteln
-		$optionen = explode(';', $attributes['options'][0]);
+		$optionen = explode('<required by>', $attributes['options'][0]);
+		$optionen = explode(';', $optionen[0]);
 		$sql = $optionen[0];
 		if ($optionen[1] != '') {
 			$further_options = explode(' ', $optionen[1]); # die weiteren Optionen exploden (opt1 opt2 opt3)
@@ -19549,8 +19550,8 @@ class db_mapObj{
 							if (strpos($attributes['options'][$i], '{') === 0) {
 								$json = json_decode($attributes['options'][$i], true);
 								$attributes['subform_layer_id'][$i] = $json['layer_id'];
-								$attributes['subform_fkeys'][$i] = $json['fkeys'];
-								$attributes['no_new_window'][$i] = $json['no_new_window'];
+								$attributes['subform_fkeys'][$i] = $json['keys'];
+								$attributes['no_new_window'][$i] = ($json['window_type'] == 'no_new_window');
 							}
 							else {
 								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen
@@ -19561,14 +19562,14 @@ class db_mapObj{
 								for ($k = 1; $k < count($subform); $k++) {
 									if (strpos($subform[$k], ':')) {
 										$exp = explode(':', $attribute_foreign_keys[$f]);
-										$keynames['key'] = $exp[0];			# Verknüpfungsattribut in diesem Layer
-										$keynames['oberkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
+										$keys['fkey'] = $exp[0];	# Verknüpfungsattribut in diesem Layer
+										$keys['pkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
 									}
 									else {
-										$keynames['key'] = $keynames['oberkey'] = $subform[$k];
+										$keys['fkey'] = $keys['pkey'] = $subform[$k];
 									}
-									$attributes['subform_fkeys'][$i][] = $keynames;
-									$attributes['SubFormFK_hidden'][$attributes['indizes'][$keynames['key']]] = 1;
+									$attributes['subform_fkeys'][$i][] = $keys;
+									$attributes['SubFormFK_hidden'][$attributes['indizes'][$keys['fkey']]] = 1;
 								}
 								if ($options[1] != '') {
 									if ($options[1] == 'no_new_window') {
