@@ -19364,7 +19364,7 @@ class db_mapObj{
 								$json = json_decode($attributes['options'][$i], true);
 								$attributes['subform_layer_id'][$i] = $json['layer_id'];
 								$attributes['subform_fkeys'][$i] = $json['keys'];
-								$attributes['no_new_window'][$i] = $json['no_new_window'];
+								$attributes['no_new_window'][$i] = ($json['window_type'] == 'no_new_window');
 							}
 							else {
 								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen
