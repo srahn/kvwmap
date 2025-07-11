@@ -3784,7 +3784,8 @@ echo '			</table>
 		$attributenames[0] = $this->formvars['attribute'];
 		$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		# value und output ermitteln
-		$optionen = explode(';', $attributes['options'][0]);
+		$optionen = explode('<required by>', $attributes['options'][0]);
+		$optionen = explode(';', $optionen[0]);
 		$sql = $optionen[0];
 		if ($optionen[1] != '') {
 			$further_options = explode(' ', $optionen[1]); # die weiteren Optionen exploden (opt1 opt2 opt3)
