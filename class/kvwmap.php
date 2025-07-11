@@ -19363,7 +19363,7 @@ class db_mapObj{
 							if (strpos($attributes['options'][$i], '{') === 0) {
 								$json = json_decode($attributes['options'][$i], true);
 								$attributes['subform_layer_id'][$i] = $json['layer_id'];
-								$attributes['subform_fkeys'][$i] = $json['fkeys'];
+								$attributes['subform_fkeys'][$i] = $json['keys'];
 								$attributes['no_new_window'][$i] = $json['no_new_window'];
 							}
 							else {
@@ -19375,14 +19375,14 @@ class db_mapObj{
 								for ($k = 1; $k < count($subform); $k++) {
 									if (strpos($subform[$k], ':')) {
 										$exp = explode(':', $attribute_foreign_keys[$f]);
-										$keynames['key'] = $exp[0];			# Verknüpfungsattribut in diesem Layer
-										$keynames['oberkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
+										$keys['fkey'] = $exp[0];	# Verknüpfungsattribut in diesem Layer
+										$keys['pkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
 									}
 									else {
-										$keynames['key'] = $keynames['oberkey'] = $subform[$k];
+										$keys['fkey'] = $keys['pkey'] = $subform[$k];
 									}
-									$attributes['subform_fkeys'][$i][] = $keynames;
-									$attributes['SubFormFK_hidden'][$attributes['indizes'][$keynames['key']]] = 1;
+									$attributes['subform_fkeys'][$i][] = $keys;
+									$attributes['SubFormFK_hidden'][$attributes['indizes'][$keys['fkey']]] = 1;
 								}
 								if ($options[1] != '') {
 									if ($options[1] == 'no_new_window') {

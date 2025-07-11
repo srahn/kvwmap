@@ -505,8 +505,8 @@
 				$datapart .= '<table width="98%" cellpadding="0" cellspacing="0"><tr><td>';
 				$attribute_foreign_keys = $attributes['subform_fkeys'][$j];	# die FKeys des aktuellen Attributes
 				for($f = 0; $f < count($attribute_foreign_keys); $f++){
-					$key = $attribute_foreign_keys[$f]['key'];
-					$oberkey = $attribute_foreign_keys[$f]['oberkey'];
+					$key = $attribute_foreign_keys[$f]['fkey'];
+					$oberkey = $attribute_foreign_keys[$f]['pkey'];
 					$linkParams .= '&value_'.$oberkey.'='.$dataset[$key];
 					$linkParams .= '&operator_'.$oberkey.'==';
 
