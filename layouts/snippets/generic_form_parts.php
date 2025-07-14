@@ -415,7 +415,7 @@
 				else{
 					$enum_output = $attributes['enum_output'][$j][$k];
 				}					
-				$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_output, $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $change_all, $size, $onchange, $field_class);
+				$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_output, $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $change_all, $size, $onchange, $field_class, $attributes['req'][$j]);
 			} break;
 
 			case 'Autovervollständigungsfeld_zweispaltig' : {
@@ -952,7 +952,10 @@
 		return $datapart.$after_attribute;
 	}
 
-	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $change_all, $size, $onchange, $field_class){
+	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $change_all, $size, $onchange, $field_class, $req = NULL){
+		if (!is_array($req)) {
+			$req = array($req);
+		}
 		$element_id = $layer_id . '_' . $name . '_' . $k;
 		if (strpos($fieldname, $element_id) !== false) {		# bei Array-Typen der Fall
 			$element_id = $fieldname;
@@ -1003,7 +1006,7 @@
 									}
 								"
 								onkeyup="
-									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value);
+									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'ok\', ' . $k . ', new Array(\'' . implode(',', $req) . '\'));
 								"
 								onchange="
 									if (!document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked && document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
@@ -1111,7 +1114,7 @@
 									}
 								"
 								onkeyup="
-									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'zweispaltig\');
+									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'zweispaltig\', ' . $k . ');
 								"
 								onchange="
 									if (document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {

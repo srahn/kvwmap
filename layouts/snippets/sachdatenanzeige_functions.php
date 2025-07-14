@@ -812,9 +812,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}		
 	}
 	
-	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp) {
+	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp, k, req_attr_names_array) {
 		listentyp = listentyp || 'ok';
 		var suggest_field = document.getElementById('suggests_' + field_id);
+		req_attribute_data = get_attribute_values(document.getElementById(field_id), k, layer_id, req_attr_names_array);
+
 		if(event.key == 'ArrowDown'){
 			suggest_field.firstChild.selectedIndex = suggest_field.firstChild.selectedIndex + 1;
 		}
@@ -833,7 +835,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		else{
 			suggest_field.style.display = 'none';
 			if (inputvalue.length > 0) {
-				ahah('index.php', 'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + (listentyp != '' ? '&listentyp=' + listentyp : ''), new Array(suggest_field, ""), new Array("sethtml", "execute_function"));
+				ahah('index.php', 'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + '&attributenames=' + req_attribute_data['attributenames'] + '&attributevalues=' + req_attribute_data['attributevalues'] + (listentyp != '' ? '&listentyp=' + listentyp : ''), new Array(suggest_field, ""), new Array("sethtml", "execute_function"));
 			}
 			else{
 				document.getElementById(field_id).value = '';
@@ -1140,18 +1142,14 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 
-
-	update_require_attribute = function(object, attributes, k,layer_id, attributenamesarray){
+	get_attribute_values = function(object, k, layer_id, attributenamesarray){
 		// object ist das Objekt welches diese Funktion ausgeloest hat
-		// attributes ist eine Liste von zu aktualisierenden Attributen
 		// k die Nummer des Datensatzes
-		// attributenamesarray ein Array aller Attribute im Formular
-		var datatype = '';
-		if(object.dataset.datatype_id)datatype = '&datatype_id='+object.dataset.datatype_id;
+		// attributenamesarray ein Array der Attribute, deren Werte geholt werden sollen
 		var attributenames = '';
 		var attributevalues = '';
 		// die Layer-ID muss aufgesplittet werden, um sie für css zu escapen
-		var id = layer_id.toString();;
+		var id = layer_id.toString();
 		var id1 = id.substring(0, 1);
 		var id2 = id.substring(1);
 		for(var i = 0; i < attributenamesarray.length; i++){
@@ -1164,7 +1162,25 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				attributevalues += scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k).value + '|';
 			}
 		}
+		return {
+			'attributenames' : attributenames,
+			'attributevalues' : attributevalues
+		};
+	}
+
+	update_require_attribute = function(object, attributes, k, layer_id, attributenamesarray){
+		// object ist das Objekt welches diese Funktion ausgeloest hat
+		// attributes ist eine Liste von zu aktualisierenden Attributen
+		// k die Nummer des Datensatzes
+		// attributenamesarray ein Array aller Attribute im Formular
+		var datatype = '';
+		if(object.dataset.datatype_id)datatype = '&datatype_id='+object.dataset.datatype_id;
+		attribute_data = get_attribute_values(object, k, layer_id, attributenamesarray);
 		attribute = attributes.split(',');
+		// die Layer-ID muss aufgesplittet werden, um sie für css zu escapen
+		var id = layer_id.toString();
+		var id1 = id.substring(0, 1);
+		var id2 = id.substring(1);
 		for(var i = 0; i < attribute.length; i++){
 			var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
 			if (scope.querySelector('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k) == undefined) {
@@ -1182,7 +1198,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 					if (type == 'hidden') {	// image-select
 						target = scope.querySelector('#image_select_' + element.id + ' .dropdown');
 					}
-					ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(target), new Array(action));
+					ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attribute_data['attributenames']+"&attributevalues="+attribute_data['attributevalues']+"&type="+type, new Array(target), new Array(action));
 				}
 			})
 		}

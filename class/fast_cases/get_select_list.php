@@ -307,33 +307,39 @@ class GUI {
 }
 
 class user {
+	# // TODO: Beim Anlegen eines neuen Benutzers müssen die Einstellungen für die Karte aus der Stellenbeschreibung als Anfangswerte übernommen werden
 
-  var $id;
-  var $Name;
-  var $Vorname;
-  var $login_name;
-  var $funktion;
-  var $dbConn;
-  var $Stellen;
-  var $nZoomFactor;
-  var $nImageWidth;
-  var $nImageHeight;
-  var $database;
-  var $remote_addr;
+	var $id;
+	var $Name;
+	var $Vorname;
+	var $login_name;
+	var $funktion;
+	var $dbConn; # Datenbankverbindungskennung
+	var $Stellen;
+	var $nZoomFactor;
+	var $nImageWidth;
+	var $nImageHeight;
+	var $database;
+	var $remote_addr;
+	var $has_logged_in;
+	var $language = 'german';
+	var $debug;
+	var $share_rollenlayer_allowed;
 
-	function __construct($login_name,$id,$database) {
+	/**
+	 * Create a user object
+	 * if only login_name is defined, find_by login_name only
+	 * if login_name and password is defined, find_by login_name and password
+	*/
+	function __construct($login_name, $id, $database, $password = '', $archived = false) {
 		global $debug;
-		$this->debug=$debug;
-		$this->database=$database;
-		if($login_name){
-			$this->login_name=$login_name;
-			$this->readUserDaten(0,$login_name);
-			$this->remote_addr=getenv('REMOTE_ADDR');
-		}
-		else{
-			$this->id = $id;
-			$this->readUserDaten($id,0);
-		}
+		$this->debug = $debug;
+		$this->database = $database;
+		$this->has_logged_in = false;
+		$this->login_name = $login_name;
+		$this->id = (int) $id;
+		$this->remote_addr = getenv('REMOTE_ADDR');
+		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
 	}
 
 	function readUserDaten($id, $login_name = '', $password = '', $archived) {
@@ -1299,25 +1305,28 @@ class pgdatabase {
 	* @param integer, $connection_id The id of the connection defined in connections table, if 0 default connection will be used
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
-  function open($connection_id = 0) {
-		if ($connection_id == 0) {
-			# get credentials from object variables
-			$connection_string = $this->format_pg_connection_string($this->get_object_credentials());
+  function open($connection_id = 0, $flag = NULL) {
+		$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
+		$this->connection_id = $connection_id;
+		$connection_string = $this->get_connection_string();
+		try {
+			$this->dbConn = pg_connect($connection_string . ' connect_timeout=5', $flag);
 		}
-		else {
-			$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
-			$this->connection_id = $connection_id;
-			$connection_string = $this->get_connection_string();
+		catch (Exception $e) {
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
+				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; })) . '<br>Exception: ' . $e;
+			return false;
 		}
-		$this->dbConn = pg_connect($connection_string);
+
 		if (!$this->dbConn) {
-			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden: ' . str_replace($credentials['password'], '********', $connection_string);
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
+				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection:  successfully opend.", 4);
+			$this->debug->write("Database connection successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
-			$this->connection_id = $connection_id;
+			$this->connection_id = $connection_id ?: POSTGRES_CONNECTION_ID;
 			return true;
 		}
 	}
@@ -1335,15 +1344,21 @@ class pgdatabase {
 	*/
 	function get_credentials($connection_id) {
 		#echo '<p>get_credentials with connection_id: ' . $connection_id;
-		include_once(CLASSPATH . 'Connection.php');
-		$conn = Connection::find_by_id($this->gui, $connection_id);
-		return array(
-			'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
-			'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
-			'dbname' => 	($conn->get('dbname')   != '' ? $conn->get('dbname')   : 'kvwmapsp'),
-			'user' => 		($conn->get('user')     != '' ? $conn->get('user')     : 'kvwmap'),
-			'password' => ($conn->get('password') != '' ? $conn->get('password') : KVWMAP_INIT_PASSWORD)
-		);
+		if ($connection_id == 0) {
+			return $this->get_object_credentials();
+		}
+		else {
+			include_once(CLASSPATH . 'Connection.php');
+			$conn = Connection::find_by_id($this->gui, $connection_id);
+			$this->host = $conn->get('host');
+			return array(
+				'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
+				'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
+				'dbname' => 	($conn->get('dbname')   != '' ? $conn->get('dbname')   : 'kvwmapsp'),
+				'user' => 		($conn->get('user')     != '' ? $conn->get('user')     : 'kvwmap'),
+				'password' => ($conn->get('password') != '' ? $conn->get('password') : KVWMAP_INIT_PASSWORD)
+			);
+		}
 	}
 
 	/**
@@ -1381,11 +1396,11 @@ class pgdatabase {
 	*/
 	function get_object_credentials() {
 		return array(
-			'host'     => $this->host,
-			'port'     => $this->port,
-			'dbname'   => $this->dbName,
-			'user'     => $this->user,
-			'password' => $this->passwd
+			'host'     => $this->host ?: POSTGRES_HOST,
+			'port'     => $this->port ?: 5432,
+			'dbname'   => $this->dbName ?: POSTGRES_DBNAME,
+			'user'     => $this->user ?: POSTGRES_USER,
+			'password' => $this->passwd ?: POSTGRES_PASSWORD
 		);
 	}
 
@@ -1399,8 +1414,12 @@ class pgdatabase {
     return $ret[1];
   }
 
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
+	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
+		if (!$this->dbConn) {
+			echo '<p>pgconn: ' . $this->dbConn;
+		}
 		$ret = array(); // Array with results to return
+		$ret['msg'] = '';
 		$strip_context = true;
 
 		switch ($this->loglevel) {
@@ -1417,17 +1436,25 @@ class pgdatabase {
 		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
 		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
-		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+		if (DBWRITE OR (!stristr($sql, 'INSERT') AND !stristr($sql, 'UPDATE') AND !stristr($sql, 'DELETE'))) {
 			#echo "<br>SQL in execSQL: " . $sql;
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
-			#echo "<br>SQL in execSQL: " . $sql;
-			$query = @pg_query($this->dbConn, $sql);
+			if (count($prepared_params) > 0) {
+				$query_id = 'query_' . rand();
+				$query = pg_prepare($this->dbConn, $query_id, $sql);
+				$query = pg_execute($this->dbConn, $query_id, $prepared_params);
+			}
+			else {
+				#echo "<br>SQL in execSQL: " . $sql;
+				$query = @pg_query($this->dbConn, $sql);
+			}
 			//$query=0;
-			if ($query == 0) {
+			if ($query === false) {
+				$this->error = true;
 				$ret['success'] = false;
-				# erzeuge eine Fehlermeldung;
+				$ret['sql'] = $sql;
 				$last_error = pg_last_error($this->dbConn);
 				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
 					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
@@ -1439,11 +1466,13 @@ class pgdatabase {
 				if (strpos($last_error, '{') !== false AND strpos($last_error, '}') !== false) {
 					# Parse als JSON String;
 					$error_obj = json_decode(substr($last_error, strpos($last_error, '{'), strpos($last_error, '}') - strpos($last_error, '{') + 1), true);
-					if (array_key_exists('msg_type', $error_obj)) {
-						$ret['type'] = $error_obj['msg_type'];
-					}
-					if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
-						$ret['msg'] = $error_obj['msg'];
+					if ($error_obj) {
+						if (array_key_exists('msg_type', $error_obj)) {
+							$ret['type'] = $error_obj['msg_type'];
+						}
+						if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
+							$ret['msg'] = $error_obj['msg'];
+						}
 					}
 				}
 				else {
@@ -1461,31 +1490,38 @@ class pgdatabase {
 				$ret[1] = $ret['query'] = $query;
 
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
-				$last_notice = pg_last_notice($this->dbConn);
-				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
-					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+				if (PHPVERSION >= 710) {
+					$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
 				}
-				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
-					$this->gui->notices[] = $last_notice;
-					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
-						# Parse als JSON String
-						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-						if ($notice_obj AND array_key_exists('success', $notice_obj)) {
-							if (!$notice_obj['success']) {
-								$ret['success'] = false;
-							}
-							if (array_key_exists('msg_type', $notice_obj)) {
-								$ret['type'] = $notice_obj['msg_type'];
-							}
-							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-								$ret['msg'] = $notice_obj['msg'];
+				else {
+					$last_notices = array(pg_last_notice($this->dbConn));
+				}
+				foreach ($last_notices as $last_notice) {
+					if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+						$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+					}
+					# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
+					if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+						$this->gui->notices[] = $last_notice;
+						if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
+							# Parse als JSON String
+							$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
+							if ($notice_obj AND array_key_exists('success', $notice_obj)) {
+								if (!$notice_obj['success']) {
+									$ret['success'] = false;
+								}
+								if (array_key_exists('msg_type', $notice_obj)) {
+									$ret['type'] = $notice_obj['msg_type'];
+								}
+								if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+									$ret['msg'] .= $notice_obj['msg'];
+								}
 							}
 						}
-					}
-					else {
-						# Gebe Noticetext wie er ist zurück
-						$ret['msg'] = $last_notice;
+						else {
+							# Gebe Noticetext wie er ist zurück
+							$ret['msg'] .= $last_notice.chr(10).chr(10);
+						}
 					}
 				}
 
@@ -1517,19 +1553,26 @@ class pgdatabase {
 			# alles ok mach nichts weiter
 		}
 		else {
-			# Fehler setze entsprechende Fags und Fehlermeldung
+			# Fehler setze entsprechende Flags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
 				# mache nichts, denn die Fehlermeldung wird unterdrückt
 			}
 			else {
+				if (strpos(strtolower($this->gui->formvars['export_format']), 'json') !== false) {
+					header('Content-Type: application/json; charset=utf-8');
+					echo utf8_decode(json_encode($ret));
+					exit;
+				}
 				# gebe Fehlermeldung aus.
-				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
+				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:' . $sql, $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
+				echo $sql; exit;
 				header('error: true');	// damit ajax-Requests das auch mitkriegen
 			}
 		}
+		$this->success = $ret['success'];
 		return $ret;
 	}
 

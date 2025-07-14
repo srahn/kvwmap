@@ -3795,6 +3795,16 @@ echo '			</table>
 			$orderby = "ORDER BY output";	# nur sortieren, wenn noch nicht sortiert
 		}
 
+		# requires ersetzen
+		$attributenames = explode('|', $this->formvars['attributenames']);
+		$attributevalues = explode('|', $this->formvars['attributevalues']);
+		$sql = str_replace('=<requires>', '= <requires>', $sql);
+		for ($i = 0; $i < count($attributenames); $i++) {
+			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
+			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
+			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
+		}
+
 		# setze Where Ausdruck
 		if ($this->formvars['listentyp'] == 'zweispaltig' && strpos(' ', $this->formvars['inputvalue']) !== 0) {
 			$parts = explode(' ', $this->formvars['inputvalue']);
@@ -19412,13 +19422,13 @@ class db_mapObj{
 								# ------<required by>------
 								# -----<requires>------
 								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
+									foreach ($attributes['name'] as $attributename) {
+										if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
+											$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
+										}
+									}
 									if ($all_options) {
 										# alle Auswahlmöglichkeiten -> where abschneiden
-										foreach ($attributes['name'] as $attributename) {
-											if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
-												$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
-											}
-										}
 										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
 										$sql = $attributes['options'][$i];
 										#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
