@@ -237,8 +237,8 @@ class rolle {
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
-			$layer_name_filter . 
-			$active_filter . "
+				$layer_name_filter .
+				$active_filter . "
 			ORDER BY
 				l.drawingorder desc
 		";
