@@ -812,9 +812,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}		
 	}
 	
-	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp, k, req_attr_names_array) {
+	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp, k, req_attr_names_array, req_by_attr_name) {
 		listentyp = listentyp || 'ok';
 		var suggest_field = document.getElementById('suggests_' + field_id);
+
+		// required_by-Attribute leeren
+		var req_by = document.getElementById('output_' + layer_id + '_' + req_by_attr_name + '_' + k);
+		if (req_by) {
+			req_by.value = '';
+		}
+		// requires-Attributdaten holen
 		req_attribute_data = get_attribute_values(document.getElementById(field_id), k, layer_id, req_attr_names_array);
 
 		if(event.key == 'ArrowDown'){
@@ -1142,24 +1149,34 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 
+	get_attribute_field = function(object, k, layer_id, attributename){
+		// object ist das Objekt welches diese Funktion ausgeloest hat
+		// k die Nummer des Datensatzes
+		// attributename Name des Attributfelds, das geholt werden soll
+		// gibt eine Nodelist zurück
+		// die Layer-ID muss aufgesplittet werden, um sie für css zu escapen
+		var id = layer_id.toString();
+		var id1 = id.substring(0, 1);
+		var id2 = id.substring(1);
+		var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
+		if (scope.querySelector('#\\3' + id1 + ' ' + id2 + '_' + attributename + '_' + k) == undefined) {
+			scope = document; // ansonsten global
+		}
+		return scope.querySelectorAll('#\\3' + id1 + ' ' + id2 + '_' + attributename + '_' + k);
+	}
+
 	get_attribute_values = function(object, k, layer_id, attributenamesarray){
 		// object ist das Objekt welches diese Funktion ausgeloest hat
 		// k die Nummer des Datensatzes
 		// attributenamesarray ein Array der Attribute, deren Werte geholt werden sollen
 		var attributenames = '';
 		var attributevalues = '';
-		// die Layer-ID muss aufgesplittet werden, um sie für css zu escapen
-		var id = layer_id.toString();
-		var id1 = id.substring(0, 1);
-		var id2 = id.substring(1);
+		var field;
 		for(var i = 0; i < attributenamesarray.length; i++){
-			var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
-			if (scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k) == undefined) {
-				scope = document; // ansonsten global
-			}
-			if(scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k) != undefined){
+			field = get_attribute_field(object, k, layer_id, attributenamesarray[i])[0];
+			if (field != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k).value + '|';
+				attributevalues += field.value + '|';
 			}
 		}
 		return {
@@ -1177,16 +1194,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		if(object.dataset.datatype_id)datatype = '&datatype_id='+object.dataset.datatype_id;
 		attribute_data = get_attribute_values(object, k, layer_id, attributenamesarray);
 		attribute = attributes.split(',');
-		// die Layer-ID muss aufgesplittet werden, um sie für css zu escapen
-		var id = layer_id.toString();
-		var id1 = id.substring(0, 1);
-		var id2 = id.substring(1);
 		for(var i = 0; i < attribute.length; i++){
-			var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
-			if (scope.querySelector('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k) == undefined) {
-				scope = document; // ansonsten global
-			}
-			var elements = [].slice.call(scope.querySelectorAll('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k));
+			var elements = [].slice.call(get_attribute_field(object, k, layer_id, attribute[i]));
 			elements.forEach(function(element){
 				var target = element;
 				var type = element.type;

@@ -415,7 +415,7 @@
 				else{
 					$enum_output = $attributes['enum_output'][$j][$k];
 				}					
-				$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_output, $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $change_all, $size, $onchange, $field_class, $attributes['req'][$j]);
+				$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_output, $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $change_all, $size, $onchange, $field_class, $attributes['req'][$j], $attributes['req_by'][$j]);
 			} break;
 
 			case 'Autovervollständigungsfeld_zweispaltig' : {
@@ -952,7 +952,7 @@
 		return $datapart.$after_attribute;
 	}
 
-	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $change_all, $size, $onchange, $field_class, $req = NULL){
+	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $change_all, $size, $onchange, $field_class, $req = NULL, $req_by = NULL){
 		if (!is_array($req)) {
 			$req = array($req);
 		}
@@ -1006,7 +1006,7 @@
 									}
 								"
 								onkeyup="
-									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'ok\', ' . $k . ', new Array(\'' . implode(',', $req) . '\'));
+									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'ok\', ' . $k . ', [\'' . implode(',', $req) . '\'], \'' . $req_by . '\');
 								"
 								onchange="
 									if (!document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked && document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
