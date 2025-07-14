@@ -7,6 +7,7 @@
 // mobile_get_data_version
 // mobile_get_layers 
 // mobile_get_stellen
+// mobile_list_logs
 // mobile_prepare_layer_sync
 // mobile_prepare_layer_sync_all
 // mobile_reformat_attributes
@@ -100,6 +101,9 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 					$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
 					#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 				}
+
+				include_once(CLASSPATH . 'DataSource.php');
+				$layerset[0]['datasources'] = DataSource::find_by_layer_id($GUI, $layer_id);
 
 				$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
 				$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true, true);
@@ -558,6 +562,12 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"privileg" => $layerset['privileg'],
 		"drawingorder" => $layerset['drawingorder'],
 		'legendorder' => $layerset['legendorder'],
+		'attribution' => implode(', ', array_map(
+			function($datasource) {
+				return $datasource->get('name');
+			},
+			$layerset['datasources']
+		)),
 		"sync" => $layerset['sync'],
 		"version" => $layerset['version']
 	);
@@ -736,6 +746,36 @@ $GUI->mobile_create_sync_table = function ($layerdb) use ($GUI) {
 	if ($ret[0]) {
 		echo "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
 		return 0;
+	}
+};
+
+$GUI->mobile_list_logs = function() use ($GUI) {
+	$GUI->main = '../../plugins/mobile/view/list_logs.php';
+	$GUI->titel = 'kvmobile Logs';
+};
+
+$GUI->mobile_show_log = function($log_file) use ($GUI) {
+	$GUI->main = '../../plugins/mobile/view/show_log.php';
+	$GUI->titel = 'kvmobile Log: ' . $log_file;
+	$GUI->log_file = $log_file;
+	$GUI->mobile_log_dir = LOGPATH . 'kvmobile/';
+	$GUI->mobile_log_file = $log_file . '_debug_log.html';
+	$GUI->mobile_log_path = $GUI->mobile_log_dir . $GUI->mobile_log_file;
+	$GUI->mobile_log_content = file_get_contents($GUI->mobile_log_path);
+	$parts = explode('<h1>', $GUI->mobile_log_content);
+	array_shift($parts);
+	$GUI->mobile_logs = array();
+	foreach ($parts AS $part) {
+		$end_parts = explode('</h1>', $part);
+		preg_match_all('/\+ 1\s*\);\s*(.*?)UPDATE syncs/s', $end_parts[1], $sql_matches);
+		if (count($sql_matches[1]) > 0) {
+			preg_match_all('/Fehler mit result:(.*?)(?:\s*<html>|$)/s', $end_parts[1], $error_matches);
+			$GUI->mobile_logs[] = array(
+				'timestamp' => $end_parts[0],
+				'client_deltas' => $sql_matches[1][0],
+				'error' => (count($error_matches[1]) > 0 ? $error_matches[1][0] : '')
+			);
+		}
 	}
 };
 

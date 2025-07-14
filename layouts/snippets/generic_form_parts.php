@@ -302,7 +302,7 @@
 				}
 				if($attribute_privileg == '0'){ // nur lesbares Attribut
 					if($size == 16){		// spaltenweise
-						$datapart .= htmlspecialchars($value);
+						$datapart .= '<pre>' . htmlspecialchars($value) . '</pre>';
 					}
 					else{								// zeilenweise
 						$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3;"><pre>' . $value . '</pre></div>';
@@ -505,14 +505,8 @@
 				$datapart .= '<table width="98%" cellpadding="0" cellspacing="0"><tr><td>';
 				$attribute_foreign_keys = $attributes['subform_fkeys'][$j];	# die FKeys des aktuellen Attributes
 				for($f = 0; $f < count($attribute_foreign_keys); $f++){
-					if (strpos($attribute_foreign_keys[$f], ':')) {
-						$exp = explode(':', $attribute_foreign_keys[$f]);
-						$key = $exp[0];			# Verknüpfungsattribut in diesem Layer
-						$oberkey = $exp[1];	# Verknüpfungsattribut im Ober-Layer
-					}
-					else {
-						$key = $oberkey = $attribute_foreign_keys[$f];
-					}
+					$key = $attribute_foreign_keys[$f]['fkey'];
+					$oberkey = $attribute_foreign_keys[$f]['pkey'];
 					$linkParams .= '&value_'.$oberkey.'='.$dataset[$key];
 					$linkParams .= '&operator_'.$oberkey.'==';
 
@@ -640,7 +634,7 @@
 				if ($value != '') {
 					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url'], $attributes['type'][$j], $layer_id, $oid, $name);
 					if ($preview['doc_src'] != '') {
-						$datapart .= '<table border="0"><tr><td>';
+						$datapart .= '<table border="0"><tr><td class="td_preview_image">';
 						if ($hover_preview) {
 							$onmouseover = 'onmouseenter="root.document.getElementById(\'vorschau\').style.border=\'1px solid grey\';root.document.getElementById(\'preview_img\').src=this.src" onmouseleave="root.document.getElementById(\'vorschau\').style.border=\'none\';root.document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 						}
@@ -808,7 +802,7 @@
 							class="dynamicLink"
 							onclick="' . $onclick . '"
 							href="' . urlencode2(add_csrf($href)) . '"
-						>' . $alias . '</a><br>';
+						>' . $alias . '</a><br>';	
 					}
 				}
 			} break;
