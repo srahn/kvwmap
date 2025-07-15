@@ -156,7 +156,7 @@
 					}
 				} ?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<textarea name="expression[<?php echo $this->classes[$i]['class_id']; ?>]" cols="28" rows="3" style="min-width: 196px; width: 100%"><?php echo $this->classes[$i]['Expression']; ?></textarea>
+					<textarea name="expression[<?php echo $this->classes[$i]['class_id']; ?>]" cols="28" rows="3" style="min-width: 196px; width: 100%"><?php echo $this->classes[$i]['expression']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<textarea name="text[<?php echo $this->classes[$i]['class_id']; ?>]" cols="18" rows="3"><?php echo $this->classes[$i]['text']; ?></textarea>
