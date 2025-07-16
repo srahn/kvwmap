@@ -599,6 +599,10 @@ function go_switch($go, $exit = false) {
 				$GUI->showMapImage();
 			} break;
 
+			case 'show_missing_documents' : {
+				$GUI->show_missing_documents();
+			} break;
+
 			case 'showRefMapImage' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->getRefMapImage($GUI->formvars['ID']);

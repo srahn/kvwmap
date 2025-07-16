@@ -783,11 +783,11 @@ from
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="max_query_rows" type="text" value="<?php echo $this->formvars['max_query_rows']; ?>" size="50" maxlength="5">
 						</td>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_path; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="document_path" type="text" value="<?php echo $this->formvars['document_path']; ?>" size="50" maxlength="100">
+								<input name="document_path" type="text" value="<?php echo $this->formvars['document_path']; ?>" size="50" maxlength="100"><a href="index.php?go=show_missing_documents&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-chain-broken" aria-hidden="true" style="margin-top: 5px; margin-left: 5px" title="Zeige Datensätze für die Dateien auf dem Server fehlen."></i></a>
 						</td>
 					</tr>
 					<tr>

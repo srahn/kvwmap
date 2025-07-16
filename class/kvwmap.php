@@ -3769,8 +3769,16 @@ echo '			</table>
 	* Second it test if the case is extra allowed as a function in this stelle
 	* Third it test if the user have special permissions to execute this case
 	*/
-	function checkCaseAllowed($case) {
-		$this->check_csrf_token();
+	function checkCaseAllowed($case, $check_csrf_token = true) {
+		if ($check_csrf_token) {
+			if (!(
+				$case == 'show_snippet' AND
+				strpos(file_get_contents(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $this->formvars['snippet'] . '.php'), '$check_csrf_token = false;') !== false
+			)) {
+				// Nicht prüfen wenn im snippet der csrf_token_check explizit ausgeschaltet ist.
+				$this->check_csrf_token();
+			}
+		}
 		if (!(
 			$this->Stelle->isMenueAllowed($case) OR
 			$this->Stelle->isFunctionAllowed($case) OR
@@ -3785,8 +3793,8 @@ echo '			</table>
 	}
 
 	/**
-		Function check the csrf_token if the user has not logged in with this request
-		HTTP 405 Error is sent if csrf_token is not received or does not match the one in the session.
+	* Function check the csrf_token if the user has not logged in with this request
+	* HTTP 405 Error is sent if csrf_token is not received or does not match the one in the session.
 	*/
 	function check_csrf_token() {
 		#$csrf_token = filter_input(INPUT_GET, 'csrf_token', FILTER_SANITIZE_STRING);
@@ -4573,6 +4581,20 @@ echo '			</table>
     }
 		include(SNIPPETS . 'map_image.php');
   }
+
+	/**
+	 * Find and show documents that are registered in datasets of layer with $selected_layer_id
+	 * but can not be found in document_path of this layer.
+	 */
+	function show_missing_documents() {
+		$this->sanitize([
+			'selected_layer_id' => 'int'
+		]);
+		include_once(CLASSPATH . 'Layer.php');
+		$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+		$this->main = 'layer_missing_documents.php';
+		$this->output();
+	}
 
 	/*
 	* This function return the image of the referenzkarte with given ID
