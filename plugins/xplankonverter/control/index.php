@@ -101,7 +101,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		true
 	);
 
-	/*
+	/**
 	* extract zip files if necessary, check completeness and copy files to upload folder
 	*/
 	function xplankonverter_unzip_and_check_and_copy($shape_files, $dest_dir) {
@@ -134,7 +134,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		return $uploaded_files;
 	}
 
-	/*
+	/**
 	* extract zip files if necessary and copy files to upload folder
 	*/
 	function xplankonverter_unzip($shape_files, $dest_dir) {
@@ -162,7 +162,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		return $temp_files;
 	}
 
-	/*
+	/**
 	* Packt die angegebenen Zip-Dateien im sys_temp_dir Verzeichnis aus
 	* und gibt die ausgepackten Dateien in der Struktur von
 	* hochgeladenen Dateien aus
@@ -288,12 +288,6 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 
 	$GUI->konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']);
 
-	/*
-		ToDo 1 pk:
-		Die nachfolgenden Variablen von GUI wurden schon in der konvertierung config gesetzt.
-		Diese im nachfolgenden Quellecode durch $GUI->konvertierung->config ersetzten.
-		siehe auch ToDo 2 pk in konvertierung.php
-	*/
 	if (!in_array($GUI->formvars['planart'], array('BP-Plan', 'FP-Plan', 'SO-Plan', 'RP-Plan'))) {
 		$GUI->formvars['planart'] = 'Plan';
 	}
