@@ -3898,8 +3898,10 @@ echo '			</table>
 	* Second it test if the case is extra allowed as a function in this stelle
 	* Third it test if the user have special permissions to execute this case
 	*/
-	function checkCaseAllowed($case) {
-		$this->check_csrf_token();
+	function checkCaseAllowed($case, $check_csrf_token = true) {
+		if ($check_csrf_token) {
+			$this->check_csrf_token();
+		}
 		if (!(
 			$this->Stelle->isMenueAllowed($case) OR
 			$this->Stelle->isFunctionAllowed($case) OR
@@ -7398,7 +7400,7 @@ echo '			</table>
 				$pathinfo = pathinfo($dateipfad);
 				if ($doc_type == '') {
 					$type = strtolower($pathinfo['extension']);
-					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf', 'heic', 'heif'))) {
+					if (in_array($type, array('jpg', 'jpeg', 'png', 'gif', 'tif', 'pdf', 'heic', 'heif'))) {
 						$doc_type = 'local_img';
 					}
 					else {
@@ -10976,9 +10978,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$insert = array();
 			$exif_data = array();
 			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
+				// Setzen der Auto-Werte für Auto-Attribute
 				for ($i = 0; $i < count($table['attributname']); $i++) {
 					if (array_key_exists($table['attributname'][$i], $attributes['constraints'])) { 	# Rechte
 						$this->sanitize([$table['formfield'][$i] => $table['datatype'][$i]], true);
+						include_once(CLASSPATH . 'LayerAttribute.php');
+						$attribute = new LayerAttribute($this);
 						#echo '<br>' . $table['attributname'][$i] . ' type: ' . $table['type'][$i];
 						switch (true) {
 							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
@@ -11088,41 +11093,78 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							} break;
 
-							case ($table['type'][$i] == 'Geometrie') : {
-								if ($this->formvars['geomtype'] == 'POINT') {
-									if ($this->formvars['loc_x'] != '') {
-										# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
-										include_once (CLASSPATH.'pointeditor.php');
-										$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-										$result = $pointeditor->get_wkb_geometry(array(
-											'loc_x' => $this->formvars['loc_x'],
-											'loc_y' => $this->formvars['loc_y'],
-											'dimension' => $this->formvars['dimension']
-										));
-										if ($result['success']) {
-											$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
-										}
-										else {
-											$this->add_message('error', 'Umwandeln der Punktgeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
-											$this->success = false;
-										}
+							case ($table['type'][$i] == 'SubFormFK') : {
+								$attribute_options = $attribute->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
+								include_once(CLASSPATH . 'Layer.php');
+								$fk_field_is_empty = $this->formvars[$table['formfield'][$i]] == '';
+								$parent_layer = Layer::find_by_id($this, $attribute_options['parent_layer_id']);
+								$parent_layer_has_geom = $parent_layer->get('geom_column') != '';
+								$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
+								if ($result['success']) {
+									$new_feature_has_geometry = true;
+									$new_feature_geometry = $result['wkb_geometry'];
+									include_once(CLASSPATH . 'PgObject.php');
+									$pg_object = new PgObject($this, $parent_layer->get('schema'), $parent_layer->get('maintable'));
+									$pg_object->debug->user_funktion = 'admin'; $pg_object->show = true;
+									$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
+									$intersecting_parent_gefunden = false;
+									if (count($intersected_objects) > 0) {
+										$parent_feature = $parent_object[0];
+										$intersecting_parent_gefunden = true;
+									}
+									if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
+										$insert[$table['attributname'][$i]] = "'" . $parent_feature->get_id() . "'";
 									}
 								}
-								elseif ($this->formvars['newpathwkt'] != '') {
-									# ToDo: Replace this also with a get_wkb_geometry function from polygoneditor and replace wkb_geometry generation in
-									# PointEditor_Senden also by a function and also for Line and Polygon editing cases
-									$result = $multigeomeditor->get_wkb_geometry(array(
-										'geomtype' => $this->formvars['geomtype'],
-										'geom' => $this->formvars['newpathwkt']
-									));									
+							} break;
+
+							case ($table['type'][$i] == 'Geometrie') : {
+								if ($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != '' OR $this->formvars['newpathwkt'] != '') {
+									$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
 									if ($result['success']) {
+										# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
 										$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
 									}
 									else {
-										$this->add_message('error', 'Umwandeln der Liniengeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
+										$this->add_message('error', 'Umwandeln der ' . ($this->formvars['newpathwkt'] == 'POINT' ? 'Punkt' : 'Linien') . 'geometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
 										$this->success = false;
 									}
 								}
+
+								// if ($this->formvars['geomtype'] == 'POINT') {
+								// 	if ($this->formvars['loc_x'] != '') {
+								// 		# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
+								// 		include_once (CLASSPATH.'pointeditor.php');
+								// 		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
+								// 		$result = $pointeditor->get_wkb_geometry(array(
+								// 			'loc_x' => $this->formvars['loc_x'],
+								// 			'loc_y' => $this->formvars['loc_y'],
+								// 			'dimension' => $this->formvars['dimension']
+								// 		));
+								// 		if ($result['success']) {
+								// 			$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
+								// 		}
+								// 		else {
+								// 			$this->add_message('error', 'Umwandeln der Punktgeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
+								// 			$this->success = false;
+								// 		}
+								// 	}
+								// }
+								// elseif ($this->formvars['newpathwkt'] != '') {
+								// 	# ToDo: Replace this also with a get_wkb_geometry function from polygoneditor and replace wkb_geometry generation in
+								// 	# PointEditor_Senden also by a function and also for Line and Polygon editing cases
+								// 	$result = $multigeomeditor->get_wkb_geometry(array(
+								// 		'geomtype' => $this->formvars['geomtype'],
+								// 		'geom' => $this->formvars['newpathwkt']
+								// 	));
+								// 	if ($result['success']) {
+								// 		$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
+								// 	}
+								// 	else {
+								// 		$this->add_message('error', 'Umwandeln der Liniengeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
+								// 		$this->success = false;
+								// 	}
+								// }
 							} break;
 							default : {
 								switch ($datatype) {

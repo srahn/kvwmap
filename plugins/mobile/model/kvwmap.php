@@ -102,6 +102,9 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 					#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 				}
 
+				include_once(CLASSPATH . 'DataSource.php');
+				$layerset[0]['datasources'] = DataSource::find_by_layer_id($GUI, $layer_id);
+
 				$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
 				$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true, true);
 				$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
@@ -559,6 +562,12 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"privileg" => $layerset['privileg'],
 		"drawingorder" => $layerset['drawingorder'],
 		'legendorder' => $layerset['legendorder'],
+		'attribution' => implode(', ', array_map(
+			function($datasource) {
+				return $datasource->get('name');
+			},
+			$layerset['datasources']
+		)),
 		"sync" => $layerset['sync'],
 		"version" => $layerset['version']
 	);

@@ -754,13 +754,13 @@ class synchro {
 	function find_later_update($row) {
 		$sql = "
 			SELECT
-				updated_at
+				updated_at_server
 			FROM
 				" . $row->schema_name . "." . $row->table_name . "
 			WHERE
 				uuid = '" . $row->uuid . "'::uuid AND
 				(
-					updated_at > '" . $row->action_time . "' OR
+					updated_at_server > '" . $row->action_time . "' OR
 					updated_at_client > '" . $row->action_time . "'
 				)
 		";
