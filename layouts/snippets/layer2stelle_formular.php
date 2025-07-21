@@ -114,7 +114,7 @@ include_once(CLASSPATH . 'LayerGroup.php');
 				<tr>
 					<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strFilter; ?></th>
 					<td>
-						<textarea name="Filter" cols="33" rows="4"><? echo $this->formvars['filter'] ?></textarea>
+						<textarea name="filter" cols="33" rows="4"><? echo $this->formvars['filter'] ?></textarea>
 					</td>
 				</tr>
 				<tr>

@@ -1826,7 +1826,7 @@ class stelle {
 				use_geom				= "  . $formvars['use_geom'] 					. ",
 				postlabelcache 	= "  . $formvars['postlabelcache'] 		. ",
 				offsite 				= '" . $formvars['offsite'] 					. "',
-				Filter 					= '" . $formvars['Filter'] 						. "',
+				Filter 					= '" . $formvars['filter'] 						. "',
 				template 				= '" . $formvars['template'] 					. "',
 				header   				= '" . $formvars['header'] 						. "',
 				footer   				= '" . $formvars['footer'] 						. "',
@@ -1878,7 +1878,7 @@ class stelle {
 	// 		$sql .= ', transparency = NULL';
 	// 	}
 	// 	$sql .= ', postlabelcache = "'.$formvars['postlabelcache'].'"';
-	// 	$sql .= ", Filter = '".$formvars['Filter']."'";
+	// 	$sql .= ", Filter = '".$formvars['filter']."'";
 	// 	$sql .= ', template = "'.$formvars['template'].'"';
 	// 	$sql .= ', header = "'.$formvars['header'].'"';
 	// 	$sql .= ', footer = "'.$formvars['footer'].'"';

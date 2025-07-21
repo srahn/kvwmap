@@ -774,9 +774,9 @@ class spatial_processor {
 				}
 				
 	      # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
-	      if($layerset[0]['Filter'] != ''){
-	      	$layerset[0]['Filter'] = str_replace('$USER_ID', $this->rolle->user_id, $layerset[0]['Filter']);
-	        $sql_where .= " AND ".$layerset[0]['Filter'];
+	      if($layerset[0]['filter'] != ''){
+	      	$layerset[0]['filter'] = str_replace('$USER_ID', $this->rolle->user_id, $layerset[0]['filter']);
+	        $sql_where .= " AND ".$layerset[0]['filter'];
 	      }
 
 				#$fromwhere = pg_escape_string('from (' . $fromwhere . ') as foo where 1=1');

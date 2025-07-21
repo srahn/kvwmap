@@ -2525,8 +2525,6 @@ echo '			</table>
 			}
 			# Setzen des Filters
 			if ($layerset['filter'] != '') {
-				# 2024-07-28 pk Replace all params in Filter
-				// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
 				$layerset['filter'] = replace_params_rolle($layerset['filter']);
 				if (substr($layerset['filter'], 0, 1) == '(') {
 					switch (true) {
@@ -4095,9 +4093,9 @@ echo '			</table>
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
 				# Filter hinzufügen
-				if($layer[$i]['Filter'] != ''){
-					$layer[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layer[$i]['Filter']);
-          $fromwhere .= " AND " . $layer[$i]['Filter'];
+				if($layer[$i]['filter'] != ''){
+					$layer[$i]['filter'] = str_replace('$USER_ID', $this->user->id, $layer[$i]['filter']);
+          $fromwhere .= " AND " . $layer[$i]['filter'];
         }
 				if($data_attributes['the_geom'] != ''){
 					$sql = '
@@ -4147,9 +4145,9 @@ echo '			</table>
 			$select = preg_replace ("/ FROM /", ' from ', $select);
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			# Filter hinzufügen
-			if($layer['Filter'] != ''){
-				$layer['Filter'] = str_replace('$USER_ID', $this->user->id, $layer['Filter']);
-				$fromwhere .= " AND " . $layer['Filter'];
+			if($layer['filter'] != ''){
+				$layer['filter'] = str_replace('$USER_ID', $this->user->id, $layer['filter']);
+				$fromwhere .= " AND " . $layer['filter'];
 			}
 		}
 		elseif($layer['connectiontype'] == MS_WFS){
@@ -8312,7 +8310,7 @@ echo '			</table>
 			'use_geom' => 'int',
 			'postlabelcache' => 'int',
 			'offsite' => 'text',
-			'Filter' => 'text',
+			'filter' => 'text',
 			'template' => 'text',
 			'header' => 'text',
 			'footer' => 'text',
@@ -9948,9 +9946,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				# 2008-10-22 sr Filter zur Where-Klausel hinzugefügt
 				# 2024-07-28 pk Replace all params from filter
-				if ($layerset[0]['Filter'] != '') {
-					$layerset[0]['Filter'] = replace_params_rolle($layerset[0]['Filter']);
-					$sql_where .= " AND " . $layerset[0]['Filter'];
+				if ($layerset[0]['filter'] != '') {
+					$layerset[0]['filter'] = replace_params_rolle($layerset[0]['filter']);
+					$sql_where .= " AND " . $layerset[0]['filter'];
 				}
 				// echo '<br>sql where: ' . $sql_where;
 				$sql = "
@@ -17280,9 +17278,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$query_parts['select'] .= ", st_assvg(st_buffer(st_transform(" . $the_geom . ", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom";
 				}
 
-				if ($layerset[$i]['Filter'] != '') {
-					$layerset[$i]['Filter'] = replace_params_rolle($layerset[$i]['Filter']);
-					$sql_where .= " AND " . $layerset[$i]['Filter'];
+				if ($layerset[$i]['filter'] != '') {
+					$layerset[$i]['filter'] = replace_params_rolle($layerset[$i]['filter']);
+					$sql_where .= " AND " . $layerset[$i]['filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['layer_id'], $disabled_class_expressions)) {
@@ -17659,22 +17657,22 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Parameter $scale in Data ersetzen
 				$layerset['data'] = str_replace('$SCALE', $this->map_scaledenom ?: 1000, $layerset['data']);
 				$layer->data = $layerset['data'];
-				if ($layerset['Filter'] != '') {
-					if (substr($layerset['Filter'], 0, 1) == '(') {
+				if ($layerset['filter'] != '') {
+					if (substr($layerset['filter'], 0, 1) == '(') {
 						switch (true) {
 							case MAPSERVERVERSION >= 800 : {
-								$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
+								$layer->setProcessingKey('NATIVE_FILTER', $layerset['filter']);
 							}break;
 							case MAPSERVERVERSION >= 700 : {
-								$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+								$layer->setProcessing('NATIVE_FILTER='.$layerset['filter']);
 							}break;
 							default : {
-								$layer->setFilter($layerset['Filter']);
+								$layer->setFilter($layerset['filter']);
 							}
 						}
 					}
 					else {
-						$expr = buildExpressionString($layerset['Filter']);
+						$expr = buildExpressionString($layerset['filter']);
 						$layer->setFilter($expr);
 					}
 				}

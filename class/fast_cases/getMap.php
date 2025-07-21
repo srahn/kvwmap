@@ -839,23 +839,23 @@ class GUI {
 				$layer->classitem = $layerset['classitem'];
 			}
 			# Setzen des Filters
-			if ($layerset['Filter'] != '') {
-				$layerset['Filter'] = replace_params_rolle($layerset['Filter']);
-				if (substr($layerset['Filter'], 0, 1) == '(') {
+			if ($layerset['filter'] != '') {
+				$layerset['filter'] = replace_params_rolle($layerset['filter']);
+				if (substr($layerset['filter'], 0, 1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {
-							$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
+							$layer->setProcessingKey('NATIVE_FILTER', $layerset['filter']);
 						}break;
 						case MAPSERVERVERSION >= 700 : {
-							$layer->setProcessing('NATIVE_FILTER=' . $layerset['Filter']);
+							$layer->setProcessing('NATIVE_FILTER=' . $layerset['filter']);
 						} break;
 						default : {
-							$layer->setFilter($layerset['Filter']);
+							$layer->setFilter($layerset['filter']);
 						}
 					}
 			 }
 			 else {
-				 $expr=buildExpressionString($layerset['Filter']);
+				 $expr=buildExpressionString($layerset['filter']);
 				 $layer->setFilter($expr);
 			 }
 			}

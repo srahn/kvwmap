@@ -741,7 +741,7 @@ class GUI {
 			# Setzen des Filters
 			if ($layerset['filter'] != '') {
 				# 2024-07-28 pk Replace all params in Filter
-				// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
+				// $layerset['filter'] = str_replace('$USER_ID', $this->user->id, $layerset['filter']);
 				$layerset['filter'] = replace_params_rolle($layerset['filter']);
 				if (substr($layerset['filter'], 0, 1) == '(') {
 					switch (true) {

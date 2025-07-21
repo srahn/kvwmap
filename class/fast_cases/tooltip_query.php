@@ -561,9 +561,9 @@ class GUI {
 					$query_parts['select'] .= ", st_assvg(st_buffer(st_transform(" . $the_geom . ", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom";
 				}
 
-				if ($layerset[$i]['Filter'] != '') {
-					$layerset[$i]['Filter'] = replace_params_rolle($layerset[$i]['Filter']);
-					$sql_where .= " AND " . $layerset[$i]['Filter'];
+				if ($layerset[$i]['filter'] != '') {
+					$layerset[$i]['filter'] = replace_params_rolle($layerset[$i]['filter']);
+					$sql_where .= " AND " . $layerset[$i]['filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['layer_id'], $disabled_class_expressions)) {
