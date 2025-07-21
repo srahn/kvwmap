@@ -3236,7 +3236,7 @@ FROM
     return $rs['wkt'];
   }	
 	
-  function getMERfromFlurstuecke($flurstkennz, $epsgcode, $without_temporal_filter = 0) {
+  function getMERfromFlurstuecke($flurstkennz, $epsgcode, $without_temporal_filter = false) {
     $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flurstï¿½cke",4);
     $sql = "
 			SELECT 
