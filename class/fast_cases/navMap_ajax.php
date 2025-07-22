@@ -1,5 +1,17 @@
 <?
-
+function get_remote_ip() {
+	$ip = '172.0.0.1';
+	if (strpos(getenv('REMOTE_ADDR'), '172.') !== 0) {
+		$ip = getenv('REMOTE_ADDR');
+	}
+	else {
+		$ip = $_SERVER['HTTP_X_REAL_IP'];
+		if ($ip == '') {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}
+	}
+	return $ip;
+}
 function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
 	if ($last) {
 		$word_pos = strripos($str, $word);
@@ -2352,7 +2364,7 @@ class user {
 		$this->funktion = $rs['Funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
-		$this->password_expired = $rs['password_expired'];
+		$this->password_expired = $rs['password_expired'] === 't';
 		$this->userdata_checking_time = $rs['userdata_checking_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
@@ -2458,6 +2470,23 @@ class user {
 		}
 		return 0;
 	}
+
+	function updateStelleID($stelle_id) {
+		# sezten der aktuell für den Nutzer eingestellten Stelle
+		$sql = "
+			UPDATE
+				kvwmap.user
+			SET
+				stelle_id = " . $stelle_id . "
+			WHERE
+				id = " . $this->id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->updateStelleID - Setzen der aktuellen Stellen-ID für den User<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
+		$this->debug->write('Stelle gewechselt, neue Stellen_ID: ' . $stelle_id, 4);
+	}
+
 }
 
 class stelle {

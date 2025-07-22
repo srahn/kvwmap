@@ -849,7 +849,7 @@ class user {
 		$this->funktion = $rs['funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
-		$this->password_expired = $rs['password_expired'];
+		$this->password_expired = $rs['password_expired'] === 't';
 		$this->userdata_checking_time = $rs['userdata_checking_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
@@ -1436,7 +1436,7 @@ class user {
 		$columns['namenszusatz'] = "'" . $userdaten['namenszusatz'] . "'";
 		$columns['password'] = "kvwmap.sha1('" . pg_escape_string(trim($userdaten['password2'])) . "')";
 		$columns['password_setting_time'] = "CURRENT_TIMESTAMP";
-		$columns['password_expired'] = ($userdaten['password_expired'] ? '1' : '0');
+		$columns['password_expired'] = ($userdaten['password_expired'] ? 'true' : 'false');
 		if ($userdaten['phon']!='') {
 			$columns['phon'] = "'" . $userdaten['phon'] . "'";
 		}
@@ -1565,19 +1565,16 @@ class user {
 	}		
 
 	/**
-		Aktualisiert das Passwort und setzt ein neuen Zeitstempel
-	
-		Diese Funktion trägt für den Benutzer in diesem Objekt ein neues Passwort ein und setzt als Datum das aktuelle Datum.
-		Zusätzlich wird das flag password_expired auf true gesetzt, damit der Nutzer auch zur Eingabe eines neuen Passwortes
-		aufgefordert wird wenn in der Stelle das Passwortalter nicht geprüft wird.
-
-		Reihenfolge: Übersichtssatz - Kommentar - Tags.
-	
-		@param string password Einzutragendes Password als Text
-		@return array liefert zweidimensionales Array zurück,
-									Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-									Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
-		@see NeuAnlegen(), Aendern(), Loeschen(), $user, $rolle, $stelle
+	 * Aktualisiert das Passwort und setzt ein neuen Zeitstempel
+	 * Diese Funktion trägt für den Benutzer in diesem Objekt ein neues Passwort ein und setzt als Datum das aktuelle Datum.
+	 * Zusätzlich wird das flag password_expired auf true gesetzt, damit der Nutzer auch zur Eingabe eines neuen Passwortes
+	 * aufgefordert wird wenn in der Stelle das Passwortalter nicht geprüft wird	 * 
+	 * Reihenfolge: Übersichtssatz - Kommentar - Tags.	 * 
+	 * @param string password Einzutragendes Password als Text
+	 * @return array liefert zweidimensionales Array zurück,
+	 * 							Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+	 * 							Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+	 * @see NeuAnlegen(), Aendern(), Loeschen(), $user, $rolle, $stelle
 	 */
 	function setNewPassword($password) {
 		$password_setting_time = date('Y-m-d H:i:s', time());

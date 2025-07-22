@@ -2,7 +2,6 @@
 $language = ((array_key_exists('language', $_REQUEST) AND in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese'))) ? $_REQUEST['language'] : 'german');
 $language_file = LAYOUTPATH . 'languages/start_' . $language . '.php';
 include(LAYOUTPATH . 'languages/_include_language_files.php');
-
 $errors = array();
 
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten

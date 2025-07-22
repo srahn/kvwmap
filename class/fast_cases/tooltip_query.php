@@ -871,7 +871,7 @@ class user {
 		$this->funktion = $rs['Funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
-		$this->password_expired = $rs['password_expired'];
+		$this->password_expired = $rs['password_expired'] === 't';
 		$this->userdata_checking_time = $rs['userdata_checking_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
