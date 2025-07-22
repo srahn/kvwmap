@@ -541,8 +541,5 @@ insert into alkis.pp_aktualitaet
 
 $BODY$;
 
-ALTER FUNCTION alkis.postprocessing()
-    OWNER TO kvwmap;
-
 
 COMMIT;
