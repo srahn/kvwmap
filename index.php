@@ -284,7 +284,7 @@ function go_switch($go, $exit = false) {
 				$GUI->sanitize([
 					'layer_id' => 'int',
 					'oid' => 'text'
-				]);				
+				]);
 				$GUI->get_position_qrcode();
 			} break;
 

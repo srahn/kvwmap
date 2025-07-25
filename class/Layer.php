@@ -1,6 +1,5 @@
 <?php
 include_once(CLASSPATH . 'MyObject.php');
-include_once(CLASSPATH . 'LayerAttribute.php');
 include_once(CLASSPATH . 'LayerChart.php');
 include_once(CLASSPATH . 'DataSource.php');
 include_once(CLASSPATH . 'LayerDataSource.php');
@@ -165,6 +164,7 @@ class Layer extends MyObject {
 	}
 
 	function get_layer_attributes() {
+		include_once(CLASSPATH . 'LayerAttribute.php');
 		$obj = new LayerAttribute($this->gui);
 		$layer_attributes = $obj->find_where(
 			$this->has_many['attributes']['fk'] . ' = ' . $this->get_id(),
@@ -429,13 +429,17 @@ l.Name AS sub_layer_name
 		foreach ($attributes AS $key => $value) {
 			$new_layer->set($key, $value);
 		}
-		$new_layer->create();
+
+		$result = $new_layer->create()[0];
+		if ($result['success'] === false) {
+			throw new Exception('Fehler beim Kopieren des Layers: ' . $result['msg']);
+		}
 		$new_layer_id = $new_layer->get($new_layer->identifier);
 
 		if (!empty($new_layer_id)) {
-			$this->debug->show('<p>Copiere die Klassen des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
+			$this->debug->show('<p>Kopiere die Klassen des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
 			$this->copy_classes($new_layer_id);
-			$this->debug->show('<p>Copiere die layer_attributes des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
+			$this->debug->show('<p>Kopiere die layer_attributes des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
 			$this->copy_layer_attributes($new_layer_id);
 		}
 		return $new_layer;
@@ -445,6 +449,7 @@ l.Name AS sub_layer_name
 	* Kopiere die Klassen des Layers mit anderer Layer_id
 	*/
 	function copy_classes($new_layer_id) {
+		include_once(CLASSPATH . 'LayerClass.php');
 		foreach(LayerClass::find($this->gui, 'Layer_id = ' . $this->get('Layer_ID')) AS $layer_class) {
 			$this->debug->show('Copy class: ' . $layer_class->get('Name') . ' mit layer id: ' . $this->get('Layer_ID') . ' => ' . $new_layer_id, Layer::$write_debug);
 			$layer_class->copy($new_layer_id);
@@ -452,6 +457,7 @@ l.Name AS sub_layer_name
 	}
 
 	function copy_layer_attributes($new_layer_id) {
+		include_once(CLASSPATH . 'LayerAttribute.php');
 		foreach(LayerAttribute::find($this->gui, 'Layer_id = ' . $this->get('Layer_ID')) AS $attribute) {
 			$this->debug->show('Copy Attribute: ' . $attribute->get('name') . ' mit neuer layer id: ' . $this->get('Layer_ID') . ' => ' . $new_layer_id, Layer::$write_debug);
 			$attribute->copy($new_layer_id);

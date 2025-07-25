@@ -2271,6 +2271,10 @@ function send_image_not_found($img) {
 	imagedestroy($empty_img);
 }
 
+/**
+ * Prüft ob der Wert $key im Array $array existiert und gibt den Wert zurück.
+ * Wenn der Wert nicht existiert, wird ein leerer String zurückgegeben.
+ */
 function value_of($array, $key) {
 	if (!is_array($array)) {
 		$array = array();

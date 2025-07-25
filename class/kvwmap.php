@@ -10012,8 +10012,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$layerset[0]['sql'] = $sql;
-				// if ($this->user->id == 41) {
-			  // echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				// if ($this->user->id == 1) {
+				// 	echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
 				// }
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
@@ -11197,7 +11197,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 					$this->debug->show('<p>SQL zum Anlegen des Datensatzes: ' . $sql);
-					#echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
+					// echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
 					$ret = $layerdb->execSQL($sql, 4, 1, true);
 
 					if ($ret['success']) {
@@ -11338,8 +11338,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     }
   }
 
-	function neuer_Layer_Datensatz() {
-		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+	function neuer_Layer_Datensatz($params = array()) {
+		$params = array_merge(array('output' => true, 'use_primary_from_new' => false), $params);
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->titel='neuen Datensatz einfügen';
 		$this->main='new_layer_data.php';
 		if ($this->formvars['chosen_layer_id']) {			# für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars
@@ -11373,7 +11374,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 					for ($i = 0; $i < count($checkbox_names); $i++) {
 						if (value_of($this->formvars, $checkbox_names[$i]) == 'on') {
-							$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+							$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid;layer_id
 							$oid = $element[3];
 						}
 					}
@@ -11384,18 +11385,22 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$dont_use_for_new = $layerset[0]['attributes']['dont_use_for_new'][$layerset[0]['attributes']['indizes'][$element[1]]];
 							if (
 								$element[3] == $oid AND
-								!in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE')) AND  # Primärschlüssel werden nicht mitübergeben
+								(
+									!in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE')) OR
+									$params['use_primary_from_new']
+								) AND  # Primärschlüssel werden nicht mitübergeben
 								!in_array($formElementType, array('Time', 'User', 'UserID', 'Stelle', 'StelleID', 'ClientID')) AND # und automatisch generierte Typen auch nicht
 								$dont_use_for_new != 1
 							) {
 								$element[3] = '';
 								$this->formvars[implode(';', $element)] = value_of($this->formvars, $form_fields[$i]);
 							}
-							else $this->formvars[implode(';', $element)] = '';
+							else {
+								$this->formvars[implode(';', $element)] = '';
+							}
 						}
 					}
 				}
-
 				######### von einer Sachdatenanzeige übergebene Formvars #######
 				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
 					# Hier auch nur Werte übergeben, die in neues Formular übernommen werden sollen
@@ -11409,11 +11414,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$new_value = '';
 					}
 					else {
-						$new_value =  $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$attribute_name].';'.$layerset[0]['attributes']['table_name'][$attribute_name].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j].';'.$layerset[0]['attributes']['saveable'][$j]];
+						$new_value =  $this->formvars[
+							$layerset[0]['Layer_ID'].';'
+							. $layerset[0]['attributes']['real_name'][$attribute_name].';'
+							. $layerset[0]['attributes']['table_name'][$attribute_name].';;'
+							. $layerset[0]['attributes']['form_element_type'][$j].';'
+							. $layerset[0]['attributes']['nullable'][$j].';'
+							. $layerset[0]['attributes']['type'][$j].';'
+							. $layerset[0]['attributes']['saveable'][$j]
+						];
 					}
 
 					$layerset[0]['shape'][-1][$attribute_name] = $new_value;
-
 					if (
 						$layerset[0]['shape'][-1][$attribute_name] == '' AND
 						$layerset[0]['attributes']['default'][$j] != ''
@@ -11425,9 +11437,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$this->angle_attribute = $attribute_name;
 					}
 				}
-				$this->formvars['layer_columnname'] = $layerset[0]['attributes']['the_geom'];
-				$this->formvars['layer_tablename'] = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
-				$this->qlayerset[0]=$layerset[0];
+				$this->formvars['layer_columnname'] = ($this->formvars['layer_columnname'] ?: $layerset[0]['attributes']['the_geom']);
+				$this->formvars['layer_tablename'] = ($this->formvars['layer_tablename'] ?: $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']]);
+				$this->qlayerset[0] = $layerset[0];
 
 				# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
 				if (is_array(value_of($this->formvars, 'attributenames'))) {
@@ -11574,7 +11586,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			include(LAYOUTPATH.'snippets/new_layer_data_embedded.php');
 		}
 		else {
-			$this->output();
+			if ($params['output']) {
+				$this->output();
+			}
+			else {
+				include_once(SNIPPETS . $this->main);
+			}
 		}
 	}
 
