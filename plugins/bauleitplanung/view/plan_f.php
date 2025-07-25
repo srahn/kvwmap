@@ -42,7 +42,7 @@ go_back = function(){
 	currentform.details.value = '';
 	currentform.go.value = 'Layer-Suche_Suchen';
 	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
-	//currentform.value_f_plan_stammdaten_oid.value = '';
+	currentform.value_f_plan_stammdaten_oid.value = '';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = currentform._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
 	overlay_submit(currentform, false);
 }
@@ -50,7 +50,7 @@ go_back = function(){
 copy_dataset = function(plan_id){
 	currentform.plan_id.value = plan_id;
 	currentform.go.value = 'copy_fplan';
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
 update_fplan_from_rok = function(plan_id){
@@ -58,7 +58,7 @@ update_fplan_from_rok = function(plan_id){
 	if(really){
 		currentform.plan_id.value = plan_id;
 		currentform.go.value = 'update_fplan_from_rok';
-		currentform.submit();
+		overlay_submit(currentform, false);
 	}
 }
 
@@ -73,7 +73,7 @@ delete_dataset = function(plan_id){
 		}
 		currentform.plan_id.value = plan_id;
 		currentform.go.value = 'delete_fplan';
-		currentform.submit();
+		overlay_submit(currentform, false);
 	}
 }
 
@@ -120,7 +120,7 @@ update_gebietstyp = function(){
 	<? /*for($a = 0; $a < count($this->qlayerset[$i]['attributes']['name']); $a++){
 		echo $this->qlayerset[$i]['attributes']['name'][$a].'  '.$a.'<br>';
 	}*/
-	if($this->formvars['value_f_plan_stammdaten_oid'] != '' OR $this->new_entry == true){
+	if($this->formvars['value_f_plan_stammdaten_oid'] != '' OR $this->new_entry == true OR $this->formvars['details'] == 'true'){
 		$this->formvars['printversion'] = 'n';   # nur dazu da, damit die Links "zurück zur Suche" und "drucken" nicht erscheinen
 ?>
 <table style="border: 1px solid grey" width="1020px" border="0" cellspacing="0" cellpadding="0">
@@ -444,7 +444,7 @@ update_gebietstyp = function(){
 	</tr>
 </table>
 <? } ?>
-<? if($this->new_entry != true AND $this->formvars['details'] == true){ ?>
+<? if($this->new_entry != true AND $this->formvars['details'] == 'true'){ ?>
 		<br>
 		<a href="javascript:go_back();">zurück zur Trefferliste</a>
 		<br>
@@ -452,7 +452,8 @@ update_gebietstyp = function(){
 <br>
 <?php   
 		#  zusätzliches Hiddenfeld zum Merken des Offsets der Trefferliste, solange man in der Detailansicht ist 
-		echo '<input name="_offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['_offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
+		echo '<input name="_offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['_offset_'.$this->qlayerset[$i]['Layer_ID']].'">
+		<input type="hidden" name="value_f_plan_stammdaten_oid" value="">';
 	}				# details == true
 	else{ ?>
 		<table border="1" cellpadding="2" style="border-collapse: collapse;">
@@ -511,6 +512,23 @@ else {
 <input type="hidden" name="plan_id" value="">
 <input type="hidden" name="roknr" value="">
 <input type="hidden" name="art" value="">
+
+<?
+	for($j = 0; $j < count_or_0($layer['attributes']['name']); $j++){
+		$value = $this->formvars[$prefix.'value_'.$layer['attributes']['name'][$j]];
+		if (!is_array($value)) {
+			$value = [$value];
+		}
+		foreach($value as $val) {
+			echo '<input name="'.$prefix.'value_'.$layer['attributes']['name'][$j].'" type="hidden" value="'.$val.'">';
+		}
+		echo '
+			<input name="'.$prefix.'value2_'.$layer['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$layer['attributes']['name'][$j]].'">
+			<input name="'.$prefix.'operator_'.$layer['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$layer['attributes']['name'][$j]].'">
+		';
+	}
+?>
+
 <? if($this->new_entry != true){ ?>
 <input type="hidden" name="selected_layer_id" value="">
 <? } ?>
