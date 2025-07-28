@@ -374,7 +374,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		  ?>
 	  </td>
 				<tr>
-					<td><a target="root" href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>&geom_from_layer=<? echo $this->formvars['geom_from_layer']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
+					<td><a target="root" href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>&geom_from_layer=<? echo $this->formvars['geom_from_layer']; echo (($this->formvars['lea_layer_id'] != '')? '&lea_id=' . $this->formvars['lea_id'] . '&lea_layer_id=' . $this->formvars['lea_layer_id'] : ''); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
 				</tr>
         </tr>
         <tr> 
@@ -878,6 +878,12 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  ?>
 	  <span class="fett">Es konnten keine Dokumente zu der Auswahl gefunden werden.<br>
 Wählen Sie neue Suchparameter.</span><br>
+
+		<? if ($this->formvars['lea_layer_id'] != '') { ?>
+			<br><br><br><br>
+			<div style="text-align: center"><a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->formvars['lea_layer_id']; ?>&value_lea_id=<? echo $this->formvars['lea_id'] ?>&operator_lea_id==&opentab=4"><span class="fett">zurück zum Antrag</span></a></div>
+		<? } ?>
+
 	  <? } ?>			
 		</td>
   </tr>

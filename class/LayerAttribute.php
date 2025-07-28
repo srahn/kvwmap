@@ -99,8 +99,63 @@ class LayerAttribute extends MyObject {
 		return $selects;
 	}
 
-	function is_document_attribute() {
-		return $this->get('form_element_type') == 'Dokument';
+	function get_options($settings, $type) {
+		switch ($type) {
+			case 'SubFormFK':
+				$options = $this->get_SubFormFK_options($settings);
+				break;
+			// case 'checkbox':
+			// 	$options = $this->get_checkbox_options($settings);
+			// 	break;
+			// case 'radio':
+			// 	$options = $this->get_radio_options($settings);
+			// 	break;
+			default:
+				$options = array();
+				break;
+		}
+		return $options;
+	}
+
+	function get_SubFormFK_options($settings) {
+		$options = array();
+		$semicolon_parts = explode(';', $settings);
+		$comma_parts = explode(',', $semicolon_parts[0]);
+		$colon_parts = explode(':', $comma_parts[1]);
+		$options['parent_layer_id'] = $comma_parts[0];
+		$options['fk_name'] = $colon_parts[0];
+		$options['pk_name'] = $colon_parts[1];
+		$options['window_option'] = $semicolon_parts[1] ?? '';
+		return $options;
+	}
+
+	/**
+	 * Returns the WKB geometry for the given layerset and form variables.
+	 *
+	 * @param object $layerdb The database for the layer.
+	 * @param array $layerset The layerset containing EPSG code and OID.
+	 * @param string $epsg_code The EPSG code for the geometry.
+	 * @param array $formvars The form variables containing geometry type, coordinates and dimension.
+	 * @return array An array containing success status and WKB geometry.
+	 */
+	function get_wkb_geometry($layerdb, $layerset, $epsg_code, $formvars) {
+		if ($formvars['geomtype'] == 'POINT') {
+			include_once (CLASSPATH . 'pointeditor.php');
+			$pointeditor = new pointeditor($layerdb, $layerset['epsg_code'], $epsg_code, $layerset['oid']);
+			return $pointeditor->get_wkb_geometry(array(
+				'loc_x' => $formvars['loc_x'],
+				'loc_y' => $formvars['loc_y'],
+				'dimension' => $formvars['dimension']
+			));
+		}
+		else {
+			include_once (CLASSPATH . 'multigeomeditor.php');
+			$multigeomeditor = new multigeomeditor($layerdb, $layerset['epsg_code'], $epsg_code, $layerset['oid']);
+			return $multigeomeditor->get_wkb_geometry(array(
+				'geomtype' => $formvars['geomtype'],
+				'geom' => $formvars['newpathwkt']
+			));
+		}
 	}
 
 	function is_datatype_attribute() {

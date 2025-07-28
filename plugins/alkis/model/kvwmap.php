@@ -180,11 +180,11 @@
     $style->outlinecolor->setRGB(0,0,0);
   };
 
-	$GUI->zoomToALKFlurst = function($FlurstListe, $border, $zoom = true) use ($GUI){
+	$GUI->zoomToALKFlurst = function($FlurstListe, $border, $zoom = true, $without_temporal_filter = false) use ($GUI){
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$dbmap = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 		$alkis = new ALKIS($GUI->pgdatabase);
-    $ret=$alkis->getMERfromFlurstuecke($FlurstListe, $GUI->user->rolle->epsg_code);
+    $ret=$alkis->getMERfromFlurstuecke($FlurstListe, $GUI->user->rolle->epsg_code, $without_temporal_filter);
     if ($ret[0]) {
       $GUI->Fehlermeldung='Es konnten keine Flurstücke gefunden werden.<br>'.$ret[1];
       $rect=$GUI->user->rolle->oGeorefExt;
@@ -195,8 +195,10 @@
       $randy=($rect->maxy-$rect->miny)*$border/100;
     }
 		$epsg = EPSGCODE_ALKIS;
-		$layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-		$data = $layerset[0]['Data'];
+    if (!$without_temporal_filter) {
+		  $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+		  $data = $layerset[0]['Data'];
+    }
 		if($data == '')$data ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1) as foo using unique oid using srid=" . $epsg;
 		$explosion = explode(' ', $data);
 		$datageom = $explosion[0];
@@ -742,7 +744,8 @@
             # Es wurde mindestens ein eindeutiges FlurstKennz in FlstID ausgewählt, oder ein oder mehrere über FlstNr gefunden
             # Zoom auf Flurstücke
 						if ($GUI->user->rolle->querymode == 1 OR $GUI->formvars['ALK_Suche'] == 1) {
-							$GUI->zoomToALKFlurst($FlurstKennz,10);
+              if($GUI->formvars['historical'])echo 'sdfsdf';
+							$GUI->zoomToALKFlurst($FlurstKennz, 10, true, ($GUI->formvars['history_mode'] != 'aktuell'));
 							$GUI->saveMap('');
 						}						
             if($GUI->formvars['ALK_Suche'] == 1){
