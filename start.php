@@ -397,6 +397,7 @@ if (!$show_login_form) {
 							$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 							session_start();
 							set_session_vars($GUI->formvars);
+							$_SESSION['stelle_angemeldet'] = true;
 							$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
 							$GUI->user->stelle_id = $GUI->Stelle->id;
 							# login case 17
