@@ -40,7 +40,7 @@ show_details = function(oid){
 
 go_back = function(){
 	currentform.details.value = '';
-	currentform.go.value = 'get_last_query';
+	currentform.go.value = 'Layer-Suche_Suchen';
 	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['layer_id'] ?>;
 	currentform.value_b_plan_stammdaten_oid.value = '';
 	currentform.offset_<? echo $this->qlayerset[$i]['layer_id']; ?>.value = currentform._offset_<? echo $this->qlayerset[$i]['layer_id']; ?>.value;
@@ -565,6 +565,23 @@ else {
 <input type="hidden" name="plan_id" value="">
 <input type="hidden" name="roknr" value="">
 <input type="hidden" name="art" value="">
+
+<?
+	for($j = 0; $j < count_or_0($layer['attributes']['name']); $j++){
+		$value = $this->formvars[$prefix.'value_'.$layer['attributes']['name'][$j]];
+		if (!is_array($value)) {
+			$value = [$value];
+		}
+		foreach($value as $val) {
+			echo '<input name="'.$prefix.'value_'.$layer['attributes']['name'][$j].'" type="hidden" value="'.$val.'">';
+		}
+		echo '
+			<input name="'.$prefix.'value2_'.$layer['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$layer['attributes']['name'][$j]].'">
+			<input name="'.$prefix.'operator_'.$layer['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$layer['attributes']['name'][$j]].'">
+		';
+	}
+?>
+
 <? if($this->new_entry != true){ ?>
 <input type="hidden" name="selected_layer_id" value="<? echo $this->qlayerset[$i]['layer_id']; ?>">
 <? } ?>
