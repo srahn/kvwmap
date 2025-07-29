@@ -1334,7 +1334,7 @@ class data_import_export {
 		}
 		else {
 			#echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];
-			#echo '<br>name: ' . $layerset[0]['Name']; exit;
+			// echo '<br>name: ' . $layerset[0]['Name']; exit;
 			$filter = '';
 			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1)) { 
 				$filter = replace_params_rolle(
@@ -1386,6 +1386,7 @@ class data_import_export {
 			else {
 				$where = 'WHERE true ';
 			}
+
 			if ($this->formvars['newpathwkt']){
 				# über Polygon einschränken
 				if ($this->formvars['within'] == 1) {
@@ -1395,6 +1396,16 @@ class data_import_export {
 					$where .= " AND st_intersects(".$layerset[0]['attributes']['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 				}
 			}
+
+			if ($layerset[0]['geom_column'] != '') {
+				$where .= " AND " . $GUI->pgdatabase->get_extent_filter(
+					$GUI->Stelle->MaxGeorefExt,
+					$user->rolle->epsg_code,
+					$layerset[0]['attributes']['the_geom'],
+					$layerset[0]['epsg_code']
+				);
+			}
+
 			if ($this->formvars['export_format'] == 'GPX' AND $layerset[0]['Datentyp'] == 2) {	# bei GPX Polygone in Linien umwandeln
 				$query_parts['select'] = str_replace(
 					$layerset[0]['attributes']['the_geom'], 

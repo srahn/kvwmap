@@ -1754,10 +1754,18 @@ span.black {
 }
 
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
+
+.td_preview_image{
+	padding-top: 125px;
+}
+
 a .preview_image{
 	border:1px solid black;
 	max-width: 125px;
 	max-height: 125px;
+	position: absolute;
+	top: 0px;
+	right: 0px;
 	transition: all 0.25s ease;
 }
 
@@ -1765,7 +1773,9 @@ a:hover .preview_image{
 	max-width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
 	max-height: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
 	transition: all 0.25s ease;
-	transition-delay: 0.5s;
+	transition-delay: 0.2s;
+	right: -70px;
+	z-index: 9999999999;
 }
 
 .preview_doc{}
@@ -2900,7 +2910,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nds_titel {
 	font-family: SourceSansPro3;
 	font-size: 20px;
-	margin-bottom: 0px;
+	margin-bottom: 20px;
 	margin-top: 10px;
 }
 

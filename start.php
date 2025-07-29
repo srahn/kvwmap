@@ -184,10 +184,8 @@ else {
 
 		if (is_login($GUI->formvars)) {
 			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4, $GUI->echo);
-			/**
-				This set the passwort with the sha1 method before each login
-				if not allready exists and only if it matches with the old md5 method.
-			*/
+			// This set the passwort with the sha1 method before each login
+			// if not allready exists and only if it matches with the old md5 method.
 			if (prepare_sha1(trim($GUI->database->mysqli->real_escape_string($GUI->formvars['login_name'])), trim($GUI->database->mysqli->real_escape_string($GUI->formvars['passwort'])))) {
 				if ($GUI->database->mysqli->affected_rows > 0) {
 					$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
@@ -397,6 +395,7 @@ if (!$show_login_form) {
 							$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 							session_start();
 							set_session_vars($GUI->formvars);
+							$_SESSION['stelle_angemeldet'] = true;
 							$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
 							$GUI->user->stelle_id = $GUI->Stelle->id;
 							# login case 17

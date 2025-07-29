@@ -104,7 +104,7 @@ class Konvertierung extends PgObject {
 					'plan_abk' => 'fplan',
 					'plan_abk_plural' => 'fplaene',
 					'plan_layer_id' => XPLANKONVERTER_FP_PLAENE_LAYER_ID,
-					'plan_attribut_aktualitaet' => 'wirksamkeitsdatum, aenderungenbisdatum, genehmigungsdatum',
+					'plan_attribut_aktualitaet' => 'wirksamkeitsdatum, aenderungenbisdatum','genehmigungsdatum',
 					'plan_file_name' => 'Zusammenzeichnung.gml',
 					'mapfile_name' => 'zusammenzeichnung.map',
 					'upload_steps' => array(
@@ -290,7 +290,7 @@ class Konvertierung extends PgObject {
 					$layer->set('data', $result['data_sql']);
 					if (strpos($layer->data, 'xplankonverter.konvertierungen k') !== false) {
 						$layer->set('data', str_ireplace(' WHERE ', ' WHERE (', $layer->data));
-						$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data)); 
+						$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data));
 					}
 				}
 				else {
@@ -2910,16 +2910,40 @@ class Konvertierung extends PgObject {
 		$md->set('date_title', 'Datum');
 		$md->set('id_cite_title', $md->get('stellendaten')['ows_title'] . ' (Zusammenzeichnung)');
 		//$md->set('id_cite_title', $plan->get('name'));
+		
+		$abstract_dataset = 'Dieser Geodatensatz beinhaltet den Flächennutzungsplan der in der Überschrift angegebenen Kommune des Landes Niedersachsen in einem standardisierten Format. Eine rechtlich verbindliche Auskunft zur Flächennutzungsplanung erteilt jedoch ausschließlich die zuständige Einheits- oder Samtgemeinde als Trägerin der Flächennutzungsplanung. Die Daten beinhalten mindestens einen Layer pro XPlanung-Klasse, basierend auf dem Datenaustauschformat XPlanGML. 
+
+Die hier vorliegende Zusammenzeichnung beinhaltet den aktuellen Stand der rechtswirksamen Flächennutzungsplanung, der gegebenenfalls in den ursprünglich aufgestellten Flächennutzungsplan alle inzwischen rechtswirksam erfolgten Änderungen und Berichtigungen einarbeitet, so dass es ein Gesamtplanwerk ergibt. Die XPlanGML-Dateien wurden im Rahmen des Projektes PlanDigital erstellt bzw. veröffentlicht und werden über die Plattform PlanDigital (https://testportal-plandigital.de/kvwmap/index.php) für die Träger der Flächennutzungsplanung zugangsbeschränkt bereitgestellt. Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die letzte technische Aktualisierung des Geodatensatzes bzw. der Dienste, die möglicherweise keine Änderung der Inhalte bedeutet. Die Veröffentlichung aktualisierter Daten sollte mindestens einmal jährlich erfolgen. 
+In der Plattform/Testportal PlanDigital wurde in den Dienstmetadaten von der zuständigen Kommune folgende Aktualität angegeben: ';
+		$abstract_dataset .= $md->get('stellendaten')['ows_abstract'];
+		$abstract_dataset .= '. Das angegebene Veröffentlichungsdatum soll das Datum der Rechtskraft des Plans oder der letzten Änderung sein; diese Information wird der XPlanGML entnommen.';
+			
+		$abstract_viewservice = 'Dieser Darstellungsdienst (Web Map Service oder kurz WMS) stellt die Zusammenzeichnung des Flächennutzungsplans der in der Überschrift angegebenen Kommune des Landes Niedersachsen in einer landesweit einheitlichen Visualisierung bereit.
+Eine rechtlich verbindliche Auskunft erteilt jedoch ausschließlich die zuständige Einheits- oder Samtgemeinde als Trägerin der Flächennutzungsplanung. Hierbei handelt es sich um einen Gebrauchsdienst der Zusammenzeichnungen von Planelementen des Flächennutzungsplans der in der Überschrift angegebenen Kommune mit mindestens einem Layer pro XPlanung-Klasse, basierend auf dem Datenaustauschformat XPlanGML. Es handelt sich explizit nicht um einen XPlanung-konformen Dienst, da er nicht dem XPlanung-Schema entspricht. Stattdessen wird ein eigenes, abgeflachtes Schema verwendet. 
+
+Die Zusammenzeichnung beinhaltet den aktuellen Stand der rechtswirksamen Flächennutzungs-planung, der in den ursprünglich aufgestellten Flächennutzungsplan alle inzwischen rechtswirksam erfolgten Änderungen und Berichtigungen einarbeitet, so dass es ein Gesamtplanwerk ergibt. Die Grenzen der Geltungsbereiche von Flächennutzungsplan-Änderungen und Berichtigungen sind im Layer „Geltungsbereiche“ zusammengefasst. Die Daten wurden im Rahmen des Projektes PlanDigital erstellt bzw. veröffentlicht und werden durch die Plattform PlanDigital (https://testportal-plandigital.de/kvwmap/index.php) für die Träger der Flächennutzungsplanung zugangsbeschränkt bereitgestellt. 
+Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die letzte technische Aktualisierung des Geodatensatzes bzw. der Dienste, die möglicherweise keine Änderung der Inhalte bedeutet. Die Veröffentlichung aktualisierter Daten sollte mindestens einmal jährlich erfolgen. In der Plattform/Testportal PlanDigital wurde in den Dienstmetadaten von der zuständigen Kommune folgende Aktualität angegeben: ';
+		$abstract_viewservice .= $md->get('stellendaten')['ows_abstract'];
+		$abstract_viewservice .= '. Das angegebene Veröffentlichungsdatum soll das Datum der Rechtskraft des Plans oder der letzten Änderung sein; diese Information wird der XPlanGML entnommen.';
+		
+		$abstract_downloadservice = 'Dieser Downloaddienst (Web Feature Service oder kurz WFS) stellt die Zusammenzeichnung des Flächennutzungsplans der in der Überschrift angegebenen Kommune des Landes Niedersachsen in einer landesweit einheitlichen Visualisierung bereit.
+Eine rechtlich verbindliche Auskunft erteilt jedoch ausschließlich die zuständige Einheits- oder Samtgemeinde als Trägerin der Flächennutzungsplanung. Hierbei handelt es sich um einen an XPlanung angelehnten Gebrauchsdienst der Zusammenzeichnungen von Planelementen des Flächennutzungsplans der in der Überschrift angegebenen Kommune mit mindestens einem Layer pro XPlanung-Klasse. Es handelt sich explizit nicht um einen XPlanung-konformen Dienst, da er nicht dem XPlanung-Schema entspricht. Stattdessen wird ein eigenes, abgeflachtes Schema verwendet. 
+
+Die Zusammenzeichnung beinhaltet den aktuellen Stand der rechtswirksamen Flächennutzungs-planung, der in den ursprünglich aufgestellten Flächennutzungsplan alle inzwischen rechtswirksam erfolgten Änderungen und Berichtigungen einarbeitet, so dass es ein Gesamtplanwerk ergibt. Die Grenzen der Geltungsbereiche von Flächennutzungsplan-Änderungen und Berichtigungen sind im Layer „Geltungsbereiche“ zusammengefasst. Die Daten wurden im Rahmen des Projektes PlanDigital erstellt bzw. veröffentlicht und werden durch die Plattform PlanDigital (www.testportal-plandigital.de) bereitgestellt. 
+Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die letzte technische Aktualisierung des Geodatensatzes bzw. der Dienste, die möglicherweise keine Änderung der Inhalte bedeutet. Die Veröffentlichung aktualisierter Daten sollte mindestens einmal jährlich erfolgen. In der Plattform/Testportal PlanDigital wurde in den Dienstmetadaten von der zuständigen Kommune folgende Aktualität angegeben: ';
+		$abstract_downloadservice .= $md->get('stellendaten')['ows_abstract'];
+		$abstract_downloadservice .= '. Das angegebene Veröffentlichungsdatum soll das Datum der Rechtskraft des Plans oder der letzten Änderung sein; diese Information wird der XPlanGML entnommen.';
+		
 		$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist der " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
 		$md->set('id_abstract', array(
-			'dataset' => 'Geodatensatz des Plans ' . $plan->get('name') . $abstract_zusatz,
-			'viewservice' => 'Darstellungsdienst (WMS) des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
-			'downloadservice' => 'Downloaddienst (WFS) des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
+			'dataset' => $abstract_dataset,
+			'viewservice' => $abstract_viewservice,
+			'downloadservice' => $abstract_downloadservice
 		));
 		$md->set('date_title', $this->get_plan_attribut_aktualitaet());
-		//$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));
+		$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));
 		// id_cite_date should be set to aktualisierungsdatum for metadataportal niedersachsen
-		$md->set('id_cite_date', en_date($this->get_letztes_aktualisierungsdatum_gebietstabelle()));
+		//$md->set('id_cite_date', en_date($this->get_letztes_aktualisierungsdatum_gebietstabelle()));
 		
 		//Auf Wunsch von ArL's/GDI-NI wurde der Identifier für alle Pläne auf den Namespace Plandigital angepasst
 		$md->set('namespace', $md->get('stellendaten')['ows_namespace']);
@@ -2942,8 +2966,8 @@ class Konvertierung extends PgObject {
 		$metaDataCreator = new MetaDataCreator($md);
 		return array(
 			'metaDataGeodatensatz' => $metaDataCreator->createMetadataGeodatensatz(),
-			'metaDataDownload' => $metaDataCreator->createMetaDataDownload(),
-			'metaDataView' =>  $metaDataCreator->createMetaDataView()
+			'metaDataDownload' => $metaDataCreator->createMetadataDownload(),
+			'metaDataView' =>  $metaDataCreator->createMetadataView()
 		);
 	}
 

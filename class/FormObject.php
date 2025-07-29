@@ -35,7 +35,7 @@ class FormObject {
 	#
 	################################################################################
 
-	function __construct($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "") {
+	function __construct($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "", $output = true) {
 		if (!is_array($selectedValue)) { $selectedValue=array($selectedValue); }
 		$this->type = $type;
 		$this->width = $width;
@@ -77,7 +77,9 @@ class FormObject {
 				$this->hidden['value']=$value[0];
 			}
 		} # ende switch type
-		$this->outputHTML();
+		if ($output) {
+			$this->outputHTML();
+		}
 	} # ende constructor
 
 /*

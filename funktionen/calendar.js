@@ -38,10 +38,6 @@ function CalendarJS() {
 						this.parEl = document.getElementById('calendar_'+elementid);
 						this.attributefield = document.getElementById(elementid);
 	        	value = this.attributefield.value;
-						if(setnow){
-							this.submit();
-							return;
-						}
 	        	if(value != ''){
 							if(type == 'date'){
 								dateElements = value.split('.');
@@ -60,6 +56,10 @@ function CalendarJS() {
 							initDate = new Date(dateElements[2],dateElements[1]-1,dateElements[0], timeElements[0], timeElements[1], timeElements[2]);
 	        	}
 						this.type = type;
+						if(setnow){
+							this.submit();
+							return;
+						}
 						this.now = initDate?initDate:new Date();
 						this.date = this.now.getDate();
 						this.month = this.mm = this.now.getMonth();

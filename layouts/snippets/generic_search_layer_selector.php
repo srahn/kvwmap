@@ -94,14 +94,14 @@ if(value_of($this->formvars, 'selected_layer_id') != '') {
 ?> 
 	<div class="gsl_suche_raeumlich_map generic_search_defaults">
 		<div id="gsl_suche_raeumlich_params">
-			<!--div class="gsl_suche_raeumlich_param">
+			<div class="gsl_suche_raeumlich_param">
 				<div><input type="checkbox" name="within" value="1" <?php if($this->formvars['within'] == 1)echo 'checked'; ?>></div>
 				<div><?php echo $strWithin; ?></div>
 			</div>
 			<div class="gsl_suche_raeumlich_param">
 				<div><input type="checkbox" name="singlegeom" value="true" <?php if($this->formvars['singlegeom'])echo 'checked="true"'; ?>></div>
 				<div><?php echo $strSingleGeoms; ?></div>
-			</div-->
+			</div>
 			<div class="gsl_suche_raeumlich_param">
 				<div><?php echo $this->strUseGeometryOf; ?>:</div> 
 				<div>
