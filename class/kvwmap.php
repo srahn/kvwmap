@@ -19611,7 +19611,7 @@ class db_mapObj{
 								$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
 								for ($k = 1; $k < count($subform); $k++) {
 									if (strpos($subform[$k], ':')) {
-										$exp = explode(':', $attribute_foreign_keys[$f]);
+										$exp = explode(':', $subform[$k]);
 										$keys['fkey'] = $exp[0];	# Verknüpfungsattribut in diesem Layer
 										$keys['pkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
 									}
