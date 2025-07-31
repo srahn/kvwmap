@@ -2046,26 +2046,47 @@ class rolle {
 		}
 		else {
 			for($j = 0; $j < count_or_0($layerids); $j++){
-				$sql = "
+				if (MYSQLVERSION < 800) {
+					$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
-					WITH RECURSIVE cte (group_id) AS (
-						SELECT 
-            	coalesce(ul.group_id, l.Gruppe) AS group_id
-						FROM
-          		used_layer ul JOIN
-            	layer l ON ul.`Layer_ID` = l.`Layer_ID`
-            WHERE 
-            	l.Layer_ID = " . $layerids[$j] . " AND
-            	ul.Stelle_ID = " . $stelle_id . "
-						UNION ALL
-						SELECT obergruppe FROM u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
-					)
-					SELECT 
-						" . $user_id . ", 
-						" . $stelle_id . ", 
-						group_id, 
+					SELECT DISTINCT 
+						".$user_id.", 
+						".$stelle_id.", 
+						u_groups.id, 
 						0
-					FROM cte;";
+					FROM (
+						SELECT 
+							@id AS id, 
+							@id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe
+						FROM 
+							u_groups, 
+							(SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = ".$layerids[$j].")) AS vars
+						WHERE @id IS NOT NULL
+					) AS dat
+					JOIN u_groups ON dat.id = u_groups.id";
+				}
+				else {
+					$sql = "
+						INSERT IGNORE INTO u_groups2rolle 
+						WITH RECURSIVE cte (group_id) AS (
+							SELECT 
+								coalesce(ul.group_id, l.Gruppe) AS group_id
+							FROM
+								used_layer ul JOIN
+								layer l ON ul.`Layer_ID` = l.`Layer_ID`
+							WHERE 
+								l.Layer_ID = " . $layerids[$j] . " AND
+								ul.Stelle_ID = " . $stelle_id . "
+							UNION ALL
+							SELECT obergruppe FROM u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
+						)
+						SELECT 
+							" . $user_id . ", 
+							" . $stelle_id . ", 
+							group_id, 
+							0
+						FROM cte;";
+				}
 				#echo '<br>Gruppen: '.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
@@ -2088,34 +2109,53 @@ class rolle {
 	}
 
 	static function setGroupsForAll($database) {
-		$sql = "
-			INSERT IGNORE INTO u_groups2rolle 				
-			WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
-				SELECT DISTINCT
-						ul.`Stelle_ID` AS stelle_id,
-						r.user_id,
-						coalesce(ul.group_id, l.Gruppe) AS group_id
-				FROM
-						used_layer ul JOIN
-						layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
-						rolle r ON ul.`Stelle_ID` = r.stelle_id
-				UNION ALL
-				SELECT 
-						cte.stelle_id,
-						cte.user_id,
-						obergruppe AS group_id
-				FROM 
-						u_groups, cte 
-				WHERE 
-						cte.group_id = u_groups.id AND 
-						obergruppe IS NOT NULL
-			)
+		if (MYSQLVERSION < 800) {
+			$sql = "
+			INSERT IGNORE INTO u_groups2rolle 
 			SELECT DISTINCT 
-				user_id,
-				stelle_id,
-				group_id,
-				0 
-			FROM cte";
+				r2ul.user_id,
+				r2ul.stelle_id,
+				g5.id,
+				0
+			FROM 
+				`u_rolle2used_layer` r2ul
+				JOIN layer l ON l.Layer_ID = r2ul.layer_id
+				JOIN u_groups g1 ON g1.id = l.Gruppe
+				LEFT JOIN u_groups g2 ON g2.id = g1.obergruppe
+				LEFT JOIN u_groups g3 ON g3.id = g2.obergruppe
+				LEFT JOIN u_groups g4 ON g4.id = g3.obergruppe
+				LEFT JOIN u_groups g5 ON (g5.id = g4.id OR g5.id = g3.id OR g5.id = g2.id OR g5.id = g1.id)";
+		}
+		else {
+			$sql = "
+				INSERT IGNORE INTO u_groups2rolle 				
+				WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
+					SELECT DISTINCT
+							ul.`Stelle_ID` AS stelle_id,
+							r.user_id,
+							coalesce(ul.group_id, l.Gruppe) AS group_id
+					FROM
+							used_layer ul JOIN
+							layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
+							rolle r ON ul.`Stelle_ID` = r.stelle_id
+					UNION ALL
+					SELECT 
+							cte.stelle_id,
+							cte.user_id,
+							obergruppe AS group_id
+					FROM 
+							u_groups, cte 
+					WHERE 
+							cte.group_id = u_groups.id AND 
+							obergruppe IS NOT NULL
+				)
+				SELECT DISTINCT 
+					user_id,
+					stelle_id,
+					group_id,
+					0 
+				FROM cte";
+		}
 		#echo '<br>Gruppen: '.$sql;
 		$database->execSQL($sql);
 	}
@@ -2174,7 +2214,9 @@ class rolle {
 				n.group_id IS NULL
 		";
 		// echo '<br>SQL zum Löschen nicht mehr benötigter groups2rolle Eintragungen: ' . $sql . '<br>';
-		$database->execSQL($sql);
+		if (MYSQLVERSION > 800) {
+			$database->execSQL($sql);
+		}
 	}
 
 	function set_one_Layer($user_id, $stelle_id, $layer_id,  $active) {
