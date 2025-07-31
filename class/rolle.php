@@ -2339,7 +2339,7 @@ class rolle {
 				n.user_id IS NULL AND
 				n.group_id IS NULL
 		";
-		// echo '<br>SQL zum Löschen nicht mehr benötigter groups2rolle Eintragungen: ' . $sql . '<br>';
+		// echo '<br>SQL zum Löschen nicht mehr benötigter groups2rolle Eintragungen: ' . $sql . '<br>'; 
 		$database->execSQL($sql);
 	}
 
