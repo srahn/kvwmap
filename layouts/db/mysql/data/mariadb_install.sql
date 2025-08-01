@@ -1,16 +1,25 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql
--- Erstellungszeit: 14. Jan 2024 um 17:18
+-- Erstellungszeit: 16. Apr 2025 um 13:11
 -- Server-Version: 10.7.1-MariaDB-1:10.7.1+maria~focal
--- PHP-Version: 7.4.27
+-- PHP-Version: 8.2.28
+
+
+START TRANSACTION;
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Datenbank: `kvwmapdb`
 --
-BEGIN;
+
 -- --------------------------------------------------------
 
 --
@@ -37,17 +46,17 @@ CREATE TABLE `belated_files` (
 
 CREATE TABLE `classes` (
   `Class_ID` int(11) NOT NULL,
-  `Name` varchar(50) DEFAULT NULL,
-  `Name_low-german` varchar(100) DEFAULT NULL,
-  `Name_english` varchar(100) DEFAULT NULL,
-  `Name_polish` varchar(100) DEFAULT NULL,
-  `Name_vietnamese` varchar(100) DEFAULT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Name_low-german` varchar(255) DEFAULT NULL,
+  `Name_english` varchar(255) DEFAULT NULL,
+  `Name_polish` varchar(255) DEFAULT NULL,
+  `Name_vietnamese` varchar(255) DEFAULT NULL,
   `Layer_ID` int(11) NOT NULL DEFAULT 0,
   `Expression` mediumtext DEFAULT NULL,
   `drawingorder` int(11) UNSIGNED DEFAULT NULL,
   `legendorder` int(11) DEFAULT NULL,
   `text` varchar(255) DEFAULT NULL,
-  `classification` varchar(50) DEFAULT NULL,
+  `classification` varchar(255) DEFAULT NULL,
   `legendgraphic` varchar(255) DEFAULT NULL,
   `legendimagewidth` int(11) DEFAULT NULL,
   `legendimageheight` int(11) DEFAULT NULL
@@ -118,7 +127,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (16, 'ZOOM2COORD_STYLE_ID', '', '3244', 'hier können eigene Styles für den Koordinatenzoom und Punktzoom definiert werden\r\n', 'string', 'Layout', '', 1, 2),
 (17, 'ZOOM2POINT_STYLE_ID', '', '3244', '', 'string', 'Layout', '', 1, 2),
 (18, 'GLEVIEW', '', '2', 'Schalter für eine zeilen- oder spaltenweise Darstellung der Attribute im generischen Layereditor  # Version 1.6.5\r\n', 'numeric', 'Layout', '', 1, 2),
-(19, 'sizes', '', '{\r\n    \"layouts/gui.php\": {\r\n        \"margin\": {\r\n            \"width\": 10,\r\n            \"height\": 10\r\n        },\r\n        \"header\": {\r\n            \"height\": 25\r\n        },\r\n        \"scale_bar\": {\r\n            \"height\": 30\r\n        },\r\n        \"lagebezeichnung_bar\": {\r\n            \"height\": 30\r\n        },\r\n        \"map_functions_bar\": {\r\n            \"height\": 36\r\n        },\r\n        \"footer\": {\r\n            \"height\": 20\r\n        },\r\n        \"menue\": {\r\n            \"width\": 240,\r\n            \"hide_width\": 22\r\n        },\r\n        \"legend\": {\r\n            \"width\": 250,\r\n            \"hide_width\": 27\r\n        }\r\n    },\r\n    \"gui_button.php\": {\r\n        \"margin\": {\r\n            \"width\": 10,\r\n            \"height\": 22\r\n        },\r\n        \"header\": {\r\n            \"height\": 25\r\n        },\r\n        \"footer\": {\r\n            \"height\": 107\r\n        },\r\n        \"menue\": {\r\n            \"width\": 209\r\n        },\r\n        \"legend\": {\r\n            \"width\": 250\r\n        }\r\n    }\r\n}', 'Höhen und Breiten von Browser, Rand, Header, Footer, Menü und Legende																# Version 2.7\r\n', 'array', 'Layout', '', 1, 2),
+(19, 'sizes', '', '{\r\n    \"layouts/gui.php\": {\r\n        \"margin\": {\r\n            \"width\": 10,\r\n            \"height\": 10\r\n        },\r\n        \"header\": {\r\n            \"height\": 38\r\n        },\r\n        \"scale_bar\": {\r\n            \"height\": 30\r\n        },\r\n        \"lagebezeichnung_bar\": {\r\n            \"height\": 30\r\n        },\r\n        \"map_functions_bar\": {\r\n            \"height\": 36\r\n        },\r\n        \"footer\": {\r\n            \"height\": 20\r\n        },\r\n        \"menue\": {\r\n            \"width\": 240,\r\n            \"hide_width\": 22\r\n        },\r\n        \"legend\": {\r\n            \"width\": 250,\r\n            \"hide_width\": 27\r\n        }\r\n    },\r\n    \"gui_button.php\": {\r\n        \"margin\": {\r\n            \"width\": 10,\r\n            \"height\": 22\r\n        },\r\n        \"header\": {\r\n            \"height\": 25\r\n        },\r\n        \"footer\": {\r\n            \"height\": 107\r\n        },\r\n        \"menue\": {\r\n            \"width\": 209\r\n        },\r\n        \"legend\": {\r\n            \"width\": 250\r\n        }\r\n    }\r\n}', 'Höhen und Breiten von Browser, Rand, Header, Footer, Menü und Legende																# Version 2.7\r\n', 'array', 'Layout', '', 1, 2),
 (20, 'LEGEND_GRAPHIC_FILE', '', '', 'zusätzliche Legende; muss unterhalb von snippets liegen\r\n', 'string', 'Layout', '', 1, 2),
 (21, 'legendicon_size', '', '{\r\n    \"width\": [\r\n        18,\r\n        18,\r\n        18,\r\n        18\r\n    ],\r\n    \"height\": [\r\n        18,\r\n        12,\r\n        12,\r\n        18\r\n    ]\r\n}', 'Höhe und Breite der generierten Legendenbilder für verschiedene Layertypen\r\n-> Punktlayer\r\n-> Linienlayer\r\n-> Flächenlayer\r\n-> Rasterlayer\r\n', 'array', 'Layout', '', 1, 2),
 (22, 'PREVIEW_IMAGE_WIDTH', '', '800', 'Vorschaubildgröße\r\n', 'numeric', 'Layout', '', 1, 2),
@@ -140,7 +149,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (38, 'PHPVERSION', '', '730', 'PHP-Version\r\n', 'string', 'Administration', '', 1, 2),
 (39, 'MYSQL_CHARSET', '', 'UTF8', 'Character Set der MySQL-Datenbank\r\n', 'string', 'Administration', '', 1, 2),
 (40, 'POSTGRES_CHARSET', '', 'UTF8', '', 'string', 'Administration', '', 1, 2),
-(41, 'PUBLISHERNAME', '', 'WebGIS INROS', 'Bezeichung des Datenproviders\r\n', 'string', 'Administration', '', 1, 2),
+(41, 'PUBLISHERNAME', '', 'WebGIS', 'Bezeichung des Datenproviders\r\n', 'string', 'Administration', '', 1, 2),
 (42, 'CHECK_CLIENT_IP', '', 'true', 'Erweiterung der Authentifizierung um die IP Adresse des Nutzers\r\nTestet ob die IP des anfragenden Clientrechners dem Nutzer zugeordnet ist\r\n', 'boolean', 'Administration', '', 1, 2),
 (43, 'PASSWORD_MAXLENGTH', '', '25', 'maximale Länge der Passwörter\r\n', 'numeric', 'Administration', '', 1, 2),
 (44, 'PASSWORD_MINLENGTH', '', '12', 'minimale Länge der Passwörter\r\n', 'numeric', 'Administration', '', 1, 2),
@@ -149,7 +158,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (47, 'MAXQUERYROWS', '', '100', 'maximale Anzahl der in einer Sachdatenabfrage zurückgelieferten Zeilen.\r\n', 'numeric', 'Administration', '', 1, 2),
 (48, 'ALWAYS_DRAW', '', 'true', 'definiert, ob der Polygoneditor nach einem Neuladen\r\nder Seite immer in den Modus \"Polygon zeichnen\" wechselt\r\n', 'boolean', 'Administration', '', 1, 2),
 (49, 'EARTH_RADIUS', '', '6384000', 'Parameter für die Strecken- und Flächenreduktion\r\n', 'numeric', 'Administration', '', 1, 2),
-(50, 'admin_stellen', '', '[\r\n    1,54\r\n]', 'Adminstellen\r\n', 'array', 'Administration', '', 1, 2),
+(50, 'admin_stellen', '', '[\r\n    1\r\n]', 'Adminstellen\r\n', 'array', 'Administration', '', 1, 2),
 (51, 'gast_stellen', '', '[\r\n  \r\n]', 'Gast-Stellen\r\n', 'array', 'Administration', '', 1, 2),
 (52, 'selectable_limits', '', '[\r\n    10,\r\n    25,\r\n    50,\r\n    100,\r\n    200\r\n]', 'auswählbare Treffermengen\r\n', 'array', 'Administration', '', 1, 2),
 (53, 'selectable_scales', '', '[\r\n    500,\r\n    1000,\r\n    2500,\r\n    5000,\r\n    7500,\r\n    10000,\r\n    25000,\r\n    50000,\r\n    100000,\r\n    250000,\r\n    500000,\r\n    1000000\r\n]', 'auswählbare Maßstäbe\r\n', 'array', 'Administration', '', 1, 2),
@@ -224,7 +233,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (123, 'LOG_CONSUME_ACTIVITY', '', '1', 'Einstellungen zur Speicherung der Zugriffe\r\n', 'numeric', 'Logging', '', 1, 2),
 (124, 'POSTGRES_HOST', '', 'pgsql', '', 'string', 'Datenbanken', '', 1, 2),
 (125, 'POSTGRES_USER', '', 'kvwmap', '', 'string', 'Datenbanken', '', 1, 2),
-(126, 'POSTGRES_PASSWORD', '', '***********', '', 'password', 'Datenbanken', '', 1, 2),
+(126, 'POSTGRES_PASSWORD', '', 'ujxT4cmIrbZLkfsJKznhYgI5', '', 'password', 'Datenbanken', '', 1, 2),
 (127, 'POSTGRES_DBNAME', '', 'kvwmapsp', '', 'string', 'Datenbanken', '', 1, 2),
 (128, 'MAPFILENAME', '', 'kvwmap', '', 'string', 'OWS-METADATEN', '', 1, 2),
 (129, 'WMS_MAPFILE_REL_PATH', '', 'ows/', 'Voreinstellungen für Metadaten zu Web Map Services (WMS-Server)\r\n', 'string', 'OWS-METADATEN', '', 1, 2),
@@ -251,10 +260,10 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (150, 'OWS_CONTACTELECTRONICMAILADDRESS', '', 'stefan.rahn@gdi-service.de', 'An Stelle von WMS_CONTACTELECTRONICMAILADDRESS\r\nWMT_MS_Capabilities/Service/ContactInformation/ContactElectronicMailAddress\r\nWCS_Capabilities/Service/contactInfo/address/eletronicMailAddress\r\n', 'string', 'OWS-METADATEN', '', 1, 2),
 (151, 'OWS_SRS', '', 'EPSG:25832 EPSG:25833 EPSG:5650 EPSG:4326', 'An Stelle von WMS_SRS\r\nWMT_MS_Capabilities/Capability/Layer/SRS\r\nWMT_MS_Capabilities/Capability/Layer/Layer[*]/SRS\r\nWFS_Capabilities/FeatureTypeList/FeatureType[*]/SRS\r\nunless differently defined in LAYER object\r\nif you are setting > 1 SRS for WMS, you need to define \"wms_srs\" and \"wfs_srs\"\r\nseperately because OGC:WFS only accepts one OUTPUT SRS\r\n', 'string', 'OWS-METADATEN', '', 1, 2),
 (152, 'WFS_SRS', '', 'EPSG:25833', '', 'string', 'OWS-METADATEN', '', 1, 2),
-(153, 'METADATA_AUTH_LINK', '', '', 'URL zum Authentifizieren am CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
-(154, 'METADATA_ONLINE_RESOURCE', '', '', 'URL zum CSW-Server\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
-(155, 'METADATA_EDIT_LINK', '', '', 'URL zum Editieren von Metadaten im CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
-(156, 'METADATA_EDIT_LINK', '', '', 'URL zum Editieren von Metadaten im CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
+(153, 'METADATA_AUTH_LINK', '', 'http://berg.preagro.de:8088/geonetwork/srv/en/xml.user.login?username=admin&password=!admin!', 'URL zum Authentifizieren am CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
+(154, 'METADATA_ONLINE_RESOURCE', '', 'http://berg.preagro.de:8088/geonetwork/srv/en/csw', 'URL zum CSW-Server\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
+(155, 'METADATA_EDIT_LINK', '', 'http://berg:8088/geonetwork/srv/en/metadata.edit?id=', 'URL zum Editieren von Metadaten im CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
+(156, 'METADATA_EDIT_LINK', '', 'http://berg:8088/geonetwork/srv/en/metadata.edit?id=', 'URL zum Editieren von Metadaten im CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
 (157, 'LOGIN_AGREEMENT', 'SNIPPETS', 'login_agreement.php', 'PHP-Seite, welche die Agreement-Message anzeigt', 'string', 'Layout', NULL, 1, 3),
 (158, 'LOGIN_NEW_PASSWORD', 'SNIPPETS', 'login_new_password.php', 'PHP-Seite, auf der man ein neues Passwort vergeben kann', 'string', 'Layout', NULL, 1, 3),
 (159, 'LOGIN_REGISTRATION', 'SNIPPETS', 'login_registration.php', 'PHP-Seite, auf der man sich registrieren kann', 'string', 'Layout', NULL, 1, 3),
@@ -285,7 +294,8 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (184, 'IMPORT_POINT_STYLE_ID', '', '3128', 'Hier kann ein eigener Style für den Datenimport von Punkt-Objekten eingetragen werden.', 'integer', 'Layout', NULL, 1, 2),
 (185, 'NUTZER_ARCHIVIEREN', '', 'false', 'Ist dieser Parameter auf true gesetzt, werden Nutzer nicht gelöscht sondern archiviert.', 'boolean', 'Administration', NULL, 1, 2),
 (208, 'QUERY_ONLY_ACTIVE_CLASSES', '', 'true', 'Wenn aktiviert, dann werden bei der Kartenabfrage nur aktive Klassen berücksichtigt.', 'boolean', 'Administration', NULL, 1, 2),
-(209, 'OVERRIDE_LANGUAGE_VARS', '', 'false', 'Wenn mit true aktiviert, werden Variablen mit Texten der unterschiedlichen Sprachen durch Variablen in gleichnamigen custom-Dateien überschrieben falls vorhanden.', 'boolean', 'Layout', NULL, 1, 2);
+(209, 'OVERRIDE_LANGUAGE_VARS', '', 'false', 'Wenn mit true aktiviert, werden Variablen mit Texten der unterschiedlichen Sprachen durch Variablen in gleichnamigen custom-Dateien überschrieben falls vorhanden.', 'boolean', 'Layout', NULL, 1, 2),
+(210, 'ROUTING_URL', '', '', 'URL eines Routing-Dienstes. Der Dienst muss GeoJSON zurückliefern. $start und $end sind die Platzhalter für den Start- bzw. Endpunkt der Route.', 'string', 'Administration', NULL, 1, 2);
 
 -- --------------------------------------------------------
 
@@ -308,7 +318,7 @@ CREATE TABLE `connections` (
 --
 
 INSERT INTO `connections` (`id`, `name`, `host`, `port`, `dbname`, `user`, `password`) VALUES
-(1, 'kvwmapsp', 'pgsql', 5432, 'kvwmapsp', 'kvwmap', '************');
+(1, 'kvwmapsp', 'pgsql', 5432, 'kvwmapsp', 'kvwmap', 'ujxT4cmIrbZLkfsJKznhYgI5');
 
 -- --------------------------------------------------------
 
@@ -347,7 +357,7 @@ INSERT INTO `cron_jobs` (`id`, `bezeichnung`, `beschreibung`, `time`, `query`, `
 
 CREATE TABLE `datasources` (
   `id` int(11) NOT NULL,
-  `name` varchar(50) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
   `beschreibung` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
@@ -454,7 +464,8 @@ CREATE TABLE `datendrucklayouts` (
   `gap` int(11) NOT NULL DEFAULT 20,
   `no_record_splitting` tinyint(1) NOT NULL DEFAULT 0,
   `columns` tinyint(4) NOT NULL DEFAULT 0,
-  `filename` varchar(255) DEFAULT NULL
+  `filename` varchar(255) DEFAULT NULL,
+  `use_previews` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
@@ -904,6 +915,7 @@ CREATE TABLE `layer` (
   `uptodateness` varchar(100) DEFAULT NULL COMMENT 'Aktualität der Daten des Layers.',
   `updatecycle` varchar(100) DEFAULT NULL COMMENT 'Aktualisierungszyklus der Daten des Layers.',
   `metalink` varchar(255) DEFAULT NULL,
+  `terms_of_use_link` varchar(255) DEFAULT NULL,
   `icon` varchar(255) DEFAULT NULL,
   `privileg` enum('0','1','2') NOT NULL DEFAULT '0',
   `export_privileg` tinyint(1) NOT NULL DEFAULT 1,
@@ -923,9 +935,9 @@ CREATE TABLE `layer` (
 -- Daten für Tabelle `layer`
 --
 
-INSERT INTO `layer` (`Layer_ID`, `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `identifier_text`, `maintable_is_view`, `Data`, `schema`, `geom_column`, `document_path`, `document_url`, `ddl_attribute`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `max_query_rows`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `icon`, `privileg`, `export_privileg`, `status`, `trigger_function`, `sync`, `editable`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`, `version`, `comment`) VALUES
-(1, 'BaseMap DE farbig', NULL, '', NULL, NULL, 'BaseMap DE farbig', 3, 32, '', '', '', '', 0, '', '', NULL, '', '', '', '', '', '', '', NULL, NULL, '', 0, 'https://sgx.geodatenzentrum.de/wms_basemapde?VERSION=1.1.0&FORMAT=image/png&STYLES=&LAYERS=de_basemapde_web_raster_farbe', NULL, '', 7, '', '', '', NULL, 3, 'pixels', NULL, '25833', NULL, NULL, '0', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 'EPSG:25833 EPSG:25832 EPSG:4326', 'de_basemapde_web_raster_farbe', '', '1.1.1', 'image/png', 60, '', '', '', NULL, 'radio', '0', '0', '1.3.0', 'Der WMS DE basemap.de Web Raster hat als Datengrundlage die basemap.de Web Vektor. Die Darstellung dieser beruht auf einer bundesweit einheitlichen Definition des Webkarten-Signaturenkataloges (basemap.de Web-SK) der AdV. Es wird die basemap.de Web-SK Version in der jeweils aktuellen Fassung verwendet. Informationen zur Aktualität der Daten und zur jeweiligen Version können unter https://www.basemap.de/data/produkte/web_raster/meta/bm_web_raster_datenaktualitaet.html eingesehen werden. ', NULL, 'Dienstleistungszentrum des Bundes für Geoinformation und Geodäsie', 'dlz@bkg.bund.de', '+49 (0) 341 5634 333', NULL, NULL, 'https://sgx.geodatenzentrum.de/wms_basemapde?Service=WMS&Request=GetCapabilities', NULL, '0', 1, '', '', '0', 1, 1, NULL, NULL, NULL, '1.1.1', NULL),
-(2, 'BaseMap DE grau', NULL, '', NULL, NULL, 'BaseMap DE grau', 3, 32, '', '', '', '', 0, '', '', NULL, '', '', '', '', '', '', '', NULL, NULL, '', 0, 'https://sgx.geodatenzentrum.de/wms_basemapde?VERSION=1.1.0&FORMAT=image/png&STYLES=&LAYERS=de_basemapde_web_raster_grau', NULL, '', 7, '', '', '', NULL, 3, 'pixels', NULL, '25833', NULL, NULL, '0', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 'EPSG:25833 EPSG:25832 EPSG:4326', 'de_basemapde_web_raster_grau', '', '1.1.1', 'image/png', 60, '', '', '', NULL, 'radio', '0', '0', '1.3.0', 'Der WMS DE basemap.de Web Raster hat als Datengrundlage die basemap.de Web Vektor. Die Darstellung dieser beruht auf einer bundesweit einheitlichen Definition des Webkarten-Signaturenkataloges (basemap.de Web-SK) der AdV. Es wird die basemap.de Web-SK Version in der jeweils aktuellen Fassung verwendet. Informationen zur Aktualität der Daten und zur jeweiligen Version können unter https://www.basemap.de/data/produkte/web_raster/meta/bm_web_raster_datenaktualitaet.html eingesehen werden. ', NULL, 'Dienstleistungszentrum des Bundes für Geoinformation und Geodäsie', 'dlz@bkg.bund.de', '+49 (0) 341 5634 333', NULL, NULL, 'https://sgx.geodatenzentrum.de/wms_basemapde?Service=WMS&Request=GetCapabilities', NULL, '0', 1, '', '', '0', 1, 1, NULL, NULL, NULL, '1.1.1', NULL);
+INSERT INTO `layer` (`Layer_ID`, `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `identifier_text`, `maintable_is_view`, `Data`, `schema`, `geom_column`, `document_path`, `document_url`, `ddl_attribute`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `max_query_rows`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `icon`, `privileg`, `export_privileg`, `status`, `trigger_function`, `sync`, `editable`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`, `version`, `comment`) VALUES
+(1, 'BaseMap DE farbig', NULL, '', NULL, NULL, 'BaseMap DE farbig', 3, 32, '', '', '', '', 0, '', '', NULL, '', '', '', '', '', '', '', NULL, NULL, '', 0, 'https://sgx.geodatenzentrum.de/wms_basemapde?VERSION=1.1.0&FORMAT=image/png&STYLES=&LAYERS=de_basemapde_web_raster_farbe', NULL, '', 7, '', '', '', NULL, 3, 'pixels', NULL, '25833', NULL, NULL, '0', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 'EPSG:25833 EPSG:25832 EPSG:4326', 'de_basemapde_web_raster_farbe', '', '1.1.1', 'image/png', 60, '', '', '', NULL, 'radio', '0', '0', '1.3.0', 'Der WMS DE basemap.de Web Raster hat als Datengrundlage die basemap.de Web Vektor. Die Darstellung dieser beruht auf einer bundesweit einheitlichen Definition des Webkarten-Signaturenkataloges (basemap.de Web-SK) der AdV. Es wird die basemap.de Web-SK Version in der jeweils aktuellen Fassung verwendet. Informationen zur Aktualität der Daten und zur jeweiligen Version können unter https://www.basemap.de/data/produkte/web_raster/meta/bm_web_raster_datenaktualitaet.html eingesehen werden. ', NULL, 'Dienstleistungszentrum des Bundes für Geoinformation und Geodäsie', 'dlz@bkg.bund.de', '+49 (0) 341 5634 333', NULL, NULL, 'https://sgx.geodatenzentrum.de/wms_basemapde?Service=WMS&Request=GetCapabilities', NULL, NULL, '0', 1, '', '', '0', 1, 1, NULL, NULL, NULL, '1.1.1', NULL),
+(2, 'BaseMap DE grau', NULL, '', NULL, NULL, 'BaseMap DE grau', 3, 32, '', '', '', '', 0, '', '', NULL, '', '', '', '', '', '', '', NULL, NULL, '', 0, 'https://sgx.geodatenzentrum.de/wms_basemapde?VERSION=1.1.0&FORMAT=image/png&STYLES=&LAYERS=de_basemapde_web_raster_grau', NULL, '', 7, '', '', '', NULL, 3, 'pixels', NULL, '25833', NULL, NULL, '0', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 'EPSG:25833 EPSG:25832 EPSG:4326', 'de_basemapde_web_raster_grau', '', '1.1.1', 'image/png', 60, '', '', '', NULL, 'radio', '0', '0', '1.3.0', 'Der WMS DE basemap.de Web Raster hat als Datengrundlage die basemap.de Web Vektor. Die Darstellung dieser beruht auf einer bundesweit einheitlichen Definition des Webkarten-Signaturenkataloges (basemap.de Web-SK) der AdV. Es wird die basemap.de Web-SK Version in der jeweils aktuellen Fassung verwendet. Informationen zur Aktualität der Daten und zur jeweiligen Version können unter https://www.basemap.de/data/produkte/web_raster/meta/bm_web_raster_datenaktualitaet.html eingesehen werden. ', NULL, 'Dienstleistungszentrum des Bundes für Geoinformation und Geodäsie', 'dlz@bkg.bund.de', '+49 (0) 341 5634 333', NULL, NULL, 'https://sgx.geodatenzentrum.de/wms_basemapde?Service=WMS&Request=GetCapabilities', NULL, NULL, '0', 1, '', '', '0', 1, 1, NULL, NULL, NULL, '1.1.1', NULL);
 
 -- --------------------------------------------------------
 
@@ -936,7 +948,7 @@ INSERT INTO `layer` (`Layer_ID`, `Name`, `Name_low-german`, `Name_english`, `Nam
 CREATE TABLE `layer_attributes` (
   `layer_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `real_name` varchar(255) DEFAULT NULL,
+  `real_name` text DEFAULT NULL,
   `tablename` varchar(100) DEFAULT NULL,
   `table_alias_name` varchar(100) DEFAULT NULL,
   `schema` varchar(100) DEFAULT NULL,
@@ -948,7 +960,7 @@ CREATE TABLE `layer_attributes` (
   `length` int(11) DEFAULT NULL,
   `decimal_length` int(11) DEFAULT NULL,
   `default` varchar(255) DEFAULT NULL,
-  `form_element_type` enum('Text','Textfeld','Auswahlfeld','Auswahlfeld_Bild','Autovervollständigungsfeld','Autovervollständigungsfeld_zweispaltig','Radiobutton','Checkbox','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','dynamicLink','User','UserID','Stelle','StelleID','Fläche','Länge','Zahl','mailto','Winkel','Style','Editiersperre','ExifLatLng','ExifRichtung','ExifErstellungszeit','Farbauswahl') NOT NULL,
+  `form_element_type` enum('Text','Textfeld','Auswahlfeld','Auswahlfeld_Bild','Autovervollständigungsfeld','Autovervollständigungsfeld_zweispaltig','Radiobutton','Checkbox','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','dynamicLink','User','UserID','Stelle','StelleID','ClientID','Fläche','Länge','Zahl','mailto','Winkel','Style','Editiersperre','ExifLatLng','ExifRichtung','ExifErstellungszeit','Farbauswahl') NOT NULL,
   `options` mediumtext DEFAULT NULL,
   `alias` varchar(255) DEFAULT NULL,
   `alias_low-german` varchar(100) DEFAULT NULL,
@@ -1020,8 +1032,35 @@ CREATE TABLE `layer_charts` (
   `aggregate_function` enum('sum','average','min','max') DEFAULT NULL,
   `value_attribute_label` varchar(100) DEFAULT NULL,
   `value_attribute_name` varchar(65) DEFAULT NULL,
-  `label_attribute_name` varchar(65) DEFAULT NULL
+  `label_attribute_name` varchar(65) DEFAULT NULL,
+  `beschreibung` text NOT NULL,
+  `breite` varchar(255) NOT NULL DEFAULT '100%'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `layer_datasources`
+--
+
+CREATE TABLE `layer_datasources` (
+  `layer_id` int(11) NOT NULL,
+  `datasource_id` int(11) NOT NULL,
+  `sortorder` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `layer_labelitems`
+--
+
+CREATE TABLE `layer_labelitems` (
+  `layer_id` int(11) NOT NULL,
+  `name` varchar(100) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `alias` varchar(100) COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+  `order` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -1046,272 +1085,335 @@ CREATE TABLE `layer_parameter` (
 CREATE TABLE `migrations` (
   `component` varchar(50) NOT NULL,
   `type` enum('mysql','postgresql') NOT NULL,
-  `filename` varchar(255) NOT NULL
+  `filename` varchar(255) NOT NULL,
+  `comment` text DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
 
 --
 -- Daten für Tabelle `migrations`
 --
 
-INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES
-('kvwmap', 'mysql', '2014-09-12_16-33-22_Version2.0.sql'),
-('kvwmap', 'mysql', '2014-11-07_11-37-59_layer_attributes_Autovervollstaendigungsfeld.sql'),
-('kvwmap', 'mysql', '2014-11-24_10-29-21_druckrahmen_lage_gemeinde_flurst.sql'),
-('kvwmap', 'mysql', '2014-11-27_11-16-24_druckrahmen_scalebar.sql'),
-('kvwmap', 'mysql', '2014-12-03_10-25-40_zwischenablage.sql'),
-('kvwmap', 'mysql', '2015-01-14_16-44-46_styles_initialgap_opacity.sql'),
-('kvwmap', 'mysql', '2015-02-20_11-11-00_rolle_instant_reload_menu_auto_close.sql'),
-('kvwmap', 'mysql', '2015-03-12_15-03-13_styles_colorrange_datarange.sql'),
-('kvwmap', 'mysql', '2015-03-16_15-15-35_rollenlayer_query.sql'),
-('kvwmap', 'mysql', '2015-03-17_10-29-08_rollenlayer_queryStatus.sql'),
-('kvwmap', 'mysql', '2015-03-27_11-36-34_rollenlayer_Data_longtext.sql'),
-('kvwmap', 'mysql', '2015-05-05_13-53-32_u_polygon2used_layer_loeschen.sql'),
-('kvwmap', 'mysql', '2015-05-07_11-29-06_search_attributes2rolle_PK.sql'),
-('kvwmap', 'mysql', '2015-05-08_14-03-33_rolle_last_query_sql_longtext.sql'),
-('kvwmap', 'mysql', '2015-05-22_14-34-59_layer_postlabelcache.sql'),
-('kvwmap', 'mysql', '2015-05-28_11-08-55_rolle_auto_map_resize.sql'),
-('kvwmap', 'mysql', '2015-06-16_16-16-14_u_rolle2usedlayer_gle_view.sql'),
-('kvwmap', 'mysql', '2015-06-23_16-29-07_layer_requires.sql'),
-('kvwmap', 'mysql', '2015-08-05_14-02-01_rolle_saved_layers.sql'),
-('kvwmap', 'mysql', '2015-09-09_15-10-25_rolle_saved_layers_query.sql'),
-('kvwmap', 'mysql', '2015-10-07_09-19-25_layer_attributes_StelleID.sql'),
-('kvwmap', 'mysql', '2015-10-29_13-50-26_u_consumeALB_format.sql'),
-('kvwmap', 'mysql', '2015-12-08_12-01-43_user_loginname.sql'),
-('kvwmap', 'mysql', '2016-01-07_11-26-53_datendrucklayouts_gap.sql'),
-('kvwmap', 'mysql', '2016-01-18_11-43-24_u_consume_epsg_code.sql'),
-('kvwmap', 'mysql', '2016-01-26_14-04-28_druckrahmen_dhk_call.sql'),
-('kvwmap', 'mysql', '2016-02-09_15-34-14_layer_cluster_maxdistance.sql'),
-('kvwmap', 'mysql', '2016-02-17_13-55-03_rolle_coord_query.sql'),
-('kvwmap', 'mysql', '2016-04-21_10-42-03_stelle_gemeinden_gemarkung_flur.sql'),
-('kvwmap', 'mysql', '2016-04-28_16-35-05_add_data_query_params_to_u_rolle2used.sql'),
-('kvwmap', 'mysql', '2016-04-28_16-35-05_add_layer_params.sql'),
-('kvwmap', 'mysql', '2016-05-31_11-22-56_stelle_hist_timestamp.sql'),
-('kvwmap', 'mysql', '2016-05-31_13-18-54_stelle_wasserzeichen.sql'),
-('kvwmap', 'mysql', '2016-06-22_16-24-48_layer_attributes_arrangement_labeling.sql'),
-('kvwmap', 'mysql', '2016-06-29_10-50-56_layer_maintable_is_view.sql'),
-('kvwmap', 'mysql', '2016-06-30_10-54-02_u_rolle2used_layer_transparency.sql'),
-('kvwmap', 'mysql', '2016-07-12_15-46-25_used_layer_use_geom.sql'),
-('kvwmap', 'mysql', '2016-07-29_14-24-25_add_visually_impaired_to_rolle.sql'),
-('kvwmap', 'mysql', '2016-08-17_13-57-20_add_datatypes_and_datatype_attributes.sql'),
-('kvwmap', 'mysql', '2016-08-29_11-45-00_datatypes_dbname_host_port.sql'),
-('kvwmap', 'mysql', '2016-08-30_14-11-10_add_trigger_function_to_layer.sql'),
-('kvwmap', 'mysql', '2016-10-05_11-09-37_styles_symbolname.sql'),
-('kvwmap', 'mysql', '2016-10-05_12-11-57_styles_rangeitem.sql'),
-('kvwmap', 'mysql', '2016-11-22_15-23-00_set_relative_fonts_pfade.sql'),
-('kvwmap', 'mysql', '2016-11-23_11-47-01_layer_classification.sql'),
-('kvwmap', 'mysql', '2016-11-24_10-56-43_styles_minscale_maxscale.sql'),
-('kvwmap', 'mysql', '2017-01-10_13-46-46_cronjobs.sql'),
-('kvwmap', 'mysql', '2017-01-12_13-19-18_datendrucklayouts_no_record_splitting.sql'),
-('kvwmap', 'mysql', '2017-02-02_15-57-57_add_db_to_cronjobs.sql'),
-('kvwmap', 'mysql', '2017-03-24_14-56-40_add_custom_legend_graphic_and_order.sql'),
-('kvwmap', 'mysql', '2017-03-29_16-48-03_add_title_to_menues.sql'),
-('kvwmap', 'mysql', '2017-04-05_16-14-15_add_default_rolle_to_stelle.sql'),
-('kvwmap', 'mysql', '2017-04-06_09-59-50_add_showmapfunctions_to_rolle.sql'),
-('kvwmap', 'mysql', '2017-04-07_12-17-10_add_showlayeroptions.sql'),
-('kvwmap', 'mysql', '2017-04-13_17-00-45_add_onclick_on_menues.sql'),
-('kvwmap', 'mysql', '2017-04-20_15-17-29_u_menues_button_class.sql'),
-('kvwmap', 'mysql', '2017-04-20_15-59-03_rolle_menue_buttons.sql'),
-('kvwmap', 'mysql', '2017-04-21_10-49-49_u_menues_logout.sql'),
-('kvwmap', 'mysql', '2017-06-07_16-01-20_add_dont_use_for_new.sql'),
-('kvwmap', 'mysql', '2017-07-04_14-37-35_rolle_gui_button.sql'),
-('kvwmap', 'mysql', '2017-07-11_10-20-03_layer_attributes_radiobutton.sql'),
-('kvwmap', 'mysql', '2017-07-11_14-57-05_druckfreilinien.sql'),
-('kvwmap', 'mysql', '2017-07-13_10-37-26_layer_attributes_Winkel.sql'),
-('kvwmap', 'mysql', '2017-07-14_13-51-46_classes_legendimageheight_width.sql'),
-('kvwmap', 'mysql', '2017-07-17_09-31-55_label_maxlength.sql'),
-('kvwmap', 'mysql', '2017-08-31_14-16-16_delete_legend_order_in_group_and_used_layer.sql'),
-('kvwmap', 'mysql', '2017-09-11_15-40-24_u_menues_Druckausschnittswahl.sql'),
-('kvwmap', 'mysql', '2017-09-13_10-39-04_add_stellen_hierarchie.sql'),
-('kvwmap', 'mysql', '2017-09-19_12-04-37_styles_polaroffset.sql'),
-('kvwmap', 'mysql', '2017-10-08_09-51-31_add_sync_attr_to_layers.sql'),
-('kvwmap', 'mysql', '2017-11-02_12-14-38_rolle_legendtype.sql'),
-('kvwmap', 'mysql', '2017-11-14_10-08-33_u_rolle2used_layer_drawingorder.sql'),
-('kvwmap', 'mysql', '2017-11-16_14-01-29_datendrucklayouts_filename.sql'),
-('kvwmap', 'mysql', '2018-01-04_14-11-01_layer_legendorder.sql'),
-('kvwmap', 'mysql', '2018-01-08_14-09-22_add_style_attribute_type.sql'),
-('kvwmap', 'mysql', '2018-02-01_16-14-00_layer_attributes_invisible.sql'),
-('kvwmap', 'mysql', '2018-03-22_16-22-21_fk_for_users.sql'),
-('kvwmap', 'mysql', '2018-03-26_12-48-46_improve_innodb_performance.sql'),
-('kvwmap', 'mysql', '2018-04-03_17-01-06_add_num_login_failed_to_users.sql'),
-('kvwmap', 'mysql', '2018-04-06_18-15-25_add_invitations.sql'),
-('kvwmap', 'mysql', '2018-04-11_14-08-25_editable.sql'),
-('kvwmap', 'mysql', '2018-04-16_11-37-08_layer_listed.sql'),
-('kvwmap', 'mysql', '2018-05-16_11-23-39_user_agreement_accepted.sql'),
-('kvwmap', 'mysql', '2018-05-25_16-26-55_layer_document_url.sql'),
-('kvwmap', 'mysql', '2018-06-25_16-40-37_add_visible_and_arrangement_to_datatype_attributes.sql'),
-('kvwmap', 'mysql', '2018-07-03_11-49-35_layer_attributes_vcheck.sql'),
-('kvwmap', 'mysql', '2018-07-23_15-45-15_datatype_foreign_keys.sql'),
-('kvwmap', 'mysql', '2018-08-23_16-47-03_fk_for_menues.sql'),
-('kvwmap', 'mysql', '2018-08-24_11-14-04_rollenlayer_classitem.sql'),
-('kvwmap', 'mysql', '2018-09-07_14-34-53_config.sql'),
-('kvwmap', 'mysql', '2018-09-19_14-34-53_config.php'),
-('kvwmap', 'mysql', '2018-10-01_12-35-08_login_constants.sql'),
-('kvwmap', 'mysql', '2018-10-11_16-50-18_login-logout_routine.sql'),
-('kvwmap', 'mysql', '2018-10-12_15-30-58_druckfreilinien_offset.sql'),
-('kvwmap', 'mysql', '2018-10-15_10-01-29_druckfreilinien_breite.sql'),
-('kvwmap', 'mysql', '2018-10-15_11-49-53_USE_EXISTING_SESSION.sql'),
-('kvwmap', 'mysql', '2018-10-19_16-08-48_print_legend_separate.sql'),
-('kvwmap', 'mysql', '2018-10-25_13-11-16_custom_labelitem.sql'),
-('kvwmap', 'mysql', '2018-11-07_13-42-05_metadata_constants.sql'),
-('kvwmap', 'mysql', '2018-11-09_11-30-36_sizeitem_entfernt.sql'),
-('kvwmap', 'mysql', '2018-11-26_11-29-39_custom_raster.sql'),
-('kvwmap', 'mysql', '2018-12-13_15-05-58_add_OGR_BINPATH_GDAL.sql'),
-('kvwmap', 'mysql', '2018-12-18_15-31-29_layer_hist_timestamp.sql'),
-('kvwmap', 'mysql', '2019-02-07_11-42-12_alb_raumbezug.sql'),
-('kvwmap', 'mysql', '2019-02-08_09-16-51_u_rolle2used_layer_geom_from_layer.sql'),
-('kvwmap', 'mysql', '2019-02-14_17-30-53_add_protected_to_stelle.sql'),
-('kvwmap', 'mysql', '2019-02-28_10-35-41_config_PASSWORD_INFO.sql'),
-('kvwmap', 'mysql', '2019-03-05_09-22-46_add_editiersperre_attribute_type.sql'),
-('kvwmap', 'mysql', '2019-03-06_15-31-28_geo_name_search.sql'),
-('kvwmap', 'mysql', '2019-03-07_14-13-59_Menue_Stelle_waehlen.sql'),
-('kvwmap', 'mysql', '2019-03-11_10-06-54_rolle_print_scale.sql'),
-('kvwmap', 'mysql', '2019-03-13_09-23-22_public_comments.sql'),
-('kvwmap', 'mysql', '2019-03-18_10-33-37_rollenlayer_gle_view.sql'),
-('kvwmap', 'mysql', '2019-04-01_11-20-10_add_kvp_to_layer_attrb.sql'),
-('kvwmap', 'mysql', '2019-04-09_17-10-26_change_menue_link_length.sql'),
-('kvwmap', 'mysql', '2019-04-14_13-09-22_add_rolle2used_layer_filter.sql'),
-('kvwmap', 'mysql', '2019-04-25_13-11-02_change_user_phon_and_mail_length.sql'),
-('kvwmap', 'mysql', '2019-04-28_16-44-58_add_further_attribute_table_to_layer.sql'),
-('kvwmap', 'mysql', '2019-05-02_17-14-53_geom_buttons.sql'),
-('kvwmap', 'mysql', '2019-05-03_11-36-09_change_rolle_default_values.sql'),
-('kvwmap', 'mysql', '2019-05-11_10-29-24_add_zweispaltiges_autovervollstaendigungsfeld.sql'),
-('kvwmap', 'mysql', '2019-05-14_13-02-51_wms_keywordlist.sql'),
-('kvwmap', 'mysql', '2019-05-16_16-29-24_bug_zweispaltiges_autovervollstaendigungsfeld.sql'),
-('kvwmap', 'mysql', '2019-05-17_11-41-14_drop_further_attributes.sql'),
-('kvwmap', 'mysql', '2019-06-03_10-35-43_showrollenfilter.sql'),
-('kvwmap', 'mysql', '2019-06-25_12-09-43_add_org_and_pos_to_user.sql'),
-('kvwmap', 'mysql', '2019-07-25_14-31-16_set_rollenlayer_gle_view_default.sql'),
-('kvwmap', 'mysql', '2019-07-29_11-38-48_u_menues_schnelle_Druckausgabe.sql'),
-('kvwmap', 'mysql', '2019-07-31_08-59-09_gle_view_not_null.sql'),
-('kvwmap', 'mysql', '2019-08-25_16-40-16_outsource_custom_files.php'),
-('kvwmap', 'mysql', '2019-08-29_16-17-17_datendrucklayouts_margins.sql'),
-('kvwmap', 'mysql', '2019-09-23_10-03-03_ddl_columns.sql'),
-('kvwmap', 'mysql', '2019-10-01_14-16-57_sicherungen.sql'),
-('kvwmap', 'mysql', '2019-10-04_15-35-07_add_ddl_attibute_to_layer.sql'),
-('kvwmap', 'mysql', '2019-10-18_14-08-32_layer_identifier.sql'),
-('kvwmap', 'mysql', '2019-11-01_13-04-10_config_name.sql'),
-('kvwmap', 'mysql', '2019-11-14_13-45-06_add_stellen_style.sql'),
-('kvwmap', 'mysql', '2019-11-19_14-25-41_rolle_gui_default.sql'),
-('kvwmap', 'mysql', '2019-12-04_11-49-03_rolle_result_style.sql'),
-('kvwmap', 'mysql', '2019-12-05_09-36-56_layer_attributes_constraints.sql'),
-('kvwmap', 'mysql', '2019-12-06_09-48-49_SubformPK_privileg.sql'),
-('kvwmap', 'mysql', '2019-12-06_10-01-59_config_bg_image.sql'),
-('kvwmap', 'mysql', '2019-12-06_10-19-31_config_rollenfilter.sql'),
-('kvwmap', 'mysql', '2020-01-07_14-51-45_ddl_format.sql'),
-('kvwmap', 'mysql', '2020-01-29_16-10-32_styleitem.sql'),
-('kvwmap', 'mysql', '2020-02-21_09-55-59_styles_width_attribute.sql'),
-('kvwmap', 'mysql', '2020-02-28_15-26-23_layer_attributes_saveable.sql'),
-('kvwmap', 'mysql', '2020-03-19_11-22-21_druckfreitexte_width_border.sql'),
-('kvwmap', 'mysql', '2020-04-02_19-52-03_config_normalize_geometry.sql'),
-('kvwmap', 'mysql', '2020-04-14_13-30-54_epsg_code_druckausschnitte.sql'),
-('kvwmap', 'mysql', '2020-04-16_11-02-51_add_column_user_to_cron_jobs.sql'),
-('kvwmap', 'mysql', '2020-04-21_10-25-24_add_duplicate_columns_to_layer.sql'),
-('kvwmap', 'mysql', '2020-05-12_12-09-27_add_exif_attribute_types.sql'),
-('kvwmap', 'mysql', '2020-05-25_10-41-36_druckfreirechtecke.sql'),
-('kvwmap', 'mysql', '2020-05-28_10-57-58_ddl_colors.sql'),
-('kvwmap', 'mysql', '2020-06-02_10-16-50_change_layer_attributes_tooltip_type.sql'),
-('kvwmap', 'mysql', '2020-06-04_10-29-54_NORMALIZE_Parameter_verschieben.sql'),
-('kvwmap', 'mysql', '2020-07-03_11-12-57_change_collations.sql'),
-('kvwmap', 'mysql', '2020-07-03_11-12-58_add_layer_attributes2rolle.sql'),
-('kvwmap', 'mysql', '2020-07-03_14-40-28_config_postgres_connection_id.sql'),
-('kvwmap', 'mysql', '2020-07-08_15-32-53_add_connection_id_to_rollenlayer.sql'),
-('kvwmap', 'mysql', '2020-07-15_12-59-27_label_REPEATDISTANCE.sql'),
-('kvwmap', 'mysql', '2020-07-15_14-28-12_add_connection_id_to_datatyps.sql'),
-('kvwmap', 'mysql', '2020-07-19_17-29-52_add_php_sql_parser.php'),
-('kvwmap', 'mysql', '2020-08-18_09-10-17_layer_use_geom.sql'),
-('kvwmap', 'mysql', '2020-08-19_09-20-04_layer_max_query_rows.sql'),
-('kvwmap', 'mysql', '2020-08-25_12-13-32_drop_filteritem.sql'),
-('kvwmap', 'mysql', '2020-10-02_13-56-39_Indizes.sql'),
-('kvwmap', 'mysql', '2020-11-06_10-00-00_migrate_to_3.0.php'),
-('kvwmap', 'mysql', '2020-11-06_11-42-05_Version3.0.sql'),
-('kvwmap', 'mysql', '2020-11-24_11-11-29_add_const_ms_debug_level.sql'),
-('kvwmap', 'mysql', '2020-12-10_23-01-33_add_rolle_attribut_immer_weiter_erfassen.sql'),
-('kvwmap', 'mysql', '2021-01-20_16-15-36_add_mailsmtpuser_passwd_constants.sql'),
-('kvwmap', 'mysql', '2021-01-25_13-07-32_add_rollenlayer_freigabe_attribute.sql'),
-('kvwmap', 'mysql', '2021-02-16_10-50-18_rolle_export_settings.sql'),
-('kvwmap', 'mysql', '2021-02-18_09-41-33_layer_attributes_schema.sql'),
-('kvwmap', 'mysql', '2021-03-01_13-24-21_adapt_sicherung_schema.sql'),
-('kvwmap', 'mysql', '2021-03-01_15-15-35_adapt_sicherung_schema2.sql'),
-('kvwmap', 'mysql', '2021-03-03_13-51-07_sicherungen.sql'),
-('kvwmap', 'mysql', '2021-03-08_13-14-45_drop_antialias.sql'),
-('kvwmap', 'mysql', '2021-03-15_12-21-50_add_const_copy_mail_attachment.sql'),
-('kvwmap', 'mysql', '2021-03-15_13-00-50_use_parent_privileges.sql'),
-('kvwmap', 'mysql', '2021-03-26_13-52-17_add_wms_auth_to_rollenlayer.sql'),
-('kvwmap', 'mysql', '2021-05-19_10-03-58_layer_attributes_Farbauswahl.sql'),
-('kvwmap', 'mysql', '2021-05-20_12-04-49_layer_attributes_tab.sql'),
-('kvwmap', 'mysql', '2021-05-25_09-38-14_config_IMPORT_POINT_STYLE_ID.sql'),
-('kvwmap', 'mysql', '2021-06-28_20-41-13_belated_files.sql'),
-('kvwmap', 'mysql', '2021-09-22_10-13-14_belated_files_lastmodified.sql'),
-('kvwmap', 'mysql', '2021-09-22_11-34-48_drop_sicherungen.sql'),
-('kvwmap', 'mysql', '2021-11-15_15-35-23_add_redline_options.sql'),
-('kvwmap', 'mysql', '2021-11-23_11-00-05_layer_sizeunits.sql'),
-('kvwmap', 'mysql', '2021-11-24_10-00-19_add_layer_metadata.sql'),
-('kvwmap', 'mysql', '2021-12-21_11-11-21_invitations_login_name.sql'),
-('kvwmap', 'mysql', '2021-12-23_14-49-19_change_enum_columns.sql'),
-('kvwmap', 'mysql', '2022-01-11_15-13-08_zwischenablage_oid.sql'),
-('kvwmap', 'mysql', '2022-01-16_11-38-45_add_icon_to_layer_groups.sql'),
-('kvwmap', 'mysql', '2022-01-18_14-24-10_change_color_attribute.sql'),
-('kvwmap', 'mysql', '2022-03-08_13-44-15_layer_oid_null.sql'),
-('kvwmap', 'mysql', '2022-03-09_09-49-07_stelle_drop_pg_conn.sql'),
-('kvwmap', 'mysql', '2022-03-15_13-57-47_postlabelcache.sql'),
-('kvwmap', 'mysql', '2022-04-28_09-08-38_invitation_anrede.sql'),
-('kvwmap', 'mysql', '2022-05-16_07-49-58_identifier_text.sql'),
-('kvwmap', 'mysql', '2022-05-31_11-37-31_config_NUTZER_ARCHIVIEREN.sql'),
-('kvwmap', 'mysql', '2022-05-31_11-48-07_user_archived.sql'),
-('kvwmap', 'mysql', '2022-06-09_12-52-40_add_layer_version_and_comment_attribute.sql'),
-('kvwmap', 'mysql', '2022-06-15_08-16-53_Auswahlfeld_Bild.sql'),
-('kvwmap', 'mysql', '2022-06-16_08-28-51_layer_data_import_allowed.sql'),
-('kvwmap', 'mysql', '2022-06-23_06-39-33_rollenlayer_connection.sql'),
-('kvwmap', 'mysql', '2022-06-28_19-10-12_add_metadata_to_stelle.sql'),
-('kvwmap', 'mysql', '2022-06-30_10-12-34_add_more_metadata_to_stelle.sql'),
-('kvwmap', 'mysql', '2022-07-05_10-49-10_update_jquery_and_bootstrap.php'),
-('kvwmap', 'mysql', '2022-07-19_14-25-29_add_ows_namespace_to_stelle.sql'),
-('kvwmap', 'mysql', '2022-08-09_14-23-43_styles_angleitem_null.sql'),
-('kvwmap', 'mysql', '2022-08-17_09-41-48_user_tokens.sql'),
-('kvwmap', 'mysql', '2022-08-22_11-11-31_rolle_tooltipquery.sql'),
-('kvwmap', 'mysql', '2022-09-02_07-28-07_user_tokens.sql'),
-('kvwmap', 'mysql', '2022-09-04_22-24-27_sha1_user_password.sql'),
-('kvwmap', 'mysql', '2022-11-10_14-14-48_add_login_locked_until.sql'),
-('kvwmap', 'mysql', '2022-11-17_08-11-28_drop_DELETE_ROLLENLAYER.sql'),
-('kvwmap', 'mysql', '2022-11-17_13-45-40_label_text.sql'),
-('kvwmap', 'mysql', '2022-11-17_14-18-57_label_minscale_maxscale.sql'),
-('kvwmap', 'mysql', '2022-11-21_13-11-42_rollenlayer_buffer.sql'),
-('kvwmap', 'mysql', '2022-11-25_13-11-42_rename_Suchergebnis_to_eigene_Abfragen.sql'),
-('kvwmap', 'mysql', '2022-12-14_00-19-18_add_font_size_factor_to_user_settings.sql'),
-('kvwmap', 'mysql', '2022-12-19_14-43-11_add_multiple_notifications.sql'),
-('kvwmap', 'mysql', '2022-22-29_14-13-17_change_layer_oid_default.sql'),
-('kvwmap', 'mysql', '2023-01-02_13-35-17_add_write_mapserver_templates_to_layer.sql'),
-('kvwmap', 'mysql', '2023-02-03_15-14-42_add_password_expired_to_users.sql'),
-('kvwmap', 'mysql', '2023-02-23_15-18-47_anglemode.sql'),
-('kvwmap', 'mysql', '2023-04-20_09-10-42_stelle_foreign_keys.sql'),
-('kvwmap', 'mysql', '2023-05-03_15-02-27_default_ohne_select.sql'),
-('kvwmap', 'mysql', '2023-05-09_13-50-46_layer_drawingorder.sql'),
-('kvwmap', 'mysql', '2023-05-11_09-59-51_FKs_used_layer_layer_attributes2stelle.sql'),
-('kvwmap', 'mysql', '2023-05-23_10-25-19_rollenlayer_autodelete.sql'),
-('kvwmap', 'mysql', '2023-05-23_13-53-55_datasources.sql'),
-('kvwmap', 'mysql', '2023-05-25_05-12-58_add_ows_updatesequence_to_stelle.sql'),
-('kvwmap', 'mysql', '2023-06-01_15-52-14_add_dataset_operations_position.sql'),
-('kvwmap', 'mysql', '2023-06-06_13-53-51_layercharts.sql'),
-('kvwmap', 'mysql', '2023-06-12_10-59-37_user_userdata_checking_time.sql'),
-('kvwmap', 'mysql', '2023-06-19_17-57-12_change_write_mapserver_templates_to_layer.sql'),
-('kvwmap', 'mysql', '2023-06-27_12-46-51_datatypes_drop_dbname_host_port.sql'),
-('kvwmap', 'mysql', '2023-06-30_15-26-14_datatype_attributes_layer_id.sql'),
-('kvwmap', 'mysql', '2023-07-06_12-33-57_QUERY_ONLY_ACTIVE_CLASSES.sql'),
-('kvwmap', 'mysql', '2023-07-06_15-05-03_add_geom_column.sql'),
-('kvwmap', 'mysql', '2023-07-17_09-49-57_Change_OWS_SERVICE_ONLINERESOURCE_write_permission.sql'),
-('kvwmap', 'mysql', '2023-07-17_14-10-12_change_wappen_default.sql'),
-('kvwmap', 'mysql', '2023-09-04_19-48-12_add_chartjs_to_3rdparty.php'),
-('kvwmap', 'mysql', '2023-10-05_21-57-32_add_user_to_notification.sql'),
-('kvwmap', 'mysql', '2023-10-09_15-38-33_add_label_to_dll.sql'),
-('kvwmap', 'mysql', '2023-10-30_09-28-37_add_menue_fk.sql'),
-('kvwmap', 'mysql', '2023-11-24_11-29-11_offsetxy_text.sql'),
-('kvwmap', 'mysql', '2023-11-27_12-59-19_reset_password_text.sql'),
-('kvwmap', 'mysql', '2023-12-05_09-35-40_invitation_text.sql'),
-('kvwmap', 'mysql', '2023-12-08_11-22-35_config_OWERRIDE_LANGUAGE_VARS.sql'),
-('kvwmap', 'mysql', '2023-12-08_11-25-56_create_custom_language_and_ccs_readme_files.php'),
-('kvwmap', 'mysql', '2024-01-01_19-39-23_add_used_layer_group_id.sql'),
-('kvwmap', 'mysql', '2024-01-08_17-52-40_add_primary_key_user2notifications.sql');
-
+INSERT INTO `migrations` (`component`, `type`, `filename`, `comment`) VALUES
+('kvwmap', 'mysql', '2024-09-04_11-32-14_alter_datasources_name.sql', NULL),
+('kvwmap', 'mysql', '2024-08-21_14-14-15_add_client_id.sql', NULL),
+('kvwmap', 'postgresql', '2019-02-04_14-26-51_bug_st_length_utm.sql', NULL),
+('kvwmap', 'postgresql', '2018-11-14_16-17-17_fix_line_interpolate_functions.sql', NULL),
+('kvwmap', 'postgresql', '2018-10-21_09-10-12_line_interpolate_functions.sql', NULL),
+('kvwmap', 'postgresql', '2018-07-20_10-22-56_add_filter_rings_function.sql', NULL),
+('kvwmap', 'postgresql', '2018-03-08_14-10-31_uko_polygon_dateiname.sql', NULL),
+('kvwmap', 'postgresql', '2018-02-20_20-36-34_add_func_replace_line_feeds.sql', NULL),
+('kvwmap', 'postgresql', '2018-02-20_20-42-06_add_func_insert_str_before_and_after.sql', NULL),
+('kvwmap', 'mysql', '2024-06-07_14-22-48_classes_classification.sql', NULL),
+('kvwmap', 'mysql', '2024-05-29_09-16-26_params_uppercase2.sql', NULL),
+('kvwmap', 'mysql', '2024-05-29_08-31-54_params_uppercase.sql', NULL),
+('kvwmap', 'mysql', '2024-05-14_11-49-21_add_use_preview_in_ddl.sql', NULL),
+('kvwmap', 'mysql', '2024-05-08_11-00-24_last_query_layer.sql', NULL),
+('kvwmap', 'mysql', '2024-04-08_14-12-08_drop_fontsize_gle.sql', NULL),
+('kvwmap', 'mysql', '2014-09-12_16-33-22_Version2.0.sql', NULL),
+('kvwmap', 'mysql', '2014-11-07_11-37-59_layer_attributes_Autovervollstaendigungsfeld.sql', NULL),
+('kvwmap', 'mysql', '2014-11-24_10-29-21_druckrahmen_lage_gemeinde_flurst.sql', NULL),
+('kvwmap', 'mysql', '2014-11-27_11-16-24_druckrahmen_scalebar.sql', NULL),
+('kvwmap', 'mysql', '2014-12-03_10-25-40_zwischenablage.sql', NULL),
+('kvwmap', 'mysql', '2015-01-14_16-44-46_styles_initialgap_opacity.sql', NULL),
+('kvwmap', 'mysql', '2015-02-20_11-11-00_rolle_instant_reload_menu_auto_close.sql', NULL),
+('kvwmap', 'mysql', '2015-03-12_15-03-13_styles_colorrange_datarange.sql', NULL),
+('kvwmap', 'mysql', '2015-03-16_15-15-35_rollenlayer_query.sql', NULL),
+('kvwmap', 'mysql', '2015-03-17_10-29-08_rollenlayer_queryStatus.sql', NULL),
+('kvwmap', 'mysql', '2015-03-27_11-36-34_rollenlayer_Data_longtext.sql', NULL),
+('kvwmap', 'mysql', '2015-05-05_13-53-32_u_polygon2used_layer_loeschen.sql', NULL),
+('kvwmap', 'mysql', '2015-05-07_11-29-06_search_attributes2rolle_PK.sql', NULL),
+('kvwmap', 'mysql', '2015-05-08_14-03-33_rolle_last_query_sql_longtext.sql', NULL),
+('kvwmap', 'mysql', '2015-05-22_14-34-59_layer_postlabelcache.sql', NULL),
+('kvwmap', 'mysql', '2015-05-28_11-08-55_rolle_auto_map_resize.sql', NULL),
+('kvwmap', 'mysql', '2015-06-16_16-16-14_u_rolle2usedlayer_gle_view.sql', NULL),
+('kvwmap', 'mysql', '2015-06-23_16-29-07_layer_requires.sql', NULL),
+('kvwmap', 'mysql', '2015-08-05_14-02-01_rolle_saved_layers.sql', NULL),
+('kvwmap', 'mysql', '2015-09-09_15-10-25_rolle_saved_layers_query.sql', NULL),
+('kvwmap', 'mysql', '2015-10-07_09-19-25_layer_attributes_StelleID.sql', NULL),
+('kvwmap', 'mysql', '2015-10-29_13-50-26_u_consumeALB_format.sql', NULL),
+('kvwmap', 'mysql', '2015-12-08_12-01-43_user_loginname.sql', NULL),
+('kvwmap', 'mysql', '2016-01-07_11-26-53_datendrucklayouts_gap.sql', NULL),
+('kvwmap', 'mysql', '2016-01-18_11-43-24_u_consume_epsg_code.sql', NULL),
+('kvwmap', 'mysql', '2016-01-26_14-04-28_druckrahmen_dhk_call.sql', NULL),
+('kvwmap', 'mysql', '2016-02-09_15-34-14_layer_cluster_maxdistance.sql', NULL),
+('kvwmap', 'mysql', '2016-02-17_13-55-03_rolle_coord_query.sql', NULL),
+('kvwmap', 'mysql', '2016-04-21_10-42-03_stelle_gemeinden_gemarkung_flur.sql', NULL),
+('kvwmap', 'mysql', '2016-04-28_16-35-05_add_data_query_params_to_u_rolle2used.sql', NULL),
+('kvwmap', 'mysql', '2016-04-28_16-35-05_add_layer_params.sql', NULL),
+('kvwmap', 'mysql', '2016-05-31_11-22-56_stelle_hist_timestamp.sql', NULL),
+('kvwmap', 'mysql', '2016-05-31_13-18-54_stelle_wasserzeichen.sql', NULL),
+('kvwmap', 'mysql', '2016-06-22_16-24-48_layer_attributes_arrangement_labeling.sql', NULL),
+('kvwmap', 'mysql', '2016-06-29_10-50-56_layer_maintable_is_view.sql', NULL),
+('kvwmap', 'mysql', '2016-06-30_10-54-02_u_rolle2used_layer_transparency.sql', NULL),
+('kvwmap', 'mysql', '2016-07-12_15-46-25_used_layer_use_geom.sql', NULL),
+('kvwmap', 'mysql', '2016-07-29_14-24-25_add_visually_impaired_to_rolle.sql', NULL),
+('kvwmap', 'mysql', '2016-08-17_13-57-20_add_datatypes_and_datatype_attributes.sql', NULL),
+('kvwmap', 'mysql', '2016-08-29_11-45-00_datatypes_dbname_host_port.sql', NULL),
+('kvwmap', 'mysql', '2016-08-30_14-11-10_add_trigger_function_to_layer.sql', NULL),
+('kvwmap', 'mysql', '2016-10-05_11-09-37_styles_symbolname.sql', NULL),
+('kvwmap', 'mysql', '2016-10-05_12-11-57_styles_rangeitem.sql', NULL),
+('kvwmap', 'mysql', '2016-11-22_15-23-00_set_relative_fonts_pfade.sql', NULL),
+('kvwmap', 'mysql', '2016-11-23_11-47-01_layer_classification.sql', NULL),
+('kvwmap', 'mysql', '2016-11-24_10-56-43_styles_minscale_maxscale.sql', NULL),
+('kvwmap', 'mysql', '2017-01-10_13-46-46_cronjobs.sql', NULL),
+('kvwmap', 'mysql', '2017-01-12_13-19-18_datendrucklayouts_no_record_splitting.sql', NULL),
+('kvwmap', 'mysql', '2017-02-02_15-57-57_add_db_to_cronjobs.sql', NULL),
+('kvwmap', 'mysql', '2017-03-24_14-56-40_add_custom_legend_graphic_and_order.sql', NULL),
+('kvwmap', 'mysql', '2017-03-29_16-48-03_add_title_to_menues.sql', NULL),
+('kvwmap', 'mysql', '2017-04-05_16-14-15_add_default_rolle_to_stelle.sql', NULL),
+('kvwmap', 'mysql', '2017-04-06_09-59-50_add_showmapfunctions_to_rolle.sql', NULL),
+('kvwmap', 'mysql', '2017-04-07_12-17-10_add_showlayeroptions.sql', NULL),
+('kvwmap', 'mysql', '2017-04-13_17-00-45_add_onclick_on_menues.sql', NULL),
+('kvwmap', 'mysql', '2017-04-20_15-17-29_u_menues_button_class.sql', NULL),
+('kvwmap', 'mysql', '2017-04-20_15-59-03_rolle_menue_buttons.sql', NULL),
+('kvwmap', 'mysql', '2017-04-21_10-49-49_u_menues_logout.sql', NULL),
+('kvwmap', 'mysql', '2017-06-07_16-01-20_add_dont_use_for_new.sql', NULL),
+('kvwmap', 'mysql', '2017-07-04_14-37-35_rolle_gui_button.sql', NULL),
+('kvwmap', 'mysql', '2017-07-11_10-20-03_layer_attributes_radiobutton.sql', NULL),
+('kvwmap', 'mysql', '2017-07-11_14-57-05_druckfreilinien.sql', NULL),
+('kvwmap', 'mysql', '2017-07-13_10-37-26_layer_attributes_Winkel.sql', NULL),
+('kvwmap', 'mysql', '2017-07-14_13-51-46_classes_legendimageheight_width.sql', NULL),
+('kvwmap', 'mysql', '2017-07-17_09-31-55_label_maxlength.sql', NULL),
+('kvwmap', 'mysql', '2017-08-31_14-16-16_delete_legend_order_in_group_and_used_layer.sql', NULL),
+('kvwmap', 'mysql', '2017-09-11_15-40-24_u_menues_Druckausschnittswahl.sql', NULL),
+('kvwmap', 'mysql', '2017-09-13_10-39-04_add_stellen_hierarchie.sql', NULL),
+('kvwmap', 'mysql', '2017-09-19_12-04-37_styles_polaroffset.sql', NULL),
+('kvwmap', 'mysql', '2017-10-08_09-51-31_add_sync_attr_to_layers.sql', NULL),
+('kvwmap', 'mysql', '2017-11-02_12-14-38_rolle_legendtype.sql', NULL),
+('kvwmap', 'mysql', '2017-11-14_10-08-33_u_rolle2used_layer_drawingorder.sql', NULL),
+('kvwmap', 'mysql', '2017-11-16_14-01-29_datendrucklayouts_filename.sql', NULL),
+('kvwmap', 'mysql', '2018-01-04_14-11-01_layer_legendorder.sql', NULL),
+('kvwmap', 'mysql', '2018-01-08_14-09-22_add_style_attribute_type.sql', NULL),
+('kvwmap', 'mysql', '2018-02-01_16-14-00_layer_attributes_invisible.sql', NULL),
+('kvwmap', 'mysql', '2018-03-22_16-22-21_fk_for_users.sql', NULL),
+('kvwmap', 'mysql', '2018-03-26_12-48-46_improve_innodb_performance.sql', NULL),
+('kvwmap', 'mysql', '2018-04-03_17-01-06_add_num_login_failed_to_users.sql', NULL),
+('kvwmap', 'mysql', '2018-04-06_18-15-25_add_invitations.sql', NULL),
+('kvwmap', 'mysql', '2018-04-11_14-08-25_editable.sql', NULL),
+('kvwmap', 'mysql', '2018-04-16_11-37-08_layer_listed.sql', NULL),
+('kvwmap', 'mysql', '2018-05-16_11-23-39_user_agreement_accepted.sql', NULL),
+('kvwmap', 'mysql', '2018-05-25_16-26-55_layer_document_url.sql', NULL),
+('kvwmap', 'mysql', '2018-06-25_16-40-37_add_visible_and_arrangement_to_datatype_attributes.sql', NULL),
+('kvwmap', 'mysql', '2018-07-03_11-49-35_layer_attributes_vcheck.sql', NULL),
+('kvwmap', 'mysql', '2018-07-23_15-45-15_datatype_foreign_keys.sql', NULL),
+('kvwmap', 'mysql', '2018-08-23_16-47-03_fk_for_menues.sql', NULL),
+('kvwmap', 'mysql', '2018-08-24_11-14-04_rollenlayer_classitem.sql', NULL),
+('kvwmap', 'mysql', '2018-09-07_14-34-53_config.sql', NULL),
+('kvwmap', 'mysql', '2018-09-19_14-34-53_config.php', NULL),
+('kvwmap', 'mysql', '2018-10-01_12-35-08_login_constants.sql', NULL),
+('kvwmap', 'mysql', '2018-10-11_16-50-18_login-logout_routine.sql', NULL),
+('kvwmap', 'mysql', '2018-10-12_15-30-58_druckfreilinien_offset.sql', NULL),
+('kvwmap', 'mysql', '2018-10-15_10-01-29_druckfreilinien_breite.sql', NULL),
+('kvwmap', 'mysql', '2018-10-15_11-49-53_USE_EXISTING_SESSION.sql', NULL),
+('kvwmap', 'mysql', '2018-10-19_16-08-48_print_legend_separate.sql', NULL),
+('kvwmap', 'mysql', '2018-10-25_13-11-16_custom_labelitem.sql', NULL),
+('kvwmap', 'mysql', '2018-11-07_13-42-05_metadata_constants.sql', NULL),
+('kvwmap', 'mysql', '2018-11-09_11-30-36_sizeitem_entfernt.sql', NULL),
+('kvwmap', 'mysql', '2018-11-26_11-29-39_custom_raster.sql', NULL),
+('kvwmap', 'mysql', '2018-12-13_15-05-58_add_OGR_BINPATH_GDAL.sql', NULL),
+('kvwmap', 'mysql', '2018-12-18_15-31-29_layer_hist_timestamp.sql', NULL),
+('kvwmap', 'mysql', '2019-02-07_11-42-12_alb_raumbezug.sql', NULL),
+('kvwmap', 'mysql', '2019-02-08_09-16-51_u_rolle2used_layer_geom_from_layer.sql', NULL),
+('kvwmap', 'mysql', '2019-02-14_17-30-53_add_protected_to_stelle.sql', NULL),
+('kvwmap', 'mysql', '2019-02-28_10-35-41_config_PASSWORD_INFO.sql', NULL),
+('kvwmap', 'mysql', '2019-03-05_09-22-46_add_editiersperre_attribute_type.sql', NULL),
+('kvwmap', 'mysql', '2019-03-06_15-31-28_geo_name_search.sql', NULL),
+('kvwmap', 'mysql', '2019-03-07_14-13-59_Menue_Stelle_waehlen.sql', NULL),
+('kvwmap', 'mysql', '2019-03-11_10-06-54_rolle_print_scale.sql', NULL),
+('kvwmap', 'mysql', '2019-03-13_09-23-22_public_comments.sql', NULL),
+('kvwmap', 'mysql', '2019-03-18_10-33-37_rollenlayer_gle_view.sql', NULL),
+('kvwmap', 'mysql', '2019-04-01_11-20-10_add_kvp_to_layer_attrb.sql', NULL),
+('kvwmap', 'mysql', '2019-04-09_17-10-26_change_menue_link_length.sql', NULL),
+('kvwmap', 'mysql', '2019-04-14_13-09-22_add_rolle2used_layer_filter.sql', NULL),
+('kvwmap', 'mysql', '2019-04-25_13-11-02_change_user_phon_and_mail_length.sql', NULL),
+('kvwmap', 'mysql', '2019-04-28_16-44-58_add_further_attribute_table_to_layer.sql', NULL),
+('kvwmap', 'mysql', '2019-05-02_17-14-53_geom_buttons.sql', NULL),
+('kvwmap', 'mysql', '2019-05-03_11-36-09_change_rolle_default_values.sql', NULL),
+('kvwmap', 'mysql', '2019-05-11_10-29-24_add_zweispaltiges_autovervollstaendigungsfeld.sql', NULL),
+('kvwmap', 'mysql', '2019-05-14_13-02-51_wms_keywordlist.sql', NULL),
+('kvwmap', 'mysql', '2019-05-16_16-29-24_bug_zweispaltiges_autovervollstaendigungsfeld.sql', NULL),
+('kvwmap', 'mysql', '2019-05-17_11-41-14_drop_further_attributes.sql', NULL),
+('kvwmap', 'mysql', '2019-06-03_10-35-43_showrollenfilter.sql', NULL),
+('kvwmap', 'mysql', '2019-06-25_12-09-43_add_org_and_pos_to_user.sql', NULL),
+('kvwmap', 'mysql', '2019-07-25_14-31-16_set_rollenlayer_gle_view_default.sql', NULL),
+('kvwmap', 'mysql', '2019-07-29_11-38-48_u_menues_schnelle_Druckausgabe.sql', NULL),
+('kvwmap', 'mysql', '2019-07-31_08-59-09_gle_view_not_null.sql', NULL),
+('kvwmap', 'mysql', '2019-08-25_16-40-16_outsource_custom_files.php', NULL),
+('kvwmap', 'mysql', '2019-08-29_16-17-17_datendrucklayouts_margins.sql', NULL),
+('kvwmap', 'mysql', '2019-09-23_10-03-03_ddl_columns.sql', NULL),
+('kvwmap', 'mysql', '2019-10-01_14-16-57_sicherungen.sql', NULL),
+('kvwmap', 'mysql', '2019-10-04_15-35-07_add_ddl_attibute_to_layer.sql', NULL),
+('kvwmap', 'mysql', '2019-10-18_14-08-32_layer_identifier.sql', NULL),
+('kvwmap', 'mysql', '2019-11-01_13-04-10_config_name.sql', NULL),
+('kvwmap', 'mysql', '2019-11-14_13-45-06_add_stellen_style.sql', NULL),
+('kvwmap', 'mysql', '2019-11-19_14-25-41_rolle_gui_default.sql', NULL),
+('kvwmap', 'mysql', '2019-12-04_11-49-03_rolle_result_style.sql', NULL),
+('kvwmap', 'mysql', '2019-12-05_09-36-56_layer_attributes_constraints.sql', NULL),
+('kvwmap', 'mysql', '2019-12-06_09-48-49_SubformPK_privileg.sql', NULL),
+('kvwmap', 'mysql', '2019-12-06_10-01-59_config_bg_image.sql', NULL),
+('kvwmap', 'mysql', '2019-12-06_10-19-31_config_rollenfilter.sql', NULL),
+('kvwmap', 'mysql', '2020-01-07_14-51-45_ddl_format.sql', NULL),
+('kvwmap', 'mysql', '2020-01-29_16-10-32_styleitem.sql', NULL),
+('kvwmap', 'mysql', '2020-02-21_09-55-59_styles_width_attribute.sql', NULL),
+('kvwmap', 'mysql', '2020-02-28_15-26-23_layer_attributes_saveable.sql', NULL),
+('kvwmap', 'mysql', '2020-03-19_11-22-21_druckfreitexte_width_border.sql', NULL),
+('kvwmap', 'mysql', '2020-04-02_19-52-03_config_normalize_geometry.sql', NULL),
+('kvwmap', 'mysql', '2020-04-14_13-30-54_epsg_code_druckausschnitte.sql', NULL),
+('kvwmap', 'mysql', '2020-04-16_11-02-51_add_column_user_to_cron_jobs.sql', NULL),
+('kvwmap', 'mysql', '2020-04-21_10-25-24_add_duplicate_columns_to_layer.sql', NULL),
+('kvwmap', 'mysql', '2020-05-12_12-09-27_add_exif_attribute_types.sql', NULL),
+('kvwmap', 'mysql', '2020-05-25_10-41-36_druckfreirechtecke.sql', NULL),
+('kvwmap', 'mysql', '2020-05-28_10-57-58_ddl_colors.sql', NULL),
+('kvwmap', 'mysql', '2020-06-02_10-16-50_change_layer_attributes_tooltip_type.sql', NULL),
+('kvwmap', 'mysql', '2020-06-04_10-29-54_NORMALIZE_Parameter_verschieben.sql', NULL),
+('kvwmap', 'mysql', '2020-07-03_11-12-57_change_collations.sql', NULL),
+('kvwmap', 'mysql', '2020-07-03_11-12-58_add_layer_attributes2rolle.sql', NULL),
+('kvwmap', 'mysql', '2020-07-03_14-40-28_config_postgres_connection_id.sql', NULL),
+('kvwmap', 'mysql', '2020-07-08_15-32-53_add_connection_id_to_rollenlayer.sql', NULL),
+('kvwmap', 'mysql', '2020-07-15_12-59-27_label_REPEATDISTANCE.sql', NULL),
+('kvwmap', 'mysql', '2020-07-15_14-28-12_add_connection_id_to_datatyps.sql', NULL),
+('kvwmap', 'mysql', '2020-07-19_17-29-52_add_php_sql_parser.php', NULL),
+('kvwmap', 'mysql', '2020-08-18_09-10-17_layer_use_geom.sql', NULL),
+('kvwmap', 'mysql', '2020-08-19_09-20-04_layer_max_query_rows.sql', NULL),
+('kvwmap', 'mysql', '2020-08-25_12-13-32_drop_filteritem.sql', NULL),
+('kvwmap', 'mysql', '2020-10-02_13-56-39_Indizes.sql', NULL),
+('kvwmap', 'mysql', '2020-11-06_10-00-00_migrate_to_3.0.php', NULL),
+('kvwmap', 'mysql', '2020-11-06_11-42-05_Version3.0.sql', NULL),
+('kvwmap', 'mysql', '2020-11-24_11-11-29_add_const_ms_debug_level.sql', NULL),
+('kvwmap', 'mysql', '2020-12-10_23-01-33_add_rolle_attribut_immer_weiter_erfassen.sql', NULL),
+('kvwmap', 'mysql', '2021-01-20_16-15-36_add_mailsmtpuser_passwd_constants.sql', NULL),
+('kvwmap', 'mysql', '2021-01-25_13-07-32_add_rollenlayer_freigabe_attribute.sql', NULL),
+('kvwmap', 'mysql', '2021-02-16_10-50-18_rolle_export_settings.sql', NULL),
+('kvwmap', 'mysql', '2021-02-18_09-41-33_layer_attributes_schema.sql', NULL),
+('kvwmap', 'mysql', '2021-03-01_13-24-21_adapt_sicherung_schema.sql', NULL),
+('kvwmap', 'mysql', '2021-03-01_15-15-35_adapt_sicherung_schema2.sql', NULL),
+('kvwmap', 'mysql', '2021-03-03_13-51-07_sicherungen.sql', NULL),
+('kvwmap', 'mysql', '2021-03-08_13-14-45_drop_antialias.sql', NULL),
+('kvwmap', 'mysql', '2021-03-15_12-21-50_add_const_copy_mail_attachment.sql', NULL),
+('kvwmap', 'mysql', '2021-03-15_13-00-50_use_parent_privileges.sql', NULL),
+('kvwmap', 'mysql', '2021-03-26_13-52-17_add_wms_auth_to_rollenlayer.sql', NULL),
+('kvwmap', 'mysql', '2021-05-19_10-03-58_layer_attributes_Farbauswahl.sql', NULL),
+('kvwmap', 'mysql', '2021-05-20_12-04-49_layer_attributes_tab.sql', NULL),
+('kvwmap', 'mysql', '2021-05-25_09-38-14_config_IMPORT_POINT_STYLE_ID.sql', NULL),
+('kvwmap', 'mysql', '2021-06-28_20-41-13_belated_files.sql', NULL),
+('kvwmap', 'mysql', '2021-09-22_10-13-14_belated_files_lastmodified.sql', NULL),
+('kvwmap', 'mysql', '2021-09-22_11-34-48_drop_sicherungen.sql', NULL),
+('kvwmap', 'mysql', '2021-11-15_15-35-23_add_redline_options.sql', NULL),
+('kvwmap', 'mysql', '2021-11-23_11-00-05_layer_sizeunits.sql', NULL),
+('kvwmap', 'mysql', '2021-11-24_10-00-19_add_layer_metadata.sql', NULL),
+('kvwmap', 'mysql', '2021-12-21_11-11-21_invitations_login_name.sql', NULL),
+('kvwmap', 'mysql', '2021-12-23_14-49-19_change_enum_columns.sql', NULL),
+('kvwmap', 'mysql', '2022-01-11_15-13-08_zwischenablage_oid.sql', NULL),
+('kvwmap', 'mysql', '2022-01-16_11-38-45_add_icon_to_layer_groups.sql', NULL),
+('kvwmap', 'mysql', '2022-01-18_14-24-10_change_color_attribute.sql', NULL),
+('kvwmap', 'mysql', '2022-03-08_13-44-15_layer_oid_null.sql', NULL),
+('kvwmap', 'mysql', '2022-03-09_09-49-07_stelle_drop_pg_conn.sql', NULL),
+('kvwmap', 'mysql', '2022-03-15_13-57-47_postlabelcache.sql', NULL),
+('kvwmap', 'mysql', '2022-04-28_09-08-38_invitation_anrede.sql', NULL),
+('kvwmap', 'mysql', '2022-05-16_07-49-58_identifier_text.sql', NULL),
+('kvwmap', 'mysql', '2022-05-31_11-37-31_config_NUTZER_ARCHIVIEREN.sql', NULL),
+('kvwmap', 'mysql', '2022-05-31_11-48-07_user_archived.sql', NULL),
+('kvwmap', 'mysql', '2022-06-09_12-52-40_add_layer_version_and_comment_attribute.sql', NULL),
+('kvwmap', 'mysql', '2022-06-15_08-16-53_Auswahlfeld_Bild.sql', NULL),
+('kvwmap', 'mysql', '2022-06-16_08-28-51_layer_data_import_allowed.sql', NULL),
+('kvwmap', 'mysql', '2022-06-23_06-39-33_rollenlayer_connection.sql', NULL),
+('kvwmap', 'mysql', '2022-06-28_19-10-12_add_metadata_to_stelle.sql', NULL),
+('kvwmap', 'mysql', '2022-06-30_10-12-34_add_more_metadata_to_stelle.sql', NULL),
+('kvwmap', 'mysql', '2022-07-05_10-49-10_update_jquery_and_bootstrap.php', NULL),
+('kvwmap', 'mysql', '2022-07-19_14-25-29_add_ows_namespace_to_stelle.sql', NULL),
+('kvwmap', 'mysql', '2022-08-09_14-23-43_styles_angleitem_null.sql', NULL),
+('kvwmap', 'mysql', '2022-08-17_09-41-48_user_tokens.sql', NULL),
+('kvwmap', 'mysql', '2022-08-22_11-11-31_rolle_tooltipquery.sql', NULL),
+('kvwmap', 'mysql', '2022-09-02_07-28-07_user_tokens.sql', NULL),
+('kvwmap', 'mysql', '2022-09-04_22-24-27_sha1_user_password.sql', NULL),
+('kvwmap', 'mysql', '2022-11-10_14-14-48_add_login_locked_until.sql', NULL),
+('kvwmap', 'mysql', '2022-11-17_08-11-28_drop_DELETE_ROLLENLAYER.sql', NULL),
+('kvwmap', 'mysql', '2022-11-17_13-45-40_label_text.sql', NULL),
+('kvwmap', 'mysql', '2022-11-17_14-18-57_label_minscale_maxscale.sql', NULL),
+('kvwmap', 'mysql', '2022-11-21_13-11-42_rollenlayer_buffer.sql', NULL),
+('kvwmap', 'mysql', '2022-11-25_13-11-42_rename_Suchergebnis_to_eigene_Abfragen.sql', NULL),
+('kvwmap', 'mysql', '2022-12-14_00-19-18_add_font_size_factor_to_user_settings.sql', NULL),
+('kvwmap', 'mysql', '2022-12-19_14-43-11_add_multiple_notifications.sql', NULL),
+('kvwmap', 'mysql', '2022-22-29_14-13-17_change_layer_oid_default.sql', NULL),
+('kvwmap', 'mysql', '2023-01-02_13-35-17_add_write_mapserver_templates_to_layer.sql', NULL),
+('kvwmap', 'mysql', '2023-02-03_15-14-42_add_password_expired_to_users.sql', NULL),
+('kvwmap', 'mysql', '2023-02-23_15-18-47_anglemode.sql', NULL),
+('kvwmap', 'mysql', '2023-04-20_09-10-42_stelle_foreign_keys.sql', NULL),
+('kvwmap', 'mysql', '2023-05-03_15-02-27_default_ohne_select.sql', NULL),
+('kvwmap', 'mysql', '2023-05-09_13-50-46_layer_drawingorder.sql', NULL),
+('kvwmap', 'mysql', '2023-05-11_09-59-51_FKs_used_layer_layer_attributes2stelle.sql', NULL),
+('kvwmap', 'mysql', '2023-05-23_10-25-19_rollenlayer_autodelete.sql', NULL),
+('kvwmap', 'mysql', '2023-05-23_13-53-55_datasources.sql', NULL),
+('kvwmap', 'mysql', '2023-05-25_05-12-58_add_ows_updatesequence_to_stelle.sql', NULL),
+('kvwmap', 'mysql', '2023-06-01_15-52-14_add_dataset_operations_position.sql', NULL),
+('kvwmap', 'mysql', '2023-06-06_13-53-51_layercharts.sql', NULL),
+('kvwmap', 'mysql', '2023-06-12_10-59-37_user_userdata_checking_time.sql', NULL),
+('kvwmap', 'mysql', '2023-06-19_17-57-12_change_write_mapserver_templates_to_layer.sql', NULL),
+('kvwmap', 'mysql', '2023-06-27_12-46-51_datatypes_drop_dbname_host_port.sql', NULL),
+('kvwmap', 'mysql', '2023-06-30_15-26-14_datatype_attributes_layer_id.sql', NULL),
+('kvwmap', 'mysql', '2023-07-06_12-33-57_QUERY_ONLY_ACTIVE_CLASSES.sql', NULL),
+('kvwmap', 'mysql', '2023-07-06_15-05-03_add_geom_column.sql', NULL),
+('kvwmap', 'mysql', '2023-07-17_09-49-57_Change_OWS_SERVICE_ONLINERESOURCE_write_permission.sql', NULL),
+('kvwmap', 'mysql', '2023-07-17_14-10-12_change_wappen_default.sql', NULL),
+('kvwmap', 'mysql', '2023-09-04_19-48-12_add_chartjs_to_3rdparty.php', NULL),
+('kvwmap', 'mysql', '2023-10-05_21-57-32_add_user_to_notification.sql', NULL),
+('kvwmap', 'mysql', '2023-10-09_15-38-33_add_label_to_dll.sql', NULL),
+('kvwmap', 'mysql', '2024-03-22_20-10-31_alter_real_name_length.sql', NULL),
+('kvwmap', 'mysql', '2024-03-20_10-20-13_layer_charts_beschreibung_breite.sql', NULL),
+('kvwmap', 'mysql', '2024-03-01_11-40-30_add_layer_datasources.sql', NULL),
+('kvwmap', 'mysql', '2024-01-31_08-14-04_styles_minwith_maxwidth_decimal.sql', NULL),
+('kvwmap', 'mysql', '2023-09-05_14-04-12_change_class_name_length.sql', NULL),
+('kvwmap', 'postgresql', '2024-01-18_17-01-23_gdi_conditional_nextval.sql', NULL),
+('kvwmap', 'postgresql', '2022-11-25_12-31-24_privilege_backup.sql', NULL),
+('kvwmap', 'postgresql', '2022-10-14_13-04-07_update_gdi_normalize_geometry.sql', NULL),
+('kvwmap', 'postgresql', '2022-08-31_18-20-37_add_get_deltas_function.sql', NULL),
+('kvwmap', 'postgresql', '2022-08-09_14-28-05_convert_column_names.sql', NULL),
+('kvwmap', 'postgresql', '2022-06-27_12-24-31_add_function_in_date_ranges.sql', NULL),
+('kvwmap', 'postgresql', '2022-05-31_11-59-17_id_for_q_notizen.sql', NULL),
+('kvwmap', 'postgresql', '2022-05-18_11-37-14_u_polygon.sql', NULL),
+('kvwmap', 'postgresql', '2021-11-11_15-26-30_function_gdi_MakeValidPolygons.sql', NULL),
+('kvwmap', 'postgresql', '2020-11-17_10-19-40_change_filter_rings_function.sql', NULL),
+('kvwmap', 'postgresql', '2020-11-13_10-12-13_change_filter_rings_function.sql', NULL),
+('kvwmap', 'postgresql', '2020-04-02_22-12-42_add_function_normalize_geometry.sql', NULL),
+('kvwmap', 'postgresql', '2020-01-13_11-23-26_drop_uko_polygon.sql', NULL),
+('kvwmap', 'postgresql', '2019-11-12_10-34-27_bug_convert_column_names.sql', NULL),
+('kvwmap', 'postgresql', '2019-04-25_17-02-24_bug_convert_column_names.sql', NULL),
+('kvwmap', 'postgresql', '2019-04-24_11-34-36_convert_column_names.sql', NULL),
+('kvwmap', 'postgresql', '2019-02-14_15-57-39_func_linelocatepointwithoffset.sql', NULL),
+('kvwmap', 'postgresql', '2019-02-14_15-54-35_func_gdi_lineinterpolatepointwithoffset.sql', NULL),
+('kvwmap', 'postgresql', '2023-05-22_18-53-17_json_to_text_functions.sql', NULL),
+('kvwmap', 'postgresql', '2019-02-14_15-49-15_function_extend_line.sql', NULL),
+('kvwmap', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql', NULL),
+('kvwmap', 'postgresql', '2015-05-06_08-47-01_st_area_utm.sql', NULL),
+('kvwmap', 'postgresql', '2015-05-28_14-07-36_bug_st_area_utm.sql', NULL),
+('kvwmap', 'postgresql', '2015-05-29_09-33-07_bug_st_area_utm.sql', NULL),
+('kvwmap', 'postgresql', '2017-04-28_14-42-46_Bug_st_area_utm.sql', NULL),
+('kvwmap', 'postgresql', '2017-04-28_14-49-32_Bug_st_area_utm.sql', NULL),
+('kvwmap', 'postgresql', '2017-05-03_09-08-07_Bug_st_area_utm.sql', NULL),
+('kvwmap', 'postgresql', '2017-05-03_12-13-08_Bug_st_area_utm.sql', NULL),
+('kvwmap', 'postgresql', '2017-05-15_15-28-45_spatial_ref_sys_srs_params.sql', NULL),
+('kvwmap', 'postgresql', '2018-02-08_11-30-00_rename_if_exisits.sql', NULL),
+('kvwmap', 'mysql', '2023-11-27_12-59-19_reset_password_text.sql', NULL),
+('kvwmap', 'mysql', '2023-12-05_09-35-40_invitation_text.sql', NULL),
+('kvwmap', 'mysql', '2024-01-01_19-39-23_add_used_layer_group_id.sql', NULL),
+('kvwmap', 'mysql', '2023-10-30_09-28-37_add_menue_fk.sql', NULL),
+('kvwmap', 'mysql', '2023-11-24_11-29-11_offsetxy_text.sql', NULL),
+('kvwmap', 'mysql', '2023-12-08_11-22-35_config_OWERRIDE_LANGUAGE_VARS.sql', NULL),
+('kvwmap', 'mysql', '2023-12-08_11-25-56_create_custom_language_and_ccs_readme_files.php', NULL),
+('kvwmap', 'mysql', '2024-01-08_17-52-40_add_primary_key_user2notifications.sql', NULL),
+('kvwmap', 'mysql', '2024-11-20_10-05-04_add_commend_to_migrations.sql', NULL),
+('kvwmap', 'mysql', '2024-11-27_10-13-17_drop_used_layer_drawingorder.sql', NULL),
+('kvwmap', 'postgresql', '2023-08-31_14-27-17_gdi_codelist_json_to_text_type.sql', NULL),
+('kvwmap', 'postgresql', '2024-02-20_18-26-07_gdi_parent_val.sql', NULL),
+('kvwmap', 'postgresql', '2024-03-22_19-46-14_gdi_conditional_val_und_gdi_current_date.sql', NULL),
+('kvwmap', 'postgresql', '2024-09-12_gdi_md5_agg_func.sql', NULL),
+('kvwmap', 'mysql', '2024-12-18_08-36-20_layer_terms_of_use_link.sql', NULL),
+('kvwmap', 'mysql', '2025-01-16_13-38-31_ROUTING_URL.sql', NULL),
+('kvwmap', 'mysql', '2025-02-27_11-29-37_layer_labelitems.sql', NULL),
+('kvwmap', 'mysql', '2025-02-27_11-44-26_fill_layer_labelitems.php', NULL),
+('kvwmap', 'mysql', '2025-02-28_10-47-31_rollenlayer_original_layer_id.sql', NULL),
+('kvwmap', 'mysql', '2025-03-26_09-42-01_layer_labelitems_Cluster_FeatureCount.sql', NULL),
+('kvwmap', 'postgresql', '2025-01-31_11-59-14_change_gdi_conditional_nextval.sql', NULL);
 
 -- --------------------------------------------------------
 
@@ -1391,7 +1493,6 @@ CREATE TABLE `rolle` (
   `language` enum('german','low-german','english','polish','vietnamese') NOT NULL DEFAULT 'german',
   `hidemenue` enum('0','1') NOT NULL DEFAULT '0',
   `hidelegend` enum('0','1') NOT NULL DEFAULT '0',
-  `fontsize_gle` int(2) DEFAULT 15,
   `tooltipquery` tinyint(1) NOT NULL DEFAULT 0,
   `buttons` varchar(255) DEFAULT 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure',
   `geom_buttons` varchar(255) DEFAULT 'delete,polygon,flurstquery,polygon2,buffer,transform,vertex_edit,coord_input,ortho_point,measure',
@@ -1425,15 +1526,16 @@ CREATE TABLE `rolle` (
   `redline_font_family` varchar(25) NOT NULL DEFAULT 'Arial',
   `redline_font_size` int(11) NOT NULL DEFAULT 16,
   `redline_font_weight` varchar(25) NOT NULL DEFAULT 'bold',
-  `dataset_operations_position` enum('unten','oben','beide') NOT NULL DEFAULT 'unten'
+  `dataset_operations_position` enum('unten','oben','beide') NOT NULL DEFAULT 'unten',
+  `last_query_layer` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 --
 -- Daten für Tabelle `rolle`
 --
 
-INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `tooltipquery`, `buttons`, `geom_buttons`, `scrollposition`, `result_color`, `result_hatching`, `result_transparency`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `showrollenfilter`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `legendtype`, `visually_impaired`, `font_size_factor`, `print_legend_separate`, `print_scale`, `immer_weiter_erfassen`, `upload_only_file_metadata`, `redline_text_color`, `redline_font_family`, `redline_font_size`, `redline_font_weight`, `dataset_operations_position`) VALUES
-(1, 1, 886, 580, 1, -536536.80569948, 5230803, 899287.80569948, 6170173, 2, 'zoomin', '25833', '4326', 'dec', 49, '2024-01-14 17:40:56', 'layouts/gui.php', 'german', '0', '0', 15, 1, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,freepolygon,freearrow,freetext,', 'delete,polygon,flurstquery,polygon2,buffer,transform,vertex_edit,coord_input,ortho_point,measure', 2, 6, 0, 60, 0, 1, 1, 1, 0, 0, 0, 0, 400, 150, NULL, 1, 1, '\"jahr\":\"15\",\"geschlecht\":\"g\",\"datenreihe\":\"summe\",\"umzuege\":\"bw_zu\"', 0, 0, 0, 1, 0, 'auto', NULL, NULL, '#ff0000', 'Arial', 16, 'bold', 'unten');
+INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `tooltipquery`, `buttons`, `geom_buttons`, `scrollposition`, `result_color`, `result_hatching`, `result_transparency`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `showrollenfilter`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `legendtype`, `visually_impaired`, `font_size_factor`, `print_legend_separate`, `print_scale`, `immer_weiter_erfassen`, `upload_only_file_metadata`, `redline_text_color`, `redline_font_family`, `redline_font_size`, `redline_font_weight`, `dataset_operations_position`, `last_query_layer`) VALUES
+(1, 1, 1402, 792, 1, -534651.29127055, 5281911.3104564, 897402.29127055, 6119064.6895436, 2, 'zoomin', '25833', '4326', 'dec', 49, '2025-04-16 15:07:42', 'layouts/gui.php', 'german', '0', '0', 1, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,freepolygon,freearrow,freetext,', 'delete,polygon,flurstquery,polygon2,buffer,transform,vertex_edit,coord_input,ortho_point,measure', 2, 6, 0, 60, 0, 1, 1, 1, 0, 0, 0, 0, 400, 150, NULL, 1, 1, '\"jahr\":\"15\",\"geschlecht\":\"g\",\"datenreihe\":\"summe\",\"umzuege\":\"bw_zu\"', 0, 0, 0, 1, 0, 'auto', NULL, NULL, '#ff0000', 'Arial', 16, 'bold', 'unten', NULL);
 
 -- --------------------------------------------------------
 
@@ -1443,6 +1545,7 @@ INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `aut
 
 CREATE TABLE `rollenlayer` (
   `id` int(11) NOT NULL,
+  `original_layer_id` int(11) DEFAULT NULL,
   `user_id` int(11) NOT NULL,
   `stelle_id` int(11) NOT NULL,
   `aktivStatus` enum('0','1','2') NOT NULL,
@@ -1672,7 +1775,7 @@ CREATE TABLE `stelle` (
 --
 
 INSERT INTO `stelle` (`ID`, `Bezeichnung`, `Bezeichnung_low-german`, `Bezeichnung_english`, `Bezeichnung_polish`, `Bezeichnung_vietnamese`, `start`, `stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `minzoom`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `ows_namespace`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_contactvoicephone`, `ows_contactfacsimile`, `ows_contactaddress`, `ows_contactpostalcode`, `ows_contactcity`, `ows_contactadministrativearea`, `ows_contentorganization`, `ows_contentemailaddress`, `ows_distributionperson`, `ows_updatesequence`, `ows_distributionposition`, `ows_distributionvoicephone`, `ows_distributionfacsimile`, `ows_distributionaddress`, `ows_distributionpostalcode`, `ows_distributioncity`, `ows_distributionadministrativearea`, `ows_contentperson`, `ows_contentposition`, `ows_contentvoicephone`, `ows_contentfacsimile`, `ows_contentaddress`, `ows_contentpostalcode`, `ows_contentcity`, `ows_contentadministrativearea`, `ows_geographicdescription`, `ows_distributionorganization`, `ows_distributionemailaddress`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `show_shared_layers`, `version`, `reset_password_text`, `invitation_text`, `comment`) VALUES
-(1, 'Administration', NULL, NULL, NULL, NULL, '0000-00-00', '0000-00-00', -174807, 5230803, 537558, 6170173, 8, 25833, 3  , '1', '30', 'Logo_GDI-Service_200x47.png', '', NULL, 'gdi', 'kvwmap-Demo Server', 'keine', 'Demoversion eines Web Service zur Bereitstellung von Geodaten aus den Bereichen des Katasters, der Landkreise', 'Peter Korduan', 'GDI-Service Rostock', 'peter.korduan@gdi-service.de', 'Geschäftsführer', '+49 381 403 44444', '+49 381 3378 9527', 'Friedrichstraße 16', '18057', 'Rostock', 'Mecklenburg-Vorpommern', '21', '22', '33', NULL, '34', '35', '36', '37', '38', '39', '3.10', '24', '25', '26', '27', '28', '29', '2.10', '2.11', '23', '31', '32', 'für Testzwecke frei', 'EPSG:25832 EPSG:25833 EPSG:4326 EPSG:2398', '0', '0', '1', 6, '1', '', 0, NULL, NULL, 0, '1.0.0', '', '', 'Test 2');
+(1, 'Administration', NULL, NULL, NULL, NULL, '0000-00-00', '0000-00-00', -174807, 5230803, 537558, 6170173, 8, 25833, 10, '1', '30', 'Logo_GDI-Service_200x47.png', '', NULL, 'gdi', 'kvwmap-Demo Server', 'keine', 'Demoversion eines Web Service zur Bereitstellung von Geodaten aus den Bereichen des Katasters, der Landkreise', 'Peter Korduan', 'GDI-Service Rostock', 'peter.korduan@gdi-service.de', 'Geschäftsführer', '+49 381 403 44444', '+49 381 3378 9527', 'Friedrichstraße 16', '18057', 'Rostock', 'Mecklenburg-Vorpommern', '21', '22', '33', NULL, '34', '35', '36', '37', '38', '39', '3.10', '24', '25', '26', '27', '28', '29', '2.10', '2.11', '23', '31', '32', 'für Testzwecke frei', 'EPSG:25832 EPSG:25833 EPSG:4326 EPSG:2398', '0', '0', '1', 6, '1', '', 0, NULL, NULL, 0, '1.0.0', '', '', 'Test 2');
 
 -- --------------------------------------------------------
 
@@ -1720,11 +1823,11 @@ CREATE TABLE `styles` (
   `maxsize` varchar(50) DEFAULT NULL,
   `minscale` int(11) UNSIGNED DEFAULT NULL,
   `maxscale` int(11) UNSIGNED DEFAULT NULL,
-  `angle` int(11) DEFAULT NULL,
+  `angle` varchar(11) DEFAULT NULL,
   `angleitem` varchar(255) DEFAULT NULL,
   `width` varchar(50) DEFAULT NULL,
-  `minwidth` int(11) DEFAULT NULL,
-  `maxwidth` int(11) DEFAULT NULL,
+  `minwidth` decimal(5,2) DEFAULT NULL,
+  `maxwidth` decimal(5,2) DEFAULT NULL,
   `offsetx` varchar(50) DEFAULT NULL,
   `offsety` varchar(50) DEFAULT NULL,
   `polaroffset` varchar(255) DEFAULT NULL,
@@ -1748,7 +1851,6 @@ CREATE TABLE `used_layer` (
   `Layer_ID` int(11) NOT NULL DEFAULT 0,
   `group_id` int(11) DEFAULT NULL,
   `queryable` enum('0','1') NOT NULL DEFAULT '1',
-  `drawingorder` int(11) NOT NULL DEFAULT 0,
   `legendorder` int(11) DEFAULT NULL,
   `minscale` int(11) DEFAULT NULL,
   `maxscale` int(11) DEFAULT NULL,
@@ -1773,9 +1875,9 @@ CREATE TABLE `used_layer` (
 -- Daten für Tabelle `used_layer`
 --
 
-INSERT INTO `used_layer` (`Stelle_ID`, `Layer_ID`, `group_id`, `queryable`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`, `Filter`, `template`, `header`, `footer`, `symbolscale`, `logconsume`, `requires`, `privileg`, `export_privileg`, `use_parent_privileges`, `start_aktiv`, `use_geom`) VALUES
-(1, 1, NULL, '0', 0, NULL, NULL, NULL, NULL, NULL, 0, '', NULL, NULL, NULL, NULL, NULL, NULL, '0', 1, 1, '0', 0),
-(1, 2, NULL, '0', 0, NULL, NULL, NULL, NULL, NULL, 0, '', NULL, NULL, NULL, NULL, NULL, NULL, '0', 1, 1, '0', 0);
+INSERT INTO `used_layer` (`Stelle_ID`, `Layer_ID`, `group_id`, `queryable`, `legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`, `Filter`, `template`, `header`, `footer`, `symbolscale`, `logconsume`, `requires`, `privileg`, `export_privileg`, `use_parent_privileges`, `start_aktiv`, `use_geom`) VALUES
+(1, 1, NULL, '0', NULL, NULL, NULL, NULL, NULL, 0, '', NULL, NULL, NULL, NULL, NULL, NULL, '0', 0, 1, '0', 0),
+(1, 2, NULL, '0', NULL, NULL, NULL, NULL, NULL, 0, '', NULL, NULL, NULL, NULL, NULL, NULL, '0', 0, 1, '0', 0);
 
 -- --------------------------------------------------------
 
@@ -1817,7 +1919,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`ID`, `login_name`, `Name`, `Vorname`, `Namenszusatz`, `passwort`, `password`, `password_expired`, `password_setting_time`, `userdata_checking_time`, `start`, `stop`, `ips`, `tokens`, `Funktion`, `stelle_id`, `phon`, `email`, `agreement_accepted`, `num_login_failed`, `login_locked_until`, `organisation`, `position`, `share_rollenlayer_allowed`, `layer_data_import_allowed`, `archived`) VALUES
-(1, 'kvwmap', 'Administrator', 'WebGIS', '', '', '10c55af15ef1a6d3caf1b3599eadd3d84e446916', 0, '2024-01-14 13:55:14', NULL, '0000-00-00', '0000-00-00', '', 'f7cef80b665dd06ed1bacb73fd973ea7,e30557ce861fef88148d8a60abad7b94,6e9f0247722341e4fe268ebc0682d276,401846380de8366c6cf5c053b9e0282e,f20033d55a768b5c92832b96f6baa111', 'admin', 1, '038140344445', 'stefan.rahn@gdi-service.de', 1, 0, '2024-01-14 15:24:29', 'GDI-Service', 'kvwmap Entwickler', 0, 0, NULL);
+(1, 'pkorduan', 'Korduan', 'Peter', '', '', 'f17050aeb2010f75818043c68a0837935443f1ba', 0, '2024-12-14 13:55:14', NULL, '0000-00-00', '0000-00-00', '', '763d0eda8725fd86e1cd4e004b4a0a26,6bc695c80b700a178e39ab2ffd7f3c45,4b4b83bf7d1c92309fcb9d9f651ae486,cd147cef213b6fc012729495daedeb53,5f02d50272873449af670b222d9ce376', 'admin', 1, '038140344445', 'peter.korduan@gdi-service.de', 1, 0, '2025-04-16 13:07:40', 'GDI-Service', 'Web-GIS Admin', 0, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -1885,7 +1987,14 @@ CREATE TABLE `u_consume` (
 --
 
 INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagewidth`, `nimageheight`, `epsg_code`, `minx`, `miny`, `maxx`, `maxy`, `prev`, `next`) VALUES
-(1, 1, '2024-01-14 17:40:56', 'getMap', 886, 580, '25833', -536536.80569948, 5230803, 899287.80569948, 6170173, '2024-01-14 17:24:48', NULL);
+(1, 1, '2024-01-14 17:40:56', 'getMap', 886, 580, '25833', -536536.80569948, 5230803, 899287.80569948, 6170173, '2024-01-14 17:24:48', NULL),
+(1, 1, '2024-01-14 22:14:08', 'getMap', 886, 580, '25833', -536536.80569948, 5230803, 899287.80569948, 6170173, '2024-01-14 17:40:56', NULL),
+(1, 1, '2025-01-29 14:56:46', 'getMap', 1288, 950, '25833', -455594.56849315, 5230803, 818345.56849315, 6170173, '2024-01-14 22:14:08', NULL),
+(1, 1, '2025-02-18 13:36:52', 'getMap', 1402, 834, '25833', -608574.90216086, 5230803, 971325.90216086, 6170173, '2025-01-29 14:56:46', NULL),
+(1, 1, '2025-02-18 13:37:50', 'getMap', 1320, 920, '25833', -492742.57943417, 5230803, 855493.57943417, 6170173, '2025-02-18 13:36:52', NULL),
+(1, 1, '2025-02-18 13:45:07', 'getMap', 1402, 834, '25833', -534651.29127053, 5274756.1533702, 897402.29127053, 6126219.8466298, '2025-02-18 13:37:50', NULL),
+(1, 1, '2025-02-18 13:45:48', 'getMap', 1402, 820, '25833', -534651.29127055, 5281911.3104564, 897402.29127055, 6119064.6895436, '2025-02-18 13:45:07', NULL),
+(1, 1, '2025-04-16 15:07:42', 'getMap', 1402, 820, '25833', -534651.29127055, 5281911.3104564, 897402.29127055, 6119064.6895436, '2025-02-18 13:45:48', NULL);
 
 -- --------------------------------------------------------
 
@@ -2165,7 +2274,7 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 46, 0),
 (1, 1, 47, 0),
 (1, 1, 49, 0),
-(1, 1, 50, 0),
+(1, 1, 50, 1),
 (1, 1, 51, 0),
 (1, 1, 63, 0),
 (1, 1, 64, 0),
@@ -2205,7 +2314,8 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 306, 0),
 (1, 1, 312, 0),
 (1, 1, 314, 0),
-(1, 1, 315, 0);
+(1, 1, 315, 0),
+(1, 1, 316, 0);
 
 -- --------------------------------------------------------
 
@@ -2224,65 +2334,66 @@ CREATE TABLE `u_menue2stelle` (
 --
 
 INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
-(1, 4, 50),
-(1, 7, 57),
-(1, 17, 0),
-(1, 20, 11),
-(1, 21, 12),
-(1, 22, 13),
-(1, 25, 7),
-(1, 27, 8),
-(1, 28, 3),
-(1, 29, 56),
-(1, 30, 49),
-(1, 35, 55),
-(1, 39, 43),
-(1, 42, 58),
-(1, 45, 19),
-(1, 46, 21),
-(1, 47, 22),
-(1, 49, 9),
-(1, 50, 23),
-(1, 51, 29),
-(1, 63, 47),
-(1, 64, 45),
-(1, 65, 20),
-(1, 66, 27),
-(1, 72, 32),
-(1, 73, 33),
-(1, 74, 53),
-(1, 76, 4),
-(1, 77, 5),
-(1, 78, 40),
-(1, 79, 42),
-(1, 126, 26),
-(1, 141, 37),
-(1, 142, 39),
-(1, 143, 38),
-(1, 144, 34),
-(1, 147, 6),
-(1, 148, 14),
-(1, 149, 35),
-(1, 151, 2),
-(1, 152, 1),
-(1, 153, 51),
-(1, 154, 44),
-(1, 174, 41),
-(1, 186, 24),
-(1, 215, 52),
-(1, 216, 54),
-(1, 239, 31),
-(1, 241, 17),
-(1, 251, 46),
-(1, 269, 16),
-(1, 274, 18),
-(1, 301, 30),
-(1, 303, 10),
-(1, 305, 25),
-(1, 306, 48),
-(1, 312, 15),
-(1, 314, 28),
-(1, 315, 36);
+(1, 4, 51),
+(1, 7, 58),
+(1, 17, 1),
+(1, 20, 12),
+(1, 21, 13),
+(1, 22, 14),
+(1, 25, 8),
+(1, 27, 9),
+(1, 28, 4),
+(1, 29, 57),
+(1, 30, 50),
+(1, 35, 56),
+(1, 39, 44),
+(1, 42, 59),
+(1, 45, 20),
+(1, 46, 22),
+(1, 47, 23),
+(1, 49, 10),
+(1, 50, 24),
+(1, 51, 30),
+(1, 63, 48),
+(1, 64, 46),
+(1, 65, 21),
+(1, 66, 28),
+(1, 72, 33),
+(1, 73, 34),
+(1, 74, 54),
+(1, 76, 5),
+(1, 77, 6),
+(1, 78, 41),
+(1, 79, 43),
+(1, 126, 27),
+(1, 141, 38),
+(1, 142, 40),
+(1, 143, 39),
+(1, 144, 35),
+(1, 147, 7),
+(1, 148, 15),
+(1, 149, 36),
+(1, 151, 3),
+(1, 152, 2),
+(1, 153, 52),
+(1, 154, 45),
+(1, 174, 42),
+(1, 186, 25),
+(1, 215, 53),
+(1, 216, 55),
+(1, 239, 32),
+(1, 241, 18),
+(1, 251, 47),
+(1, 269, 17),
+(1, 274, 19),
+(1, 301, 31),
+(1, 303, 11),
+(1, 305, 26),
+(1, 306, 49),
+(1, 312, 16),
+(1, 314, 29),
+(1, 315, 37),
+(1, 316, 0);
 
 -- --------------------------------------------------------
 
@@ -2401,9 +2512,10 @@ INSERT INTO `u_menues` (`id`, `name`, `name_low-german`, `name_english`, `name_p
 (303, 'Daten Export', '', '', '', '', 'index.php?go=Daten_Export', '', 17, 2, '', 20, '', ''),
 (305, 'Layergruppen', '', '', '', '', 'index.php?go=Layergruppen_Anzeigen', '', 50, 2, '', 4, '', ''),
 (306, 'Dienstmetadaten', '', '', '', '', 'index.php?go=Dienstmetadaten', '', 64, 2, '', 10, '', ''),
-(312, 'Nutzer einladen', NULL, NULL, NULL, NULL, 'index.php?go=Einladung_Editor', NULL, 20, 2, NULL, 10, NULL, NULL),
+(312, 'Einladungen anzeigen', NULL, NULL, NULL, NULL, 'index.php?go=Einladungen_Anzeigen', '', 20, 2, NULL, 40, '', NULL),
 (314, 'Layer anzeigen', '', '', '', '', 'index.php?go=Layer_Anzeigen', '', 50, 2, '', 10, '', ''),
-(315, 'Postgre-Datenbankverbindungen', NULL, NULL, NULL, NULL, 'index.php?go=connections_anzeigen', NULL, 50, 2, NULL, 100, 'Zeigt die Postgres-Datenbankverbindungen', NULL);
+(315, 'Postgre-Datenbankverbindungen', NULL, NULL, NULL, NULL, 'index.php?go=connections_anzeigen', NULL, 50, 2, NULL, 100, 'Zeigt die Postgres-Datenbankverbindungen', NULL),
+(316, 'Zeitstempel einstellen', NULL, NULL, NULL, NULL, NULL, 'set_hist_timestamp()', 0, 1, NULL, 10, 'Zeitstempel einstellen', 'timetravel');
 
 -- --------------------------------------------------------
 
@@ -2692,6 +2804,13 @@ ALTER TABLE `layer_charts`
   ADD KEY `fk_layer_charts_label_attribute_name` (`layer_id`,`label_attribute_name`);
 
 --
+-- Indizes für die Tabelle `layer_datasources`
+--
+ALTER TABLE `layer_datasources`
+  ADD PRIMARY KEY (`layer_id`,`datasource_id`),
+  ADD KEY `layer_datasource_fk_datasource_id` (`datasource_id`);
+
+--
 -- Indizes für die Tabelle `layer_parameter`
 --
 ALTER TABLE `layer_parameter`
@@ -2972,7 +3091,7 @@ ALTER TABLE `colors`
 -- AUTO_INCREMENT für Tabelle `config`
 --
 ALTER TABLE `config`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=210;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=211;
 
 --
 -- AUTO_INCREMENT für Tabelle `connections`
@@ -3128,7 +3247,7 @@ ALTER TABLE `u_groups`
 -- AUTO_INCREMENT für Tabelle `u_menues`
 --
 ALTER TABLE `u_menues`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=316;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=317;
 
 --
 -- Constraints der exportierten Tabellen
@@ -3190,6 +3309,13 @@ ALTER TABLE `layer_attributes2stelle`
 ALTER TABLE `layer_charts`
   ADD CONSTRAINT `fk_layer_charts_label_attribute_name` FOREIGN KEY (`layer_id`,`label_attribute_name`) REFERENCES `layer_attributes` (`layer_id`, `name`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_layer_charts_value_attribute_name` FOREIGN KEY (`layer_id`,`value_attribute_name`) REFERENCES `layer_attributes` (`layer_id`, `name`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints der Tabelle `layer_datasources`
+--
+ALTER TABLE `layer_datasources`
+  ADD CONSTRAINT `layer_datasource_fk_datasource_id` FOREIGN KEY (`datasource_id`) REFERENCES `datasources` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `layer_datasource_fk_layer_id` FOREIGN KEY (`layer_id`) REFERENCES `layer` (`Layer_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints der Tabelle `rolle`
@@ -3363,5 +3489,8 @@ ALTER TABLE `u_rolle2used_layer`
 --
 ALTER TABLE `zwischenablage`
   ADD CONSTRAINT `zwischenablage_ibfk_1` FOREIGN KEY (`user_id`,`stelle_id`) REFERENCES `rolle` (`user_id`, `stelle_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
 COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

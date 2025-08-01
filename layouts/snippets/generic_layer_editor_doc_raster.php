@@ -1,6 +1,6 @@
 <?php
  # 2008-09-30 sr
-  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
  
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -132,8 +132,9 @@
 									<input
 										id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
 										type="checkbox"
-										class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
+										class="check_<? echo $layer['Layer_ID']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
 										name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>"
+										onchange="count_selected(<? echo $layer['Layer_ID']; ?>);"
 									>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
 									if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>
 										<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">

@@ -1,7 +1,7 @@
 <?php
 	$strBuffer = "Puffer hinzuf\u00fcgen";
 	$strBufferedLine = "gepufferte Linie hinzuf\u00fcgen";
-	$strCornerPoint = "Eckpunkte bearbeiten. Punkte Löschen mit Doppelklick.";
+	$strCornerPoint = "Stützpunkte bearbeiten. Punkte Löschen mit Doppelklick.";
 	$strCutByPolygon = "Freihandpolygon ausschneiden";
 	$strDelete = "alles l\u00f6schen";
 	$strDelLine = "Linien l\u00f6schen";
@@ -11,6 +11,7 @@
 	$strPunktfang = "Punktfang";
 	$strGPSFollow = "GPS-Verfolgungsmodus";
 	$strMoveGeometry = "Geometrie verschieben";
+  $strRotateGeometry="Geometrie drehen";
 	$strParallelPolygon = "einseitig gepufferte Linie erzeugen";
 	$strReverse = "Linienrichtung drehen";
 	$strRuler = "Streckenmessung";
@@ -21,4 +22,5 @@
 	$strSplitPolygon = "Polygone teilen";
 	$strUndo = "R\u00fcckg\u00e4ngig";
 	$strCircle = "Kreis hinzuf\u00fcgen";
+	$strCreateRectangle = "Rechteck aufziehen";
 ?>

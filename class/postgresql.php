@@ -90,7 +90,7 @@ class pgdatabase {
 			$connection_string = $this->get_connection_string();
 		}
 		try {
-			$this->dbConn = pg_connect($connection_string, $flag);
+			$this->dbConn = pg_connect($connection_string . ' connect_timeout=5', $flag);
 		}
 		catch (Exception $e) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
@@ -206,6 +206,33 @@ class pgdatabase {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
   }
+
+	function schema_exists($schema_name) {
+		$sql = "
+			SELECT
+				EXISTS(
+					SELECT
+						1
+					FROM
+						information_schema.schemata
+					WHERE 
+						schema_name = '" . $schema_name . "'
+					AND
+						catalog_name = '" . POSTGRES_DBNAME . "'
+				)
+			;";
+		$ret = $this->execSQL($sql, 4, 0);
+		$result = pg_fetch_row($ret[1]);
+		return ($result[0] === 't');
+	}
+
+	function create_schema($schema_name) {
+		$sql = "
+			CREATE SCHEMA IF NOT EXISTS " . $schema_name . "
+		";
+		$ret = $this->execSQL($sql, 4,0);
+		return $ret;
+	}
 
 	function get_schemata($user_name) {
 		$schemata = array();
@@ -542,7 +569,7 @@ FROM
 	*/
 	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
 		if (!$this->dbConn) {
-			echo '<p>pgconn: ' . $this->dbConn; exit;
+			echo '<p>pgconn: ' . $this->dbConn;
 		}
 		$ret = array(); // Array with results to return
 		$ret['msg'] = '';
@@ -824,7 +851,7 @@ FROM
 			if(strpos($error_message, "\n      :resno") !== false){
 				$error_list[] = $error_message;
 			}
-			return false;
+			#return false;
 		};
 		set_error_handler($myErrorHandler);
 		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
@@ -908,7 +935,7 @@ FROM
 					$fields[$i]['nullable'] = $attr_info['nullable']; 
 					$fields[$i]['length'] = $attr_info['length'];
 					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
-					$fields[$i]['default'] = $attr_info['default'];
+					$fields[$i]['default'] = ($attr_info['generated'] == '' ? $attr_info['default'] : '');
 					$fields[$i]['type_type'] = $attr_info['type_type'];
 					$fields[$i]['type_schema'] = $attr_info['type_schema'];
 					$fields[$i]['is_array'] = $attr_info['is_array'];
@@ -944,7 +971,7 @@ FROM
 						}
 					}
 					$fields[$i]['constraints'] = $constraintstring;
-					$fields[$i]['saveable'] = 1;
+					$fields[$i]['saveable'] = ($attr_info['generated'] == '' ? 1 : 0);
 				}
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
 					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
@@ -996,6 +1023,7 @@ FROM
 				c.relkind,
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
+				" . (POSTGRESVERSION >= 1300 ? 'a.attgenerated as generated' : 'NULL as generated') . ",
 				a.attnum AS ordinal_position,
 				pg_get_expr(ad.adbin, ad.adrelid) as default,
 				t.typname AS type_name,
@@ -1065,12 +1093,6 @@ FROM
 				if ($attr_info['decimal_length'] == '') {
 					$attr_info['decimal_length'] = 'NULL';
 				}
-				/*
-				if (strpos($attr_info['type_name'], 'xp_spezexternereferenzauslegung') !== false) {
-					$attr_info['type_name'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type_name']);
-					$attr_info['type'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type']);
-				}
-				*/
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
@@ -1135,9 +1157,10 @@ FROM
 	
 	function writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
+		$attribute_names = [];
 		for($i = 1; $i < count($attr_info)+1; $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
-			$fields[$i]['name'] = $attr_info[$i]['name'];
+			$attribute_names[] = $fields[$i]['name'] = $attr_info[$i]['name'];
 			$fieldtype = $attr_info[$i]['type_name'];
 			$fields[$i]['nullable'] = $attr_info[$i]['nullable']; 
 			$fields[$i]['length'] = $attr_info[$i]['length'];
@@ -1188,6 +1211,16 @@ FROM
 			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
+		$sql = "
+			DELETE FROM
+				datatype_attributes
+			WHERE
+				layer_id = " . $layer_id . " AND
+				datatype_id = " . $datatype_id . " AND
+				name NOT IN ('" . implode("', '", $attribute_names) . "')";
+		#echo "<br>Löschen der alten Datentyp-Attribute: " . $sql;
+		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 	}
 
 	/*
@@ -2113,6 +2146,10 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
+		if (value_of($formvars, 'newpathwkt') != ''){
+			# Suche im Suchpolygon
+			$sql .=' AND st_intersects(f.wkb_geometry, (st_transform(st_geomfromtext(\'' . $formvars['newpathwkt'] . '\', ' . $formvars['user_epsg'] . '), ' . EPSGCODE_ALKIS . ')))';
+		}
 		if($ganze_gemkg_ids[0] != '' OR count_or_0($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
@@ -2712,7 +2749,7 @@ FROM
     return $rs['wkt'];
   }	
 	
-  function getMERfromFlurstuecke($flurstkennz, $epsgcode) {
+  function getMERfromFlurstuecke($flurstkennz, $epsgcode, $without_temporal_filter = false) {
     $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flurstï¿½cke",4);
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
@@ -2726,7 +2763,9 @@ FROM
       }
       $sql.=")";
     }
-		$sql.= $this->build_temporal_filter(array('f'));
+		if (!$without_temporal_filter) {
+			$sql.= $this->build_temporal_filter(array('f'));
+		}
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Flurstücke.<br>'.$ret[1];
@@ -3104,6 +3143,15 @@ FROM
 		";
 		#echo '<br>SQL: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
+		return $ret;
+	}
+
+	function drop_schema($schema_name, $cascade = false) {
+		$sql = "
+			DROP SCHEMA IF EXISTS " . $schema_name .
+			($cascade ? ' CASCADE' : '') . "
+		";
+		$ret = $this->execSQL($sql, 4,0);
 		return $ret;
 	}
 }

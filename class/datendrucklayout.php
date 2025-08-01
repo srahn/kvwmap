@@ -496,7 +496,8 @@ class ddl {
 										$this->gui->getSubFormResultSet($this->attributes, $j, $this->layerset['maintable'], $this->result[$i]);
 										$this->gui->formvars['aktivesLayout'] = $sublayout;
 										$page_id_before_sublayout = $this->pdf->currentContents;
-										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy, false);
+										$result = $this->gui->generischer_sachdaten_druck_createPDF($this->pdf, $offx, $offy, false);
+										$y = $result['y'];
 										$page_id_after_sublayout = $this->pdf->currentContents;
 										if ($page_id_before_sublayout != $page_id_after_sublayout) {
 											$this->page_overflow = true;
@@ -711,9 +712,9 @@ class ddl {
 							);
 						}
 						else {
-							include_(CLASSPATH.'polygoneditor.php');
-							$polygoneditor = new polygoneditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);
-							$rect = $polygoneditor->zoomTopolygon(
+							include_(CLASSPATH.'multigeomeditor.php');
+							$polygoneditor = new multigeomeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);
+							$rect = $polygoneditor->zoomToGeom(
 								$oid,
 								$attributes['table_name'][$attributes['the_geom']],
 								$attributes['real_name'][$attributes['the_geom']],
@@ -1037,6 +1038,7 @@ class ddl {
 	* @param ...
 	* @param array $result Array von Sachdatenabfrageergebnissen
 	* @param ...
+	* @return array $return_values Full path to created pdf document if $output is true and else only the last y-value of cursor in page
 	*/
 	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true, $append = false ) {
 		$result = (!$result ? array() : $result);
@@ -1055,6 +1057,10 @@ class ddl {
 		$this->xoffset_onpage = 0;
 		$new_column = false;
 		$this->page_overflow = false;
+		$return_values = array(
+			'pdf_file' => '',
+			'y' => 0
+		);
 		if ($pdfobject == NULL) {
 			include_once (CLASSPATH . 'class.ezpdf.php');
 			$this->pdf=new Cezpdf($this->layout['size'], $this->layout['orientation']);
@@ -1134,7 +1140,7 @@ class ddl {
 					$column_i++;
 				}
 			}
-			if (!$new_column) {
+			if (!$new_column AND $this->i_on_page > 0) {
 				$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage] + $this->layout['gap']; # der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			}
 			if (
@@ -1205,7 +1211,7 @@ class ddl {
 			for ($j = 0; $j < count($this->attributes['name']); $j++) {
 				if ($this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0) {
 					# zum Anfang sind alle Attribute noch zu schreiben
-					$this->remaining_attributes[$this->attributes['name'][$j]] = $this->attributes['name'][$j];		
+					$this->remaining_attributes[$this->attributes['name'][$j]] = $this->attributes['name'][$j];
 				}
 			}
 
@@ -1336,12 +1342,13 @@ class ddl {
 			$fp = fopen($dateipfad . $dateiname, 'wb');
 			fwrite($fp, $this->pdf->ezOutput());
 			fclose($fp);
-			return $dateipfad . $dateiname;
+			$return_values['pdf_file'] = $dateipfad . $dateiname;
 		}
 		else {
 			# der letzte y-Wert wird zurückgeliefert, um nachfolgende Elemente darunter zu setzen
-			return $this->miny[$this->pdf->currentContents];
+			$return_values['y'] = $this->miny[$this->pdf->currentContents];
 		}
+		return $return_values;
 	}
 
 	function add_everypage_elements($preview){
@@ -1513,25 +1520,25 @@ class ddl {
 					`name` = '" . $formvars['name'] . "',
 					`layer_id` = " . (int)$formvars['selected_layer_id'] . ",
 					`format` = '" . $formvars['format'] . "'";
-			if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
+			if($formvars['bgposx'] != '')$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
   		else $sql .= ", `bgposx` = NULL";
-      if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
+      if($formvars['bgposy'] != '')$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
       else $sql .= ", `bgposy` = NULL";
-      if($formvars['bgwidth'])$sql .= ", `bgwidth` = ".(int)$formvars['bgwidth'];
+      if($formvars['bgwidth'] != '')$sql .= ", `bgwidth` = ".(int)$formvars['bgwidth'];
       else $sql .= ", `bgwidth` = NULL";
-      if($formvars['bgheight'])$sql .= ", `bgheight` = ".(int)$formvars['bgheight'];
+      if($formvars['bgheight'] != '')$sql .= ", `bgheight` = ".(int)$formvars['bgheight'];
       else $sql .= ", `bgheight` = NULL";
-      if($formvars['dateposx'])$sql .= ", `dateposx` = ".(int)$formvars['dateposx'];
+      if($formvars['dateposx'] != '')$sql .= ", `dateposx` = ".(int)$formvars['dateposx'];
       else $sql .= ", `dateposx` = NULL";
-      if($formvars['dateposy'])$sql .= ", `dateposy` = ".(int)$formvars['dateposy'];
+      if($formvars['dateposy'] != '')$sql .= ", `dateposy` = ".(int)$formvars['dateposy'];
       else $sql .= ", `dateposy` = NULL";
-      if($formvars['datesize'])$sql .= ", `datesize` = ".(int)$formvars['datesize'];
+      if($formvars['datesize'] != '')$sql .= ", `datesize` = ".(int)$formvars['datesize'];
       else $sql .= ", `datesize` = NULL";
-      if($formvars['userposx'])$sql .= ", `userposx` = ".(int)$formvars['userposx'];
+      if($formvars['userposx'] != '')$sql .= ", `userposx` = ".(int)$formvars['userposx'];
       else $sql .= ", `userposx` = NULL";
-      if($formvars['userposy'])$sql .= ", `userposy` = ".(int)$formvars['userposy'];
+      if($formvars['userposy'] != '')$sql .= ", `userposy` = ".(int)$formvars['userposy'];
       else $sql .= ", `userposy` = NULL";
-      if($formvars['usersize'])$sql .= ", `usersize` = ".(int)$formvars['usersize'];
+      if($formvars['usersize'] != '')$sql .= ", `usersize` = ".(int)$formvars['usersize'];
       else $sql .= ", `usersize` = NULL";
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
@@ -1696,25 +1703,25 @@ class ddl {
 						`layer_id` = " . (int)$formvars['selected_layer_id'] . ",
 						`format` = '" . $formvars['format'] . "'
 				";
-  		if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
+  		if($formvars['bgposx'] != '')$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
   		else $sql .= ", `bgposx` = NULL";
-      if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
+      if($formvars['bgposy'] != '')$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
       else $sql .= ", `bgposy` = NULL";
-      if($formvars['bgwidth'])$sql .= ", `bgwidth` = ".(int)$formvars['bgwidth'];
+      if($formvars['bgwidth'] != '')$sql .= ", `bgwidth` = ".(int)$formvars['bgwidth'];
       else $sql .= ", `bgwidth` = NULL";
-      if($formvars['bgheight'])$sql .= ", `bgheight` = ".(int)$formvars['bgheight'];
+      if($formvars['bgheight'] != '')$sql .= ", `bgheight` = ".(int)$formvars['bgheight'];
       else $sql .= ", `bgheight` = NULL";
-      if($formvars['dateposx'])$sql .= ", `dateposx` = ".(int)$formvars['dateposx'];
+      if($formvars['dateposx'] != '')$sql .= ", `dateposx` = ".(int)$formvars['dateposx'];
       else $sql .= ", `dateposx` = NULL";
-      if($formvars['dateposy'])$sql .= ", `dateposy` = ".(int)$formvars['dateposy'];
+      if($formvars['dateposy'] != '')$sql .= ", `dateposy` = ".(int)$formvars['dateposy'];
       else $sql .= ", `dateposy` = NULL";
-      if($formvars['datesize'])$sql .= ", `datesize` = ".(int)$formvars['datesize'];
+      if($formvars['datesize'] != '')$sql .= ", `datesize` = ".(int)$formvars['datesize'];
       else $sql .= ", `datesize` = NULL";
-      if($formvars['userposx'])$sql .= ", `userposx` = ".(int)$formvars['userposx'];
+      if($formvars['userposx'] != '')$sql .= ", `userposx` = ".(int)$formvars['userposx'];
       else $sql .= ", `userposx` = NULL";
-      if($formvars['userposy'])$sql .= ", `userposy` = ".(int)$formvars['userposy'];
+      if($formvars['userposy'] != '')$sql .= ", `userposy` = ".(int)$formvars['userposy'];
       else $sql .= ", `userposy` = NULL";
-      if($formvars['usersize'])$sql .= ", `usersize` = ".(int)$formvars['usersize'];
+      if($formvars['usersize'] != '')$sql .= ", `usersize` = ".(int)$formvars['usersize'];
       else $sql .= ", `usersize` = NULL";
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
@@ -1726,8 +1733,8 @@ class ddl {
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
-			$sql .= ", `no_record_splitting` = ".(int)$formvars['use_previews'];
-			$sql .= ", `use_previews` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `use_previews` = ".(int)$formvars['use_previews'];
 			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
@@ -1777,19 +1784,19 @@ class ddl {
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
         if($formvars['textfont'][$i] == 'NULL')$formvars['textfont'][$i] = NULL;
         $sql = "UPDATE druckfreitexte SET `text` = '".$formvars['text'][$i]."'";
-        if($formvars['textposx'][$i])$sql .= ", `posx` = ".(int)$formvars['textposx'][$i];
+        if($formvars['textposx'][$i] != '')$sql .= ", `posx` = ".(int)$formvars['textposx'][$i];
         else $sql .= ", `posx` = NULL";
-        if($formvars['textposy'][$i])$sql .= ", `posy` = ".(int)$formvars['textposy'][$i];
+        if($formvars['textposy'][$i] != '')$sql .= ", `posy` = ".(int)$formvars['textposy'][$i];
         else $sql .= ", `posy` = NULL";
-				if($formvars['textoffset_attribute'][$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'][$i]."'";
+				if($formvars['textoffset_attribute'][$i] != '')$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'][$i]."'";
         else $sql .= ", `offset_attribute` = NULL";
-        if($formvars['textsize'][$i])$sql .= ", `size` = ".(int)$formvars['textsize'][$i];
+        if($formvars['textsize'][$i] != '')$sql .= ", `size` = ".(int)$formvars['textsize'][$i];
         else $sql .= ", `size` = NULL";
 				if($formvars['textwidth'][$i] != NULL)$sql.= " ,width = ".(int)$formvars['textwidth'][$i];
 				else $sql.= " ,width = NULL";
 				if($formvars['textborder'][$i] != NULL)$sql.= " ,border = ".(int)$formvars['textborder'][$i];
 				else $sql.= " ,border = NULL";
-        if($formvars['textangle'][$i])$sql .= ", `angle` = ".(int)$formvars['textangle'][$i];
+        if($formvars['textangle'][$i] != '')$sql .= ", `angle` = ".(int)$formvars['textangle'][$i];
         else $sql .= ", `angle` = NULL";
         $sql .= ", `font` = '".$formvars['textfont'][$i]."'";
         if($formvars['texttype'][$i] == '')$formvars['texttype'][$i] = 0;
@@ -1803,17 +1810,17 @@ class ddl {
 			
       for($i = 0; $i < $formvars['linecount']; $i++){
         $sql = "UPDATE druckfreilinien SET `breite` = '".$formvars['breite'.$i]."'";
-        if($formvars['lineposx'.$i])$sql .= ", `posx` = ".(int)$formvars['lineposx'.$i];
+        if($formvars['lineposx'.$i] != '')$sql .= ", `posx` = ".(int)$formvars['lineposx'.$i];
         else $sql .= ", `posx` = NULL";
-        if($formvars['lineposy'.$i])$sql .= ", `posy` = ".(int)$formvars['lineposy'.$i];
+        if($formvars['lineposy'.$i] != '')$sql .= ", `posy` = ".(int)$formvars['lineposy'.$i];
         else $sql .= ", `posy` = NULL";
-				if($formvars['lineendposx'.$i])$sql .= ", `endposx` = ".(int)$formvars['lineendposx'.$i];
+				if($formvars['lineendposx'.$i] != '')$sql .= ", `endposx` = ".(int)$formvars['lineendposx'.$i];
         else $sql .= ", `endposx` = NULL";
-        if($formvars['lineendposy'.$i])$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
+        if($formvars['lineendposy'.$i] != '')$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
         else $sql .= ", `endposy` = NULL";
-				if($formvars['lineoffset_attribute_start'.$i])$sql .= ", `offset_attribute_start` = '".$formvars['lineoffset_attribute_start'.$i]."'";
+				if($formvars['lineoffset_attribute_start'.$i] != '')$sql .= ", `offset_attribute_start` = '".$formvars['lineoffset_attribute_start'.$i]."'";
         else $sql .= ", `offset_attribute_start` = NULL";
-				if($formvars['lineoffset_attribute_end'.$i])$sql .= ", `offset_attribute_end` = '".$formvars['lineoffset_attribute_end'.$i]."'";
+				if($formvars['lineoffset_attribute_end'.$i] != '')$sql .= ", `offset_attribute_end` = '".$formvars['lineoffset_attribute_end'.$i]."'";
         else $sql .= ", `offset_attribute_end` = NULL";
         if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
         $sql .= ", `type` = '".$formvars['linetype'.$i]."'";
@@ -1826,20 +1833,20 @@ class ddl {
 			
       for($i = 0; $i < $formvars['rectcount']; $i++){
         $sql = "UPDATE druckfreirechtecke SET `breite` = '".$formvars['rectbreite'.$i]."'";
-        if($formvars['rectposx'.$i])$sql .= ", `posx` = ".(int)$formvars['rectposx'.$i];
+        if($formvars['rectposx'.$i] != '')$sql .= ", `posx` = ".(int)$formvars['rectposx'.$i];
         else $sql .= ", `posx` = NULL";
-        if($formvars['rectposy'.$i])$sql .= ", `posy` = ".(int)$formvars['rectposy'.$i];
+        if($formvars['rectposy'.$i] != '')$sql .= ", `posy` = ".(int)$formvars['rectposy'.$i];
         else $sql .= ", `posy` = NULL";
-				if($formvars['rectendposx'.$i])$sql .= ", `endposx` = ".(int)$formvars['rectendposx'.$i];
+				if($formvars['rectendposx'.$i] != '')$sql .= ", `endposx` = ".(int)$formvars['rectendposx'.$i];
         else $sql .= ", `endposx` = NULL";
-        if($formvars['rectendposy'.$i])$sql .= ", `endposy` = ".(int)$formvars['rectendposy'.$i];
+        if($formvars['rectendposy'.$i] != '')$sql .= ", `endposy` = ".(int)$formvars['rectendposy'.$i];
         else $sql .= ", `endposy` = NULL";
-				if($formvars['rectoffset_attribute_start'.$i])$sql .= ", `offset_attribute_start` = '".$formvars['rectoffset_attribute_start'.$i]."'";
+				if($formvars['rectoffset_attribute_start'.$i] != '')$sql .= ", `offset_attribute_start` = '".$formvars['rectoffset_attribute_start'.$i]."'";
         else $sql .= ", `offset_attribute_start` = NULL";
-				if($formvars['rectoffset_attribute_end'.$i])$sql .= ", `offset_attribute_end` = '".$formvars['rectoffset_attribute_end'.$i]."'";
+				if($formvars['rectoffset_attribute_end'.$i] != '')$sql .= ", `offset_attribute_end` = '".$formvars['rectoffset_attribute_end'.$i]."'";
         else $sql .= ", `offset_attribute_end` = NULL";
         if($formvars['recttype'.$i] == '')$formvars['recttype'.$i] = 0;
-				if($formvars['rectcolor'.$i])$sql .= ", `color` = '".$formvars['rectcolor'.$i]."'";
+				if($formvars['rectcolor'.$i] != '')$sql .= ", `color` = '".$formvars['rectcolor'.$i]."'";
 				else $sql .= ", `color` = NULL";
         $sql .= ", `type` = '".$formvars['recttype'.$i]."'";
         $sql .= " WHERE id = ".(int)$formvars['rect_id'.$i];

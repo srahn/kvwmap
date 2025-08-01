@@ -74,6 +74,8 @@ class Nachweis {
 	}
 	
 	function LENRIS_get_new_nachweise(){
+    ini_set('memory_limit', '8192M');
+		set_time_limit(1800);
 		$sql = "
 			SELECT 
 				a.*
@@ -95,6 +97,8 @@ class Nachweis {
 	}
 	
 	function LENRIS_get_changed_nachweise(){
+    ini_set('memory_limit', '8192M');
+		set_time_limit(1800);
 		$sql = "
 			SELECT DISTINCT
 				a.*
@@ -116,6 +120,8 @@ class Nachweis {
 	}
 	
 	function LENRIS_get_deleted_nachweise(){
+    ini_set('memory_limit', '8192M');
+		set_time_limit(1800);
 		$sql = "
 			SELECT 
 				id_nachweis
@@ -968,7 +974,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$hauptart,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $unterart = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL, $geprueft = NULL, $alle_der_messung = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$hauptart,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $unterart = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL, $geprueft = NULL, $alle_der_messung = NULL, $format = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -1261,6 +1267,9 @@ class Nachweis {
 					if($suchbemerkung != ''){
 						$sql.=" AND lower(".$n.".bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
 					}
+          if ($format != '') {
+            $sql.=" AND " . $n . ".format = '" . $format . "'";
+          }
           if ($richtung=='' OR $richtung=='ASC'){
             $richtung=="ASC";
             $this->richtung="DESC";

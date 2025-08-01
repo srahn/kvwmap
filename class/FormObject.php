@@ -35,7 +35,7 @@ class FormObject {
 	#
 	################################################################################
 
-	function __construct($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "") {
+	function __construct($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "", $output = true) {
 		if (!is_array($selectedValue)) { $selectedValue=array($selectedValue); }
 		$this->type = $type;
 		$this->width = $width;
@@ -77,32 +77,15 @@ class FormObject {
 				$this->hidden['value']=$value[0];
 			}
 		} # ende switch type
-		$this->outputHTML();
+		if ($output) {
+			$this->outputHTML();
+		}
 	} # ende constructor
 
 /*
 * parma $options array value, output, attribute, attribute_value, title, style
 */
-/**
- * Erzeugt ein Select-Feld mit den übergebenen Optionen.
- * @param string $name Name des Select-Feldes
- * @param array $options Array mit den Optionen, die als value und output verwendet werden.
- * @param string $value Voreingestellter Wert
- * @param int $size Größe des Select-Feldes
- * @param string $style CSS-Style für das Select-Feld
- * @param string $onchange JavaScript-Funktion, die bei Änderung des Select-Feldes aufgerufen wird
- * @param string $id ID des Select-Feldes
- * @param string $multiple Gibt an, ob das Select-Feld mehrere Auswahlmöglichkeiten zulässt
- * @param string $class CSS-Klasse für das Select-Feld
- * @param string $first_option Text für die erste Option, die angezeigt wird, wenn keine Auswahl getroffen wurde
- * @param string $option_style CSS-Style für die Optionen
- * @param string $option_class CSS-Klasse für die Optionen
- * @param string $onclick JavaScript-Funktion, die bei Klick auf eine Option aufgerufen wird
- * @param string $onmouseenter JavaScript-Funktion, die bei Mouseover auf eine Option aufgerufen wird
- * @param string $title Titel für das Select-Feld
- * @param array $attributes Array mit zusätzlichen Attributen für das Select-Feld
- */
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '', $title = '', $attributes = array()) {
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '') {
 	$id = ($id == '' ? $name : $id);
 	if ($multiple != '') {
 		$multiple = ' multiple';
@@ -114,14 +97,6 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	if ($option_style != '') $option_style = 'style="' . $option_style . '"';
 	if ($option_class != '') $option_class = 'class="' . $option_class . '"';
 	if ($onmouseenter != '') $onmouseenter = 'onmouseenter="' . $onmouseenter . '"';
-	if ($title != '') $title = 'title="' . $title . '"';
-	$attributes = implode(' ', array_map(
-		function($key, $value) {
-			return $key . '="' . $value . '"';
-		},
-		array_keys($attributes),
-		$attributes
-	));
 
 	$options_html = array();
 	if ($first_option != '') {
@@ -147,7 +122,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	}
 
 	$html  = '
-<select id="' . $id . '" name="' . $name . ($multiple != '' ? '[]' : '') . '" size="' . $size . '" ' . $style . ' ' . $onchange . ' ' . $onmouseenter . ' ' . $multiple . ' ' . $class . ' ' . $title . ' ' . $attributes . '>
+<select id="' . $id . '" name="' . $name . ($multiple != '' ? '[]' : '') . '" size="' . $size . '" ' . $style . ' ' . $onchange . ' ' . $onmouseenter . ' ' . $multiple . ' ' . $class . '>
 	' . implode("\n", $options_html) . '
 </select>';
   return $html;

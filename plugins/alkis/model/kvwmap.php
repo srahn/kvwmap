@@ -98,9 +98,8 @@
     $layer = new LayerObj($GUI->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $Gemkgschl."'";
-		$datastring.=" AND CASE WHEN '\$HIST_TIMESTAMP' = '' THEN endet IS NULL ELSE beginnt::text <= '\$HIST_TIMESTAMP' and ('\$HIST_TIMESTAMP' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '" . rolle::$hist_timestamp . "' = '' THEN endet IS NULL ELSE beginnt::text <= '" . rolle::$hist_timestamp . "' and ('" . rolle::$hist_timestamp . "' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
-    $datastring = replace_params($datastring, NULL, NULL, NULL, rolle::$hist_timestamp);
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($Gemkgschl);
     $layer->data = $datastring;
     $layer->status = MS_ON;
@@ -154,9 +153,8 @@
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $GemkgID."'";
     $datastring.=" AND flurnummer = ".(int)$FlurID;
-		$datastring.=" AND CASE WHEN '\$HIST_TIMESTAMP' = '' THEN endet IS NULL ELSE beginnt::text <= '\$HIST_TIMESTAMP' and ('\$HIST_TIMESTAMP' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '" . rolle::$hist_timestamp . "' = '' THEN endet IS NULL ELSE beginnt::text <= '" . rolle::$hist_timestamp . "' and ('" . rolle::$hist_timestamp . "' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
-    $datastring = replace_params($datastring, NULL, NULL, NULL, rolle::$hist_timestamp);
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($GemkgID);
     $legendentext .="<br>Flur: " . $FlurID;
     $layer->data = $datastring;
@@ -182,11 +180,11 @@
     $style->outlinecolor->setRGB(0,0,0);
   };
 
-	$GUI->zoomToALKFlurst = function($FlurstListe, $border, $zoom = true) use ($GUI){
+	$GUI->zoomToALKFlurst = function($FlurstListe, $border, $zoom = true, $without_temporal_filter = false) use ($GUI){
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$dbmap = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 		$alkis = new ALKIS($GUI->pgdatabase);
-    $ret=$alkis->getMERfromFlurstuecke($FlurstListe, $GUI->user->rolle->epsg_code);
+    $ret=$alkis->getMERfromFlurstuecke($FlurstListe, $GUI->user->rolle->epsg_code, $without_temporal_filter);
     if ($ret[0]) {
       $GUI->Fehlermeldung='Es konnten keine Flurstücke gefunden werden.<br>'.$ret[1];
       $rect=$GUI->user->rolle->oGeorefExt;
@@ -197,36 +195,24 @@
       $randy=($rect->maxy-$rect->miny)*$border/100;
     }
 		$epsg = EPSGCODE_ALKIS;
-		$layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-		$data = $layerset[0]['Data'];
+    if (!$without_temporal_filter) {
+		  $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+		  $data = $layerset[0]['Data'];
+    }
 		if($data == '')$data ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1) as foo using unique oid using srid=" . $epsg;
 		$explosion = explode(' ', $data);
 		$datageom = $explosion[0];
 		$explosion = explode('using unique ', strtolower($data));
 		$end = $explosion[1];
 		$select = $dbmap->getSelectFromData($data);
-		$whereposition = strpos(strtolower($select), ' where ');
-		$withoutwhere = substr($select, 0, $whereposition);
-		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		#$alias = $GUI->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
 		else $select .= " AND ";
-		$datastring = $datageom." from (" . $select;
-		#$datastring.=" " . $alias.".flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-		$datastring.=" flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-    $legendentext="Flurstück";
-    if (count_or_0($FlurstListe) > 1) {
-			$legendentext .= "e";
-		}
-    $legendentext .= " (".date('d.m. H:i',time())."): " . $FlurstListe[0];
-    for ($i=1; $i < count_or_0($FlurstListe); $i++) {
-      $datastring.=",'" . $FlurstListe[$i]."'";
-      $legendentext.=" " . $FlurstListe[$i];
-    }
-   	$datastring.=") ";
-		$datastring.=") as foo using unique " . $end;
+		$select .= " flurstueckskennzeichen IN ('" . implode("','", $FlurstListe) . "')";
+    $legendentext = "Flurstück" . (count_or_0($FlurstListe) > 1 ? 'e' : '');
+    $legendentext .= " (".date('d.m. H:i',time())."): " . implode(" ", $FlurstListe);
+    $datastring = $datageom." from (" . $select . ") as foo using unique " . $end;
     $group = $dbmap->getGroupbyName('eigene Abfragen');
     if($group != ''){
       $groupid = $group['id'];
@@ -234,6 +220,7 @@
     else{
       $groupid = $dbmap->newGroup('eigene Abfragen', 0);
     }
+    $GUI->formvars['original_layer_id'] = $layerset[0]['Layer_ID'];
     $GUI->formvars['user_id'] = $GUI->user->id;
     $GUI->formvars['stelle_id'] = $GUI->Stelle->id;
     $GUI->formvars['aktivStatus'] = 1;
@@ -242,12 +229,15 @@
     $GUI->formvars['Typ'] = 'search';
     $GUI->formvars['Datentyp'] = 2;
     $GUI->formvars['Data'] = $datastring;
+    $GUI->formvars['query'] = $select;
     $GUI->formvars['connectiontype'] = 6;
     $GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
     $GUI->formvars['epsg_code'] = $epsg;
     $GUI->formvars['transparency'] = $GUI->user->rolle->result_transparency;
 
     $layer_id = $dbmap->newRollenLayer($GUI->formvars);
+    $attributes = $dbmap->load_attributes($GUI->pgdatabase, $select);
+		$dbmap->save_postgis_attributes($GUI->pgdatabase, -$layer_id, $attributes, '', '');
 		
 		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 		
@@ -552,6 +542,9 @@
 			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
 			$bom = pack('H*','EFBBBF');
 			$importliste[0] = preg_replace("/^$bom/", '', $importliste[0]);
+      foreach ($importliste as &$zeile) {
+        $zeile = trim($zeile, ";, \t");
+      }
 			$importliste_string = implode(';', $importliste);
 			$importliste_string = formatFlurstkennzALKIS($importliste_string);
 			$importliste = explode(';', $importliste_string);
@@ -751,7 +744,8 @@
             # Es wurde mindestens ein eindeutiges FlurstKennz in FlstID ausgewählt, oder ein oder mehrere über FlstNr gefunden
             # Zoom auf Flurstücke
 						if ($GUI->user->rolle->querymode == 1 OR $GUI->formvars['ALK_Suche'] == 1) {
-							$GUI->zoomToALKFlurst($FlurstKennz,10);
+              if($GUI->formvars['historical'])echo 'sdfsdf';
+							$GUI->zoomToALKFlurst($FlurstKennz, 10, true, ($GUI->formvars['history_mode'] != 'aktuell'));
 							$GUI->saveMap('');
 						}						
             if($GUI->formvars['ALK_Suche'] == 1){
@@ -1107,8 +1101,11 @@
 		$GUI->formvars['no_last_search'] = true;
 		$GUI->GenerischeSuche_Suchen();
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
-		$GUI->generischer_sachdaten_druck_drucken();
-	};
+		$result = $GUI->generischer_sachdaten_druck_createPDF();
+    $GUI->outputfile = basename($result['pdf_file']);
+    $GUI->mime_type='pdf';
+    $GUI->output();
+  };
 
 	$GUI->export_Adressaenderungen = function() use ($GUI){
     $GUI->titel='Adressänderungen der Eigentümer exportieren';
@@ -1327,6 +1324,26 @@
     $GUI->FlurFormObj=new FormObject("FlurID","select",$FlurListe['FlurID'],$GUI->formvars['FlurID'],$FlurListe['Name'],"1","","",NULL);
     $GUI->FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
     $GUI->FlurFormObj->outputHTML();
+    if (value_of($GUI->formvars, 'map_flag') != '') {
+      ################# Map ###############################################
+      if (value_of($GUI->formvars, 'geom_from_layer') == '') {
+        $GUI->formvars['geom_from_layer'] = $GUI->formvars['selected_layer_id'];
+      }
+      $saved_scale = $GUI->reduce_mapwidth(10);
+      $GUI->loadMap('DataBase');
+      if (value_of($GUI->formvars, 'CMD') == '' AND $saved_scale != NULL) {
+        $GUI->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
+      }
+      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
+      if (in_array(value_of($GUI->formvars, 'CMD'), ['Full_Extent', 'recentre', 'zoomin', 'zoomout', 'previous', 'next'])) {
+        $GUI->navMap($GUI->formvars['CMD']);
+      }
+      $GUI->drawMap();
+      $GUI->saveMap('');
+      $currenttime=date('Y-m-d H:i:s',time());
+      $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+      ########################################################################
+    }
     $GUI->output();
   };
 
@@ -1340,6 +1357,7 @@
 			$GemeindenStelle['ganze_gemarkung'] = array_flip($GemkgListe['GemkgID']);
 		}
     $formvars = $GUI->formvars;
+    $formvars['user_epsg'] = $GUI->user->rolle->epsg_code;
     $flurstueck=new flurstueck('',$GUI->pgdatabase);
 		$ret=$flurstueck->getNamen($formvars, array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
     if ($ret[0]) {

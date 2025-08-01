@@ -13,7 +13,9 @@
 	$strBufferedLine="add buffered line";
 	$strParallelPolygon="create one-side buffered line";
 	$strMoveGeometry="move geometry";
+  $strRotateGeometry="rotate geometry";
 	$strReverse="change line orientation";
 	$strEditOther="edit other object";
   $strCircle = "add circle";
+  $strCreateRectangle = "create rectangle";
 ?>  

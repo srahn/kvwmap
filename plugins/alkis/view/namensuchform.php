@@ -1,5 +1,6 @@
 <?php
-include(LAYOUTPATH.'languages/namensuche_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/namensuche_'.rolle::$language.'.php');
+include(LAYOUTPATH.'languages/generic_search_'.rolle::$language.'.php');
 include('funktionen/input_check_functions.php');
   
 $anzNamen = count_or_0($this->namen);
@@ -65,6 +66,13 @@ if($bis > $this->anzNamenGesamt){
   		alert('Das Geburtsdatum hat nicht das Format TT.MM.JJJJ.');
   		return;
   	}
+		if (document.GUI.map_flag.value == 1) {
+			if (document.GUI.newpathwkt.value == '') {
+				if (document.GUI.newpath.value != '') {
+					document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+				}
+			}
+		}
 		document.GUI.offset.value = 0;
 		document.GUI.go.value = 'Namen_Auswaehlen_Suchen';
 		document.GUI.submit();
@@ -147,6 +155,16 @@ if($bis > $this->anzNamenGesamt){
 			e.style.display = 'none';
 		else
 			e.style.display = 'block';
+	}
+
+	function showmap(){
+		if(document.GUI.map_flag.value == 0){
+			document.GUI.map_flag.value = 1;
+		}
+		else{
+			document.GUI.map_flag.value = '';
+		}
+		document.GUI.submit();
 	}
 	
 //-->
@@ -356,6 +374,56 @@ body {
 .zoom_flurstuecksdaten {
 	background-image: url(graphics/zoom_flurstuecksdaten.png);
 }
+
+#nsf_suche_raeumlich {
+	margin-bottom: 10px;
+	cursor: pointer;
+}
+.gsl_suche_raeumlich_x {
+	position: absolute;
+	margin-left: 5px;
+	margin-top: -2px;
+	padding: 0;
+	display: inline-block;
+	width: 17px;
+	height: 17px;
+	font-size: 17px;
+	font-weight: bold;
+	background: #fff;
+	color: #f21e28;
+	border: 2px solid #555;
+	border-radius: 50%;
+}
+
+.gsl_suche_raeumlich_map {
+	margin: 30px 10px 10px 10px;
+	padding: 20px;
+	border:  1px solid #CCC;
+	box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+#gsl_suche_raeumlich_params {
+	display: flex;
+	flex-direction:row;
+	align-items: center;
+	height: 40px;
+}
+.gsl_suche_raeumlich_param {
+	display: flex;
+	flex-direction:row;
+	align-items: center;
+	gap: 0 5px;
+}
+#gsl_suche_raeumlich_params>div:not(:last-child) {
+	margin-right: 10px;
+}
+#gsl_suche_raeumlich_params>div:last-child {
+	position: absolute;
+	right: 30px;
+}
+.gsl_suche_raeumlich_param input[type="checkbox"] {
+	margin: auto;
+}
+
 </style>
 
 <div id="form-titel"><?php echo $strTitle; ?></div>
@@ -448,6 +516,54 @@ Suche genau nach der Eingabe"></span>
 	<div id="nsf_gebiet">
 		<div class="nsf_titel menu"><?php echo $strGebiet; ?></div>
 		<div class="nsf_suche">
+
+				<div id="nsf_suche_raeumlich">
+					<div>
+						<a onclick="showmap();">
+							<? echo $strSpatialFiltering; ?>
+							<? 
+							if(value_of($this->formvars, 'map_flag') != '') { 
+							?>
+								<span class="gsl_suche_raeumlich_x" title="<? echo $strSpatialFilteringClose; ?>">×</span>
+							<?php					
+							}
+							?>
+						</a>
+					</div>
+				</div>
+
+		<?
+			if(value_of($this->formvars, 'map_flag') != '') {
+		?> 
+			<div class="gsl_suche_raeumlich_map generic_search_defaults">
+				<div id="gsl_suche_raeumlich_params">
+					<div class="gsl_suche_raeumlich_param">
+						<div><input type="checkbox" name="within" value="1" <?php if($this->formvars['within'] == 1)echo 'checked'; ?>></div>
+						<div><?php echo $strWithin; ?></div>
+					</div>
+					<div class="gsl_suche_raeumlich_param">
+						<div><input type="checkbox" name="singlegeom" value="true" <?php if($this->formvars['singlegeom'])echo 'checked="true"'; ?>></div>
+						<div><?php echo $strSingleGeoms; ?></div>
+					</div>
+					<div class="gsl_suche_raeumlich_param">
+						<div><?php echo $this->strUseGeometryOf; ?>:</div> 
+						<div>
+							<select name="geom_from_layer" onchange="geom_from_layer_change();">		<?
+							for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
+								echo '<option';
+								if($this->formvars['geom_from_layer'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
+								echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
+							}	?>
+							</select>
+						</div>
+					</div>
+				</div>
+				<?php include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php') ?>		
+			</div>
+		<?php
+			}
+
+			?>
 			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strGbbez; ?></div>
 				<div><input name="bezirk" type="text" value="<?php echo $this->formvars['bezirk']; ?>" tabindex="12"></div>
@@ -657,4 +773,7 @@ if($this->formvars['offset'] > 0){
 <input type="hidden" name="FlurstKennz" value="">
 <input type="hidden" name="formnummer" value="">
 <input type="hidden" name="wz" value="">
+<input type="hidden" name="map_flag" value="<? echo value_of($this->formvars, 'map_flag'); ?>">
+<input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">
+<input type="hidden" name="area" value="">
 

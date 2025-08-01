@@ -592,7 +592,7 @@ class stelle {
 
 	# Stelle ändern
 	function Aendern($stellendaten) {
-		$language = $this->database->gui->user->rolle->language;
+		$language = rolle::$language;
 		$stelle = ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "");
 		$wappen = (value_of($stellendaten, 'wappen') != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
 		$sql = "
@@ -1440,6 +1440,18 @@ class stelle {
 		return 1;
 	}
 
+	/**
+	 * Function add layer with $layer_ids to stelle
+	 * ToDo sr: Beschreibung der 3 verschiedenen Fälle hinzufügen
+	 * - !$assign_default_values
+	 * - $assign_default_values OR $this->database->mysqli->affected_rows == 0
+	 * - !$assign_default_values AND $this->database->mysqli->affected_rows > 0
+	 * @param array $layer_ids
+	 * @param string $filter
+	 * @param boolean $assign_default_values
+	 * @param string $privileg
+	 * @return integer 1 if success 0 if error
+	 */
 	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
@@ -1659,6 +1671,10 @@ class stelle {
 		return 1;
 	}
 	
+	/**
+	 * check if layer_params are used in any layer or menue of stelle
+	 * and set the ids in selectable_layer_params of stelle
+	 */
 	function updateLayerParams() {
 		$sql = "
 			UPDATE stelle
@@ -1713,8 +1729,7 @@ class stelle {
 				)
 			WHERE stelle.ID = " . $this->id . "
 		";
-
-		#echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
+		// echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
 
 		$this->database->execSQL($sql);
@@ -2039,8 +2054,8 @@ class stelle {
 				'export_privileg' => array()
 			);
 			while($rs=$this->database->result->fetch_array()) {
-				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
+				$rs['Name'] = replace_params_rolle($rs['Name']);
+				$rs['alias'] = replace_params_rolle($rs['alias']);
 				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
 				$layer['ID'][] = $rs['Layer_ID'];
 				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
@@ -2124,8 +2139,8 @@ class stelle {
 		}
 		else {
 			while ($rs=$this->database->result->fetch_assoc()){
-				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
+				$rs['Name'] = replace_params_rolle($rs['Name']);
+				$rs['alias'] = replace_params_rolle($rs['alias']);
 				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
 				$layer['ID'][] = $rs['Layer_ID'];
 				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
@@ -2136,76 +2151,6 @@ class stelle {
 		}
 		return $layer;
 	}
-
-	// function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $no_query_layers = false,  $export_privileg = NULL) {
-	// 	global $language;
-	// 	$sql = 'SELECT layer.Layer_ID, ';
-	// 	if ($language != 'german') {
-	// 		$sql .= 'CASE WHEN `Name_' . $language . '` != "" THEN `Name_' . $language . '` ELSE `Name` END AS ';
-	// 	}
-	// 	$sql .= 'Name, alias, COALESCE(used_layer.group_id, Gruppe) AS Gruppe, ';
-	// 	if ($language != 'german') {
-	// 		$sql .= 'CASE WHEN `Gruppenname_' . $language . '` != "" THEN `Gruppenname_' . $language . '` ELSE `Gruppenname` END AS ';
-	// 	}
-	// 	$sql .= 'Gruppenname, `connection`, used_layer.export_privileg FROM used_layer, layer, u_groups';
-	// 	$sql .= ' WHERE stelle_id = ' . $this->id;
-	// 	$sql .= ' AND COALESCE(used_layer.group_id, Gruppe) = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
-	// 	$sql .= ' AND layer.Layer_ID = used_layer.Layer_ID';
-	// 	if ($use_geom != NULL) {
-	// 		$sql .= ' AND used_layer.use_geom = 1';
-	// 	} else {
-	// 		$sql .= ' AND used_layer.queryable = \'1\'';
-	// 	}
-	// 	if ($no_query_layers) {
-	// 		$sql .= ' AND layer.Datentyp != 5';
-	// 	}
-	// 	if ($privileg != NULL) {
-	// 		$sql .= ' AND used_layer.privileg >= "' . $privileg . '"';
-	// 	}
-	// 	if ($export_privileg != NULL) {
-	// 		$sql .= ' AND used_layer.export_privileg > 0';
-	// 	}
-	// 	if ($group_id != NULL) {
-	// 		$sql .= ' AND u_groups.id = ' . $group_id;
-	// 	}
-	// 	if ($layer_ids != NULL) {
-	// 		$sql .= ' AND layer.Layer_ID IN (' . implode(',', $layer_ids) . ')';
-	// 	}
-	// 	if ($user_id != NULL) {
-	// 		$sql .= ' UNION ';
-	// 		$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -eigene Abfrage-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
-	// 		$sql .= ' WHERE stelle_id = ' . $this->id . ' AND user_id = ' . $user_id . ' AND connectiontype = 6';
-	// 		if ($rollenlayer_type != NULL) {
-	// 			$sql .= ' AND Typ = "' . $rollenlayer_type . '"';
-	// 		}
-	// 		if ($group_id != NULL) {
-	// 			$sql .= ' AND Gruppe = ' . $group_id;
-	// 		}
-	// 	}
-	// 	$sql .= " ORDER BY COALESCE(NULLIF(alias, ''), Name)";
-	// 	#echo $sql;
-	// 	$this->debug->write("<p>file:stelle.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>" . $sql, 4);
-	// 	$this->database->execSQL($sql);
-	// 	if (!$this->database->success) {
-	// 		$this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
-	// 		return 0;
-	// 	} else {
-	// 		while ($rs = $this->database->result->fetch_assoc()) {
-	// 			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-	// 			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
-
-	// 			if ($rs['alias'] != '' and $this->useLayerAliases) {
-	// 				$rs['Name'] = $rs['alias'];
-	// 			}
-	// 			$layer['ID'][] = $rs['Layer_ID'];
-	// 			$layer['Bezeichnung'][] = $rs['Name'];
-	// 			$layer['Gruppe'][] = $rs['Gruppe'];
-	// 			$layer['Gruppenname'][] = $rs['Gruppenname'];
-	// 			$layer['export_privileg'][] = $rs['export_privileg'];
-	// 		}
-	// 	}
-	// 	return $layer;
-	// }
 
 	function addAktivLayer($layerid) {
 		# Hinzufügen der Layer als aktive Layer
@@ -2380,6 +2325,9 @@ class stelle {
 			'overlays' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					if ($layer2Stelle->get('group_id')) {
+						$layer->set('Gruppe', $layer2Stelle->get('group_id'));
+					}
 					if ($layer) {
 						// return overlay_def only if layer has been found
 						$layer->minScale = $layer2Stelle->get('minscale');
@@ -2418,7 +2366,7 @@ class stelle {
 				WHERE 
 				`layer_id` = " . $layer_id;
 		}
-		#echo '<br>Sql: ' . $sql;
+		// echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }

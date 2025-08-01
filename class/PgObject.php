@@ -42,11 +42,8 @@ class PgObject {
 	private $from;
 	private $where;
 
-	function __construct($gui, $schema_name, $table_name) {
-		if (!$gui) {
-			throw new Exception('An das PgObjekt mit schema: ' . $schema_name . ' und table: ' . $table_name . ' wurde ein leeres GUI-Objekt übergeben!<br>');
-		}
-		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, false);
+	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
+		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
 		$this->debug = $gui->debug;
 		$this->gui = $gui;
 		$this->database = $gui->pgdatabase;
@@ -55,14 +52,14 @@ class PgObject {
 		$this->qualifiedTableName = $schema_name . '.' . $table_name;
 		$this->data = array();
 		$this->select = '*';
-		$this->from = $schema_name . '.' . $table_name;
+		$this->from = $schema . '.' . $tableName;
 		$this->where = '';
-		$this->identifier = 'id';
-		$this->identifier_type = 'integer';
+		$this->identifier = $identifier;
+		$this->identifier_type = $identifier_type;
 		$this->identifiers = array(
 			array(
-				'column' => $this->identifier,
-				'type' => $this->identifier_type
+				'column' => 'id',
+				'type' => 'integer'
 			)
 		);
 		$this->show = false;
@@ -70,6 +67,7 @@ class PgObject {
 		$this->geom_column = 'geom';
 		$this->extent = array();
 		$this->extents = array();
+		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, $this->show);
 	}
 
 	/**
@@ -94,7 +92,7 @@ class PgObject {
 	}
 
 	function find_by($attribute, $value) {
-		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, false);
+		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, $this->show);
 		$sql = "
 			SELECT
 				{$this->select}
@@ -110,27 +108,21 @@ class PgObject {
 	}
 
 	function get_id_condition($ids) {
-		return implode(' AND ', array_map(
-			function($identifier) use ($ids) {
-				$quote = ($identifier['type'] == 'text') ? "'" : "";
-				return "\"{$identifier['column']}\" = " . $quote . $ids[$identifier['column']] . $quote;
-			},
-			$this->identifiers
-		));
+		$parts = array();
+		if (func_num_args() == 0) {
+			$ids = array(
+				$this->identifier => $this->get($this->identifier)
+			);
+		}
+		foreach ($this->identifiers AS $key => $identifier) {
+			$parts[] = "\"{$identifier['column']}\" = '{$ids[$key]}'"; 
+		}
+		return implode(' AND ', $parts);
 	}
 
-	function get_id_columns() {
-		return array_map(
-			function($identifier) {
-				return $identifier['column'];
-			},
-			$this->identifiers
-		);
-	}
-
-	function find_by_ids($ids) {
+	function find_by_ids(...$ids) {
 		$where_condition = $this->get_id_condition($ids);
-		$this->debug->show('find by ids: ' . $where_condition, false);
+		$this->debug->show('find by ids: ' . $where_condition, $this->show);
 		$sql = "
 			SELECT
 				{$this->select}
@@ -139,15 +131,14 @@ class PgObject {
 			WHERE
 				" . $where_condition . "
 		";
-		$this->debug->show('find_by_ids sql: ' . $sql, $this->show);
+		$this->debug->show('find_by_id sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
 		return $this;
 	}
 
-	function execSQL($sql, $suppress_error = true) {
-		$this->debug->show('execSQL sql: ' . $sql, $this->show);
-		$query = ($suppress_error ? @pg_query($this->database->dbConn, $sql) : pg_query($this->database->dbConn, $sql));
+	function execSQL($sql) {
+		$query = @pg_query($this->database->dbConn, $sql);
 		return $query;
 	}
 
@@ -159,21 +150,22 @@ class PgObject {
 	 * @param string $limit?
 	 * @return array PgObject An array with all found object
 	 */
-	function find_where($where, $order = NULL, $select = '*', $limit = NULL) {
+	function find_where($where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
 		// echo '<br>PgObject->find_where';
 		$select = (empty($select) ? $this->select : $select);
-		$where = (empty($where) ? "true": $where);
+		$from = (empty($from) ? $this->schema . '."' . $this->tableName . '"' : $from);
+		$where = (empty($where) ? "true" : $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
 		$limit = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
 		$sql = "
 			SELECT
 				" . $select . "
 			FROM
-				" . $this->schema . '.' . $this->tableName . "
+				" . $from . "
 			WHERE
 				" . $where . "
-			" . $order . "
-			" . $limit . "
+				" . $order . "
+				" . $limit . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
@@ -187,7 +179,7 @@ class PgObject {
 	/**
 	 * Function query, set and return extent of all features in epsg of $this->geom_column in $this->extent variable
 	 * additional it query and set the extents in epsg given in $ows_srs string
-	 * @param string $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
+	 * @param String $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
 	 * e.g. "EPSG:25833 EPSG:25832 EPSG:4326 5650"
 	 * with an empty string in $ows_srs only extent in geom_column srs will be queried, set and returned.
 	 * @return Array Array with extent in geom_column srs, other extents will be set in extents array with epsg codes as keys
@@ -212,7 +204,7 @@ class PgObject {
 				" . $where . "
 		";
 		#echo $sql; exit;
-		$this->debug->show('get_extent sql: ' . $sql, false);
+		$this->debug->show('get_extent sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->extent = pg_fetch_assoc($query);
 
@@ -231,7 +223,7 @@ class PgObject {
 						" . $where . "
 				";
 				$sqls[] = $sql;
-				$this->debug->show('get_extent sql: ' . $sql, false);
+				$this->debug->show('get_extent sql: ' . $sql, $this->show);
 				$query = pg_query($this->database->dbConn, $sql);
 				$this->extents[$epsg_code] = pg_fetch_assoc($query);
 			}
@@ -247,7 +239,7 @@ class PgObject {
 			WHERE
 				\"{$attribute}\" = '{$value}'
 		";
-		$this->debug->show('delete_by sql: ' . $sql, false);
+		$this->debug->show('delete_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		return $query;
 	}
@@ -323,22 +315,6 @@ class PgObject {
 		return $this->get($this->identifier);
 	}
 
-	function get_ids() {
-		$ids = array();
-		foreach ($this->identifiers AS $identifier) {
-			$ids[] = $this->get($identifier['column']);
-		}
-		return $ids;
-	}
-
-	function get_ids_assoc() {
-		$ids = array();
-		foreach ($this->identifiers AS $identifier) {
-			$ids[$identifier['column']] = $this->get($identifier['column']);
-		}
-		return $ids;
-	}
-
 	function set($attribute, $value) {
 		$this->data[$attribute] = $value;
 		return $value;
@@ -376,33 +352,65 @@ class PgObject {
 				) . "'
 			)
 			RETURNING
-				" . implode(', ', $this->get_id_columns()) . ";
+				" . $this->identifier . ";
 		";
+		/*
+		$sql = "
+			INSERT INTO " . $this->qualifiedTableName . " (
+				$1
+			)
+			VALUES (
+				'$2'
+			)
+			RETURNING
+				$3
+		";
+		*/
 		$this->debug->show('Create new dataset with sql: ' . $sql, $this->show);
+		#echo 'SQL zum Eintragen des Datensatzes: ' . $sql; exit;
+		/*
+		$query = pg_query_params(
+			$this->database->dbConn, $sql,
+			array(
+				implode(", ", $this->getKeys()),
+				implode(
+					"', '",
+					array_map(
+						function($value) {
+							return pg_escape_string($value);
+						},
+						$values
+					)
+				),
+				$this->identifier
+			)
+		);
+		*/
 		$query = pg_query($this->database->dbConn, $sql);
-		if ($query === false) {
-			return array(
-				'success' => false,
-				'msg' => 'Fehler bei der Abfrage: ' . pg_last_error($this->database->dbConn)
-			);
-		}
-		$this->data = pg_fetch_assoc($query);
-		$this->debug->show('Dataset created with ' . $this->get_id_condition($this->get_ids_assoc()), $this->show);
-		$this->find_by_ids($this->get_ids_assoc()); // find and set all data attributes	
-		// ToDo: Refactor to return always newly created object and that all creators expect the an array with success, msg and object
-		// or through an exception in error case
-		if (count($this->identifiers) > 1) {
-			return array(
-				'success' => true,
-				'msg' => 'Datensatz erfolgreich erstellt',
-				'object' => $this
-			);
+		$oid = pg_last_oid($query);
+		if (empty($oid)) {
+			$ret_id = pg_fetch_assoc($query)[$this->identifier];
+			$this->debug->show('Query created identifier ' . $this->identifier . ' with values ' . $ret_id, false);
+			$this->lastquery = $query;
+			$this->set($this->identifier, $ret_id);
 		}
 		else {
-			return $this->get($this->identifier);
+			$sql = "
+				SELECT
+					*
+				FROM
+					" . $this->qualifiedTableName . "
+				WHERE
+					oid = " . $oid . "
+			";
+			$this->debug->show('Query created oid with sql: ' . $sql, $this->show);
+			$query = pg_query($this->database->dbConn, $sql);
+			$row = pg_fetch_assoc($query);
+			$this->set($this->identifier, $row[$this->identifier]);
 		}
+		$this->debug->show('Dataset created with ' . $this->identifier . ': '. $this->get($this->identifier), $this->show);
+		return $this->get($this->identifier);
 	}
-
 	/* Für Postgres Version in der RETURNING zusammen mit RULE und Bedingung funktioniert. 
 	function create($data = '') {
 		if (!empty($data))
@@ -424,7 +432,7 @@ class PgObject {
 			)
 			RETURNING id
 		";
-		$this->debug->show('create sql: ' . $sql, false);
+		$this->debug->show('create sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$row = pg_fetch_assoc($query);
 		$this->set($this->identifier, $row[$this->identifier]);
@@ -441,11 +449,11 @@ class PgObject {
 			WHERE
 				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";
-		$this->debug->show('update sql: ' . $sql, false);
+		$this->debug->show('update sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 	}
 
-	function update_attr($attributes) {
+	function update_attr($attributes, $set = false) {
 		$quote = ($this->identifier_type == 'text' ? "'" : "");
 		$sql = "
 			UPDATE
@@ -459,6 +467,12 @@ class PgObject {
 		$this->debug->show('update sql: ' . $sql, $this->show);
 		try {
 			pg_query($this->database->dbConn, $sql);
+			if ($set) {
+				foreach($attributes AS $attribute) {
+					$parts = explode('=', $attribute);
+					$this->set(trim($parts[0]), trim($parts[1], "'"));
+				}
+			}
 			return array(
 				'success' => true,
 				'msg' => 'Attributes erfolgreich geupdated'
@@ -472,37 +486,14 @@ class PgObject {
 		}
 	}
 
-	// function delete() {
-	// 	$quote = ($this->identifier_type == 'text') ? "'" : "";
-	// 	$sql = "
-	// 		DELETE
-	// 		FROM
-	// 			" . $this->qualifiedTableName . "
-	// 		WHERE
-	// 			" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
-	// 	";
-	// 	$this->debug->show('delete sql: ' . $sql, false);
-	// 	$result = pg_query($this->database->dbConn, $sql);
-	// 	return $result;
-	// }
-
 	function delete() {
 		$quote = ($this->identifier_type == 'text') ? "'" : "";
-		foreach ($this->identifiers AS $key => $identifier) {
-			$this->identifiers[$key]['value'] = $this->get($identifier['column']);
-		}
 		$sql = "
 			DELETE
 			FROM
 				" . $this->qualifiedTableName . "
 			WHERE
-				" . implode(' AND ', array_map(
-					function($identifier) {
-						$quote = ($identifier['type'] == 'text') ? "'" : "";
-						return  $identifier['column'] . " = " . $quote . $identifier['value'] . $quote;
-					},
-					$this->identifiers
-				)) . "
+				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";
 		$this->debug->show('delete sql: ' . $sql, $this->show);
 		$result = pg_query($this->database->dbConn, $sql);
@@ -510,7 +501,6 @@ class PgObject {
 	}
 
 	function getSQLResults($sql) {
-		$this->debug->show('getSQLResult with SQL: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$results = array();
 		while ($rs = pg_fetch_assoc($query)) {
@@ -526,16 +516,13 @@ class PgObject {
 	 * @return array $results: All found objects.
 	 */
 	function find_by_sql($params) {
-		$params['select'] = $params['select'] ?? '*';
-		$params['from'] = $params['from'] ?? $this->schema . '.' . $this->tableName;
 		$sql = "
 			SELECT
-				" . $params['select'] . "
+				" . (!empty($params['select']) ? $params['select'] : '*') . "
 			FROM
-				" . $params['from'] . "
-				" . (!empty($params['where'])    ? "WHERE "    . $params['where'] : "") . "
-				" . (!empty($params['group']) ? "GROUP BY " . $params['group'] : "") . "
-				" . (!empty($params['order'])    ? "ORDER BY " . replace_semicolon($params['order']) : "") . "
+				" . (!empty($params['from']) ? $params['from'] : $this->schema . '.' . $this->tableName) . "
+			" . (!empty($params['where']) ? "WHERE " . $params['where'] : "") . "
+			" . (!empty($params['order']) ? "ORDER BY " . replace_semicolon($params['order']) : "") . "
 		";
 		// echo '<br>PgObject->find_by_sql with sql: ' . $sql;
 		$this->debug->show('PgObject find_by_sql sql: ' . $sql, $this->show);
@@ -662,10 +649,10 @@ class PgObject {
 
 	/**
 	* Query all child elementes of a table related over given fk_id
-	* @param string $child_schema - Name of the schema of child table
-	* @param string $child_table - Name of the table of child table
-	* @param string $fkey_column - Name of the column where the fkeys resists in child table
-	* @param string $fk_id - ID of the parent to filter the childs that belongs to the parent
+	* @param String $child_schema - Name of the schema of child table
+	* @param String $child_table - Name of the table of child table
+	* @param String $fkey_column - Name of the column where the fkeys resists in child table
+	* @param String $fk_id - ID of the parent to filter the childs that belongs to the parent
 	* @return Array(PgObject) - The childs that belongs to the parent over this fkey constraint
 	*/
 	function find_childs($child_schema, $child_table, $fkey_column, $fk_id) {

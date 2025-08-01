@@ -1,6 +1,6 @@
 <?php
  # 2008-01-22 pkvvm
-  include(LAYOUTPATH.'languages/data_export_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/data_export_'.rolle::$language.'.php');
 	include_once(CLASSPATH . 'FormObject.php');
 	$simple = ($this->formvars['simple'] == 1);
 	$document_ids = [];
@@ -66,28 +66,6 @@
 <script type="text/javascript">
 <!--
 
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	wkt = "POLYGON((";
-	parts = svgpath.split("M");
-	for(j = 1; j < parts.length; j++){
-		if(j > 1){
-			wkt = wkt + "),("
-		}
-		koords = ""+parts[j];
-		coord = koords.split(" ");
-		wkt = wkt+coord[1]+" "+coord[2];
-		for(var i = 3; i < coord.length-1; i++){
-			if(coord[i] != ""){
-				wkt = wkt+","+coord[i]+" "+coord[i+1];
-			}
-			i++;
-		}
-	}
-	wkt = wkt+"))";
-	return wkt;
-}
-
 function update_format(){
 	if(document.GUI.export_format.value == 'UKO' || document.GUI.export_format.value == 'OVL'){
 		document.getElementById('attributes_div').style.visibility = 'hidden';
@@ -130,7 +108,7 @@ function data_export() {
 			if(sure == false)return;
 		}
 		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 		document.GUI.go_plus.value = 'Exportieren';
 		document.GUI.submit();
@@ -167,7 +145,7 @@ function select_document_attributes(ids){
 function save_settings(){
 	if(document.GUI.setting_name.value != ''){
 		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 		document.GUI.go_plus.value = 'Einstellungen_speichern';
 		document.GUI.submit();
@@ -399,11 +377,20 @@ $j=0;
 								&nbsp;<? echo $strFilename; ?>:&nbsp;&nbsp;<input type="text" name="layer_name" value="<? echo sonderzeichen_umwandeln($this->layerdaten['Bezeichnung'][$selectindex]); ?>">
 							</td>
 						</tr>
+				<? 	if ($this->layerset[0]['metalink'] != '') { ?>
 						<tr>
 							<td>
 								<input type="checkbox" name="with_metadata_document" value="1" <? if ($this->formvars['with_metadata_document'] == 1)echo 'checked'; ?>> <? echo $strExportMetadatadocument; ?>
 							</td>
-						</tr><?
+						</tr>
+				<? 	}
+						if ($this->layerset[0]['terms_of_use_link'] != '') { ?>
+						<tr style="display: none">
+							<td>
+								<input type="checkbox" name="with_terms_of_use_document" value="1" checked> <? echo $strExportTermsOfUsedocument; ?>
+							</td>
+						</tr>
+				<? 	}
 						if ($groupnames){ ?>
 							<tr>
 								<td>

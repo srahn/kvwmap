@@ -1,12 +1,14 @@
 <?
-include_once(CLASSPATH.'FormObject.php');
-include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
+	include_once(CLASSPATH.'FormObject.php');
+	include(LAYOUTPATH.'languages/PolygonEditor_'.rolle::$language.'.php');
+	global $selectable_scales;
+	$selectable_scales = array_reverse($selectable_scales);
 ?>
 <script language="JavaScript">
 <!--
 
 function toggle_vertices(){	
-	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.toggle_vertices();
 }
 
 function send(){
@@ -57,7 +59,7 @@ function send(){
 			alert('Geben Sie ein Polygon an.');exit();
 		}
 		else{
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 	}
 	if(document.GUI.loc_x.value == '' && document.GUI.loc_y.value == ''){
@@ -111,28 +113,6 @@ function update_nutzungsart() {
 	if (document.GUI.entwicklungszustand.value == 'SF') {
 		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN'), '-- Bitte wählen --');
 	}
-}
-
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	wkt = "POLYGON((";
-	parts = svgpath.split("M");
-	for(j = 1; j < parts.length; j++){
-		if(j > 1){
-			wkt = wkt + "),("
-		}
-		koords = ""+parts[j];
-		coord = koords.split(" ");
-		wkt = wkt+coord[1]+" "+coord[2];
-		for(var i = 3; i < coord.length-1; i++){
-			if(coord[i] != ""){
-				wkt = wkt+","+coord[i]+" "+coord[i+1];
-			}
-			i++;
-		}
-	}
-	wkt = wkt+"))";
-	return wkt;
 }
 
 update_require_attribute = function(attributes, layer_id, value){
@@ -350,8 +330,8 @@ update_require_attribute = function(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2" align="right"> 
 												      <?php 
-												        $FormatWerte = array('', 'mA');
-												        $FormatBez = array('-- Bitte wählen --','mit'); 
+												        $FormatWerte = array('', 'mA', 'oA');
+												        $FormatBez = array('-- Bitte wählen --', 'mit', 'ohne'); 
 												        $aufwuchs = new FormObject('aufwuchs','select',$FormatWerte,array($this->formvars['aufwuchs']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $aufwuchs->OutputHTML();
 												        echo $aufwuchs->html;
@@ -497,7 +477,22 @@ update_require_attribute = function(attributes, layer_id, value){
 									  </tr>
 						  		</table>
 								</td>
-								<td width="50%" align="left" valign="top">&nbsp;<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
+								<td width="50%" align="left" valign="top">
+									<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+										<div valign="top" style="height:0px; position:relative;">
+											<div id="scales" style="display:none; position:absolute; left:66px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+												<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="setScale(this);">
+													<? 
+														foreach($selectable_scales as $scale){
+															echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
+														}
+													?>
+												</select>
+											</div>
+										</div>
+										&nbsp;<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" onkeyup="if (event.keyCode == 13) { setScale(this); }" autocomplete="off" size="5" value="<?php echo round($this->map->scaledenom); ?>">
+									</div>
+								</td>
 								<td width="50%" align="right" valign="top">
 									<? if($this->formvars['go'] != 'Bodenrichtwertformular_Anzeige'){ ?>
 									<input type="checkbox" name="always_draw" onclick="saveDrawmode();" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;

@@ -90,10 +90,11 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 				$attributes = $mapDB->read_layer_attributes(
 					$layer_id,
 					$layerdb,
-					null, // $privileges['attributenames'],
-					false,
-					true
+					null, // Null statt $privileges['attributenames'], weil in kvmobile immer alle attribute vorhanden sein müssen, nicht nur die die sichtbar sind.
+					false, // $all_languages
+					true // recursive
 				);
+
 				# Zuordnen der Privilegien und Tooltips zu den Attributen
 				for ($j = 0; $j < count($attributes['name']); $j++) {
 					$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);

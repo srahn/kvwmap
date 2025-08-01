@@ -3,19 +3,23 @@
 // metadata_cancel_data_package
 // metadata_create_bundle_package
 // metadata_create_data_package
-// metadata_create_data_packages
+// metadata_create_metadata_document
+// metadata_list_files
 // metadata_delete_bundle_package
 // metadata_delete_data_package
 // metadata_download_bundle_package
 // metadata_download_data_package
+// metadata_download_metadata_document
 // metadata_order_bundle_package
 // metadata_order_data_package
-// metadata_reorder_data_package
+// metadata_reorder_data_packages
+// metadata_set_ressource_status
 // metadata_show_data_packages
+// metadata_show_ressources_status
+// metadata_update_outdated
 // Metadaten_Auswaehlen_Senden
 // Metadaten_Recherche
 // Metadateneingabe
-// Metadaten_update_outdated
 
 include_once(CLASSPATH . 'FormObject.php');
 include_once(PLUGINS . 'metadata/model/kvwmap.php');
@@ -52,6 +56,23 @@ function go_switch_metadata($go){
 
 			$response = $GUI->metadata_create_data_package($GUI->formvars['package_id']);
 			echo json_encode($response);
+		} break;
+
+		case 'metadata_create_metadata_document' : {
+			$GUI->sanitize([
+				'layer_id' => 'integer'
+			]);
+			$response = $GUI->metadata_create_metadata_document($GUI->formvars['layer_id']);
+			echo json_encode($response);
+		} break;
+
+		case 'metadata_list_files' : {
+			$GUI->checkCaseAllowed('metadata_list_files');
+			$result = $GUI->metadata_list_files($GUI->formvars['dir']);
+			if (!$result['success']) {
+				$GUI->Fehlermeldung = $result['msg'];
+			}
+			$GUI->output();
 		} break;
 
 		case 'metadata_delete_bundle_package' : {
@@ -108,6 +129,25 @@ function go_switch_metadata($go){
 			readfile($downloadfile);
 		} break;
 
+		case 'metadata_download_metadata_document' : {
+			$GUI->sanitize([
+				'layer_id' => 'integer'
+			]);
+			$response = $GUI->metadata_download_metadata_document($GUI->formvars['layer_id']);
+			if (!$result['success']) {
+				$GUI->Fehlermeldung = $response['msg'];
+				$GUI->main = '../../plugins/metadata/view/download_error.php';
+				$GUI->output();
+			}
+			header($_SERVER["SERVER_PROTOCOL"] . " 200 OK");
+			header("Cache-Control: public"); // needed for internet explorer
+			header("Content-Type: application/pdf");
+			header("Content-Transfer-Encoding: Binary");
+			header("Content-Length:" . filesize($response['downloadfile']));
+			header('Content-Disposition: attachment; filename=' . $response['filename'] . '.pdf');
+			readfile($response['downloadfile']);
+		} break;
+
 		case 'metadata_order_bundle_package': {
 			$response = $GUI->metadata_order_bundle_package();
 			echo json_encode($response);
@@ -129,8 +169,49 @@ function go_switch_metadata($go){
 			echo json_encode($response);
 		} break;
 
+		case 'metadata_set_ressource_status' : {
+			$GUI->sanitize([
+				'ressource_id' => 'integer',
+				'status_id' => 'integer'
+			]);
+			$response = $GUI->metadata_set_ressource_status($GUI->formvars['ressource_id'], $GUI->formvars['status_id']);
+			echo json_encode($response);
+		} break;
+
 		case 'metadata_show_data_packages': {
 			$GUI->metadata_show_data_packages();
+		} break;
+
+		case 'metadata_show_ressources_status' : {
+			$GUI->sanitize([
+				'ressource_id' => 'integer'
+			]);
+			$GUI->metadata_show_ressources_status($GUI->formvars['ressource_id']);
+		} break;
+
+		case 'metadata_update_outdated' : {
+			$GUI->sanitize([
+				'ressource_id' => 'integer'
+			]);
+			$GUI->checkCaseAllowed($go);
+			$result = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id'], $GUI->formvars['method_only']);
+			// header('Content-Type: application/json; charset=utf-8');
+			// echo json_encode($result);
+			echo $result['msg'];
+		} break;
+
+		case 'metadata_test' : {
+			$handle = fopen('/var/www/data/fdm/dom/dom_atom.xml', "r");
+			if ($handle) {
+				$atom_url = 'https://www.geodaten-mv.de/dienste/dom_download?index=4&amp;dataset=us214578-a1n5-4v12-v31c-5tg2az3a2164&amp;file=dom1_33_$x_$y_2_gtiff.tif';
+				$regex = '/' . str_replace('$x', '(.*?)', str_replace('$y', '(.*?)', str_replace('?', '\?', str_replace('/', '\/', $atom_url)))) . '/';
+				while (($line = fgets($handle)) !== false) {
+					if (preg_match($regex, $line, $match) == 1) {
+						echo '<br>' . $match[0];
+					}
+				}
+				fclose($handle);
+			}
 		} break;
 
 		case 'Metadaten_Auswaehlen_Senden' : {
@@ -152,17 +233,6 @@ function go_switch_metadata($go){
 			$GUI->metadaten_suche();
 		} break;
 
-		case 'Metadaten_update_outdated' : {
-			$GUI->sanitize([
-				'ressource_id' => 'integer'
-			]);
-			$GUI->checkCaseAllowed($go);
-			$result = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id'], $GUI->formvars['method_only']);
-			// header('Content-Type: application/json; charset=utf-8');
-			// echo json_encode($result);
-			echo $result['msg'];
-		} break;
-
 		case 'Metadateneingabe' : {
 			$GUI->sanitize(['oid' => 'int', 'mdfileid' => 'int']);
 			$GUI->metadateneingabe();
@@ -170,7 +240,7 @@ function go_switch_metadata($go){
 
 
 		default : {
-			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true; // in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
 }

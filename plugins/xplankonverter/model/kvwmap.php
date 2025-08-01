@@ -121,28 +121,28 @@
 				$xp_plan->update();
 
 				$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
-				//$GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
+				// $GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
-				#echo '<script>console.log("' . print_r($GUI->formvars) . '")</script>';
+				// echo '<script>console.log("' . print_r($GUI->formvars, true) . '")</script>';
 				# layer_schemaname needs to be an empty textfield in the layer definition
 				# 03.11.21 change from ... layer_schemaname;;;Text;;unknown;0' to ... layer_schemaname;;;Text;;text;0'
-				if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
-				($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) ||
-				($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
-				($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)
+				if (
+					($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
+					($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) ||
+					($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
+					($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)
 				) {
 				#if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || ($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)) {
 					# renames to xplan_gmlas_ + konvertierung_id to make schema permanent
 					//$konvertierung->rename_xplan_gmlas($GUI->user->id, $konvertierung_id);
 					$sql = "
-								 ALTER SCHEMA
-												xplan_gmlas_tmp_" . $GUI->user->id .
-								 " RENAME TO
-												 xplan_gmlas_" . $konvertierung_id . ";
+						ALTER SCHEMA
+						xplan_gmlas_tmp_" . $GUI->user->id .
+						" RENAME TO
+						xplan_gmlas_" . $konvertierung_id . ";
 				 ";
 				 #echo $sql;
 				 $ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
-
 
 					# Creates Bereiche for each Plan loaded with GMLAS
 					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $konvertierung_id);

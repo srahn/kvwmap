@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH . 'languages/layergruppe_formular_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/layergruppe_formular_' . rolle::$language . '.php');
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script>

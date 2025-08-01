@@ -319,7 +319,14 @@ input[type="button"][value='«'], input[type="button"][value='»'] {
 form {
 	margin: 0;
 	padding: 0;
-} 
+}
+
+hr {
+	margin: 7px; 
+	background-color: #777; 
+	height: 1px; 
+	border-width: 0;
+}
 
 .fett{
 	font-family: SourceSansPro2;
@@ -1361,7 +1368,7 @@ a.menuered:hover {
 	opacity: 1;
 }
 
-#header{
+#header {
 	height: <? echo ($size['header']['height'] - 2); ?>px;
 	border: 1px solid;
 	border-color: #ffffff #cccccc #bbbbbb;
@@ -1612,6 +1619,7 @@ a.menuered:hover {
 
 #legend{
 	margin: 4px 0 4px 7px;
+	width: 93%;
 }
 
 .normallegend {
@@ -2484,7 +2492,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	background-color: #FFFFFF;
 	position:absolute;
 	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.3);
-	top: 30px;
+	top: 42px;
 	right: <? echo $font_size_factor * 15; ?>px;
 	z-index: 2000;
 }
@@ -2754,7 +2762,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 #neuer_datensatz_button {
-	display: none;
+	/* display: none; */
 	position: relative;
 	text-align: right;
 	margin-right: 8px;
@@ -2776,7 +2784,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .scrolltable_header{
 	position: absolute;
 	top: -30px;
-	padding-left: 5px;
 }
 
 .scrolltable_footer{
@@ -2870,7 +2877,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nds_titel {
 	font-family: SourceSansPro3;
 	font-size: 20px;
-	margin-bottom: 0px;
+	margin-bottom: 20px;
 	margin-top: 10px;
 }
 

@@ -2,7 +2,7 @@
 	global $selectable_limits;
 	include_once(CLASSPATH.'FormObject.php');
 	include(SNIPPETS.'generic_form_parts.php');
-  include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/sachdatenanzeige_'.rolle::$language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php');
 ?>
 <script>
@@ -159,7 +159,7 @@ if(!empty($this->noMatchLayers)){
 			</td>
 		</tr>
 	<? 	$layer_new_dataset = $this->Stelle->getqueryablePostgisLayers(1, NULL, true, $noMatchLayerID);		// Abfrage ob Datensatzerzeugung möglich
-			if($layer_new_dataset != NULL){ ?>
+			if($layer_new_dataset['ID'] != NULL){ ?>
 		<tr align="center">
 			<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $noMatchLayerID; ?>"><? echo $strNewDataset; ?></a></td>
 		</tr>

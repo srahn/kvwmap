@@ -1,7 +1,7 @@
 <?php
  # 2008-10-01 sr
-  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
-	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/PolygonEditor_'.rolle::$language.'.php');
+	include(LAYOUTPATH.'languages/map_'.rolle::$language.'.php');
 	global $selectable_scales;
 	$selectable_scales = array_reverse($selectable_scales);
  ?>
@@ -9,7 +9,7 @@
 <!--
 
 function toggle_vertices(){	
-	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.toggle_vertices();
 }
 
 function split_geometries(){
@@ -29,35 +29,10 @@ function send(zoom){
 				return 0;
 			}
 		}
-		else document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+		else document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 	}
 	document.GUI.go_plus.value = 'Senden';
 	document.GUI.submit();
-}
-
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	var wkt = '';
-	if(svgpath != '' && svgpath != undefined){
-		wkt = "POLYGON((";
-		parts = svgpath.split("M");
-		for(j = 1; j < parts.length; j++){
-			if(j > 1){
-				wkt = wkt + "),("
-			}
-			koords = ""+parts[j];
-			coord = koords.split(" ");
-			wkt = wkt+coord[1]+" "+coord[2];
-			for(var i = 3; i < coord.length-1; i++){
-				if(coord[i] != ""){
-					wkt = wkt+","+coord[i]+" "+coord[i+1];
-				}
-				i++;
-			}
-		}
-		wkt = wkt+"))";
-	}
-	return wkt;
 }
 
 //-->
@@ -88,7 +63,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 						<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 							<div valign="top" style="height:0px; position:relative;">
 								<div id="scales" style="display:none; position:absolute; left:66px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
-									<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
+									<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="setScale(this);">
 										<? 
 											foreach($selectable_scales as $scale){
 												echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
@@ -97,7 +72,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 									</select>
 								</div>
 							</div>
-							&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+							&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" onkeyup="if (event.keyCode == 13) { setScale(this); }" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 						</div>
 					</td>
 					<? if($this->user->rolle->runningcoords != '0'){ ?>

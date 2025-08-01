@@ -21,7 +21,7 @@ root.getlegend_requests = new Array();
 var current_date = new Date().toLocaleString().replace(',', '');;
 var new_hist_timestamp;
 var loc = window.location.href.toString().split('index.php')[0];
-var mapimg0, mapimg3, mapimg4;
+var mapimg, mapimg0, mapimg3, mapimg4;
 var compare_clipping = false;
 
 window.onbeforeunload = function(){
@@ -370,12 +370,13 @@ function printMap(){
 	document.GUI.submit();
 }
 
-function printMapFast(){
+function printMapFast(filetype = 'pdf'){
 	if(typeof addRedlining != 'undefined'){
 		addRedlining();
 	}
 	document.GUI.go.value = 'Schnelle_Druckausgabe';
 	document.GUI.target = '_blank';
+	document.GUI.output_filetype.value = filetype;
 	document.GUI.submit();
 	document.GUI.go.value = 'neu Laden';
 	document.GUI.target = '';
@@ -734,12 +735,20 @@ function formdata2urlstring(formdata){
 	return url;
 }
 
+function setScale(select){
+	if(select.value != ''){
+		document.GUI.nScale.value=select.value;
+		document.getElementById('scales').style.display='none';
+		document.GUI.submit();
+	}
+}
+
 function add_split_mapimgs() {
 	svgdoc = document.SVG.getSVGDocument();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();	
 	svgdoc.getElementById("mapimg0")?.remove();
-	var mapimg = svgdoc.getElementById("mapimg");
+	mapimg = svgdoc.getElementById("mapimg");
 	var movegroup = svgdoc.getElementById("moveGroup");
 	var cartesian = svgdoc.getElementById("cartesian");
 	mapimg3 = mapimg.cloneNode();
@@ -756,6 +765,7 @@ function add_split_mapimgs() {
 
 function pass_preloaded_img(){
 	mapimg4.setAttribute('href', mapimg0.getAttribute('href'));
+	mapimg.setAttribute('href', mapimg0.getAttribute('href'));
 }
 
 function compare_view_for_layer(layer_id){
@@ -777,7 +787,7 @@ function set_hist_timestamp() {
 	}
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
 	get_map(mapimg3, 'no_postgis_layer=1&hist_timestamp=' + ts);
-	get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
+	//get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
 	document.GUI.hist_timestamp3.value = 0;
 	$('#hist_timestamp_form').show();
 	document.getElementById('hist_range_div').scrollLeft = scroll;
@@ -1554,12 +1564,24 @@ function showMapParameter(epsg_code, width, height, l) {
 }
 
 function showURL(params, headline) {
-	var msg = " \
-				<div style=\"text-align: left\"> \
-					<h2>" + headline + "</h2><br> \
-					<input id=\"url\" style=\"width: 350px\" type=\"text\" value=\"" + document.baseURI.match(/.*\//) + 'index.php?' + params + "\"><br> \
-				</div> \
-			";
+	let url = `${document.baseURI.match(/.*\//)}index.php?${params}`;
+	let msg = `
+		<div style="text-align: left;">
+			<h2 style="margin-top: 2px; margin-buttom: 2px">${headline}</h2>
+			<div style="display:flex; margin-top: 10px">
+				<div style="float: left;"><textarea id="url" style="min-width: 385px;">${url}</textarea></div>
+				<div style="float: left; margin-left: 5px"><a href="${url}"><i class="fa fa-hand-o-right" aria-hidden="true"></i></a></div>
+			</div>
+			<div style="clear: both"></div>
+		</div>
+	`;
+	// msg = `
+	// 	<div style="text-align: left">
+	// 		<h2 style="margin-top: 2px; margin-buttom: 2px">${headline}</h2>
+	// 		<input type="text" id="url" style="width: 93%; float: left" value="${url}">
+	// 		<a href="${url}"><i class="fa fa-hand-o-right" aria-hidden="true" style="float: right""></i></a>
+	// 	</div>
+	// `;
 	message([{
 			'type': 'info',
 			'msg': msg

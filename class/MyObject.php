@@ -153,7 +153,10 @@ class MyObject {
 				" . $this->get_identifier_expression() . "
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
+		if (!$ret['success']) {
+			return $this;
+		}
 		$rs = $this->database->result->fetch_assoc();
 		if ($rs !== false) {
 			$this->data = $rs;
@@ -569,48 +572,67 @@ class MyObject {
 		return $result;
 	}
 
+	/**
+	 * Update dataset.
+	 * When $data is not empty first merge with $this->data.
+	 * When $data is empty and $update_all_attributes is false do nothing else.
+	 * When $update_all_attributes is true update with $this->data else only $data.
+	 * @param Array $data Array with key, value pairs of attributes.
+	 * @param Boolean $update_all_attributes. Update $this->data or only $data.
+	 * @return Array('success', 'msg', 'err_msg')
+	 */
 	function update($data = array(), $update_all_attributes = true) {
 		$results = array();
 		if (!empty($data)) {
 			$this->debug->show('Merge this->data: ' . print_r($this->data, true) . ' mit data: ' . print_r($data, true), MyObject::$write_debug);
 			$this->data = array_merge($this->data, $data);
 		}
-		$data = (count($data) > 0 ? $data : $this->data);
-		$sql = "
-			UPDATE
-				`" . $this->tableName . "`
-			SET
-				" . implode(', ', $this->getKVP(array('escaped' => true), $data)) . "
-			WHERE
-				" . $this->get_identifier_expression() . "
-		";
-		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-		$this->database->execSQL($sql);
-		$err_msg = $this->database->errormessage;
-		$results[] = array(
-			'success' => ($err_msg == ''),
-			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
-			'msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
-		);
+
+		if (empty($data) AND $update_all_attributes == false) {
+			$results = array(array(
+				'success' => true,
+				'err_msg' => '',
+				'msg' => ''
+			));
+		}
+		else {
+			$sql = "
+				UPDATE
+					`" . $this->tableName . "`
+				SET
+					" . implode(', ', $this->getKVP(array('escaped' => true), ($update_all_attributes ? $this->data : $data))) . "
+				WHERE
+					" . $this->get_identifier_expression() . "
+			";
+			$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+			$this->database->execSQL($sql);
+			$err_msg = $this->database->errormessage;
+			$results[] = array(
+				'success' => ($err_msg == ''),
+				'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
+				'msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+			);
+		}
 		return $results;
 	}
 
-	function delete() {
+	function delete($where = NULL) {
 		$sql = "
 			DELETE
 			FROM
 				`" . $this->tableName . "`
 			WHERE
-				" . $this->get_identifier_expression() . "
+				" . ($where ?: $this->get_identifier_expression()) . "
 		";
 		#$this->debug->show('MyObject delete sql: ' . $sql, true);
 		$result = $this->database->execSQL($sql);
 		$err_msg = $this->database->errormessage;
-		$results[] = array(
+		$result = array(
 			'success' => ($err_msg == ''),
+			'msg' => ($err_msg == '' ? 'Abfrage zum Löschen erfolgreich' : 'Fehler bei Ausführung der Löschanfrage!'),
 			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
 		);
-		return $results;
+		return $result;
 	}
 
 	function reset_auto_increment() {

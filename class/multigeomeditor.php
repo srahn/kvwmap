@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver f�r Kreisverwaltungen                     #
+# kvwmap - Kartenserver für Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 #
@@ -26,10 +26,10 @@
 # stefan.rahn@gdi-service.de                                      #
 ###################################################################
 #############################
-# Klasse Polygoneditor #
+# Klasse Multigeomeditor #
 #############################
 
-class polygoneditor {
+class multigeomeditor {
 
   function __construct($database, $layerepsg, $clientepsg, $oid_attribute) {
     global $debug;
@@ -40,7 +40,7 @@ class polygoneditor {
     $this->oid_attribute = $oid_attribute;
   }
 
-  function zoomTopolygon($oid, $tablename, $columnname,  $border, $schemaname = '') {
+  function zoomToGeom($oid, $tablename, $columnname,  $border, $schemaname = '') {
   	# Eine Variante mit der nur einmal transformiert wird
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
   	$sql.=" FROM (SELECT box2D(st_transform(".$columnname.", ".$this->clientepsg.")) as bbox";
@@ -74,7 +74,7 @@ class polygoneditor {
 		$ret[0] = 0;
 		if ($newpathwkt != '') {
 			if ($newpathwkt == '\\') {
-				$ret[1] = 'Die Geometrie des Polygons ist fehlerhaft und kann nicht gespeichert werden:<p>';
+				$ret[1] = 'Die Geometrie ist fehlerhaft und kann nicht gespeichert werden:<p>';
 				$ret[0] = 1;
 			}
 			else {
@@ -89,7 +89,7 @@ class polygoneditor {
 					";
 					$ret = $this->database->execSQL($sql, 4, 0);
 					$reason = pg_fetch_row($ret[1]);
-					$ret[1] = 'Die Geometrie des Polygons ist fehlerhaft und kann nicht gespeichert werden:<p>' . $reason[0];
+					$ret[1] = 'Die Geometrie ist fehlerhaft und kann nicht gespeichert werden:<p>' . $reason[0];
 					$ret[0] = 1;
 				}
 			}
@@ -98,45 +98,45 @@ class polygoneditor {
 	}
 
 	/**
-	 * Function returns a WKT MultiPolygon from a polygon, transformed from client to layer system.
-	 * @params string $polygon The Polygon as comma separated text
-	 * @return string The WKT MultiLineString
+	 * Function returns a WKT multigeometry from a singlegeometry, transformed from client to layer system.
+	 * @params string $geom The geometry as comma separated text
+	 * @return string The WKT Multigeometry
 	 */
-	function get_multipolygon($polygon) {
-		return "ST_Multi(ST_GeometryFromText('" . $polygon . "', " . $this->clientepsg . "))";
+	function get_multigeom($geom) {
+		return "ST_Multi(ST_GeometryFromText('" . $geom . "', " . $this->clientepsg . "))";
 	}
 
 	/**
-	 * Function returns a WKT Polygon from a polygon or multipolygon by using only the first ring, transformed from client to layer system.
-	 * @params string $polygon The Polygon as comma separated text
-	 * @return string The WKT Polygon
+	 * Function returns a WKT singlegeometry from a single- or multigeometry by using only the first geometry, transformed from client to layer system.
+	 * @params string $geom The geometry as comma separated text
+	 * @return string The WKT Geometry
 	 */
-	function get_polygon($polygon) {
-		return "ST_geometryN(ST_GeometryFromText('" . $polygon . "', " . $this->clientepsg . "), 1)";
+	function get_geom($geom) {
+		return "ST_geometryN(ST_GeometryFromText('" . $geom . "', " . $this->clientepsg . "), 1)";
 	}
 
 	/**
-	 * Function returns wkb_geometry from polygon and geomtype given in options
-	 * transformed from client to layerepsg of this polygoneditor object.
-	 * @params array options with line = WKT-Line and geomtype = Postgis-Geometrytype string
+	 * Function returns wkb_geometry from geometry and geomtype given in options
+	 * transformed from client to layerepsg of this object.
+	 * @params array options with geom = WKT-Geometry and geomtype = Postgis-Geometrytype string
 	 * @return array success = false and err_msg if error in database request and true and
-	 * wkb_geometry with the requested WKB Geometry of that polygon
+	 * wkb_geometry with the requested WKB Geometry
 	 */
 	function get_wkb_geometry($options) {
 		$sql = "
 			SELECT
 				ST_Transform(
-					" . ($options['geomtype'] == 'POLYGON' ? $this->get_polygon($options['polygon']) : $this->get_multipolygon($options['polygon'])) . ",
+					" . (in_array(strtoupper(substr($options['geomtype'], 0, 5)), ['MULTI', 'GEOME']) ? $this->get_multigeom($options['geom']) : $this->get_geom($options['geom'])) . ",					
 					" . $this->layerepsg . "
 				) AS wkb_geometry
 		";
-		#echo '<p>SQL zum Berechnen der WKB-Geometrie des Polygon: ' . $sql;
+		#echo '<p>SQL zum Berechnen der WKB-Geometrie: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if ($ret[0]) {
 			# Fehler beim Berechnen der WKB-Geometrie in der Datenbank
 			return array(
 				'success' => false,
-				'err_msg' => 'Auf Grund eines Fehlers bei der Anfrage an die Datenbank konnte die Geometrie des Polygons nicht berechnet werden!<br>' . $ret[1]
+				'err_msg' => 'Auf Grund eines Fehlers bei der Anfrage an die Datenbank konnte die Geometrie nicht berechnet werden!<br>' . $ret[1]
 			);
 		}
 		else {
@@ -148,14 +148,14 @@ class polygoneditor {
 		}
 	}
 
-	function eintragenFlaeche($polygon, $oid, $tablename, $columnname, $geomtype, $kvps) {
+	function updateGeom($polygon, $oid, $tablename, $columnname, $geomtype, $kvps) {
 		if ($polygon == '') {
 			$wkb_geometry = 'NULL';
 		}
 		else {
 			$ret = $this->get_wkb_geometry(array(
 				'geomtype' => $geomtype,
-				'polygon' => $polygon
+				'geom' => $polygon
 			));
 			if (!$ret['success']) {
 				return $ret;
@@ -168,7 +168,7 @@ class polygoneditor {
 			SET " . implode(', ', $kvps) . "
 			WHERE " . pg_quote($this->oid_attribute) . " = '" . $oid . "'
 		";
-		#echo '<p>SQL zum Updaten von Liniengeometrie: ' . $sql;
+		#echo '<p>SQL zum Updaten von Geometrie: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if (!$ret[0]) {
 			if (pg_affected_rows($ret[1]) == 0) {
@@ -180,14 +180,21 @@ class polygoneditor {
 		return $ret;
 	}
 
-	function getpolygon($oid, $tablename, $columnname, $extent, $schemaname = ''){
-		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom, st_numGeometries(st_union(".$columnname.")) as numgeometries FROM " . ($schemaname != '' ? $schemaname . '.' : '') . pg_quote($tablename);
-		if($oid != NULL)$sql .= " WHERE ".$this->oid_attribute." = '" . $oid. "'";
+	function getGeom($oid, $tablename, $columnname, $schemaname = ''){
+		$sql = "
+			SELECT 
+				st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 15) AS svggeom, 
+				st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom, 
+				st_numGeometries(st_union(".$columnname.")) as numgeometries 
+			FROM 
+				" . ($schemaname != '' ? $schemaname . '.' : '') . pg_quote($tablename) . "
+			WHERE 
+				" . $this->oid_attribute . " = '" . $oid. "'";
 		#echo '<br>sql: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
-		$polygon = pg_fetch_array($ret[1]);
-		$polygon['svggeom'] = transformCoordsSVG($polygon['svggeom']);
-		return $polygon;
+		$geom = pg_fetch_array($ret[1]);
+		$geom['svggeom'] = transformCoordsSVG($geom['svggeom']);
+		return $geom;
 	}
 }
 ?>

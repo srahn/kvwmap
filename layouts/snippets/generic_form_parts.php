@@ -19,7 +19,7 @@
 				for($i = 0; $i < $cell_count; $i++) {
 					$cell = $row['cells'][$i];
 					if ($row['contains_attribute_names']) {
-						if ($cell_count > 1 AND $cell['properties'] == 'class="gle-attribute-name"') {		# ist auch schon im repo drin
+						if ($cell_count > 1 AND $cell['properties'] == 'class="gle-attribute-name"') {
 							$width = 'width="' . ($i == 0 ? '10%' : '1%') . '"';
 						}
 						else {
@@ -607,8 +607,13 @@
 				$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&targetlayer_id='.$layer_id;
-				$reloadParams .= '&targetattribute='.$name;
-				$reloadParams .= '&reload='.$attributes['reload'][$j];
+				$reloadParams .= '&targetattribute='.$name;				
+				if ($attributes['no_subform_reload'][$j] == true) {
+					$reloadParams .= '&reload=0';
+				}
+				else {
+					$reloadParams .= '&reload='.$attributes['reload'][$j];
+				}
 				$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$key].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 				$reloadParams .= '&tablename_mother='.$attributes['table_name'][$attributes['the_geom']];											# dito
 				$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
@@ -1360,6 +1365,9 @@
 		}
 		elseif ($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
 			$geomtype = 'Line';
+		}
+		elseif ($geomtype == 'MULTIPOINT') {
+			$geomtype = 'Multipoint';
 		}
 		return $geomtype;
 	}

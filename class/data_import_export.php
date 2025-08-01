@@ -953,7 +953,7 @@ class data_import_export {
 		$errorfile = rand(0, 1000000);
 		$command .= ' 2> ' . IMAGEPATH . $errorfile . '.err';
 		$output = array();
-		// echo '<br>' . $command;
+		// echo '<br>Command in org2ogr_export: ' . $command;
 		exec($command, $output, $ret);
 		if ($ret != 0) {
 			exec("sed -i -e 's/".$database->passwd."/xxxx/g' " . IMAGEPATH . $errorfile . '.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
@@ -962,13 +962,25 @@ class data_import_export {
 		return $ret;
 	}
 
+	/**
+	 * Function import the file $importfile into postgres $database in $schema.$tablename
+	 * with more options
+	 * @return int Should return the result_code $ret of exec but:
+	 *  1) when running ogr in web container
+	 *  1.1) int return status of command running with exec or
+	 *  1.2) string with msg in error case
+	 *  2) when running with http on gdal container
+	 *  2.1) exitCode of output of curl_exec or
+	 *  2.2) echo exitCode of output of curl_exec and exit
+	 */
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
+		// echo '<br>Function ogr2ogr_import';
 		$command = '';
 		if ($options != NULL) {
 			$command .= $options;
 		}
 		// $command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
-		$command .= ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
 		}
@@ -977,14 +989,14 @@ class data_import_export {
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
-			#echo '<br>url:   ' . urldecode($url) . '<br><br>';
-			#echo '<br>url:   ' . $url . '<br><br>';
+			// echo '<br>url:   ' . urldecode($url) . '<br><br>';
+			// echo '<br>url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
 			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
-			#echo '<br>output: ' . $output;
+			// echo '<br>output: ' . $output;
 			$result = json_decode($output);
 			$ret = $result->exitCode;
 			if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
@@ -1004,7 +1016,7 @@ class data_import_export {
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogr2ogr ' . $command;
 			$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 			$output = array();
-			#echo '<p>command: ' . $command;
+			// echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$err_file = file_get_contents(IMAGEPATH . $tablename . '.err');
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
@@ -1045,7 +1057,7 @@ class data_import_export {
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$result = new stdClass();
-			$result->stdout = implode('', $output);
+			$result->stdout = $output;
 			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
@@ -1056,7 +1068,7 @@ class data_import_export {
 	}
 
 	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile, ' -q -nogeomtype');
+		$result = $this->ogrinfo($importfile, ' -q');
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();
@@ -1069,10 +1081,12 @@ class data_import_export {
 				$layers = explode("\r\n", $result->stdout);
 				array_pop($layers);
 			}
-			array_walk($layers, function(&$value, $key){
-				$value = explode(': ', $value)[1];
-			});
-			return $layers;
+			foreach ($layers as $layer) {
+				if (strpos($layer, '(None)') === false) {	// Layer ohne Geometrie ausschließen
+					$geomlayers[] = explode(' (', explode(': ', $layer)[1])[0];
+				}
+			}
+			return $geomlayers;
 		}
 	}
 
@@ -1222,7 +1236,7 @@ class data_import_export {
       $csv .= implode(';', $values[$i]).chr(13).chr(10);
     }
 
-    $currenttime=date('Y-m-d H:i:s',time());
+    $currenttime = date('Y-m-d H:i:s',time());
 		return utf8_decode($csv);
 	}
 
@@ -1273,6 +1287,7 @@ class data_import_export {
 		ini_set('memory_limit', '8192M');
 		global $GUI;
 		global $kvwmap_plugins;
+		rolle::$export = 'true';
 		$currenttime = date('Y-m-d H:i:s',time());
 		$this->formvars = $formvars;
 		$export_rollen_layer = ((int)$this->formvars['selected_layer_id'] < 0);
@@ -1319,13 +1334,8 @@ class data_import_export {
 			#echo '<br>name: ' . $layerset[0]['Name']; exit;
 			$filter = '';
 			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1)) { 
-				$filter = replace_params(
-					$mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id),
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
+				$filter = replace_params_rolle(
+					$mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id)
 				);
 			}
 
@@ -1398,7 +1408,7 @@ class data_import_export {
 				. $where
 				. $query_parts['orderby'] . "
 			";
-			#echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql; exit;
+			// echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
 			$data_sql = $sql;
 
 			$temp_table = 'shp_export_'.rand(1, 1000000);
@@ -1408,7 +1418,7 @@ class data_import_export {
 				CREATE TABLE public." . $temp_table . " AS "
 				. $sql . "
 			";
-			#echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
+			// echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
 			$ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
 			if ($ret['success']) {
 				for ($s = 0; $s < count($selected_attributes); $s++) {
@@ -1436,7 +1446,7 @@ class data_import_export {
 					FROM
 						public." . $temp_table . "
 				";
-				#echo '<p>SQL zur Abfrage der zu exportierenden Attribute; ' . $sql;
+				// echo '<p>SQL zur Abfrage der zu exportierenden Attribute; ' . $sql;
 				$ret = $layerdb->execSQL($sql, 4, 0, $suppress_err_msg);
 				if (!$ret[0]) {
 					$count = pg_num_rows($ret[1]);
@@ -1445,29 +1455,31 @@ class data_import_export {
 					}
 
 					#showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
-					$this->formvars['layer_name'] = replace_params($this->formvars['layer_name'], rolle::$layer_params);
+					$this->formvars['layer_name'] = replace_params_rolle($this->formvars['layer_name']);
 					$this->formvars['layer_name'] = sonderzeichen_umwandeln($this->formvars['layer_name']);
 					$this->formvars['layer_name'] = str_replace(['.', '(', ')', '/', '[', ']', '<', '>'], '_', $this->formvars['layer_name']);
 					$this->formvars['geomtype'] = $layerset[0]['attributes']['geomtype'][$layerset[0]['attributes']['the_geom']];
 					$folder = 'Export_'.$this->formvars['layer_name'].rand(0,10000);
-					$old = umask(0);
 					$exportpath = $exportpath ?: IMAGEPATH . $folder . '/';
 					if (!is_dir($exportpath)) {
-						mkdir($exportpath, 0777); # Ordner erzeugen
+						$old = umask(0);
+						mkdir($exportpath, 0774); # Ordner erzeugen
+						umask($old);
 					}
-					umask($old);
 					$zip = false;
 
 					$exportfile = $exportpath . ($exportfilename ?: $this->formvars['layer_name']);
 					switch ($this->formvars['export_format']) {
 						case 'Shape' : {
+							// echo '<br>SQL für ogr2ogr_export: ' . $sql;
 							$err = $this->ogr2ogr_export(addslashes($sql), '"ESRI Shapefile"', $exportfile . '.shp', $layerdb);
-							if (!file_exists($exportfile.'.cpg')) {
+							if (!file_exists($exportfile . '.cpg')) {
 								// ältere ogr-Versionen erzeugen die cpg-Datei nicht
 								$fp = fopen($exportfile.'.cpg', 'w');
 								fwrite($fp, 'UTF-8');
 								fclose($fp);
 							}
+							// echo '<br>Datei ' . $exportfile . ' expoprtiert.';
 							$zip = true;
 						} break;
 
@@ -1528,7 +1540,7 @@ class data_import_export {
 
 						case 'CSV' : {
 							$result = array();
-							while ($rs = pg_fetch_assoc($ret[1])){
+							while ($rs = pg_fetch_assoc($ret[1])) {
 								$result[] = $rs;
 							}
 							# Bugfix 3.5.64: Fehlerbehebung liefert bei leeren Tabellen nur leere csv
@@ -1583,11 +1595,23 @@ class data_import_export {
 					if ($this->formvars['with_metadata_document'] != '' AND $layerset[0]['metalink'] != '') {
 						$metadata_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['metalink']);
 						if (file_put_contents($metadata_file, file_get_contents($layerset[0]['metalink'], false, stream_context_create(array('ssl' => array('verify_peer' => false)))))) {
-							# echo '<br>Metadatendatei heruntergeladen von: ' . $layerset[0]['metalink'];
-							# echo '<br>und gespeichert unter: ' . $metadata_file;
+							$zip = true;
 						}
 						else { ?>
-							Download der Metadatendatei des Layers ist fehlgeschlagen!<br>Tragen Sie den Metadatenlink des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihrem Administrator bei wiederholtem Auftreten dieses Fehlers.
+							Download der Metadatendatei des Layers ist fehlgeschlagen!<br>Tragen Sie den Metadatenlink des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihren Administrator bei wiederholtem Auftreten dieses Fehlers.
+							<p><a href="index.php?go=Daten_Export">Weiter mit Daten-Export</a>
+							<p><a href="index.php?go=neu Laden">Zur Karte</a><?php
+							exit;
+						}
+					}
+					# Bei Bedarf auch Nutzungsbedingungendatei mit dazupacken
+					if ($this->formvars['with_terms_of_use_document'] != '' AND $layerset[0]['terms_of_use_link'] != '') {
+						$terms_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['terms_of_use_link']);
+						if (file_put_contents($terms_file, file_get_contents($layerset[0]['terms_of_use_link'], false, stream_context_create(array('ssl' => array('verify_peer' => false)))))) {
+							$zip = true;
+						}
+						else { ?>
+							Download der Nutzungsbedingungen des Layers ist fehlgeschlagen!<br>Tragen Sie den Nutzungsbedingungen-Link des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihren Administrator bei wiederholtem Auftreten dieses Fehlers.
 							<p><a href="index.php?go=Daten_Export">Weiter mit Daten-Export</a>
 							<p><a href="index.php?go=neu Laden">Zur Karte</a><?php
 							exit;
@@ -1596,17 +1620,7 @@ class data_import_export {
 
 					# bei Bedarf zippen
 					if ($zip) {
-						$zipfilepath = rtrim($exportpath, '/');
-						# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
-						array_walk(searchdir($zipfilepath, true), function($item, $key){
-							$pathinfo = pathinfo($item);
-							rename($item, $pathinfo['dirname'] . '/' . umlaute_umwandeln($pathinfo['filename']) . '.' . $pathinfo['extension']);
-						});
-
-						exec(ZIP_PATH.' -j ' . $zipfilepath . ' ' . $zipfilepath . '/*'); # Ordner zippen
-						#echo '<p>' . ZIP_PATH.' -j ' . $zipfilepath . ' ' . $zipfilepath .'/*';
-
-						$exportfile = $zipfilepath . '.zip';
+						$exportfile = $this->zip_export_path($exportpath);
 						$contenttype = 'application/octet-stream';
 					}
 					# temp. Tabelle wieder löschen
@@ -1667,6 +1681,18 @@ class data_import_export {
 			'contenttype' => $contenttype,
 			'exportfile' => $exportfile,
 		);
+	}
+
+	function zip_export_path($export_path) {
+		$zipfilepath = rtrim($export_path, '/');
+		# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
+		array_walk(searchdir($export_path, true), function($item, $key){
+			$pathinfo = pathinfo($item);
+			rename($item, $pathinfo['dirname'] . '/' . umlaute_umwandeln($pathinfo['filename']) . '.' . $pathinfo['extension']);
+		});
+		exec(ZIP_PATH . ' -j ' . rtrim($export_path, '/') . ' ' . $export_path . '*'); # Ordner zippen
+		// echo ZIP_PATH . ' -j ' . rtrim($export_path, '/') . ' ' . $export_path . '*';
+		return rtrim($export_path, '/') . '.zip';
 	}
 
 	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder, $doc_path, $doc_url, $recursion_depth = 0){
