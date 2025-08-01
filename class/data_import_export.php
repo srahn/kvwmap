@@ -1073,7 +1073,7 @@ class data_import_export {
 	}
 
 	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile, ' -q -nogeomtype');
+		$result = $this->ogrinfo($importfile, ' -q');
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();
@@ -1086,10 +1086,12 @@ class data_import_export {
 				$layers = explode("\r\n", $result->stdout);
 				array_pop($layers);
 			}
-			array_walk($layers, function(&$value, $key){
-				$value = explode(': ', $value)[1];
-			});
-			return $layers;
+			foreach ($layers as $layer) {
+				if (strpos($layer, '(None)') === false) {	// Layer ohne Geometrie ausschließen
+					$geomlayers[] = explode(' (', explode(': ', $layer)[1])[0];
+				}
+			}
+			return $geomlayers;
 		}
 	}
 
