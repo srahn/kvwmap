@@ -1062,7 +1062,7 @@ class data_import_export {
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$result = new stdClass();
-			$result->stdout = implode('', $output);
+			$result->stdout = $output;
 			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
