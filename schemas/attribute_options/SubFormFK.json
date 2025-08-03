@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gdi-service.de/public/schemas/kvwmap/options/SubformFK.json",
+  "title": "SubformFK options",
+  "description": "Options for kvwmap formular element type SubformFK. SubformFK define a one to many foreign key relationship to a parent layer.",
+  "type": "object",
+  "properties": {
+    "parent_layer_id": {
+      "description": "The id of the parent layer that have the reference table of that foreign key relation as maintable.",
+      "type": "integer"
+    },
+    "fk_id": {
+      "description": "The name of the foreign key attribute in the layer that have this attribute.",
+      "type": "string"
+    },
+    "pk_id": {
+      "description": "The name of the primary key attribute in parent layer respectively in there reference table.",
+      "type": "string"
+    },
+    "display": {
+      "description": "An expression that define what to display in the formular. It is a string expression in sql that will be executed on the parent layer table and it can contain attribute variables from the layer that have that SubformFK attribute.",
+      "type": "String"
+    },
+    "display_type": {
+      "description": "How to display the reference to the feature in parent layer.",
+      "anyOf": [
+        {
+          "const": "plain",
+          "desctiption": "Display the value of that attribute as defined in query of the layer definition interpretated as plain text. It will be set in pre tags in the output page."
+        },
+        {
+          "const": "html",
+          "desctiption": "Display the value of that attribute as defined in query of the layer definition interpretated as html. Html tags in the value string will be interpreted from browser."
+        },
+        {
+          "const": "input_field",
+          "desctiption": "Show that value in a text input field. The input field is disabled when the attribute is defined as not editable."
+        },
+        {
+          "const": "select_field",
+          "desctiption": "Show a single select field to select the feature of the parent layer with the value of that attribute as preselected. The select field is disabled when the attribute is defined as not editable."
+        }
+      ],
+      "default": "input_field"
+    },
+    "link_type": {
+      "description": "The type of link to the feature of parent layer.",
+      "anyOf": [
+       {
+          "const": "href",
+          "desctiption": "Display the value of that attribute as a link to the referenced feature in the parent layer. It is only applicable if display_type is of plain of html."
+        },
+        {
+          "const": "button",
+          "description": "Shows a button to jump to the referenced feature in the parent layer."
+        }
+      ],
+      "default": "button"
+    },
+    "default_value": {
+      "description": "An expression that define the value for newly created datasets. It is a SQL select expression that will be executed to query the value. It will only be used if the default_value_type is set to query.",
+      "type" : "string"
+    },
+    "default_value_type": {
+      "description": "The type the default value will be determined.",
+      "anyOf": [
+        {
+          "const": "value",
+          "desctiption": "Use the value as defined in default_value property, without executing as an SQL expression."
+        },
+        {
+          "const": "query",
+          "desctiption": "Execute the SQL expression as defined in default_value property and use the result string as the default_value for that attribute."
+        },
+        {
+          "const": "database_default",
+          "desctiption": "Use the default value of that attribute as defined in the database schema."
+        },
+        {
+          "const": "spatial",
+          "desctiption": "Find the id of the feature in the parent layer by spacial intersection or ST_Within if parent layer have a polygon geometry type and the child only point typ. Find the first feature that is spacially intersected with the geometry of the feature that have this attribute. It will only be used if both the parent and the child layer have a geometry column in its layer definition and if the child feature have a geometry. In the form of a new feature the value will calculated if the geometry of that feature was created or changed and the user switched back to the data form tab."
+        }
+      ],
+      "default": "value"
+    }
+  },
+  "required": [ "parent_layer_id", "fk_id", "pk_id", "preview", "display_type" ]
+}
