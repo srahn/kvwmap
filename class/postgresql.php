@@ -2781,7 +2781,7 @@ FROM
     return $rs['wkt'];
   }	
 	
-  function getMERfromFlurstuecke($flurstkennz, $epsgcode) {
+  function getMERfromFlurstuecke($flurstkennz, $epsgcode, $without_temporal_filter = false) {
     $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flurstï¿½cke",4);
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
@@ -2795,7 +2795,9 @@ FROM
       }
       $sql.=")";
     }
-		$sql.= $this->build_temporal_filter(array('f'));
+		if (!$without_temporal_filter) {
+			$sql.= $this->build_temporal_filter(array('f'));
+		}
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Flurstücke.<br>'.$ret[1];
