@@ -17790,6 +17790,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$layer->get('Data')
 		));
 		$layer->set('queryable', '1');
+		$layer->set('drawingorder', 10000);
 		$layer->set('use_geom', 1);
 		$layer->set('query_map', ($layer->get('Datentyp') == 0 ? '0' : '1')); // not for points
 		$layer->set('privileg', 0);
