@@ -213,7 +213,7 @@ if ($doit == true) {
 								if(value_of($explosion, 1) != '')$collapsed = true;else $collapsed = false;
 								$groupname = $explosion[0];
 								$groupname_short = explode('<br>', $groupname);
-								$groupname_short = str_replace(' ', '_', $groupname_short[0]);
+								$groupname_short = str_replace([' ', '"'], '_', $groupname_short[0]);
 								if ($layer['attributes']['tab'][$j] != '') {
 									$visibility = '';
 									$tabname = sonderzeichen_umwandeln($layer['attributes']['tab'][$j]);

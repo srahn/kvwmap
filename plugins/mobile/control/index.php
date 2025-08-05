@@ -131,7 +131,7 @@ function go_switch_mobile($go) {
 
 		case 'mobile_delete_images': {
 			$GUI->sanitize(['selected_layer_id' => 'int']);
-			$GUI->checkCaseAllowed($GUI->go);
+			$GUI->checkCaseAllowed($GUI->go, false);
 			$result = $GUI->mobile_delete_images($GUI->formvars['selected_layer_id'], $GUI->formvars['images']);
 			echo json_encode($result);
 		}

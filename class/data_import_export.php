@@ -979,7 +979,7 @@ class data_import_export {
 			. ' -lco GEOMETRY_NAME=the_geom'
 			. ' -lco launder=NO'
 			. ' -lco precision=NO'
-			. ' -lco FID=' . $this->unique_column
+			. (strpos($options, '-lco FID') === false ? ' -lco FID=' . $this->unique_column : '')
 			. ' -nln ' . $tablename
 			. ($multi ? ' -nlt PROMOTE_TO_MULTI' : '')
 			. ($unlogged ? ' -lco UNLOGGED=ON' : '')
@@ -1062,7 +1062,7 @@ class data_import_export {
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$result = new stdClass();
-			$result->stdout = implode('', $output);
+			$result->stdout = $output;
 			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
@@ -1073,7 +1073,7 @@ class data_import_export {
 	}
 
 	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile, ' -q -nogeomtype');
+		$result = $this->ogrinfo($importfile, ' -q');
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();
@@ -1086,10 +1086,12 @@ class data_import_export {
 				$layers = explode("\r\n", $result->stdout);
 				array_pop($layers);
 			}
-			array_walk($layers, function(&$value, $key){
-				$value = explode(': ', $value)[1];
-			});
-			return $layers;
+			foreach ($layers as $layer) {
+				if (strpos($layer, '(None)') === false) {	// Layer ohne Geometrie ausschließen
+					$geomlayers[] = explode(' (', explode(': ', $layer)[1])[0];
+				}
+			}
+			return $geomlayers;
 		}
 	}
 
@@ -1334,7 +1336,7 @@ class data_import_export {
 		}
 		else {
 			#echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];
-			#echo '<br>name: ' . $layerset[0]['Name']; exit;
+			// echo '<br>name: ' . $layerset[0]['Name']; exit;
 			$filter = '';
 			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1)) { 
 				$filter = replace_params_rolle(
@@ -1386,6 +1388,7 @@ class data_import_export {
 			else {
 				$where = 'WHERE true ';
 			}
+
 			if ($this->formvars['newpathwkt']){
 				# über Polygon einschränken
 				if ($this->formvars['within'] == 1) {
@@ -1396,12 +1399,14 @@ class data_import_export {
 				}
 			}
 
-			$where .= " AND " . $GUI->pgdatabase->get_extent_filter(
-				$GUI->Stelle->MaxGeorefExt,
-				$user->rolle->epsg_code,
-				$layerset[0]['attributes']['the_geom'],
-				$layerset[0]['epsg_code']
-			);
+			if ($layerset[0]['geom_column'] != '') {
+				$where .= " AND " . $GUI->pgdatabase->get_extent_filter(
+					$GUI->Stelle->MaxGeorefExt,
+					$user->rolle->epsg_code,
+					$layerset[0]['attributes']['the_geom'],
+					$layerset[0]['epsg_code']
+				);
+			}
 
 			if ($this->formvars['export_format'] == 'GPX' AND $layerset[0]['Datentyp'] == 2) {	# bei GPX Polygone in Linien umwandeln
 				$query_parts['select'] = str_replace(
@@ -1419,7 +1424,7 @@ class data_import_export {
 				. $where
 				. $query_parts['orderby'] . "
 			";
-			echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
+			// echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
 			$data_sql = $sql;
 
 			$temp_table = 'shp_export_'.rand(1, 1000000);

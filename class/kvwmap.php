@@ -1616,7 +1616,7 @@ echo '			</table>
 								}
 							}
 							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-							if($s > 0 OR $class->status == MS_ON){
+							if(true OR $s > 0 OR $class->status == MS_ON){
 								$width = $height = '';
 								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
@@ -3784,7 +3784,8 @@ echo '			</table>
 		$attributenames[0] = $this->formvars['attribute'];
 		$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		# value und output ermitteln
-		$optionen = explode(';', $attributes['options'][0]);
+		$optionen = explode('<required by>', $attributes['options'][0]);
+		$optionen = explode(';', $optionen[0]);
 		$sql = $optionen[0];
 		if ($optionen[1] != '') {
 			$further_options = explode(' ', $optionen[1]); # die weiteren Optionen exploden (opt1 opt2 opt3)
@@ -3892,8 +3893,10 @@ echo '			</table>
 	* Second it test if the case is extra allowed as a function in this stelle
 	* Third it test if the user have special permissions to execute this case
 	*/
-	function checkCaseAllowed($case) {
-		$this->check_csrf_token();
+	function checkCaseAllowed($case, $check_csrf_token = true) {
+		if ($check_csrf_token) {
+			$this->check_csrf_token();
+		}
 		if (!(
 			$this->Stelle->isMenueAllowed($case) OR
 			$this->Stelle->isFunctionAllowed($case) OR
@@ -7376,7 +7379,7 @@ echo '			</table>
 				$pathinfo = pathinfo($dateipfad);
 				if ($doc_type == '') {
 					$type = strtolower($pathinfo['extension']);
-					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf', 'heic', 'heif'))) {
+					if (in_array($type, array('jpg', 'jpeg', 'png', 'gif', 'tif', 'pdf', 'heic', 'heif'))) {
 						$doc_type = 'local_img';
 					}
 					else {
@@ -10935,9 +10938,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$insert = array();
 			$exif_data = array();
 			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
+				// Setzen der Auto-Werte für Auto-Attribute
 				for ($i = 0; $i < count($table['attributname']); $i++) {
 					if (array_key_exists($table['attributname'][$i], $attributes['constraints'])) { 	# Rechte
 						$this->sanitize([$table['formfield'][$i] => $table['datatype'][$i]], true);
+						include_once(CLASSPATH . 'LayerAttribute.php');
+						$attribute = new LayerAttribute($this);
 						#echo '<br>' . $table['attributname'][$i] . ' type: ' . $table['type'][$i];
 						switch (true) {
 							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
@@ -11047,41 +11053,78 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							} break;
 
-							case ($table['type'][$i] == 'Geometrie') : {
-								if ($this->formvars['geomtype'] == 'POINT') {
-									if ($this->formvars['loc_x'] != '') {
-										# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
-										include_once (CLASSPATH.'pointeditor.php');
-										$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-										$result = $pointeditor->get_wkb_geometry(array(
-											'loc_x' => $this->formvars['loc_x'],
-											'loc_y' => $this->formvars['loc_y'],
-											'dimension' => $this->formvars['dimension']
-										));
-										if ($result['success']) {
-											$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
-										}
-										else {
-											$this->add_message('error', 'Umwandeln der Punktgeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
-											$this->success = false;
-										}
+							case ($table['type'][$i] == 'SubFormFK') : {
+								$attribute_options = $attribute->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
+								include_once(CLASSPATH . 'Layer.php');
+								$fk_field_is_empty = $this->formvars[$table['formfield'][$i]] == '';
+								$parent_layer = Layer::find_by_id($this, $attribute_options['parent_layer_id']);
+								$parent_layer_has_geom = $parent_layer->get('geom_column') != '';
+								$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
+								if ($result['success']) {
+									$new_feature_has_geometry = true;
+									$new_feature_geometry = $result['wkb_geometry'];
+									include_once(CLASSPATH . 'PgObject.php');
+									$pg_object = new PgObject($this, $parent_layer->get('schema'), $parent_layer->get('maintable'));
+									$pg_object->debug->user_funktion = 'admin'; $pg_object->show = true;
+									$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
+									$intersecting_parent_gefunden = false;
+									if (count($intersected_objects) > 0) {
+										$parent_feature = $parent_object[0];
+										$intersecting_parent_gefunden = true;
+									}
+									if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
+										$insert[$table['attributname'][$i]] = "'" . $parent_feature->get_id() . "'";
 									}
 								}
-								elseif ($this->formvars['newpathwkt'] != '') {
-									# ToDo: Replace this also with a get_wkb_geometry function from polygoneditor and replace wkb_geometry generation in
-									# PointEditor_Senden also by a function and also for Line and Polygon editing cases
-									$result = $multigeomeditor->get_wkb_geometry(array(
-										'geomtype' => $this->formvars['geomtype'],
-										'geom' => $this->formvars['newpathwkt']
-									));									
+							} break;
+
+							case ($table['type'][$i] == 'Geometrie') : {
+								if ($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != '' OR $this->formvars['newpathwkt'] != '') {
+									$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
 									if ($result['success']) {
+										# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
 										$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
 									}
 									else {
-										$this->add_message('error', 'Umwandeln der Liniengeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
+										$this->add_message('error', 'Umwandeln der ' . ($this->formvars['newpathwkt'] == 'POINT' ? 'Punkt' : 'Linien') . 'geometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
 										$this->success = false;
 									}
 								}
+
+								// if ($this->formvars['geomtype'] == 'POINT') {
+								// 	if ($this->formvars['loc_x'] != '') {
+								// 		# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
+								// 		include_once (CLASSPATH.'pointeditor.php');
+								// 		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
+								// 		$result = $pointeditor->get_wkb_geometry(array(
+								// 			'loc_x' => $this->formvars['loc_x'],
+								// 			'loc_y' => $this->formvars['loc_y'],
+								// 			'dimension' => $this->formvars['dimension']
+								// 		));
+								// 		if ($result['success']) {
+								// 			$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
+								// 		}
+								// 		else {
+								// 			$this->add_message('error', 'Umwandeln der Punktgeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
+								// 			$this->success = false;
+								// 		}
+								// 	}
+								// }
+								// elseif ($this->formvars['newpathwkt'] != '') {
+								// 	# ToDo: Replace this also with a get_wkb_geometry function from polygoneditor and replace wkb_geometry generation in
+								// 	# PointEditor_Senden also by a function and also for Line and Polygon editing cases
+								// 	$result = $multigeomeditor->get_wkb_geometry(array(
+								// 		'geomtype' => $this->formvars['geomtype'],
+								// 		'geom' => $this->formvars['newpathwkt']
+								// 	));
+								// 	if ($result['success']) {
+								// 		$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
+								// 	}
+								// 	else {
+								// 		$this->add_message('error', 'Umwandeln der Liniengeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
+								// 		$this->success = false;
+								// 	}
+								// }
 							} break;
 							default : {
 								switch ($datatype) {
@@ -11234,10 +11277,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         case 'SubFormEmbeddedPK' : {
 					if ($this->success) {
 						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-							echo 'currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+							echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
 						}
 						else{
-							echo 'reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+							echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
 						}
 					}
 					if(!empty(GUI::$messages)){
@@ -12506,7 +12549,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				
 				case 'use_geometry' : {
 					if (!in_array($filetype, array('tiff', 'tif', 'geotif'))) {
-						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'&code2execute=zoom_to_max_layer_extent('.$layer_id.');\', new Array(enclosingForm.result, \'\', \'\'), new Array(\'setvalue\', \'execute_function\', \'execute_function\'));">Geometrie&nbsp;übernehmen</a>';
+						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'&code2execute=zoomToMaxLayerExtent('.$layer_id.');\', new Array(enclosingForm.result, \'\', \'\'), new Array(\'setvalue\', \'execute_function\', \'execute_function\'));">Geometrie&nbsp;übernehmen</a>';
 					}
 				} break;
 
@@ -14923,7 +14966,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->user->rolle->readSettings();
 		$this->loadMap('DataBase');
 		if ($zoom_to_layer_extent) {
-			$this->zoomToMaxLayerExtent($layer_id);
+			$this->zoom_to_max_layer_extent($layer_id);
 		}
 	}
 
@@ -16024,10 +16067,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($datatype != 'bytea') {
 				$datei_erweiterung = ($this->user->rolle->upload_only_file_metadata == 1 ? 'jpg' : $pathinfo['extension']);
 				$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $pathinfo['filename']);
-				$nachDatei = $doc_paths['doc_path'] . (substr(trim($doc_paths['doc_path']), -1) === '/' ? $pathinfo['filename'] : '') . '.' . $datei_erweiterung;
+				$dateiname = (substr(trim($doc_paths['doc_path']), -1) === '/' ? $pathinfo['filename'] : '') . '.' . $datei_erweiterung;
+				$nachDatei = $doc_paths['doc_path'] . $dateiname;
 
 				if ($doc_paths['doc_url'] != '') {
-					$db_input = $doc_paths['doc_url'] . '.' . $datei_erweiterung;			# die URL zu der Datei wird gespeichert (Permalink)
+					$db_input = $doc_paths['doc_url'] . $dateiname;			# die URL zu der Datei wird gespeichert (Permalink)
 				}
 				else {
 					$db_input = $nachDatei . "&original_name=" . $_files[$input_name]['name']; # absoluter Dateipfad wird gespeichert
@@ -17362,7 +17406,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		sanitize($layer_id, 'int');
 		# Abfragen der maximalen Ausdehnung aller Daten eines Layers
 		if($layer_id > 0) {
-			$layer = $this->user->rolle->getLayer($layer_id);
+			$layer = $this->user->rolle->getLayer($layer_id)[0];
 		}
 		else {
 			$layer = $this->user->rolle->getRollenLayer(-$layer_id)[0];
@@ -17710,46 +17754,50 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			return 0; // do not create the layer
 		}
 		# Set initial values from rollenlayer
-		$layer = $ret[0];
+		include_once(CLASSPATH . 'PgObject.php');
+		$layer = new PgObject($this, $ret[0]['schema'], $ret[0]['tablename']);
+		$layer->data = $ret[0];
 
 		# overwrite some values for shared layer
-		$layer['id'] 					= ''; // it shall become a new layer
-		$layer['alias'] 			= '';
-		$layer['connection'] 	= '';
-		$layer['oid'] 				= 'gid';
-		$layer['old_id'] 			= -$this->formvars['selected_rollenlayer_id'];
-		$layer['Name'] 				= $this->formvars['layer_options_name'];
-		$layer['Name_or_alias'] = $this->formvars['layer_options_name'];
-		$layer['Gruppe'] 			= $this->formvars['shared_layer_group_id'];
+		$layer->set('id', ''); // it shall become a new layer
+		$layer->set('alias', '');
+		$layer->set('connection', '');
+		$pkey_constraint = $layer->get_pkey_constraint();
+		$layer->set('oid', $pkey_constraint['constraint_columns']);
+		$layer->set('old_id', -$this->formvars['selected_rollenlayer_id']);
+		$layer->set('Name', $this->formvars['layer_options_name']);
+		$layer->set('Name_or_alias', $this->formvars['layer_options_name']);
+		$layer->set('Gruppe', $this->formvars['shared_layer_group_id']);
 		$shared_layer_schema_name = ($this->formvars['shared_layer_schema_name'] == '' ? 'shared' : $this->formvars['shared_layer_schema_name']);
-		$layer['schema'] 			= $shared_layer_schema_name;
+		$layer->set('schema', $shared_layer_schema_name);
 		# Assume that query has the form "SELECT * FROM rollenlayertable"
 		# as it should be for rollenlayer
-		$rollenlayer_table 		= get_first_word_after($layer['query'], 'FROM');
+		$rollenlayer_table 		= get_first_word_after($layer->get('query'), 'FROM');
 		$shared_layer_table_name = ($this->formvars['shared_layer_table_name'] == '' ? $rollenlayer_table : $this->formvars['shared_layer_table_name']);
 		if ($this->pgdatabase->table_exists($shared_layer_schema_name, $shared_layer_table_name)) {
 			$shared_layer_table_name = $shared_layer_table_name  . '_' .  strval(rand(100, 999));
 		}
-		$layer['maintable'] = $shared_layer_table_name;
-		$layer['pfad'] = str_replace(
+		$layer->set('maintable', $shared_layer_table_name);
+		$layer->set('pfad', str_replace(
 			$rollenlayer_table,
 			$shared_layer_table_name,
-			$layer['query']
-		);
-		unset($layer['query']);
-		$layer['Data'] 				= str_replace(
+			$layer->get('query')
+		));
+		$layer->unset('query');
+		$layer->set('Data', str_replace(
 			CUSTOM_SHAPE_SCHEMA . '.' . $rollenlayer_table,
 			$shared_layer_schema_name . '.' . $shared_layer_table_name,
-			$layer['Data']
-		);
-		$layer['queryable'] 			= '1';
-		$layer['use_geom'] 				= 1;
-		$layer['query_map'] 			= ($layer['Datentyp'] == 0 ? '0' : '1'); // not for points
-		$layer['privileg'] 				= 0;
-		$layer['export_privileg'] = 1;
-		$layer['editable'] 				= 1;
-		$layer['listed'] 					= 1;
-		$layer['shared_from'] 		= $this->user->id;
+			$layer->get('Data')
+		));
+		$layer->set('queryable', '1');
+		$layer->set('drawingorder', 10000);
+		$layer->set('use_geom', 1);
+		$layer->set('query_map', ($layer->get('Datentyp') == 0 ? '0' : '1')); // not for points
+		$layer->set('privileg', 0);
+		$layer->set('export_privileg', 1);
+		$layer->set('editable', 1);
+		$layer->set('listed', 1);
+		$layer->set('shared_from', $this->user->id);
 
 		# create share schema if not exists and copy rollenlayer table to shared layer table
 		$sql = "
@@ -17762,7 +17810,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (!$ret['success']) { $this->add_message('error', err_msg('kvwmap.php', __LINE__, $sql)); return 0; }
 
 		# Set formvars from layer
-		$this->formvars = array_merge($layer, $this->formvars);
+		$this->formvars = array_merge($layer->data, $this->formvars);
 		$this->LayerAnlegen();
 
 		# Assign new layer $this->formvars['selected_layer_id'] to alle stellen that allow shared layers
@@ -19031,7 +19079,12 @@ class db_mapObj{
 				$type_attributes = $attributes['type_attributes'][$i];
 				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
 					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $query_result[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
-					@$datatype_query_result = json_decode($json, true);
+						if (is_string($json)){
+							@$datatype_query_result = json_decode($json, true);
+						}
+						else {
+							$datatype_query_result = $json;
+						}
 					if (!empty($datatype_query_result) AND $type == $attributes['type'][$i]) {	# kein Array von Datentypen --> zur weiteren einheitlichen Verarbeitung num. Array draus machen
 						$datatype_query_result = [$datatype_query_result];
 					}
@@ -19354,18 +19407,34 @@ class db_mapObj{
 					# SubFormulare mit Fremdschlüssel
 					case 'SubFormFK' : {
 						if ($attributes['options'][$i] != '') {
-							$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen
-							$subform = explode(',', $options[0]);
-							$attributes['subform_layer_id'][$i] = $subform[0];
-							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-							for ($k = 1; $k < count($subform); $k++) {
-								$attributes['subform_fkeys'][$i][] = $subform[$k];
-								$attributes['SubFormFK_hidden'][$attributes['indizes'][$subform[$k]]] = 1;
+							if (strpos($attributes['options'][$i], '{') === 0) {
+								$json = json_decode($attributes['options'][$i], true);
+								$attributes['subform_layer_id'][$i] = $json['layer_id'];
+								$attributes['subform_fkeys'][$i] = $json['keys'];
+								$attributes['no_new_window'][$i] = ($json['window_type'] == 'no_new_window');
 							}
-							if ($options[1] != '') {
-								if ($options[1] == 'no_new_window') {
-									$attributes['no_new_window'][$i] = true;
+							else {
+								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen
+								$subform = explode(',', $options[0]);
+								$attributes['subform_layer_id'][$i] = $subform[0];
+								$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+								$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+								for ($k = 1; $k < count($subform); $k++) {
+									if (strpos($subform[$k], ':')) {
+										$exp = explode(':', $subform[$k]);
+										$keys['fkey'] = $exp[0];	# Verknüpfungsattribut in diesem Layer
+										$keys['pkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
+									}
+									else {
+										$keys['fkey'] = $keys['pkey'] = $subform[$k];
+									}
+									$attributes['subform_fkeys'][$i][] = $keys;
+									$attributes['SubFormFK_hidden'][$attributes['indizes'][$keys['fkey']]] = 1;
+								}
+								if ($options[1] != '') {
+									if ($options[1] == 'no_new_window') {
+										$attributes['no_new_window'][$i] = true;
+									}
 								}
 							}
 						}
@@ -20315,11 +20384,18 @@ class db_mapObj{
 			'drawingorder',
 			'listed'
 		);
-		
+
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
 				array('sync')
+			);
+		}
+
+		if ($this->GUI->plugin_loaded('portal')) {
+			$zero_if_empty_attributes = array_merge(
+				$zero_if_empty_attributes,
+				array('cluster_option')
 			);
 		}
 
