@@ -1083,7 +1083,7 @@ echo '			</table>
 	}
 
 	/**
-		@param $prefix String dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
+	 * @param $prefix String dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
 	*/
 	function setLayerParams($prefix = '') {
 		$layer_params = array();
@@ -1094,7 +1094,7 @@ echo '			</table>
 		foreach ($this->formvars AS $key => $value) {
 			$param_key = str_replace($prefix . 'layer_parameter_', '', $key);
 			if ($param_key != $key) {
-				rolle::$layer_params[$param_key] = $value;
+				rolle::$layer_params[$param_key] = is_array($value) ? implode(',', $value) : $value;
 			}
 		}
 		foreach (rolle::$layer_params as $param_key => $value) {
@@ -2228,6 +2228,7 @@ echo '			</table>
 
 				if (count($layerset) == 0) {
 					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
+					$featurelayer = $mapDB->read_feature_layer();
 					$rollenlayer = $mapDB->read_RollenLayer();
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
@@ -17854,7 +17855,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		else {
 			if (!empty($params)) {
-				if($layer_id == NULL){
+				if ($layer_id == NULL) {
 					$output .= '
 						<table style="border: 1px solid #ccc" class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 							<tr>
@@ -17864,7 +17865,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								<td class="rollenwahl-option-data">
 									<table>';
 				}
-									foreach($params AS $param) {
+									foreach ($params AS $param) {
 										$output .= '
 										<tr id="layer_parameter_'.$param['key'].'_tr">';
 											if (!$open) {
@@ -17877,18 +17878,28 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											}
 											$output .= '
 											<td>
-												'.($layer_id == NULL ?
-													FormObject::createSelectField(
-														'options_layer_parameter_' . $param['key'],		# name
-														$param['options'],										# options
-														rolle::$layer_params[$param['key']],	# value
-														1,																		# size
-														'width: 110px',												# style
-														'onLayerParameterChanged(this);',			# onchange
-														'layer_parameter_' . $param['key'],		# id
-														'',																		# multiple
-														'',																		# class
-														''																		# firstoption
+												' . (
+													$layer_id == NULL ? (
+														$param['multiple'] == '1' ?
+														FormObject::createCheckboxList(
+															'options_layer_parameter_' . $param['key'],					# name
+															$param['options'],																	# options
+															rolle::$layer_params[$param['key']] === '' ? [] : explode(',', rolle::$layer_params[$param['key']]),	# values
+															'onLayerParameterChanged(this);'										# onchange
+														)
+														:
+														FormObject::createSelectField(
+															'options_layer_parameter_' . $param['key'],		# name
+															$param['options'],										# options
+															rolle::$layer_params[$param['key']],	# value
+															($param['multiple'] == '1' ? count($param['options']) : 1),	# size
+															'',																		# style
+															'onLayerParameterChanged(this);',			# onchange
+															'layer_parameter_' . $param['key'],		# id
+															($param['multiple'] == '1'),					# multiple
+															'',																		# class
+															''																		# firstoption
+														)
 													)
 													:
 													FormObject::createCustomSelectField(
@@ -18135,6 +18146,10 @@ class db_mapObj{
 #		echo '<br>ref: ' . print_r($this->referenceMap, true);
     return $rs;
   }
+
+	function read_feature_layer() {
+		
+	}
 
 	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
@@ -21556,8 +21571,9 @@ class db_mapObj{
 
 	function save_all_layer_params($formvars) {
 		$sql = "TRUNCATE layer_parameter";
+		$komma = false;
 		$this->db->execSQL($sql);
-		$sql = "INSERT INTO layer_parameter VALUES ";
+		$sql = "INSERT INTO layer_parameter (`id`, `key`, `alias`, `default_value`, `options_sql`, `multiple`) VALUES ";
 		for ($i = 0; $i < count($formvars['key']); $i++) {
 			if ($formvars['key'][$i] != '') {
 				if ($formvars['id'][$i] == '') {
@@ -21571,11 +21587,13 @@ class db_mapObj{
 					'" . $formvars['key'][$i] . "',
 					'" . $formvars['alias'][$i] . "',
 					'" . $this->db->mysqli->real_escape_string($formvars['default_value'][$i]) . "',
-					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "'
+					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "',
+					" . ($formvars['multiple'][$i] == 'on' ? "1" : "0") . "
 				)";
 				$komma = true;
 			}
 		}
+		// echo '<br>Speichern der Layerparameter mit SQL: ' . $sql;
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
 			echo '<br>Fehler beim Speichern der Layerparameter mit SQL: ' . $sql;

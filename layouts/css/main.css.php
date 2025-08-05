@@ -2451,7 +2451,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .rollenwahl-option-header {
-	width: 270px;
+	<!-- width: 270px; -->
 	padding : 4px;
 }
 
