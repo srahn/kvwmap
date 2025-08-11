@@ -632,7 +632,7 @@ CREATE TABLE layer_labelitems (
 )   ;
 
 CREATE TABLE layer_parameter (
-  id integer  NOT NULL,
+  id serial,
   key varchar(255) NOT NULL,
   alias varchar(255) NOT NULL,
   default_value varchar(255) NOT NULL,
