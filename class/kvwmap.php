@@ -1083,7 +1083,7 @@ echo '			</table>
 	}
 
 	/**
-		@param $prefix String dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
+	 * @param $prefix String dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
 	*/
 	function setLayerParams($prefix = '') {
 		$layer_params = array();
@@ -1094,7 +1094,7 @@ echo '			</table>
 		foreach ($this->formvars AS $key => $value) {
 			$param_key = str_replace($prefix . 'layer_parameter_', '', $key);
 			if ($param_key != $key) {
-				rolle::$layer_params[$param_key] = $value;
+				rolle::$layer_params[$param_key] = is_array($value) ? implode(',', $value) : $value;
 			}
 		}
 		foreach (rolle::$layer_params as $param_key => $value) {
@@ -2228,6 +2228,7 @@ echo '			</table>
 
 				if (count($layerset) == 0) {
 					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
+					$featurelayer = $mapDB->read_feature_layer();
 					$rollenlayer = $mapDB->read_RollenLayer();
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
@@ -17754,46 +17755,50 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			return 0; // do not create the layer
 		}
 		# Set initial values from rollenlayer
-		$layer = $ret[0];
+		include_once(CLASSPATH . 'PgObject.php');
+		$layer = new PgObject($this, $ret[0]['schema'], $ret[0]['tablename']);
+		$layer->data = $ret[0];
 
 		# overwrite some values for shared layer
-		$layer['id'] 					= ''; // it shall become a new layer
-		$layer['alias'] 			= '';
-		$layer['connection'] 	= '';
-		$layer['oid'] 				= 'gid';
-		$layer['old_id'] 			= -$this->formvars['selected_rollenlayer_id'];
-		$layer['Name'] 				= $this->formvars['layer_options_name'];
-		$layer['Name_or_alias'] = $this->formvars['layer_options_name'];
-		$layer['Gruppe'] 			= $this->formvars['shared_layer_group_id'];
+		$layer->set('id', ''); // it shall become a new layer
+		$layer->set('alias', '');
+		$layer->set('connection', '');
+		$pkey_constraint = $layer->get_pkey_constraint();
+		$layer->set('oid', $pkey_constraint['constraint_columns']);
+		$layer->set('old_id', -$this->formvars['selected_rollenlayer_id']);
+		$layer->set('Name', $this->formvars['layer_options_name']);
+		$layer->set('Name_or_alias', $this->formvars['layer_options_name']);
+		$layer->set('Gruppe', $this->formvars['shared_layer_group_id']);
 		$shared_layer_schema_name = ($this->formvars['shared_layer_schema_name'] == '' ? 'shared' : $this->formvars['shared_layer_schema_name']);
-		$layer['schema'] 			= $shared_layer_schema_name;
+		$layer->set('schema', $shared_layer_schema_name);
 		# Assume that query has the form "SELECT * FROM rollenlayertable"
 		# as it should be for rollenlayer
-		$rollenlayer_table 		= get_first_word_after($layer['query'], 'FROM');
+		$rollenlayer_table 		= get_first_word_after($layer->get('query'), 'FROM');
 		$shared_layer_table_name = ($this->formvars['shared_layer_table_name'] == '' ? $rollenlayer_table : $this->formvars['shared_layer_table_name']);
 		if ($this->pgdatabase->table_exists($shared_layer_schema_name, $shared_layer_table_name)) {
 			$shared_layer_table_name = $shared_layer_table_name  . '_' .  strval(rand(100, 999));
 		}
-		$layer['maintable'] = $shared_layer_table_name;
-		$layer['pfad'] = str_replace(
+		$layer->set('maintable', $shared_layer_table_name);
+		$layer->set('pfad', str_replace(
 			$rollenlayer_table,
 			$shared_layer_table_name,
-			$layer['query']
-		);
-		unset($layer['query']);
-		$layer['Data'] 				= str_replace(
+			$layer->get('query')
+		));
+		$layer->unset('query');
+		$layer->set('Data', str_replace(
 			CUSTOM_SHAPE_SCHEMA . '.' . $rollenlayer_table,
 			$shared_layer_schema_name . '.' . $shared_layer_table_name,
-			$layer['Data']
-		);
-		$layer['queryable'] 			= '1';
-		$layer['use_geom'] 				= 1;
-		$layer['query_map'] 			= ($layer['Datentyp'] == 0 ? '0' : '1'); // not for points
-		$layer['privileg'] 				= 0;
-		$layer['export_privileg'] = 1;
-		$layer['editable'] 				= 1;
-		$layer['listed'] 					= 1;
-		$layer['shared_from'] 		= $this->user->id;
+			$layer->get('Data')
+		));
+		$layer->set('queryable', '1');
+		$layer->set('drawingorder', 10000);
+		$layer->set('use_geom', 1);
+		$layer->set('query_map', ($layer->get('Datentyp') == 0 ? '0' : '1')); // not for points
+		$layer->set('privileg', 0);
+		$layer->set('export_privileg', 1);
+		$layer->set('editable', 1);
+		$layer->set('listed', 1);
+		$layer->set('shared_from', $this->user->id);
 
 		# create share schema if not exists and copy rollenlayer table to shared layer table
 		$sql = "
@@ -17806,7 +17811,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (!$ret['success']) { $this->add_message('error', err_msg('kvwmap.php', __LINE__, $sql)); return 0; }
 
 		# Set formvars from layer
-		$this->formvars = array_merge($layer, $this->formvars);
+		$this->formvars = array_merge($layer->data, $this->formvars);
 		$this->LayerAnlegen();
 
 		# Assign new layer $this->formvars['selected_layer_id'] to alle stellen that allow shared layers
@@ -17850,7 +17855,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		else {
 			if (!empty($params)) {
-				if($layer_id == NULL){
+				if ($layer_id == NULL) {
 					$output .= '
 						<table style="border: 1px solid #ccc" class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 							<tr>
@@ -17860,7 +17865,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								<td class="rollenwahl-option-data">
 									<table>';
 				}
-									foreach($params AS $param) {
+									foreach ($params AS $param) {
 										$output .= '
 										<tr id="layer_parameter_'.$param['key'].'_tr">';
 											if (!$open) {
@@ -17873,18 +17878,28 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											}
 											$output .= '
 											<td>
-												'.($layer_id == NULL ?
-													FormObject::createSelectField(
-														'options_layer_parameter_' . $param['key'],		# name
-														$param['options'],										# options
-														rolle::$layer_params[$param['key']],	# value
-														1,																		# size
-														'width: 110px',												# style
-														'onLayerParameterChanged(this);',			# onchange
-														'layer_parameter_' . $param['key'],		# id
-														'',																		# multiple
-														'',																		# class
-														''																		# firstoption
+												' . (
+													$layer_id == NULL ? (
+														$param['multiple'] == '1' ?
+														FormObject::createCheckboxList(
+															'options_layer_parameter_' . $param['key'],					# name
+															$param['options'],																	# options
+															rolle::$layer_params[$param['key']] === '' ? [] : explode(',', rolle::$layer_params[$param['key']]),	# values
+															'onLayerParameterChanged(this);'										# onchange
+														)
+														:
+														FormObject::createSelectField(
+															'options_layer_parameter_' . $param['key'],		# name
+															$param['options'],										# options
+															rolle::$layer_params[$param['key']],	# value
+															($param['multiple'] == '1' ? count($param['options']) : 1),	# size
+															'',																		# style
+															'onLayerParameterChanged(this);',			# onchange
+															'layer_parameter_' . $param['key'],		# id
+															($param['multiple'] == '1'),					# multiple
+															'',																		# class
+															''																		# firstoption
+														)
 													)
 													:
 													FormObject::createCustomSelectField(
@@ -18131,6 +18146,10 @@ class db_mapObj{
 #		echo '<br>ref: ' . print_r($this->referenceMap, true);
     return $rs;
   }
+
+	function read_feature_layer() {
+		
+	}
 
 	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
@@ -20380,11 +20399,18 @@ class db_mapObj{
 			'drawingorder',
 			'listed'
 		);
-		
+
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
 				array('sync')
+			);
+		}
+
+		if ($this->GUI->plugin_loaded('portal')) {
+			$zero_if_empty_attributes = array_merge(
+				$zero_if_empty_attributes,
+				array('cluster_option')
 			);
 		}
 
@@ -21545,8 +21571,9 @@ class db_mapObj{
 
 	function save_all_layer_params($formvars) {
 		$sql = "TRUNCATE layer_parameter";
+		$komma = false;
 		$this->db->execSQL($sql);
-		$sql = "INSERT INTO layer_parameter VALUES ";
+		$sql = "INSERT INTO layer_parameter (`id`, `key`, `alias`, `default_value`, `options_sql`, `multiple`) VALUES ";
 		for ($i = 0; $i < count($formvars['key']); $i++) {
 			if ($formvars['key'][$i] != '') {
 				if ($formvars['id'][$i] == '') {
@@ -21560,11 +21587,13 @@ class db_mapObj{
 					'" . $formvars['key'][$i] . "',
 					'" . $formvars['alias'][$i] . "',
 					'" . $this->db->mysqli->real_escape_string($formvars['default_value'][$i]) . "',
-					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "'
+					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "',
+					" . ($formvars['multiple'][$i] == 'on' ? "1" : "0") . "
 				)";
 				$komma = true;
 			}
 		}
+		// echo '<br>Speichern der Layerparameter mit SQL: ' . $sql;
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
 			echo '<br>Fehler beim Speichern der Layerparameter mit SQL: ' . $sql;
