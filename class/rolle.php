@@ -542,7 +542,12 @@ class rolle {
 			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
-			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
+			rolle::$layer_params = array_map(
+				function ($layer_param) {
+					return ($layer_param === 'Array' ? '' : $layer_param);
+				},
+				(array)json_decode('{' . $rs['layer_params'] . '}')
+			);
 			$this->visually_impaired = $rs['visually_impaired'];
 			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
@@ -639,7 +644,7 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo $sql;
+		#echo '<br>SQL to set Layer params: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 1);
 		rolle::$layer_params = (array)json_decode('{' . $layer_params . '}');
 		return $ret;

@@ -324,18 +324,16 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	$GUI->plan_oid_name = $GUI->konvertierung->config['plan_oid_name'];
 	
 	//TEMP
-	if($GUI->formvars['planart'] == 'FP-Plan') {
-		$GUI->title = 'Flächennutzungsplan';
-		$GUI->plan_short_title = 'F-Plan';
-		$GUI->plan_class = 'FP_Plan';
-		$GUI->plan_abk = 'fplan';
-		$GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
-		$GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
-		$GUI->plan_table_name = 'fp_plan';
-		
-		$GUI->plan_table_name = strtolower($GUI->plan_class);
-		$GUI->plan_oid_name = $GUI->plan_table_name . '_oid';
-	}
+	// $GUI->title = 'Flächennutzungsplan';
+	// $GUI->plan_short_title = 'F-Plan';
+	// $GUI->plan_class = 'FP_Plan';
+	// $GUI->plan_abk = 'fplan';
+	// $GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
+	// $GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
+	// $GUI->plan_table_name = 'fp_plan';
+	
+	// $GUI->plan_table_name = strtolower($GUI->plan_class);
+	// $GUI->plan_oid_name = $GUI->plan_table_name . '_oid';
 	// TEMP END
 }
 

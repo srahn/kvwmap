@@ -704,6 +704,7 @@ class user {
 	var $language = 'german';
 	var $debug;
 	var $share_rollenlayer_allowed;
+	var $stelle_id;
 
 	/**
 	 * Create a user object
@@ -1106,6 +1107,7 @@ class user {
 		#debug_write('<br>sql: ', $sql, 1);
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
 		$ret = $this->database->execSQL($sql, 4, 0, true);
+		$stellen = array( 'ID' => array(), 'Bezeichnung' => array());
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$stellen['ID'][]=$rs['id'];
 			$stellen['Bezeichnung'][]=$rs['bezeichnung'];

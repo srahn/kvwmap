@@ -23,6 +23,7 @@
 					<th align="left" style="border:1px solid #C3C7C3">Alias</th>
 					<th align="left" style="border:1px solid #C3C7C3">Standard-Wert</th>
 					<th align="left" style="border:1px solid #C3C7C3">Auswahlmöglichkeiten</th>
+					<th align="left" style="border:1px solid #C3C7C3">Mehrfachauswahl</th>
 					<th align="left" style="border:1px solid #C3C7C3">Verwendung in Layer</th>
 					<th align="left" style="border:1px solid #C3C7C3">&nbsp;</th>
 				</tr><?
@@ -33,9 +34,10 @@
 						<td style="border:1px solid #C3C7C3"><input name="alias[]" type="text" value="<? echo $this->params[$i]['alias']; ?>" size="20" maxlength="50"></td>
 						<td style="border:1px solid #C3C7C3"><input name="default_value[]" type="text" value="<? echo $this->params[$i]['default_value'];; ?>" size="20"></td>
 						<td style="border:1px solid #C3C7C3"><textarea name="options_sql[]" style="height: 22px"><? echo $this->params[$i]['options_sql']; ?></textarea></td>
+						<td style="border:1px solid #C3C7C3"><input name="multiple[<? echo $i+1; ?>]" type="checkbox"<? echo ($this->params[$i]['multiple'] == '1' ? ' checked' : ''); ?>/></td>
 						<td style="border:1px solid #C3C7C3"><?
 							$layer_count = count_or_0($this->params_layer[$this->params[$i]['id']]) - 1;
-							if($layer_count > 0){
+							if ($layer_count > 0){
 								echo '<ul>';
 								for ($j = 0; $j < $layer_count; $j++){
 									echo '<li>
