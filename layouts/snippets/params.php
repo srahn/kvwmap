@@ -68,7 +68,7 @@
 										<tr>
 											<td class="layerOptionHeader"><?php echo $param['alias']; ?></td>
 											<td><?php
-												if ($param['multiple'] == '1') {
+												if ($param['multiple'] == 't') {
 													echo FormObject::createCheckboxList(
 														'layer_parameter_' . $param['key'],									# name
 														$param['options'],																	# options

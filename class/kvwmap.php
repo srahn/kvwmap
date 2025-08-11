@@ -18060,7 +18060,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											<td>
 												' . (
 													$layer_id == NULL ? (
-														$param['multiple'] == '1' ?
+														$param['multiple'] == 't' ?
 														FormObject::createCheckboxList(
 															'options_layer_parameter_' . $param['key'],					# name
 															$param['options'],																	# options
