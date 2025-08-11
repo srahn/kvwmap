@@ -2223,7 +2223,6 @@ echo '			</table>
 
 				if (count($layerset) == 0) {
 					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
-					$featurelayer = $mapDB->read_feature_layer();
 					$rollenlayer = $mapDB->read_RollenLayer();
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
@@ -18326,10 +18325,6 @@ class db_mapObj{
 #		echo '<br>ref: ' . print_r($this->referenceMap, true);
     return $rs;
   }
-
-	function read_feature_layer() {
-		
-	}
 
 	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
