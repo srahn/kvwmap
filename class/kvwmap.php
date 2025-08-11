@@ -21869,17 +21869,16 @@ DO $$
 		$komma = false;
 		$sql = "TRUNCATE kvwmap.layer_parameter";
 		$this->db->execSQL($sql);
-		$sql = "INSERT INTO kvwmap.layer_parameter VALUES ";
+		$sql = "
+			INSERT INTO kvwmap.layer_parameter 
+				(key, alias, default_value, options_sql, multiple)
+			VALUES ";
 		for ($i = 0; $i < count($formvars['key']); $i++) {
 			if ($formvars['key'][$i] != '') {
-				if ($formvars['id'][$i] == '') {
-					$formvars['id'][$i] = 'NULL';
-				}
 				if ($komma) {
 					$sql .= ",";
 				}
 				$sql .= "(
-					" . $formvars['id'][$i] . ",
 					'" . $formvars['key'][$i] . "',
 					'" . $formvars['alias'][$i] . "',
 					'" . pg_escape_string($formvars['default_value'][$i]) . "',
