@@ -636,7 +636,8 @@ CREATE TABLE layer_parameter (
   key varchar(255) NOT NULL,
   alias varchar(255) NOT NULL,
   default_value varchar(255) NOT NULL,
-  options_sql text NOT NULL
+  options_sql text NOT NULL,
+  multiple boolean NOT NULL DEFAULT false
 )  ;
 
 
