@@ -41,6 +41,9 @@ class PgObject {
 	private $select;
 	private $from;
 	private $where;
+	public $fkeys;
+	public $pkey;
+	public $data;
 
 	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
@@ -67,6 +70,8 @@ class PgObject {
 		$this->geom_column = 'geom';
 		$this->extent = array();
 		$this->extents = array();
+		$this->fkeys = array();
+		$this->pkey = array();
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, $this->show);
 	}
 
@@ -320,6 +325,10 @@ class PgObject {
 		return $value;
 	}
 
+	function unset($attribute) {
+		unset($this->data[$attribute]);
+	}
+
 	function set_array($attribute, $value) {
 		$this->data[$attribute][] = $value;
 		return $this->data[$attribute];
@@ -563,6 +572,34 @@ class PgObject {
 			$this->fkeys[] = $rs;
 		}
 		return $this->fkeys;
+	}
+
+	function get_pkey_constraint() {
+		$sql = "
+			SELECT DISTINCT
+			  cu.constraint_name,
+			  tc.constraint_type,
+			  string_agg(cu.column_name, ',') AS constraint_columns
+			FROM
+			  information_schema.table_constraints tc
+			  JOIN information_schema.constraint_column_usage cu ON (
+			    tc.table_schema = cu.table_schema AND
+			    tc.table_name = cu.table_name AND
+			    tc.constraint_name = cu.constraint_name
+			  )
+			WHERE
+			  tc.table_schema = '" . $this->schema . "' AND
+			  tc.table_name = '" . $this->tableName . "' AND
+			  tc.constraint_type IN ('PRIMARY KEY')
+			GROUP BY
+				tc.constraint_type, cu.constraint_name
+		";
+		#echo '<p>sql zur Abfrage von fkey_constrains: ' . $sql;
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->pkey = array();
+		$rs = pg_fetch_assoc($query);
+		$this->pkey = $rs;
+		return $this->pkey;
 	}
 
 	function get_constraints() {
