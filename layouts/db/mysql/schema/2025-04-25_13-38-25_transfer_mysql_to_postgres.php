@@ -50,7 +50,7 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
     $ret = $this->database->execSQL($sql,4, 1);
   } 
   else {
-      echo "Fehler beim Öffnen der Datei.\n";
+      echo "Fehler beim Öffnen der Datei config.php.\n";
   }
 
   # Plugin-Migrationen eintragen
