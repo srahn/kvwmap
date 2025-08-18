@@ -21100,61 +21100,61 @@ DO $$
 
 	function save_datatype_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
-		$language_columns = array();
-
-		foreach ($supportedLanguages as $language){
-			if ($language != 'german') {
-				$language = str_replace('-', '_', $language);
-				$language_columns[] = "alias_" . $language . " = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
-			}
-		}
-		$language_columns = (count($language_columns) > 0 ? implode(',
-					', $language_columns) . ',' : '');
 
 		for ($i = 0; $i < count($attributes['name']); $i++) {
+			$alias_rows = ["alias" => "'" . $formvars['alias_' . $attributes['name'][$i]] . "'"];
+			foreach ($supportedLanguages as $language) {
+				if ($language != 'german') {
+					$language = str_replace('-', '_', $language);
+					$alias_rows["alias_" . $language] = "'" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
+				}
+			}
 			if($formvars['visible_' . $attributes['name'][$i]] != 2 OR $formvars['vcheck_value_'.$attributes['name'][$i]] == ''){
 				$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
 				$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
 				$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
 			}
-			$set_values = 
-				$language_columns . "
-				name = '" . $attributes['name'][$i] . "',
-				form_element_type = '" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "',
-				options = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
-				tooltip = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
-				alias = '" . $formvars['alias_'.$attributes['name'][$i]] . "',
-				group = '" . $formvars['group_' . $attributes['name'][$i]] . "',
-				raster_visibility = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
-				mandatory = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
-				quicksearch = " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
-				visible = " . ($formvars['visible_' . $attributes['name'][$i]] == '' ? "0" : $formvars['visible_' . $attributes['name'][$i]]) . ",
-				vcheck_attribute= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
-				vcheck_operator= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
-				vcheck_value= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."',
-				arrangement = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? "0" : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
-				labeling = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? "0" : $formvars['labeling_' . $attributes['name'][$i]]);
+
+			$rows = [
+				'layer_id' => $formvars['selected_layer_id'],
+				'datatype_id' => $formvars['selected_datatype_id'],
+				'name' => "'" . $attributes['name'][$i] . "'",
+				'form_element_type' => "'" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "'",
+				'options' => "'" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "'",
+				'"default"' => "'" . pg_escape_string($formvars['default_' . $attributes['name'][$i]]) . "'",
+				'tooltip' => "'" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "'",
+				'"group"' => "'" . $formvars['group_' . $attributes['name'][$i]] . "'",
+				'arrangement' => ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]),
+				'labeling' => ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]),
+				'raster_visibility' => ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]),
+				'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
+				'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
+				'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
+				'vcheck_attribute' => "'" . $formvars['vcheck_attribute_'.$attributes['name'][$i]] . "'",
+				'vcheck_operator' => "'" . $formvars['vcheck_operator_'.$attributes['name'][$i]] . "'",
+				'vcheck_value' => "'" . $formvars['vcheck_value_'.$attributes['name'][$i]] . "'"
+			] + $alias_rows;
 				
 			if ($formvars['for_all_layers'] != 1) {
 				# nur für einen bestimmten Layer
 				$sql = "
 					INSERT INTO
-						datatype_attributes
-					SET
-						layer_id = " . $formvars['selected_layer_id'] . ",
-						datatype_id = " . $formvars['selected_datatype_id'] . ",
-						" . $set_values . "
-					ON DUPLICATE KEY UPDATE
-						" . $set_values . "
-				";
+						kvwmap.datatype_attributes
+						(" . implode(', ', array_keys($rows)) . ")
+					VALUES	
+						(" . implode(', ', $rows) . ")
+					ON CONFLICT (layer_id, datatype_id, name) DO UPDATE 
+						SET " .
+							implode(', ',	array_map(function($key) {return $key . ' = EXCLUDED.' . $key;}, array_keys($rows)));
 			}
 			else {
 				# für alle Layer, die diesen Datentyp benutzen
+				unset($rows['layer_id']);
 				$sql = "
 					UPDATE
-						datatype_attributes
-					SET
-						" . $set_values . "
+						kvwmap.datatype_attributes
+					SET " .
+						implode(', ',	array_map(function($key, $value) {return $key . ' = ' . $value;}, array_keys($rows), $rows)) . "
 					WHERE
 						datatype_id = " . $formvars['selected_datatype_id'] . " AND
 						name = '" . $attributes['name'][$i] . "'";

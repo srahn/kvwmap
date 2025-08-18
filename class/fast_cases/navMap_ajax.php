@@ -2898,7 +2898,15 @@ class rolle {
 					$ret = $this->database->execSQL($sql);
 					while ($rs = pg_fetch_assoc($ret[1])) {
 						if (value_of($formvars, 'class'.$rs['class_id']) == '0' OR value_of($formvars, 'class'.$rs['class_id']) == '2'){
-							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$rs['class_id'].', '.$formvars['class'.$rs['class_id']].');';
+							$sql2 = '
+								INSERT INTO kvwmap.u_rolle2used_class 
+									(user_id, stelle_id, class_id, status) 
+								VALUES 
+									('.$this->user_id.', '.$this->stelle_id.', '.$rs['class_id'].', '.$formvars['class'.$rs['class_id']].')
+								ON CONFLICT (user_id, stelle_id, class_id) DO 
+									UPDATE SET
+										status = excluded.status
+								;';
 							$this->database->execSQL($sql2,4, $this->loglevel);
 						}
 						elseif (value_of($formvars, 'class'.$rs['class_id']) == '1'){
