@@ -2394,7 +2394,7 @@ function str_replace_last($search , $replace, $str) {
 /**
  * Liefert den Namen der Thumb-Datei vom Originalnamen in $path
  * @param String $path Name of original file.
- * @return String Name of thump file.
+ * @return String Name of thumb file.
  */
 function get_thumb_from_name($path) {
 	return before_last($path, '.') . '_thumb.jpg';
@@ -2428,8 +2428,8 @@ function detect_delimiter($line) {
 
 /**
 * Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
-* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
-* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
+* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumbnails
+* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thumb.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
 *
 * @param string $txt Der Text von dem der Teilstring extrahiert werden soll.
 *

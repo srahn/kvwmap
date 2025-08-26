@@ -11246,7 +11246,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 			}
 		}
-
 		if ($this->formvars['embedded'] != '') {
 			# wenn es ein neuer Datensatz aus einem embedded-Formular ist,
 			# muss das entsprechende Attribut des Hauptformulars aktualisiert werden
@@ -11276,12 +11275,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         } break;
 
         case 'SubFormEmbeddedPK' : {
-					if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-						echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
-					}
-					else{
-						echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
-					}
+					// if ($this->success) { // Stefan fragen ob das wirklich weg kann!!
+					// im Fehlerfall (success == false) würde gar kein echo kommen.
+						if ($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+							echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+						}
+						else {
+							echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+						}
+					// }
+					// hier müsste noch ein else mit Rückgabe einer Fehlermeldung hin oder steckt die schon in GUI::$messages drin?
 					if(!empty(GUI::$messages)){
 						echo 'message('.json_encode(GUI::$messages).');';
 					}
