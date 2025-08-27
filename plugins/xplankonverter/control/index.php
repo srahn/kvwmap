@@ -269,9 +269,9 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		global $GUI;
 		# Erzeuge ein neues Ticket der Kategorie Fehler mit Auftragsart Fehlerkorrektur.
 		$pgObj = new PgObject($GUI, 'feedback', 'tickets');
-		$ticket_id = $pgObj->create(array(
-			'titel' => 'Fehler beim Upload der Zusammenzeichnung' . ($GUI->konvertierung ? ' ' . $GUI->konvertierung->get_id() : '') . ' in Stelle ' . $GUI->Stelle->id,
-			'anfrage' => 'Beim Hochladen der Zusammenzeichnung ' . ($GUI->konvertierung ? $GUI->konvertierung->get('bezeichnung') : '') . ($GUI->konvertierung ? ' id: ' . $GUI->konvertierung->get_id() : '') . " ist ein Fehler aufgetreten.\n" . pg_escape_string($msg),
+		$ticket = $pgObj->create(array(
+			'titel' => 'Fehler beim Upload ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? ' ' . $GUI->konvertierung->get_id() : '') . ' in Stelle ' . $GUI->Stelle->id,
+			'anfrage' => 'Beim Hochladen ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? $GUI->konvertierung->get('bezeichnung') : '') . ($GUI->konvertierung ? ' id: ' . $GUI->konvertierung->get_id() : '') . " ist ein Fehler aufgetreten.\n" . pg_escape_string($msg),
 			'kategorie_id' => 3, # Planuploadfehler
 			'status_id' => 1, # erstellt
 			'dringlichkeit' => 3, # dringlich
@@ -282,8 +282,6 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			'verantwortlich_id' => 5, # Support GDI-Service
 			'stelle_id' => $GUI->Stelle->id
 		));
-
-		$ticket = $pgObj->find_by('id', $ticket_id);
 		return $ticket;
 	}
 
