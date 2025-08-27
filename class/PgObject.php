@@ -64,8 +64,6 @@ class PgObject {
 			array(
 				'column' => $identifier,
 				'type' => $identifier_type
-				'column' => $identifier,
-				'type' => $identifier_type
 			)
 		);
 		$this->show = false;
