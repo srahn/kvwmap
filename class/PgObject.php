@@ -44,6 +44,8 @@ class PgObject {
 	public $fkeys;
 	public $pkey;
 	public $data;
+	public $schema;
+	public $tableName;
 
 	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
@@ -55,7 +57,7 @@ class PgObject {
 		$this->qualifiedTableName = $schema_name . '.' . $table_name;
 		$this->data = array();
 		$this->select = '*';
-		$this->from = $schema . '.' . $tableName;
+		$this->from = '"' . $this->schema . '"."' . $this->tableName . "'";
 		$this->where = '';
 		$this->identifier = $identifier;
 		$this->identifier_type = $identifier_type;
@@ -131,9 +133,9 @@ class PgObject {
 			SELECT
 				{$this->select}
 			FROM
-				\"{$this->schema}\".\"{$this->tableName}\"
+				{$this->from}
 			WHERE
-				" . $where_condition . "
+				" . ($this->where != '' ? ' AND ' : '') . $where_condition . "
 		";
 		$this->debug->show('find_by_ids sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
