@@ -415,7 +415,6 @@ class PgObject {
 			$this->lastquery = $query;
 			$returning_ids = pg_fetch_assoc($query);
 			$this->find_by_ids($returning_ids);
-			echo '<br>data after find_by_ids: ' . print_r($this->data, true);
 		}
 		else {
 			$sql = "
@@ -430,7 +429,6 @@ class PgObject {
 			$query = pg_query($this->database->dbConn, $sql);
 			$this->data = pg_fetch_assoc($query);
 		}
-		echo '<br>this->show nach find_by_ids: ' . $this->show . ' id cond: ' . $this->get_id_condition();
 		$this->debug->show('Dataset created with ' . $this->get_id_condition(), $this->show);
 
 		return array(
