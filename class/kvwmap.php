@@ -18980,7 +18980,7 @@ class db_mapObj{
 		$rs['schema'] = replace_params_rolle($rs['schema']);
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
 		if (!$layerdb->open($rs['connection_id'])) {
-			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit connection_id: ' . $rs['connection_id'] . ' nicht hergestellt werden:';
+			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit connection_id: ' . $rs['connection_id'] . ' aus dem Layer mit ID: ' . $layer_id . ' nicht hergestellt werden:';
 		}
 		return $layerdb;
 	}
