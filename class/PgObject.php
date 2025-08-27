@@ -136,7 +136,7 @@ class PgObject {
 			WHERE
 				" . $where_condition . "
 		";
-		$this->debug->show('find_by_id sql: ' . $sql, $this->show);
+		$this->debug->show('find_by_ids sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
 		return $this;
@@ -340,6 +340,7 @@ class PgObject {
 		foreach ($this->identifiers AS $identifier) {
 			$ids[$identifier['column']] = $this->get($identifier['column']);
 		}
+		echo '<br>ids from get_ids: ' . print_r($ids, true);
 		return $ids;
 	}
 
@@ -431,6 +432,7 @@ class PgObject {
 			$this->lastquery = $query;
 			$returning_ids = pg_fetch_assoc($query);
 			$this->find_by_ids($returning_ids);
+			echo '<br>data after find_by_ids: ' . print_r($this->data, true);
 		}
 		else {
 			$sql = "
@@ -445,6 +447,7 @@ class PgObject {
 			$query = pg_query($this->database->dbConn, $sql);
 			$this->data = pg_fetch_assoc($query);
 		}
+		echo '<br>this->show nach find_by_ids: ' . $this->show . ' id cond: ' . $this->get_id_condition();
 		$this->debug->show('Dataset created with ' . $this->get_id_condition(), $this->show);
 
 		return array(

@@ -591,7 +591,7 @@
 				return array(
 					'success' => true,
 					'package' => $package->data,
-					'msg' => 'Download-Paket mit id: ' . $new_package_id . ' angelegt. Packen für Ressource ID: ' . $package->get('ressource_id') . ' beauftragt.'
+					'msg' => 'Download-Paket mit id: ' . $package->get_id() . ' angelegt. Packen für Ressource ID: ' . $package->get('ressource_id') . ' beauftragt.'
 				);
 			}
 		}
