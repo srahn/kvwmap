@@ -11146,13 +11146,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         } break;
 
         case 'SubFormEmbeddedPK' : {
-					if ($this->success) {
-						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-							echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
-						}
-						else{
-							echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
-						}
+					if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+						echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+					}
+					else{
+						echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
 					}
 					if(!empty(GUI::$messages)){
 						echo 'message('.json_encode(GUI::$messages).');';
@@ -17637,46 +17635,50 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			return 0; // do not create the layer
 		}
 		# Set initial values from rollenlayer
-		$layer = $ret[0];
+		include_once(CLASSPATH . 'PgObject.php');
+		$layer = new PgObject($this, $ret[0]['schema'], $ret[0]['tablename']);
+		$layer->data = $ret[0];
 
 		# overwrite some values for shared layer
-		$layer['id'] 					= ''; // it shall become a new layer
-		$layer['alias'] 			= '';
-		$layer['connection'] 	= '';
-		$layer['oid'] 				= 'gid';
-		$layer['old_id'] 			= -$this->formvars['selected_rollenlayer_id'];
-		$layer['Name'] 				= $this->formvars['layer_options_name'];
-		$layer['Name_or_alias'] = $this->formvars['layer_options_name'];
-		$layer['Gruppe'] 			= $this->formvars['shared_layer_group_id'];
+		$layer->set('id', ''); // it shall become a new layer
+		$layer->set('alias', '');
+		$layer->set('connection', '');
+		$pkey_constraint = $layer->get_pkey_constraint();
+		$layer->set('oid', $pkey_constraint['constraint_columns']);
+		$layer->set('old_id', -$this->formvars['selected_rollenlayer_id']);
+		$layer->set('Name', $this->formvars['layer_options_name']);
+		$layer->set('Name_or_alias', $this->formvars['layer_options_name']);
+		$layer->set('Gruppe', $this->formvars['shared_layer_group_id']);
 		$shared_layer_schema_name = ($this->formvars['shared_layer_schema_name'] == '' ? 'shared' : $this->formvars['shared_layer_schema_name']);
-		$layer['schema'] 			= $shared_layer_schema_name;
+		$layer->set('schema', $shared_layer_schema_name);
 		# Assume that query has the form "SELECT * FROM rollenlayertable"
 		# as it should be for rollenlayer
-		$rollenlayer_table 		= get_first_word_after($layer['query'], 'FROM');
+		$rollenlayer_table 		= get_first_word_after($layer->get('query'), 'FROM');
 		$shared_layer_table_name = ($this->formvars['shared_layer_table_name'] == '' ? $rollenlayer_table : $this->formvars['shared_layer_table_name']);
 		if ($this->pgdatabase->table_exists($shared_layer_schema_name, $shared_layer_table_name)) {
 			$shared_layer_table_name = $shared_layer_table_name  . '_' .  strval(rand(100, 999));
 		}
-		$layer['maintable'] = $shared_layer_table_name;
-		$layer['pfad'] = str_replace(
+		$layer->set('maintable', $shared_layer_table_name);
+		$layer->set('pfad', str_replace(
 			$rollenlayer_table,
 			$shared_layer_table_name,
-			$layer['query']
-		);
-		unset($layer['query']);
-		$layer['Data'] 				= str_replace(
+			$layer->get('query')
+		));
+		$layer->unset('query');
+		$layer->set('Data', str_replace(
 			CUSTOM_SHAPE_SCHEMA . '.' . $rollenlayer_table,
 			$shared_layer_schema_name . '.' . $shared_layer_table_name,
-			$layer['Data']
-		);
-		$layer['queryable'] 			= '1';
-		$layer['use_geom'] 				= 1;
-		$layer['query_map'] 			= ($layer['Datentyp'] == 0 ? '0' : '1'); // not for points
-		$layer['privileg'] 				= 0;
-		$layer['export_privileg'] = 1;
-		$layer['editable'] 				= 1;
-		$layer['listed'] 					= 1;
-		$layer['shared_from'] 		= $this->user->id;
+			$layer->get('Data')
+		));
+		$layer->set('queryable', '1');
+		$layer->set('drawingorder', 10000);
+		$layer->set('use_geom', 1);
+		$layer->set('query_map', ($layer->get('Datentyp') == 0 ? '0' : '1')); // not for points
+		$layer->set('privileg', 0);
+		$layer->set('export_privileg', 1);
+		$layer->set('editable', 1);
+		$layer->set('listed', 1);
+		$layer->set('shared_from', $this->user->id);
 
 		# create share schema if not exists and copy rollenlayer table to shared layer table
 		$sql = "
@@ -17689,7 +17691,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (!$ret['success']) { $this->add_message('error', err_msg('kvwmap.php', __LINE__, $sql)); return 0; }
 
 		# Set formvars from layer
-		$this->formvars = array_merge($layer, $this->formvars);
+		$this->formvars = array_merge($layer->data, $this->formvars);
 		$this->LayerAnlegen();
 
 		# Assign new layer $this->formvars['selected_layer_id'] to alle stellen that allow shared layers

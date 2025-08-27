@@ -210,9 +210,9 @@ class NASLoader extends DOMDocument {
 							$ff->set('anlassart', $anlassarten[0]);
 						}
 
-						$ff_id = $ff->create();
-						if (empty($ff_id)) {
-							while($row = pg_fetch_assoc($ff->lastquery)) {
+						$result = $ff->create();
+						if ($result['success']) {
+							while ($row = pg_fetch_assoc($ff->lastquery)) {
 								$this->gui->add_message($row['msg_type'], $row['msg']);
 							}
 						}

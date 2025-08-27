@@ -82,10 +82,28 @@ class FormObject {
 		}
 	} # ende constructor
 
-/*
-* parma $options array value, output, attribute, attribute_value, title, style
-*/
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '') {
+
+/**
+ * Function to create a select field
+ * @param $name string name attribute of the select field
+ * @param $options array options for the select field (array with value and output keys)
+ * @param $value string|int selected value
+ * @param $size int size attribute of the select field
+ * @param $style string style attribute of the select field
+ * @param $onchange string onchange attribute of the select field
+ * @param $id string id attribute of the select field
+ * @param $multiple string if not empty the multiple attribute is added
+ * @param $class string class attribute of the select field
+ * @param $first_option string first option to be added with empty value
+ * @param $option_style string style attribute for each option
+ * @param $option_class string class attribute for each option
+ * @param $onclick string onclick attribute for each option
+ * @param $onmouseenter string onmouseenter attribute for the select field
+ * @param $title string title attribute for the select field
+ * @param $data array additional data attributes for the select field (arrays with key => value pairs)
+ * @return string HTML code for the select field
+ */
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '', $title = '', $data = array()) {
 	$id = ($id == '' ? $name : $id);
 	if ($multiple != '') {
 		$multiple = ' multiple';
@@ -97,6 +115,10 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	if ($option_style != '') $option_style = 'style="' . $option_style . '"';
 	if ($option_class != '') $option_class = 'class="' . $option_class . '"';
 	if ($onmouseenter != '') $onmouseenter = 'onmouseenter="' . $onmouseenter . '"';
+	if ($title != '') $title = 'title="' . $title . '"';
+	foreach ($data AS $data_key => $data_value) {
+		$data[$data_key] = 'data-' . $data_key . '="' . $data_value . '"';
+	}
 
 	$options_html = array();
 	if ($first_option != '') {
@@ -110,6 +132,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 			$selected = (in_array(strval($option['value']), explode(',', $value)) ? ' selected' : '');
 		}
 		else {
+			// echo 'option value: ' . $option['value'] . ' value: ' . $value . '<br>';
 			$selected = (strval($option['value']) === strval($value) ? ' selected' : '');
 		}
 		$options_html[] = "
@@ -122,12 +145,11 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	}
 
 	$html  = '
-<select id="' . $id . '" name="' . $name . ($multiple != '' ? '[]' : '') . '" size="' . $size . '" ' . $style . ' ' . $onchange . ' ' . $onmouseenter . ' ' . $multiple . ' ' . $class . '>
-	' . implode("\n", $options_html) . '
-</select>';
+	<select id="' . $id . '" name="' . $name . ($multiple != '' ? '[]' : '') . '" size="' . $size . '" ' . $style . ' ' . $onchange . ' ' . $onmouseenter . ' ' . $multiple . ' ' . $class . ' ' . $title . ' ' . implode(' ', $data) . '>
+		' . implode("\n", $options_html) . '
+	</select>';
   return $html;
 }
-
 
 static	function createCustomSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '', $option_onmouseenter = '') {
 	$id = ($id == '' ? $name : $id);

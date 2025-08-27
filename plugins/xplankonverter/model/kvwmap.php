@@ -108,7 +108,7 @@
 
 				# Create Konvertierung and get konvertierung_id
 				$konvertierung = new Konvertierung($GUI);
-				$konvertierung_id = $konvertierung->create(
+				$konvertierung = $konvertierung->create(
 					$xp_plan->get_anzeige_name(),
 					$GUI->Stelle->epsg_code,
 					$GUI->user->rolle->epsg_code,
@@ -117,10 +117,9 @@
 					$GUI->user->id
 				);
 
-				$xp_plan->set('konvertierung_id', $konvertierung_id);
+				$xp_plan->set('konvertierung_id', $konvertierung->get_id());
 				$xp_plan->update();
 
-				$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
 				// $GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
 				// echo '<script>console.log("' . print_r($GUI->formvars, true) . '")</script>';
@@ -410,16 +409,21 @@
 		# Hochgeladene Zusammenzeichnung hat Prüfung im XPlanValidator bestanden
 		# Create Konvertierung and get konvertierung_id
 		# Bezeichnung wird später wenn die Zusammenzeichnung eingelesen wurde noch entsprechend der Zusammenzeichnung.gml aktualisiert.
-		$konvertierung_id = $konvertierung->create(
+		$result = $konvertierung->create(
 			$GUI->konvertierung->config['title'] . ' aus Datei ' . $upload_file['name'],
 			$GUI->Stelle->epsg_code,
 			$GUI->user->rolle->epsg_code,
 			$GUI->formvars['planart'],
 			$GUI->Stelle->id,
-			$GUI->user->id
+			$GUI->user->id,
+			$upload_validation_result['plan_file_name']
 		);
-		$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
-
+		if (!$result['success']) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Anlegen der Konvertierung. ' . $result['msg']
+			);
+		}
 		$konvertierung->create_directories();
 
 		# move files from tmp to upload folder from konvertierung
