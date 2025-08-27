@@ -17802,7 +17802,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$shared_layer_table_name,
 			$layer->get('query')
 		));
-		$layer->unset('query');
+		$layer->unset_('query');
 		$layer->set('Data', str_replace(
 			CUSTOM_SHAPE_SCHEMA . '.' . $rollenlayer_table,
 			$shared_layer_schema_name . '.' . $shared_layer_table_name,
