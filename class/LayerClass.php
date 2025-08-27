@@ -34,12 +34,14 @@ class LayerClass extends MyObject {
 	}
 
 	function copy_styles2classes($new_class) {
+		include_once(CLASSPATH . 'Style2Class.php');
 		foreach(Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier)) AS $style2class) {
 			$style2class->copy($new_class->get($new_class->identifier));
 		}
 	}
 
 	function copy_labels2classes($new_class) {
+		include_once(CLASSPATH . 'Label2Class.php');
 		foreach(Label2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier)) AS $label2class) {
 			$label2class->copy($this->get('id'));
 		}
