@@ -118,6 +118,10 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	foreach ($data AS $data_key => $data_value) {
 		$data[$data_key] = 'data-' . $data_key . '="' . $data_value . '"';
 	}
+	if ($title != '') $title = 'title="' . $title . '"';
+	foreach ($data AS $data_key => $data_value) {
+		$data[$data_key] = 'data-' . $data_key . '="' . $data_value . '"';
+	}
 
 	$options_html = array();
 	if ($first_option != '') {
@@ -131,6 +135,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 			$selected = (in_array(strval($option['value']), explode(',', $value)) ? ' selected' : '');
 		}
 		else {
+			// echo 'option value: ' . $option['value'] . ' value: ' . $value . '<br>';
 			// echo 'option value: ' . $option['value'] . ' value: ' . $value . '<br>';
 			$selected = (strval($option['value']) === strval($value) ? ' selected' : '');
 		}

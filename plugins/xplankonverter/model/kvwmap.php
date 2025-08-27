@@ -117,6 +117,7 @@
 				);
 
 				$xp_plan->set('konvertierung_id', $konvertierung->get_id());
+				$xp_plan->set('konvertierung_id', $konvertierung->get_id());
 				$xp_plan->update();
 
 				// $GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);

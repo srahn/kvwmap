@@ -64,6 +64,8 @@ class PgObject {
 			array(
 				'column' => $identifier,
 				'type' => $identifier_type
+				'column' => $identifier,
+				'type' => $identifier_type
 			)
 		);
 		$this->show = false;
@@ -114,10 +116,16 @@ class PgObject {
 	}
 
 	function get_id_condition($ids = array()) {
+	function get_id_condition($ids = array()) {
 		$parts = array();
 		if (count($ids) == 0) {
 			$ids = $this->get_ids();
+		if (count($ids) == 0) {
+			$ids = $this->get_ids();
 		}
+		foreach ($this->identifiers AS $identifier) {
+			$quote = ($identifier['type'] == 'text' ? "'" : "");
+			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
 		foreach ($this->identifiers AS $identifier) {
 			$quote = ($identifier['type'] == 'text' ? "'" : "");
 			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
@@ -125,6 +133,7 @@ class PgObject {
 		return implode(' AND ', $parts);
 	}
 
+	function find_by_ids($ids) {
 	function find_by_ids($ids) {
 		$where_condition = $this->get_id_condition($ids);
 		$this->debug->show('find by ids: ' . $where_condition, $this->show);
@@ -136,6 +145,7 @@ class PgObject {
 			WHERE
 				" . $where_condition . "
 		";
+		$this->debug->show('find_by_ids sql: ' . $sql, $this->show);
 		$this->debug->show('find_by_ids sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
@@ -192,6 +202,7 @@ class PgObject {
 	 */
 	function get_extent($ows_srs = '', $where = '') {
 		if ($where == '') {
+			$where = $this->get_id_condition(array($this->identifier => $this->get($this->identifier)));
 			$where = $this->get_id_condition(array($this->identifier => $this->get($this->identifier)));
 		}
 		$epsg_codes = explode(' ', trim(preg_replace('~[EPSGepsg: ]+~', ' ', $ows_srs)));
@@ -340,7 +351,6 @@ class PgObject {
 		foreach ($this->identifiers AS $identifier) {
 			$ids[$identifier['column']] = $this->get($identifier['column']);
 		}
-		echo '<br>ids from get_ids: ' . print_r($ids, true);
 		return $ids;
 	}
 
