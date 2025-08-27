@@ -332,7 +332,7 @@ class PgObject {
 		return $value;
 	}
 
-	function unset($attribute) {
+	function unset_($attribute) {
 		unset($this->data[$attribute]);
 	}
 
