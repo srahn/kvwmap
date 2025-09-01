@@ -5,12 +5,16 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 if (MAPSERVERVERSION < 800) {
-	function msGetErrorObj(){
-		return ms_GetErrorObj();
+	if (!function_exists('msGetErrorObj')) {
+		function msGetErrorObj() {
+			return ms_GetErrorObj();
+		}
 	}
 
-	function msResetErrorList(){
-		return ms_ResetErrorList();
+	if (!function_exists('msResetErrorList')) {
+		function msResetErrorList(){
+			return ms_ResetErrorList();
+		}
 	}
 }
 
@@ -450,8 +454,8 @@ function ie_check(){
 	}
 }
 
-if(!function_exists('mb_strrpos')){		# Workaround, falls es die Funktion nicht gibt
-	function mb_strrpos($str, $search, $offset = 0, $encoding){
+if (!function_exists('mb_strrpos')) {		# Workaround, falls es die Funktion nicht gibt
+	function mb_strrpos($str, $search, $offset = 0, $encoding = 'UTF-8') {
 		return strrpos($str, $search, $offset);
 	}
 }

@@ -944,7 +944,7 @@ class data_import_export {
 			. ' -sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" '
 			. $formvars_nln . ' '
 			. $formvars_nlt . ' '
-			. $exportfile . ' '
+			. '"' . $exportfile . '" '
 			. 'PG:"' . $layerdb->get_connection_string(true) . ' active_schema=' . $layerdb->schema . '"';
 		$errorfile = rand(0, 1000000);
 		$command .= ' 2> ' . IMAGEPATH . $errorfile . '.err';
@@ -1435,7 +1435,7 @@ class data_import_export {
 				. $sql . "
 			";
 			// echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
-			$ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
+			$ret = $layerdb->execSQL($sql, 4, 0, $suppress_err_msg);
 			if ($ret['success']) {
 				for ($s = 0; $s < count($selected_attributes); $s++) {
 					$selected_attributes[$s] = pg_quote($selected_attributes[$s]);
@@ -1495,7 +1495,6 @@ class data_import_export {
 								fwrite($fp, 'UTF-8');
 								fclose($fp);
 							}
-							// echo '<br>Datei ' . $exportfile . ' expoprtiert.';
 							$zip = true;
 						} break;
 

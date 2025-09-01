@@ -1,8 +1,11 @@
 <?
+  $timestamp = date("Y-m-d H:i:s", time());
+  echo "\n\n" . $timestamp;
   // Running this script with a cron job like this:
   // cd /var/www/apps/kvwmap/plugins/metadata/tools; php -f packages_cron.php login_name=pkorduan >> /var/www/logs/cron/packages_cron.log 2>&1
   //error_reporting(E_ALL);
-  error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
+  // error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
+  error_reporting(E_ERROR | E_WARNING);
   try {
     include('../../../credentials.php');
     include('../../../config.php');
@@ -13,6 +16,7 @@
     include(CLASSPATH . 'rolle.php');
     include(CLASSPATH . 'stelle.php');
     include(CLASSPATH . 'users.php');
+    include(CLASSPATH . 'Layer.php');
     include(CLASSPATH . 'mysql.php');
     include(CLASSPATH . 'postgresql.php');
 
@@ -37,7 +41,8 @@
     $GUI->database = $userDb;
     $GUI->database->open();
     $GUI->pgdatabase = new pgdatabase();
-    $GUI->pgdatabase->open(1);
+    $ressources_layer = Layer::find_by_id($GUI, METADATA_RESSOURCES_LAYER_ID);
+    $GUI->pgdatabase->open($ressources_layer->get('connection_id'));
 
     include_once(PLUGINS . 'metadata/model/kvwmap.php');
     include_once(PLUGINS . 'metadata/model/Ressource.php');
@@ -170,8 +175,6 @@
   }
 
   function echoLog($msg) {
-    $timestamp = date("Y-m-d H:i:s", time());
-    echo "\n\n" . $timestamp;
     echo "\n" . $msg;
   }
 ?>

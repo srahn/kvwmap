@@ -45,8 +45,6 @@ class PgObject {
 	public $fkeys;
 	public $pkey;
 	public $data;
-	public $schema;
-	public $tableName;
 
 	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
@@ -75,7 +73,7 @@ class PgObject {
 		$this->extents = array();
 		$this->fkeys = array();
 		$this->pkey = array();
-		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, $this->show);
+		$gui->debug->show('Create new Object PgObject with schema ' . $this->schema . ' table ' . $this->tableName, $this->show);
 	}
 
 	/**
@@ -120,13 +118,6 @@ class PgObject {
 		if (count($ids) == 0) {
 			$ids = $this->get_ids();
 		}
-		if (count($ids) == 0) {
-			$ids = $this->get_ids();
-		}
-		foreach ($this->identifiers AS $identifier) {
-			$quote = ($identifier['type'] == 'text' ? "'" : "");
-			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
-		}
 		foreach ($this->identifiers AS $identifier) {
 			$quote = ($identifier['type'] == 'text' ? "'" : "");
 			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
@@ -136,14 +127,19 @@ class PgObject {
 
 	function find_by_ids($ids) {
 		$where_condition = $this->get_id_condition($ids);
-		$this->debug->show('find by ids: ' . $where_condition, $this->show);
 		$sql = "
 			SELECT
-				{$this->select}
+				*
 			FROM
-				{$this->from}
+				(
+					SELECT
+						{$this->select}
+					FROM
+						{$this->from}
+					" . ($this->where != '' ? 'WHERE ' . $this->where : '') . "
+				) foo
 			WHERE
-				" . ($this->where != '' ? ' AND ' : '') . $where_condition . "
+				" . $where_condition . "
 		";
 		$this->debug->show('find_by_ids sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);

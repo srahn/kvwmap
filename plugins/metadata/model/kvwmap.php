@@ -192,8 +192,10 @@
 				include_once(CLASSPATH . 'data_import_export.php');
 				$data_import_export = new data_import_export();
 				$result = $data_import_export->export_exportieren($GUI->formvars, $GUI->Stelle, $GUI->user , $export_path, $exportfilename, true);
-				if (strtolower(pathinfo($result['success'])['extension']) !== 'zip') {
-					$data_import_export->zip_export_path($export_path);
+				if ($result['success']) {
+					if (strtolower(pathinfo($result['exportfile'])['extension']) !== 'zip') {
+						$data_import_export->zip_export_path($export_path);
+					}
 				}
 				else {
 					// Fehler loggen
