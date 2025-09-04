@@ -51,7 +51,7 @@ class LayerClass extends MyObject {
 		#echo '<br>LayerClass->get_first_style for Class id: ' . $this->get($this->identifier);
 		include_once(CLASSPATH . 'Style2Class.php');
 		include_once(CLASSPATH . 'LayerStyle.php');
-		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier));
+		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier) . ' AND style_id > 0');
 		if (count($styles2class) == 0) {
 			return '';
 		}
@@ -75,7 +75,7 @@ class LayerClass extends MyObject {
 			$def = '';
 		}
 		else {
-			$def = '([' . $classitem . '] = ' . $this->get('Expression') . ')';
+			$def = "([' . $classitem . '] = '" . $this->get('Expression') . "')";
 		}
 
 		$first_style = $this->get_first_style($datentyp);
