@@ -57,6 +57,20 @@ class LayerStyle extends MyObject {
 				$iconSize / 2
 			)
 		);
+
+		if ($this->get('minsize')) {
+			$icondef->iconMinSize = array($this->get('minsize'), $this->get('minsize'));
+			if ($this->get('maxsize') == '') {
+				$icondef->iconMaxSize = $icondef->iconSize;
+			}
+		}
+		if ($this->get('maxsize')) {
+			$icondef->iconMaxSize = array($this->get('maxsize'), $this->get('maxsize'));
+			if ($this->get('minsize') == '') {
+				$icondef->iconMinSize = $icondef->iconSize;
+			}
+		}
+
 		return $icondef;
 	}
 
