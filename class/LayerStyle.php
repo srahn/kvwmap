@@ -95,15 +95,15 @@ class LayerStyle extends MyObject {
 					'fillOpacity'	=> ($this->get('opacity') == '' ? $layer_opacity / 100 : $this->get('opacity') / 100)
 				);
 				if ($this->get('minsize')) {
-					$layerdef['minsize'] = $this->get('minsize');
+					$layerdef->minsize = $this->get('minsize');
 					if ($this->get('maxsize') == '') {
-						$layerdef['maxsize'] = $layerdef['size'];
+						$layerdef->maxsize = $layerdef->size;
 					}
 				}
 				if ($this->get('maxsize')) {
-					$layerdef['maxsize'] = $this->get('maxsize');
+					$layerdef->maxsize = $this->get('maxsize');
 					if ($this->get('minsize') == '') {
-						$layerdef['minsize'] = $layerdef['size'];
+						$layerdef->minsize = $layerdef->size;
 					}
 				}
 			}

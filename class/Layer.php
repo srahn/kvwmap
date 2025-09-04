@@ -771,7 +771,7 @@ l.Name AS sub_layer_name
 		);
 
 		if ($this->get_layer2stelle($stelle_id) AND $this->layer2stelle->get('symbolscale')) {
-			$layerdef['symbolscale'] = $this->layer2stelle->get('symbolscale');
+			$layerdef->symbolscale = $this->layer2stelle->get('symbolscale');
 		}
 
 		if ($this->get('processing') != '') {
