@@ -75,7 +75,7 @@ class LayerClass extends MyObject {
 			$def = '';
 		}
 		else {
-			$def = "([' . $classitem . '] = '" . $this->get('Expression') . "')";
+			$def = "([" . $classitem . "] = '" . $this->get('Expression') . "')";
 		}
 
 		$first_style = $this->get_first_style($datentyp);
