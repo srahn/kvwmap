@@ -1614,7 +1614,7 @@ class stelle {
 						privileg = foo.privileg, 
 						tooltip = foo.tooltip
 					";
-				#echo $sql.'<br>';
+				#echo 'SQL zum Anlegen eines used layers :' . $sql . '<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }

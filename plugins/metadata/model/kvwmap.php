@@ -573,19 +573,25 @@
 		// echo '<p>metadata_order_data_package ressource_id: ' . $ressource_id . ' in stelle_id: ' . $stelle_id;
 		try {
 			$package = new DataPackage($GUI);
-			$new_package_id = $package->create(array(
-				'stelle_id' => $stelle_id,
-				'ressource_id' => $GUI->formvars['ressource_id'],
-				'pack_status_id' => 2, // Paketerstellung beauftragt
-				'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name
-			), true);
-			$package = $package->find_by_id($GUI, $new_package_id);
+			$packages = $package->find_where("stelle_id = " . $stelle_id . " AND ressource_id = " . $ressource_id);
+			if (count($packages) > 0) {
+				// Dieses Paket gibt es schon. Setze es auf 2 (beauftragt)
+				$packages[0]->update_attr(array('status_id' => 2));
+			}
+			else {
+				$package->create(array(
+					'stelle_id' => $stelle_id,
+					'ressource_id' => $GUI->formvars['ressource_id'],
+					'pack_status_id' => 2, // Paketerstellung beauftragt
+					'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name
+				), true);
 
-			return array(
-				'success' => true,
-				'package' => $package->data,
-				'msg' => 'Download-Paket mit id: ' . $new_package_id . ' angelegt. Packen für Ressource ID: ' . $package->get('ressource_id') . ' beauftragt.'
-			);
+				return array(
+					'success' => true,
+					'package' => $package->data,
+					'msg' => 'Download-Paket mit id: ' . $package->get_id() . ' angelegt. Packen für Ressource ID: ' . $package->get('ressource_id') . ' beauftragt.'
+				);
+			}
 		}
 		catch (Exception $e) {
 			return array(
