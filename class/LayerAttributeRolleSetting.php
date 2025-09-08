@@ -7,10 +7,10 @@ class LayerAttributeRolleSetting extends PgObject {
 		parent::__construct($gui, 'kvwmap', 'layer_attributes2rolle');
 		$this->identifier_type = 'array';
 		$this->identifier = array(
-			array('type' => 'int(11)', 'key' => 'layer_id'),
-			array('type' => 'varchar(256)', 'key' => 'attributename'),
-			array('type' => 'int(11)', 'key' => 'stelle_id'),
-			array('type' => 'int(11)', 'key' => 'user_id')
+			array('type' => 'integer', 'column' => 'layer_id'),
+			array('type' => 'varchar(256)', 'column' => 'attributename'),
+			array('type' => 'integer', 'column' => 'stelle_id'),
+			array('type' => 'integer', 'column' => 'user_id')
 		);
 	}
 

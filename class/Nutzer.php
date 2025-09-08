@@ -120,11 +120,11 @@ class Nutzer extends PgObject {
 				'rolle',
 				array(
 					array(
-						'key' =>'user_id',
+						'column' =>'user_id',
 						'type' => 'integer'
 					),
 					array(
-						'key' => 'stelle_id',
+						'column' => 'stelle_id',
 						'type' => 'integer'
 					)
 				),

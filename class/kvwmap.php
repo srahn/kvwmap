@@ -8627,11 +8627,11 @@ END $$;
 			'rolle',
 			array(
 				array(
-					'key' => 'user_id',
+					'column' => 'user_id',
 					'type' => 'integer'
 				),
 				array(
-					'key' => 'stelle_id',
+					'column' => 'stelle_id',
 					'type' => 'integer'
 				)
 			),
@@ -9609,7 +9609,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->invitation->create();
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
 			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
 				Zum Einladen per E-Mail<br>

@@ -56,14 +56,15 @@ class PgObject {
 		$this->qualifiedTableName = $schema_name . '.' . $table_name;
 		$this->data = array();
 		$this->select = '*';
-		$this->from = '"' . $this->schema . '"."' . $this->tableName . "'";
+		$this->from = '"' . $this->schema . '"."' . $this->tableName . '"';
 		$this->where = '';
 		$this->identifier = $identifier;
 		$this->identifier_type = $identifier_type;
-		$this->identifiers = array(
-			array(
-				'column' => $identifier,
-				'type' => $identifier_type
+		$this->identifiers = ($this->identifier_type == 'array' ? $identifier : array(
+				array(
+					'column' => $identifier,
+					'type' => $identifier_type
+				)
 			)
 		);
 		$this->show = false;
@@ -259,7 +260,7 @@ class PgObject {
 				\"{$this->schema}\".\"{$this->tableName}\"
 			WHERE
 				" . $key . " = " . quote($this->get($key)) . " AND
-				NOT " . $this->get_identifier_expression() . "
+				NOT " . $this->get_id_condition() . "
 		";
 		$query = pg_query($this->database->dbConn, $sql);
 		$result = pg_fetch_assoc($query);
@@ -535,7 +536,7 @@ class PgObject {
 			SET
 				" . implode(', ', $this->getKVP(true, true)) . "
 			WHERE
-				" . $this->get_identifier_expression() . "
+				" . $this->get_id_condition() . "
 		";
 		$this->debug->show('update sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);

@@ -9,8 +9,8 @@ class User2Notification extends PgObject {
 			'kvwmap',
 			'user2notifications',
 			array(
-				array('key' => 'user_id', 'type' => 'int'),
-				array('key' => 'notification_id', 'type' => 'int')
+				array('column' => 'user_id', 'type' => 'int'),
+				array('column' => 'notification_id', 'type' => 'int')
 			),
 			'array'
 		);

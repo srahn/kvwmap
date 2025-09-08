@@ -7,11 +7,11 @@ class User2Stelle extends MyObject {
 		parent::__construct($gui, 'rolle');
 		$this->identifiers = array(
 			array(
-				'key' => 'user_id',
+				'column' => 'user_id',
 				'type' => 'integer'
 			),
 			array(
-				'key' => 'stelle_id',
+				'column' => 'stelle_id',
 				'type' => 'integer'
 			)
 		);

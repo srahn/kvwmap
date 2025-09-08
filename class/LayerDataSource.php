@@ -38,11 +38,11 @@ class LayerDataSource extends PgObject {
 		parent::__construct($gui, 'kvwmap', 'layer_datasources', '');
 		$this->identifiers = array(
 			array(
-				'key' => 'layer_id',
+				'column' => 'layer_id',
 				'type' => 'integer'
 			),
 			array(
-				'key' => 'datasource_id',
+				'column' => 'datasource_id',
 				'type' => 'integer'
 			)
 		);
