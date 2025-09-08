@@ -1,6 +1,5 @@
 <?php
 include_once(CLASSPATH . 'MyObject.php');
-include_once(CLASSPATH . 'LayerAttribute.php');
 include_once(CLASSPATH . 'LayerChart.php');
 include_once(CLASSPATH . 'DataSource.php');
 include_once(CLASSPATH . 'LayerDataSource.php');
@@ -17,6 +16,7 @@ class Layer extends MyObject {
 	public $minScale;
 	public $maxScale;
 	public $document_attributes;
+	public $layer2stelle;
 
 	function __construct($gui) {
 		$this->gui = $gui;
@@ -179,6 +179,7 @@ class Layer extends MyObject {
 	}
 
 	function get_layer_attributes() {
+		include_once(CLASSPATH . 'LayerAttribute.php');
 		$obj = new LayerAttribute($this->gui);
 		$layer_attributes = $obj->find_where(
 			$this->has_many['attributes']['fk'] . ' = ' . $this->get_id(),
@@ -443,13 +444,17 @@ l.Name AS sub_layer_name
 		foreach ($attributes AS $key => $value) {
 			$new_layer->set($key, $value);
 		}
-		$new_layer->create();
+
+		$result = $new_layer->create()[0];
+		if ($result['success'] === false) {
+			throw new Exception('Fehler beim Kopieren des Layers: ' . $result['msg']);
+		}
 		$new_layer_id = $new_layer->get($new_layer->identifier);
 
 		if (!empty($new_layer_id)) {
-			$this->debug->show('<p>Copiere die Klassen des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
+			$this->debug->show('<p>Kopiere die Klassen des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
 			$this->copy_classes($new_layer_id);
-			$this->debug->show('<p>Copiere die layer_attributes des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
+			$this->debug->show('<p>Kopiere die layer_attributes des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
 			$this->copy_layer_attributes($new_layer_id);
 		}
 		return $new_layer;
@@ -459,6 +464,7 @@ l.Name AS sub_layer_name
 	* Kopiere die Klassen des Layers mit anderer Layer_id
 	*/
 	function copy_classes($new_layer_id) {
+		include_once(CLASSPATH . 'LayerClass.php');
 		foreach(LayerClass::find($this->gui, 'Layer_id = ' . $this->get('Layer_ID')) AS $layer_class) {
 			$this->debug->show('Copy class: ' . $layer_class->get('Name') . ' mit layer id: ' . $this->get('Layer_ID') . ' => ' . $new_layer_id, Layer::$write_debug);
 			$layer_class->copy($new_layer_id);
@@ -466,6 +472,7 @@ l.Name AS sub_layer_name
 	}
 
 	function copy_layer_attributes($new_layer_id) {
+		include_once(CLASSPATH . 'LayerAttribute.php');
 		foreach(LayerAttribute::find($this->gui, 'Layer_id = ' . $this->get('Layer_ID')) AS $attribute) {
 			$this->debug->show('Copy Attribute: ' . $attribute->get('name') . ' mit neuer layer id: ' . $this->get('Layer_ID') . ' => ' . $new_layer_id, Layer::$write_debug);
 			$attribute->copy($new_layer_id);
@@ -633,6 +640,9 @@ l.Name AS sub_layer_name
 		}
 	}
 
+	/**
+	 * Get layer definition from layer for stelle
+	 */
 	function get_overlays_def($stelle_id) {
 		$this->debug->show('<p>Layer->get_overlays_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
 		#echo '<p>get_overlays_def for Layer: ' . $this->get('Name');
@@ -759,6 +769,10 @@ l.Name AS sub_layer_name
 			'hideEmptyLayerAttributes' => true,
 			'layerAttributes' => $layerAttributes
 		);
+
+		if ($this->get_layer2stelle($stelle_id) AND $this->layer2stelle->get('symbolscale')) {
+			$layerdef->symbolscale = $this->layer2stelle->get('symbolscale');
+		}
 
 		if ($this->get('processing') != '') {
 			$processing = explode(';', $this->get('processing'));
@@ -951,6 +965,18 @@ l.Name AS sub_layer_name
   function get_table_alias() {
     return $this->table_alias;
   }
+
+	/**
+	 * Liefert das Layer2Stelle-Objekt für die übergebene Stelle zurück, wenn es existiert.
+	 * @param int $stelle_id
+	 * @return Layer2Stelle|null
+	 */
+	function get_layer2stelle($stelle_id) {
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		$result = Layer2Stelle::find($this->gui, 'Stelle_ID = ' . $stelle_id . ' AND Layer_ID = ' . $this->get('Layer_ID'));
+		$this->layer2stelle = (count($result) == 0 ? null : $result[0]);
+		return $this->layer2stelle;
+	}
 
 	/**
 	 * Generiert ein data-Statement in dem fehlende Attribute aus dem main_table ergänzt werden.

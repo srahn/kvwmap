@@ -192,8 +192,10 @@
 				include_once(CLASSPATH . 'data_import_export.php');
 				$data_import_export = new data_import_export();
 				$result = $data_import_export->export_exportieren($GUI->formvars, $GUI->Stelle, $GUI->user , $export_path, $exportfilename, true);
-				if (strtolower(pathinfo($result['success'])['extension']) !== 'zip') {
-					$data_import_export->zip_export_path($export_path);
+				if ($result['success']) {
+					if (strtolower(pathinfo($result['exportfile'])['extension']) !== 'zip') {
+						$data_import_export->zip_export_path($export_path);
+					}
 				}
 				else {
 					// Fehler loggen
@@ -581,18 +583,17 @@
 				$packages[0]->update_attr(array('status_id' => 2));
 			}
 			else {
-				$new_package_id = $package->create(array(
+				$package->create(array(
 					'stelle_id' => $stelle_id,
 					'ressource_id' => $GUI->formvars['ressource_id'],
 					'pack_status_id' => 2, // Paketerstellung beauftragt
 					'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name
 				), true);
-				$package = $package->find_by_id($GUI, $new_package_id);
 
 				return array(
 					'success' => true,
 					'package' => $package->data,
-					'msg' => 'Download-Paket mit id: ' . $new_package_id . ' angelegt. Packen für Ressource ID: ' . $package->get('ressource_id') . ' beauftragt.'
+					'msg' => 'Download-Paket mit id: ' . $package->get_id() . ' angelegt. Packen für Ressource ID: ' . $package->get('ressource_id') . ' beauftragt.'
 				);
 			}
 		}

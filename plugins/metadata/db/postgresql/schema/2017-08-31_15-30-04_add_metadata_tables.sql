@@ -1,7 +1,7 @@
 --#####################
 --# Metadatentabellen #
 --#####################
-CREATE TABLE md_metadata
+CREATE TABLE public.md_metadata
 (
   id serial NOT NULL,
   mdfileid varchar(255) NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE md_metadata
 COMMENT ON TABLE md_metadata IS 'Metadatendokumente';
 
 SELECT AddGeometryColumn('public', 'md_metadata','the_geom',25833,'POLYGON', 2);
-CREATE INDEX md_metadata_the_geom_gist ON md_metadata USING GIST (the_geom);
+CREATE INDEX md_metadata_the_geom_gist ON public.md_metadata USING GIST (the_geom);
 
 --# Diese Tabellen sind für ein normalisiertes Datenbankmodell für Metadaten geplant
 --# und werden noch nicht verwendet 
