@@ -56,11 +56,16 @@ class PgObject {
 		$this->qualifiedTableName = $schema_name . '.' . $table_name;
 		$this->data = array();
 		$this->select = '*';
-		$this->from = $schema . '.' . $tableName;
+		$this->from = '"' . $this->schema . '"."' . $this->tableName . "'";
 		$this->where = '';
 		$this->identifier = $identifier;
 		$this->identifier_type = $identifier_type;
-		$this->identifiers = ($this->identifier_type == 'array' ? $identifier : array());
+		$this->identifiers = array(
+			array(
+				'column' => $identifier,
+				'type' => $identifier_type
+			)
+		);
 		$this->show = false;
 		$this->attribute_types = array();
 		$this->geom_column = 'geom';
@@ -69,7 +74,7 @@ class PgObject {
 		$this->children_ids = array();
 		$this->fkeys = array();
 		$this->pkey = array();
-		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, $this->show);
+		$gui->debug->show('Create new Object PgObject with schema ' . $this->schema . ' table ' . $this->tableName, $this->show);
 	}
 
 	/**
@@ -119,84 +124,37 @@ class PgObject {
 		return $this;
 	}
 
-	function get_id_condition($ids) {
+	function get_id_condition($ids = array()) {
 		$parts = array();
-		if (func_num_args() == 0) {
-			$ids = array(
-				$this->identifier => $this->get($this->identifier)
-			);
+		if (count($ids) == 0) {
+			$ids = $this->get_ids();
 		}
-		foreach ($this->identifiers AS $key => $identifier) {
-			$parts[] = "\"{$identifier['column']}\" = '{$ids[$key]}'"; 
+		foreach ($this->identifiers AS $identifier) {
+			$quote = ($identifier['type'] == 'text' ? "'" : "");
+			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
 		}
 		return implode(' AND ', $parts);
 	}
 
-	/**
-	* Function return the expression to identify the unique dataset
-	* SQL-Statements
-	* It compose it from the identifier and its value or
-	* from more identifiers if these are defined in an array
-	* @return string The expression representing true or false in a sql statement
-	*/
-	function get_identifier_expression() {
-		$this->debug->show('<br>Class PgObject Method get_identifier_expression', PgObject::$write_debug);
-		$where = array();
-		if (count($this->identifiers) > 0) {
-			$where = array_map(
-				function($identifier) {
-					$quote = ($identifier['type'] == 'text' ? "'" : "");
-					return $identifier['key'] . " = " . $quote . $this->get($identifier['key']) . $quote;
-				},
-				$this->identifiers
-			);
-		}
-		else {
-			if (
-				in_array($this->identifier, $this->getKeys()) AND
-				$this->get($this->identifier) != null AND
-				$this->get($this->identifier) != ''
-			) {
-				$quote = ($this->identifier_type == 'text' ? "'" : "");
-				$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
-			}
-		}
-		return implode(' AND ', $where);
-	}
-
-	/**
-	* Search for a unique record in the database by identifier of the table
-	* if $id is empty use the values from data array
-	* else set the identifier from given value or array
-	* @param $id string, text or associative array with id keys and values
-	* @return an object with this record
-	*/
-	function find_by_ids($id) {
-		if ($id) {
-			if (getType($id) == 'array') {
-				$this->data = $id;
-			}
-			else {
-				$this->set($this->identifier, $id);
-			}
-		}
+	function find_by_ids($ids) {
+		$where_condition = $this->get_id_condition($ids);
 		$sql = "
 			SELECT
 				*
 			FROM
-				" . $this->schema . '.' . $this->tableName . "
+				(
+					SELECT
+						{$this->select}
+					FROM
+						{$this->from}
+					" . ($this->where != '' ? 'WHERE ' . $this->where : '') . "
+				) foo
 			WHERE
-				" . $this->get_identifier_expression() . "
+				" . $where_condition . "
 		";
-		$this->debug->show('<p>sql: ' . $sql, PgObject::$write_debug);
-		$ret = $this->database->execSQL($sql);
-		if (!$ret['success']) {
-			return $this;
-		}
-		$rs = pg_fetch_assoc($ret[1]);
-		if ($rs !== false) {
-			$this->data = $rs;
-		}
+		$this->debug->show('find_by_ids sql: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->data = pg_fetch_assoc($query);
 		return $this;
 	}
 
@@ -250,7 +208,7 @@ class PgObject {
 	 */
 	function get_extent($ows_srs = '', $where = '') {
 		if ($where == '') {
-			$where = $this->get_id_condition(array($this->get($this->identifier)));
+			$where = $this->get_id_condition(array($this->identifier => $this->get($this->identifier)));
 		}
 		$epsg_codes = explode(' ', trim(preg_replace('~[EPSGepsg: ]+~', ' ', $ows_srs)));
 		$extents = array();
@@ -419,12 +377,20 @@ class PgObject {
 		return $this->get($this->identifier);
 	}
 
+	function get_ids() {
+		$ids = array();
+		foreach ($this->identifiers AS $identifier) {
+			$ids[$identifier['column']] = $this->get($identifier['column']);
+		}
+		return $ids;
+	}
+
 	function set($attribute, $value) {
 		$this->data[$attribute] = $value;
 		return $value;
 	}
 
-	function unset($attribute) {
+	function unset_($attribute) {
 		unset($this->data[$attribute]);
 	}
 
@@ -437,45 +403,76 @@ class PgObject {
 		if (!empty($data)) {
 			$this->data = $data;
 		}
-		if ($this->data[$this->identifier] == '' OR $this->data[$this->identifier] == 0) {
-			unset($this->data[$this->identifier]);
-		}
+
 		$values = array_map(
 			function($value) {
 				return (is_array($value) ? "{" . implode(", ", $value) . "}" : $value);
 			},
 			$this->getValues()
 		);
+
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
-				" . implode(', ', array_map(function ($key) {return '"' . $key . '"';}, $this->getKeys())) . "
+				" . implode(', ', $this->getKeys()) . "
 			)
 			VALUES (" .
 				implode(
 					", ",
 					array_map(
 						function($value) {
-							if ($value === '' OR $value === NULL) {
-								return 'NULL';
-							}
-							else {
-								return "'" . pg_escape_string($value) . "'";
-							}
+							return (($value == '' OR $value === null) ? "NULL" : "'" . pg_escape_string($value) . "'");
 						},
 						$values
 					)
 				) . "
 			)
-			" . ($this->identifier != ''? "RETURNING " . $this->identifier : '');
+			RETURNING
+				" . implode(', ', array_keys($this->get_ids())) . ";
+		";
+		/*
+		$sql = "
+			INSERT INTO " . $this->qualifiedTableName . " (
+				$1
+			)
+			VALUES (
+				'$2'
+			)
+			RETURNING
+				$3
+		";
+		*/
 		$this->debug->show('Create new dataset with sql: ' . $sql, $this->show);
+		#echo 'SQL zum Eintragen des Datensatzes: ' . $sql; exit;
+		/*
+		$query = pg_query_params(
+			$this->database->dbConn, $sql,
+			array(
+				implode(", ", $this->getKeys()),
+				implode(
+					"', '",
+					array_map(
+						function($value) {
+							return pg_escape_string($value);
+						},
+						$values
+					)
+				),
+				$this->identifier
+			)
+		);
+		*/
 		$query = pg_query($this->database->dbConn, $sql);
-		if(!$query){echo $sql; exit;}
+		if (!$query) {
+			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), true);
+			return array(
+				'success' => false,
+				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn));
+		}
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
-			$ret_id = pg_fetch_assoc($query)[$this->identifier];
-			$this->debug->show('Query created identifier ' . $this->identifier . ' with values ' . $ret_id, false);
 			$this->lastquery = $query;
-			$this->set($this->identifier, $ret_id);
+			$returning_ids = pg_fetch_assoc($query);
+			$this->find_by_ids($returning_ids);
 		}
 		else {
 			$sql = "
@@ -486,28 +483,17 @@ class PgObject {
 				WHERE
 					oid = " . $oid . "
 			";
-			$this->debug->show('Query created oid with sql: ' . $sql, $this->show);
+			$this->debug->show('Query created dataset with new oid: ' . $sql, $this->show);
 			$query = pg_query($this->database->dbConn, $sql);
-			$row = pg_fetch_assoc($query);
-			$this->set($this->identifier, $row[$this->identifier]);
+			$this->data = pg_fetch_assoc($query);
 		}
-		$this->debug->show('Dataset created with ' . $this->identifier . ': '. $this->get($this->identifier), $this->show);
+		$this->debug->show('Dataset created with ' . $this->get_id_condition(), $this->show);
 
-		if ($this->database->success) {
-			$results[] = array(
-				'success' => true,
-				'msg' => 'Datensatz erfolgreich angelegt.',
-				'id' => $this->get($this->identifier)
-			);
-		}
-		else {
-			$results[] = array(
-				'success' => false,
-				'msg' => $this->database->errormessage,
-				'err_msg' => $this->database->errormessage
-			);
-		}
-		return $results;
+		return array(
+			'success' => true,
+			'ids' => $this->get_ids(),
+			'msg' => 'Datensatz erfolgreich angelegt'
+		);
 	}
 	/* Für Postgres Version in der RETURNING zusammen mit RULE und Bedingung funktioniert. 
 	function create($data = '') {
@@ -602,7 +588,7 @@ class PgObject {
 			FROM
 				" . $this->qualifiedTableName . "
 			WHERE
-				" . ($where ?: $this->get_identifier_expression()) . "
+				" . ($where ?: $this->get_id_condition()) . "
 		";
 		$this->debug->show('delete sql: ' . $sql, $this->show);
 		$result = pg_query($this->database->dbConn, $sql);

@@ -1681,7 +1681,7 @@ class stelle {
 						privileg = EXCLUDED.privileg, 
 						tooltip = EXCLUDED.tooltip
 					";
-				#echo $sql.'<br>';
+				#echo 'SQL zum Anlegen eines used layers :' . $sql . '<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$ret = $this->database->execSQL($sql);
 				if (!$this->database->success) {

@@ -16,7 +16,7 @@ class Ressource extends PgObject {
 	public $unlogged = true;
 
 	function __construct($gui) {
-		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->$write_debug);
+		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->show);
 		parent::__construct($gui, Ressource::$schema, Ressource::$tableName);
 		include_once(CLASSPATH . 'data_import_export.php');
 		$this->gui->data_import_export = new data_import_export('gid');
@@ -187,7 +187,7 @@ class Ressource extends PgObject {
 
 	function destroy() {
 		#echo "\ndestroy Dataset: " . $this->get($this->identifier);
-		$this->debug->show('destroy dataset ' . $this->get('datenquelle'), Dataset::$write_debug);
+		$this->debug->show('destroy dataset ' . $this->get('datenquelle'), $this->show);
 		$this->delete();
 	}
 

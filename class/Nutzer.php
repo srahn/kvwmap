@@ -134,7 +134,10 @@ class Nutzer extends PgObject {
 				'user_id' 	=> $this->get('id'),
 				'stelle_id' => $this->get('stelle_id')
 			);
-			$this->rolle = $db_object->find_by_ids(array('user_id' => $db_object->get('user_id'), 'stelle_id' => $db_object->get('stelle_id')));
+			$this->rolle = $db_object->find_by_ids(array(
+				'user_id' => $db_object->get('user_id'),
+				'stelle_id' => $db_object->get('stelle_id')
+			));
 		}
 		return $this->rolle;
 	}

@@ -56,6 +56,14 @@ class LayerGroup extends PgObject {
 		return $layers;
 	}
 
+	function get_next_order($obergruppe) {
+		return ($this->find_by_sql(array(
+			'select' => 'max(`order`) AS max_order',
+			'from' => "`u_groups`",
+			'where' => "`obergruppe` = " . $obergruppe
+		))[0])->get('max_order') + 100;
+	}
+
 	public static function find_top_parents($gui, $stelle_id) {
 		#echo '<br>find_top_parents for stelle_id: ' . $stelle_id;
 		$group = new LayerGroup($gui);

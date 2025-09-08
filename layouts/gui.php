@@ -4,7 +4,7 @@
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
 	<body onload="onload_functions();">
-		<? include(LAYOUTPATH.'snippets/SVGvars_defs.php');	?>
+		<? include_once(LAYOUTPATH.'snippets/SVGvars_defs.php');	?>
 		<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
 		<defs>
 			<? echo $SVGvars_defs; ?>
