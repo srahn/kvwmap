@@ -16,6 +16,14 @@
 	}
 </style>
 <script language="javascript" type="text/javascript">
+	var landkreise = {<?php
+		echo implode(', ', array_map(
+			function($landkreis) {
+				return '"' . $landkreis->get('krs_schl') . '": "' . $landkreis->get('krs_name') . '"';
+			},
+			$this->landkreise
+		)); ?>
+	}
 	$('#gui-table').css('width', '100%');
 	$(function () {
 		result = $('#eventsResult');
@@ -383,8 +391,46 @@
 			}
 		).join(', ')
 	}
+	
+	// takes ags 1-5 (kreisschluessel) to get landkreis
+	function konvertierungLandkreisFormatter(value, row) {
+		let krs_schl = row.stelle_id.toString().substring(0,5);
+		if (krs_schl) {
+			return landkreise[krs_schl];
+		}
+		else {
+			return '';
+		}
+		// switch(lk) {
+		// 	case '13003':
+		// 		return 'Hanse- und Universitätsstadt Rostock';
+		// 		break;
+		// 	case '13004':
+		// 		return 'Landeshauptstadt Schwerin';
+		// 		break;
+		// 	case '13071':
+		// 		return 'Landkreis MSE';
+		// 		break;
+		// 	case '13072':
+		// 		return 'Landkreis ROS';
+		// 		break;
+		// 	case '13073':
+		// 		return 'Landkreis VR';
+		// 		break;
+		// 	case '13074':
+		// 		return 'Landkreis NWM';
+		// 		break;
+		// 	case '13075':
+		// 		return 'Landkreis_VG';
+		// 		break;
+		// 	case '13076':
+		// 		return 'Landkreis_VR';
+		// 		break;
+		// 	default:
+		// 		return '';
+		// }
+	}
 
-	// formatter functions
 	function konvertierungStatusFormatter(value, row) {
 		var output = value;
 		return output;
@@ -706,7 +752,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 		data-show-refresh="false"
 		data-show-toggle="false"
 		data-show-columns="true"
-		data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
+		data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=20000&mime_type=formatter&format=json"
 		data-pagination="true"
 		data-page-list=[10,15,25,50,100,250,500,1000,all]
 		data-page-size="15"
@@ -753,6 +799,19 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 						data-filter-control="select"
 						data-filter-control-placeholder="Filtern nach"
 					>Gemeinden</th><?php
+				}
+				// created_at is dummy field, as data-field has to be unique for sort to work and data-field: stelle_id also exists,
+				// konvertierungLandkreisformatter takes stelle_id from row to get the landkreis
+				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID && $this->Stelle->id == 1) { ?>
+					<th
+						data-field="created_at"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungLandkreisFormatter"
+						class="col-md-2"
+						data-filter-control="select"
+						data-filter-control-placeholder="Filtern nach"
+					>Landkreise</th><?php
 				}
 				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
 					<th
@@ -843,7 +902,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-switchable="true"
 					data-searchable="true"
 					data-search_selector="input"
-					>Plan-Id</th>
+				>Plan-Id</th>
 				<th
 					data-field="stelle_id"
 					data-sortable="true"
