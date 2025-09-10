@@ -585,6 +585,8 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_plaene_index' : {
+			$landkreis = new PgObject($GUI, 'gebietseinheiten', 'kreise', 'krs_schl', 'string');
+			$GUI->landkreise = $landkreis->find_by_sql(array('select' => 'krs_schl, krs_name', 'order' => 'krs_name'));
 			$GUI->title = str_replace('an', 'äne', $GUI->title);
 			$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
 			$GUI->output();
