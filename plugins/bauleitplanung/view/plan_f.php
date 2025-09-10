@@ -530,7 +530,7 @@ else {
 ?>
 
 <? if($this->new_entry != true){ ?>
-<input type="hidden" name="selected_layer_id" value="">
+<input type="hidden" name="selected_layer_id" value="<? echo $this->qlayerset[$i]['Layer_ID']; ?>">
 <? } ?>
 
 

@@ -278,9 +278,8 @@ if ($doit == true) {
 											if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
 												echo '<span title="Eingabe erforderlich">*</span>';
 											}
-											if($layer['attributes']['tooltip'][$j]!='' AND $layer['attributes']['form_element_type'][$j] != 'Time'){
-												echo '<td align="right"><a href="javascript:void(0);" title="'.$layer['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
-											}
+											echo attribute_tooltip($layer['attributes'], $j);
+
 											if($layer['attributes']['type'][$j] == 'date' OR $layer['attributes']['type'][$j] == 'timestamp' OR $layer['attributes']['type'][$j] == 'time'){
 												echo '<td align="right"><a href="javascript:;" title="(TT.MM.JJJJ)"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
 											}

@@ -664,10 +664,16 @@ class GUI {
 											$output .= '##';
 										} break;
 										default : {
+											if (is_scalar($value ?? '')) {
+												$value = strval($value);
+											}
+											else {
+												$value = json_encode($value);
+											}
 											$output .=  $attributes['alias'][$j].': ';
 											$attribcount++;
 											$value = str_replace(chr(10), '##',  $value);
-											$output .= $value.'  ';
+											$output .= $value . '  ';
 											$output .= '##';
 										}
 									}

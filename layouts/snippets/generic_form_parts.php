@@ -44,6 +44,18 @@
 		return $output;
 	}
 
+	function attribute_tooltip($attributes, $j) {
+		if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
+			if (substr($attributes['tooltip'][$j], 0, 4) == 'http') {
+				$title_link = 'href="'.$attributes['tooltip'][$j].'" target="_blank"';
+			}
+			else {
+				$title_link = 'href="javascript:void(0);"';
+			}
+			return '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"></a></td>';
+		}
+	}
+
 	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true, $field_id = NULL) {
 		$field_id = $field_id ?: $layer_id.'_'.$attributes['name'][$j].'_'.$k;
 		$datapart = '<table ';
@@ -67,15 +79,8 @@
 		if ($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
 			$datapart .= '<span title="Eingabe erforderlich">*</span>';
 		}
-		if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
-			if (substr($attributes['tooltip'][$j], 0, 4) == 'http') {
-				$title_link = 'href="'.$attributes['tooltip'][$j].'" target="_blank"';
-			}
-			else {
-				$title_link = 'href="javascript:void(0);"';
-			}
-			$datapart .= '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"></a></td>';
-		}
+		$datapart .= attribute_tooltip($attributes, $j);
+
 		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 			$datapart .= '<td align="right" style="position: relative">'.calendar($attributes['type'][$j], $field_id, $attributes['privileg'][$j]).'</td>';
 		}
