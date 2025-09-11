@@ -743,6 +743,7 @@ class Layer extends PgObject {
 			'geomType' => array('Point', 'Linestring', 'Polygon', 'Raster', 'Annotation', 'Query', 'Circle', 'Tileindex', 'Chart')[$this->get('datentyp')],
 			'backgroundColor' => '#c1ffd8',
 			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
+			'classItem' => ($this->get('classitem') != '' ? $this->get('classitem') : $this->get('oid')),
 			'url' => $url,
 			'params' => $params,
 			'options' => $options,
