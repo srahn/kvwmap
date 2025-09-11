@@ -1,4 +1,5 @@
 <?php
+	$this->strAll = "wszystkie";
 	$this->strAnd = "i";
 	$this->strAsteriskRequired = 'Fields with * are mandatory';
 	$this->strComment = 'komenatrz';
