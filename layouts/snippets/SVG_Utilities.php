@@ -994,6 +994,9 @@ SCRIPTDEFINITIONS;
 			case 'draw_box':
 	 			startpointFS(world_x, world_y);
 			break;
+			case 'draw_second_box':
+				startpointFS_second(world_x, world_y);
+		 break;
 			case 'draw_line':
 				addlinepoint_first(world_x, world_y);
 				redrawfirstline();
@@ -1135,7 +1138,12 @@ function mousemove(evt){
 		}
 		else{
 			if (draggingFS){
-	   		movepointFS(evt);
+				if (enclosingForm.firstpoly.value == 'true') {
+					movepointFS_second(evt);
+				}
+				else{
+					movepointFS(evt);
+				}
 	  	}
 			else{
 				if (moving){
@@ -2634,19 +2642,40 @@ function mouseup(evt){
 	boxfunctions = true;
 
 	function draw_box_on() {
-	 	clear_geometry();
-		enclosingForm.last_doing.value = "draw_box";
+		applypolygons();
+		if (enclosingForm.firstpoly.value == "true") {
+			enclosingForm.last_doing.value = "draw_second_box";
+		}
+		else{
+			enclosingForm.last_doing.value = "draw_box";
+		}
 	}
 
 	// ----------------------------box aufziehen---------------------------------
 	function startpointFS(worldx, worldy) {
+		enclosingForm.firstpoly.value = false;
+		var alles = pathx.length;
+		for(var i = 0; i < alles; ++i){
+			pathx.pop();
+			pathy.pop();
+		}
 	  draggingFS  = true;
-	  clear_geometry();
-	  // neuen punkt hinzufuegen
 	  pathx.push(worldx);
 	  pathy.push(worldy);
-	  path = buildsvgpath(pathx,pathy);
+	  path = buildsvgpath(pathx, pathy);
 	  enclosingForm.newpath.value = path;
+	}
+
+	function startpointFS_second(worldx, worldy) {
+		var alles = poly_pathx_second.length;
+		for(var i = 0; i < alles; ++i){
+			poly_pathx_second.pop();
+			poly_pathy_second.pop();
+		}
+		draggingFS  = true;
+	  poly_pathx_second.push(world_x);
+	  poly_pathy_second.push(world_y);
+	  path_second = buildsvgpath(poly_pathx_second, poly_pathy_second);
 	}
 
 	function movepointFS(evt) {
@@ -2664,14 +2693,38 @@ function mouseup(evt){
 	  pathy[3]  = pathy[0];
 	  path = buildsvgpath(pathx,pathy);
 	  enclosingForm.newpath.value = path;
-	  enclosingForm.firstpoly.value = true;
 	  redrawfirstpolygon();
+	}
+
+	function movepointFS_second(evt) {
+		if (!draggingFS) return;
+	  // neuen punkt abgreifen
+	  clientx = evt.clientX;
+	  clienty = resy - evt.clientY;
+	  world_x = (clientx * scale) + minx;
+	  world_y = (clienty * scale) + miny;
+	  poly_pathx_second[1]  = poly_pathx_second[0];
+	  poly_pathy_second[1]  = world_y;
+	  poly_pathx_second[2]  = world_x;
+	  poly_pathy_second[2]  = world_y;
+	  poly_pathx_second[3]  = world_x;
+	  poly_pathy_second[3]  = poly_pathy_second[0];
+	  path_second = buildsvgpath(poly_pathx_second, poly_pathy_second);
+	  enclosingForm.secondpoly.value = true;
+	  redrawsecondpolygon();
 	}
 
 	function endpointFS(evt) {
 	  draggingFS  = false;
-		var width = Math.abs(Math.round((pathx[2] - pathx[1]) * 1000) / 1000);
-		var height = Math.abs(Math.round((pathy[0] - pathy[2]) * 1000) / 1000);
+		enclosingForm.firstpoly.value = true;
+		if (enclosingForm.secondpoly.value == "true") {
+			var width = Math.abs(Math.round((poly_pathx_second[2] - poly_pathx_second[1]) * 1000) / 1000);
+			var height = Math.abs(Math.round((poly_pathy_second[0] - poly_pathy_second[2]) * 1000) / 1000);
+		}
+		else {
+			var width = Math.abs(Math.round((pathx[2] - pathx[1]) * 1000) / 1000);
+			var height = Math.abs(Math.round((pathy[0] - pathy[2]) * 1000) / 1000);
+		}
 		var Msg = top.$("#message_box");
 		Msg[0].style.left = "75%";
 		Msg.show();
@@ -2681,20 +2734,36 @@ function mouseup(evt){
 		content+= \'<tr><td align="right">Höhe:&nbsp;</td><td><input style="width: 110px" type="text" id="rect_height" name="rect_height" value="\'+height+\'">&nbsp;m</td></tr></table>\';
 		content+= \'<br><input type="button" value="OK" onclick="change_box_width_height()">\';
 		Msg.html(content);
+		if (enclosingForm.secondpoly.value == "true"){
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+		}
 	}
 	
 	function change_box_width_height() {
 		if (enclosingForm.rect_width.value && enclosingForm.rect_height.value) {
 			var width = parseFloat(enclosingForm.rect_width.value);
 			var height = parseFloat(enclosingForm.rect_height.value);
-			if (pathy[0] > pathy[2]) {
-				height = -1 * height;
+			if (enclosingForm.secondpoly.value == "true") {
+				if (poly_pathy_second[0] > poly_pathy_second[2]) {
+					height = -1 * height;
+				}
+				poly_pathy_second[1] = poly_pathy_second[2] = (poly_pathy_second[0] + height);
+				poly_pathx_second[2] = poly_pathx_second[3] = (poly_pathx_second[0] + width);
+				path_second = buildsvgpath(poly_pathx_second, poly_pathy_second);
+				enclosingForm.secondpoly.value = true;
+				redrawsecondpolygon();
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			}
-			pathy[1] = pathy[2] = (pathy[0] + height);
-			pathx[2] = pathx[3] = (pathx[0] + width);
-			path = buildsvgpath(pathx,pathy);
-			enclosingForm.newpath.value = path;
-			redrawfirstpolygon();
+			else {
+				if (pathy[0] > pathy[2]) {
+					height = -1 * height;
+				}
+				pathy[1] = pathy[2] = (pathy[0] + height);
+				pathx[2] = pathx[3] = (pathx[0] + width);
+				path = buildsvgpath(pathx,pathy);
+				enclosingForm.newpath.value = path;
+				redrawfirstpolygon();
+			}
 		}
 	}
 	
