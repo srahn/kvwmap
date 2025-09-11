@@ -536,6 +536,7 @@ function go_switch_xplankonverter($go) {
 
 		case 'xplankonverter_plaene_index' : {
 			$GUI->title = str_replace('an', 'äne', $GUI->title);
+			$GUI->title = str_replace('Sonstiger', 'Sonstige', $GUI->title);
 			$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
 			$GUI->output();
 		} break;

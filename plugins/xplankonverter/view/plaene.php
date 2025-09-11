@@ -737,7 +737,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 		data-show-refresh="false"
 		data-show-toggle="false"
 		data-show-columns="true"
-		data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
+		data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=20000&mime_type=formatter&format=json"
 		data-pagination="true"
 		data-page-list=[10,15,25,50,100,250,500,1000,all]
 		data-page-size="15"
@@ -836,6 +836,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					class="col-md-2"
 					data-filter-control="input"
 				>Genehmigung</th>
+				<? if ($this->plan_layer_id != XPLANKONVERTER_SO_PLAENE_LAYER_ID) { ?>
 				<th
 					data-field="auslegungsstartdatum"
 					data-sortable="true"
@@ -847,6 +848,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					class="col-md-2"
 					data-filter-control="input"
 				>Bekanntmachung</th>
+				<? } ?>
 				<th
 					data-field="konvertierung_id"
 					data-visible="<? echo ((!array_key_exists('konvertierung_id', $rolle_attribute_settings) OR $rolle_attribute_settings['konvertierung_id']['switched_on'] == 1) ? 'true' : 'false'); ?>"

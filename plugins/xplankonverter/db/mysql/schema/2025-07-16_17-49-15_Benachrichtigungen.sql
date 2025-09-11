@@ -1,6 +1,6 @@
 BEGIN;
   INSERT INTO notifications (notification, ablaufdatum) VALUES (
-    'Die Liste der Pläne hat jetzt zusätzlich die Attribute Genehmigung und Bekanntmachung zur Auswahhl. Außerdem werden die Einstellungen für die Sichtbarkeit der Attribute in der Tabelle für den Nutzer pro Stelle gespeichert. In den zusätzlichen Attributen aber auch in den schon vorhandenen ID-Attributen kann jetzt auch gesucht werden.',
+    'Die Liste der Pläne hat jetzt zusätzlich die Attribute Genehmigung und Bekanntmachung zur Auswahl. Außerdem werden die Einstellungen für die Sichtbarkeit der Attribute in der Tabelle für den Nutzer pro Stelle gespeichert. In den zusätzlichen Attributen aber auch in den schon vorhandenen ID-Attributen kann jetzt auch gesucht werden.',
     DATE(NOW() + INTERVAL 6 MONTH)
   );
   SET @last_insert_id = LAST_INSERT_ID();
