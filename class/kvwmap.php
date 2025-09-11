@@ -12808,6 +12808,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
 			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 			header('Pragma: public');
+			header('Access-Control-Allow-Origin: *');
 			readfile($result['exportfile']);
 		}
 	}
