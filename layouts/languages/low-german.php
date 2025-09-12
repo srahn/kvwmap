@@ -1,4 +1,5 @@
 <?
+	$this->strAll = 'all';
 	$this->strAnd = 'un';
 	$this->strArchive = 'Archive';
 	$this->strAsteriskRequired = 'Weerte mit een * mööst du indragen';
