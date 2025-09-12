@@ -998,7 +998,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-switchable="true"
 					data-searchable="true"
 					data-search_selector="input"
-					>Plan-Id</th>
+				>Plan-Id</th>
 				<th
 					data-field="stelle_id"
 					data-sortable="true"

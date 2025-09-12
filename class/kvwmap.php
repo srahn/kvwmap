@@ -3900,16 +3900,14 @@ echo '			</table>
 	* Third it test if the user have special permissions to execute this case
 	*/
 	function checkCaseAllowed($case, $check_csrf_token = true) {
-		if ($check_csrf_token, $check_csrf_token = true) {
 		if ($check_csrf_token) {
 			if (!(
 				$case == 'show_snippet' AND
 				strpos(file_get_contents(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $this->formvars['snippet'] . '.php'), '$check_csrf_token = false;') !== false
 			)) {
 				// Nicht prüfen wenn im snippet der csrf_token_check explizit ausgeschaltet ist.
-					$this->check_csrf_token();
+				$this->check_csrf_token();
 			}
-		}
 		}
 		if (!(
 			$this->Stelle->isMenueAllowed($case) OR
@@ -4772,24 +4770,12 @@ echo '			</table>
 		$this->output();
 	}
 
-	/**
-	 * Find and show documents that are registered in datasets of layer with $selected_layer_id
-	 * but can not be found in document_path of this layer.
-	 */
-	function show_missing_documents() {
-		$this->sanitize([
-			'selected_layer_id' => 'int'
-		]);
-		include_once(CLASSPATH . 'Layer.php');
-		$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
-		$this->main = 'layer_missing_documents.php';
-		$this->output();
-	}
 
 	/**
-	 * This function return the image of the referenzkarte with given ID
+	 * This function returns the image of the referenzkarte with given ID
 	 * if refmap not found return alternative not found image
 	 */
+
 	function getRefMapImage($id) {
 		include_once(CLASSPATH . 'Referenzkarte.php');
 		$referenzkarte = Referenzkarte::find_by_id($this, $id);
