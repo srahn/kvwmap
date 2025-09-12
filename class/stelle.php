@@ -41,6 +41,7 @@ class stelle {
 	var $ows_srs;
 
 	var $ows_contactorganization;
+	var $ows_contacturl;
 	var $ows_contactaddress;
 	var $ows_contactpostalcode;
 	var $ows_contactcity;
@@ -50,7 +51,9 @@ class stelle {
 	var $ows_contactposition;
 	var $ows_contactvoicephone;
 	var $ows_contactfacsimile;
+
 	var $ows_distributionorganization;
+	var $ows_distributionurl;
 	var $ows_distributionaddress;
 	var $ows_distributionpostalcode;
 	var $ows_distributioncity;
@@ -62,6 +65,7 @@ class stelle {
 	var $ows_distributionfacsimile;
 
 	var $ows_contentorganization;
+	var $ows_contenturl;
 	var $ows_contentaddress;
 	var $ows_contentpostalcode;
 	var $ows_contentcity;
@@ -84,6 +88,7 @@ class stelle {
 	var $style;
 	var $reset_password_text;
 	var $invitation_text;
+	public $pgdbhost = 'pgsql';
 
 	function __construct($id, $database) {
 		global $debug;
@@ -208,6 +213,7 @@ class stelle {
 				`ows_srs`,
 
 				`ows_contactorganization`,
+				`ows_contacturl`,
 				`ows_contactaddress`,
 				`ows_contactpostalcode`,
 				`ows_contactcity`,
@@ -219,6 +225,7 @@ class stelle {
 				`ows_contactfacsimile`,
 
 				`ows_distributionorganization`,
+				`ows_distributionurl`,
 				`ows_distributionaddress`,
 				`ows_distributionpostalcode`,
 				`ows_distributioncity`,
@@ -230,6 +237,7 @@ class stelle {
 				`ows_distributionfacsimile`,
 
 				`ows_contentorganization`,
+				`ows_contenturl`,
 				`ows_contentaddress`,
 				`ows_contentpostalcode`,
 				`ows_contentcity`,
@@ -240,7 +248,11 @@ class stelle {
 				`ows_contentvoicephone`,
 				`ows_contentfacsimile`,
 
-				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `reset_password_text`, `invitation_text`
+				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`,
+				`style`,
+				`show_shared_layers`,
+				`reset_password_text`,
+				`invitation_text`
 			FROM
 				stelle s
 			WHERE
@@ -268,6 +280,7 @@ class stelle {
 		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
 
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contacturl = $rs['ows_contacturl'];
 		$this->ows_contactaddress = $rs['ows_contactaddress'];
 		$this->ows_contactpostalcode = $rs['ows_contactpostalcode'];
 		$this->ows_contactcity = $rs['ows_contactcity'];
@@ -279,6 +292,7 @@ class stelle {
 		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
 
 		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionurl = $rs['ows_distributionurl'];
 		$this->ows_distributionaddress = $rs['ows_distributionaddress'];
 		$this->ows_distributionpostalcode = $rs['ows_distributionpostalcode'];
 		$this->ows_distributioncity = $rs['ows_distributioncity'];
@@ -290,6 +304,7 @@ class stelle {
 		$this->ows_distributionfacsimile = $rs['ows_distributionfacsimile'];
 
 		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contenturl = $rs['ows_contenturl'];
 		$this->ows_contentaddress = $rs['ows_contentaddress'];
 		$this->ows_contentpostalcode = $rs['ows_contentpostalcode'];
 		$this->ows_contentcity = $rs['ows_contentcity'];
@@ -475,7 +490,9 @@ class stelle {
 		if (empty($stellendaten['ows_distributionorganization'])) {
 			$stellendaten['ows_distributionorganization'] = $stellendaten['ows_contactorganization'];
 		}
-
+		if (empty($stellendaten['ows_distributionurl'])) {
+			$stellendaten['ows_distributionurl'] = $stellendaten['ows_contacturl'];
+		}
 		if (empty($stellendaten['ows_contentperson'])) {
 			$stellendaten['ows_contentperson'] = $stellendaten['ows_contactperson'];
 		}
@@ -512,6 +529,7 @@ class stelle {
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
 				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
+				`ows_contacturl` = '" . $stellendaten['ows_contacturl'] . "',
 				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
 				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
@@ -522,6 +540,7 @@ class stelle {
 				`ows_contactcity` = '" . $stellendaten['ows_contactcity'] . "',
 				`ows_contactadministrativearea` = '" . $stellendaten['ows_contactadministrativearea'] . "',
 				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
+				`ows_contenturl` = '" . $stellendaten['ows_contenturl'] . "',
 				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
 				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
 				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
@@ -533,6 +552,7 @@ class stelle {
 				`ows_contentadministrativearea` = '" . $stellendaten['ows_contentadministrativearea'] . "',
 				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
 				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
+				`ows_distributionurl` = '" . $stellendaten['ows_distributionurl'] . "',
 				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
 				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
 				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
@@ -587,7 +607,7 @@ class stelle {
 
 	# Stelle ändern
 	function Aendern($stellendaten) {
-		$language = $this->database->gui->user->rolle->language;
+		$language = rolle::$language;
 		$stelle = ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "");
 		$wappen = (value_of($stellendaten, 'wappen') != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
 		$sql = "
@@ -612,6 +632,7 @@ class stelle {
  				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
 				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
+				`ows_contacturl` = '" . $stellendaten['ows_contacturl'] . "',
 				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
 				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
@@ -622,6 +643,7 @@ class stelle {
 				`ows_contactcity` = '" . $stellendaten['ows_contactcity'] . "',
 				`ows_contactadministrativearea` = '" . $stellendaten['ows_contactadministrativearea'] . "',
 				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
+				`ows_contenturl` = '" . $stellendaten['ows_contenturl'] . "',
 				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
 				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
 				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
@@ -633,6 +655,7 @@ class stelle {
 				`ows_contentadministrativearea` = '" . $stellendaten['ows_contentadministrativearea'] . "',
 				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
 				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
+				`ows_distributionurl` = '" . $stellendaten['ows_distributionurl'] . "',
 				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
 				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
 				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
@@ -680,6 +703,7 @@ class stelle {
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
 				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
+				`ows_contacturl` = '" . $stellendaten['ows_contacturl'] . "',
 				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
 				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
@@ -690,6 +714,7 @@ class stelle {
 				`ows_contactcity` = '" . $stellendaten['ows_contactcity'] . "',
 				`ows_contactadministrativearea` = '" . $stellendaten['ows_contactadministrativearea'] . "',
 				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
+				`ows_contenturl` = '" . $stellendaten['ows_contenturl'] . "',
 				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
 				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
 				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
@@ -701,6 +726,7 @@ class stelle {
 				`ows_contentadministrativearea` = '" . $stellendaten['ows_contentadministrativearea'] . "',
 				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
 				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
+				`ows_distributionurl` = '" . $stellendaten['ows_distributionurl'] . "',
 				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
 				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
 				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
@@ -1031,11 +1057,11 @@ class stelle {
 	function getFlurstueckeAllowed($FlurstKennz, $database) {
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$GemeindenStelle = $this->getGemeindeIDs();
-		if($GemeindenStelle != NULL){
+		if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])) {   // Stelle ist auf Gemeinden eingeschränkt
 			$alkis = new alkis($database);
 			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
-				$anzFlurstKennz = @count($ret[1]);
+				$anzFlurstKennz = count_or_0($ret[1]);
 				if ($anzFlurstKennz==0) {
 					$ret[0]=1;
 					$ret[1]="Sie haben keine Berechtigung zur Ansicht diese(s)r Flurstücke(s)";
@@ -1050,10 +1076,11 @@ class stelle {
 		return $ret;
 	}
 
-	/*
-	* Add inheritted menues, functions, layouts, layers and users that not allready exists in formvars
-	* Remove inheritted menues, functions, layouts, layers and users that currently exists in formvars
-	*/
+	/**
+	 * Add inheritted menues, functions, layouts, layers and users that not allready exists in formvars
+	 * Remove inheritted menues, functions, layouts, layers and users that currently exists in formvars
+	 * @param int[] $selected_parents Array of ids from parent stellen.
+	 */
 	function apply_parent_selection(
 		$selected_parents,
 		&$menues,
@@ -1434,6 +1461,20 @@ class stelle {
 		return 1;
 	}
 
+	/**
+	 * Function assign layers with $layer_ids to this stelle
+	 * ToDo sr: Beschreibung der 3 verschiedenen Fälle hinzufügen
+	 * - !$assign_default_values
+	 * - $assign_default_values OR $this->database->mysqli->affected_rows == 0
+	 * - !$assign_default_values AND $this->database->mysqli->affected_rows > 0
+	 * If $assign_default_values are defined these will be used for used_layers table
+	 * @param Array{String} $layer_ids
+	 * @param Integer $drawinorder
+	 * @param String $filter
+	 * @param Boolean $assign_default_values
+	 * @param String $privileg default 'default'
+	 * @return Boolean Always 1
+	 */
 	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
@@ -1456,11 +1497,13 @@ class stelle {
 				`privileg`,
 				`export_privileg`,
 				`postlabelcache`,
-				`requires`
+				`requires`,
+				`start_aktiv`
 			)";
 			if (!$assign_default_values) {
 				# Einstellungen von der Elternstelle übernehmen
-				$sql = "INSERT INTO used_layer " . $insert . "
+				$sql = "
+					INSERT INTO used_layer " . $insert . "
 					SELECT
 						'" . $this->id . "',
 						'" . $layer_ids[$i] . "',
@@ -1479,12 +1522,13 @@ class stelle {
 						`privileg`,
 						`export_privileg`,
 						postlabelcache,
-						requires
+						requires,
+						`start_aktiv`
 					FROM
 						used_layer as l,
 						stellen_hierarchie
 					WHERE
-						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+						COALESCE((select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . "), 1) AND
 						layer_id = " . $layer_ids[$i] . " AND
 						stelle_id = parent_id AND
 						child_id = " . $this->id . "
@@ -1501,11 +1545,15 @@ class stelle {
 						postlabelcache = l.postlabelcache,
 						`privileg` = l.`privileg`,
 						`export_privileg` = l.`export_privileg`,
-						requires = l.requires";
-				#echo $sql.'<br><br>';
+						requires = l.requires
+				";
+				// echo $sql.'<br><br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 			if ($assign_default_values OR $this->database->mysqli->affected_rows == 0) {
 				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
@@ -1528,7 +1576,8 @@ class stelle {
 						" . ($privileg == 'editable'? "'1'" : 'privileg') . ",
 						`export_privileg`,
 						postlabelcache,
-						requires
+						requires,
+						'0'
 					FROM
 						layer as l
 					WHERE
@@ -1552,7 +1601,10 @@ class stelle {
 				#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 
 			if (!$assign_default_values AND $this->database->mysqli->affected_rows > 0) {
@@ -1591,10 +1643,13 @@ class stelle {
 						privileg = foo.privileg, 
 						tooltip = foo.tooltip
 					";
-				#echo $sql.'<br>';
+				#echo 'SQL zum Anlegen eines used layers :' . $sql . '<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 				if ($this->database->mysqli->affected_rows != 0) {
 					# löschen der Einträge für "kein Zugriff" Rechte
 					$sql = "
@@ -1622,7 +1677,10 @@ class stelle {
 					#echo $sql.'<br>';
 					$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 					$this->database->execSQL($sql);
-					if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+					if (!$this->database->success) {
+						$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+						return 0;
+					}
 				}
 				else {
 					# wenn nicht von Elternstelle übernommen, Defaultrechte übernehmen
@@ -1642,36 +1700,20 @@ class stelle {
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 		}
 		return 1;
 	}
 	
+	/**
+	 * check if layer_params are used in any layer or menue of stelle
+	 * and set the ids in selectable_layer_params of stelle
+	 */
 	function updateLayerParams() {
-		/*
-		$sql = "
-			UPDATE
-				stelle
-			SET
-				selectable_layer_params = COALESCE(
-					(
-						SELECT GROUP_CONCAT(id)
-						FROM (
-							SELECT DISTINCT id
-							FROM `layer_parameter` as p, used_layer as ul, layer as l
-							WHERE
-								ul.Stelle_ID = " . $this->id . " AND
-								ul.Layer_ID = l.Layer_ID AND
-								locate(concat('$', p.key), concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)) > 0
-						) as foo
-					),
-					''
-				)
-			WHERE
-				stelle.ID = " . $this->id . "
-		";
-		*/
 		$sql = "
 			UPDATE stelle
 			SET
@@ -1688,22 +1730,21 @@ class stelle {
 										FROM
 										`layer_parameter` as p,
 										used_layer as ul,
-										layer as l,
-										layer_attributes la
+										layer as l
+									--	LEFT JOIN layer_attributes la ON la.layer_id = l.Layer_ID
 									WHERE
 										ul.Stelle_ID = " . $this->id . " AND
 										ul.Layer_ID = l.Layer_ID AND
-										la.layer_id = l.Layer_ID AND
 										(
 											locate(
 												concat('$', p.key),
 												concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 											) > 0
-										OR
-											locate(
-												concat('$', p.key),
-												concat(la.options, la.default)
-											) > 0
+										-- OR						-- aus Performancegründen rausgenommen
+										-- 	locate(
+										-- 		concat('$', p.key),
+										-- 		concat(la.options, la.default)
+										-- 	) > 0
 										)
 									UNION
 									SELECT
@@ -1726,38 +1767,7 @@ class stelle {
 				)
 			WHERE stelle.ID = " . $this->id . "
 		";
-
-		#echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
-		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-
-		$sql = "
-			UPDATE
-				rolle
-			SET
-				layer_params = concat(coalesce(layer_params, ''), 
-					coalesce(
-						concat(
-							CASE WHEN coalesce(layer_params, '') = '' THEN '' ELSE ',' END,
-							(SELECT
-								GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
-							FROM
-								layer_parameter p, stelle
-							WHERE
-								FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
-								locate(concat('\"', p.key, '\"'), coalesce(layer_params, '')) = 0 AND
-								stelle.ID = rolle.stelle_id
-							)
-						),
-						''
-					)
-				)
-			WHERE
-				rolle.stelle_id = " . $this->id . "
-		";
-		#echo '<br>SQL zum Aktualisieren der Layerparameter in den Rollen: ' . $sql;
+		// echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
 
 		$this->database->execSQL($sql);
@@ -2082,8 +2092,8 @@ class stelle {
 				'export_privileg' => array()
 			);
 			while($rs=$this->database->result->fetch_array()) {
-				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
+				$rs['Name'] = replace_params_rolle($rs['Name']);
+				$rs['alias'] = replace_params_rolle($rs['alias']);
 				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
 				$layer['ID'][] = $rs['Layer_ID'];
 				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
@@ -2167,8 +2177,8 @@ class stelle {
 		}
 		else {
 			while ($rs=$this->database->result->fetch_assoc()){
-				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
+				$rs['Name'] = replace_params_rolle($rs['Name']);
+				$rs['alias'] = replace_params_rolle($rs['alias']);
 				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
 				$layer['ID'][] = $rs['Layer_ID'];
 				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
@@ -2179,76 +2189,6 @@ class stelle {
 		}
 		return $layer;
 	}
-
-	// function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $no_query_layers = false,  $export_privileg = NULL) {
-	// 	global $language;
-	// 	$sql = 'SELECT layer.Layer_ID, ';
-	// 	if ($language != 'german') {
-	// 		$sql .= 'CASE WHEN `Name_' . $language . '` != "" THEN `Name_' . $language . '` ELSE `Name` END AS ';
-	// 	}
-	// 	$sql .= 'Name, alias, COALESCE(used_layer.group_id, Gruppe) AS Gruppe, ';
-	// 	if ($language != 'german') {
-	// 		$sql .= 'CASE WHEN `Gruppenname_' . $language . '` != "" THEN `Gruppenname_' . $language . '` ELSE `Gruppenname` END AS ';
-	// 	}
-	// 	$sql .= 'Gruppenname, `connection`, used_layer.export_privileg FROM used_layer, layer, u_groups';
-	// 	$sql .= ' WHERE stelle_id = ' . $this->id;
-	// 	$sql .= ' AND COALESCE(used_layer.group_id, Gruppe) = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
-	// 	$sql .= ' AND layer.Layer_ID = used_layer.Layer_ID';
-	// 	if ($use_geom != NULL) {
-	// 		$sql .= ' AND used_layer.use_geom = 1';
-	// 	} else {
-	// 		$sql .= ' AND used_layer.queryable = \'1\'';
-	// 	}
-	// 	if ($no_query_layers) {
-	// 		$sql .= ' AND layer.Datentyp != 5';
-	// 	}
-	// 	if ($privileg != NULL) {
-	// 		$sql .= ' AND used_layer.privileg >= "' . $privileg . '"';
-	// 	}
-	// 	if ($export_privileg != NULL) {
-	// 		$sql .= ' AND used_layer.export_privileg > 0';
-	// 	}
-	// 	if ($group_id != NULL) {
-	// 		$sql .= ' AND u_groups.id = ' . $group_id;
-	// 	}
-	// 	if ($layer_ids != NULL) {
-	// 		$sql .= ' AND layer.Layer_ID IN (' . implode(',', $layer_ids) . ')';
-	// 	}
-	// 	if ($user_id != NULL) {
-	// 		$sql .= ' UNION ';
-	// 		$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -eigene Abfrage-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
-	// 		$sql .= ' WHERE stelle_id = ' . $this->id . ' AND user_id = ' . $user_id . ' AND connectiontype = 6';
-	// 		if ($rollenlayer_type != NULL) {
-	// 			$sql .= ' AND Typ = "' . $rollenlayer_type . '"';
-	// 		}
-	// 		if ($group_id != NULL) {
-	// 			$sql .= ' AND Gruppe = ' . $group_id;
-	// 		}
-	// 	}
-	// 	$sql .= " ORDER BY COALESCE(NULLIF(alias, ''), Name)";
-	// 	#echo $sql;
-	// 	$this->debug->write("<p>file:stelle.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>" . $sql, 4);
-	// 	$this->database->execSQL($sql);
-	// 	if (!$this->database->success) {
-	// 		$this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
-	// 		return 0;
-	// 	} else {
-	// 		while ($rs = $this->database->result->fetch_assoc()) {
-	// 			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-	// 			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
-
-	// 			if ($rs['alias'] != '' and $this->useLayerAliases) {
-	// 				$rs['Name'] = $rs['alias'];
-	// 			}
-	// 			$layer['ID'][] = $rs['Layer_ID'];
-	// 			$layer['Bezeichnung'][] = $rs['Name'];
-	// 			$layer['Gruppe'][] = $rs['Gruppe'];
-	// 			$layer['Gruppenname'][] = $rs['Gruppenname'];
-	// 			$layer['export_privileg'][] = $rs['export_privileg'];
-	// 		}
-	// 	}
-	// 	return $layer;
-	// }
 
 	function addAktivLayer($layerid) {
 		# Hinzufügen der Layer als aktive Layer
@@ -2385,8 +2325,8 @@ class stelle {
 		$stelle_id = $this->id;
 		$stellendaten = $this->getstellendaten();
 		$stellenextent = $this->MaxGeorefExt;
-		$projFROM = ms_newprojectionobj("init=epsg:" . $this->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$projFROM = new projectionObj("init=epsg:" . $this->epsg_code);
+		$projTO = new projectionObj("init=epsg:4326");
 		$stellenextent->project($projFROM, $projTO);
 
 		$layerdef = (Object) array(
@@ -2413,18 +2353,27 @@ class stelle {
 			'baseLayers' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
-					return $layer->get_baselayers_def($this->id);
+					if ($layer) {
+						// return only baselayer_def if layer has been found
+						return $layer->get_baselayers_def($this->id);
+					}
 				},
 				Layer2Stelle::find_base_layers($this->database->gui, $this->id)
 			),
 			'overlays' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
-					$layer->minScale = $layer2Stelle->get('minscale');
-					$layer->maxScale = $layer2Stelle->get('maxscale');
-					$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
-					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
-					return $layer->get_overlays_def($this->id);
+					if ($layer2Stelle->get('group_id')) {
+						$layer->set('Gruppe', $layer2Stelle->get('group_id'));
+					}
+					if ($layer) {
+						// return overlay_def only if layer has been found
+						$layer->minScale = $layer2Stelle->get('minscale');
+						$layer->maxScale = $layer2Stelle->get('maxscale');
+						$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
+						#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
+						return $layer->get_overlays_def($this->id);
+					}
 				},
 				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
 			)
@@ -2455,7 +2404,7 @@ class stelle {
 				WHERE 
 				`layer_id` = " . $layer_id;
 		}
-		#echo '<br>Sql: ' . $sql;
+		// echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
@@ -2551,17 +2500,17 @@ class stelle {
 
 	function getGemeindeIDs() {
 		$liste = [];
+		$liste['ganze_gemeinde'] = Array();
+		$liste['eingeschr_gemeinde'] = Array();
+		$liste['ganze_gemarkung'] = Array();
+		$liste['eingeschr_gemarkung'] = Array();
+		$liste['ganze_flur'] = Array();
+		$liste['eingeschr_flur'] = Array();
 		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if ($this->database->result->num_rows > 0) {
-			$liste['ganze_gemeinde'] = Array();
-			$liste['eingeschr_gemeinde'] = Array();
-			$liste['ganze_gemarkung'] = Array();
-			$liste['eingeschr_gemarkung'] = Array();
-			$liste['ganze_flur'] = Array();
-			$liste['eingeschr_flur'] = Array();
 			while ($rs=$this->database->result->fetch_assoc()) {
 				if ($rs['Gemarkung'] != '') {
 					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;

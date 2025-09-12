@@ -38,6 +38,14 @@
 	}
 </style>
 <script language="javascript" type="text/javascript">
+	var landkreise = {<?php
+		echo implode(', ', array_map(
+			function($landkreis) {
+				return '"' . $landkreis->get('krs_schl') . '": "' . $landkreis->get('krs_name') . '"';
+			},
+			$this->landkreise
+		)); ?>
+	}
 	$('#gui-table').css('width', '100%');
 	$(function () {
 		result = $('#eventsResult');
@@ -405,6 +413,46 @@
 				return gemeinde.gemeindename;
 			}
 		).join(', ')
+	}
+	
+	// takes ags 1-5 (kreisschluessel) to get landkreis
+	// some LKs written with _ to allow proper sorting in bootraps table
+	function konvertierungLandkreisFormatter(value, row) {
+		let krs_schl = row.stelle_id.toString().substring(0,5);
+		if (krs_schl) {
+			return landkreise[krs_schl];
+		}
+		else {
+			return '';
+		}
+		// switch(lk) {
+		// 	case '13003':
+		// 		return 'Hanse- und Universitätsstadt Rostock';
+		// 		break;
+		// 	case '13004':
+		// 		return 'Landeshauptstadt Schwerin';
+		// 		break;
+		// 	case '13071':
+		// 		return 'Landkreis MSE';
+		// 		break;
+		// 	case '13072':
+		// 		return 'Landkreis ROS';
+		// 		break;
+		// 	case '13073':
+		// 		return 'Landkreis VR';
+		// 		break;
+		// 	case '13074':
+		// 		return 'Landkreis NWM';
+		// 		break;
+		// 	case '13075':
+		// 		return 'Landkreis_VG';
+		// 		break;
+		// 	case '13076':
+		// 		return 'Landkreis_VR';
+		// 		break;
+		// 	default:
+		// 		return '';
+		// }
 	}
 
 	function konvertierungStatusFormatter(value, row) {
@@ -789,6 +837,19 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 						data-filter-control-placeholder="Filtern nach"
 					>Gemeinden</th><?php
 				}
+				// created_at is dummy field, as data-field has to be unique for sort to work and data-field: stelle_id also exists,
+				// konvertierungLandkreisformatter takes stelle_id from row to get the landkreis
+				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID && $this->Stelle->id == 1) { ?>
+					<th
+						data-field="created_at"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungLandkreisFormatter"
+						class="col-md-2"
+						data-filter-control="select"
+						data-filter-control-placeholder="Filtern nach"
+					>Landkreise</th><?php
+				}
 				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
 					<th
 						data-field="konvertierung_status"
@@ -923,6 +984,27 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-switchable="false"
 					class="col-md-2 text-center"
 				>Edit</th>
+				<th
+					data-field="konvertierung_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+					data-searchable="true"
+				>Konvertierung Id</th>
+				<th
+					data-field="plan_gml_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+					data-searchable="true"
+					data-search_selector="input"
+					>Plan-Id</th>
+				<th
+					data-field="stelle_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+				>Stelle Id</th>
 			</tr>
 		</thead>
 	</table>

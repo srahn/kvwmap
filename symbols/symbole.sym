@@ -652,4 +652,22 @@ SYMBOLSET
 		END
 	END
 
+	SYMBOL #62
+		NAME 'windrad'
+		TYPE VECTOR
+		FILLED TRUE
+		POINTS
+			5 8.66
+			3 8.66
+			0 0
+			5 8.66
+			6 6.93
+			15 8.66
+			5 8.66
+			6 10.39
+			0 17.32
+			5 8.66
+		END
+	END
+
 END

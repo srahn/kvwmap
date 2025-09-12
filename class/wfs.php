@@ -12,6 +12,56 @@ class wfs{
 		$this->epsg = $epsg;
 	}
 	
+	function parse_capabilities($onlineResource, $wms_auth_username = '', $wms_auth_password = '') {
+		$doc = url_get_contents(
+			$onlineResource . (strpos($onlineResource, '?') === false ? '?' : '&') . 'SERVICE=WFS&VERSION=' . $this->version . '&REQUEST=GetCapabilities',
+			$wms_auth_username,
+			$wms_auth_password
+		);
+		$parser = xml_parser_create();
+		xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+		xml_parse_into_struct($parser, $doc, $this->values, $this->indexes);
+		xml_parser_free($parser);
+		return true;
+	}
+
+	/**
+	 * Die Funktion durchsucht den Inhalt eines getcapabilties xml-dokument nach
+	 * verfügbaren featuretypes. Es nutzt die in parse_capabilities von der Funktion xml_parse_into_struct zurückgegebenen
+	 * und als Objektvariablen gesetzten Arrays values und indexes.
+	 * @return array{ array{ name: string, title: String}} Array mit Arrays mit Name und Titel des Featuretypes
+	 */
+	function get_featuretypes() {
+		$values = $this->values;
+		$indexes = $this->indexes;
+		$featuretype_names = array_map(
+			function ($i) use ($values, $indexes) {
+				return array(
+					'name' => $values[$indexes['NAME'][$i]]['value'],
+					'title' => $values[$indexes['TITLE'][$i]]['value']
+				);
+			},
+			array_keys($indexes['NAME'])
+		);
+		return $featuretype_names;
+	}
+
+	/**
+	 * Die Funktion durchsucht den Inhalt eines getcapabilties xml-dokument nach
+	 * verfügbaren Titeln von featuretypes. Es nutzt die in parse_capabilities von der Funktion xml_parse_into_struct zurückgegebenen
+	 * und als Objektvariablen gesetzten Arrays values und indexes.
+	 */
+	function get_featuretype_titles() {
+		$values = $this->values;
+		$featuretype_names = array_map(
+			function ($index) use ($values) {
+				return $values[$index]['value'];
+			},
+			$this->indexes['TITLE']
+		);
+		return $featuretype_names;
+	}
+
 	function get_feature_request($request, $bbox, $filter, $maxfeatures){
 		# entweder wird eine fertige request-URL übergeben oder an Hand der bbox bzw. des Filters gebildet
 		if($request == NULL){
@@ -46,7 +96,7 @@ class wfs{
 	function create_filter($attributenames, $operators, $values){
 		# Diese Funktion generiert aus Attributnamen, Operatoren und Werten einen über 'And' verknüpften WFS-Filterstring
 		if($this->namespace != '')$namespace = $this->namespace.':';
-		$count = @count($attributenames);
+		$count = count_or_0($attributenames);
 		if($count > 0){
 			$filter = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">';
 			if($count > 1){
@@ -161,7 +211,7 @@ class wfs{
 		else {
 			$geomtag = 'gml:pos';
 		}
-		for ($i = 0; $i < @count($this->objects); $i++) {
+		for ($i = 0; $i < count_or_0($this->objects); $i++) {
 			# durchläuft alle Objekte
 			for ($j = 0; $j < count($this->objects[$i]); $j++) {
 				# durchläuft alle Tags im Objekt
@@ -194,7 +244,7 @@ class wfs{
 				if ($this->objects[$i][$j]["type"] == 'complete' AND $this->objects[$i][$j]["tag"] != $geomtag) {
 					# alle kompletten Tags und keine Geometrie-Tags
 					# evtl. Namespace davor entfernen
-					$this->objects[$i][$j]["tag"] = str_replace($this->namespace . ':', '', $this->objects[$i][$j]["tag"]);
+					$this->objects[$i][$j]["tag"] = array_pop(explode(':', $this->objects[$i][$j]["tag"]));
 		  		$features[$i]['value'][$this->objects[$i][$j]["tag"]] = $this->objects[$i][$j]["value"];
 				}				
 			}

@@ -8,25 +8,90 @@ class rolle {
 	var $database;
 	var $loglevel;
 	var $hist_timestamp_de;
+	static $language;
 	static $hist_timestamp;
 	static $layer_params;
+	static $user_ID;
+	static $stelle_ID;
+	static $stelle_bezeichnung;
+	static $export;
 	var $minx;
-	var $language;
 	var $newtime;
+	var $gui; // file to include as gui
 	var $gui_object;
 	var $layerset;
+	var $data;
 
 	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
 		global $GUI;
 		$this->gui_object = $GUI;
-		$this->debug=$debug;
-		$this->user_id=$user_id;
-		$this->stelle_id=$stelle_id;
-		$this->database=$database;
-		#$this->layerset=$this->getLayer('');
-		#$this->groupset=$this->getGroups('');
+		$this->debug = $debug;
+		$this->user_id = $user_id;
+		$this->stelle_id = $stelle_id;
+		$this->database = $database;
+		rolle::$user_ID = $user_id;
+		rolle::$stelle_ID = $stelle_id;
+		rolle::$stelle_bezeichnung = $this->gui_object->Stelle->Bezeichnung;
+		rolle::$export = 'false';
 		$this->loglevel = 0;
+	}
+
+	/**
+	 * Function create a rolle for a user with $user_id and all relations to menues, layers and layergroups in stelle with $stelle_id.
+	 * If $default_user_id is given them settings will be used.
+	 * @param database $database MySQL-Database object from class database defined in classes/mysql.php
+	 * @param Integer $stelle_id
+	 * @param Integer $user_id
+	 * @param Integer $default_user_id Die id eines Default-Users.
+	 * @param Layer[] $layer Array with layer_ids to assign rolle to there groups.
+	 * @return Array Result with Boolean success and String $msg.
+	 */
+	public static	function create($database, $stelle_id, $user_id, $default_user_id = 0, $layer = array(), $parent_stelle_id = NULL) {
+		$rolle = new rolle($user_id, $stelle_id, $database);
+		# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der selektierten Obermenüs zur Rolle
+		if (!$rolle->setMenue($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen der Menüs der Stelle zum Nutzer.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der Layer zur Rolle
+		if (!$rolle->setLayer($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen des Layers zur Rolle.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+		if (!$rolle->setGroups($user_id, $stelle_id, $default_user_id, $layer)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Hinzufügen der Layergruppen der selektierten Layer zur Rolle.<br>' . $database->errormessage
+			);
+		};	
+
+		if (!$rolle->setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen von savedLayersFromDefaultUser.<br>' . $database->errormessage
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Anlegen der Rolle erfolgreich.'
+		);
 	}
 
 	/*
@@ -75,15 +140,15 @@ class rolle {
 	}
 
 	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
-		global $language;
+		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
 
 		# Abfragen der Layer in der Rolle
-		if ($language != 'german') {
+		if (rolle::$language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				WHEN l.`Name_" . rolle::$language . "` != \"\" THEN l.`Name_" . rolle::$language . "`
 				ELSE l.`Name`
 			END AS Name";
 		} else {
@@ -115,6 +180,9 @@ class rolle {
 		if ($only_active_or_requires) {
 			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
 		}
+		else {
+			$active_filter = '';
+		}
 
 		$sql = "
 			SELECT " .
@@ -128,7 +196,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, terms_of_use_link, status, trigger_function, version,
 				ul.`queryable`,
 				l.`drawingorder`,
 				ul.`legendorder`,
@@ -169,8 +237,8 @@ class rolle {
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
-			$layer_name_filter . 
-			$active_filter . "
+				$layer_name_filter .
+				$active_filter . "
 			ORDER BY
 				l.drawingorder desc
 		";
@@ -192,14 +260,9 @@ class rolle {
 			}
 			if ($replace_params) {
 				foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
-					$rs[$key] = replace_params(
+					$rs[$key] = replace_params_rolle(
 						$rs[$key],
-						rolle::$layer_params,
-						$this->user_id,
-						$this->stelle_id,
-						rolle::$hist_timestamp,
-						$language,
-						$rs['duplicate_criterion']
+						['duplicate_criterion' => $rs['duplicate_criterion']]
 					);
 				}
 			}
@@ -288,11 +351,10 @@ class rolle {
   }	
 
   function getGroups($GroupName) {
-		global $language;
     # Abfragen der Gruppen in der Rolle
     $sql ='SELECT g2r.*, ';
-		if($language != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
+		if(rolle::$language != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.rolle::$language.'` != "" THEN `Gruppenname_'.rolle::$language.'` ELSE `Gruppenname` END AS ';
 		}
 		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
     $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
@@ -325,13 +387,13 @@ class rolle {
 		return 1;
 	}
 
-	function switch_gle_view($layer_id) {
+	function switch_gle_view($layer_id, $mode) {
 		if ($layer_id > 0) {
 			$sql = "
 				UPDATE
 					u_rolle2used_layer
 				SET
-					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+					gle_view = " . $mode . "
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
@@ -343,7 +405,7 @@ class rolle {
 				UPDATE
 					rollenlayer
 				SET
-					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+					gle_view = " . $mode . "
 				WHERE
 					id = " . (-$layer_id) . "
 			";
@@ -432,7 +494,6 @@ class rolle {
 	}
 	
   function readSettings() {
-		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql = "
 			SELECT
@@ -443,7 +504,7 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo 'Read rolle settings mit sql: ' . $sql;
+		#echo '<br>Read rolle settings mit sql: ' . $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>",4);
     $this->database->execSQL($sql);
     if (!$this->database->success) {
@@ -466,8 +527,7 @@ class rolle {
 			$this->coordtype=$rs['coordtype'];
 			$this->last_time_id=$rs['last_time_id'];
 			$this->gui=$rs['gui'];
-			$this->language=$rs['language'];
-			$language = $this->language;
+			rolle::$language = $rs['language'];
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->tooltipquery=$rs['tooltipquery'];
@@ -492,7 +552,12 @@ class rolle {
 			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
-			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
+			rolle::$layer_params = array_map(
+				function ($layer_param) {
+					return ($layer_param === 'Array' ? '' : $layer_param);
+				},
+				(array)json_decode('{' . $rs['layer_params'] . '}')
+			);
 			$this->visually_impaired = $rs['visually_impaired'];
 			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
@@ -526,6 +591,7 @@ class rolle {
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
+			$this->routing = in_array('routing', $buttons);
 			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
 			$this->redline_text_color = $rs['redline_text_color'];
 			$this->redline_font_family = $rs['redline_font_family'];
@@ -587,7 +653,7 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo $sql;
+		#echo '<br>SQL to set Layer params: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 1);
 		rolle::$layer_params = (array)json_decode('{' . $layer_params . '}');
 		return $ret;
@@ -739,7 +805,7 @@ class rolle {
 		return $ret;
 	}
 
-# 2006-03-20 pk
+	# 2006-03-20 pk
   function setConsumeActivity($time,$activity,$prevtime) {
 		$errmsg = '';
     if (LOG_CONSUME_ACTIVITY==1) {
@@ -1637,6 +1703,13 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Function set saved themes from Default user with $default_user_id to User with $user_id in Stelle $stelle_id
+	 * @param int $user_id
+	 * @param int $stelle_id
+	 * @param int $default_user_id
+	 * @return int 1 | 0 Wenn success 1 else 0
+	 */
 	function setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id){
 		# Gespeicherte Themeneinstellungen von default user übernehmen
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
@@ -1671,9 +1744,14 @@ class rolle {
 		return 1;
 	}
 
-	function setRolle($user_id, $stelle_id, $default_user_id) {
+	/**
+	 * Fügt die Rolle für den Nutzer $user_id in der Stelle $stelle_id hinzu.
+	 * Verwendet die Defaulteinstellungen der Rolle $default_user_id, falls übergeben
+	 * und anders als $user_id
+	 */
+	function setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id = NULL) {
 		# trägt die Rolle für einen Benutzer ein.
-		if ($default_user_id > 0 AND $default_user_id != $user_id) {
+		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
 			# Rolleneinstellungen vom Defaultnutzer verwenden
 			$sql = "
 				INSERT IGNORE INTO `rolle` (
@@ -1769,7 +1847,7 @@ class rolle {
 					`rolle`
 				WHERE
 					`user_id` = " . $default_user_id . " AND
-					`stelle_id` = " . $stelle_id . "
+					`stelle_id` = " . ($parent_stelle_id ?? $stelle_id) . "
 			";
 		}
 		else {
@@ -1797,12 +1875,74 @@ class rolle {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . $ret[1], 4);
 			return 0;
 		}
+		// Update layer_params if default is not available for user
+		$rolle = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
+		$this->rectify_layer_params($rolle);
 		return 1;
+	}
+
+	# ToDo pk: harmonize get_rolle_layer_params and get_layer_params, same with set_rolle_layer_params and set_layer_params
+	/**
+	 * Function get the layer parameter from rolle attribut layer_params as an assoziative array
+	 * @param MyObject The MyObject of the rolle.
+	 * @return Array The assoziative array with the layer params of rolle.
+	 */
+	function get_rolle_layer_params($rolle) {
+		return (array)json_decode('{' . $rolle->get('layer_params') . '}');
+	}
+
+	/**
+	 * Function set the layer parameter for rolle attribut layer_params as string
+	 * @param MyObject The MyObject of the rolle.
+	 * @param Array The assoziative array with layer params of rolle.
+	 * @return void
+	 */
+	function set_rolle_layer_params($rolle, $layer_params) {
+		$rolle->update(array('layer_params', implode(',', $new_layer_params)));
+	}
+
+	/**
+	 * Function get the layer_params of rolle and check if they are
+	 * arvailable for the user in that rolle. If not set the first possible value instead
+	 * of the before existing value of that layer parameter.
+	 * @param MyObject The MyObject of the rolle to be checked.
+	 * @return void
+	 */
+	function rectify_layer_params($rolle) {
+		include_once(CLASSPATH . 'LayerParam.php');
+		$layer_params = $this->get_rolle_layer_params($rolle);
+		$new_layer_params = array();
+		foreach (array_keys($layer_params) AS $key) {
+			$layer_param = LayerParam::find_by_key($this->gui_object, $key);
+			$result = $layer_param->get_options($this->user_id, $this->stelle_id);
+			if (!$result['success']) {
+				return $result;
+			}
+			if (!in_array(
+				$layer_params[$key],
+				array_map(
+					function($option) {
+						return $option['value'];
+					},
+					$result['options']
+				)
+			)) {
+				$layer_params[$key] = $result['options']['value'][0];
+			};
+		}
+		foreach ($layer_params AS $param_key => $value) {
+			$new_layer_params[] = '"' . $param_key . '":"' . $value . '"';
+		}
+		$this->set_layer_params(implode(',', $new_layer_params));
+		return array(
+			'success' => true,
+			'msg' => 'Layerparameter erfolgreich für Rolle angepasst.'
+		);
 	}
 
 	function deleteRollen($user_id, $stellen) {
 		# löscht die übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			$sql = "
 				DELETE FROM `rolle`
 				WHERE
@@ -1905,7 +2045,7 @@ class rolle {
 	function deleteMenue($user_id, $stellen, $menues) {
 		# löscht die Menuepunkte der übergebenen Stellen für einen Benutzer.
 		if($menues == 0) {
-			for ($i = 0; $i < @count($stellen); $i++) {
+			for ($i = 0; $i < count_or_0($stellen); $i++) {
 				# löscht alle Menuepunkte der Stelle
 				$sql = "
 					DELETE FROM
@@ -1966,14 +2106,19 @@ class rolle {
 				WHERE
 					stelle_id = ".$stelle_id." AND
 					user_id = ".$default_user_id;
-			#echo '<br>Gruppen: '.$sql;
+			#echo '<br>SQL zum Zuordnen der Rolle zu den Layergruppen: '.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rolle:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			if (!$this->database->success) {
+				$msg = "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__;
+				$this->debug->write($msg, 4);
+				return 0;
+			}
 		}
 		else {
-			for($j = 0; $j < @count($layerids); $j++){
-				$sql = "
+			for ($j = 0; $j < count_or_0($layerids); $j++){
+				if (MYSQLVERSION < 800) {
+					$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
 					SELECT DISTINCT 
 						".$user_id.", 
@@ -1990,17 +2135,59 @@ class rolle {
 						WHERE @id IS NOT NULL
 					) AS dat
 					JOIN u_groups ON dat.id = u_groups.id";
+				}
+				else {
+					$sql = "
+						INSERT IGNORE INTO u_groups2rolle 
+						WITH RECURSIVE cte (group_id) AS (
+							SELECT 
+								coalesce(ul.group_id, l.Gruppe) AS group_id
+							FROM
+								used_layer ul JOIN
+								layer l ON ul.`Layer_ID` = l.`Layer_ID`
+							WHERE 
+								l.Layer_ID = " . $layerids[$j] . " AND
+								ul.Stelle_ID = " . $stelle_id . "
+							UNION ALL
+							SELECT obergruppe FROM u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
+						)
+						SELECT 
+							" . $user_id . ", 
+							" . $stelle_id . ", 
+							group_id, 
+							0
+						FROM cte;";
+				}
 				#echo '<br>Gruppen: '.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
+			}
+		}
+		return 1;
+	}
+
+	function deleteGroups($user_id,$stellen) {
+		# löscht die Gruppen der übergebenen Stellen für einen Benutzer.
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
+			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
+			#echo '<br>'.$sql;
+			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
+			$this->database->execSQL($sql);
+			if (!$this->database->success) {
+				$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+				return 0;
 			}
 		}
 		return 1;
 	}
 
 	static function setGroupsForAll($database) {
-		$sql = "
+		if (MYSQLVERSION < 800) {
+			$sql = "
 			INSERT IGNORE INTO u_groups2rolle 
 			SELECT DISTINCT 
 				r2ul.user_id,
@@ -2015,80 +2202,98 @@ class rolle {
 				LEFT JOIN u_groups g3 ON g3.id = g2.obergruppe
 				LEFT JOIN u_groups g4 ON g4.id = g3.obergruppe
 				LEFT JOIN u_groups g5 ON (g5.id = g4.id OR g5.id = g3.id OR g5.id = g2.id OR g5.id = g1.id)";
+		}
+		else {
+			$sql = "
+				INSERT IGNORE INTO u_groups2rolle 				
+				WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
+					SELECT DISTINCT
+							ul.`Stelle_ID` AS stelle_id,
+							r.user_id,
+							coalesce(ul.group_id, l.Gruppe) AS group_id
+					FROM
+							used_layer ul JOIN
+							layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
+							rolle r ON ul.`Stelle_ID` = r.stelle_id
+					UNION ALL
+					SELECT 
+							cte.stelle_id,
+							cte.user_id,
+							obergruppe AS group_id
+					FROM 
+							u_groups, cte 
+					WHERE 
+							cte.group_id = u_groups.id AND 
+							obergruppe IS NOT NULL
+				)
+				SELECT DISTINCT 
+					user_id,
+					stelle_id,
+					group_id,
+					0 
+				FROM cte";
+		}
 		#echo '<br>Gruppen: '.$sql;
 		$database->execSQL($sql);
 	}
 
-	function deleteGroups($user_id,$stellen) {
-		# löscht die Gruppen der übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
-			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
-			#echo '<br>'.$sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+	static function clear_groups2rolle($database) {
+		$sql = "
+			DELETE
+				u_groups2rolle
+			FROM 
+				u_groups2rolle LEFT JOIN
+				(
+					SELECT DISTINCT
+						*
+					FROM
+						(
+							WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
+								(
+									SELECT DISTINCT
+										ul.`Stelle_ID` AS stelle_id,
+										r.user_id,
+										coalesce(ul.group_id, l.Gruppe) AS group_id
+									FROM
+										used_layer ul JOIN
+										layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
+										rolle r ON ul.`Stelle_ID` = r.stelle_id
+									UNION ALL
+									SELECT DISTINCT
+										stelle_id,
+										user_id,
+										Gruppe
+									FROM
+										rollenlayer
+								)
+								UNION ALL
+								SELECT 
+										cte.stelle_id,
+										cte.user_id,
+										obergruppe AS group_id
+								FROM 
+										u_groups, cte 
+								WHERE 
+										cte.group_id = u_groups.id AND 
+										obergruppe IS NOT NULL
+							)
+							SELECT * FROM cte
+						) sub
+					WHERE
+						group_id IS NOT NULL
+				) n ON 
+					u_groups2rolle.stelle_id = n.stelle_id AND 
+					u_groups2rolle.user_id = n.user_id AND 
+					u_groups2rolle.id = n.group_id
+			WHERE
+				n.stelle_id IS NULL AND
+				n.user_id IS NULL AND
+				n.group_id IS NULL
+		";
+		// echo '<br>SQL zum Löschen nicht mehr benötigter groups2rolle Eintragungen: ' . $sql . '<br>';
+		if (MYSQLVERSION > 800) {
+			$database->execSQL($sql);
 		}
-		return 1;
-	}
-
-	function updateGroups($user_id,$stelle_id, $layer_id) {
-		# überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe und deren Obergruppen in u_groups2rolle überflüssig sind
-		#
-		# Abfragen der Gruppe und der Obergruppen
-		$sql ='SELECT DISTINCT u_groups.id';
-		$sql.=' FROM (SELECT @id AS id, @id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe';
-		$sql.='       FROM u_groups, (SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = '.$layer_id.')) AS vars';
-		$sql.='       WHERE @id IS NOT NULL';
-		$sql.='	    ) AS dat';
-		$sql.='	JOIN u_groups ON dat.id = u_groups.id';
-		#echo '<br>'.$sql;
-		$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_row()) {
-			$gruppen_ids[] = $rs[0];
-		}
-		if($gruppen_ids != NULL){
-			# Test ob Layer in den Gruppen vorhanden sind
-			$sql ='SELECT DISTINCT Gruppe FROM layer, u_rolle2used_layer AS r2ul WHERE Gruppe IN ('.implode(',', $gruppen_ids).') AND ';
-			$sql.='r2ul.layer_id = layer.Layer_ID AND ';
-			$sql.='r2ul.user_id = '.$user_id.' AND ';
-			$sql.='r2ul.stelle_id = '.$stelle_id;
-			#echo '<br>'.$sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			while ($rs = $this->database->result->fetch_assoc()) {
-				$rs_layer[$rs['Gruppe']] = $rs['Gruppe'];		# ein Array mit den GruppenIDs, die noch Layer haben
-			}
-			
-			# Test ob Untergruppen in den Gruppen vorhanden sind
-			$sql ='SELECT u_groups.id, u_groups.obergruppe FROM u_groups, u_groups2rolle as r2g WHERE u_groups.id NOT IN ('.implode(',', $gruppen_ids).') AND u_groups.obergruppe IN ('.implode(',', $gruppen_ids).') AND ';
-			$sql.='r2g.id = u_groups.id AND ';
-			$sql.='r2g.user_id = '.$user_id.' AND ';
-			$sql.='r2g.stelle_id = '.$stelle_id;
-			#echo '<br>'.$sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			while ($rs = $this->database->result->fetch_assoc()) {
-				$rs_subgroups[$rs['obergruppe']] = $rs['obergruppe'];		# ein Array mit den GruppenIDs, die noch Untergruppen haben
-			}
-			
-			if($rs_layer[$gruppen_ids[0]] == '' AND $rs_subgroups[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers weder Layer noch Untergruppen hat, diese löschen
-				$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
-				$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-				if($rs_layer == '' AND empty($rs_subgroups)){				# wenn darüberhinaus keine Layer oder Untergruppen in den Gruppen darüber vorhanden sind, diese auch löschen
-					$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` IN ('.implode(',', $gruppen_ids).');';
-					$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-					$this->database->execSQL($sql);
-					if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-				}
-			}
-		}
-		return 1;
 	}
 
 	function set_one_Layer($user_id, $stelle_id, $layer_id,  $active) {
@@ -2099,10 +2304,12 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
+	 */
 	function setLayer($user_id, $stelle_id, $default_user_id) {
-		# trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
-			# Layereinstellungen von Defaultrolle abfragen
+			// echo '<br>Layereinstellungen von Defaultrolle abfragen';
 			$rolle2used_layer_select_sql = "
 				SELECT " .
 					$user_id . ", " .
@@ -2121,7 +2328,7 @@ class rolle {
 			";
 		}
 		else {
-			# Layereinstellungen von Defaultlayerzuordnung abfragen
+			// echo '<br>Layereinstellungen von Defaultlayerzuordnung abfragen';
 			$rolle2used_layer_select_sql = "
 				SELECT " .
 					$user_id . ", " .
@@ -2152,7 +2359,8 @@ class rolle {
 			) " .
 			$rolle2used_layer_select_sql . "
 		";
-		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>".$sql,4);
+		// echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		return 1;
@@ -2160,7 +2368,7 @@ class rolle {
 
 	function deleteLayer($user_id, $stellen, $layer) {
 		# löscht die Layer der übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			if (!is_array($layer)) {
 				$layer = array();
 			}
@@ -2460,6 +2668,6 @@ class rolle {
 		}
 		return $ret;
 	}
-
 }
+include(CLASSPATH . 'Role.php');
 ?>

@@ -33,6 +33,12 @@ class Nutzer extends MyObject {
 		return $user->find_by('login_name', $gui->database->mysqli->real_escape_string($login_name));
 	}
 
+	public static	function find_by_id($gui, $id) {
+		$gui->debug->show('Frage Nutzer mit id ab.', Nutzer::$write_debug);
+		$user = new Nutzer($gui);
+		return $user->find_by('ID', $gui->database->mysqli->real_escape_string($id));
+	}
+
 	function get_name() {
 		return ($this->get('Name') ? $this->get('Name') . ', ' : '') . ($this->get('Vorname') ? $this->get('Vorname') : $this->login_name);
 	}
@@ -44,10 +50,13 @@ class Nutzer extends MyObject {
 			$num_login_failed = $nutzer->get('num_login_failed') + 1;
 			$gui->debug->show('Setze num_login_failed auf ' . $num_login_failed, Nutzer::$write_debug);
 
-			$nutzer->update(array(
-				'num_login_failed' => $num_login_failed,
-				'login_locked_until' => date('Y-m-d H:i:s', time() + ($num_login_failed <= 5 ? 0 : $num_login_failed * 5))
-			));
+			$nutzer->update(
+				array(
+					'num_login_failed' => $num_login_failed,
+					'login_locked_until' => date('Y-m-d H:i:s', time() + ($num_login_failed <= 5 ? 0 : $num_login_failed * 5))
+				),
+				false
+			);
 		}
 		return $nutzer;
 	}
@@ -55,11 +64,14 @@ class Nutzer extends MyObject {
 	public static function reset_num_login_failed($gui, $login_name) {
 		$nutzer = Nutzer::find_by_login_name($gui, $login_name);
 		if ($nutzer->has_key('num_login_failed')) {
-			$nutzer->update(array(
-				'ID' => $nutzer->get('ID'),
-				'num_login_failed' => 0,
-				'login_locked_until' => ''
-			));
+			$nutzer->update(
+				array(
+					'ID' => $nutzer->get('ID'),
+					'num_login_failed' => 0,
+					'login_locked_until' => ''
+				),
+				false
+			);
 		}
 		return $nutzer;
 	}
@@ -80,26 +92,20 @@ class Nutzer extends MyObject {
 				'stelle_id' => $stelle_id
 			)
 		);
-
-		if ($results[0]['success']) {
-			$result['success'] = false;
-			$rolle = new rolle($user->get('ID'), $stelle_id, $gui->database);
-			if ($rolle->setRolle($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
-				if ($rolle->setMenue($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
-					if ($rolle->setLayer($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
-						$layers = $stelle->getLayers(NULL);
-						if ($rolle->setGroups($user->get('ID'), $stelle_id, $stelle->default_user_id, $layers['ID'])) {
-							$rolle->setSavedLayersFromDefaultUser($user->get('ID'), $stelle_id, $stelle->default_user_id);
-							$result['success'] = true;
-						}
-					}
-				}
-			}
-			if ($result['success'] == 0) {
-				$succsess['msg'] = $gui->database->error;
-			}
+		$result = $results[0];
+		if (!$result['success']) {
+			return $result;
 		}
-		return $result;
+
+		$create_rolle_result = rolle::create($gui->database, $stelle_id, $user->get('ID'), $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
+		if (!$create_rolle_result['success']) {
+			return $create_rolle_result;
+		}
+
+		return array(
+			'success' => true,
+			'msg' => $result['msg'] . '<br>' . $create_rolle_result['msg']
+		);
 	}
 
 	function get_rolle() {
@@ -124,7 +130,10 @@ class Nutzer extends MyObject {
 				'user_id' 	=> $this->get('ID'),
 				'stelle_id' => $this->get('stelle_id')
 			);
-			$this->rolle = $db_object->find_by_ids(array('user_id' => $db_object->get('user_id'), 'stelle_id' => $db_object->get('stelle_id')));
+			$this->rolle = $db_object->find_by_ids(array(
+				'user_id' => $db_object->get('user_id'),
+				'stelle_id' => $db_object->get('stelle_id')
+			));
 		}
 		return $this->rolle;
 	}

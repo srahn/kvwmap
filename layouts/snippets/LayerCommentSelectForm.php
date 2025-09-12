@@ -1,12 +1,12 @@
 <?php
  # 2008-02-05 pkvvm
-  include(LAYOUTPATH.'languages/MapCommentSelectForm_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/MapCommentSelectForm_'.rolle::$language.'.php');
  ?>
 <br>
 <h2><?php echo $strTitleLayers; ?></h2>
 <br>
 <table cellpadding="0" cellspacing="0">
-<?	$anzLayerComments = @count($this->layerComments ?: []);
+<?	$anzLayerComments = count_or_0($this->layerComments ?: []);
   for ($i=0;$i<$anzLayerComments;$i++) { ?>
 		<tr>
 			<td style="background-color:<? echo BG_GLEATTRIBUTE; ?>;border:1px solid #C3C7C3;">

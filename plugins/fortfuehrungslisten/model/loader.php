@@ -19,9 +19,8 @@ class NASLoader extends DOMDocument {
 		#echo '<br>Prüfe ob Datei: ' . $file['basename'] . ' eine Zip-Datei ist.';
 		if (strtolower($file['extension']) == 'zip') {
 			#echo '<br>Ja Datei ist eine Zipdatei. Versuche auszupacken.';
-			$unziped_files = unzip($file_name, false, false, true);
-			foreach ($unziped_files AS $unziped_file) {
-				$unziped_file = str_replace('\\', '/', $unziped_file);
+			$result = unzip($file_name, false, false, true);
+			foreach ($result['files'] AS $unziped_file) {
 				#echo '<br>Verarbeite ausgepackte Datei: ' . $unziped_file;
 				$pathinfo_unziped_file = pathinfo($unziped_file);
 				if (substr($pathinfo_unziped_file['filename'], -5) == '_2000') {
@@ -31,7 +30,7 @@ class NASLoader extends DOMDocument {
 
 				$rm_file = $file['dirname'] . '/' . $unziped_file;
 				#echo '<br>Lösche Datei: ' . $rm_file;
-				unlink(str_replace('\\', '/', $file['dirname'] . '/' . $unziped_file));
+				unlink($file['dirname'] . '/' . $unziped_file);
 
 				if (!empty($pathinfo_unziped_file['dirname'])) {
 					$rmdir = $file['dirname'] . '/' . $pathinfo_unziped_file['dirname'];
@@ -142,7 +141,7 @@ class NASLoader extends DOMDocument {
 								$flst['flurstueckskennzeichen'] = $child_node->nodeValue;
 							}
 							if ($tag == 'anlass') {
-								$flst['anlass'] = $child_node->nodeValue;
+								$flst['anlass'] = explode('AA_Anlassart/', $child_node->getAttribute('xlink:href'))[1];
 							}
 						}
 						$anlaesse[$flst['flurstueckskennzeichen']] = $flst['anlass'];
@@ -211,9 +210,9 @@ class NASLoader extends DOMDocument {
 							$ff->set('anlassart', $anlassarten[0]);
 						}
 
-						$ff_id = $ff->create();
-						if (empty($ff_id)) {
-							while($row = pg_fetch_assoc($ff->lastquery)) {
+						$result = $ff->create();
+						if ($result['success']) {
+							while ($row = pg_fetch_assoc($ff->lastquery)) {
 								$this->gui->add_message($row['msg_type'], $row['msg']);
 							}
 						}

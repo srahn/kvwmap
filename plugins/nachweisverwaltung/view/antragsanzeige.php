@@ -28,7 +28,7 @@
           <td colspan="2">&nbsp;</td>
         </tr>
         <?php
-		 for ($i=0; $i < @count($this->antrag->antragsliste); $i++) {
+		 for ($i=0; $i < count_or_0($this->antrag->antragsliste); $i++) {
         ?>
         <tr align="left" bgcolor="<?php if ($i%2!=0) {
 							 echo '#FFFFFF';

@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/punktliste_anzeigen_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/punktliste_anzeigen_'.rolle::$language.'.php');
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -16,7 +16,7 @@ function load(){
 
 function show(){
 	var x, y, label;
-	for(i = 0; i < <? echo @count($this->data_import_export->columns); ?>; i++){
+	for(i = 0; i < <? echo count_or_0($this->data_import_export->columns); ?>; i++){
 		if(document.getElementById('column'+i).value == 'x')x = true;
 		if(document.getElementById('column'+i).value == 'y')y = true;
 	}

@@ -1,4 +1,4 @@
-<? include(LAYOUTPATH . 'languages/zwischenablage_' . $this->user->rolle->language . '.php'); ?>
+<? include(LAYOUTPATH . 'languages/zwischenablage_' . rolle::$language . '.php'); ?>
 
 <style>
 
@@ -47,7 +47,7 @@
 
 $print_all = false;
 
-for ($i = 0; $i < @count($this->layer); $i++) { ?>
+for ($i = 0; $i < count_or_0($this->layer); $i++) { ?>
 	<div class="item layer-item">
 		<a href="index.php?go=gemerkte_Datensaetze_anzeigen&layer_id=<? echo $this->layer[$i]['layer_id']; ?>"><? echo $this->layer[$i]['Name_or_alias']; ?></a>
 	</div>
@@ -79,7 +79,7 @@ for ($i = 0; $i < @count($this->layer); $i++) { ?>
 <div class="item layer-item"></div>
 
 <div class="item show-item">
-	<?php echo $this->num_rows == 0 ? '' : $this->all . ' ' . $strRecords; ?>
+	<?php echo $this->num_rows == 0 ? '' : $this->strAll . ' ' . $strRecords; ?>
 </div>
 
 <?

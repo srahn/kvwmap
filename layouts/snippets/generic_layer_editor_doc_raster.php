@@ -1,6 +1,6 @@
 <?php
  # 2008-09-30 sr
-  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
  
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -40,21 +40,21 @@
 <? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
-		<td valign="top" style="padding: 0 0 0 0">
+		<!--td valign="top" style="padding: 0 0 0 0">
 			<? if($layer['template'] != 'generic_layer_editor.php'){ ?>
 			<a href="javascript:switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
 			<? }else{ ?>
 			<a href="javascript:switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 			<? } ?>
-		</td>
+		</td-->
 		<td height="30" width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
-		<td valign="top" style="padding: 0 10 0 0">
+		<!--td valign="top" style="padding: 0 10 0 0">
 			<? if($layer['template'] != 'generic_layer_editor.php'){ ?>
 			<a href="javascript:switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
 			<? }else{ ?>
 			<a href="javascript:switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 			<? } ?>
-		</td>
+		</td-->
 		<td align="right" valign="top">
 		</td>
 	</tr>
@@ -72,7 +72,7 @@
 		}
 
   	$doit = false;
-	  $anzObj = @count($layer['shape']);
+	  $anzObj = count_or_0($layer['shape']);
 		if ($anzObj > 0) {
 			$this->found = 'true';
 			$k = 0;
@@ -132,8 +132,9 @@
 									<input
 										id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
 										type="checkbox"
-										class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
+										class="check_<? echo $layer['Layer_ID']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
 										name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>"
+										onchange="count_selected(<? echo $layer['Layer_ID']; ?>);"
 									>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
 									if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>
 										<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">
@@ -516,7 +517,7 @@
 
 <?
 
-	for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
+	for($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++){
 		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 	}
 

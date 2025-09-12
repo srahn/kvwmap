@@ -31,7 +31,6 @@
 
 class Konformitaetsbedingung extends PgObject {
 
-
 	static $schema = 'xplankonverter';
 	static $tableName = 'konformitaetsbedingungen';
 	static $write_debug = false;
@@ -54,7 +53,7 @@ class Konformitaetsbedingung extends PgObject {
 
 	public static	function find_by_id($gui, $nummer, $version_von) {
 		$bedingung = new Konformitaetsbedingung($gui);
-		$bedingung->find_by_ids($nummer, $version_von);
+		$bedingung->find_by_ids(array('nummer' => $nummer, 'version_von' => $version_von));
 		$bedingung->getValidierungen();
 		return $bedingung;
 	}

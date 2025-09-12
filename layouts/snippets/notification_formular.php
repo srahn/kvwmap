@@ -1,5 +1,5 @@
 <?php
-include(LAYOUTPATH . 'languages/notifications_' . $this->user->rolle->language . '.php');
+include(LAYOUTPATH . 'languages/notifications_' . rolle::$language . '.php');
 include_once(CLASSPATH . 'FormObject.php');
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
@@ -154,7 +154,7 @@ include_once(CLASSPATH . 'FormObject.php');
 	</tr>
 	<tr>
 		<td colspan="2" align="center">
-			<input type="button" name="cancle" value="<? echo $this->strCancel; ?>" onclick="document.location.href = 'index.php?go=notifications_anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">
+			<input type="button" name="cancel" value="<? echo $this->strCancel; ?>" onclick="document.location.href = 'index.php?go=notifications_anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">
 			<input id="form-submit-button" type="submit" name="go_plus" value="<? echo $this->strSave; ?>">
 		</td>
 	</tr>

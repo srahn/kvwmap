@@ -1,0 +1,87 @@
+#odr-header-div {
+  background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
+  overflow-x: hidden;
+  overflow-y: auto;
+  text-align: justify;
+  padding-bottom: 4px;
+}
+
+.odr-header {
+  background-color: blue;
+  /* margin-left: 4px; */
+  font-family: 'SourceSansPro3';
+}
+
+#odr-table-div {
+  background-color: white;
+  overflow-x: hidden;
+  overflow-y: auto;
+  text-align: left;
+  /* padding: 4px; */
+}
+
+#odr-footer-div {
+  background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
+  height: 38px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* justify-content: center; */
+  align-items: center;
+  display: flex;
+  /* padding: 4px; */
+}
+
+.odr-footer-cell {
+  margin-top: 3px;
+  padding: 4px;
+}
+
+.odr-row {
+  margin-left: 0px;
+}
+
+.odr-alt {
+  background-color: #eeeeee;
+  width: auto;
+  height: 32px;
+}
+
+.odr-cell {
+  margin-top: 3px;
+  padding: 4px;
+  float: left;
+}
+
+.odr-cell-right {
+  float: right;
+  /* margin-top: 4px; */
+  padding: 4px;
+}
+
+.odr-checkbox {
+  width: 3%;
+}
+
+.odr-ressource {
+  width: 30%;
+}
+
+.odr-status {
+  width: 15%;
+}
+
+.odr-last_updated_at {
+  width: 15%;
+}
+
+.odr-next_update_at {
+  width: 15%;
+}
+
+.odr-action {
+  width: 10%;
+}
+
+.odr-button {
+  display: none;
+}

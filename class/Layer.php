@@ -1,6 +1,5 @@
 <?php
 include_once(CLASSPATH . 'MyObject.php');
-include_once(CLASSPATH . 'LayerAttribute.php');
 include_once(CLASSPATH . 'LayerChart.php');
 include_once(CLASSPATH . 'DataSource.php');
 include_once(CLASSPATH . 'LayerDataSource.php');
@@ -16,6 +15,8 @@ class Layer extends MyObject {
 	public $opacity;
 	public $minScale;
 	public $maxScale;
+	public $document_attributes;
+	public $layer2stelle;
 
 	function __construct($gui) {
 		$this->gui = $gui;
@@ -36,7 +37,7 @@ class Layer extends MyObject {
 			)
 		);
 		parent::__construct($gui, 'layer');
-		$this->stelle_id = $gui->stelle->id;
+		$this->stelle_id = ($gui->stelle ? $gui->stelle->id : null);
 		$this->identifier = 'Layer_ID';
 		$this->geometry_types = array('Point', 'LineString', 'Polygon');
 		$this->geom_column = 'geom';
@@ -47,13 +48,22 @@ class Layer extends MyObject {
 		return $layer->find_where($where, $order);
 	}
 
+	/**
+	 * Function find layer with $id in MariaDb database
+	 * and return the layer object with beloning attributes and charts
+	 * If no layer has been found, it returns false
+	 * @param GUI $gui
+	 * @param int $id
+	 * @return Layer|false
+	 */
 	public static	function find_by_id($gui, $id) {
 		$obj = new Layer($gui);
 		$layer = $obj->find_by('Layer_ID', $id);
-		if ($layer->get_id() != '') {
-			$layer->attributes = $layer->get_layer_attributes();
-			$layer->charts = $layer->get_layer_charts();
+		if ($layer->get_id() == '') {
+			return false;
 		}
+		$layer->attributes = $layer->get_layer_attributes();
+		$layer->charts = $layer->get_layer_charts();
 		return $layer;
 	}
 
@@ -82,7 +92,7 @@ class Layer extends MyObject {
 	/**
 	* This function return the layer id's of the duplicates of a layer
 	* @param mysql_connection object
-	* @param integer $duplicate_from_layer_id The layer id from witch the others are duplicates
+	* @param int $duplicate_from_layer_id The layer id from witch the others are duplicates
 	* @param array(integer) The layer_ids of the duplicates
 	*/
 	public static function find_by_duplicate_from_layer_id($database, $duplicate_from_layer_id) {
@@ -119,16 +129,29 @@ class Layer extends MyObject {
 	}
 
 	function update_datasources($gui, $datasource_ids) {
-		#echo '<br>update_datasources: ' . implode(', ', $datasource_ids) . ' of layer: ' . $this->get_id(); 
-		foreach(LayerDataSource::find($gui, '`layer_id` = ' . $this->get_id()) AS $layer_datasource) {
-			$layer_datasource->delete();
-		}
 		$layer_datasource = new LayerDataSource($gui);
+		$layer_datasource->delete('`layer_id` = ' . $this->get_id());
 		foreach($datasource_ids AS $datasource_id) {
 			$layer_datasource->create(array(
 				'layer_id' => $this->get_id(),
 				'datasource_id' => $datasource_id
 			));
+		}
+	}
+
+	function update_labelitems($gui, $names, $aliases) {
+		$layer_labelitems = new MyObject($gui, 'layer_labelitems');
+		$layer_labelitems->delete('layer_id = ' . $this->get_id());
+		for ($i = 1; $i < count($names); $i++) {
+			# der erste ist ein Dummy und wird ausgelassen
+			if ($names[$i] != '') {
+				$layer_labelitems->create(array(
+					'layer_id' => $this->get_id(),
+					'name' => $names[$i],
+					'alias' => $aliases[$i],
+					'order' => $i + 1
+				));
+			}
 		}
 	}
 
@@ -156,6 +179,7 @@ class Layer extends MyObject {
 	}
 
 	function get_layer_attributes() {
+		include_once(CLASSPATH . 'LayerAttribute.php');
 		$obj = new LayerAttribute($this->gui);
 		$layer_attributes = $obj->find_where(
 			$this->has_many['attributes']['fk'] . ' = ' . $this->get_id(),
@@ -420,13 +444,17 @@ l.Name AS sub_layer_name
 		foreach ($attributes AS $key => $value) {
 			$new_layer->set($key, $value);
 		}
-		$new_layer->create();
+
+		$result = $new_layer->create()[0];
+		if ($result['success'] === false) {
+			throw new Exception('Fehler beim Kopieren des Layers: ' . $result['msg']);
+		}
 		$new_layer_id = $new_layer->get($new_layer->identifier);
 
 		if (!empty($new_layer_id)) {
-			$this->debug->show('<p>Copiere die Klassen des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
+			$this->debug->show('<p>Kopiere die Klassen des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
 			$this->copy_classes($new_layer_id);
-			$this->debug->show('<p>Copiere die layer_attributes des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
+			$this->debug->show('<p>Kopiere die layer_attributes des Template layers für neuen Layer id: ' . $new_layer_id, Layer::$write_debug);
 			$this->copy_layer_attributes($new_layer_id);
 		}
 		return $new_layer;
@@ -436,6 +464,7 @@ l.Name AS sub_layer_name
 	* Kopiere die Klassen des Layers mit anderer Layer_id
 	*/
 	function copy_classes($new_layer_id) {
+		include_once(CLASSPATH . 'LayerClass.php');
 		foreach(LayerClass::find($this->gui, 'Layer_id = ' . $this->get('Layer_ID')) AS $layer_class) {
 			$this->debug->show('Copy class: ' . $layer_class->get('Name') . ' mit layer id: ' . $this->get('Layer_ID') . ' => ' . $new_layer_id, Layer::$write_debug);
 			$layer_class->copy($new_layer_id);
@@ -443,6 +472,7 @@ l.Name AS sub_layer_name
 	}
 
 	function copy_layer_attributes($new_layer_id) {
+		include_once(CLASSPATH . 'LayerAttribute.php');
 		foreach(LayerAttribute::find($this->gui, 'Layer_id = ' . $this->get('Layer_ID')) AS $attribute) {
 			$this->debug->show('Copy Attribute: ' . $attribute->get('name') . ' mit neuer layer id: ' . $this->get('Layer_ID') . ' => ' . $new_layer_id, Layer::$write_debug);
 			$attribute->copy($new_layer_id);
@@ -471,14 +501,14 @@ l.Name AS sub_layer_name
 		return (count($layers) > 0);
 	}
 
-	function delete() {
-		#echo '<br>Class Layer Method delete';
-		$ret = parent::delete();
-		if (MYSQLVERSION > 412) {
-			parent::reset_auto_increment();
-		}
-		return $ret;
-	}
+	// function delete() {
+	// 	#echo '<br>Class Layer Method delete';
+	// 	$ret = parent::delete();
+	// 	if (MYSQLVERSION > 412) {
+	// 		parent::reset_auto_increment();
+	// 	}
+	// 	return $ret;
+	// }
 
 	function get_subform_layers() {
 		include_once(CLASSPATH . 'LayerAttribute.php');
@@ -546,6 +576,11 @@ l.Name AS sub_layer_name
 		}
 	}
 
+	/**
+	 * Create the layer definition for a baselayer in stelle with $stelle_id
+	 * @param int $stelle_id
+	 * @return array{ label: String, options: array{}, shortLabel: String, img: String, url: String}
+	 */
 	function get_baselayers_def($stelle_id) {
 		$this->debug->show('<p>Layer->get_baselayers_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
 		#echo '<p>get_baselayer_def for Layer: ' . $this->get('Name');
@@ -605,6 +640,9 @@ l.Name AS sub_layer_name
 		}
 	}
 
+	/**
+	 * Get layer definition from layer for stelle
+	 */
 	function get_overlays_def($stelle_id) {
 		$this->debug->show('<p>Layer->get_overlays_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
 		#echo '<p>get_overlays_def for Layer: ' . $this->get('Name');
@@ -713,6 +751,7 @@ l.Name AS sub_layer_name
 			'geomType' => array('Point', 'Linestring', 'Polygon', 'Raster', 'Annotation', 'Query', 'Circle', 'Tileindex', 'Chart')[$this->get('Datentyp')],
 			'backgroundColor' => '#c1ffd8',
 			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
+			'classItem' => ($this->get('classitem') != '' ? $this->get('classitem') : $this->get('oid')),
 			'url' => $url,
 			'params' => $params,
 			'options' => $options,
@@ -731,6 +770,10 @@ l.Name AS sub_layer_name
 			'hideEmptyLayerAttributes' => true,
 			'layerAttributes' => $layerAttributes
 		);
+
+		if ($this->get_layer2stelle($stelle_id) AND $this->layer2stelle->get('symbolscale')) {
+			$layerdef->symbolscale = $this->layer2stelle->get('symbolscale');
+		}
 
 		if ($this->get('processing') != '') {
 			$processing = explode(';', $this->get('processing'));
@@ -764,7 +807,7 @@ l.Name AS sub_layer_name
 	}
 
 	function get_name($name_col = 'Name') {
-		return $this->get($name_col . (($name_col == 'Name' AND $this->gui->user->rolle->language != 'german') ? '_' . $this->gui->user->rolle->language : ''));
+		return $this->get($name_col . (($name_col == 'Name' AND rolle::$language != 'german') ? '_' . rolle::$language : ''));
 	}
 
 	function write_mapserver_templates($ansicht = 'Tabelle') {
@@ -806,7 +849,7 @@ l.Name AS sub_layer_name
 		$query_attribute_aliases = array();
 
 		for ($i = 0; $i < count($query_attributes['name']); $i++) {
-			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language : '')][$i];
+			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . (rolle::$language != 'german' ? '_' . rolle::$language : '')][$i];
 		}
 
 		$data_attribute_names = array_map(
@@ -923,6 +966,18 @@ l.Name AS sub_layer_name
   function get_table_alias() {
     return $this->table_alias;
   }
+
+	/**
+	 * Liefert das Layer2Stelle-Objekt für die übergebene Stelle zurück, wenn es existiert.
+	 * @param int $stelle_id
+	 * @return Layer2Stelle|null
+	 */
+	function get_layer2stelle($stelle_id) {
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		$result = Layer2Stelle::find($this->gui, 'Stelle_ID = ' . $stelle_id . ' AND Layer_ID = ' . $this->get('Layer_ID'));
+		$this->layer2stelle = (count($result) == 0 ? null : $result[0]);
+		return $this->layer2stelle;
+	}
 
 	/**
 	 * Generiert ein data-Statement in dem fehlende Attribute aus dem main_table ergänzt werden.

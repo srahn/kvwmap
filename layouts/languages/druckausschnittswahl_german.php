@@ -27,5 +27,6 @@ $strHelp="Hilfe";
 $strRollenlayerLegend="Wenn Sie diese Option aktivieren, werden in der Legende auch Ihre eigenen Abfragelayer sowie importierte Layer angezeigt.";
 $strLegendOptions="Legenden-Optionen";
 $strLayers="Themen";
+$strOutputFileType = "Ausgabeformat: ";
  
 ?>  

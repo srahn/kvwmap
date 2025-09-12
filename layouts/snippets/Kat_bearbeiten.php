@@ -1,6 +1,6 @@
 <?php
   # 2007-01-26 pkvvm
-  include(LAYOUTPATH.'languages/Kat_bearbeiten_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/Kat_bearbeiten_'.rolle::$language.'.php');
 ?>
 <script type="text/javascript">
 Text[3]=["Tipp:","Mit der Kategorienverwaltung lassen sich Kategorien hinzufügen, löschen oder die Zugriffe der Stellen pro Kategorie festlegen. Wenn Sie ein Kategorie löschen, wird auch die Zuordnung der Stellen gelöscht. Um die entsprechenden Notizen mit zu löschen müssen sie das Häckchen neben dem 'Kategorie löschen'-Link setzen."]

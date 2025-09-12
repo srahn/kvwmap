@@ -101,14 +101,13 @@
 		}
 
 		switch(true) {
-
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				# echo '<br>Führe ' . $fired . ' ' . $event . ' mit gml_id: ' . $oid . ' in handle_xp_plan Funktion aus.';
 				$xp_plan = XP_Plan::find_by_id($GUI, 'gml_id', $oid, $planart);
 
 				# Create Konvertierung and get konvertierung_id
 				$konvertierung = new Konvertierung($GUI);
-				$konvertierung_id = $konvertierung->create(
+				$konvertierung->create(
 					$xp_plan->get_anzeige_name(),
 					$GUI->Stelle->epsg_code,
 					$GUI->user->rolle->epsg_code,
@@ -117,57 +116,57 @@
 					$GUI->user->id
 				);
 
-				$xp_plan->set('konvertierung_id', $konvertierung_id);
+				$xp_plan->set('konvertierung_id', $konvertierung->get_id());
+				$xp_plan->set('konvertierung_id', $konvertierung->get_id());
 				$xp_plan->update();
 
-				$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
-				//$GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
+				// $GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
-				#echo '<script>console.log("' . print_r($GUI->formvars) . '")</script>';
+				// echo '<script>console.log("' . print_r($GUI->formvars, true) . '")</script>';
 				# layer_schemaname needs to be an empty textfield in the layer definition
 				# 03.11.21 change from ... layer_schemaname;;;Text;;unknown;0' to ... layer_schemaname;;;Text;;text;0'
-				if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
-				($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) ||
-				($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
-				($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)
-				) {
+				#if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
+				#($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) ||
+				#($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
+				#($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)
+				#) {
 				#if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || ($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)) {
-					# renames to xplan_gmlas_ + konvertierung_id to make schema permanent
-					//$konvertierung->rename_xplan_gmlas($GUI->user->id, $konvertierung_id);
-					$sql = "
-								 ALTER SCHEMA
-												xplan_gmlas_tmp_" . $GUI->user->id .
-								 " RENAME TO
-												 xplan_gmlas_" . $konvertierung_id . ";
-				 ";
-				 #echo $sql;
-				 $ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
+				# renames to xplan_gmlas_ + konvertierung_id to make schema permanent
+				//$konvertierung->rename_xplan_gmlas($GUI->user->id, $konvertierung_id);
+				$sql = "
+					ALTER SCHEMA xplan_gmlas_tmp_" . $GUI->user->id . "
+						RENAME TO xplan_gmlas_" . $konvertierung_id . ";
+				";
+				#echo $sql;
+				$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
 
+				# Creates Bereiche for each Plan loaded with GMLAS
+				$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $konvertierung_id);
+				$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);
 
-					# Creates Bereiche for each Plan loaded with GMLAS
-					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $konvertierung_id);
-					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);
-
-					# Inserts all existing Textabschnitte if they exist(no regel as potential link to plan)
-					$result = $konvertierung->insert_textabschnitte($gml_extractor);
-					if (!$result['success']) {
-						$GUI->add_message('error', $result['msg']);
-					}
-
-					# Inserts regeln for each possible class loaded with GMLAS
-					//$gml_extractor->insert_all_regeln_into_db();
-					$gml_extractor->insert_all_regeln_into_db($konvertierung_id, $GUI->Stelle->id);
-
-					# directories to be created (if they do no exist yet e.g. for shape export)
-					$konvertierung->create_directories($gml_extractor);
-
-					# mv uploaded xplan_gml from tmp to uploaded_xplan_gml
-					$upload_dir = XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/';
-					$store_dir = XPLANKONVERTER_FILE_PATH . $konvertierung_id . '/uploaded_xplan_gml/';
-					$gml_file = scandir($upload_dir)[2];
-					# Speichern der externen referenzen im Filesystem und Anpassen der Werte im Datensatz des Planes.
-					exec('mv ' . XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/* ' . XPLANKONVERTER_FILE_PATH . $konvertierung_id . '/uploaded_xplan_gml/');
+				# Inserts all existing Textabschnitte if they exist(no regel as potential link to plan)
+				$result = $konvertierung->insert_textabschnitte($gml_extractor);
+				if (!$result['success']) {
+					$GUI->add_message('error', $result['msg']);
 				}
+
+				# Inserts regeln for each possible class loaded with GMLAS
+				$gml_extractor->insert_all_regeln_into_db(
+					$konvertierung_id,
+					$GUI->Stelle->id,
+					(array_key_exists('simplify_fachdaten_geom', $GUI->formvars) ? floatval($GUI->formvars['simplify_fachdaten_geom']) : null)
+				);
+
+				# directories to be created (if they do no exist yet e.g. for shape export)
+				$konvertierung->create_directories($gml_extractor);
+
+				# mv uploaded xplan_gml from tmp to uploaded_xplan_gml
+				$upload_dir = XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/';
+				$store_dir = XPLANKONVERTER_FILE_PATH . $konvertierung_id . '/uploaded_xplan_gml/';
+				$gml_file = scandir($upload_dir)[2];
+				# Speichern der externen referenzen im Filesystem und Anpassen der Werte im Datensatz des Planes.
+				exec('mv ' . XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/* ' . XPLANKONVERTER_FILE_PATH . $konvertierung_id . '/uploaded_xplan_gml/');
+				#}
 			} break;
 
 			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
@@ -268,6 +267,8 @@
 	$GUI->xplankonverter_get_xplan_layers = function($planart) use ($GUI) {
 		include_once(CLASSPATH . 'Layer.php');
 		# ToDo pk: Hier prüfen ob die richtigen layer abgefragt werden, weil die Namen geändert wurden.
+		# zusammenzeichnungen/fp_plan should check for layers named xp,bp_,fp,rp,so and the zusammenzeichnung layer.
+		# An alternative filter could be built e.g. over a defined list of elements for each service-type
 		$layers = Layer::find($GUI, "
 				(
 					(
@@ -275,7 +276,18 @@
 						LOWER(`Name`) NOT LIKE '%\_textabschnitt' AND
 						LOWER(`Name`) NOT LIKE '%\_begruendungabschnitt' AND
 						LOWER(`Name`) NOT LIKE '%_aendert'" .
-						($planart == 'FP-Plan' ? " AND LOWER(`Name`) NOT LIKE 'rp\_%'" : '') . "
+						//($planart == 'FP-Plan' ? " AND LOWER(`Name`) NOT LIKE 'rp\_%'" : '') . "
+						($planart == 'FP-Plan' ? " AND (
+						LOWER(`Name`) LIKE 'xp\_%' OR
+						LOWER(`Name`) LIKE 'bp\_%' OR
+						LOWER(`Name`) LIKE 'fp\_%' OR
+						LOWER(`Name`) LIKE 'rp\_%' OR
+						LOWER(`Name`) LIKE 'so\_%' OR
+						LOWER(`Name`) LIKE 'zusammenzeichnungen%'
+						)
+						AND LOWER(`Name`) != 'rp_bereich'
+						AND LOWER(`Name`) != 'rp_plan'
+						" : '') . "
 					) OR
 					(
 						`schema` LIKE 'xplankonverter' AND
@@ -384,7 +396,7 @@
 			return $upload_validation_result;
 		}
 
-		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . $konvertierung->config['plan_file_name']);
+		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . $upload_validation_result['plan_file_name']);
 
 		if (!$result_zusammenzeichnung['success']) {
 			return $result_zusammenzeichnung;
@@ -410,16 +422,21 @@
 		# Hochgeladene Zusammenzeichnung hat Prüfung im XPlanValidator bestanden
 		# Create Konvertierung and get konvertierung_id
 		# Bezeichnung wird später wenn die Zusammenzeichnung eingelesen wurde noch entsprechend der Zusammenzeichnung.gml aktualisiert.
-		$konvertierung_id = $konvertierung->create(
+		$result = $konvertierung->create(
 			$GUI->konvertierung->config['title'] . ' aus Datei ' . $upload_file['name'],
 			$GUI->Stelle->epsg_code,
 			$GUI->user->rolle->epsg_code,
 			$GUI->formvars['planart'],
 			$GUI->Stelle->id,
-			$GUI->user->id
+			$GUI->user->id,
+			$upload_validation_result['plan_file_name']
 		);
-		$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
-
+		if (!$result['success']) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Anlegen der Konvertierung. ' . $result['msg']
+			);
+		}
 		$konvertierung->create_directories();
 
 		# move files from tmp to upload folder from konvertierung
@@ -442,11 +459,13 @@
 		);
 	};
 
+	//also rewrites Gml-id to always use GML_ and lowercase UUID (excludes uppercase UUIDs)
 	$GUI->xplankonverter_get_new_gml_id = function($gml_id) use ($GUI) {
-		if (! array_key_exists($gml_id, $GUI->xplan_gml_ids)) {
-			$GUI->xplan_gml_ids[$gml_id] = 'GML_' . uuid();
+		$rewritten_gml_id = 'GML_' . strtolower(ltrim($gml_id,'GML_'));
+		if (! array_key_exists($rewritten_gml_id, $GUI->xplan_gml_ids)) {
+			$GUI->xplan_gml_ids[$rewritten_gml_id] = 'GML_' . uuid();
 		}
-		return $GUI->xplan_gml_ids[$gml_id];
+		return $GUI->xplan_gml_ids[$rewritten_gml_id];
 	};
 
 	$GUI->xplankonverter_reindex_gml_ids = function() use ($GUI) {
@@ -455,8 +474,8 @@
 		if (! file_exists($reindexed_xplan_gml_path)) {
 			mkdir($reindexed_xplan_gml_path, 0777);
 		}
-		$read_handle = fopen($uploaded_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "r");
-		$write_handle = fopen($reindexed_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "w");
+		$read_handle = fopen($uploaded_xplan_gml_path . $GUI->konvertierung->get_plan_file_name(), "r");
+		$write_handle = fopen($reindexed_xplan_gml_path . $GUI->konvertierung->get_plan_file_name(), "w");
 		$GUI->xplan_gml_ids = array();
 		if ($read_handle) {
 			while (($line = fgets($read_handle)) !== false) {
@@ -472,12 +491,12 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}${$GUI->konvertierung->config['plan_file_name']} zum Umbenennen der gml_id's."
+				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}${$GUI->konvertierung->get_plan_file_name()} zum Umbenennen der gml_id's."
 			);
 		}
 		return array(
 			'success' => true,
-			'msg' => "GML-ID's in GML-Datei erfolgreich umbennannt."
+			'msg' => 'GML-IDs in GML-Datei ' . $reindexed_xplan_gml_path . $GUI->konvertierung->get_plan_file_name() . 'erfolgreich umbennannt.'
 		);
 	};
 
@@ -532,9 +551,16 @@
 			$layer->set('template', 'templates/' . $layer->name . '_body.html');
 			# Extent mit Ausdehnung von adminstelle überschreiben
 			$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+			$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 
-			$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
-
+			$layer_id = $layer->getMetadata('kvwmap_layer_id');
+			$layerObj = Layer::find_by_id($GUI, $layer_id);
+			if (!$layerObj) {
+				return array(
+					'success' => false,
+					'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+				);
+			}
 			if ($layerObj->get('write_mapserver_templates') == 'generic') {
 				# Set generic Data sql for layer
 				$result = $layerObj->get_generic_data_sql();
@@ -614,7 +640,15 @@
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
 				# Extent mit Ausdehnung von adminstelle überschreiben
 				$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
-				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
+				$layer_id = $layer->getMetadata('kvwmap_layer_id');
+				$layerObj = Layer::find_by_id($GUI, $layer_id);
+				if (!$layerObj) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+					);
+				}
+
 				if ($layerObj->get('write_mapserver_templates') == 'generic') {
 					# Set generic Data sql for layer
 					$result = $layerObj->get_generic_data_sql();
@@ -648,13 +682,14 @@
 	 * @param array $md metadata Metadatenobjekt aus dem plugin metadata mit vorgegebenen Werten für Metadaten
 	 */
 	$GUI->xplankonverter_create_metadata_documents = function($md) use ($GUI) {
+		$GUI->xlog('GUI->xplankonverter_create_metadata_documents für Landesdienst');
 		global $admin_stellen;
 		$current_time = time();
 		$pg_object = new PgObject($GUI, 'xplankonverter', 'plan_services');
 
 		$plan_object = new XP_Plan($GUI, $GUI->formvars['planart']);
 		if ($GUI->konvertierung->get('planart') == 'FP-Plan') {
-			$plan_object->get_extent(OWS_SRS, 'zusammenzeichnung'); # Pläne mit Attribut zusammenzeichnung = true
+			$plan_object->get_extent(OWS_SRS, 'p.zusammenzeichnung AND k.veroeffentlicht'); # Pläne mit Attribut zusammenzeichnung = true
 		}
 		else {
 			$plan_object->get_extent(OWS_SRS); # Alle Pläne in Tabelle der Planart
@@ -683,16 +718,19 @@
 		$md->set('date_de', date('d.m.Y', $current_time));
 		$md->set('id_cite_date', date('Y-m-d', $current_time));
 		if ($GUI->konvertierung->get('planart') == 'FP-Plan') {
-			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
+			//$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst. Die Daten wurden im Rahmen des Projektes PlanDigital zusammengestellt und durch das testportal-plandigital.de bereitgestellt.';
 		}
 		else {
 			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '.';
 		}
 
 		$md->set('id_abstract', array(
-			'dataset' => $admin_stelle->ows_abstract . $abstract_zusatz,
-			'viewservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
-			'downloadservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			//'dataset' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			//'viewservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			//'downloadservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			'dataset' => defined('XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DATASET') ? XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DATASET : ($admin_stelle->ows_abstract . $abstract_zusatz),
+			'viewservice' => defined('XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_VIEWSERVICE') ? XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_VIEWSERVICE : ($admin_stelle->ows_abstract . $abstract_zusatz),
+			'downloadservice' =>  defined('XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DOWNLOADSERVICE') ? XPLAN_ABSTRACT_ZUSAMMENZEICHNUNGEN_DOWNLOADSERVICE : ($admin_stelle->ows_abstract . $abstract_zusatz)
 		));
 		$md->set('version', floatval(implode('.', array_slice(explode('/', XPLAN_NS_URI), -2))));
 		$md->set('extents', $plan_object->extents);
@@ -702,20 +740,35 @@
 		$md->set('viewservice_browsegraphic', $md->get('onlineresource') . "Service=WMS&amp;Request=GetMap&amp;Version=1.1.0&amp;Layers=" . $plan_object->tableName . "&amp;FORMAT=image/png&amp;SRS=EPSG:" . $md->get('stellendaten')['epsg_code'] . "&amp;BBOX=" . implode(',', $md->get('extents')[$md->get('stellendaten')['epsg_code']]) . "&amp;WIDTH=300&amp;HEIGHT=300");
 		$md->set('downloadservice_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Downloadservice.png');
 		$md->set('geographicIdentifier', '');
-
+		$md->set('withRegionalKeyword', true);
 		$metaDataCreator = new MetaDataCreator($md);
 		return array(
 			'metaDataGeodatensatz' => $metaDataCreator->createMetadataGeodatensatz(),
-			'metaDataDownload' => $metaDataCreator->createMetaDataDownload(),
-			'metaDataView' =>  $metaDataCreator->createMetaDataView()
+			'metaDataDownload' => $metaDataCreator->createMetadataDownload(),
+			'metaDataView' =>  $metaDataCreator->createMetadataView()
 		);
 	};
 
   $GUI->xplankonverter_remove_failed_konvertierungen = function() use ($GUI) {
-    $zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
-    foreach($zusammenzeichnungen['faulty'] AS $faulty_zusammenzeichnung) {
+    $konvertierungen = Konvertierung::find_konvertierungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
+    foreach($konvertierungen['faulty'] AS $faulty_zusammenzeichnung) {
+			$GUI->debug->write('Lösche zuvor fehlgeschlagene Konvertierung id: ', $faulty_zusammenzeichnung->get('id'));
       $faulty_zusammenzeichnung->destroy();
     }
+
+    return array(
+      'success' => true,
+      'msg' => 'Fehlerhafte Konvertierungen gelöscht.'
+    );
+  };
+	
+	$GUI->xplankonverter_remove_old_konvertierungen = function() use ($GUI) {
+    $zusammenzeichnungen = Konvertierung::find_konvertierungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
+    foreach($zusammenzeichnungen['draft'] AS $draft_zusammenzeichnung) {
+			$GUI->debug->write('Lösche alte (draft) Konvertierung id: ', $draft_zusammenzeichnung->get('id'));
+      $draft_zusammenzeichnung->destroy();
+    }
+
     return array(
       'success' => true,
       'msg' => 'Fehlerhafte Konvertierungen gelöscht.'
@@ -724,8 +777,8 @@
 
 	$GUI->xplankonverter_send_notification = function($msg) use ($GUI) {
 		$from_name = 'XPlan-Server PlanDigital';
-		$from_email = 'info@testportal-plandigital.de';
-		$to_email = 'petra.wilken-janssen@arl-we.niedersachsen.de';
+		$from_email = 'plandigital@arl-we.niedersachsen.de';
+		$to_email = 'plandigital@arl-we.niedersachsen.de';
 		$cc_email = 'peter.korduan@gdi-service.de';
 		$reply_email = null;
 		$subject = 'Fehler in Plandigital';

@@ -1,4 +1,28 @@
 <?
+
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+	if ($last) {
+		$word_pos = strripos($str, $word);
+	}
+	else {
+		$word_pos = stripos($str, $word);
+	}
+	if ($word_pos !== false) {
+		$str_from_word_pos = substr($str, $word_pos + strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return trim($parts[0]);
+	}
+}
+
+function count_or_0($val) {
+	if (is_null($val) OR !is_array($val)) {
+		return 0;
+	}
+	else {
+		return count($val);
+	}
+}
+
 function replace_semicolon($text) {
 	return str_replace(';', '', $text);
 }
@@ -77,10 +101,10 @@ function value_of($array, $key) {
 
 function InchesPerUnit($unit, $center_y){
 	if($unit == MS_METERS){
-		return 39.3743;
+		return 39.3701;
 	}
 	elseif($unit == MS_DD){
-		return 39.37 * degree2meter($center_y);
+		return 39.3701 * degree2meter($center_y);
 	}
 }
 
@@ -135,21 +159,36 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+/**
+* Funktion ersetzt in $str die Schlüsselwörter, die in rolle::$layer_params als key enthalten sind durch deren values.
+* Zusätzlich werden die vordefinierten Parameter ($USER_ID usw.) ersetzt
+* Im optionalen Array $additional_params können weitere zu ersetzende key-value-Paare übergeben werden
+*/
+function replace_params_rolle($str, $additional_params = NULL) {
 	if (strpos($str, '$') !== false) {
-		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
-		if (is_array($params)) {
-			foreach($params AS $key => $value){
-				$str = str_replace('$'.$key, $value, $str);
-			}
+		$params = rolle::$layer_params;
+		if (is_array($additional_params)) {
+			$params = array_merge($params, $additional_params);
 		}
-		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
-		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
-		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
-		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
-		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
-		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
-		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
+		$str = replace_params($str, $params);
+		$current_time = time();
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d', $current_time), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);
+		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
+		$str = str_replace('$STELLE_ID', rolle::$stelle_ID, $str);
+		$str = str_replace('$STELLE', rolle::$stelle_bezeichnung, $str);
+		$str = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $str);
+		$str = str_replace('$LANGUAGE', rolle::$language, $str);
+		$str = str_replace('$EXPORT', rolle::$export, $str);
+	}
+	return $str;
+}
+
+function replace_params($str, $params) {
+	if (is_array($params)) {
+		foreach ($params AS $key => $value) {
+			$str = str_replace('$'.$key, $value, $str);
+		}
 	}
 	return $str;
 }
@@ -282,8 +321,8 @@ class GUI {
 
 	function resizeMap2Window() {
 		global $sizes;
-
 		$size = $sizes[$this->user->rolle->gui];
+		$gui_light = ($this->user->rolle->gui == 'layouts/gui_light.php');
 
 		if (array_key_exists('legenddisplay', $this->formvars) AND $this->formvars['legenddisplay'] !== NULL) {
 			$hideLegend = $this->formvars['legenddisplay'];		// falls die Legende gerade ein/ausgeblendet wurde
@@ -293,10 +332,10 @@ class GUI {
 		}
 
 		$width = $this->formvars['browserwidth'] -
-			$size['margin']['width'] -
-			($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) -
-			($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
-			- 18;	# Breite für möglichen Scrollbalken
+			$size['margin']['width']
+			- ($this->user->rolle->hideMenue == 1 ? $size['menue']['hide_width'] : $size['menue']['width'])
+			- ($gui_light? 0 : ($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']))
+			- ($gui_light ? 0 : 18);	# Breite für möglichen Scrollbalken
 
 		$height = $this->formvars['browserheight'] -
 			$size['margin']['height'] -
@@ -306,50 +345,41 @@ class GUI {
 			($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0) -
 			$size['footer']['height'];
 
-		if($width  < 0) $width = 10;
-		if($height < 0) $height = 10;
+		if($width  < 0) $width = 1000;
+		if($height < 0) $height = 800;
 		if($height % 2 != 0)$height = $height - 1;		# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
 		if($width  % 2 != 0)$width = $width - 1;				# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
 
+		// $this->debug->write('<br>resizeMap2Window for gui: ' . $this->user->rolle->gui . ' to: ' . $width . 'x' . $height, 4, false);
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
-	}	
-	
-	function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
-		if ($last) {
-			$word_pos = strripos($str, $word);
+	}
+		
+	/**
+	 * Function zoom to maximum extent of Layer with $layer_id in current map object $this->map
+	 * @param int $layer_id Id of layer or rollenlayer to zoom to
+	 * @return void
+	 */
+	function zoom_to_max_layer_extent($layer_id) {
+		sanitize($layer_id, 'int');
+		# Abfragen der maximalen Ausdehnung aller Daten eines Layers
+		if ($layer_id > 0) {
+			$layer = $this->user->rolle->getLayer($layer_id)[0];
 		}
 		else {
-			$word_pos = stripos($str, $word);
+			$layer = $this->user->rolle->getRollenLayer(-$layer_id)[0];
 		}
-		if ($word_pos !== false) {
-			$str_from_word_pos = substr($str, $word_pos + strlen($word));
-			$parts = explode($delim2, trim($str_from_word_pos, $delim1));
-			return trim($parts[0]);
-		}
-	}
-	
-	function zoomToMaxLayerExtent($layer_id) {
-    # Abfragen der maximalen Ausdehnung aller Daten eines Layers
-		if($layer_id > 0){
-			$layer = $this->user->rolle->getLayer($layer_id);
-		}
-		else{
-			$layer = $this->user->rolle->getRollenLayer(-$layer_id);
-		}
-		switch ($layer[0]['Datentyp']) {
+		switch ($layer['Datentyp']) {
 			case MS_LAYER_POLYGON : case MS_LAYER_LINE : case MS_LAYER_POINT : {
 				# Abfragen der Datenbankverbindung des Layers
-				$layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-				$data = $layer[0]['Data'];
-				if ($data != ''){
-					# ersetzen von $scale
-					$data = str_replace('$SCALE', 1000, $data);
+				$layerdb = $this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+				$data = $layer['Data'];
+				if ($data != '') {
 					# suchen nach dem ersten Vorkommen von using
-					$pos = strpos(strtolower($data),'using ');
-					# Abschneiden der uing Wörter im Datastatement wenn unique verwendet wurde
+					$pos = strpos(strtolower($data), 'using ');
+					# Abschneiden der using Wörter im Datastatement wenn unique verwendet wurde
 					if ($pos !== false) {
-						$subquery=substr($data,0,$pos);
+						$subquery = substr($data, 0, $pos);
 					}
 					else {
 						# using kommt nicht vor, es handelt sich um ein einfaches Data Statement in der Form
@@ -359,66 +389,84 @@ class GUI {
 					$explosion = explode(' ', $data);
 					$this->attributes['the_geom'] = $explosion[0];
 				}
-				else{
-					$subquery = substr($layer[0]['pfad'], 7);
+				else {
+					$subquery = substr($layer['pfad'], 7);
 					$this->attributes = $this->mapDB->read_layer_attributes($layer_id, $layerdb, NULL);
 				}
 
 				# Filter berücksichtigen
 				$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
-				if($filter != ''){
+				if ($filter != '') {
 					$filter = str_replace('$USER_ID', $this->user->id, $filter);
-					$subquery .= ' WHERE '.$filter;
+					$subquery .= ' WHERE ' . $filter;
 				}
 
+				$subquery = replace_params(
+					$subquery,
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language,
+					$layer['duplicate_criterion']
+				);
+
 				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
-				$sql = '
-					SELECT 
-						st_xmin(extent) - (st_xmax(extent) - st_xmin(extent))/10 AS minx,
-						st_ymin(extent) - (st_ymax(extent) - st_ymin(extent))/10 AS miny,
-						st_xmax(extent) + (st_xmax(extent) - st_xmin(extent))/10 AS maxx,
-						st_ymax(extent) + (st_ymax(extent) - st_ymin(extent))/10 AS maxy
-					FROM (
-						SELECT 
-							st_transform(
-								st_setsrid(
-									st_extent(' . $this->attributes['the_geom'] . '), 
-									' . $layer[0]['epsg_code'] . '
-								), 
-								'.$this->user->rolle->epsg_code.'
-							) AS extent 
-						FROM (
-							SELECT 
-								' . $subquery . '
-						) AS fooForMaxLayerExtent
-					) as foo';
+				$sql = "
+					SELECT
+						st_xmin(extent) AS minx,
+						st_ymin(extent) AS miny,
+						st_xmax(extent) AS maxx,
+						st_ymax(extent) AS maxy
+					FROM
+						(
+							SELECT
+								st_transform(
+									st_setsrid(
+										st_extent(" . $this->attributes['the_geom'] . "),
+										" . $layer['epsg_code'] . "
+									),
+									" . $this->user->rolle->epsg_code . "
+								) AS extent
+							FROM
+								(
+									SELECT
+										" . $subquery . "
+								) AS fooForMaxLayerExtent
+						) as foo
+				";
 				#echo $sql;
 
 				# Abfragen der Layerausdehnung
-				$ret=$layerdb->execSQL($sql,4,0);
-				if ($ret[0]) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+				$ret = $layerdb->execSQL($sql, 4, 0);
+				if ($ret[0]) {
+					echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql);
+					return 0;
+				}
 				$rs = pg_fetch_array($ret[1]);
-			}break;
-			
+			} break;
+
 			case MS_LAYER_RASTER : {
-				if($layer[0]['Data'] != ''){				# eine einzelne Rasterdatei
-					$raster_file = SHAPEPATH.$layer[0]['Data'];
-					if(file_exists($raster_file)){
+				if ($layer['Data'] != '') {
+					# eine einzelne Rasterdatei
+					$raster_file = SHAPEPATH . $layer['Data'];
+					if (file_exists($raster_file)) {
 						$output = rand(0, 100000);
-						$command = OGR_BINPATH.'gdalinfo '.$raster_file.' > '.IMAGEPATH.$output.'.info';
+						$command = OGR_BINPATH . 'gdalinfo "' . $raster_file . '" > ' . IMAGEPATH . $output . '.info';
 						exec($command);
-						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
-						$ll = explode(', ', trim($this->get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
-						$ur = explode(', ', trim($this->get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
+						$infotext = file_get_contents(IMAGEPATH . $output . '.info');
+						$ll = explode(', ', trim(get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
+						$ur = explode(', ', trim(get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
 					}
 				}
-				elseif($layer[0]['tileindex'] != ''){		# ein Tile-Index
-					$shape_file = SHAPEPATH.$layer[0]['tileindex'];
-					if(file_exists($shape_file)){
+				elseif ($layer['tileindex'] != '') {
+					# ein Tile-Index
+					$shape_file = SHAPEPATH.$layer['tileindex'];
+					if (file_exists($shape_file)) {
 						$output = rand(0, 100000);
-						$command = OGR_BINPATH.'ogrinfo -al -so '.$shape_file.' > '.IMAGEPATH.$output.'.info';
+						$command = OGR_BINPATH . 'ogrinfo -al -so ' . $shape_file . ' > ' . IMAGEPATH . $output . '.info';
 						exec($command);
-						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
+						$infotext = file_get_contents(IMAGEPATH . $output . '.info');
 						$extent = get_first_word_after($infotext, 'Extent:', ' ', chr(10));
 						$corners = explode('-', $extent);
 						$ll = explode(', ', trim($corners[0], '() '));
@@ -426,42 +474,42 @@ class GUI {
 					}
 				}
 				$extent = new rectObj();
-				$extent->setextent($ll[0],$ll[1],$ur[0],$ur[1]);
-				$rasterProjection = ms_newprojectionobj("init=epsg:".$layer[0]['epsg_code']);
-				$userProjection = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+				$extent->setextent($ll[0], $ll[1], $ur[0], $ur[1]);
+				$rasterProjection = new projectionObj("init=epsg:".$layer['epsg_code']);
+				$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 				$extent->project($rasterProjection, $userProjection);
 				$rs['minx'] = $extent->minx;
 				$rs['maxx'] = $extent->maxx;
 				$rs['miny'] = $extent->miny;
 				$rs['maxy'] = $extent->maxy;
-			}break;
+			} break;
 		}
-		if($rs['minx'] != ''){
-			if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
-			else $rand = 10;
-			$minx=$rs['minx']-$rand;
-			$maxx=$rs['maxx']+$rand;
-			$miny=$rs['miny']-$rand;
-			$maxy=$rs['maxy']+$rand;
-			#echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
-			$this->map->setextent($minx,$miny,$maxx,$maxy);
-			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
-			$oPixelPos = new PointObj();
-			$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
-			if (MAPSERVERVERSION > 600) {
-				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
-				else $nScale = $this->map->scaledenom;
-				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-				$this->map_scaledenom = $this->map->scaledenom;
+		if ($rs['minx'] != '') {
+			if ($this->user->rolle->epsg_code == 4326) {
+				$rand = 10/10000;
 			}
 			else {
-				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scale)$nScale = $layer[0]['maxscale']-1;
-				else $nScale = $this->map->scale;
-				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-				$this->map_scaledenom = $this->map->scale;
+				$rand = 10;
 			}
+			$minx = $rs['minx'] - $rand;
+			$maxx = $rs['maxx'] + $rand;
+			$miny = $rs['miny'] - $rand;
+			$maxy = $rs['maxy'] + $rand;
+			#echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
+			$this->map->setextent($minx, $miny, $maxx, $maxy);
+			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
+			$oPixelPos = new PointObj();
+			$oPixelPos->setXY($this->map->width / 2, $this->map->height / 2);
+			if ($layer['maxscale'] > 0 AND $layer['maxscale'] < $this->map->scaledenom) {
+				$nScale = $layer['maxscale'] - 1;
+			}
+			else {
+				$nScale = $this->map->scaledenom;
+			}
+			$this->map->zoomscale($nScale, $oPixelPos, $this->map->width, $this->map->height, $this->map->extent, $this->Stelle->MaxGeorefExt);
+			$this->map_scaledenom = $this->map->scaledenom;
 		}
-  }
+	}
 
 	function login_agreement() {
 		$this->expect = array('agreement_accepted');
@@ -479,21 +527,21 @@ class GUI {
 		}
 		$layer = new LayerObj($map);
 		$layer->name = $layerset[$layer_name_attribute];
-		$layer->metadata->set('wms_name', $layerset['wms_name']); #Mapserver8
+		$layer->metadata->set('wms_name', $layerset['wms_name'] ?: ''); #Mapserver8
 		$layer->metadata->set('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->metadata->set('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
 			$layer->metadata->set('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
-		$layer->metadata->set('wfs_typename', $layerset['wms_name']); #Mapserver8
-		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
-		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
+		$layer->metadata->set('wfs_typename', $layerset['wms_name'] ?: ''); #Mapserver8
+		$layer->metadata->set('wms_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
+		$layer->metadata->set('wfs_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
 		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
-		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
-		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
-		$layer->metadata->set('ows_version',$layerset['wms_server_version']); #Mapserver8
+		$layer->metadata->set('wms_format',$layerset['wms_format'] ?: ''); #Mapserver8
+		$layer->metadata->set('ows_server_version',$layerset['wms_server_version'] ?: ''); #Mapserver8
+		$layer->metadata->set('ows_version',$layerset['wms_server_version'] ?: ''); #Mapserver8
 		if ($layerset['metalink']) {
 			$layer->metadata->set('ows_metadataurl_href',$layerset['metalink']);
 			$layer->metadata->set('ows_metadataurl_type', 'ISO 19115');
@@ -503,14 +551,14 @@ class GUI {
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}		
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
-		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
-		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
-		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password']);
+		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout'] ?: ''); #Mapserver8
+		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username'] ?: '');
+		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password'] ?: '');
 		$layer->metadata->set('ows_auth_type', 'basic');
 		$layer->metadata->set('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->metadata->set("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-		$layer->metadata->set("gml_featureid", $layerset['oid']); #Mapserver8
+		$layer->metadata->set("gml_featureid", $layerset['oid'] ?: ''); #Mapserver8
 		$layer->metadata->set("gml_include_items", "all");
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
@@ -608,14 +656,7 @@ class GUI {
 
 		if ($layerset['processing'] != "") {
 			$processings = explode(";",
-				replace_params(
-					$layerset['processing'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->Stelle->id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				)
+				replace_params_rolle($layerset['processing'])
 			);
 			foreach ($processings as $processing) {
 				if (MAPSERVERVERSION >= 800) {
@@ -695,16 +736,7 @@ class GUI {
 			}
 			# Setzen des Filters
 			if ($layerset['Filter'] != '') {
-				# 2024-07-28 pk Replace all params in Filter
-				// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
-				$layerset['Filter'] = replace_params(
-					$layerset['Filter'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
+				$layerset['Filter'] = replace_params_rolle($layerset['Filter']);
 				if (substr($layerset['Filter'], 0, 1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {
@@ -719,7 +751,7 @@ class GUI {
 					}
 			 }
 			 else {
-				 $expr=buildExpressionString($layerset['Filter']);
+				 $expr = buildExpressionString($layerset['Filter']);
 				 $layer->setFilter($expr);
 			 }
 			}
@@ -797,9 +829,9 @@ class GUI {
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
     $oldscale=round($this->map_scaledenom);
-		# zoomToMaxLayerExtent
+		# zoom_to_max_layer_extent
 		if($this->formvars['zoom_layer_id'] != '') {
-			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 		}
 
 		if ($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
@@ -821,6 +853,37 @@ class GUI {
         $this->navMap($this->formvars['CMD']);
       }
     }
+  }
+
+	function zoomToRefExt() {
+    # Zoomen auf den in der Referenzkarte gesetzten Punkt
+    # Berechnen der Koordinaten des angeklickten Punktes in der Referencekarte
+    $refmapwidthm=($this->reference_map->reference->extent->maxx-$this->reference_map->reference->extent->minx);
+    $refmappixsize=$refmapwidthm/$this->reference_map->reference->width;
+    $refmapxposm=$this->reference_map->reference->extent->minx+$refmappixsize*$this->formvars['refmap_x'];
+    $refmapyposm=$this->reference_map->reference->extent->maxy-$refmappixsize*$this->formvars['refmap_y'];
+
+		$point = new PointObj();
+	  $point->setXY($refmapxposm, $refmapyposm);
+
+		if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
+			$projFROM = new projectionObj('init=epsg:' . $this->ref['epsg_code']);
+			$projTO = new projectionObj('init=epsg:' . $this->user->rolle->epsg_code);
+			$point->project($projFROM, $projTO);
+		}
+
+		$halfmapwidthm=($this->map->extent->maxx-$this->map->extent->minx)/2;
+    $halfmapheight=($this->map->extent->maxy-$this->map->extent->miny)/2;
+    $zoommaxx=$point->x + $halfmapwidthm;
+    $zoomminx=$point->x - $halfmapwidthm;
+    $zoommaxy=$point->y + $halfmapheight;
+    $zoomminy=$point->y - $halfmapheight;
+
+    $this->map->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
+    $oPixelPos = new PointObj();
+    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
+    $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+    $this->saveMap('');
   }
 	
 	function reduce_mapwidth($width_reduction, $height_reduction = 0){
@@ -856,10 +919,10 @@ class GUI {
 	}
 	
 	function loadMultiLingualText($language) {
-    #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
+    #echo 'In der Rolle eingestellte Sprache: '.rolle::$language;
     $this->Stelle->language=$language;
     $this->Stelle->getName();
-    include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
+    include(LAYOUTPATH.'languages/'.$language.'.php');
   }
 
   function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false) {
@@ -971,7 +1034,6 @@ class GUI {
 					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
 					#echo '<br>Name: '.$layerset[$i][name];
 					$layer->set('connection',	$layerset[$i][connection]);
-					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
 					if (MAPSERVERVERSION < 540) {
 						$layer->set('connectiontype', 7);
 					}
@@ -1022,10 +1084,10 @@ class GUI {
 				$map->status = MS_ON;
 				$map->name = MAPFILENAME;
 
-				if (MS_DEBUG_LEVEL > 0) {
-					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
+				if (MS_DEBUG_LEVEL !== NULL) {
+					$map->setConfigOption('MS_ERRORFILE', dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
 					$map->debug = MS_DEBUG_LEVEL;
-				};
+				}
 				$map->imagecolor->setRGB(255,255,255);
 				$map->maxsize = 4096;
 				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code);
@@ -1139,12 +1201,16 @@ class GUI {
         $map->scalebar->status = MS_ON;
         $map->scalebar->units =  MS_METERS;
         $map->scalebar->intervals = 4;
-        $map->scalebar->color->setRGB(0,0,0);
-        $r = substr(BG_MENUETOP, 1, 2);
-        $g = substr(BG_MENUETOP, 3, 2);
-        $b = substr(BG_MENUETOP, 5, 2);
-        $map->scalebar->imagecolor->setRGB(hexdec($r), hexdec($g), hexdec($b));
-        $map->scalebar->outlinecolor->setRGB(0,0,0);
+				$r = hexdec(substr(BG_MENUETOP, 1, 2));
+        $g = hexdec(substr(BG_MENUETOP, 3, 2));
+        $b = hexdec(substr(BG_MENUETOP, 5, 2));
+        $map->scalebar->imagecolor->setRGB($r, $g, $b);
+				$r = hexdec(substr(TXT_SCALEBAR, 1, 2));
+        $g = hexdec(substr(TXT_SCALEBAR, 3, 2));
+        $b = hexdec(substr(TXT_SCALEBAR, 5, 2));
+        $map->scalebar->color->setRGB($r, $g, $b);
+				$map->scalebar->outlinecolor->setRGB($r, $g, $b);
+				$map->scalebar->label->color->setRGB($r, $g, $b);
 				$map->scalebar->label->font = 'SourceSansPro';		# Kommentarzeichen wieder entfernt, da sonst auf Metropolplaner Fehler
 				if (MAPSERVERVERSION < 700 ) {
 					$map->scalebar->label->type = 'truetype';
@@ -1242,8 +1308,8 @@ class GUI {
 		}
 	}
 
-	function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass = @count($classset);
+  function loadclasses($layer, $layerset, $classset, $map){
+		$anzClass = count_or_0($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
       if ($classset[$j]['Name']!='') {
@@ -1265,8 +1331,8 @@ class GUI {
       if ($classset[$j]['legendgraphic'] != '') {
 				$imagename = WWWROOT . APPLVERSION . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->keyimage = $imagename;
-			}
-      for ($k = 0; $k < @count($classset[$j]['Style']); $k++) {
+			}			
+      for ($k = 0; $k < count_or_0($classset[$j]['Style']); $k++) {
         $dbStyle = $classset[$j]['Style'][$k];
 				$style = new styleObj($klasse);
 				if ($dbStyle['geomtransform'] != '') {
@@ -1278,7 +1344,7 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->maxscaledenom = $dbStyle['maxscale'];
 				}
-				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != 0) {
+				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 					$dbStyle['symbolname'] = NULL;
 					$dbStyle['symbol'] = NULL;
 				}
@@ -1287,7 +1353,12 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['symbolname']!='') {
-						$style->symbolname = $dbStyle['symbolname'];
+						if (MAPSERVERVERSION < 800) {
+							$style->symbolname = $dbStyle['symbolname'];
+						}
+						else {
+							$style->setSymbolByName($map, $dbStyle['symbolname']);
+						}
 					}
 					if ($dbStyle['symbol']>0) {
 						$style->symbol = $dbStyle['symbol'];
@@ -1324,7 +1395,7 @@ class GUI {
 						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END END");
 					}
 					else {
-						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");
+						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");		
 					}
 					$style->linecap = 'butt';
 				}
@@ -1335,7 +1406,7 @@ class GUI {
 					else{
 						$style->gap = $dbStyle['gap'];
 					}
-				}
+				}		
 				if($dbStyle['initialgap'] != '') {
 					$style->initialgap = $dbStyle['initialgap'];
 				}
@@ -1423,7 +1494,7 @@ class GUI {
 						}
 					}
         }
-
+		
         if ($dbStyle['minwidth']!='') {
           if ($this->map_factor != '') {
             $style->minwidth = $dbStyle['minwidth']*$this->map_factor/1.414;
@@ -1449,7 +1520,12 @@ class GUI {
 					else $style->updateFromString("STYLE COLOR [" . $dbStyle['color']."] END");
         }
 				if ($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
-					$style->opacity = $dbStyle['opacity'];
+					if (MAPSERVERVERSION >= 800) {
+						$style->updateFromString("STYLE OPACITY " . $dbStyle['opacity'] . " END");
+					}
+					else {
+						$style->opacity = $dbStyle['opacity'];
+					}
 				}
         if ($dbStyle['outlinecolor']!='') {
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
@@ -1480,14 +1556,14 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['offsetx']!='') {
-						$style->set('offsetx', $dbStyle['offsetx']);
+						$style->offsetx = $dbStyle['offsetx'];
 					}
 					if ($dbStyle['offsety']!='') {
-						$style->set('offsety', $dbStyle['offsety']);
+						$style->offsety = $dbStyle['offsety'];
 					}
 				}
       } # Ende Schleife für mehrere Styles
-
+	  
       # setzen eines oder mehrerer Labels
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
@@ -1560,12 +1636,18 @@ class GUI {
 				}
 				$label->maxlength = $dbLabel['maxlength'];
 				$label->repeatdistance = $dbLabel['repeatdistance'];
-				$label->wrap = $dbLabel['wrap'];
+				if (MAPSERVERVERSION >= 800) {
+					$label->wrap = chr($dbLabel['wrap']);
+				}
+				else {
+					$label->wrap = $dbLabel['wrap'];
+				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
 				$label->size = $dbLabel['size'];
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
+				$label->minfeaturesize = $dbLabel['minfeaturesize'];
 				if ($dbLabel['maxscale'] != '') {
 					$label->maxscaledenom = $dbLabel['maxscale'];
 				}
@@ -1626,10 +1708,10 @@ class GUI {
 				}
 				else {
 					if ($dbLabel['offsetx']!='') {
-						$label->set('offsetx', $dbLabel['offsetx']);
+						$label->offsetx = $dbLabel['offsetx'];
 					}
 					if ($dbLabel['offsety']!='') {
-						$label->set('offsety', $dbLabel['offsety']);
+						$label->offsety = $dbLabel['offsety'];
 					}
 				}
 				$klasse->addLabel($label);
@@ -1723,7 +1805,7 @@ class GUI {
           }
           else {
 						$consumetime = $prevtime;
-						$prevextent->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+						$prevextent = rectObj($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
           }
         }
       }
@@ -1763,7 +1845,7 @@ class GUI {
         $this->errmsg="Der nächste Kartenausschnitt konnte nicht abgefragt werden.<br>" . $ret[1];
       }
       else {
-        $nextextent->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+        $nextextent = rectObj($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
         #echo '<br>gewechselt auf Einstellung von:'.$this->consumetime;
       }
       $i++;
@@ -1850,43 +1932,35 @@ class GUI {
     $this->user->rolle->readSettings();
   }
 	
-	function layer_error_handling(){
-		global $errors;
-		for($i = 0; $i < 2; $i++){		// es wird nach den ersten beiden Fehlern abgebrochen, da die Fehlermeldungen bei mehrmaligem Aufruf immer mehr werden...
-			$error_details .= $errors[$i].chr(10);
-			if(strpos($errors[$i], 'named') !== false){
-				$start = strpos($errors[$i], '\'')+1;
-				$end = strpos($errors[$i], '\'', $start);
-				$length = $end - $start;
-				$error_layername = substr($errors[$i], $start, $length);
-				$layer = $this->user->rolle->getLayer($error_layername);
-				if($layer == NULL)$layer = $this->user->rolle->getRollenLayer($error_layername);
-				$error_layer_id = $layer[0]['Layer_ID'];
-			}
-		}
-		restore_error_handler();
-		if($this->formvars['go'] != 'navMap_ajax'){
-			include(LAYER_ERROR_PAGE);
-		}
-		else{
-			header('error: true');	// damit ajax-Requests das auch mitkriegen
-		}
-	}
-
 	function drawMap($img_urls = false) {
-		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
-			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
-		}
 		if($this->main == 'map.php' AND $this->user->rolle->epsg_code != 4326 AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){			
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
     }
 		# Parameter $scale in Data ersetzen
 		for($i = 0; $i < count($this->layers_replace_scale); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+			$this->layers_replace_scale[$i]->data = str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data);
 		}
 
-    $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
+		try {
+			$f = @fopen(dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log', 'r+');
+			if ($f !== false) {
+					ftruncate($f, 0);
+					fclose($f);
+			}
+    	$this->image_map = $this->map->draw();
+			# sorgt dafür, dass die mapserver' . $this->user->id . '.log geschrieben und abgeschlossen wird
+			# unter Mapserver 7 wird durch drawmap() kein Fehler geschmissen, deswegen steht diese Zeile hier auch nochmal
+			$this->map->setConfigOption('MS_ERRORFILE', LOGPATH . 'mapserver.log');
+		}
+		catch (Exception $ex) {
+			# sorgt dafür, dass die mapserver' . $this->user->id . '.log geschrieben und abgeschlossen wird
+			$this->map->setConfigOption('MS_ERRORFILE', LOGPATH . 'mapserver.log');
+			global $errors;
+			$errors[] = file_get_contents(dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
+			throw new Exception('Fehler beim Erzeugen des Kartenbildes');
+		}
+
 		if (!$img_urls) {
 			if (MAPSERVERVERSION >= 800) {
 				$image = $this->image_map->getBytes();
@@ -2009,8 +2083,8 @@ class GUI {
     if($this->reference_map->reference->image != NULL){
 			$this->reference_map->setextent($this->map->extent->minx,$this->map->extent->miny,$this->map->extent->maxx,$this->map->extent->maxy);
 			if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-				$projFROM = $this->map->projection;
-				$projTO = $this->reference_map->projection;
+				$projFROM = new projectionObj('init=epsg:' . $this->user->rolle->epsg_code);
+				$projTO = new projectionObj('init=epsg:' . $this->ref['epsg_code']);
 				$this->reference_map->extent->project($projFROM, $projTO);
 			}
       $img_refmap = $this->reference_map->drawReferenceMap();
@@ -2047,7 +2121,7 @@ class GUI {
 	}
 
   function getFlurbezeichnung($epsgcode) {
-    $Flurbezeichnung = '';
+    $Flurbezeichnung = [];
  	  $flur = new Flur('','','',$this->pgdatabase);
 		$bildmitte['rw']=($this->map->extent->maxx+$this->map->extent->minx)/2;
 		$bildmitte['hw']=($this->map->extent->maxy+$this->map->extent->miny)/2;
@@ -2479,8 +2553,8 @@ class stelle {
 
   function getName() {
     $sql ='SELECT ';
-    if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    if (rolle::$language != 'german' AND rolle::$language != ''){
+      $sql.='`Bezeichnung_'.rolle::$language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;
@@ -2541,25 +2615,36 @@ class stelle {
 }
 
 class rolle {
+	var $user_id;
+	var $stelle_id;
+	var $debug;
+	var $database;
+	var $loglevel;
+	var $hist_timestamp_de;
+	static $language;
+	static $hist_timestamp;
+	static $layer_params;
+	static $user_ID;
+	static $stelle_ID;
+	static $stelle_bezeichnung;
+	static $export;
+	var $minx;
+	var $newtime;
+	var $gui_object;
+	var $layerset;
 
-  var $user_id;
-  var $stelle_id;
-  var $debug;
-  var $database;
-  var $loglevel;
-  static $hist_timestamp;
-  static $layer_params;
-
-	function __construct($user_id,$stelle_id,$database) {
+	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
 		global $GUI;
 		$this->gui_object = $GUI;
-		$this->debug=$debug;
-		$this->user_id=$user_id;
-		$this->stelle_id=$stelle_id;
-		$this->database=$database;
-		#$this->layerset=$this->getLayer('');
-		#$this->groupset=$this->getGroups('');
+		$this->debug = $debug;
+		$this->user_id = $user_id;
+		$this->stelle_id = $stelle_id;
+		$this->database = $database;
+		rolle::$user_ID = $user_id;
+		rolle::$stelle_ID = $stelle_id;
+		rolle::$stelle_bezeichnung = $this->gui_object->Stelle->Bezeichnung;
+		rolle::$export = 'false';
 		$this->loglevel = 0;
 	}
 	
@@ -2778,7 +2863,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, terms_of_use_link, status, trigger_function, version,
 				ul.`queryable`,
 				l.`drawingorder`,
 				ul.`legendorder`,
@@ -2842,14 +2927,9 @@ class rolle {
 			}
 			if ($replace_params) {
 				foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
-					$rs[$key] = replace_params(
+					$rs[$key] = replace_params_rolle(
 						$rs[$key],
-						rolle::$layer_params,
-						$this->user_id,
-						$this->stelle_id,
-						rolle::$hist_timestamp,
-						$language,
-						$rs['duplicate_criterion']
+						['duplicate_criterion' => $rs['duplicate_criterion']]
 					);
 				}
 			}
@@ -2959,8 +3039,8 @@ class rolle {
 			$this->coordtype=$rs['coordtype'];
 			$this->last_time_id=$rs['last_time_id'];
 			$this->gui=$rs['gui'];
-			$this->language=$rs['language'];
-			$language = $this->language;
+			rolle::$language=$rs['language'];
+			$language = rolle::$language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->tooltipquery=$rs['tooltipquery'];
@@ -3615,14 +3695,7 @@ class db_mapObj{
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
-						$attributes[$column][$i] = replace_params(
-							$attributes[$column][$i],
-							rolle::$layer_params,
-							$this->User_ID,
-							$this->Stelle_ID,
-							rolle::$hist_timestamp,
-							$this->rolle->language
-						);
+						$attributes[$column][$i] = replace_params_rolle($attributes[$column][$i]);
 					}
 				}
 			}
@@ -3802,7 +3875,7 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
@@ -3877,14 +3950,9 @@ class db_mapObj{
 				$rs['Layer_ID']
 			);
 			foreach (array('Name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
-				$rs[$key] = replace_params(
+				$rs[$key] = replace_params_rolle(
 					$rs[$key],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language,
-					$rs['duplicate_criterion']
+					['duplicate_criterion' => $rs['duplicate_criterion']]
 				);
 			}
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
@@ -3993,7 +4061,7 @@ class db_mapObj{
 			if($disabled_classes){
 				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
 					$rs['Status'] = 1;
-					for($i = 0; $i < @count($rs['Style']); $i++) {
+					for($i = 0; $i < count_or_0($rs['Style']); $i++) {
 						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
 							$rs['Style'][$i]['color'] = '-1 -1 -1';
@@ -4053,7 +4121,7 @@ class db_mapObj{
 		return $Labels;
 	}
 
-	function read_RollenLayer($id = NULL, $typ = NULL) {
+	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
 			SELECT DISTINCT
 				l.`id`,
@@ -4078,7 +4146,7 @@ class db_mapObj{
 				END as connection,
 				l.`epsg_code`,
 				l.`transparency`,
-				l.`buffer`,				
+				l.`buffer`,
 				l.`labelitem`,
 				l.`classitem`,
 				l.`gle_view`,
@@ -4089,7 +4157,12 @@ class db_mapObj{
 				-l.id AS Layer_ID,
 				1 as showclasses,
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
-				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter
+				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter,
+				'' as wms_name,
+				'' as wms_format,
+				'' as wms_server_version,
+				'' as wms_connectiontimeout,
+				'' as oid
 			FROM
 				rollenlayer AS l JOIN
 				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
@@ -4098,26 +4171,24 @@ class db_mapObj{
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
-				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . "
+				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . 
+				($autodelete != NULL ? " AND l.autodelete = '" . $autodelete . "'" : '') . "
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
-		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
+		#echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$Layer = array();
 		while ($rs = $ret['result']->fetch_array()) {
 			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
-			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
-				$rs[$key] = replace_params(
+			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'Data') AS $key) {
+				$rs[$key] = replace_params_rolle(
 					$rs[$key],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language,
-					$rs['duplicate_criterion']
+					['duplicate_criterion' => $rs['duplicate_criterion']]
 				);
 			}
+			$rs['alias_link'] = $rs['alias'];
+			$rs['Name_or_alias'] = $rs['alias'];
 			$Layer[] = $rs;
 		}
 		return $Layer;

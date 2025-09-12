@@ -1,6 +1,6 @@
 <?php
 	# 2008-01-12 pkvvm
-	include(LAYOUTPATH . 'languages/userdaten_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/userdaten_' . rolle::$language . '.php');
 	$loeschen = strtolower(NUTZER_ARCHIVIEREN ? $this->strArchive : $this->strDelete);
 ?>
 <script type="text/javascript">
@@ -74,7 +74,7 @@ function Bestaetigung(link,text) {
 				<span><? echo count($this->unassigned_users['ID']).' Nutzer'; ?></span>
 			</div><?
 	}
-	for ($i = 0; $i < @count($this->unassigned_users['ID']); $i++) { ?>
+	for ($i = 0; $i < count_or_0($this->unassigned_users['ID']); $i++) { ?>
 		<div id="unassigneduser<? echo $this->unassigned_users['ID'][$i]; ?>" class="usd-nutzer">
 			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=unassigned&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?
 				echo $this->unassigned_users['Bezeichnung'][$i]; ?>      
@@ -93,7 +93,7 @@ if ($this->expired_users['ID']) { ?>
 			<span><? echo count($this->expired_users['ID']).' Nutzer'; ?></span>
 		</div><?
 }
-for ($i = 0; $i < @count($this->expired_users['ID']); $i++) { ?>
+for ($i = 0; $i < count_or_0($this->expired_users['ID']); $i++) { ?>
 	<div id="expireduser<? echo $this->expired_users['ID'][$i]; ?>" class="usd-nutzer">
 		<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=expired&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?
 			echo $this->expired_users['Bezeichnung'][$i]; ?>

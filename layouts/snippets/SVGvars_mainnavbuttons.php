@@ -13,6 +13,8 @@ if($this->user->rolle->touchquery){$SVGvars_mainnavbuttons .= touchquery($strTou
 if($this->user->rolle->queryradius){$SVGvars_mainnavbuttons .= pquery($strInfoWithRadius);}
 if($this->user->rolle->polyquery){$SVGvars_mainnavbuttons .= polygonquery($strInfoInPolygon);}
 if($this->user->rolle->measure){$SVGvars_mainnavbuttons .= dist($strRuler);}
+if($this->user->rolle->measure){$SVGvars_mainnavbuttons .= measure_area($strMeasureArea);}
+if($this->user->rolle->routing AND ROUTING_URL != ''){$SVGvars_mainnavbuttons .= routing($strRouting);}
 if($this->user->rolle->punktfang){$SVGvars_mainnavbuttons .= punktfang($strPunktfang);}
 if($this->user->rolle->freepolygon){$SVGvars_mainnavbuttons .= freepolygon($strFreePolygon);}
 if($this->user->rolle->freetext){$SVGvars_mainnavbuttons .= freetext($strFreeText);}

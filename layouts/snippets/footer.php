@@ -1,4 +1,4 @@
-<?php include(LAYOUTPATH.'languages/footer_'.$this->user->rolle->language.'.php'); ?>
+<?php include(LAYOUTPATH.'languages/footer_'.rolle::$language.'.php'); ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="<? echo BG_DEFAULT; ?>" style="height: 100%;background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);">
 	<tr>
 		<td align="center"><?php echo $strPublisherName; ?>

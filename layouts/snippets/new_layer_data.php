@@ -1,9 +1,10 @@
 <?php
+	include_once(CLASSPATH.'FormObject.php');
 	include(SNIPPETS.'generic_form_parts.php');
-  include(LAYOUTPATH.'languages/new_layer_data_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/new_layer_data_'.rolle::$language.'.php');
 	
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
- ?>
+?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <? if($this->user->rolle->querymode == 1){ ?>
 	<script type="text/javascript">
@@ -37,20 +38,20 @@
 </div>
 <div id="nds_edit">
 <?
-if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){	
-	$i = 0;	
-	if($this->qlayerset[0]['template']=='generic_layer_editor.php' OR $this->qlayerset[0]['template']==''){
-		include(SNIPPETS.'generic_layer_editor_2.php');
+if ($this->formvars['selected_layer_id'] AND $this->Fehler == '') {
+	$i = 0;
+	if ($this->qlayerset[0]['template']=='generic_layer_editor.php' OR $this->qlayerset[0]['template'] == '') {
+		include(SNIPPETS . 'generic_layer_editor_2.php');
 	}
-	else{
-		if(is_file(SNIPPETS.$this->qlayerset[0]['template'])){
+	else {
+		if (is_file(SNIPPETS.$this->qlayerset[0]['template'])) {
 			include(SNIPPETS.$this->qlayerset[0]['template']);
 		}
-		else{
-			if(file_exists(PLUGINS.$this->qlayerset[0]['template'])){
+		else {
+			if (file_exists(PLUGINS.$this->qlayerset[0]['template'])){
 				include(PLUGINS.$this->qlayerset[0]['template']);
 			}
-			else{
+			else {
 				$this->alert = 'Kein Template vorhanden.\nBitte kontaktieren Sie die Administration!';
 			}
 		}

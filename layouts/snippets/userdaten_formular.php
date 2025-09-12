@@ -1,5 +1,5 @@
 <?
-	include(LAYOUTPATH . 'languages/userdaten_formular_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/userdaten_formular_' . rolle::$language . '.php');
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -155,6 +155,9 @@
 		right: 20px;
 		position: relative;
 		bottom: 10px;
+	}
+	#udf_mapserverlog{
+		text-align: left;
 	}
 </style>
 
@@ -416,6 +419,16 @@
 							}
 						}					?>
 					</table>
+				</div>
+			</div>
+
+			<div class="form_formular-input form_formular-aic">
+				<div>Mapserver-Log</div>
+				<div id="udf_mapserverlog">
+					<a href="javascript:void(0)" onclick="document.getElementById('details').style.display = '';this.style.display = 'none';">anzeigen</a>
+					<div id="details" style="display:none;">
+						<? echo file_get_contents(dirname($this->debug->filename) . '/mapserver' . $this->formvars['selected_user_id'] . '.log'); ?>					
+					</div>
 				</div>
 			</div>
 

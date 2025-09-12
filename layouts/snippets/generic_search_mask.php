@@ -1,5 +1,5 @@
 <?
-include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/generic_search_'.rolle::$language.'.php');
 include_once(SNIPPETS.'/generic_form_parts.php');
 $num_colspan = ($this->user->rolle->visually_impaired) ? 2 : 3;
 $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
@@ -146,9 +146,9 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							<option title="<? echo $strIsEmptyHint; ?>" value="IS NULL" <? if($operator == 'IS NULL'){ echo 'selected';} ?> ><? echo $strIsEmpty; ?></option>
 							<option title="<? echo $strIsNotEmptyHint; ?>" value="IS NOT NULL" <? if($operator == 'IS NOT NULL'){ echo 'selected';} ?> ><? echo $strIsNotEmpty; ?></option>
 							<? if($this->attributes['type'][$i] != 'geometry'){ ?>
-							<option title="<? echo $strInHint; ?>" value="IN" <? if (@count($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
+							<option title="<? echo $strInHint; ?>" value="IN" <? if (count_or_0($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
 								<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
-							<option title="<? echo $strBetweenHint; ?>" value="between" <? if (@count($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
+							<option title="<? echo $strBetweenHint; ?>" value="between" <? if (count_or_0($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
 								<? }
 							}
 						} ?>
@@ -171,7 +171,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							$array = '';
 							if($this->layerset[0]['connectiontype'] != MS_WFS AND substr($this->attributes['type'][$i], 0, 1) != '_'){		# bei WFS-Layern oder Array-Typen keine multible Auswahl
 								$array = '[]';
-								echo ' multiple size="1" style="display: block; min-height: 24px; height: calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px); z-index:'.($z_index-=1).';" onmousedown="if(this.style.height==\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\'){this.style.height=\'180px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\';scrollToSelected(this);}"';
+								echo ' multiple size="1" style="display: block; min-height: 24px; height: calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px); z-index:'.($z_index-=1).';" onmousedown="this.focus();if(this.style.height==\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\'){this.style.height=\'180px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\';scrollToSelected(this);}"';
 							}
 ?>
 							 name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
@@ -180,10 +180,10 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							if (is_array($this->attributes['enum'][$i])){
 								foreach ($this->attributes['enum'][$i] as $enum_key => $enum) {	?>
 									<option  <? 
-									if (!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
-										$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);																																																																																															 
+									if ($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] != '' AND !is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
+										$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);
 									}
-									if (in_array($enum_key, $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $enum_key != '') {
+									if (in_array($enum_key, $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] ?: []) AND $enum_key != '') {
 										echo 'selected';
 									} ?> value="<? echo $enum_key; ?>" title="<? echo $enum['output']; ?>"><? echo $enum['output']; ?></option><? echo "\n";
 								}

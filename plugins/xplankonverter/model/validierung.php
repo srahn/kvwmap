@@ -91,7 +91,9 @@ class Validierung extends PgObject {
 				konvertierung_id = " . $this->konvertierung_id . " AND
 				" . implode(' AND ', json_decode(str_replace('}', ']', str_replace('{', '[', $this->get('functionsargumente'))))) . "
 		";
-		$this->debug->write('plan_attribute_has_value sql: ' . $sql, $this->show);
+		#echo '<br>Test ob Attribute Werte hat mit SQL: ' . $sql;
+
+		$this->debug->write('plan_attribute_has_value sql: ' . $sql, false);
 		$result = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
 		$has_value = $result['has_value'] == 't';
 		$validierungsergebnis = new Validierungsergebnis($this->gui);

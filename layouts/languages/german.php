@@ -2,7 +2,6 @@
 	$this->activateAllClasses = 'Klassen aktivieren';
 	$this->activatelayer = 'Dieses Thema sichtbar schalten';
 	$this->activatequery = 'Dieses Thema abfragbar schalten';
-	$this->all = 'alle';
 	$this->attributeditor = 'Attributeditor';
 	$this->deactivateAllClasses = 'Klassen deaktivieren';
 	$this->deactivatelayer = 'Dieses Thema ausschalten';
@@ -23,6 +22,7 @@
 	$this->strActivateAllQueries = 'Alle Abfragen ein/ausschalten';
 	$this->strAddToOwnQueries = 'zu eigenen Abfragen hinzufügen';
 	$this->strAlias = 'Alias';
+	$this->strAll = 'alle';
 	$this->strAnd = 'und';
 	$this->strArchive = 'Archivieren';
 	$this->strAsteriskRequired = 'Werte mit * müssen eingetragen werden';

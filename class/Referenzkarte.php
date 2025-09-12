@@ -14,7 +14,7 @@ class Referenzkarte extends MyObject {
 		return $referenzkarte->find_by($referenzkarte->identifier, $id);
 	}
 
-	public static	function find($gui, $where, $order) {
+	public static	function find($gui, $where, $order = '') {
 		$referenzkarte = new Referenzkarte($gui);
 		return $referenzkarte->find_where($where, $order);
 	}

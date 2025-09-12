@@ -1,6 +1,6 @@
 <?php
  # 2008-09-30 sr
-  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
  
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -186,7 +186,7 @@
 
 <?
 
-	for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
+	for($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++){
 		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 	}
 

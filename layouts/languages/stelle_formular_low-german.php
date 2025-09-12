@@ -26,7 +26,9 @@
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'Organisation';
 	$strOwsContactOrganizationHint = 'Name der zuständigen Organisation';
-  $strOwsContactEmailAddress = 'E-Mail-Adresse';
+  $strOwsContactUrl = 'URL';
+  $strOwsContactUrlHint = 'Home page url with further informationen about the contact or the geodata.';
+	$strOwsContactEmailAddress = 'E-Mail-Adresse';
   $strOwsContactEmailAddressHint = 'Das sollte aus Datenschutzgründen eine Funktionsadresse sein, z.B. info@organisation.de';
   $strOwsContactPerson = 'Ansprechperson';
   $strOwsContactPersonHint = 'Bezeichnung der zuständigen Person. Das kann aus Datenschutzgründen z.B. auch der Name der Tätigkeitsbezeichnung sein, z.B. Sachbearbeiter Geodaten.';

@@ -56,6 +56,23 @@ class LayerGroup extends MyObject {
 		return $layers;
 	}
 
+	function get_next_order($obergruppe) {
+		return ($this->find_by_sql(array(
+			'select' => 'max(`order`) AS max_order',
+			'from' => "`u_groups`",
+			'where' => "`obergruppe` = " . $obergruppe
+		))[0])->get('max_order') + 100;
+	}
+
+	function get_aktiv_status($stelle_id, $user_id, $group_id) {
+		$result = $this->find_by_sql(array(
+			'select' => "CASE WHEN sum(CASE WHEN r2l.aktivStatus = '1' THEN 1 ELSE 0 END) = 0 THEN 0 WHEN count(l.Layer_ID) > sum(CASE WHEN r2l.aktivStatus = '1' THEN 1 ELSE 0 END) THEN 1 ELSE 2 END AS aktiv_status",
+			'from' => "`u_rolle2used_layer` r2l JOIN `layer` l ON r2l.layer_id = l.Layer_ID",
+			'where' => "r2l.stelle_id = $stelle_id AND r2l.user_id = $user_id AND l.Gruppe = $group_id"
+		));
+		return $result[0]->get('aktiv_status');
+	}
+
 	public static function find_top_parents($gui, $stelle_id) {
 		#echo '<br>find_top_parents for stelle_id: ' . $stelle_id;
 		$group = new LayerGroup($gui);
@@ -63,12 +80,12 @@ class LayerGroup extends MyObject {
 			'select' => 'id, Gruppenname, icon, `order`',
 			'from' => "(
 				SELECT DISTINCT
-					CASE WHEN g3.id IS NULL THEN CASE WHEN g2.id IS NULL THEN g1.id ELSE g2.id END ELSE g3.id END AS group_id,
+					COALESCE(g3.id, g2.id, g1.id) AS group_id,
 					ul.Stelle_id
 				FROM
 					used_layer ul JOIN
 					layer l ON ul.Layer_ID = l.Layer_ID JOIN
-					u_groups g1 ON l.Gruppe = g1.id LEFT JOIN
+					u_groups g1 ON COALESCE(ul.group_id, l.Gruppe) = g1.id LEFT JOIN
 					u_groups g2 ON g1.obergruppe = g2.id LEFT JOIN
 					u_groups g3 ON g2.obergruppe = g3.id
 				WHERE

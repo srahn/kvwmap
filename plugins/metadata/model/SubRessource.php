@@ -2,19 +2,20 @@
 #############################
 # Klasse SubRessource #
 #############################
+include_once(PLUGINS . 'metadata/model/SubRessourceRange.php');
 
 class SubRessource extends PgObject {
 	
 	static $schema = 'metadata';
 	static $tableName = 'subressources';
-	static $write_debug = false;
+	public $write_debug = false;
   public $download_urls = array();
   public $has_ranges = false;
 
   public $ranges = array();
 
 	function __construct($gui) {
-		$gui->debug->show('Create new Object subressource', Subressource::$write_debug);
+		$gui->debug->show('Create new Object subressource', $this->write_debug);
 		parent::__construct($gui, Subressource::$schema, Subressource::$tableName);
 		// $this->typen = array(
 		// 	'Punkte',

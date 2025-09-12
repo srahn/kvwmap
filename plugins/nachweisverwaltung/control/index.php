@@ -86,6 +86,7 @@ function go_switch_nachweisverwaltung($go){
 
 	  case 'Antraganzeige_Zugeordnete_Dokumente_Anzeigen' : {
 			$GUI->sanitize(['antr_selected' => 'text']);
+			$GUI->sanitize(['lea_id' => 'int']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->checkCaseAllowed($go);
 			$GUI->DokumenteZuAntraegeAnzeigen();
@@ -104,6 +105,7 @@ function go_switch_nachweisverwaltung($go){
 
 	  case 'Antraganzeige_Zusammenstellen_Zippen' : {
 			$GUI->sanitize(['antr_selected' => 'text']);
+			$GUI->sanitize(['lea_id' => 'int']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$ret=$GUI->DokumenteZumAntragInOrdnerZusammenstellen();
 			if($ret != '')showAlert($ret);
@@ -113,6 +115,7 @@ function go_switch_nachweisverwaltung($go){
 		
 	  case 'Antraganzeige_Zusammenstellen_Zippen_mit_Uebersichten' : {
 			$GUI->sanitize(['antr_selected' => 'text']);
+			$GUI->sanitize(['lea_id' => 'int']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$ret=$GUI->DokumenteZumAntragInOrdnerZusammenstellen();
 			if($ret != '')showAlert($ret);
@@ -132,7 +135,6 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 		
 	  case 'Nachweisanzeige_zum_Auftrag_hinzufuegen' : {
-			$GUI->sanitize(['flur_thematisch' => 'int']);
 			$GUI->sanitizeNachweisSearch();
 			$GUI->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
