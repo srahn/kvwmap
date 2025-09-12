@@ -2,7 +2,6 @@
 	$this->activateAllClasses = 'activate classes';
 	$this->activatelayer = 'Activate layer';
 	$this->activatequery = 'Activate query';
-	$this->all = 'all';
 	$this->attributeditor = 'attribut editor';
 	$this->deactivateAllClasses = 'deactivate classes';
 	$this->deactivatelayer = 'Deactivate layer';
@@ -23,6 +22,7 @@
 	$this->strActivateAllQueries = 'Activate/Deactivate all queries';
 	$this->strAddToOwnQueries = 'Add to own queries';
 	$this->strAlias = 'Alias';
+	$this->strAll = 'all';
 	$this->strAnd = 'and';
 	$this->strArchive = 'Archive';
 	$this->strAsteriskRequired = 'Fields with * are mandatory';

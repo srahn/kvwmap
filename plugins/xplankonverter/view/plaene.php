@@ -393,6 +393,7 @@
 	}
 	
 	// takes ags 1-5 (kreisschluessel) to get landkreis
+	// some LKs written with _ to allow proper sorting in bootraps table
 	function konvertierungLandkreisFormatter(value, row) {
 		let krs_schl = row.stelle_id.toString().substring(0,5);
 		if (krs_schl) {

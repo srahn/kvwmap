@@ -31,7 +31,12 @@ class LayerStyle extends MyObject {
 		if ($symbol_index == -1) {
 			return false;
 		}
-		$symbol = $map->getSymbolObjectById($symbol_index);
+		if (MAPSERVERVERSION >= 800) {
+			$symbol = $map->symbolset->getSymbol($symbol_index);
+		}
+		else {
+			$symbol = $map->getSymbolObjectById($symbol_index);
+		}
 		return in_array($symbol->type, array('1003', '1006'));
 	}
 
@@ -39,7 +44,12 @@ class LayerStyle extends MyObject {
 		$map = new mapObj('');
 		$map->setSymbolSet(SYMBOLSET);
 		$map->setFontSet(FONTSET);
-		$symbol = $map->getSymbolObjectById($map->getSymbolByName($this->get('symbolname')));
+		if (MAPSERVERVERSION >= 800) {
+			$symbol = $map->symbolset->getSymbol($map->getSymbolByName($this->get('symbolname')));
+		}
+		else {
+			$symbol = $map->getSymbolObjectById($map->getSymbolByName($this->get('symbolname')));
+		}
 		#echo '<br>symbol: ' . $symbol->name . ' imagepath: ' . $symbol->imagepath;
 		$iconSize = ($this->get('size') == null ? '12' : $this->get('size'));
 		$icondef = (Object) array(
