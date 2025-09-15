@@ -1850,7 +1850,7 @@ function go_switch_xplankonverter($go) {
 
 		case 'xplankonverter_download_archivdatei' : {
 			$konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']);
-			$filename = XPLANKONVERTER_FILE_PATH . 'archiv/' . $GUI->Stelle->id . '/' . $konvertierung->configf['plan_abk_plural'] . '/' . basename($GUI->formvars['datei']);
+			$filename = XPLANKONVERTER_FILE_PATH . 'archiv/' . $GUI->Stelle->id . '/' . $konvertierung->config['plan_abk_plural'] . '/' . basename($GUI->formvars['datei']);
 
 			if (!file_exists($filename)) {
 				$GUI->add_message('warning', 'Diese Datei ist nicht vorhanden. Wenden Sie sich an den Support.');

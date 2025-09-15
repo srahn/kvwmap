@@ -53,29 +53,6 @@ class LayerAttribute extends MyObject {
 		return $datatype_attributes;
 	}
 
-	function get_datatype_id() {
-		$datatype_id = null;
-		if ($this->is_datatype_attribute()) {
-			return (int)ltrim($this->get('type'), '_');
-		}
-		return $datatype_id;
-	}
-
-	function get_datatype() {
-		include_once(CLASSPATH . 'DataType.php');
-		$datatype = null;
-		if ($this->is_datatype_attribute()) {
-			$datatype = DataType::find_by_id($this->gui, $this->get_datatype_id());
-		}
-		return $datatype;
-	}
-
-	function get_datatype_attributes() {
-		include_once(CLASSPATH . 'DataTypeAttribute.php');
-		$datatype_attributes = DataTypeAttribute::find($this->gui, "layer_id = " . $this->get('layer_id') . " AND datatype_id = " . $this->get_datatype_id());
-		return $datatype_attributes;
-	}
-
 	/**
 	 *	function return the name of the first attribut in $attributes array that has PRIMARY KEY as constraint
 	 *	@param array $attributes An array of attributes as returned by function mapdb->read_layer_attributes
@@ -191,14 +168,6 @@ class LayerAttribute extends MyObject {
 
 	function is_document_attribute() {
 		return $this->get('form_element_type') == 'Dokument';
-	}
-
-	function is_datatype_attribute() {
-		return is_numeric(ltrim($this->get('type'), '_'));
-	}
-
-	function is_array_type() {
-		return substr(trim($this->get('type')), 0, 1) === '_';
 	}
 }
 ?>
