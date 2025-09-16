@@ -16,6 +16,7 @@ class Layer extends MyObject {
 	public $minScale;
 	public $maxScale;
 	public $document_attributes;
+	public $layer2stelle;
 
 	function __construct($gui) {
 		$this->gui = $gui;
@@ -639,6 +640,9 @@ l.Name AS sub_layer_name
 		}
 	}
 
+	/**
+	 * Get layer definition from layer for stelle
+	 */
 	function get_overlays_def($stelle_id) {
 		$this->debug->show('<p>Layer->get_overlays_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
 		#echo '<p>get_overlays_def for Layer: ' . $this->get('Name');
@@ -747,6 +751,7 @@ l.Name AS sub_layer_name
 			'geomType' => array('Point', 'Linestring', 'Polygon', 'Raster', 'Annotation', 'Query', 'Circle', 'Tileindex', 'Chart')[$this->get('Datentyp')],
 			'backgroundColor' => '#c1ffd8',
 			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
+			'classItem' => ($this->get('classitem') != '' ? $this->get('classitem') : $this->get('oid')),
 			'url' => $url,
 			'params' => $params,
 			'options' => $options,
@@ -765,6 +770,10 @@ l.Name AS sub_layer_name
 			'hideEmptyLayerAttributes' => true,
 			'layerAttributes' => $layerAttributes
 		);
+
+		if ($this->get_layer2stelle($stelle_id) AND $this->layer2stelle->get('symbolscale')) {
+			$layerdef->symbolscale = $this->layer2stelle->get('symbolscale');
+		}
 
 		if ($this->get('processing') != '') {
 			$processing = explode(';', $this->get('processing'));
@@ -957,6 +966,18 @@ l.Name AS sub_layer_name
   function get_table_alias() {
     return $this->table_alias;
   }
+
+	/**
+	 * Liefert das Layer2Stelle-Objekt für die übergebene Stelle zurück, wenn es existiert.
+	 * @param int $stelle_id
+	 * @return Layer2Stelle|null
+	 */
+	function get_layer2stelle($stelle_id) {
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		$result = Layer2Stelle::find($this->gui, 'Stelle_ID = ' . $stelle_id . ' AND Layer_ID = ' . $this->get('Layer_ID'));
+		$this->layer2stelle = (count($result) == 0 ? null : $result[0]);
+		return $this->layer2stelle;
+	}
 
 	/**
 	 * Generiert ein data-Statement in dem fehlende Attribute aus dem main_table ergänzt werden.

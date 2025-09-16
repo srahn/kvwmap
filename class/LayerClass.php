@@ -51,7 +51,7 @@ class LayerClass extends MyObject {
 		#echo '<br>LayerClass->get_first_style for Class id: ' . $this->get($this->identifier);
 		include_once(CLASSPATH . 'Style2Class.php');
 		include_once(CLASSPATH . 'LayerStyle.php');
-		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier));
+		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier) . ' AND style_id > 0');
 		if (count($styles2class) == 0) {
 			return '';
 		}
@@ -68,14 +68,14 @@ class LayerClass extends MyObject {
 		if ($this->get('Expression') == '') {
 			$def = '';
 		}
-		elseif (preg_match('/^\([^\[]*\[[^\]]*\][^\)]*\)$/', $this->get('Expression'))) {
+		elseif (preg_match("/'\\[[^\\]]+\\]'\\s+in\\s+\\('[^']*'\\)/", $this->get('Expression'))) {
 			$def = trim($this->get('Expression'));
 		}
 		elseif ($classitem == '') {
 			$def = '';
 		}
 		else {
-			$def = '([' . $classitem . '] = ' . $this->get('Expression') . ')';
+			$def = "([" . $classitem . "] = '" . $this->get('Expression') . "')";
 		}
 
 		$first_style = $this->get_first_style($datentyp);

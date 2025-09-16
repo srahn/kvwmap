@@ -1642,7 +1642,8 @@ FROM
 			WHERE 
 				true " .
 				$this->build_temporal_filter(array('f')) . "
-				AND f.weistauf && ARRAY	( 
+				AND (
+					f.weistauf && ARRAY	( 
 																		SELECT 
 																			l.gml_id
 																		FROM 
@@ -1663,6 +1664,7 @@ FROM
 																		$this->build_temporal_filter(array('l')) . "
 																)";
 		}
+		$sql .= ")";
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {

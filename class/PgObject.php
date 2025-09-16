@@ -55,7 +55,7 @@ class PgObject {
 		$this->qualifiedTableName = $schema_name . '.' . $table_name;
 		$this->data = array();
 		$this->select = '*';
-		$this->from = $schema . '.' . $tableName;
+		$this->from = '"' . $this->schema . '"."' . $this->tableName . "'";
 		$this->where = '';
 		$this->identifier = $identifier;
 		$this->identifier_type = $identifier_type;
@@ -131,9 +131,9 @@ class PgObject {
 			SELECT
 				{$this->select}
 			FROM
-				\"{$this->schema}\".\"{$this->tableName}\"
+				{$this->from}
 			WHERE
-				" . $where_condition . "
+				" . ($this->where != '' ? ' AND ' : '') . $where_condition . "
 		";
 		$this->debug->show('find_by_ids sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
@@ -332,7 +332,7 @@ class PgObject {
 		return $value;
 	}
 
-	function unset($attribute) {
+	function unset_($attribute) {
 		unset($this->data[$attribute]);
 	}
 
