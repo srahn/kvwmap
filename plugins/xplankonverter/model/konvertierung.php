@@ -2790,6 +2790,9 @@ class Konvertierung extends PgObject {
 			$this->plan->destroy();
 		}
 
+		# Lösche flaechenschlussobjekte-topology to avoid duplicates of uuid
+		$this->clearTopology();
+
 		# Lösche Konvertierung
 		$this->delete();
 		$this->debug->show($msg, Konvertierung::$write_debug);

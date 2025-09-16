@@ -1,6 +1,28 @@
 <?php
 	include('header.php');
 ?>
+<script src="funktionen/bootstrap-table-settings.js"></script>
+<?
+	include_once(CLASSPATH . 'LayerAttributeRolleSetting.php');
+	$larsObj = new LayerAttributeRolleSetting($this, $this->Stelle->id, $this->user->id, $this->plan_layer_id);
+	$rolle_attribute_settings = $larsObj->read_layer_attributes2rolle($this->plan_layer_id, $this->Stelle->id, $this->user->id);
+	if (count($rolle_attribute_settings) > 0) {
+		$sort_attribute = array_values(
+			array_filter(
+				$rolle_attribute_settings,
+				function ($attribute) {
+					return $attribute['sort_order'];
+				}
+			)
+		)[0];
+	}
+	else {
+		$sort_attribute = array(
+			'attributename' => 'anzeigename',
+			'sort_direction' => 'asc'
+		);
+	}
+?>
 <style>
 	#container_paint {
 		background-color: white;
@@ -29,13 +51,13 @@
 		result = $('#eventsResult');
 		result.success = function(text, visible = 1000) {
 			message([{ type: 'notice', msg: text}], visible, 100, 400);
-/*			result.text(text);
+		/* result.text(text);
 			result.removeClass('alert-danger');
 			result.addClass('alert-success');*/
 		};
 		result.error = function(text){
 			message([{ type: 'error', msg: text}]);
-/*			result.text(text);
+			/* result.text(text);
 			result.removeClass('alert-success');
 			result.addClass('alert-danger');*/
 		};
@@ -44,12 +66,13 @@
 		$('#konvertierungen_table')
 		.one('load-success.bs.table', function (e, data) {
 			result.success('Tabelle erfolgreich geladen');
+			registerEventHandler();
 		})
 		.on('post-body.bs.table', function (e, data) {
 			$('.xpk-func-convert').click(
 				starteKonvertierung
 			);
-/*			$('.xpk-func-generate-gml').click(
+			/*$('.xpk-func-generate-gml').click(
 				starteXplanGmlGenerierung
 			);*/
 			$('.xpk-func-generate-inspire-gml').click(
@@ -381,7 +404,7 @@
 		return htmlspecialchars(value);
 	}
 
-	// formatter functions
+	// formatter function
 	function konvertierungGemeindeFormatter(value, row) {
 		var gemeinden = JSON.parse(value);
 		return $.map(
@@ -437,6 +460,17 @@
 		return output;
 	}
 
+	function konvertierungAuslegungsstartdatumFormatter(value, row) {
+		var datumsangaben = JSON.parse(row.auslegungsstartdatum);
+		return $.map(
+			datumsangaben,
+			function(datum) {
+				return datum.split('-').reverse().join('.');
+			}
+		).join(', ');
+		return value;
+	}
+
 	function konvertierungBundeslandFormatter(value, row) {
 		var bundeslaender = JSON.parse(value);
 		return bundeslaender;
@@ -448,7 +482,7 @@
 				disableFrag = ' disabled" onclick="return false',
 				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
 		output += `<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="javascript:void(0)" onClick="showPlanDetails('${row.plan_gml_id}');"><i class="btn-link fa fa-lg fa-pencil"></i></a>`;
-		output += '<a id="delButton' + value + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="fa fa-lg fa-trash"></i></a>';
+		output += '<a id="delButton' + row.plan_gml_id + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
 		return output;
 	}
@@ -457,12 +491,12 @@
 		var funcIsAllowed,
 				funcIsInProgress,
 				disableFrag = ' xpk-func-btn-disabled disabled" onclick="return false',
-				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + value + '">';
+				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + row.konvertierung_id + '">';
 
 		// enabled by status of konvertierung
 		// Shapefile upload
 		funcIsAllowed = true; // function is always allowed
-		output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs	xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-lg fa-upload"></i></a>';
+		output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs	xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + row.konvertierung_id + '"><i class="fa fa-lg fa-upload"></i></a>';
 
 		// Konvertieren und validieren
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'					]; ?>"
@@ -474,7 +508,7 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Validieren und Konvertierung durchführen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperr_div\').innerHTML = \'Anfrage gesendet. Bitte warten.\'; document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
+		output += '<a title="Validieren und Konvertierung durchführen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + row.konvertierung_id + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperr_div\').innerHTML = \'Anfrage gesendet. Bitte warten.\'; document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
 
 		// Validierungsergebnisse anzeigen
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'					]; ?>"
@@ -486,7 +520,7 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Validierungsergebnisse der Konvertierung anzeigen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-list-alt"></i></a>';
+		output += '<a title="Validierungsergebnisse der Konvertierung anzeigen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + row.konvertierung_id + '" onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-list-alt"></i></a>';
 
 		// GML-Erzeugen
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'					]; ?>"
@@ -605,7 +639,7 @@
 			symbol.class = 'fa-eye-slash'; // ist nicht veröffentlicht
 		}
 		else if (new Date(veroeffentlichungsdatum) > today) {
-			symbol.title = 'Plan wird am ' + value + ' veröffentlicht.';
+			symbol.title = 'Plan wird am ' + row.veroeffentlichungsdatum + ' veröffentlicht.';
 			symbol.colorClass = 'yellow';
 			symbol.class = 'fa-clock-o'; // wird noch veröffentlicht
 		}
@@ -615,7 +649,7 @@
 			symbol.class = 'fa-eye'; // ist veröffentlicht
 		}
 		else {
-			symbol.title = 'Plan wurde am ' + value + ' veröffentlicht.';
+			symbol.title = 'Plan wurde am ' + row.veroeffentlichungsdatum + ' veröffentlicht.';
 			symbol.colorClass = 'green';
 			symbol.class = 'fa-eye'; // ist veröffentlicht
 		}
@@ -641,7 +675,7 @@
 	function konvertierungDownloadsFormatter(value, row) {
 		var funcIsAllowed, funcIsInProgress,
 			disableFrag = ' xpk-func-btn-disabled disabled" onclick="return false';
-		output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + value + '">';
+		output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + row.konvertierung_id + '">';
 
 		// hochgeladene Shapes
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG'		 ]; ?>"
@@ -654,13 +688,13 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Hochgeladene Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' green" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=uploaded_shape_files&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-photo-o"></i></a>';
+		output += '<a title="Hochgeladene Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' green" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=uploaded_shape_files&konvertierung_id=' + row.konvertierung_id + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-photo-o"></i></a>';
 
 		// geänderte Shapes
 		funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'				 ]; ?>"
 									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Geänderte Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' orange" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=edited_shape_files&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-image-o"></i></a>';
+		output += '<a title="Geänderte Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' orange" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=edited_shape_files&konvertierung_id=' + row.konvertierung_id + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-image-o"></i></a>';
 
 		// XPlanung-GML
 		funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'				 ]; ?>"
@@ -668,7 +702,7 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']; ?>"
 									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="XPlanung-GML" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_gml&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-excel-o";"></i></a>';
+		output += '<a title="XPlanung-GML" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_gml&konvertierung_id=' + row.konvertierung_id + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-excel-o";"></i></a>';
 
 		// XPlanung-Shapes
 		funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'					]; ?>"
@@ -677,38 +711,36 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']; ?>"
 									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="XPlanung-Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_shape_files&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-picture-o"></i></a>';<?
+		output += '<a title="XPlanung-Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_shape_files&konvertierung_id=' + row.konvertierung_id + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-picture-o"></i></a>';<?
 
 		if (XPLANKONVERTER_FUNC_INSPIRE) { ?>
 			if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
 				// INSPIRE-GML
 				funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
-				output += '<a title="INSPIRE-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + ' blue" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=inspire_gml&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);" download="inspire_gml.gml" download="inspire"><i class="fa fa-lg fa-file-code-o"></i></a>';
+				output += '<a title="INSPIRE-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + ' blue" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=inspire_gml&konvertierung_id=' + row.konvertierung_id + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);" download="inspire_gml.gml" download="inspire"><i class="fa fa-lg fa-file-code-o"></i></a>';
 			}<?
 		}
 
 		if (XPLANKONVERTER_FUNC_SERVICE) { ?>
 			// GeoWebService Capabilities
 			funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GEO_WEBSERVICE_ERSTELLT']; ?>";
-			output += '<a title="Dienst-Capabilities" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=geoweb_service_capabilities&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-code-o"></i></a>';
+			output += '<a title="Dienst-Capabilities" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=geoweb_service_capabilities&konvertierung_id=' + row.konvertierung_id + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-code-o"></i></a>';
 
 			// Dienst-Metadaten
 			funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GEO_WEBSERVICE_ERSTELLT']; ?>";
-			output += '<a title="Dienst-Metadaten" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=geoweb_service_metadata&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-text-o"></i></a>';<?
+			output += '<a title="Dienst-Metadaten" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=geoweb_service_metadata&konvertierung_id=' + row.konvertierung_id + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-text-o"></i></a>';<?
 		} ?>
 
 		output += '</span>';
 		return output;
 	}
 
-	function konvertierungWirksamkeitsdatumSorter(fieldA, fieldB, rowA, rowB) {
-		
+	function konvertierungDatumSorter(fieldA, fieldB, rowA, rowB) {
 		const dateA = fieldA == null ? "000000" : fieldA.split(".").reverse().join("");
 		const dateB = fieldB == null ? "000000" : fieldB.split(".").reverse().join("");
-		console.log('A: ' + dateA + ' > B: ' + dateB);
+		// console.log('A: ' + dateA + ' > B: ' + dateB);
 		return dateA > dateB ? 1 : -1;
 	}
-
 </script>
 <h2><?php echo htmlspecialchars($this->title); ?></h2><?php
 if ($this->Stelle->id > 200) { ?>
@@ -776,7 +808,9 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 				<th
 					data-field="nummer"
 					data-sortable="true"
-					data-visible="false"
+					data-visible="<? echo ((!array_key_exists('nummer', $rolle_attribute_settings) OR $rolle_attribute_settings['nummer']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+					data-sort-name="nummer"
+					data-order="<? echo ((!array_key_exists('nummer', $rolle_attribute_settings) OR $rolle_attribute_settings['nummer']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
 					class="col-md-2"
 					data-filter-control="input"
 				>Nr</th><?php
@@ -793,8 +827,10 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 				else { ?>
 					<th
 						data-field="gemeinde"
-						data-visible="true"
 						data-sortable="true"
+						data-visible="<? echo ((!array_key_exists('gemeinde', $rolle_attribute_settings) OR $rolle_attribute_settings['gemeinde']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+						data-sort-name="gemeinde"
+						data-order="<? echo ((!array_key_exists('gemeinde', $rolle_attribute_settings) OR $rolle_attribute_settings['gemeinde']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
 						data-formatter="konvertierungGemeindeFormatter"
 						class="col-md-2"
 						data-filter-control="select"
@@ -817,8 +853,10 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
 					<th
 						data-field="konvertierung_status"
-						data-visible="true"
 						data-sortable="true"
+						data-visible="<? echo ((!array_key_exists('konvertierung_status', $rolle_attribute_settings) OR $rolle_attribute_settings['konvertierung_status']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+						data-sort-name="konvertierung_status"
+						data-order="<? echo ((!array_key_exists('konvertierung_status', $rolle_attribute_settings) OR $rolle_attribute_settings['konvertierung_status']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
 						data-formatter="konvertierungStatusFormatter"
 						class="col-md-2"
 						data-filter-control="select"
@@ -829,22 +867,82 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 				<th
 					data-field="wirksamkeitsdatum"
 					data-sortable="true"
-					data-visible="true"
-					data-sorter="konvertierungWirksamkeitsdatumSorter"
+					data-visible="<? echo ((!array_key_exists('wirksamkeitsdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['wirksamkeitsdatum']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+					data-sort-name="wirksamkeitsdatum"
+					data-sorter="konvertierungDatumSorter"
+					data-order="<? echo ((!array_key_exists('wirksamkeitsdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['wirksamkeitsdatum']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
 					class="col-md-2"
 					data-filter-control="input"
 				>Wirksamkeit</th><?
 				}
 				if ($this->plan_layer_id == XPLANKONVERTER_BP_PLAENE_LAYER_ID) { ?>
+					<th
+						data-field="inkrafttretensdatum"
+						data-sortable="true"
+						data-visible="<? echo ((!array_key_exists('inkrafttretensdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['inkrafttretensdatum']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+						data-sort-name="inkrafttretensdatum"
+						data-sorter="konvertierungDatumSorter"
+						data-order="<? echo ((!array_key_exists('inkrafttretensdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['inkrafttretensdatum']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
+						class="col-md-2"
+						data-filter-control="input"
+					>Inkrafttretensdatum</th><?
+				} ?>
 				<th
-					data-field="inkrafttretensdatum"
+					data-field="genehmigungsdatum"
 					data-sortable="true"
-					data-visible="true"
-					data-sorter="konvertierungWirksamkeitsdatumSorter"
+					data-visible="<? echo ((!array_key_exists('genehmigungsdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['genehmigungsdatum']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+					data-sort-name="genehmigungsdatum"
+					data-sorter="konvertierungDatumSorter"
+					data-order="<? echo ((!array_key_exists('genehmigungsdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['genehmigungsdatum']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
 					class="col-md-2"
 					data-filter-control="input"
-				>Inkrafttretensdatum</th><?
-				}
+				>Genehmigung</th>
+				<? if ($this->plan_layer_id != XPLANKONVERTER_SO_PLAENE_LAYER_ID) { ?>
+				<th
+					data-field="auslegungsstartdatum"
+					data-sortable="true"
+					data-visible="<? echo ((!array_key_exists('auslegungsstartdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['auslegungsstartdatum']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+					data-sort-name="auslegungsstartdatum"
+					data-sorter="konvertierungDatumSorter"
+					data-order=<? echo ((!array_key_exists('auslegungsstartdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['auslegungsstartdatum']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>
+					data-formatter="konvertierungAuslegungsstartdatumFormatter"
+					class="col-md-2"
+					data-filter-control="input"
+				>Bekanntmachung</th>
+				<? } ?>
+				<th
+					data-field="konvertierung_id"
+					data-visible="<? echo ((!array_key_exists('konvertierung_id', $rolle_attribute_settings) OR $rolle_attribute_settings['konvertierung_id']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+					data-sort-name="konvertierung_id"
+					data-order="<? echo ((!array_key_exists('konvertierung_id', $rolle_attribute_settings) OR $rolle_attribute_settings['konvertierung_id']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
+					data-sortable="true"
+					data-switchable="true"
+					data-searchable="true"
+					data-search_selector="input"
+					data-filter-control="input"
+					>Konvertierung Id</th>
+				<th
+					data-field="plan_gml_id"
+					data-visible="<? echo ((!array_key_exists('plan_gml_id', $rolle_attribute_settings) OR $rolle_attribute_settings['plan_gml_id']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+					data-sort-name="plan_gml_id"
+					data-order="<? echo ((!array_key_exists('plan_gml_id', $rolle_attribute_settings) OR $rolle_attribute_settings['plan_gml_id']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
+					data-sortable="true"
+					data-switchable="true"
+					data-searchable="true"
+					data-search_selector="input"
+					data-filter-control="input"
+					>Plan Id</th>
+				<th
+					data-field="stelle_id"
+					data-visible="<? echo ((!array_key_exists('stelle_id', $rolle_attribute_settings) OR $rolle_attribute_settings['stelle_id']['switched_on'] == 1) ? 'true' : 'false'); ?>"
+					data-sort-name="stelle_id"
+					data-order="<? echo ((!array_key_exists('stelle_id', $rolle_attribute_settings) OR $rolle_attribute_settings['stelle_id']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
+					data-sortable="true"
+					data-switchable="true"
+					data-searchable="true"
+					data-search_selector="input"
+					data-filter-control="input"
+				>Stelle Id</th><?
 				/*
 				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
 					<th
@@ -869,21 +967,18 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					><i title="Veröffentlichungsdatum" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
 				} ?>
 				<th
-					data-field="konvertierung_id"
 					data-visible="true"
 					data-formatter="konvertierungFunctionsFormatter"
 					data-switchable="false"
 					class="col-md-2 text-center"
 				>Funktionen</th>
 				<th
-					data-field="konvertierung_id"
 					data-visible="true"
 					data-formatter="konvertierungDownloadsFormatter"
 					data-switchable="false"
 					class="col-md-2 align-top text-center"
 				>Downloads</th>
 				<th
-					data-field="plan_gml_id"
 					data-visible="true"
 					data-formatter="konvertierungEditFunctionsFormatter"
 					data-switchable="false"

@@ -50,7 +50,7 @@
 			foreach ($datatype_attributes AS $datatype_attribute) {
 				if ($datatype_attribute->is_document_attribute()) {
 					$datatype = $attribute->get_datatype();
-					//echo '<br>Attribut: ' . $attribute->get('name') . ' Datentyp: ' . $datatype->get('name') . ' Datentypattribut: ' . $datatype_attribute->get('name');
+					// echo '<br>Attribut: ' . $attribute->get('name') . ' Datentyp: ' . $datatype->get('name') . ' Datentypattribut: ' . $datatype_attribute->get('name');
 					// Das extrahieren der Dokumentnamen der Feature Datentyp und Array berücksichtigen.
 					$features = $pg_obj->find_where(
 						$datatype_attribute->get_document_where($this->layer, $attribute), // where

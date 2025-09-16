@@ -17,7 +17,7 @@ registerEventHandler = function() {
 }
 
 writeSwitchedOn = function(evt) {
-  console.log('writeSwitchedOn');
+  // console.log('writeSwitchedOn');
   var target = $(evt.target),
       params = {
         layer_id: getSelectedLayerId(),
@@ -47,7 +47,7 @@ writeSwitchedOn = function(evt) {
 }
 
 writeSortDirection = function(evt) {
-  //console.log('writeSortDirection');
+  // console.log('writeSortDirection');
   var target = $(evt.target),
       sortDirection,
       params = {
@@ -59,7 +59,7 @@ writeSortDirection = function(evt) {
       },
       url = 'index.php?go=write_layer_attributes2rolle';
 
-  //console.log('send attribute settings: %o to url: %s', params, url);
+  // console.log('send attribute settings: %o to url: %s', params, url);
 
   $.ajax({
     url: url,

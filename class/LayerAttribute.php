@@ -165,5 +165,9 @@ class LayerAttribute extends PgObject {
 	function is_array_type() {
 		return substr(trim($this->get('type')), 0, 1) === '_';
 	}
+
+	function is_document_attribute() {
+		return $this->get('form_element_type') == 'Dokument';
+	}
 }
 ?>
