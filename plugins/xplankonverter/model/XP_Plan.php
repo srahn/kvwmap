@@ -415,12 +415,20 @@ class XP_Plan extends PgObject {
 	 */
 	function destroy() {
 		$this->debug->show('Objekt XP_Plan gml_id: ' . $this->get('gml_id') . ' destroy', false);
+		$bereiche = array();
 		$bereiche = $this->get_bereiche();
 		foreach ($bereiche AS $bereich) {
 			$bereich->destroy();
 		}
 		$this->destroy_associated_textabschnitte();
-		$this->delete();
+		$sql = "
+			DELETE FROM
+				xplan_gml." . $this->planartAbk . "_plan
+			WHERE
+				gml_id::text = '" . $this->get($this->identifier) . "'::text
+		";
+		$result = $this->database->execSQL($sql, 0, 3);
+		//$this->delete();
 	}
 }
 ?>

@@ -176,10 +176,8 @@
 				}
 			} break;
 
-			case ($fired == 'AFTER' AND $event == 'DELETE') : {
+			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
 				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_xp_plan Funktion aus.';
-				# Delete Konvertierung and all pending objects after deleting only plan
-				# has to happen after instead of instead, because it will become circular
 				$konvertierung_id = $old_dataset['konvertierung_id'];
 				#echo '<p>Lösche Konvertierung mit Id: ' . $konvertierung_id;
 				$konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
