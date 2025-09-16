@@ -542,6 +542,7 @@ class PgObject {
 	 * @return array $results: All found objects.
 	 */
 	function find_by_sql($params) {
+		$results = array();
 		$sql = "
 			SELECT
 				" . (!empty($params['select']) ? $params['select'] : '*') . "
@@ -553,9 +554,15 @@ class PgObject {
 		// echo '<br>PgObject->find_by_sql with sql: ' . $sql;
 		$this->debug->show('PgObject find_by_sql sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
-		$results = array();
-		while ($this->data = pg_fetch_assoc($query)) {
-			$results[] = clone $this;
+		if (!$query) {
+			$this->success = false;
+			$this->last_error = pg_last_error($this->database->dbConn);
+		}
+		else {
+			$this->success = true;
+			while ($this->data = pg_fetch_assoc($query)) {
+				$results[] = clone $this;
+			}
 		}
 		return $results;
 	}
