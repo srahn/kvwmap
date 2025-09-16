@@ -3,7 +3,7 @@
 error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
 
 include('settings.php');
-include('../../../../config.php');
+include('../../../../credentials.php');
 
 $host = POSTGRES_HOST;
 $user = POSTGRES_USER; 
