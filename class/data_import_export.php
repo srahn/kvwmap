@@ -385,7 +385,7 @@ class data_import_export {
 				return;
 			}
 			foreach($layers as $layer) {
-				$table = 'a'.strtolower(sonderzeichen_umwandeln(substr(($layer ?: basename($filename)), 0, 40))). date("_Y_m_d_H_i_s", time());
+				$table = 'a'.strtolower(sonderzeichen_umwandeln(substr(($layer ?: basename($filename)), 0, 30))). date("_Y_m_d_H_i_s", time());
 				$ret = $this->ogr2ogr_import($schema, $table, $epsg, $filename, $database, $layer, NULL, NULL, 'UTF-8');
 				if ($ret !== 0) {
 					$custom_table['error'] = $layer . ': ' . $ret;
