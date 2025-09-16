@@ -3901,7 +3901,13 @@ echo '			</table>
 	*/
 	function checkCaseAllowed($case, $check_csrf_token = true) {
 		if ($check_csrf_token) {
-			$this->check_csrf_token();
+			if (!(
+				$case == 'show_snippet' AND
+				strpos(file_get_contents(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $this->formvars['snippet'] . '.php'), '$check_csrf_token = false;') !== false
+			)) {
+				// Nicht prüfen wenn im snippet der csrf_token_check explizit ausgeschaltet ist.
+				$this->check_csrf_token();
+			}
 		}
 		if (!(
 			$this->Stelle->isMenueAllowed($case) OR
@@ -4764,10 +4770,12 @@ echo '			</table>
 		$this->output();
 	}
 
+
 	/**
-	 * This function return the image of the referenzkarte with given ID
+	 * This function returns the image of the referenzkarte with given ID
 	 * if refmap not found return alternative not found image
 	 */
+
 	function getRefMapImage($id) {
 		include_once(CLASSPATH . 'Referenzkarte.php');
 		$referenzkarte = Referenzkarte::find_by_id($this, $id);
@@ -14829,23 +14837,24 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->cronjobs = CronJob::find($this);
 
 		# erzeugt die Zeilen für den crontab
-		$crontab_lines = array('gisadmin' => array(), 'root' => array());
+		$this->crontab_lines = array('gisadmin' => array(), 'root' => array());
 		foreach ($this->cronjobs AS $cronjob) {
 			if ($cronjob->get('aktiv')) {
-				$crontab_lines[$cronjob->get('user')][] = $cronjob->get_crontab_line();
+				$this->crontab_lines[$cronjob->get('user')][] = $cronjob->get_crontab_line();
 			}
 		}
-		$crontab_dir = '/var/www/cron/';
-		if (!file_exists($crontab_dir . 'gisadmin')) {
-			mkdir($crontab_dir . 'gisadmin');
+		$this->crontab_dir = '/var/www/cron/';
+		if (!file_exists($this->crontab_dir . 'gisadmin')) {
+			mkdir($this->crontab_dir . 'gisadmin');
 		}
-		if (!file_exists($crontab_dir . 'root')) {
-			mkdir($crontab_dir . 'root');
+		if (!file_exists($this->crontab_dir . 'root')) {
+			mkdir($this->crontab_dir . 'root');
 		}
 		# schreibt die Zeilen in die crontab Dateien von root und gisadmin falls vorhanden
-		foreach ($crontab_lines AS $user => $lines) {
-			$crontab_file = $crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
-			// echo '<br>' . $user . ':' . $crontab_file;
+		foreach ($this->crontab_lines AS $user => $lines) {
+			$crontab_file = $this->crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
+			// $crontab_file = $this->crontab_dir . 'crontab_' . $user;
+			// echo '<br>' . $user . ': ' . $crontab_file;
 			$fp = fopen($crontab_file, 'w');
 			if (count($lines) > 0) {
 				foreach($lines AS $line) {
@@ -14865,7 +14874,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 #		unlink($crontab_file);
 
 		# crontab Zeilen anzeigen
-		$this->crontab_lines = $crontab_lines;
 		$this->main = 'crontab.php';
 		$this->output();
 	}
