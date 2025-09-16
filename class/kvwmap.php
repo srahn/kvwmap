@@ -1320,18 +1320,18 @@ echo '			</table>
 						$this->layer_ids_of_group[$group_id] = [];
 					}
 					$legend .=  '<tr>
-												<td align="center" colspan="3">
+												<td align="center">
 													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layer_ids_of_group[$group_id]).'">';
 					if($this->user->rolle->singlequery == 0) {
 						$legend .=  '<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.', '.$this->user->rolle->instant_reload.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllQueries.'"></a>';
 					}
 					$legend .=		'</td>
-												<!--td align="center">
+												<td align="center">
 													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.', '.$this->user->rolle->instant_reload.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllLayers.'"></a>
 												</td>
 												<td>
 													<span class="legend_layer">' . $this->strAll . '</span>
-												</td//-->
+												</td>
 											</tr>';
 				}
 				for ($j = 0; $j < $layercount; $j++) {
