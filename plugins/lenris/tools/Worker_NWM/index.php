@@ -3,6 +3,12 @@
 error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
 
 include('settings.php');
+include('../../../../config.php');
+
+$host = POSTGRES_HOST;
+$user = POSTGRES_USER; 
+$pass = POSTGRES_PASSWORD; 
+$db = POSTGRES_DBNAME;
 
 $neue_nachweise = array();
 $geaenderte_nachweise = array();
