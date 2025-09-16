@@ -1280,15 +1280,15 @@ echo '			</table>
 						<a href="javascript:getlegend(\'' . $group_id . '\')">
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>
-						<input id="group_checkbox_' . $group_id . '" name="group_checkbox_' . $group_id . '" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="javascript:selectgroupthema(document.GUI.layers_of_group_' . $group_id . ', ' . $this->user->rolle->instant_reload.')"' . ($group_aktiv_status == 2 ? ' checked' : '') . '/>
+						<!--input id="group_checkbox_' . $group_id . '" name="group_checkbox_' . $group_id . '" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="javascript:selectgroupthema(document.GUI.layers_of_group_' . $group_id . ', ' . $this->user->rolle->instant_reload.')"' . ($group_aktiv_status == 2 ? ' checked' : '') . '/-->
 						<span class="legend_group' . (value_of($this->group_has_active_layers, $group_id) != '' ? '_active_layers' : '') . '">
-							<a
+							<!--a
 								href="javascript:getGroupOptions(' . $group_id . ')"
 								onmouseover="$(\'#test_' . $group_id . '\').show()"
 								onmouseout="$(\'#test_' . $group_id . '\').hide()"
 							>' . html_umlaute($groupname) . '
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
-							</a>' .
+							</a-->' .
 							html_umlaute($groupname) . '
 							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
