@@ -119,7 +119,10 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
 		'xplankonverter' => [
 			'2025-05-20_15-46-00_config.sql',
 			'2025-05-20_15-46-00_layer.sql',
-			'2025-05-20_15-46-00_menues.sql'
+			'2025-05-20_15-46-00_menues.sql',
+      'codelists.sql',
+      'enums_rp.sql',
+      'plaene.sql'
 		]
 	];
  
