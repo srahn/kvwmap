@@ -5547,7 +5547,7 @@ echo '			</table>
 			case "switch_branch" : case "update_code_and_databases" : {
 				$result = $this->administration->update_code();
 			} # break fehlt mit Absicht
-			case "switch_branch" : case "update_code_and_databases" : case "update_databases" : {
+			case "update_code_and_databases" : case "update_databases" : {
 				$this->administration->get_database_status();
 				$err_msgs = $this->administration->update_databases();
 				if (count($err_msgs) > 0) {
