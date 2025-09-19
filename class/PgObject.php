@@ -117,10 +117,10 @@ class PgObject {
 			WHERE
 				"' . $attribute . '"';
 		if ($value == '') {
-			' IS NULL';
+			$sql .= ' IS NULL';
 		}
 		else {
-			$sql = ' = \'' . $value . '\'';
+			$sql .= ' = \'' . $value . '\'';
 		}
 		$this->debug->show('find_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
