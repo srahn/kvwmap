@@ -115,7 +115,13 @@ class PgObject {
 			FROM
 				"' . $this->schema . '"."' . $this->tableName . '"
 			WHERE
-				"' . $attribute . '" = \'' . $value . '\'';
+				"' . $attribute . '"';
+		if ($value == '') {
+			' IS NULL';
+		}
+		else {
+			$sql = ' = \'' . $value . '\'';
+		}
 		$this->debug->show('find_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		if (!$query) {
