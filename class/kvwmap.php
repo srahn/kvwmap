@@ -3647,7 +3647,7 @@ echo '			</table>
 		include_once(CLASSPATH . 'Notification.php');
 		include_once(CLASSPATH . 'formatter.php');
 		$this->notification = Notification::find_by_id($this, $this->formvars['id']);
-		$results = $this->notification->delete()[0];
+		$results = $this->notification->delete();
 		#echo '<br>habe notification mit id ' . $this->notification->get('id') . ' gefunden.'; exit;
 		$formatter = new formatter($results, 'json', 'application/json');
 		echo $formatter->output();

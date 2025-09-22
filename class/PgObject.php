@@ -410,7 +410,9 @@ class PgObject {
 		if (!empty($data)) {
 			$this->data = $data;
 		}
-
+		if ($this->data[$this->identifier] == '' OR $this->data[$this->identifier] == 0) {
+			unset($this->data[$this->identifier]);
+		}
 		$values = array_map(
 			function($value) {
 				return (is_array($value) ? "{" . implode(", ", $value) . "}" : $value);
@@ -496,11 +498,21 @@ class PgObject {
 		}
 		$this->debug->show('Dataset created with ' . $this->get_id_condition(), $this->show);
 
-		return array(
-			'success' => true,
-			'ids' => $this->get_ids(),
-			'msg' => 'Datensatz erfolgreich angelegt'
-		);
+		if ($this->database->success) {
+			$results[] = array(
+				'success' => true,
+				'msg' => 'Datensatz erfolgreich angelegt.',
+				'id' => $this->get($this->identifier)
+			);
+		}
+		else {
+			$results[] = array(
+				'success' => false,
+				'msg' => $this->database->errormessage,
+				'err_msg' => $this->database->errormessage
+			);
+		}
+		return $results;
 	}
 	/* Für Postgres Version in der RETURNING zusammen mit RULE und Bedingung funktioniert. 
 	function create($data = '') {
