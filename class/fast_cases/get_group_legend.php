@@ -611,10 +611,10 @@ class GUI {
 				}
 				$reference_map->web->imagepath = IMAGEPATH;
 				$reference_map->setProjection('+init=epsg:' . $this->ref['epsg_code']);
-				$reference_map->reference->extent->minx = round($this->ref['xmin']);
-				$reference_map->reference->extent->miny = round($this->ref['ymin']);
-				$reference_map->reference->extent->maxx = round($this->ref['xmax']);
-				$reference_map->reference->extent->maxy = round($this->ref['ymax']);
+				$reference_map->reference->extent->minx = round($this->ref['minx']);
+				$reference_map->reference->extent->miny = round($this->ref['miny']);
+				$reference_map->reference->extent->maxx = round($this->ref['maxx']);
+				$reference_map->reference->extent->maxy = round($this->ref['maxy']);
 				$reference_map->reference->image = $this->ref['refMapImg'];
         $reference_map->reference->width = $this->ref['width'];
         $reference_map->reference->height = $this->ref['height'];
