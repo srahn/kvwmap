@@ -1020,7 +1020,7 @@ echo '			</table>
 			$classes = $dbmap->read_Classes($this->formvars['layer_options_open']);
 			if (!empty($classes)) {
 				if (!empty($classes[0]['Style'])) {
-					$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
+					$this->user->rolle->setStyle($classes[0]['Style'][0]['style_id'], $this->formvars);
 				}
 				foreach ($classes as $class) {	# bei Bedarf Label anlegen
 					if ($class['Label'] == NULL){
@@ -2175,10 +2175,10 @@ echo '			</table>
 				}
 				$reference_map->web->imagepath = IMAGEPATH;
 				$reference_map->setProjection('+init=epsg:' . $this->ref['epsg_code']);
-				$reference_map->reference->extent->minx = round($this->ref['xmin']);
-				$reference_map->reference->extent->miny = round($this->ref['ymin']);
-				$reference_map->reference->extent->maxx = round($this->ref['xmax']);
-				$reference_map->reference->extent->maxy = round($this->ref['ymax']);
+				$reference_map->reference->extent->minx = round($this->ref['minx']);
+				$reference_map->reference->extent->miny = round($this->ref['miny']);
+				$reference_map->reference->extent->maxx = round($this->ref['maxx']);
+				$reference_map->reference->extent->maxy = round($this->ref['maxy']);
 				$reference_map->reference->image = $this->ref['refMapImg'];
         $reference_map->reference->width = $this->ref['width'];
         $reference_map->reference->height = $this->ref['height'];
@@ -3631,7 +3631,7 @@ echo '			</table>
 		$this->notification->create_stellen_filter();
 		$results = $this->notification->validate();
 		if (empty($results)) {
-			$results = (value_of($this->formvars, 'id') != '' ? $this->notification->update_with_users()[0] : $this->notification->create_with_users()[0]);
+			$results = (value_of($this->formvars, 'id') != '' ? $this->notification->update_with_users() : $this->notification->create_with_users());
 		}
 		else {
 			$results = array(
@@ -3647,7 +3647,7 @@ echo '			</table>
 		include_once(CLASSPATH . 'Notification.php');
 		include_once(CLASSPATH . 'formatter.php');
 		$this->notification = Notification::find_by_id($this, $this->formvars['id']);
-		$results = $this->notification->delete()[0];
+		$results = $this->notification->delete();
 		#echo '<br>habe notification mit id ' . $this->notification->get('id') . ' gefunden.'; exit;
 		$formatter = new formatter($results, 'json', 'application/json');
 		echo $formatter->output();
@@ -5570,7 +5570,7 @@ echo '			</table>
 			case "switch_branch" : case "update_code_and_databases" : {
 				$result = $this->administration->update_code();
 			} # break fehlt mit Absicht
-			case "update_code_and_databases" : case "update_databases" : {
+			case "switch_branch" : case "update_code_and_databases" : case "update_databases" : {
 				$this->administration->get_database_status();
 				$err_msgs = $this->administration->update_databases();
 				if (count($err_msgs) > 0) {
@@ -9655,7 +9655,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				false
 			);
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->add_message(
 				'info',
 				'Daten der Einladung aktualisiert.<br><a href="mailto:' . $this->invitation->mailto_text() . '">Einladung noch mal per E-Mail verschicken</a>'
@@ -13439,7 +13439,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					// reference map do not exists, create new
 					$refmap = new Referenzkarte($this);
 					$result = $refmap->create($params);
-					$refmap_id = $result[0]['id'];
+					$refmap_id = $result['id'];
 				}
 
 				if ($result[0]['success']) {
@@ -14058,7 +14058,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->menue->update();
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
@@ -14860,7 +14860,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->cronjob->create();
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->add_message('notice', 'Job erfolgreich angelegt.');
 			$this->cronjobs = CronJob::find($this);
 			$this->main = 'cronjobs.php';

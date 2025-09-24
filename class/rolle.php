@@ -1490,7 +1490,7 @@ class rolle {
 				UPDATE 
 					kvwmap.u_rolle2used_layer 
 				SET 
-					showclasses = "' . $formvars['show_classes'] . '"
+					showclasses = ' . $formvars['show_classes'] . '
 				WHERE 
 					user_id = ' . $this->user_id . ' AND 
 					stelle_id = ' . $this->stelle_id . ' AND 

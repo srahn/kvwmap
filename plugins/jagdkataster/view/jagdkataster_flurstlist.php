@@ -85,7 +85,7 @@ function csv_export(){
         <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Anteil am Jagdbezirk</td>
       </tr>
       <?php 
-      for ($i = 0; $i < count($this->flurstuecke); $i++) { ?>
+      for ($i = 0; $i < count_or_0($this->flurstuecke); $i++) { ?>
       <tr <? if($this->flurstuecke[$i]['anteil'] < 90){ echo 'bgcolor="#E6E6F0"';}else{ echo 'bgcolor="#B4C8D2"';} ?>>
       	<td><input type="checkbox" name="check_flurstueck" value="<? echo $this->flurstuecke[$i]['flurstkennz']; ?>" <? if($this->flurstuecke[$i]['anteil'] > 90){ echo 'checked="true"';} ?>></td>
       	<? if(!$this->formvars['oid']){ ?><td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->flurstuecke[$i]['name']; ?></td><? } ?>

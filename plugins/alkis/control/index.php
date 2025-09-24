@@ -24,7 +24,7 @@ function go_switch_alkis($go){
 			if (substr($GUI->formvars['FlurstKennz'], -1) == '0') $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS_0To_($GUI->formvars['FlurstKennz']);
 
 			$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
-			$GUI->zoomToALKFlurst($explodedFlurstKennz,10);
+			$GUI->zoomToALKFlurst($explodedFlurstKennz,10, true, true);
 			$currenttime=date('Y-m-d H:i:s',time());
 			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 			$GUI->drawMap();
