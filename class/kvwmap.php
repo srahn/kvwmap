@@ -17883,6 +17883,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->formvars['transparency'] = 100;
 		$this->formvars['records_status'] = 0;
 		$this->formvars['charts_status'] = 2;
+		$this->formvars['max_query_rows'] = 10000;
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 		$attributes = $dbmap->load_attributes($layerdb, $query);
@@ -20530,7 +20531,8 @@ DO $$
 				wms_auth_username,
 				wms_auth_password,
 				records_status,
-				charts_status
+				charts_status,
+				max_query_rows
 			)
 			VALUES (
 				" . ($formvars['original_layer_id'] ?: 'NULL') . ",
@@ -20554,7 +20556,8 @@ DO $$
 				'" . $formvars['wms_auth_username'] . "',
 				'" . $formvars['wms_auth_password'] . "',
 				" . ($formvars['records_status'] ?? '2') . ",
-				" . ($formvars['charts_status'] ?? '1') . "
+				" . ($formvars['charts_status'] ?? '1') . ",
+				" . (array_key_exists('max_query_rows', $formvars) ? $formvars['max_query_rows'] : 'NULL') . "
 			)
 			RETURNING id
 		";
