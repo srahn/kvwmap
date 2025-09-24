@@ -2491,7 +2491,7 @@ FROM
     
 		
 	# Hier bitte nicht auf die Idee kommen, die Strassen ohne die Flurstücke abfragen zu können. 
-	# Die Flurstücke müssen miteinbezogen werden, weil wir ja auch über die Gemarkung auswählen wollen.	
+	# Die Flurstücke müssen miteinbezogen werden, damit nur Straßen mit Flurstücksbezug aufgelistet werden	
   function getStrassenListe($GemID, $GemkgID) {
     $sql = "
 			SELECT 
@@ -2501,18 +2501,12 @@ FROM
 			UNION ALL
 				SELECT 
 					lke.gemeinde, 
-					string_agg(lke.lage, ', ') AS strasse, 
+					string_agg(distinct lke.lage, ', ') AS strasse, 
 					lke.bezeichnung AS strassenname
 				FROM 
-					alkis.ax_lagebezeichnungkatalogeintrag lke";
-    if ($GemID != '') {
-      $sql.= " 
-				WHERE lke.gemeinde = '" . substr($GemID, -3) . "' AND lke.kreis = '" . substr($GemID, 3, 2) . "'";
-    }
-    elseif ($GemkgID != '') {
-      $sql.= " 
+					alkis.ax_lagebezeichnungkatalogeintrag lke
 					JOIN (
-						SELECT distinct 
+						SELECT  
 							lmh.kreis as lmh_kreis, 
 							lmh.gemeinde as lmh_gemeinde, 
 							lmh.lage as lmh_lage,
@@ -2523,12 +2517,19 @@ FROM
 							alkis.ax_flurstueck f
 							LEFT JOIN alkis.ax_lagebezeichnungmithausnummer lmh ON lmh.gml_id = ANY(f.weistauf)
 							LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer loh ON loh.gml_id = ANY(f.zeigtauf)
-					WHERE 
-						f.land || f.gemarkungsnummer = '" . $GemkgID . "'" .
+					WHERE ";
+					if ($GemID != '') {
+						$sql.= " 
+							f.land = '" . substr($GemID, 0, 2) . "' AND f.gemeindezugehoerigkeit_kreis = '" . substr($GemID, 3, 2) . "' AND f.gemeindezugehoerigkeit_gemeinde = '" . substr($GemID, -3) . "'";
+					}
+					elseif ($GemkgID != '') {
+						$sql.= " 
+							f.land || f.gemarkungsnummer = '" . $GemkgID . "'";
+					}
+					$sql.= 
 						$this->build_temporal_filter(array('f', 'lmh', 'loh')) . "
 					) lb ON (lke.gemeinde, lke.lage, lke.kreis) IN ( (lb.lmh_gemeinde, lb.lmh_lage, lb.lmh_kreis),
                                                            (lb.loh_gemeinde, lb.loh_lage, lb.loh_kreis) )";
-    }
     $sql.= $this->build_temporal_filter(array('lke'));
     $sql.= $this->build_temporal_filter_fachdatenverbindung(array('lke'));
     $sql.= " GROUP BY lke.gemeinde, lke.bezeichnung ORDER BY gemeinde, strassenname, strasse";
