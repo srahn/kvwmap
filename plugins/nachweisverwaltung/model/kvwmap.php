@@ -1524,6 +1524,16 @@
     }
 		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
+
+		if ($GUI->queryable_vector_layers['gruppe']) {
+			$GUI->layergruppen['ID'] = array_values(array_unique($GUI->queryable_vector_layers['gruppe']));
+		}
+		$GUI->layergruppen = $GUI->mapDB->get_Groups($GUI->layergruppen); # Gruppen mit Pfaden versehen
+		# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
+		if (value_of($GUI->formvars, 'selected_group_id') AND $GUI->formvars['selected_layer_id'] == '') {
+			$GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, $GUI->formvars['selected_group_id'], NULL, NULL, true, true);
+		}
+
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
 	    $GUI->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
@@ -1823,7 +1833,16 @@
     }
 	
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
-    # Spaltenname und from-where abfragen
+    
+		if ($GUI->queryable_vector_layers['gruppe']) {
+			$GUI->layergruppen['ID'] = array_values(array_unique($GUI->queryable_vector_layers['gruppe']));
+		}
+		$GUI->layergruppen = $GUI->mapDB->get_Groups($GUI->layergruppen); # Gruppen mit Pfaden versehen
+		# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
+		if (value_of($GUI->formvars, 'selected_group_id') AND $GUI->formvars['selected_layer_id'] == '') {
+			$GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, $GUI->formvars['selected_group_id'], NULL, NULL, true, true);
+		}
+
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['geom_from_layer'] = $layerset[0]['layer_id'];

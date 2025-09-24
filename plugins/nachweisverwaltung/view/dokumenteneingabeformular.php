@@ -478,6 +478,18 @@ $legendheight = $this->map->height + 20;
 							Geometrie übernehmen von
 						</div>
 						<div class="dokein-geom-uebernehmen-obj">
+							<select size="1" name="selected_group_id" onchange="ahah('index.php', 'go=getqueryableVectorLayers&group_id=' + this.value, [document.GUI.geom_from_layer], ['sethtml']);" <?php if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
+								<option value="">  -- <?php echo $this->strGroup; ?> --  </option>
+								<?
+								for($i = 0; $i < count($this->layergruppen['ID']); $i++){         
+									echo '<option';
+									if($this->layergruppen['ID'][$i] == $this->formvars['selected_group_id']){
+										echo ' selected';
+									}
+									echo ' value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
+								}
+							?>
+							</select>
 							<select name="geom_from_layer" onchange="geom_from_layer_change(<? echo LAYER_ID_NACHWEISE; ?>);">
 								<option value="">--- Auswahl ---</option>
 								<?
