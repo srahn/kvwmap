@@ -3631,7 +3631,7 @@ echo '			</table>
 		$this->notification->create_stellen_filter();
 		$results = $this->notification->validate();
 		if (empty($results)) {
-			$results = (value_of($this->formvars, 'id') != '' ? $this->notification->update_with_users()[0] : $this->notification->create_with_users()[0]);
+			$results = (value_of($this->formvars, 'id') != '' ? $this->notification->update_with_users() : $this->notification->create_with_users());
 		}
 		else {
 			$results = array(
@@ -9655,7 +9655,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				false
 			);
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->add_message(
 				'info',
 				'Daten der Einladung aktualisiert.<br><a href="mailto:' . $this->invitation->mailto_text() . '">Einladung noch mal per E-Mail verschicken</a>'
@@ -13439,7 +13439,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					// reference map do not exists, create new
 					$refmap = new Referenzkarte($this);
 					$result = $refmap->create($params);
-					$refmap_id = $result[0]['id'];
+					$refmap_id = $result['id'];
 				}
 
 				if ($result[0]['success']) {
@@ -14058,7 +14058,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->menue->update();
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
@@ -14860,7 +14860,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->cronjob->create();
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->add_message('notice', 'Job erfolgreich angelegt.');
 			$this->cronjobs = CronJob::find($this);
 			$this->main = 'cronjobs.php';

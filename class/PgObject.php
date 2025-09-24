@@ -499,14 +499,14 @@ class PgObject {
 		$this->debug->show('Dataset created with ' . $this->get_id_condition(), $this->show);
 
 		if ($this->database->success) {
-			$results[] = array(
+			$results = array(
 				'success' => true,
 				'msg' => 'Datensatz erfolgreich angelegt.',
 				'id' => $this->get($this->identifier)
 			);
 		}
 		else {
-			$results[] = array(
+			$results = array(
 				'success' => false,
 				'msg' => $this->database->errormessage,
 				'err_msg' => $this->database->errormessage
@@ -560,7 +560,7 @@ class PgObject {
 		$query = pg_query($this->database->dbConn, $sql);
 		if(!$query){echo $sql; exit;}
 		$err_msg = $this->database->errormessage;
-		$results[] = array(
+		$results = array(
 			'success' => ($err_msg == ''),
 			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
 			'msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)

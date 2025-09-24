@@ -91,9 +91,8 @@ class Nutzer extends PgObject {
 				'stelle_id' => $stellen_ids[0]
 			)
 		);
-		$result = $results[0];
-		if (!$result['success']) {
-			return $result;
+		if (!$results['success']) {
+			return $results;
 		}
 
 		foreach($stellen_ids as $stelle_id) {
