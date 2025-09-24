@@ -30,14 +30,17 @@ $BODY$;
 
 ALTER FUNCTION xplankonverter.check_xp_spezexternereferenz()
     OWNER TO postgres;
-
-  CREATE OR REPLACE TRIGGER check_xp_spezexternereferenz BEFORE
+	
+	DROP TRIGGER IF EXISTS check_xp_spezexternereferenz on xplan_gml.bp_plan;
+  CREATE TRIGGER check_xp_spezexternereferenz BEFORE
   INSERT OR UPDATE ON xplan_gml.bp_plan FOR EACH ROW EXECUTE FUNCTION xplankonverter.check_xp_spezexternereferenz();
 
-  CREATE OR REPLACE  TRIGGER check_xp_spezexternereferenz BEFORE
+	DROP TRIGGER IF EXISTS check_xp_spezexternereferenz on xplan_gml.fp_plan;
+  CREATE TRIGGER check_xp_spezexternereferenz BEFORE
   INSERT OR UPDATE ON xplan_gml.fp_plan FOR EACH ROW EXECUTE FUNCTION xplankonverter.check_xp_spezexternereferenz();
 
-  CREATE OR REPLACE  TRIGGER check_xp_spezexternereferenz BEFORE
+	DROP TRIGGER IF EXISTS check_xp_spezexternereferenz on xplan_gml.so_plan;
+  CREATE TRIGGER check_xp_spezexternereferenz BEFORE
   INSERT OR UPDATE ON xplan_gml.so_plan FOR EACH ROW EXECUTE FUNCTION xplankonverter.check_xp_spezexternereferenz();
 
 COMMIT;
