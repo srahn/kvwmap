@@ -745,7 +745,7 @@
             # Zoom auf Flurstücke
 						if ($GUI->user->rolle->querymode == 1 OR $GUI->formvars['ALK_Suche'] == 1) {
               if($GUI->formvars['historical'])echo 'sdfsdf';
-							$GUI->zoomToALKFlurst($FlurstKennz, 10, true, ($GUI->formvars['history_mode'] != 'aktuell'));
+							$GUI->zoomToALKFlurst($FlurstKennz, 10, true, ($GUI->formvars['history_mode'] != '' AND $GUI->formvars['history_mode'] != 'aktuell'));
 							$GUI->saveMap('');
 						}						
             if($GUI->formvars['ALK_Suche'] == 1){

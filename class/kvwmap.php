@@ -12470,7 +12470,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	
 	function import_rollenlayer_into_layer_importieren(){
 		$this->import_rollenlayer_into_layer();
-		foreach ($this->formvars['rollenlayer_attributes'] as &$attribute) {
+		$formvars_layer_attributes = $this->formvars['layer_attributes'];
+		$formvars_rollenlayer_attributes = $this->formvars['rollenlayer_attributes'];
+		$auto_attributes = [];
+		$auto_values = [];
+		
+		foreach ($formvars_rollenlayer_attributes as &$attribute) {
 			if ($attribute == $this->rollenlayer_attributes['the_geom']) {
 				$attribute = 'st_transform(' . $attribute . ', ' . $this->layer[0]['epsg_code'] . ')';
 			}
@@ -12478,14 +12483,58 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$attribute = pg_quote($attribute);
 			}
 		}
+		foreach ($this->formvars['layer_attributes'] as $i => $attribute) {
+			# Auto-Attribute aus der Formvars-Liste entfernen
+			if (
+					in_array($this->layer_attributes['form_element_type'][$attribute], ['Time', 'User', 'UserID', 'Stelle', 'StelleID']) AND 
+					in_array($this->layer_attributes['options'][$attribute], array('', 'insert'))
+				) {
+				unset($formvars_layer_attributes[$i]);
+				unset($formvars_rollenlayer_attributes[$i]);
+			}
+		}
+		foreach ($this->layer_attributes['name'] as $attribute) {
+			# Auto-Attribute zusammensammeln
+			if (
+				in_array($this->layer_attributes['form_element_type'][$attribute], ['Time', 'User', 'UserID', 'Stelle', 'StelleID']) AND 
+				in_array($this->layer_attributes['options'][$attribute], array('', 'insert'))
+			) {
+				$auto_attributes[] = $attribute;
+				switch ($this->layer_attributes['form_element_type'][$attribute]) {
+					case 'Time' : {
+						$auto_values[] = "'" . date("Y-m-d H:i:s") . "'";
+					} break;
+		
+					case 'User' : {
+						$auto_values[] =  "'" . $this->user->Vorname . " " . $this->user->Name."'";
+					} break;
+		
+					case 'UserID' : {
+						$auto_values[] =  "'" . $this->user->id."'";
+					} break;
+		
+					case 'Stelle' : {
+						$auto_values[] =  "'" . $this->Stelle->Bezeichnung . "'";
+					} break;
+		
+					case 'StelleID' : {
+						$auto_values[] =  "'" . $this->Stelle->id . "'";
+					} break;
+				}
+			}
+		}
+		$formvars_rollenlayer_attributes = array_slice($formvars_rollenlayer_attributes, 0, count($formvars_layer_attributes));
+		$formvars_layer_attributes = array_merge($formvars_layer_attributes, $auto_attributes);
+		$formvars_rollenlayer_attributes = array_merge($formvars_rollenlayer_attributes, $auto_values);
 		$sql = '
 			INSERT INTO 
 				' . $this->layer[0]['maintable'] . '
-				("' . implode('", "', $this->formvars['layer_attributes']) . '")
+				("' . implode('", "', $formvars_layer_attributes) . '")
 			SELECT 
-				' . implode(', ', array_slice($this->formvars['rollenlayer_attributes'], 0, count($this->formvars['layer_attributes']))) . '
+				' . implode(', ', $formvars_rollenlayer_attributes) . '
 			FROM
 				' . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
+
 		$ret = $this->layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]){
 			if ($this->formvars['remove_rollenlayer']) {
