@@ -14376,8 +14376,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           $deletestellen[] = $userstellen['ID'][$i];
         }
       }
-      $this->user->rolle->deleteRollen($this->formvars['selected_user_id'], $deletestellen);
-      $this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $deletestellen, 0);
+			$this->user->rolle->deleteRollen($this->formvars['selected_user_id'], $deletestellen);
+			$this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $deletestellen, 0);
       $this->user->rolle->deleteGroups($this->formvars['selected_user_id'], $deletestellen);
       $this->user->rolle->deleteLayer($this->formvars['selected_user_id'], $deletestellen, 0);
       # Überprüfen ob alte Stelle noch gültig ist

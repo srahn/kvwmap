@@ -55,7 +55,7 @@ class PgObject {
 		$this->qualifiedTableName = $schema_name . '.' . $table_name;
 		$this->data = array();
 		$this->select = '*';
-		$this->from = '"' . $this->schema . '"."' . $this->tableName . "'";
+		$this->from = '"' . $this->schema . '"."' . $this->tableName . '"';
 		$this->where = '';
 		$this->identifier = $identifier;
 		$this->identifier_type = $identifier_type;
