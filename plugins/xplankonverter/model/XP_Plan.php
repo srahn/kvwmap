@@ -25,7 +25,7 @@ class XP_Plan extends PgObject {
 		$this->identifiers = array(
 			array(
 				'column' => 'gml_id',
-				'type' => 'character varying'
+				'type' => 'text'
 			)
 		);
 		$this->debug->show('Objekt XP_Plan created with planart: ' . $this->planart . ' tableName: ' . $this->tableName, false);
