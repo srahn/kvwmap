@@ -1,6 +1,6 @@
 <meta http-equiv=Content-Type content="text/html; charset=UTF-8">
 <? include('funktionen/gui_defs.php'); ?>
-  <script type="text/javascript" src="funktionen/gui_functions.js?v=124"></script>
+  <script type="text/javascript" src="funktionen/gui_functions.js?v=125"></script>
   <script type="text/javascript" src="funktionen/calendar.js?v=2"></script>
   <script type="text/javascript" src="funktionen/keyfunctions.js"></script>
   <script type="text/javascript" src="<? echo JQUERY_PATH; ?>jquery.min.js"></script><?

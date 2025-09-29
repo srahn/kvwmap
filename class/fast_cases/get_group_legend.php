@@ -1587,7 +1587,7 @@ class GUI {
 
 				# die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat,
 				# damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-				$legend .= '<input type="hidden" name="qLayer'.$layer['layer_id'].'" value="0">';
+				// $legend .= '<input type="hidden" name="qLayer'.$layer['layer_id'].'" value="0">';
 				$legend .= '<input';
 				foreach ($input_attr AS $key => $value) {
 					$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
@@ -1600,7 +1600,7 @@ class GUI {
 			}
 			$legend .=  '</td><td valign="top">';
 			// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-			$legend .=  '<input type="hidden" name="thema'.$layer['layer_id'].'" value="0">';
+			// $legend .=  '<input type="hidden" name="thema'.$layer['layer_id'].'" value="0">';
 
 			$legend .=  '<input id="thema'.$layer['layer_id'].'" ';
 			if(value_of($layer, 'selectiontype') == 'radio'){

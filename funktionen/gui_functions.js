@@ -23,6 +23,7 @@ var new_hist_timestamp;
 var loc = window.location.href.toString().split('index.php')[0];
 var mapimg, mapimg0, mapimg3, mapimg4;
 var compare_clipping = false;
+var formdata = new FormData();
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -843,10 +844,12 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	var height_reduction = '';
 	var browserwidth = '';
 	var browserheight = '';
+	var legendtouched = '';
 	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
 	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
 	if(document.GUI.browserwidth)browserwidth = document.GUI.browserwidth.value;
 	if(document.GUI.browserheight)browserheight = document.GUI.browserheight.value;
+	if(document.GUI.legendtouched)legendtouched = document.GUI.legendtouched.value;
 	
 	if(browser == 'ie'){
 		code2execute_after += 'moveback();';
@@ -854,16 +857,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
-	postdata = postdata+"&mime_type=map_ajax&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
-
-	if (document.GUI.legendtouched.value == 1) {
-		// Legende benutzt -> gesamtes Formular mitschicken
-		var formdata = new FormData(document.GUI);
-	}
-	else {
-		// nur navigiert -> Formular muss nicht mitgeschickt werden
-		var formdata = new FormData();
-	}
+	postdata = postdata+"&mime_type=map_ajax&legendtouched="+legendtouched+"&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
 	postdata.split("&")
 		.forEach(function (item) {
@@ -874,6 +868,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 		});
 	
 	ahah("index.php",	formdata, targets, actions);
+	formdata = new FormData();
 	document.GUI.INPUT_COORD.value = '';
 	document.GUI.CMD.value = '';
 }
@@ -1010,6 +1005,16 @@ function datecheck(value){
 	else return date1;
 }
 
+function add_to_formdata(element){
+	if (['checkbox', 'radio'].indexOf(element.type) == -1 || element.checked) {
+		value = element.value;
+	}
+	else {
+		value = 0;
+	}
+	formdata.set(element.name, value);
+}
+
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){
@@ -1106,7 +1111,10 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 		for(i = 0; i < radiolayer.length-1; i++){
 			if(document.getElementById('thema'+radiolayer[i]) != undefined){
 				if(document.getElementById('thema'+radiolayer[i]) != thema){
-					if(document.getElementById('qLayer'+radiolayer[i]) != undefined)document.getElementById('qLayer'+radiolayer[i]).checked = false;
+					if(document.getElementById('qLayer'+radiolayer[i]) != undefined) {
+						document.getElementById('qLayer'+radiolayer[i]).checked = false;
+						add_to_formdata(document.getElementById('qLayer'+radiolayer[i]));
+					}
 				}
 				else{
 					query.checked = !status;
@@ -1122,6 +1130,8 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 			}
 		}
   }
+	add_to_formdata(thema);
+	add_to_formdata(query);
 	if(reload)neuLaden();
 }
 
@@ -1130,6 +1140,7 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   if(query){
     if(thema.checked == false){
       query.checked = false;
+			add_to_formdata(query);
 			thema.title = activatelayer;
 			query.title = activatequery;
     }
@@ -1142,9 +1153,10 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   	radiolayerstring = radiolayers.value+'';
   	radiolayer = radiolayerstring.split('|');
   	for(i = 0; i < radiolayer.length-1; i++){
-  		if(document.getElementById('thema'+radiolayer[i]) != thema){
-  			document.getElementById('thema'+radiolayer[i]).checked = false;
-				document.getElementById('thema'+radiolayer[i]).value = 0;		// damit nicht sichtbare Radiolayers ausgeschaltet werden
+			radio = document.getElementById('thema'+radiolayer[i]);
+  		if (radio != thema) {
+  			radio.checked = false;
+				add_to_formdata(radio);
   		}
   		else{
   			thema.checked = !thema.checked;
@@ -1155,6 +1167,7 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   		}
   	}
   }
+	add_to_formdata(thema);
 	if(instantreload)neuLaden();
 }
 
