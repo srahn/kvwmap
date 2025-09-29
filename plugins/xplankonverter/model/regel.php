@@ -281,10 +281,11 @@ class Regel extends PgObject {
 	function get_convert_sql($konvertierung_id) {
 		$this->debug->show('<br>sql vor Anpassung:<br>' . $this->get('sql'), Regel::$write_debug);
 		$sql = $this->get('sql');
-		$konvertierung = $this->get_konvertierung();
+		//$konvertierung = $this->get_konvertierung();
+		$konvertierung = Konvertierung::find_by_id($this->gui, 'id', $konvertierung_id);
 		$epsg = $konvertierung->get('output_epsg');
 		# Sourcetype for geom_column
-		$sourcetype = $this->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
+		$sourcetype = $this->is_source_shape_or_gmlas($this, $konvertierung_id);
 		# Default Shape, position for gmlas
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
@@ -460,7 +461,6 @@ class Regel extends PgObject {
 	* Funktion fragt die zur Regel gehöhrende Konvertierung ab
 	*/
 	function get_konvertierung() {
-		$konvertierung_id = $this->get('konvertierung_id');
 		if (!empty($this->get('konvertierung_id'))) {
 			$this->debug->show('Regel gehört direkt zur Konvertierung: ' . $this->get('konvertierung_id'), false);
 			$konvertierung = Konvertierung::find_by_id($this->gui, 'id', $this->get('konvertierung_id'));
