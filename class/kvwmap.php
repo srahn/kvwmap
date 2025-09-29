@@ -1278,9 +1278,9 @@ echo '			</table>
 						<a href="javascript:getlegend(\'' . $group_id . '\')">
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>';
-				if (false) {
+				if (true) {
 					$legend .= '
-						<input id="group_checkbox_' . $group_id . '" name="group_checkbox_' . $group_id . '" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="javascript:selectgroupthema(document.GUI.layers_of_group_' . $group_id . ', ' . $this->user->rolle->instant_reload.')"' . ($group_aktiv_status == 2 ? ' checked' : '') . '/>
+						<input id="group_checkbox_' . $group_id . '" name="group_checkbox_' . $group_id . '" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="javascript:selectgroupthema(document.GUI.layers_of_group_' . $group_id . ', ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
 					';
 				}
 				$legend .= '
@@ -2394,18 +2394,22 @@ echo '			</table>
 		// 	}
 		// }
 		
-		if($layerset['aktivstatus'] != 0){
-			$collapsed = false;
-			if($group = value_of($this->groupset, $layerset['gruppe'])){				# die Gruppe des Layers
-				if($group['status'] == 0){
-					$this->group_has_active_layers[$layerset['gruppe']] = 1;  	# die zugeklappte Gruppe hat aktive Layer
-					$collapsed = true;
+		if ($group = value_of($this->groupset, $layerset['gruppe'])){						# die Gruppe des Layers
+			if ($layerset['aktivstatus'] != 0) {																	# wenn Layer aktiv
+				if ($this->group_has_active_layers[$layerset['gruppe']] != 1) {			# wenn group_has_active_layers noch nicht gesetzt
+					$this->group_has_active_layers[$layerset['gruppe']] = 1;  				# die Gruppe hat aktive Layer
+					while($group['obergruppe'] != ''){
+						$group = $this->groupset[$group['obergruppe']];
+						$this->group_has_active_layers[$group['id']] = 1;  							# auch alle Obergruppen durchlaufen
+					}
 				}
-				while($group['obergruppe'] != ''){
-					$group = $this->groupset[$group['obergruppe']];
-					if($collapsed OR $group['status'] == 0){
-						$this->group_has_active_layers[$group['id']] = 1;  	# auch alle Obergruppen durchlaufen
-						$collapsed = true;
+			}
+			else {																																# Layer nicht aktiv
+				if ($this->group_has_inactive_layers[$layerset['gruppe']] != 1) {		# wenn group_has_inactive_layers noch nicht gesetzt
+					$this->group_has_inactive_layers[$layerset['gruppe']] = 1;  			# die Gruppe hat inaktive Layer
+					while($group['obergruppe'] != ''){
+						$group = $this->groupset[$group['obergruppe']];
+						$this->group_has_inactive_layers[$group['id']] = 1;  						# auch alle Obergruppen durchlaufen
 					}
 				}
 			}

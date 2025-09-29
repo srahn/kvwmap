@@ -64,15 +64,6 @@ class LayerGroup extends PgObject {
 		))[0])->get('max_order') + 100;
 	}
 
-	function get_aktiv_status($stelle_id, $user_id, $group_id) {
-		$result = $this->find_by_sql(array(
-			'select' => "CASE WHEN sum(CASE WHEN r2l.aktivStatus = '1' THEN 1 ELSE 0 END) = 0 THEN 0 WHEN count(l.layer_id) > sum(CASE WHEN r2l.aktivStatus = '1' THEN 1 ELSE 0 END) THEN 1 ELSE 2 END AS aktiv_status",
-			'from' => "kvwmap.u_rolle2used_layer r2l JOIN kvwmap.layer l ON r2l.layer_id = l.layer_id",
-			'where' => "r2l.stelle_id = $stelle_id AND r2l.user_id = $user_id AND l.gruppe = $group_id"
-		));
-		return $result[0]->get('aktiv_status');
-	}
-
 	public static function find_top_parents($gui, $stelle_id) {
 		#echo '<br>find_top_parents for stelle_id: ' . $stelle_id;
 		$group = new LayerGroup($gui);
