@@ -1546,7 +1546,7 @@ class GUI {
 
 			if ($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 				$input_attr['id'] = 'qLayer' . $layer['layer_id'];
-				$input_attr['name'] = 'qLayer' . $layer['layer_id'];
+				$input_attr['name'] = 'qLayer[' . $layer['layer_id'] . ']';
 				$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
 				$input_attr['value'] = 1;
 				$input_attr['class'] = 'info-select-field';
@@ -1612,7 +1612,7 @@ class GUI {
 				$legend .=  'type="checkbox" ';
 				$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema'.$layer['layer_id'].'\'), document.getElementById(\'qLayer'.$layer['layer_id'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
 			}
-			$legend .=  ' name="thema'.$layer['layer_id'].'" value="1" ';
+			$legend .=  ' name="thema[' . $layer['layer_id'] . ']" value="1" ';
 			if($layer['aktivstatus'] == 1){
 				$legend .=  'checked title="'.$this->deactivatelayer.'"';
 			}

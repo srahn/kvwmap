@@ -2851,13 +2851,12 @@ class rolle {
 			$this->layerset = array_merge($this->layerset, $rollenlayer);
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
-		for ($i = 0; $i < count($this->layerset) - 1; $i++) {
-			#echo $i.' '.$this->layerset[$i]['layer_id'].' '.$formvars['thema'.$this->layerset[$i]['layer_id']].'<br>'; exit;
-			$aktiv_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'layer_id'));
-			$requires_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'requires'));
+		foreach ($formvars['thema'] as $layer_id => $aktiv_status) {
+			$layer = $this->layerset['layer_ids'][$layer_id];
+			$requires_status = value_of($formvars, 'thema[' . value_of($layer, 'requires') . '');
 			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
-				if ($this->layerset[$i]['layer_id'] > 0) {
+				if ($layer['layer_id'] > 0) {
 					$sql ="
 						UPDATE
 							kvwmap.u_rolle2used_layer
@@ -2866,7 +2865,7 @@ class rolle {
 						WHERE
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . " AND
-							layer_id = " . $this->layerset[$i]['layer_id'] . "
+							layer_id = " . $layer['layer_id'] . "
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
@@ -2880,13 +2879,13 @@ class rolle {
 						WHERE
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . " AND
-							id = " . abs($this->layerset[$i]['layer_id']) . "
+							id = " . abs($layer['layer_id']) . "
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
 				#neu eintragen der deaktiven Klassen
-				if ($aktiv_status != 0){
+				if (false and $aktiv_status != 0){		# TODO
 					$sql = "
 						SELECT
 							class_id
