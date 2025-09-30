@@ -277,7 +277,7 @@ $SVGvars_querytooltipscript .= '
 					for(i = 0; i < layernumber.length; i++){
 						query_layer_field = top.document.getElementById("' . $queryfield . '"+layernumber[i]);
 						if(query_layer_field != undefined && query_layer_field.checked){
-							querylayer += "&' . $queryfield . '"+layernumber[i]+"=1";
+							querylayer += "&' . $queryfield . '[" + layernumber[i] + "]=1";
 						}
 					}
 					counter++;

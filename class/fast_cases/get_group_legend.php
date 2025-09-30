@@ -1684,7 +1684,7 @@ class GUI {
 				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
 			}
 			if($layer['queryable'] == 1){
-				$legend .=  '<input type="hidden" name="qLayer'.$layer['layer_id'].'"';
+				$legend .=  '<input type="hidden" name="qLayer[' . $layer['layer_id'] . ']"';
 				if($layer['queryStatus'] != 0){
 					$legend .=  ' value="1"';
 				}
@@ -1852,7 +1852,7 @@ class GUI {
 								# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
 								if ($maplayer->type < 3) {
 									$legend .= '
-									<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'">
+									<input type="hidden" size="2" name="class[' . $classid . ']" value="'.$status.'">
 									<a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.', ' . $maplayer->type . ')">';
 								}
 								$legend .= '

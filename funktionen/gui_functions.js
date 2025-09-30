@@ -1505,8 +1505,11 @@ function scrollLayerOptions(){
 function activateAllClasses(class_ids){
 	var classids = class_ids.split(",");
 	for(i = 0; i < classids.length; i++){
-		selClass = document.getElementsByName("class"+classids[i])[0];
-		if(selClass != undefined)selClass.value = 1;
+		selClass = document.getElementsByName("class[" + classids[i] + "]")[0];
+		if (selClass != undefined) {
+			selClass.value = 1;
+			add_to_formdata(selClass);
+		}
 	}
 	overlay_submit(currentform);
 }
@@ -1514,15 +1517,18 @@ function activateAllClasses(class_ids){
 function deactivateAllClasses(class_ids){
 	var classids = class_ids.split(",");
 	for(i = 0; i < classids.length; i++){
-		selClass = document.getElementsByName("class"+classids[i])[0];
-		if(selClass != undefined)selClass.value = 0;
+		selClass = document.getElementsByName("class[" + classids[i] + "]")[0];
+		if (selClass != undefined) {
+			selClass.value = 0;
+			add_to_formdata(selClass);
+		}
 	}
 	overlay_submit(currentform);
 }
 
 /*Anne*/
 function changeClassStatus(classid, imgsrc, instantreload, width, height, type){
-	selClass = document.getElementsByName("class"+classid)[0];
+	selClass = document.getElementsByName("class[" + classid + "]")[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if (height < width) {
 		height = 12;
@@ -1542,12 +1548,13 @@ function changeClassStatus(classid, imgsrc, instantreload, width, height, type){
 		selClass.value='0';
 		selImg.src="graphics/inactive"+height+".jpg";
 	}
+	add_to_formdata(selClass);
 	if(instantreload)neuLaden();
 }
 
 /*Anne*/
 function mouseOverClassStatus(classid, imgsrc, width, height, type){
-	selClass = document.getElementsByName("class"+classid)[0];
+	selClass = document.getElementsByName("class[" + classid + "]")[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if (height < width) {
 		height = 12;
@@ -1568,7 +1575,7 @@ function mouseOverClassStatus(classid, imgsrc, width, height, type){
 
 /*Anne*/
 function mouseOutClassStatus(classid, imgsrc, width, height, type){
-	selClass = document.getElementsByName("class"+classid)[0];
+	selClass = document.getElementsByName("class[" + classid + "]")[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if (height < width) {
 		height = 12;

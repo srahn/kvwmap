@@ -1513,7 +1513,7 @@ echo '			</table>
 				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
 			}
 			if($layer['queryable'] == 1){
-				$legend .=  '<input type="hidden" name="qLayer'.$layer['layer_id'].'"';
+				$legend .=  '<input type="hidden" name="qLayer[' . $layer['layer_id'] . ']"';
 				if($layer['queryStatus'] != 0){
 					$legend .=  ' value="1"';
 				}
@@ -1681,7 +1681,7 @@ echo '			</table>
 								# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
 								if ($maplayer->type < 3) {
 									$legend .= '
-									<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'">
+									<input type="hidden" size="2" name="class[' . $classid . ']" value="'.$status.'">
 									<a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.', ' . $maplayer->type . ')">';
 								}
 								$legend .= '
@@ -5456,7 +5456,7 @@ echo '			</table>
 			$this->formvars['printversion'] = 1;
 			foreach($query_layers as $query_layer){
 				$layer=$this->user->rolle->getLayer($query_layer);
-				$this->formvars['qLayer'.$layer[0]['layer_id']] = 1;
+				$this->formvars['qLayer'][$layer[0]['layer_id']] = 1;
 			}
 			$this->queryMap();
 		}
@@ -15326,8 +15326,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			$layerset = $this->user->rolle->getLayer('');
 			for ($i = 0; $i < count($layerset); $i++){
-				$formvars['thema'.$layerset[$i]['layer_id']] = 0;		# erstmal alle ausschalten
-				$formvars['qLayer'.$layerset[$i]['layer_id']] = 0;		# erstmal alle ausschalten
+				$formvars['thema'][$layerset[$i]['layer_id']] = 0;		# erstmal alle ausschalten
+				$formvars['qLayer'][$layerset[$i]['layer_id']] = 0;		# erstmal alle ausschalten
 			}
 			foreach($groups as $group){
 				if($group['obergruppe'] == ''){
@@ -15336,7 +15336,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
       $layer_ids = explode(',', $ret[1][0]['layers']);
 			foreach($layer_ids as $layer_id){
-				$formvars['thema' . $layer_id] = 1;
+				$formvars['thema'][$layer_id] = 1;
 				$groupid = $layerset['layer_ids'][$layer_id]['gruppe'];
 				do{
 					$formvars['group_'.$groupid] = 1;
@@ -15345,7 +15345,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 			$query_ids = explode(',', $ret[1][0]['query']);
 			foreach($query_ids as $layer_id){
-				$formvars['qLayer' . $layer_id] = 1;
+				$formvars['qLayer'][$layer_id] = 1;
 			}
 			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
 			$this->user->rolle->setQueryStatus($formvars);
@@ -16334,7 +16334,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$last_query_deleted = false;
 		if ($this->last_query != '') {
 			foreach($this->last_query['layer_ids'] as $layer_id) {
-				$this->formvars[$queryfield . $layer_id] = 1;
+				$this->formvars[$queryfield . '[' . $layer_id . ']'] = 1;
 			}
 		}
 		if (is_string($rect)){
@@ -16355,8 +16355,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layerset[$i]['queryable'] AND
 				$layerset[$i]['status']  == '' AND 
 				(
-					value_of($this->formvars, $queryfield . $layerset[$i]['layer_id']) == '1' OR
-					value_of($this->formvars, $queryfield . $layerset[$i]['requires']) == '1'
+					$this->formvars[$queryfield][$layerset[$i]['layer_id']] == '1' OR
+					$this->formvars[$queryfield][$layerset[$i]['requires']] == '1'
 				) AND
 				(
 					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 
@@ -17262,8 +17262,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					(
 						(	# Karte
 							(
-								$this->formvars[$queryfield . $layerset[$i]['layer_id']] == '1' OR 
-								$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
+								$this->formvars[$queryfield][$layerset[$i]['layer_id']] == '1' OR
+								$this->formvars[$queryfield][$layerset[$i]['requires']] == '1'
 							) AND
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
 							($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)

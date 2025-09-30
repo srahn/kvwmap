@@ -2180,7 +2180,7 @@ class stelle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		$layerset=$this->getLayer('');
 		for ($i=0;$i<count($layerset);$i++) {
-			if ($formvars['thema'.$layerset[$i]['layer_id']]==1) {
+			if ($formvars['thema'][$layerset[$i]['layer_id']] == 1) {
 				$aktiv_status=1;
 			}
 			else {
@@ -2199,7 +2199,7 @@ class stelle {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		$layerset=$this->getLayer('');
 		for ($i=0;$i<count($layerset);$i++) {
-			if ($formvars['qLayer'.$layerset[$i]['layer_id']]) {
+			if ($formvars['qLayer'][$layerset[$i]['layer_id']]) {
 				$query_status=1;
 			}
 			else {

@@ -456,8 +456,8 @@ class GUI {
 					(
 						(	# Karte
 							(
-								$this->formvars[$queryfield . $layerset[$i]['layer_id']] == '1' OR 
-								$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
+								$this->formvars[$queryfield][$layerset[$i]['layer_id']] == '1' OR
+								$this->formvars[$queryfield][$layerset[$i]['requires']] == '1'
 							) AND
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
 							($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)

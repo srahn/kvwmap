@@ -2844,6 +2844,28 @@ class rolle {
     return $groups;
   }
 
+	function setQueryStatus($formvars) {
+		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
+		foreach ($formvars['qLayer'] as $layer_id => $query_status) {
+			if ($query_status !== '') {	
+				$table = ($layer_id > 0 ? 'u_rolle2used_layer' : 'rollenlayer');
+				$id = ($layer_id > 0 ? 'layer_id' : 'id');
+				$sql ='
+					UPDATE 
+						kvwmap.' . $table . ' 
+					SET 
+						queryStatus=' . $query_status . '
+					WHERE 
+						user_id = ' . $this->user_id . ' AND 
+						stelle_id = ' . $this->stelle_id . ' AND 
+						' . $id . ' = ' . $layer_id;
+				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
+			}
+		}
+		return 1;
+	}
+
 	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
 		$this->layerset = $this->getLayer('');
 		if (!$ignore_rollenlayer) {
@@ -2884,43 +2906,31 @@ class rolle {
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
-				#neu eintragen der deaktiven Klassen
-				if (false and $aktiv_status != 0){		# TODO
-					$sql = "
-						SELECT
-							class_id
-						FROM
-							kvwmap.classes
-						WHERE
-						layer_id = " . $this->layerset[$i]['layer_id'] . "
-					";
-					$ret = $this->database->execSQL($sql);
-					while ($rs = pg_fetch_assoc($ret[1])) {
-						if (value_of($formvars, 'class'.$rs['class_id']) == '0' OR value_of($formvars, 'class'.$rs['class_id']) == '2'){
-							$sql2 = '
-								INSERT INTO kvwmap.u_rolle2used_class 
-									(user_id, stelle_id, class_id, status) 
-								VALUES 
-									('.$this->user_id.', '.$this->stelle_id.', '.$rs['class_id'].', '.$formvars['class'.$rs['class_id']].')
-								ON CONFLICT (user_id, stelle_id, class_id) DO 
-									UPDATE SET
-										status = excluded.status
-								;';
-							$this->database->execSQL($sql2,4, $this->loglevel);
-						}
-						elseif (value_of($formvars, 'class'.$rs['class_id']) == '1'){
-							$sql1 = "
-								DELETE FROM
-									kvwmap.u_rolle2used_class
-								WHERE
-									user_id = " . $this->user_id . " AND
-									stelle_id = " . $this->stelle_id . " AND
-									class_id = " . $rs['class_id'] . "
-							";
-							$this->database->execSQL($sql1,4, $this->loglevel);
-						}
-					}
-				}
+			}
+		}
+		foreach ($formvars['class'] as $class_id => $class_status) {
+			if ($class_status == '0' OR $class_status == '2'){
+				$sql2 = '
+					INSERT INTO kvwmap.u_rolle2used_class 
+						(user_id, stelle_id, class_id, status) 
+					VALUES 
+						('.$this->user_id.', '.$this->stelle_id.', ' . $class_id . ', ' . $class_status . ')
+					ON CONFLICT (user_id, stelle_id, class_id) DO 
+						UPDATE SET
+							status = excluded.status
+					;';
+				$this->database->execSQL($sql2,4, $this->loglevel);
+			}
+			elseif ($class_status == '1') {
+				$sql1 = "
+					DELETE FROM
+						kvwmap.u_rolle2used_class
+					WHERE
+						user_id = " . $this->user_id . " AND
+						stelle_id = " . $this->stelle_id . " AND
+						class_id = " . $class_id . "
+				";
+				$this->database->execSQL($sql1,4, $this->loglevel);
 			}
 		}
 		return 1;
@@ -3109,28 +3119,6 @@ class rolle {
 			$layer[] = $rs;
 		}
 		return $layer;
-	}
-
-	function setQueryStatus($formvars) {
-		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
-		for ($i=0; $i<count($this->layerset)-1; $i++){
-			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'layer_id'));
-			if($query_status !== ''){	
-				if($this->layerset[$i]['layer_id'] > 0){
-					$sql ='UPDATE kvwmap.u_rolle2used_layer set queryStatus='.$query_status;
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND layer_id='.$this->layerset[$i]['layer_id'];
-				}
-				else{		# Rollenlayer
-					$sql ='UPDATE kvwmap.rollenlayer set queryStatus='.$query_status;
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND id='.-$this->layerset[$i]['layer_id'];
-				}
-				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
-			}
-		}
-		return 1;
 	}
 
 	function readSettings() {
