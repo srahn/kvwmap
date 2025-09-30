@@ -1379,6 +1379,7 @@ class ddl {
 				$this->pdf->line(0, $this->layout['height'] - $this->layout['margin_top'], $this->layout['width'], $this->layout['height'] - $this->layout['margin_top']);
 				$this->pdf->line($this->layout['margin_left'], $this->layout['height'], $this->layout['margin_left'], 0);
 				$this->pdf->line($this->layout['width'] - $this->layout['margin_right'], $this->layout['height'], $this->layout['width'] - $this->layout['margin_right'], 0);
+				$this->pdf->setLineStyle(1, 'square');
 			}
 			$this->pdf->closeObject();
 		}
