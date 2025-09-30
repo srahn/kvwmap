@@ -2847,14 +2847,14 @@ class rolle {
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		foreach ($formvars['qLayer'] as $layer_id => $query_status) {
-			if ($query_status !== '') {	
+			if ($layer_id != '' AND $query_status !== '') {	
 				$table = ($layer_id > 0 ? 'u_rolle2used_layer' : 'rollenlayer');
 				$id = ($layer_id > 0 ? 'layer_id' : 'id');
 				$sql ='
 					UPDATE 
 						kvwmap.' . $table . ' 
 					SET 
-						queryStatus=' . $query_status . '
+						querystatus=' . $query_status . '
 					WHERE 
 						user_id = ' . $this->user_id . ' AND 
 						stelle_id = ' . $this->stelle_id . ' AND 
