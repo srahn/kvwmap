@@ -679,6 +679,7 @@ class user {
 	var $language = 'german';
 	var $debug;
 	var $share_rollenlayer_allowed;
+	var $stelle_id;
 
 	/**
 	 * Create a user object
@@ -1089,6 +1090,7 @@ class user {
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		$stellen = array( 'ID' => array(), 'Bezeichnung' => array());
 		while ($rs = $this->database->result->fetch_array()) {
 			$stellen['ID'][]=$rs['ID'];
 			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];

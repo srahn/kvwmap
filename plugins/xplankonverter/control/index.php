@@ -118,7 +118,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		true
 	);
 
-	/*
+	/**
 	* extract zip files if necessary, check completeness and copy files to upload folder
 	*/
 	function xplankonverter_unzip_and_check_and_copy($shape_files, $dest_dir) {
@@ -151,7 +151,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		return $uploaded_files;
 	}
 
-	/*
+	/**
 	* extract zip files if necessary and copy files to upload folder
 	*/
 	function xplankonverter_unzip($shape_files, $dest_dir) {
@@ -179,7 +179,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		return $temp_files;
 	}
 
-	/*
+	/**
 	* Packt die angegebenen Zip-Dateien im sys_temp_dir Verzeichnis aus
 	* und gibt die ausgepackten Dateien in der Struktur von
 	* hochgeladenen Dateien aus
@@ -286,7 +286,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		global $GUI;
 		# Erzeuge ein neues Ticket der Kategorie Fehler mit Auftragsart Fehlerkorrektur.
 		$pgObj = new PgObject($GUI, 'feedback', 'tickets');
-		$ticket_id = $pgObj->create(array(
+		$ticket = $pgObj->create(array(
 			'titel' => 'Fehler beim Upload ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? ' ' . $GUI->konvertierung->get_id() : '') . ' in Stelle ' . $GUI->Stelle->id,
 			'anfrage' => 'Beim Hochladen ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? $GUI->konvertierung->get('bezeichnung') : '') . ($GUI->konvertierung ? ' id: ' . $GUI->konvertierung->get_id() : '') . " ist ein Fehler aufgetreten.\n" . pg_escape_string($msg),
 			'kategorie_id' => 3, # Planuploadfehler
@@ -300,7 +300,6 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			'stelle_id' => $GUI->Stelle->id
 		));
 
-		$ticket = $pgObj->find_by('id', $ticket_id);
 		return $ticket;
 	}
 
@@ -324,18 +323,16 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	$GUI->plan_oid_name = $GUI->konvertierung->config['plan_oid_name'];
 	
 	//TEMP
-	if($GUI->formvars['planart'] == 'FP-Plan') {
-		$GUI->title = 'Flächennutzungsplan';
-		$GUI->plan_short_title = 'F-Plan';
-		$GUI->plan_class = 'FP_Plan';
-		$GUI->plan_abk = 'fplan';
-		$GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
-		$GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
-		$GUI->plan_table_name = 'fp_plan';
-		
-		$GUI->plan_table_name = strtolower($GUI->plan_class);
-		$GUI->plan_oid_name = $GUI->plan_table_name . '_oid';
-	}
+	// $GUI->title = 'Flächennutzungsplan';
+	// $GUI->plan_short_title = 'F-Plan';
+	// $GUI->plan_class = 'FP_Plan';
+	// $GUI->plan_abk = 'fplan';
+	// $GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
+	// $GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
+	// $GUI->plan_table_name = 'fp_plan';
+	
+	// $GUI->plan_table_name = strtolower($GUI->plan_class);
+	// $GUI->plan_oid_name = $GUI->plan_table_name . '_oid';
 	// TEMP END
 }
 
@@ -588,7 +585,10 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_plaene_index' : {
+			$landkreis = new PgObject($GUI, 'gebietseinheiten', 'kreise', 'krs_schl', 'string');
+			$GUI->landkreise = $landkreis->find_by_sql(array('select' => 'krs_schl, krs_name', 'order' => 'krs_name'));
 			$GUI->title = str_replace('an', 'äne', $GUI->title);
+			$GUI->title = str_replace('Sonstiger', 'Sonstige', $GUI->title);
 			$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
 			$GUI->output();
 		} break;
@@ -1850,7 +1850,7 @@ function go_switch_xplankonverter($go) {
 
 		case 'xplankonverter_download_archivdatei' : {
 			$konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']);
-			$filename = XPLANKONVERTER_FILE_PATH . 'archiv/' . $GUI->Stelle->id . '/' . $konvertierung->configf['plan_abk_plural'] . '/' . basename($GUI->formvars['datei']);
+			$filename = XPLANKONVERTER_FILE_PATH . 'archiv/' . $GUI->Stelle->id . '/' . $konvertierung->config['plan_abk_plural'] . '/' . basename($GUI->formvars['datei']);
 
 			if (!file_exists($filename)) {
 				$GUI->add_message('warning', 'Diese Datei ist nicht vorhanden. Wenden Sie sich an den Support.');

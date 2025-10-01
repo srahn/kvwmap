@@ -29,9 +29,10 @@ class XP_Bereich extends PgObject {
 	}
 
 	function get_regeln() {
+		$regeln = array();
 		$regel = new Regel($this->gui);
 		$regeln = $regel->find_where("
-			bereich_gml_id = '{$this->get('gml_id')}'
+			bereich_gml_id::text = '{$this->get('gml_id')}'::text
 		");
 		return $regeln;
 	}
@@ -49,10 +50,10 @@ class XP_Bereich extends PgObject {
 			DELETE FROM
 				xplan_gml.xp_objekt
 			WHERE
-				gehoertzubereich = '" . $this->get('gml_id') . "'
+				gehoertzubereich::text = '" . $this->get('gml_id') . "'::text
 		";
 		#echo 'SQL zum Löschen der Objekte die zum Bereich ' . $this->get($this->identifier) . ' gehöhren: ' . $sql;
-		pg_query($this->database->dbConn, $sql);
+		$result = $this->database->execSQL($sql, 0, 3);
 	}
 	
 		/**
@@ -64,12 +65,12 @@ class XP_Bereich extends PgObject {
 			DELETE FROM
 				xplan_gml.xp_abstraktespraesentationsobjekt
 			WHERE
-				gehoertzubereich = '" . $this->get('gml_id') . "'
+				gehoertzubereich::text = '" . $this->get('gml_id') . "'::text
 			OR
-				konvertierung_id = '" . $this->get('konvertierung_id') . "'
+				konvertierung_id = " . $this->get('konvertierung_id') . "
 		";
 		#echo 'SQL zum Löschen der Objekte die zum Bereich ' . $this->get($this->identifier) . ' gehöhren: ' . $sql;
-		pg_query($this->database->dbConn, $sql);
+		$result = $this->database->execSQL($sql, 0, 3);
 	}
 
 	/**
@@ -83,10 +84,10 @@ class XP_Bereich extends PgObject {
 				xplan_gml." . $this->planartAbk . "_objekt o
 			WHERE
 				ta." . $this->planartAbk . "_objekt_gml_id::text = o.gml_id::text
-				AND o.gehoertzubereich = '" . $this->get($this->identifier) . "'
+				AND o.gehoertzubereich::text = '" . $this->get($this->identifier) . "'::text
 		";
 		#echo '<br>SQL zum Löschen der Zuordnungen der Objekte des Bereiches ' . $this->get($this->identifier) . ' zu den Textabschnitten:' . $sql;
-		pg_query($this->database->dbConn, $sql);
+		$result = $this->database->execSQL($sql, 0, 3);
 	}
 
 	/**
@@ -94,6 +95,7 @@ class XP_Bereich extends PgObject {
 	 * Löscht dazugehörige Regeln
 	 */
 	function destroy() {
+		$regeln = array();
 		$regeln = $this->get_regeln();
 		foreach ($regeln AS $regel) {
 			# Wozu hier die Konvertierung abfragen wenn danach die Regel gelöscht wird?
@@ -103,7 +105,14 @@ class XP_Bereich extends PgObject {
 		$this->destroy_objekt_zu_textabschnitte();
 		$this->destroy_associated_objekte();
 		$this->destroy_associated_praesentationsobjekte();
-		$this->delete();
+		$sql = "
+			DELETE FROM
+				xplan_gml." . $this->planartAbk . "_bereich
+			WHERE
+				gml_id::text = '" . $this->get($this->identifier) . "'::text
+		";
+		$result = $this->database->execSQL($sql, 0, 3);
+		//$this->delete();
 	}
 }
 ?>

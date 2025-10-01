@@ -1670,6 +1670,11 @@ a.menuered:hover {
 	line-height: 17px;
 }
 
+.legend-group-checkbox {
+	vertical-align: text-top;
+  margin: 3px 0px 0px -2px;
+}
+
 .legend_layer_hidden{
 
 	font-size: <? echo $font_size_factor * 15; ?>px;
@@ -2451,7 +2456,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .rollenwahl-option-header {
-	width: 270px;
+	<!-- width: 270px; -->
 	padding : 4px;
 }
 

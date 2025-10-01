@@ -1083,7 +1083,7 @@ echo '			</table>
 	}
 
 	/**
-		@param $prefix String dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
+	 * @param $prefix String dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
 	*/
 	function setLayerParams($prefix = '') {
 		$layer_params = array();
@@ -1094,7 +1094,7 @@ echo '			</table>
 		foreach ($this->formvars AS $key => $value) {
 			$param_key = str_replace($prefix . 'layer_parameter_', '', $key);
 			if ($param_key != $key) {
-				rolle::$layer_params[$param_key] = $value;
+				rolle::$layer_params[$param_key] = is_array($value) ? implode(',', $value) : $value;
 			}
 		}
 		foreach (rolle::$layer_params as $param_key => $value) {
@@ -1252,7 +1252,7 @@ echo '			</table>
 		else{		# Layer in Zeichenreihenfolge in Gruppen
 			$legend = '';
 			foreach($this->groupset as $group){
-				if($group['obergruppe'] == ''){
+				if ($group['obergruppe'] == ''){
 					$legend .= $this->create_group_legend($group['id']);
 				}
 			}
@@ -1263,7 +1263,11 @@ echo '			</table>
   }
 
 	function create_group_legend($group_id, $status = NULL){
+		include_once(CLASSPATH . 'LayerGroup.php');
 		$layerlist = $this->layerset['list'];
+		$group = new LayerGroup($this);
+		$group_aktiv_status = $group->get_aktiv_status($this->Stelle->id, $this->user->id, $group_id);
+
 		if (@$this->groupset[$group_id]['untergruppen'] == NULL AND @$this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
@@ -1276,6 +1280,7 @@ echo '			</table>
 						<a href="javascript:getlegend(\'' . $group_id . '\')">
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>
+						<!--input id="group_checkbox_' . $group_id . '" name="group_checkbox_' . $group_id . '" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="javascript:selectgroupthema(document.GUI.layers_of_group_' . $group_id . ', ' . $this->user->rolle->instant_reload.')"' . ($group_aktiv_status == 2 ? ' checked' : '') . '/-->
 						<span class="legend_group' . (value_of($this->group_has_active_layers, $group_id) != '' ? '_active_layers' : '') . '">
 							<!--a
 								href="javascript:getGroupOptions(' . $group_id . ')"
@@ -1283,7 +1288,7 @@ echo '			</table>
 								onmouseout="$(\'#test_' . $group_id . '\').hide()"
 							>' . html_umlaute($groupname) . '
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
-							</a//-->' .
+							</a-->' .
 							html_umlaute($groupname) . '
 							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
@@ -1327,7 +1332,7 @@ echo '			</table>
 													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.', '.$this->user->rolle->instant_reload.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllLayers.'"></a>
 												</td>
 												<td>
-													<span class="legend_layer">'.$this->all.'</span>
+													<span class="legend_layer">' . $this->strAll . '</span>
 												</td>
 											</tr>';
 				}
@@ -1341,7 +1346,7 @@ echo '			</table>
     $legend .= '<input type="hidden" name="radiolayers_'.$group_id.'" value="'.value_of($this->radiolayers, $group_id).'">';
 	  $legend .= '</div>';
     return $legend;
-  }
+	}
 
 	function create_layer_legend($layer){
 		if (value_of($layer, 'requires') != '' )return;
@@ -2228,6 +2233,7 @@ echo '			</table>
 
 				if (count($layerset) == 0) {
 					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
+					$featurelayer = $mapDB->read_feature_layer();
 					$rollenlayer = $mapDB->read_RollenLayer();
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
@@ -3895,7 +3901,13 @@ echo '			</table>
 	*/
 	function checkCaseAllowed($case, $check_csrf_token = true) {
 		if ($check_csrf_token) {
-			$this->check_csrf_token();
+			if (!(
+				$case == 'show_snippet' AND
+				strpos(file_get_contents(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $this->formvars['snippet'] . '.php'), '$check_csrf_token = false;') !== false
+			)) {
+				// Nicht prüfen wenn im snippet der csrf_token_check explizit ausgeschaltet ist.
+				$this->check_csrf_token();
+			}
 		}
 		if (!(
 			$this->Stelle->isMenueAllowed($case) OR
@@ -4758,10 +4770,12 @@ echo '			</table>
 		$this->output();
 	}
 
+
 	/**
-	 * This function return the image of the referenzkarte with given ID
+	 * This function returns the image of the referenzkarte with given ID
 	 * if refmap not found return alternative not found image
 	 */
+
 	function getRefMapImage($id) {
 		include_once(CLASSPATH . 'Referenzkarte.php');
 		$referenzkarte = Referenzkarte::find_by_id($this, $id);
@@ -11173,7 +11187,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 					$this->debug->show('<p>SQL zum Anlegen des Datensatzes: ' . $sql);
-					#echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
+					// echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
 					$ret = $layerdb->execSQL($sql, 4, 1, true);
 
 					if ($ret['success']) {
@@ -11245,7 +11259,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 			}
 		}
-
 		if ($this->formvars['embedded'] != '') {
 			# wenn es ein neuer Datensatz aus einem embedded-Formular ist,
 			# muss das entsprechende Attribut des Hauptformulars aktualisiert werden
@@ -11275,14 +11288,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         } break;
 
         case 'SubFormEmbeddedPK' : {
-					if ($this->success) {
-						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+					// if ($this->success) { // Stefan fragen ob das wirklich weg kann!!
+					// im Fehlerfall (success == false) würde gar kein echo kommen.
+						if ($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
 							echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
 						}
-						else{
+						else {
 							echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
 						}
-					}
+					// }
+					// hier müsste noch ein else mit Rückgabe einer Fehlermeldung hin oder steckt die schon in GUI::$messages drin?
 					if(!empty(GUI::$messages)){
 						echo 'message('.json_encode(GUI::$messages).');';
 					}
@@ -11316,10 +11331,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     }
   }
 
-	function neuer_Layer_Datensatz() {
-		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-		$this->titel = 'neuen Datensatz einfügen';
-		$this->main = 'new_layer_data.php';
+	function neuer_Layer_Datensatz($params = array()) {
+		$params = array_merge(array('output' => true, 'use_primary_from_new' => false), $params);
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->titel='neuen Datensatz einfügen';
+		$this->main='new_layer_data.php';
 		if ($this->formvars['chosen_layer_id']) {			# für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars
 			$this->formvars['CMD'] = '';
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
@@ -11367,7 +11383,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 					for ($i = 0; $i < count($checkbox_names); $i++) {
 						if (value_of($this->formvars, $checkbox_names[$i]) == 'on') {
-							$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+							$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid;layer_id
 							$oid = $element[3];
 						}
 					}
@@ -11378,18 +11394,22 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$dont_use_for_new = $layerset[0]['attributes']['dont_use_for_new'][$layerset[0]['attributes']['indizes'][$element[1]]];
 							if (
 								$element[3] == $oid AND
-								!in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE')) AND  # Primärschlüssel werden nicht mitübergeben
+								(
+									!in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE')) OR
+									$params['use_primary_from_new']
+								) AND  # Primärschlüssel werden nicht mitübergeben
 								!in_array($formElementType, array('Time', 'User', 'UserID', 'Stelle', 'StelleID', 'ClientID')) AND # und automatisch generierte Typen auch nicht
 								$dont_use_for_new != 1
 							) {
 								$element[3] = '';
 								$this->formvars[implode(';', $element)] = value_of($this->formvars, $form_fields[$i]);
 							}
-							else $this->formvars[implode(';', $element)] = '';
+							else {
+								$this->formvars[implode(';', $element)] = '';
+							}
 						}
 					}
 				}
-
 				######### von einer Sachdatenanzeige übergebene Formvars #######
 				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
 					# Hier auch nur Werte übergeben, die in neues Formular übernommen werden sollen
@@ -11403,11 +11423,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$new_value = '';
 					}
 					else {
-						$new_value =  $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$attribute_name].';'.$layerset[0]['attributes']['table_name'][$attribute_name].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j].';'.$layerset[0]['attributes']['saveable'][$j]];
+						$new_value =  $this->formvars[
+							$layerset[0]['Layer_ID'].';'
+							. $layerset[0]['attributes']['real_name'][$attribute_name].';'
+							. $layerset[0]['attributes']['table_name'][$attribute_name].';;'
+							. $layerset[0]['attributes']['form_element_type'][$j].';'
+							. $layerset[0]['attributes']['nullable'][$j].';'
+							. $layerset[0]['attributes']['type'][$j].';'
+							. $layerset[0]['attributes']['saveable'][$j]
+						];
 					}
 
 					$layerset[0]['shape'][-1][$attribute_name] = $new_value;
-
 					if (
 						$layerset[0]['shape'][-1][$attribute_name] == '' AND
 						$layerset[0]['attributes']['default'][$j] != ''
@@ -11419,9 +11446,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$this->angle_attribute = $attribute_name;
 					}
 				}
-				$this->formvars['layer_columnname'] = $layerset[0]['attributes']['the_geom'];
-				$this->formvars['layer_tablename'] = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
-				$this->qlayerset[0]=$layerset[0];
+				$this->formvars['layer_columnname'] = ($this->formvars['layer_columnname'] ?: $layerset[0]['attributes']['the_geom']);
+				$this->formvars['layer_tablename'] = ($this->formvars['layer_tablename'] ?: $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']]);
+				$this->qlayerset[0] = $layerset[0];
 
 				# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
 				if (is_array(value_of($this->formvars, 'attributenames'))) {
@@ -11539,7 +11566,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			include(LAYOUTPATH.'snippets/new_layer_data_embedded.php');
 		}
 		else {
-			$this->output();
+			if ($params['output']) {
+				$this->output();
+			}
+			else {
+				include_once(SNIPPETS . $this->main);
+			}
 		}
 	}
 
@@ -12585,7 +12617,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	
 	function import_rollenlayer_into_layer_importieren(){
 		$this->import_rollenlayer_into_layer();
-		foreach ($this->formvars['rollenlayer_attributes'] as &$attribute) {
+		$formvars_layer_attributes = $this->formvars['layer_attributes'];
+		$formvars_rollenlayer_attributes = $this->formvars['rollenlayer_attributes'];
+		$auto_attributes = [];
+		$auto_values = [];
+		
+		foreach ($formvars_rollenlayer_attributes as &$attribute) {
 			if ($attribute == $this->rollenlayer_attributes['the_geom']) {
 				$attribute = 'st_transform(' . $attribute . ', ' . $this->layer[0]['epsg_code'] . ')';
 			}
@@ -12593,14 +12630,58 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$attribute = pg_quote($attribute);
 			}
 		}
+		foreach ($this->formvars['layer_attributes'] as $i => $attribute) {
+			# Auto-Attribute aus der Formvars-Liste entfernen
+			if (
+					in_array($this->layer_attributes['form_element_type'][$attribute], ['Time', 'User', 'UserID', 'Stelle', 'StelleID']) AND 
+					in_array($this->layer_attributes['options'][$attribute], array('', 'insert'))
+				) {
+				unset($formvars_layer_attributes[$i]);
+				unset($formvars_rollenlayer_attributes[$i]);
+			}
+		}
+		foreach ($this->layer_attributes['name'] as $attribute) {
+			# Auto-Attribute zusammensammeln
+			if (
+				in_array($this->layer_attributes['form_element_type'][$attribute], ['Time', 'User', 'UserID', 'Stelle', 'StelleID']) AND 
+				in_array($this->layer_attributes['options'][$attribute], array('', 'insert'))
+			) {
+				$auto_attributes[] = $attribute;
+				switch ($this->layer_attributes['form_element_type'][$attribute]) {
+					case 'Time' : {
+						$auto_values[] = "'" . date("Y-m-d H:i:s") . "'";
+					} break;
+		
+					case 'User' : {
+						$auto_values[] =  "'" . $this->user->Vorname . " " . $this->user->Name."'";
+					} break;
+		
+					case 'UserID' : {
+						$auto_values[] =  "'" . $this->user->id."'";
+					} break;
+		
+					case 'Stelle' : {
+						$auto_values[] =  "'" . $this->Stelle->Bezeichnung . "'";
+					} break;
+		
+					case 'StelleID' : {
+						$auto_values[] =  "'" . $this->Stelle->id . "'";
+					} break;
+				}
+			}
+		}
+		$formvars_rollenlayer_attributes = array_slice($formvars_rollenlayer_attributes, 0, count($formvars_layer_attributes));
+		$formvars_layer_attributes = array_merge($formvars_layer_attributes, $auto_attributes);
+		$formvars_rollenlayer_attributes = array_merge($formvars_rollenlayer_attributes, $auto_values);
 		$sql = '
 			INSERT INTO 
 				' . $this->layer[0]['maintable'] . '
-				("' . implode('", "', $this->formvars['layer_attributes']) . '")
+				("' . implode('", "', $formvars_layer_attributes) . '")
 			SELECT 
-				' . implode(', ', array_slice($this->formvars['rollenlayer_attributes'], 0, count($this->formvars['layer_attributes']))) . '
+				' . implode(', ', $formvars_rollenlayer_attributes) . '
 			FROM
 				' . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
+
 		$ret = $this->layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]){
 			if ($this->formvars['remove_rollenlayer']) {
@@ -12784,6 +12865,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
 			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 			header('Pragma: public');
+			header('Access-Control-Allow-Origin: *');
 			readfile($result['exportfile']);
 		}
 	}
@@ -14804,23 +14886,24 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->cronjobs = CronJob::find($this);
 
 		# erzeugt die Zeilen für den crontab
-		$crontab_lines = array('gisadmin' => array(), 'root' => array());
+		$this->crontab_lines = array('gisadmin' => array(), 'root' => array());
 		foreach ($this->cronjobs AS $cronjob) {
 			if ($cronjob->get('aktiv')) {
-				$crontab_lines[$cronjob->get('user')][] = $cronjob->get_crontab_line();
+				$this->crontab_lines[$cronjob->get('user')][] = $cronjob->get_crontab_line();
 			}
 		}
-		$crontab_dir = '/var/www/cron/';
-		if (!file_exists($crontab_dir . 'gisadmin')) {
-			mkdir($crontab_dir . 'gisadmin');
+		$this->crontab_dir = '/var/www/cron/';
+		if (!file_exists($this->crontab_dir . 'gisadmin')) {
+			mkdir($this->crontab_dir . 'gisadmin');
 		}
-		if (!file_exists($crontab_dir . 'root')) {
-			mkdir($crontab_dir . 'root');
+		if (!file_exists($this->crontab_dir . 'root')) {
+			mkdir($this->crontab_dir . 'root');
 		}
 		# schreibt die Zeilen in die crontab Dateien von root und gisadmin falls vorhanden
-		foreach ($crontab_lines AS $user => $lines) {
-			$crontab_file = $crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
-			// echo '<br>' . $user . ':' . $crontab_file;
+		foreach ($this->crontab_lines AS $user => $lines) {
+			$crontab_file = $this->crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
+			// $crontab_file = $this->crontab_dir . 'crontab_' . $user;
+			// echo '<br>' . $user . ': ' . $crontab_file;
 			$fp = fopen($crontab_file, 'w');
 			if (count($lines) > 0) {
 				foreach($lines AS $line) {
@@ -14840,7 +14923,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 #		unlink($crontab_file);
 
 		# crontab Zeilen anzeigen
-		$this->crontab_lines = $crontab_lines;
 		$this->main = 'crontab.php';
 		$this->output();
 	}
@@ -17753,6 +17835,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (!$ret = $mapDB->read_RollenLayer($this->formvars['selected_rollenlayer_id'])) {
 			return 0; // do not create the layer
 		}
+		$layerdb = $mapDB->getlayerdatabase(-$this->formvars['selected_rollenlayer_id'], $this->Stelle->pgdbhost);
+		$this->attributes = $mapDB->read_layer_attributes(-$this->formvars['selected_rollenlayer_id'], $layerdb, NULL);
 		# Set initial values from rollenlayer
 		$layer = $ret[0];
 
@@ -17760,7 +17844,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$layer['id'] 					= ''; // it shall become a new layer
 		$layer['alias'] 			= '';
 		$layer['connection'] 	= '';
-		$layer['oid'] 				= 'gid';
+		$layer['oid'] 				= $this->attributes['pk'][0];
 		$layer['old_id'] 			= -$this->formvars['selected_rollenlayer_id'];
 		$layer['Name'] 				= $this->formvars['layer_options_name'];
 		$layer['Name_or_alias'] = $this->formvars['layer_options_name'];
@@ -17850,7 +17934,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		else {
 			if (!empty($params)) {
-				if($layer_id == NULL){
+				if ($layer_id == NULL) {
 					$output .= '
 						<table style="border: 1px solid #ccc" class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 							<tr>
@@ -17860,7 +17944,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								<td class="rollenwahl-option-data">
 									<table>';
 				}
-									foreach($params AS $param) {
+									foreach ($params AS $param) {
 										$output .= '
 										<tr id="layer_parameter_'.$param['key'].'_tr">';
 											if (!$open) {
@@ -17873,18 +17957,28 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											}
 											$output .= '
 											<td>
-												'.($layer_id == NULL ?
-													FormObject::createSelectField(
-														'options_layer_parameter_' . $param['key'],		# name
-														$param['options'],										# options
-														rolle::$layer_params[$param['key']],	# value
-														1,																		# size
-														'width: 110px',												# style
-														'onLayerParameterChanged(this);',			# onchange
-														'layer_parameter_' . $param['key'],		# id
-														'',																		# multiple
-														'',																		# class
-														''																		# firstoption
+												' . (
+													$layer_id == NULL ? (
+														$param['multiple'] == '1' ?
+														FormObject::createCheckboxList(
+															'options_layer_parameter_' . $param['key'],					# name
+															$param['options'],																	# options
+															rolle::$layer_params[$param['key']] === '' ? [] : explode(',', rolle::$layer_params[$param['key']]),	# values
+															'onLayerParameterChanged(this);'										# onchange
+														)
+														:
+														FormObject::createSelectField(
+															'options_layer_parameter_' . $param['key'],		# name
+															$param['options'],										# options
+															rolle::$layer_params[$param['key']],	# value
+															($param['multiple'] == '1' ? count($param['options']) : 1),	# size
+															'',																		# style
+															'onLayerParameterChanged(this);',			# onchange
+															'layer_parameter_' . $param['key'],		# id
+															($param['multiple'] == '1'),					# multiple
+															'',																		# class
+															''																		# firstoption
+														)
 													)
 													:
 													FormObject::createCustomSelectField(
@@ -18131,6 +18225,10 @@ class db_mapObj{
 #		echo '<br>ref: ' . print_r($this->referenceMap, true);
     return $rs;
   }
+
+	function read_feature_layer() {
+		
+	}
 
 	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
@@ -18960,7 +19058,7 @@ class db_mapObj{
 		$rs['schema'] = replace_params_rolle($rs['schema']);
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
 		if (!$layerdb->open($rs['connection_id'])) {
-			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit connection_id: ' . $rs['connection_id'] . ' nicht hergestellt werden:';
+			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit connection_id: ' . $rs['connection_id'] . ' aus dem Layer mit ID: ' . $layer_id . ' nicht hergestellt werden:';
 		}
 		return $layerdb;
 	}
@@ -19417,7 +19515,7 @@ class db_mapObj{
 								$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
 								for ($k = 1; $k < count($subform); $k++) {
 									if (strpos($subform[$k], ':')) {
-										$exp = explode(':', $attribute_foreign_keys[$f]);
+										$exp = explode(':', $subform[$k]);
 										$keys['fkey'] = $exp[0];	# Verknüpfungsattribut in diesem Layer
 										$keys['pkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
 									}
@@ -20380,11 +20478,18 @@ class db_mapObj{
 			'drawingorder',
 			'listed'
 		);
-		
+
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
 				array('sync')
+			);
+		}
+
+		if ($this->GUI->plugin_loaded('portal')) {
+			$zero_if_empty_attributes = array_merge(
+				$zero_if_empty_attributes,
+				array('cluster_option')
 			);
 		}
 
@@ -21545,8 +21650,9 @@ class db_mapObj{
 
 	function save_all_layer_params($formvars) {
 		$sql = "TRUNCATE layer_parameter";
+		$komma = false;
 		$this->db->execSQL($sql);
-		$sql = "INSERT INTO layer_parameter VALUES ";
+		$sql = "INSERT INTO layer_parameter (`id`, `key`, `alias`, `default_value`, `options_sql`, `multiple`) VALUES ";
 		for ($i = 0; $i < count($formvars['key']); $i++) {
 			if ($formvars['key'][$i] != '') {
 				if ($formvars['id'][$i] == '') {
@@ -21560,11 +21666,13 @@ class db_mapObj{
 					'" . $formvars['key'][$i] . "',
 					'" . $formvars['alias'][$i] . "',
 					'" . $this->db->mysqli->real_escape_string($formvars['default_value'][$i]) . "',
-					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "'
+					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "',
+					" . ($formvars['multiple'][$i] == 'on' ? "1" : "0") . "
 				)";
 				$komma = true;
 			}
 		}
+		// echo '<br>Speichern der Layerparameter mit SQL: ' . $sql;
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
 			echo '<br>Fehler beim Speichern der Layerparameter mit SQL: ' . $sql;

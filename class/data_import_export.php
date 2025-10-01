@@ -385,7 +385,7 @@ class data_import_export {
 				return;
 			}
 			foreach($layers as $layer) {
-				$table = 'a'.strtolower(sonderzeichen_umwandeln(substr(($layer ?: basename($filename)), 0, 40))). date("_Y_m_d_H_i_s", time());
+				$table = 'a'.strtolower(sonderzeichen_umwandeln(substr(($layer ?: basename($filename)), 0, 30))). date("_Y_m_d_H_i_s", time());
 				$ret = $this->ogr2ogr_import($schema, $table, $epsg, $filename, $database, $layer, NULL, NULL, 'UTF-8');
 				if ($ret !== 0) {
 					$custom_table['error'] = $layer . ': ' . $ret;
@@ -944,7 +944,7 @@ class data_import_export {
 			. ' -sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" '
 			. $formvars_nln . ' '
 			. $formvars_nlt . ' '
-			. $exportfile . ' '
+			. '"' . $exportfile . '" '
 			. 'PG:"' . $layerdb->get_connection_string(true) . ' active_schema=' . $layerdb->schema . '"';
 		$errorfile = rand(0, 1000000);
 		$command .= ' 2> ' . IMAGEPATH . $errorfile . '.err';
@@ -979,7 +979,7 @@ class data_import_export {
 			. ' -lco GEOMETRY_NAME=the_geom'
 			. ' -lco launder=NO'
 			. ' -lco precision=NO'
-			. ' -lco FID=' . $this->unique_column
+			. (strpos($options, '-lco FID') === false ? ' -lco FID=' . $this->unique_column : '')
 			. ' -nln ' . $tablename
 			. ($multi ? ' -nlt PROMOTE_TO_MULTI' : '')
 			. ($unlogged ? ' -lco UNLOGGED=ON' : '')
@@ -1062,7 +1062,7 @@ class data_import_export {
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$result = new stdClass();
-			$result->stdout = implode('', $output);
+			$result->stdout = $output;
 			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
@@ -1073,7 +1073,7 @@ class data_import_export {
 	}
 
 	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile, ' -q -nogeomtype');
+		$result = $this->ogrinfo($importfile, ' -q');
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();
@@ -1086,10 +1086,12 @@ class data_import_export {
 				$layers = explode("\r\n", $result->stdout);
 				array_pop($layers);
 			}
-			array_walk($layers, function(&$value, $key){
-				$value = explode(': ', $value)[1];
-			});
-			return $layers;
+			foreach ($layers as $layer) {
+				if (strpos($layer, '(None)') === false) {	// Layer ohne Geometrie ausschließen
+					$geomlayers[] = explode(' (', explode(': ', $layer)[1])[0];
+				}
+			}
+			return $geomlayers;
 		}
 	}
 
@@ -1433,7 +1435,7 @@ class data_import_export {
 				. $sql . "
 			";
 			// echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
-			$ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
+			$ret = $layerdb->execSQL($sql, 4, 0, $suppress_err_msg);
 			if ($ret['success']) {
 				for ($s = 0; $s < count($selected_attributes); $s++) {
 					$selected_attributes[$s] = pg_quote($selected_attributes[$s]);
@@ -1493,7 +1495,6 @@ class data_import_export {
 								fwrite($fp, 'UTF-8');
 								fclose($fp);
 							}
-							// echo '<br>Datei ' . $exportfile . ' expoprtiert.';
 							$zip = true;
 						} break;
 

@@ -2699,6 +2699,31 @@ class Konvertierung extends PgObject {
 			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Topologie!');
 			return false;
 		}
+		
+		# Füge vorhandene Flächenschlussobjekte in BP_Geometrieobjekt neu in Tabelle flächenschlussobjekte ein
+		# BP_Geometrieobjekt kann auch Flächenschlussobjekte enthalten
+		$sql = "
+			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, uuid, konvertierung_id, teilpolygon, teilpolygon_nr)
+			SELECT
+				gml_id,
+				uuid,
+				konvertierung_id,
+				(st_dump(position)).geom AS teilpolygon,
+				(st_dump(position)).path[1] AS teilpolygon_nr
+			FROM
+				xplan_gml.bp_geometrieobjekt
+			WHERE
+				flaechenschluss AND
+				(ebene = 0 OR ebene IS NULL) AND
+				ST_GeometryType(position) ILIKE '%Polygon%' AND
+				konvertierung_id = " . $this->get($this->identifier) . "
+		";
+		#echo '<p>SQL zur Erzeugung von Topology: ' . $sql;
+		$result = $this->database->execSQL($sql, 4, 0);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Topologie!');
+			return false;
+		}
 
 		# Füge ein umschließendes Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte hinzu
 		$sql = "
@@ -2789,6 +2814,9 @@ class Konvertierung extends PgObject {
 			$msg .= "\n " . $this->plan->umlName . ' ' . $this->plan->get('name') . ' gelöscht.';
 			$this->plan->destroy();
 		}
+
+		# Lösche flaechenschlussobjekte-topology to avoid duplicates of uuid
+		$this->clearTopology();
 
 		# Lösche Konvertierung
 		$this->delete();

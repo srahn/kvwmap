@@ -1140,7 +1140,7 @@ class ddl {
 					$column_i++;
 				}
 			}
-			if (!$new_column) {
+			if (!$new_column AND $this->i_on_page > 0) {
 				$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage] + $this->layout['gap']; # der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			}
 			if (
@@ -1379,6 +1379,7 @@ class ddl {
 				$this->pdf->line(0, $this->layout['height'] - $this->layout['margin_top'], $this->layout['width'], $this->layout['height'] - $this->layout['margin_top']);
 				$this->pdf->line($this->layout['margin_left'], $this->layout['height'], $this->layout['margin_left'], 0);
 				$this->pdf->line($this->layout['width'] - $this->layout['margin_right'], $this->layout['height'], $this->layout['width'] - $this->layout['margin_right'], 0);
+				$this->pdf->setLineStyle(1, 'square', '', []);
 			}
 			$this->pdf->closeObject();
 		}

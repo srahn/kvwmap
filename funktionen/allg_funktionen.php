@@ -5,12 +5,16 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 if (MAPSERVERVERSION < 800) {
-	function msGetErrorObj(){
-		return ms_GetErrorObj();
+	if (!function_exists('msGetErrorObj')) {
+		function msGetErrorObj() {
+			return ms_GetErrorObj();
+		}
 	}
 
-	function msResetErrorList(){
-		return ms_ResetErrorList();
+	if (!function_exists('msResetErrorList')) {
+		function msResetErrorList(){
+			return ms_ResetErrorList();
+		}
 	}
 }
 
@@ -450,8 +454,8 @@ function ie_check(){
 	}
 }
 
-if(!function_exists('mb_strrpos')){		# Workaround, falls es die Funktion nicht gibt
-	function mb_strrpos($str, $search, $offset = 0, $encoding){
+if (!function_exists('mb_strrpos')) {		# Workaround, falls es die Funktion nicht gibt
+	function mb_strrpos($str, $search, $offset = 0, $encoding = 'UTF-8') {
 		return strrpos($str, $search, $offset);
 	}
 }
@@ -1710,7 +1714,8 @@ function emailcheck($email) {
     $Meldung.='<br>E-Mail enthält kein @.';
   }
 
-  $postfix=strlen(strrchr($email,"."))-1;
+  $postfix = strlen(strrchr($email, ".")) - 1;
+
   if (!($postfix > 1 AND $postfix < 8)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
@@ -2340,6 +2345,10 @@ function send_image_not_found($img) {
 	imagedestroy($empty_img);
 }
 
+/**
+ * Prüft ob der Wert $key im Array $array existiert und gibt den Wert zurück.
+ * Wenn der Wert nicht existiert, wird ein leerer String zurückgegeben.
+ */
 function value_of($array, $key) {
 	if (!is_array($array)) {
 		$array = array();
@@ -2394,7 +2403,7 @@ function str_replace_last($search , $replace, $str) {
 /**
  * Liefert den Namen der Thumb-Datei vom Originalnamen in $path
  * @param String $path Name of original file.
- * @return String Name of thump file.
+ * @return String Name of thumb file.
  */
 function get_thumb_from_name($path) {
 	return before_last($path, '.') . '_thumb.jpg';
@@ -2428,8 +2437,8 @@ function detect_delimiter($line) {
 
 /**
 * Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
-* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
-* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
+* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumbnails
+* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thumb.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
 *
 * @param string $txt Der Text von dem der Teilstring extrahiert werden soll.
 *
