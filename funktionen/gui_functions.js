@@ -1235,34 +1235,8 @@ function selectgroupquery(group, instantreload){
 	}
 }
 
-function selectgroupthema(group, instantreload){
-	var value = "";
-	if(Array.isArray(group)) {
-		group = group.filter(function( x ) {
-			return x !== undefined;
-		});
-		value = group.map(function(x){return x.value+""}).join(",");
-	} else {
-		value = group.value+"";
-	}
-  
-  var layers = value.split(",");
-	var check;
-  for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
-    thema = document.getElementById("thema"+layers[i]);
-		if(thema && thema.type == 'checkbox' && !thema.disabled){
-			check = !thema.checked;
-			break;
-    }
-  }
-	for(i = 0; i < layers.length; i++){
-    thema = document.getElementById("thema"+layers[i]);
-    if(thema && (!check || thema.type == 'checkbox')){		// entweder alle Layer sollen ausgeschaltet werden oder es ist ein checkbox-Layer
-      thema.checked = check;
-      query = document.getElementById("qLayer"+layers[i]);
-      updateQuery('', thema, query, '', 0);
-    }
-  }
+function selectgroupthema(group_checkbox, instantreload){
+	add_to_formdata(group_checkbox);
 	if(instantreload)neuLaden();
 }
 

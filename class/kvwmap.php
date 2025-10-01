@@ -1280,7 +1280,7 @@ echo '			</table>
 						</a>';
 				if (true) {
 					$legend .= '
-						<input id="group_checkbox_' . $group_id . '" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="javascript:selectgroupthema(document.GUI.layers_of_group_' . $group_id . ', ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
+						<input id="group_checkbox[' . $group_id . ']" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="selectgroupthema(this, ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
 					';
 				}
 				$legend .= '
