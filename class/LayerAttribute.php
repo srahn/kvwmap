@@ -117,7 +117,7 @@ class LayerAttribute extends MyObject {
 		return $options;
 	}
 
-	function get_SubFormFK_options($settings) {
+	function get_SubFormFK_options($settings) { // get_options
 		$options = array();
 		$semicolon_parts = explode(';', $settings);
 		$comma_parts = explode(',', $semicolon_parts[0]);
@@ -164,6 +164,10 @@ class LayerAttribute extends MyObject {
 
 	function is_array_type() {
 		return substr(trim($this->get('type')), 0, 1) === '_';
+	}
+
+	function is_document_attribute() {
+		return $this->get('form_element_type') == 'Dokument';
 	}
 }
 ?>

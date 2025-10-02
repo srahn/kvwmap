@@ -808,6 +808,16 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 			</tr>
 
 			<tr class="group-metadata">
+				<th align="right" style="border-bottom:1px solid #C3C7C3">
+					<input name="ows_inspireidentifiziert" type="checkbox" value="1" <?php echo ($this->formvars['ows_inspireidentifiziert']) ? ' checked' : ''; ?>>
+				</th>
+				<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsInspireidentifiziert; ?>
+					<span data-tooltip="<?php echo $strOwsInspireidentifiziertHint; ?>"></span>
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsSrs; ?>&nbsp;<span data-tooltip="<?php echo $strOwsSrsHint; ?>"></span>
 				</th>

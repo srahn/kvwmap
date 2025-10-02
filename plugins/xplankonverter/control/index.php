@@ -9,6 +9,7 @@
 // xplankonverter_download_inspire_gml
 // xplankonverter_download_uploaded_shapes
 // xplankonverter_download_uploaded_xplan_gml
+// xplankonverter_download_archivdatei
 // xplankonverter_download_xplan_gml
 // xplankonverter_download_xplan_shapes
 // xplankonverter_download_files_query
@@ -100,7 +101,9 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	else {
 		if ($konvertierung->get('stelle_id') != Rolle::$stelle_ID) {
 			$GUI->add_message('warning', 'Die Konvertierung mit der id ' . $GUI->formvars['konvertierung_id'] . ' gehört nicht zu dieser Stelle!');
-			$GUI->formvars['konvertierung_id'] = '';
+			if (stripos($GUI->go, 'xplankonverter_create_geoweb_service') !== 0) {
+				$GUI->formvars['konvertierung_id'] = '';
+			}
 		}
 		if (!file_exists($xplankonverter_file_path)) {
 			mkdir($xplankonverter_file_path, 0777);
@@ -118,7 +121,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		true
 	);
 
-	/*
+	/**
 	* extract zip files if necessary, check completeness and copy files to upload folder
 	*/
 	function xplankonverter_unzip_and_check_and_copy($shape_files, $dest_dir) {
@@ -151,7 +154,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		return $uploaded_files;
 	}
 
-	/*
+	/**
 	* extract zip files if necessary and copy files to upload folder
 	*/
 	function xplankonverter_unzip($shape_files, $dest_dir) {
@@ -179,7 +182,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		return $temp_files;
 	}
 
-	/*
+	/**
 	* Packt die angegebenen Zip-Dateien im sys_temp_dir Verzeichnis aus
 	* und gibt die ausgepackten Dateien in der Struktur von
 	* hochgeladenen Dateien aus
@@ -286,7 +289,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		global $GUI;
 		# Erzeuge ein neues Ticket der Kategorie Fehler mit Auftragsart Fehlerkorrektur.
 		$pgObj = new PgObject($GUI, 'feedback', 'tickets');
-		$ticket_id = $pgObj->create(array(
+		$ticket = $pgObj->create(array(
 			'titel' => 'Fehler beim Upload ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? ' ' . $GUI->konvertierung->get_id() : '') . ' in Stelle ' . $GUI->Stelle->id,
 			'anfrage' => 'Beim Hochladen ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? $GUI->konvertierung->get('bezeichnung') : '') . ($GUI->konvertierung ? ' id: ' . $GUI->konvertierung->get_id() : '') . " ist ein Fehler aufgetreten.\n" . pg_escape_string($msg),
 			'kategorie_id' => 3, # Planuploadfehler
@@ -300,7 +303,6 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			'stelle_id' => $GUI->Stelle->id
 		));
 
-		$ticket = $pgObj->find_by('id', $ticket_id);
 		return $ticket;
 	}
 
@@ -319,18 +321,16 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	$GUI->plan_abk = $GUI->konvertierung->config['plan_abk'];
 	$GUI->plan_abk_plural = $GUI->konvertierung->config['plan_abk_plural'];
 	$GUI->plan_layer_id = $GUI->konvertierung->config['plan_layer_id'];
-	$GUI->plan_attribut_aktualitaet = $GUI->konvertierung->config['plan_attribut_aktualitaet'];
 	$GUI->plan_table_name = $GUI->konvertierung->config['plan_table_name'];
 	$GUI->plan_oid_name = $GUI->konvertierung->config['plan_oid_name'];
 	
 	//TEMP
-	if($GUI->formvars['planart'] == 'FP-Plan') {
+	if ($GUI->formvars['planart'] == 'FP-Plan') {
 		$GUI->title = 'Flächennutzungsplan';
 		$GUI->plan_short_title = 'F-Plan';
 		$GUI->plan_class = 'FP_Plan';
 		$GUI->plan_abk = 'fplan';
 		$GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
-		$GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
 		$GUI->plan_table_name = 'fp_plan';
 		
 		$GUI->plan_table_name = strtolower($GUI->plan_class);
@@ -538,11 +538,14 @@ function go_switch_xplankonverter($go) {
 				
 				/* 
 				* Updates letzte_aktualisierung in gemeindeverbaende-Tabelle, so ARL's can track these dates (date is also manually editable)
-				* As the date will also end up in the metadata, it needs to be set before the metadata is created/updated 
+				* As the date will also end up in the metadata, it needs to be set before the metadata is created/updated
 				*/
-				if (!$GUI->formvars['suppress_gvbtable_letzteaktualisierung_update']) {
+				if ($GUI->formvars['suppress_gvbtable_letzteaktualisierung_update'] == false ||
+				$GUI->formvars['suppress_gvbtable_letzteaktualisierung_update'] == 'false') {
+					$GUI->write_xlog('Update des Aktualisierungsdatums in gebietseinheiten-Tabelle.');
 					$GUI->debug->write('Setze Datum Letze Aktualisierung in Gemeindeverbände-Tabelle.');
 					$ret_akt = $GUI->konvertierung->update_letztes_aktualisierungsdatum_gebietstabelle();
+					
 					if (!$ret_akt['success']) {
 						$GUI->add_message('Fehler', 'Fehler beim Update der Datums letzte Aktualisierung in Gebietseinheiten-Tabelle!');
 					}
@@ -588,7 +591,10 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_plaene_index' : {
+			$landkreis = new PgObject($GUI, 'gebietseinheiten', 'kreise', 'krs_schl', 'string');
+			$GUI->landkreise = $landkreis->find_by_sql(array('select' => 'krs_schl, krs_name', 'order' => 'krs_name'));
 			$GUI->title = str_replace('an', 'äne', $GUI->title);
+			$GUI->title = str_replace('Sonstiger', 'Sonstige', $GUI->title);
 			$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
 			$GUI->output();
 		} break;
@@ -1741,8 +1747,7 @@ function go_switch_xplankonverter($go) {
 			$konvertierungen = Konvertierung::find_konvertierungen(
 				$GUI,
 				$GUI->konvertierung->get('planart'),
-				$GUI->konvertierung->plan_class,
-				$GUI->konvertierung->get_plan_attribut_aktualitaet()
+				$GUI->konvertierung->plan_class
 			);
 
 			$GUI->debug->write('Konvertierungen gefunden');
@@ -1777,12 +1782,12 @@ function go_switch_xplankonverter($go) {
 			$konvertierungen = Konvertierung::find_konvertierungen(
 				$GUI,
 				$GUI->konvertierung->get('planart'),
-				$GUI->konvertierung->plan_class,
-				$GUI->konvertierung->get_plan_attribut_aktualitaet()
+				$GUI->konvertierung->plan_class
 			);
 			// Löscht auch alle Zusammenzeichnungen, die draft(d.h nicht published oder faulty) sind, wenn mindestens eine existiert
 			if (count($konvertierungen['published']) > 0) {
 				$GUI->debug->write('Lösche draft Zusammenzeichnungen.');
+				//$GUI->xlog->write('Lösche draft Zusammenzeichnungen.');
 				$result = $GUI->xplankonverter_remove_old_konvertierungen();
 				if (!$result['success']) {
 					send_error($result['msg']);
@@ -1850,7 +1855,7 @@ function go_switch_xplankonverter($go) {
 
 		case 'xplankonverter_download_archivdatei' : {
 			$konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']);
-			$filename = XPLANKONVERTER_FILE_PATH . 'archiv/' . $GUI->Stelle->id . '/' . $konvertierung->configf['plan_abk_plural'] . '/' . basename($GUI->formvars['datei']);
+			$filename = XPLANKONVERTER_FILE_PATH . 'archiv/' . $GUI->Stelle->id . '/' . $konvertierung->config['plan_abk_plural'] . '/' . basename($GUI->formvars['datei']);
 
 			if (!file_exists($filename)) {
 				$GUI->add_message('warning', 'Diese Datei ist nicht vorhanden. Wenden Sie sich an den Support.');
@@ -2387,8 +2392,7 @@ function go_switch_xplankonverter($go) {
 
 			if ($GUI->konvertierung->get_aktualitaetsdatum() == '') {
 				$GUI->konvertierung->set('error_id', 6);
-				send_error('Der Plan '. $GUI->konvertierung->get('bezeichnung') . ' (konvertierung_id: ' . $GUI->konvertierung->get_id() . ', gml_id: ' . $GUI->konvertierung->plan->get('gml_id') . ') hat kein ' . ucfirst($GUI->plan_attribut_aktualitaet) . '. Das muss in der XPlan-GML angepasst werden. Anschließend kann der Plan erneut hochgeladen werden. get_aktualitaetsdatum(): ' . $GUI->konvertierung->get_aktualitaetsdatum() . ' aktualitätsattribut: ' . $GUI->konvertierung->plan_attribut_aktualitaet . 'datum: ' .
-				$GUI->konvertierung->plan->get($GUI->konvertierung->plan_attribut_aktualitaet) . ' wirksamkeitsdatum: ' . $GUI->konvertierung->plan->get('wirksamkeitsdatum') . 'aenderungenbisdatum: ' . $GUI->konvertierung->plan->get('aenderungenbisdatum'));
+				send_error('Der Plan ' . $GUI->konvertierung->get('bezeichnung') . ' (konvertierung_id: ' . $GUI->konvertierung->get_id() . ', gml_id: ' . $GUI->konvertierung->plan->get('gml_id') . ') hat kein ' . ucfirst($GUI->konvertierung->get_plan_attribut_aktualitaet()) . '. Das muss in der XPlan-GML angepasst werden. Anschließend kann der Plan erneut hochgeladen werden. Die Attribute ' . natural_join($GUI->konvertierung->config['plan_attribut_aktualitaet'], ', ', ' und ') . ' waren alle leer!');
 				break;
 			}
 
@@ -2603,13 +2607,18 @@ function go_switch_xplankonverter($go) {
 			// Dieser Fall ist nur noch ein Alias für xplankonverter_konvertierung_anzeigen
 			// weil nicht nur Zusammenzeichnungen hochgeladen werden können.
 		}
+
 		case 'xplankonverter_konvertierung_anzeigen' : {
 			if ((array_key_exists('planart', $GUI->formvars) AND $GUI->formvars['planart'] != 'Plan')) {
 				$GUI->sanitize([
 					'konvertierung_id' => 'int',
 					'planart' => 'text'
 				]);
-				$GUI->konvertierungen = Konvertierung::find_konvertierungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet, $GUI->formvars['konvertierung_id']);
+				$GUI->konvertierungen = Konvertierung::find_konvertierungen(
+					$GUI, $GUI->formvars['planart'],
+					$GUI->plan_class,
+					$GUI->formvars['konvertierung_id']
+				);
 			}
 			$GUI->main = '../../plugins/xplankonverter/view/konvertierung.php';
 			$GUI->output();

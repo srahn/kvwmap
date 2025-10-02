@@ -38,6 +38,7 @@ class stelle {
 	var $ows_updatesequence;
 	var $ows_geographicdescription;
 	var $ows_fees;
+	var $ows_inspireidentifiziert;
 	var $ows_srs;
 
 	var $ows_contactorganization;
@@ -210,6 +211,7 @@ class stelle {
 				`ows_updatesequence`,
 				`ows_geographicdescription`,
 				`ows_fees`,
+				`ows_inspireidentifiziert`,
 				`ows_srs`,
 
 				`ows_contactorganization`,
@@ -277,6 +279,7 @@ class stelle {
 		$this->ows_updatesequence = $rs['ows_updatesequence'];
 		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
 		$this->ows_fees = $rs['ows_fees'];
+		$this->ows_inspireidentifiziert = $rs['ows_inspireidentifiziert'];
 		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
 
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
@@ -563,6 +566,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
+				`ows_inspireidentifiziert` = '" . $stellendaten['ows_inspireidentifiziert'] . "',
 				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
@@ -666,6 +670,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
+				`ows_inspireidentifiziert` = '" . $stellendaten['ows_inspireidentifiziert'] . "',
 				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
@@ -737,6 +742,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
+				`ows_inspireidentifiziert` = '" . $stellendaten['ows_inspireidentifiziert'] . "',
 				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "'
 			WHERE
 				ID = " . $this->id . "
@@ -1643,7 +1649,7 @@ class stelle {
 						privileg = foo.privileg, 
 						tooltip = foo.tooltip
 					";
-				#echo $sql.'<br>';
+				#echo 'SQL zum Anlegen eines used layers :' . $sql . '<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) {

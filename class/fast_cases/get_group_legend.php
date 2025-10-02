@@ -1389,7 +1389,11 @@ class GUI {
   }
 
 	function create_group_legend($group_id, $status = NULL){
+		include_once(CLASSPATH . 'LayerGroup.php');
 		$layerlist = $this->layerset['list'];
+		$group = new LayerGroup($this);
+		$group_aktiv_status = $group->get_aktiv_status($this->Stelle->id, $this->user->id, $group_id);
+
 		if (@$this->groupset[$group_id]['untergruppen'] == NULL AND @$this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
@@ -1402,6 +1406,7 @@ class GUI {
 						<a href="javascript:getlegend(\'' . $group_id . '\')">
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>
+						<!--input id="group_checkbox_' . $group_id . '" name="group_checkbox_' . $group_id . '" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="javascript:selectgroupthema(document.GUI.layers_of_group_' . $group_id . ', ' . $this->user->rolle->instant_reload.')"' . ($group_aktiv_status == 2 ? ' checked' : '') . '/-->
 						<span class="legend_group' . (value_of($this->group_has_active_layers, $group_id) != '' ? '_active_layers' : '') . '">
 							<!--a
 								href="javascript:getGroupOptions(' . $group_id . ')"
@@ -1409,7 +1414,7 @@ class GUI {
 								onmouseout="$(\'#test_' . $group_id . '\').hide()"
 							>' . html_umlaute($groupname) . '
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
-							</a//-->' .
+							</a-->' .
 							html_umlaute($groupname) . '
 							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
@@ -1439,6 +1444,9 @@ class GUI {
 					$this->layerset['layers_of_group'][$group_id] = array_reverse($this->layerset['layers_of_group'][$group_id]);		# umgedrehte Zeichenreihenfolge verwenden
 				}
 				if (!value_of($this->formvars, 'nurFremdeLayer')) {
+					if (!is_array($this->layer_ids_of_group[$group_id])) {
+						$this->layer_ids_of_group[$group_id] = [];
+					}
 					$legend .=  '<tr>
 												<td align="center">
 													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layer_ids_of_group[$group_id]).'">';
@@ -1450,7 +1458,7 @@ class GUI {
 													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.', '.$this->user->rolle->instant_reload.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllLayers.'"></a>
 												</td>
 												<td>
-													<span class="legend_layer">'.$this->all.'</span>
+													<span class="legend_layer">' . $this->strAll . '</span>
 												</td>
 											</tr>';
 				}
@@ -1464,7 +1472,7 @@ class GUI {
     $legend .= '<input type="hidden" name="radiolayers_'.$group_id.'" value="'.value_of($this->radiolayers, $group_id).'">';
 	  $legend .= '</div>';
     return $legend;
-  }
+	}
 
 	function create_layer_legend($layer){
 		if (value_of($layer, 'requires') != '' )return;

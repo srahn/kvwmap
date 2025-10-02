@@ -136,7 +136,7 @@ class Zusammenzeichnung {
       form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
       form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
-			form_data.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').val());
+			form_data.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'));
       var xhttp = new XMLHttpRequest();
       xhttp.open("POST", "index.php", true);
       xhttp.onload = (event) => {
@@ -208,7 +208,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
         // console.log('Response import_zusammenzeichnung: %o', result);
@@ -248,7 +248,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val(),
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'),
         simplify_fachdaten_geom: $('#simplify_fachdaten_geom').val()
       },
       success: (result) => {
@@ -285,7 +285,7 @@ class Zusammenzeichnung {
     formData.append('planart', this.planart);
     formData.append('mime_type', 'json');
     formData.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
-		formData.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').val());
+		formData.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'));
     let response = fetch('index.php', {
       method: 'POST',
       body: formData
@@ -322,7 +322,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
         //console.log('Response import_reindexed_zusammenzeichnung: %o', result);
@@ -354,7 +354,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
         //console.log('Response convert_zusammenzeichnung: %o', result);
@@ -385,7 +385,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
         //console.log('Response gml_generieren: %o', result);
@@ -416,7 +416,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
         //console.log('Response create_geoweb_service: %o', result);
@@ -447,7 +447,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
         //console.log('Response create_metadata: %o', result);
@@ -484,7 +484,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
         //console.log('Response update_full_geoweb_service: %o', result);
@@ -514,7 +514,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
         //console.log('Response update_full_metadata: %o', result);
@@ -545,7 +545,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
         //console.log('Response check_class_completeness: %o', result);
@@ -577,7 +577,7 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
-				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').val()
+				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       beforeSend : (request) => {
         console.log('Request %o', request);

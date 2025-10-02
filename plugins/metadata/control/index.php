@@ -206,17 +206,21 @@ function go_switch_metadata($go){
 		} break;
 
 		case 'metadata_test' : {
-			$handle = fopen('/var/www/data/fdm/dom/dom_atom.xml', "r");
-			if ($handle) {
-				$atom_url = 'https://www.geodaten-mv.de/dienste/dom_download?index=4&amp;dataset=us214578-a1n5-4v12-v31c-5tg2az3a2164&amp;file=dom1_33_$x_$y_2_gtiff.tif';
-				$regex = '/' . str_replace('$x', '(.*?)', str_replace('$y', '(.*?)', str_replace('?', '\?', str_replace('/', '\/', $atom_url)))) . '/';
-				while (($line = fgets($handle)) !== false) {
-					if (preg_match($regex, $line, $match) == 1) {
-						echo '<br>' . $match[0];
-					}
-				}
-				fclose($handle);
-			}
+			// $ressource = Ressource::find_by_id($GUI, 'id', 166);
+			// include_once(PLUGINS . 'metadata/model/Lineage.php');
+			// $targets = Lineage::find_targets($GUI, 166);
+			// echo '<br>targets: ' . count($targets);
+			// $handle = fopen('/var/www/data/fdm/dom/dom_atom.xml', "r");
+			// if ($handle) {
+			// 	$atom_url = 'https://www.geodaten-mv.de/dienste/dom_download?index=4&amp;dataset=us214578-a1n5-4v12-v31c-5tg2az3a2164&amp;file=dom1_33_$x_$y_2_gtiff.tif';
+			// 	$regex = '/' . str_replace('$x', '(.*?)', str_replace('$y', '(.*?)', str_replace('?', '\?', str_replace('/', '\/', $atom_url)))) . '/';
+			// 	while (($line = fgets($handle)) !== false) {
+			// 		if (preg_match($regex, $line, $match) == 1) {
+			// 			echo '<br>' . $match[0];
+			// 		}
+			// 	}
+			// 	fclose($handle);
+			// }
 		} break;
 
 		case 'Metadaten_Auswaehlen_Senden' : {
