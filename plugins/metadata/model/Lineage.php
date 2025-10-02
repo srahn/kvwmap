@@ -2,6 +2,7 @@
 ##################
 # Klasse Lineage #
 ##################
+include_once(PLUGINS . 'metadata/model/Ressource.php');
 
 class Lineage extends PgObject {
 	
@@ -16,14 +17,16 @@ class Lineage extends PgObject {
 
   public static	function find_sources($gui, $target_id) {
     $ressources = array();
-    $linages = $this->find_where('target_id = ' . $target_id);
+    $lineage = new Lineage($gui);
+    $lineages = $lineage->find_where('target_id = ' . $target_id);
     if (count($lineages) > 0) {
+      $ressource = new Ressource($gui);
       $ressources = $ressource->find_where("id IN (" . implode(', ',
         array_map(
           function($lineage) {
             return $lineage->get('source_id');
           },
-          $linages
+          $lineages
         )) . ")"
       );
     }
@@ -39,16 +42,18 @@ class Lineage extends PgObject {
     );
   }
 
-  public static	function find_targets($gui, $souce_id) {
+  public static	function find_targets($gui, $source_id) {
     $ressources = array();
-    $lineages = $this->find_where('source_id = ' . $source_id);
+    $lineage = new Lineage($gui);
+    $lineages = $lineage->find_where('source_id = ' . $source_id);
     if (count($lineages) > 0) {
+      $ressource = new Ressource($gui);
       $ressources = $ressource->find_where("id IN (" . implode(', ',
         array_map(
           function($lineage) {
             return $lineage->get('target_id');
           },
-          $linages
+          $lineages
         )) . ")"
       );
     }

@@ -660,10 +660,16 @@ class GUI {
 											$output .= '##';
 										} break;
 										default : {
+											if (is_scalar($value ?? '')) {
+												$value = strval($value);
+											}
+											else {
+												$value = json_encode($value);
+											}
 											$output .=  $attributes['alias'][$j].': ';
 											$attribcount++;
 											$value = str_replace(chr(10), '##',  $value);
-											$output .= $value.'  ';
+											$output .= $value . '  ';
 											$output .= '##';
 										}
 									}
@@ -2173,7 +2179,7 @@ class db_mapObj{
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {
 								# SQL-Abfrage wie select attr1 as value, atrr2 as output from table1
-								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen
+								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen // get_options
 								# --------- weitere Optionen -----------
 								if (value_of($optionen, 1) != '') {
 									# die weiteren Optionen exploden (opt1 opt2 opt3)
@@ -2317,7 +2323,7 @@ class db_mapObj{
 					case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' : {
 						if ($attributes['options'][$i] != '') {
 							if (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
-								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen
+								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen // get_options
 								$attributes['options'][$i] = $optionen[0];
 								if ($query_result != NULL) {
 									foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
@@ -2367,7 +2373,7 @@ class db_mapObj{
 
 					case 'Radiobutton' : {
 						if ($attributes['options'][$i] != '') {		 # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
-							$optionen = explode(';', $attributes['options'][$i]);	# Optionen; weitere Optionen
+							$optionen = explode(';', $attributes['options'][$i]);	# Optionen; weitere Optionen // get_options
 							$attributes['options'][$i] = $optionen[0];
 							if (strpos($attributes['options'][$i], "'") === 0) {			# Aufzählung wie 'wert1','wert2','wert3'
 								$explosion = explode(',', str_replace("'", "", $attributes['options'][$i]));
@@ -2408,7 +2414,7 @@ class db_mapObj{
 					# SubFormulare mit Primärschlüssel(n)
 					case 'SubFormPK' : {
 						if ($attributes['options'][$i] != '') {
-							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,pkey3...; weitere optionen
+							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,pkey3...; weitere optionen // get_options
 							$subform = explode(',', $options[0]);
 							$attributes['subform_layer_id'][$i] = $subform[0];
 							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
@@ -2427,7 +2433,7 @@ class db_mapObj{
 					# SubFormulare mit Fremdschlüssel
 					case 'SubFormFK' : {
 						if ($attributes['options'][$i] != '') {
-							$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen
+							$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options
 							$subform = explode(',', $options[0]);
 							$attributes['subform_layer_id'][$i] = $subform[0];
 							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
@@ -2447,7 +2453,7 @@ class db_mapObj{
 					# eingebettete SubFormulare mit Primärschlüssel(n)
 					case 'SubFormEmbeddedPK' : {
 						if ($attributes['options'][$i] != '') {
-							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,preview_attribute; weitere Optionen
+							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,preview_attribute; weitere Optionen // get_options
 							$subform = explode(',', $options[0]);
 							$attributes['subform_layer_id'][$i] = $subform[0];
 							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);

@@ -237,8 +237,8 @@ class rolle {
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
-			$layer_name_filter . 
-			$active_filter . "
+				$layer_name_filter .
+				$active_filter . "
 			ORDER BY
 				l.drawingorder desc
 		";
@@ -552,7 +552,12 @@ class rolle {
 			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
-			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
+			rolle::$layer_params = array_map(
+				function ($layer_param) {
+					return ($layer_param === 'Array' ? '' : $layer_param);
+				},
+				(array)json_decode('{' . $rs['layer_params'] . '}')
+			);
 			$this->visually_impaired = $rs['visually_impaired'];
 			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
@@ -648,7 +653,7 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo $sql;
+		#echo '<br>SQL to set Layer params: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 1);
 		rolle::$layer_params = (array)json_decode('{' . $layer_params . '}');
 		return $ret;
@@ -1740,150 +1745,31 @@ class rolle {
 	}
 
 	/**
-	 * Fügt die Rolle für den Nutzer $user_id in der Stelle $stelle_id hinzu.
-	 * Verwendet die Defaulteinstellungen der Rolle $default_user_id, falls übergeben
-	 * und anders als $user_id
+	 * Function set role for user with $user_id in Stelle $stelle_id
+	 * @param int $user_id
+	 * @param int $stelle_id
+	 * @param int $default_user_id
+	 * @param int|null $parent_stelle_id
+	 * @return int 1 | 0 Wenn success 1 else 0
 	 */
 	function setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id = NULL) {
+		$role = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
+
 		# trägt die Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
-			# Rolleneinstellungen vom Defaultnutzer verwenden
-			$sql = "
-				INSERT IGNORE INTO `rolle` (
-					`user_id`,
-					`stelle_id`,
-					`nImageWidth`, `nImageHeight`,
-					`auto_map_resize`,
-					`minx`, `miny`, `maxx`, `maxy`,
-					`nZoomFactor`,
-					`selectedButton`,
-					`epsg_code`,
-					`epsg_code2`,
-					`coordtype`,
-					`active_frame`,
-					`gui`,
-					`language`,
-					`hidemenue`,
-					`hidelegend`,
-					`tooltipquery`,
-					`buttons`,
-					`scrollposition`,
-					`result_color`,
-					`result_hatching`,
-					`result_transparency`,
-					`always_draw`,
-					`runningcoords`,
-					`showmapfunctions`,
-					`showlayeroptions`,
-					`showrollenfilter`,
-					`singlequery`,
-					`querymode`,
-					`geom_edit_first`,
-					`dataset_operations_position`,
-					`immer_weiter_erfassen`,
-					`upload_only_file_metadata`,
-					`overlayx`, `overlayy`,
-					`instant_reload`,
-					`menu_auto_close`,
-					`layer_params`,
-					`visually_impaired`,
-					`font_size_factor`,
-					`menue_buttons`,
-					`redline_text_color`,
-					`redline_font_family`,
-					`redline_font_size`,
-					`redline_font_weight`
-				)
-				SELECT " .
-					$user_id . ", " .
-					$stelle_id . ",
-					`nImageWidth`, `nImageHeight`,
-					`auto_map_resize`,
-					`minx`, `miny`, `maxx`, `maxy`,
-					`nZoomFactor`,
-					`selectedButton`,
-					`epsg_code`,
-					`epsg_code2`,
-					`coordtype`,
-					`active_frame`,
-					`gui`,
-					`language`,
-					`hidemenue`,
-					`hidelegend`,
-					`tooltipquery`,
-					`buttons`,
-					`scrollposition`,
-					`result_color`,
-					`result_hatching`,
-					`result_transparency`,
-					`always_draw`,
-					`runningcoords`,
-					`showmapfunctions`,
-					`showlayeroptions`,
-					`showrollenfilter`,
-					`singlequery`,
-					`querymode`,
-					`geom_edit_first`,
-					`dataset_operations_position`,
-					`immer_weiter_erfassen`,
-					`upload_only_file_metadata`,
-					`overlayx`, `overlayy`,
-					`instant_reload`,
-					`menu_auto_close`,
-					`layer_params`,
-					`visually_impaired`,
-					`font_size_factor`,
-					`menue_buttons`,
-					`redline_text_color`,
-					`redline_font_family`,
-					`redline_font_size`,
-					`redline_font_weight`
-				FROM
-					`rolle`
-				WHERE
-					`user_id` = " . $default_user_id . " AND
-					`stelle_id` = " . ($parent_stelle_id ?? $stelle_id) . "
-			";
+			$result = $role->set_rolle_from_default_user_or_parent_stelle($user_id, $stelle_id, $default_user_id, $parent_stelle_id);
 		}
 		else {
-			# Default - Rolleneinstellungen verwenden
-			$sql = "
-				INSERT IGNORE INTO rolle (user_id, stelle_id, epsg_code, minx, miny, maxx, maxy)
-				SELECT " .
-					$user_id . ",
-					ID,
-					epsg_code,
-					minxmax,
-					minymax,
-					maxxmax,
-					maxymax
-				FROM
-					stelle
-				WHERE
-					ID = " . $stelle_id . "
-			";
+			$result = $role->set_rolle_from_stelle_default($user_id, $stelle_id);
 		}
-		#debug_write('Rolle eintragen', $sql, 1);
-		$this->debug->write("<p>file:rolle.php class:rolle function:setRolle - Einfügen einer neuen Rolle:<br>" . $sql, 4);
-		$ret = $this->database->execSQL($sql, 4, 0);
-		if (!$ret['success']) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . $ret[1], 4);
+		$this->debug->write("<p>file:rolle.php class:rolle function:setRolle - Einfügen einer neuen Rolle:<br>" . $result['sql'], 4);
+		if (!$result['success']) {
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . $result['msg'], 4);
 			return 0;
 		}
-		// Update layer_params if default is not available for user
-		$rolle = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
-		$this->rectify_layer_params($rolle);
+		$role = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
+		$role->rectify_layer_params($role->get('layer_params'));
 		return 1;
-	}
-
-	# ToDo pk: harmonize get_rolle_layer_params and get_layer_params, same with set_rolle_layer_params and set_layer_params
-	/**
-	 * Function get the layer parameter from rolle attribut layer_params as an assoziative array
-	 * @param MyObject The MyObject of the rolle.
-	 * @return Array The assoziative array with the layer params of rolle.
-	 */
-	function get_rolle_layer_params($rolle) {
-		return (array)json_decode('{' . $rolle->get('layer_params') . '}');
 	}
 
 	/**
@@ -1894,45 +1780,6 @@ class rolle {
 	 */
 	function set_rolle_layer_params($rolle, $layer_params) {
 		$rolle->update(array('layer_params', implode(',', $new_layer_params)));
-	}
-
-	/**
-	 * Function get the layer_params of rolle and check if they are
-	 * arvailable for the user in that rolle. If not set the first possible value instead
-	 * of the before existing value of that layer parameter.
-	 * @param MyObject The MyObject of the rolle to be checked.
-	 * @return void
-	 */
-	function rectify_layer_params($rolle) {
-		include_once(CLASSPATH . 'LayerParam.php');
-		$layer_params = $this->get_rolle_layer_params($rolle);
-		$new_layer_params = array();
-		foreach (array_keys($layer_params) AS $key) {
-			$layer_param = LayerParam::find_by_key($this->gui_object, $key);
-			$result = $layer_param->get_options($this->user_id, $this->stelle_id);
-			if (!$result['success']) {
-				return $result;
-			}
-			if (!in_array(
-				$layer_params[$key],
-				array_map(
-					function($option) {
-						return $option['value'];
-					},
-					$result['options']
-				)
-			)) {
-				$layer_params[$key] = $result['options']['value'][0];
-			};
-		}
-		foreach ($layer_params AS $param_key => $value) {
-			$new_layer_params[] = '"' . $param_key . '":"' . $value . '"';
-		}
-		$this->set_layer_params(implode(',', $new_layer_params));
-		return array(
-			'success' => true,
-			'msg' => 'Layerparameter erfolgreich für Rolle angepasst.'
-		);
 	}
 
 	function deleteRollen($user_id, $stellen) {
@@ -2112,26 +1959,47 @@ class rolle {
 		}
 		else {
 			for ($j = 0; $j < count_or_0($layerids); $j++){
-				$sql = "
+				if (MYSQLVERSION < 800) {
+					$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
-					WITH RECURSIVE cte (group_id) AS (
-						SELECT 
-            	coalesce(ul.group_id, l.Gruppe) AS group_id
-						FROM
-          		used_layer ul JOIN
-            	layer l ON ul.`Layer_ID` = l.`Layer_ID`
-            WHERE 
-            	l.Layer_ID = " . $layerids[$j] . " AND
-            	ul.Stelle_ID = " . $stelle_id . "
-						UNION ALL
-						SELECT obergruppe FROM u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
-					)
-					SELECT 
-						" . $user_id . ", 
-						" . $stelle_id . ", 
-						group_id, 
+					SELECT DISTINCT 
+						".$user_id.", 
+						".$stelle_id.", 
+						u_groups.id, 
 						0
-					FROM cte;";
+					FROM (
+						SELECT 
+							@id AS id, 
+							@id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe
+						FROM 
+							u_groups, 
+							(SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = ".$layerids[$j].")) AS vars
+						WHERE @id IS NOT NULL
+					) AS dat
+					JOIN u_groups ON dat.id = u_groups.id";
+				}
+				else {
+					$sql = "
+						INSERT IGNORE INTO u_groups2rolle 
+						WITH RECURSIVE cte (group_id) AS (
+							SELECT 
+								coalesce(ul.group_id, l.Gruppe) AS group_id
+							FROM
+								used_layer ul JOIN
+								layer l ON ul.`Layer_ID` = l.`Layer_ID`
+							WHERE 
+								l.Layer_ID = " . $layerids[$j] . " AND
+								ul.Stelle_ID = " . $stelle_id . "
+							UNION ALL
+							SELECT obergruppe FROM u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
+						)
+						SELECT 
+							" . $user_id . ", 
+							" . $stelle_id . ", 
+							group_id, 
+							0
+						FROM cte;";
+				}
 				#echo '<br>Gruppen: '.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
@@ -2160,34 +2028,53 @@ class rolle {
 	}
 
 	static function setGroupsForAll($database) {
-		$sql = "
-			INSERT IGNORE INTO u_groups2rolle 				
-			WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
-				SELECT DISTINCT
-						ul.`Stelle_ID` AS stelle_id,
-						r.user_id,
-						coalesce(ul.group_id, l.Gruppe) AS group_id
-				FROM
-						used_layer ul JOIN
-						layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
-						rolle r ON ul.`Stelle_ID` = r.stelle_id
-				UNION ALL
-				SELECT 
-						cte.stelle_id,
-						cte.user_id,
-						obergruppe AS group_id
-				FROM 
-						u_groups, cte 
-				WHERE 
-						cte.group_id = u_groups.id AND 
-						obergruppe IS NOT NULL
-			)
+		if (MYSQLVERSION < 800) {
+			$sql = "
+			INSERT IGNORE INTO u_groups2rolle 
 			SELECT DISTINCT 
-				user_id,
-				stelle_id,
-				group_id,
-				0 
-			FROM cte";
+				r2ul.user_id,
+				r2ul.stelle_id,
+				g5.id,
+				0
+			FROM 
+				`u_rolle2used_layer` r2ul
+				JOIN layer l ON l.Layer_ID = r2ul.layer_id
+				JOIN u_groups g1 ON g1.id = l.Gruppe
+				LEFT JOIN u_groups g2 ON g2.id = g1.obergruppe
+				LEFT JOIN u_groups g3 ON g3.id = g2.obergruppe
+				LEFT JOIN u_groups g4 ON g4.id = g3.obergruppe
+				LEFT JOIN u_groups g5 ON (g5.id = g4.id OR g5.id = g3.id OR g5.id = g2.id OR g5.id = g1.id)";
+		}
+		else {
+			$sql = "
+				INSERT IGNORE INTO u_groups2rolle 				
+				WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
+					SELECT DISTINCT
+							ul.`Stelle_ID` AS stelle_id,
+							r.user_id,
+							coalesce(ul.group_id, l.Gruppe) AS group_id
+					FROM
+							used_layer ul JOIN
+							layer l ON ul.`Layer_ID` = l.`Layer_ID` JOIN
+							rolle r ON ul.`Stelle_ID` = r.stelle_id
+					UNION ALL
+					SELECT 
+							cte.stelle_id,
+							cte.user_id,
+							obergruppe AS group_id
+					FROM 
+							u_groups, cte 
+					WHERE 
+							cte.group_id = u_groups.id AND 
+							obergruppe IS NOT NULL
+				)
+				SELECT DISTINCT 
+					user_id,
+					stelle_id,
+					group_id,
+					0 
+				FROM cte";
+		}
 		#echo '<br>Gruppen: '.$sql;
 		$database->execSQL($sql);
 	}
@@ -2246,7 +2133,9 @@ class rolle {
 				n.group_id IS NULL
 		";
 		// echo '<br>SQL zum Löschen nicht mehr benötigter groups2rolle Eintragungen: ' . $sql . '<br>';
-		$database->execSQL($sql);
+		if (MYSQLVERSION > 800) {
+			$database->execSQL($sql);
+		}
 	}
 
 	function set_one_Layer($user_id, $stelle_id, $layer_id,  $active) {

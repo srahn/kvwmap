@@ -93,7 +93,7 @@
 
     <div class="dpt-footer-cell" style="flex-grow: 100; text-align: right">
       Anzahl Pakete: <span id="num_packages_span"></span>
-      bestellt: <span id="num_ordered_packages_span"></span>
+      beauftragt: <span id="num_ordered_packages_span"></span>
       in Arbeit: <span id="num_packages_in_progress_span"></span>
       gepackt: <span id="num_packed_packages_span"></span>
     </div>
@@ -214,7 +214,7 @@
           if (package.get('pack_status_id') == 2) {
             cancelDataPackage(ressource_id);
           }
-          if (package.get('pack_status_id') == 4) {
+          if ([3, 4].includes(package.get('pack_status_id'))) {
             deleteDataPackage(ressource_id);
           }
         }
@@ -269,7 +269,7 @@
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
-      } 
+      }
       const json = await response.json();
       let msg_type = 'notice';
       if (!json.success) {

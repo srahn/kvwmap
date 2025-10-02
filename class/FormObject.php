@@ -82,10 +82,27 @@ class FormObject {
 		}
 	} # ende constructor
 
-/*
-* parma $options array value, output, attribute, attribute_value, title, style
-*/
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '') {
+/**
+ * Function to create a select field
+ * @param $name string name attribute of the select field
+ * @param $options array options for the select field (array with value and output keys)
+ * @param $value string|int selected value
+ * @param $size int size attribute of the select field
+ * @param $style string style attribute of the select field
+ * @param $onchange string onchange attribute of the select field
+ * @param $id string id attribute of the select field
+ * @param $multiple string if not empty the multiple attribute is added
+ * @param $class string class attribute of the select field
+ * @param $first_option string first option to be added with empty value
+ * @param $option_style string style attribute for each option
+ * @param $option_class string class attribute for each option
+ * @param $onclick string onclick attribute for each option
+ * @param $onmouseenter string onmouseenter attribute for the select field
+ * @param $title string title attribute for the select field
+ * @param $data array additional data attributes for the select field (arrays with key => value pairs)
+ * @return string HTML code for the select field
+ */
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '', $title = '', $data = array()) {
 	$id = ($id == '' ? $name : $id);
 	if ($multiple != '') {
 		$multiple = ' multiple';
@@ -97,6 +114,14 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	if ($option_style != '') $option_style = 'style="' . $option_style . '"';
 	if ($option_class != '') $option_class = 'class="' . $option_class . '"';
 	if ($onmouseenter != '') $onmouseenter = 'onmouseenter="' . $onmouseenter . '"';
+	if ($title != '') $title = 'title="' . $title . '"';
+	foreach ($data AS $data_key => $data_value) {
+		$data[$data_key] = 'data-' . $data_key . '="' . $data_value . '"';
+	}
+	if ($title != '') $title = 'title="' . $title . '"';
+	foreach ($data AS $data_key => $data_value) {
+		$data[$data_key] = 'data-' . $data_key . '="' . $data_value . '"';
+	}
 
 	$options_html = array();
 	if ($first_option != '') {
@@ -110,6 +135,8 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 			$selected = (in_array(strval($option['value']), explode(',', $value)) ? ' selected' : '');
 		}
 		else {
+			// echo 'option value: ' . $option['value'] . ' value: ' . $value . '<br>';
+			// echo 'option value: ' . $option['value'] . ' value: ' . $value . '<br>';
 			$selected = (strval($option['value']) === strval($value) ? ' selected' : '');
 		}
 		$options_html[] = "
@@ -122,69 +149,93 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	}
 
 	$html  = '
-<select id="' . $id . '" name="' . $name . ($multiple != '' ? '[]' : '') . '" size="' . $size . '" ' . $style . ' ' . $onchange . ' ' . $onmouseenter . ' ' . $multiple . ' ' . $class . '>
+<select id="' . $id . '" name="' . $name . ($multiple != '' ? '[]' : '') . '" size="' . $size . '" ' . $style . ' ' . $onchange . ' ' . $onmouseenter . ' ' . $multiple . ' ' . $class . ' ' . $title . ' ' . implode(' ', $data) . '>
 	' . implode("\n", $options_html) . '
 </select>';
   return $html;
 }
 
+	static function createCustomSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '', $option_onmouseenter = '') {
+		$id = ($id == '' ? $name : $id);
+		if ($multiple != '') $multiple = ' multiple';
+		if ($style != '') $style = 'style="' . $style . '"';
+		if ($onchange != '') $onchange = 'onchange="' . $onchange . '"';
+		if ($onclick != '') $onclick = 'onclick="' . $onclick . '"';
+		if ($class != '') $class = 'class="' . $class . '"';
+		if ($option_style != '') $option_style = 'style="' . $option_style . '"';
+		if ($onmouseenter != '') $onmouseenter = 'onmouseenter="' . $onmouseenter . '"';
 
-static	function createCustomSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '', $option_onmouseenter = '') {
-	$id = ($id == '' ? $name : $id);
-	if ($multiple != '') $multiple = ' multiple';
-	if ($style != '') $style = 'style="' . $style . '"';
-	if ($onchange != '') $onchange = 'onchange="' . $onchange . '"';
-	if ($onclick != '') $onclick = 'onclick="' . $onclick . '"';
-	if ($class != '') $class = 'class="' . $class . '"';
-	if ($option_style != '') $option_style = 'style="' . $option_style . '"';
-	if ($onmouseenter != '') $onmouseenter = 'onmouseenter="' . $onmouseenter . '"';
+		$options_html = array();
+		if ($first_option != '') {
+			$options = array_merge([0 => ['value' => '', 'output' => $first_option]], $options);
+		}
+		foreach($options AS $option) {
+			if (is_string($option)) {
+				$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben
+			}
+			if (!array_key_exists('output', $option)) {
+				$option['output'] = $option['value'];
+			}
+			if (strval($option['value']) === strval($value)) {
+				$selected = ' selected';
+				$output = $option['output'];
+				$image = $option['image'];
+			}
+			else {
+				$selected = '';
+			}
+			$options_html[] = "
+				<li onclick=\"custom_select_click(this)\" onmouseenter=\"custom_select_hover(this);" . $option_onmouseenter . "\" " . $option_style . " class=\"" . $option_class . $selected . "\" 
+					data-value=\"" . $option['value'] . "\"" .
+					(array_key_exists('attribute', $option) ? " " . $option['attribute'] . "=\"" . $option['attribute_value'] . "\"" : '') .
+					(array_key_exists('title', $option) ? " title=\"" . $option['title'] ."\"" : '') .
+					(array_key_exists('style', $option) ? " style=\"" . $option['style'] . "\"" : '') . "
+				>
+					<img src=\"" . ($option['image']? 'data:image/' . pathinfo($option['image'])['extension'] . ';base64,' . base64_encode(@file_get_contents($option['image'])) : 'graphics/leer.gif') . "\">
+					<span>" . $option['output'] ."</span>
+				</li>";
+		}
 
-	$options_html = array();
-	if ($first_option != '') {
-		$options = array_merge([0 => ['value' => '', 'output' => $first_option]], $options);
+		$html  = '
+			<div class="custom-select" id="custom_select_' . $id . '" ' . $style . '>
+				<input type="hidden" ' . $onchange . ' ' . $class . ' id="' . $id . '" name="' . $name . '" value="' . $value . '">
+				<div class="placeholder editable" onclick="toggle_custom_select(\'' . $id . '\');" '.$onmouseenter.'>
+					<img src="' . ($image? 'data:image/' . pathinfo($image)['extension'] . ';base64,' . base64_encode(@file_get_contents($image)) : 'graphics/leer.gif') . '">
+					<span>' . $output . '</span>
+				</div>
+				<div style="position:relative">
+					<ul class="dropdown" id="dropdown">
+						'.implode('', $options_html).'
+					</ul>
+				</div>
+			</div>';
+		return $html;
 	}
-	foreach($options AS $option) {
-		if (is_string($option)) {
-			$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben
-		}
-		if (!array_key_exists('output', $option)) {
-			$option['output'] = $option['value'];
-		}
-		if (strval($option['value']) === strval($value)) {
-			$selected = ' selected';
-			$output = $option['output'];
-			$image = $option['image'];
-		}
-		else {
-			$selected = '';
-		}
-		$options_html[] = "
-			<li onclick=\"custom_select_click(this)\" onmouseenter=\"custom_select_hover(this);" . $option_onmouseenter . "\" " . $option_style . " class=\"" . $option_class . $selected . "\" 
-				data-value=\"" . $option['value'] . "\"" .
-				(array_key_exists('attribute', $option) ? " " . $option['attribute'] . "=\"" . $option['attribute_value'] . "\"" : '') .
-				(array_key_exists('title', $option) ? " title=\"" . $option['title'] ."\"" : '') .
-				(array_key_exists('style', $option) ? " style=\"" . $option['style'] . "\"" : '') . "
-			>
-				<img src=\"" . ($option['image']? 'data:image/' . pathinfo($option['image'])['extension'] . ';base64,' . base64_encode(@file_get_contents($option['image'])) : 'graphics/leer.gif') . "\">
-				<span>" . $option['output'] ."</span>
-			</li>";
-	}
 
-	$html  = '
-		<div class="custom-select" id="custom_select_' . $id . '" ' . $style . '>
-			<input type="hidden" ' . $onchange . ' ' . $class . ' id="' . $id . '" name="' . $name . '" value="' . $value . '">
-			<div class="placeholder editable" onclick="toggle_custom_select(\'' . $id . '\');" '.$onmouseenter.'>
-				<img src="' . ($image? 'data:image/' . pathinfo($image)['extension'] . ';base64,' . base64_encode(@file_get_contents($image)) : 'graphics/leer.gif') . '">
-				<span>' . $output . '</span>
-			</div>
-			<div style="position:relative">
-				<ul class="dropdown" id="dropdown">
-					'.implode('', $options_html).'
-				</ul>
-			</div>
-		</div>';
-  return $html;
-}
+	static function createCheckboxList($name, $options, $values = array(), $onchange = '') {
+		$html = '';
+		$check_all = empty($values) OR count($options) === count($values);
+		if (count($options) > 5) {
+			$html .= '<label><input id="select-all" type="checkbox" name="" value="" ' . ($check_all ? ' checked' : '') . ' onchange="' . $onchange . '"> --- Alle ---</label><br>';
+		}
+		$html .= implode('<br>', array_map(
+			function ($option, $index) use ($name, $values, $onchange, $check_all) {
+				$checked = $check_all || in_array($option['value'], $values) ? ' checked' : '';
+				return '<label><input class="' . $name . '" type="checkbox" name="' . $name . '[' . $index . ']" value="' . htmlspecialchars($option['value']) . '" ' . $checked . ' onchange="' . $onchange . '"> ' . htmlspecialchars($option['output']) . '</label>';
+			},
+			$options,
+			array_keys($options)
+		));
+		$html .= '
+			<script>
+				document.getElementById(\'select-all\').addEventListener(\'change\', function () {
+				const checkboxes = document.querySelectorAll(\'.' . $name . '\');
+				checkboxes.forEach(cb => cb.checked = this.checked);
+			});
+			</script>
+		';
+		return $html;
+	}
 
 	function addJavaScript($event,$script){
 		$this->JavaScript.=' '.$event.'="'.$script.'"';

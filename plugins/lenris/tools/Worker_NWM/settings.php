@@ -1,10 +1,5 @@
 <?
 
-$host = "pgsql"; 
-$user = "kvwmap"; 
-$pass = "@q{TWa^83az!V8H6"; 
-$db = "kvwmapsp";
-
 $data_nwm = '/var/www/data/data_nwm';
 
 $objektarten = array(
