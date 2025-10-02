@@ -22561,7 +22561,7 @@ DO $$
 				class_id = " . $attrib['new_class_id'] . ",
 				".$names.",
 				layer_id = " . $attrib['layer_id'] . ",
-				expression = '" . str_replace('\\', '\\\\', $attrib['expression']) . "',
+				expression = '" . pg_escape_string(str_replace('\\', '\\\\', $attrib['expression'])) . "',
 				text = '" . $attrib['text'] . "',
 				classification = '" . $attrib['classification'] . "',
 				legendgraphic= '" . $attrib['legendgraphic'] . "',
