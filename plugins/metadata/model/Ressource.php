@@ -4,12 +4,12 @@
 #############################
 include_once(CLASSPATH . 'PgObject.php');
 include_once(PLUGINS . 'metadata/model/SubRessource.php');
+include_once(PLUGINS . 'metadata/model/Lineage.php');
 
 class Ressource extends PgObject {
 
 	static $schema = 'metadata';
 	static $tableName = 'ressources';
-	public $write_debug = false;
 	public $has_subressources = false;
 	public $has_ressource_ranges = false;
 	public $sub_ressources = array();
@@ -17,7 +17,7 @@ class Ressource extends PgObject {
 	public $unlogged = true;
 
 	function __construct($gui) {
-		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->write_debug);
+		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->show);
 		parent::__construct($gui, Ressource::$schema, Ressource::$tableName);
 		include_once(CLASSPATH . 'data_import_export.php');
 		$this->gui->data_import_export = new data_import_export('gid');
@@ -109,7 +109,7 @@ class Ressource extends PgObject {
 			// only ressouces with state Uptodate will be find as outdated
 			$status_condition = "= 0";
 		}
-		$ressource->show = true;
+		$ressource->show = false;
 		$ressources = $ressource->find_where(
 			"
 				(von_eneka OR use_for_datapackage) AND
@@ -188,7 +188,7 @@ class Ressource extends PgObject {
 
 	function destroy() {
 		#echo "\ndestroy Dataset: " . $this->get($this->identifier);
-		$this->debug->show('destroy dataset ' . $this->get('datenquelle'), Dataset::$write_debug);
+		$this->debug->show('destroy dataset ' . $this->get('datenquelle'), $this->show);
 		$this->delete();
 	}
 
@@ -508,18 +508,9 @@ class Ressource extends PgObject {
 	 */
 	function download_wfs() {
 		$url = $this->get('download_url');
-		// ToDo: query first capabilites to check if epsg is available
-		$epsg = ($this->get('import_epsg') ? $this->get('import_epsg') : '25832');
-		$params = array(
-			'Service' => 'WFS',
-			'Version' => $this->get_wfs_version($url, '1.1.0'),
-			'Request' => 'GetFeature',
-			'TypeName' => $this->get('import_layer'),
-			'SRS' => 'urn:ogc:def:crs:EPSG::' . $epsg
-		);
 
 		try {
-			$this->debug->show('Download from URL:<br>' . $url, true);
+			$this->debug->show('Download WFS onlineressouce: ' . $url, true);
 			if ($this->get('download_path') == '') {
 				return array(
 					'success' => false,
@@ -542,27 +533,39 @@ class Ressource extends PgObject {
 			array_map('unlink', glob($download_path . "/*"));
 			$this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 
+			$epsg = ($this->get('import_epsg') ? $this->get('import_epsg') : '25832');
+			$params = array(
+				'Service' => 'WFS',
+				'Version' => $this->get_wfs_version($url, '1.1.0'),
+				'Request' => 'GetFeature',
+				'SRS' => 'urn:ogc:def:crs:EPSG::' . $epsg
+			);
 
-			if ($this->get('import_table')) {
+			include_once(CLASSPATH . 'wfs.php');
+			$wfs = new wfs($url, $params['Version'], '', '', $this->get('import_epsg'));
+			$wfs->parse_capabilities($url);
+			// query featuretypes from capabilities and download all in separate gml-files.
+			$featuretypes = $wfs->get_featuretypes();
+			foreach ($featuretypes AS $featuretype) {
+				// If download_typenames given, only download those and only if found in service capabilities,
+				// else all from capabilities.
+				if (
+					$this->get('download_typenames') AND
+					!in_array($featuretype['name'], array_map('trim', explode(',', $this->get('download_typenames'))))
+				) {
+					continue;
+				}
+				$params['TypeNames'] = $featuretype['name'];
 				$download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
-				$download_file = $this->get('import_table') . '.gml';
-				$this->debug->show('Download ' . $download_file . ' from url: ' . $download_url . ' to ' . $download_path, true);
-				copy($download_url, $download_path .  $download_file);
-			}
-			else {
-				// query featuretypes from capabilities and download all in separate gml-files.
-				include_once(CLASSPATH . 'wfs.php');
-				$wfs = new wfs($url, $params['Version'], '', '', $this->get('import_epsg'));
-				$wfs->parse_capabilities($url);
-				$featuretypes = $wfs->get_featuretypes();
-				$this->debug->show('Download folgende FeatureTypes in gml files in download path:' . $download_path, true);
-				foreach ($featuretypes AS $featuretype) {
-					$params['TypeNames'] = $featuretype['name'];
-					// $this->debug->show('params: ' . http_build_query($params), true);
-					$download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
-					$download_file = strtolower(sonderzeichen_umwandeln(str_replace(':', '_', umlaute_umwandeln($featuretype['name'])))) . '.gml';
-					$this->debug->show($featuretype['name'] . ' (' . $featuretype['title'] . ') => ' . $download_file, true);
-					copy($download_url, $download_path .  $download_file);
+				$download_file = strtolower(sonderzeichen_umwandeln(str_replace(':', '_', umlaute_umwandeln($featuretype['name'])))) . '.gml';
+				$this->debug->show('Download FeatureType: ' . $featuretype['name'] . ' (' . $featuretype['title'] . ') from<br>' . $download_url . '<br>in Datei: ' . $download_path . $download_file, true);
+				#echo '<br>wget -O ' . $download_path . $download_file . ' "' . $download_url . '"';
+				$result = copy($download_url, $download_path . $download_file);
+				if (!$result) {
+					return array(
+						'success' => false,
+						'msg' => '<p>Download in Datei: ' . $download_path . $download_file . ' fehlgeschlagen!<br>owner von ' . $download_path . ' ' . fileowner($download_path) . ':' . filegroup($download_path)
+					);
 				}
 			}
 
@@ -1305,7 +1308,7 @@ class Ressource extends PgObject {
 		if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Einlesen des Mastr!'
+				'msg' => 'Fehler beim Einlesen des Mastr!' . $output
 			);
 		}
 		else {

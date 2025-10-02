@@ -5,12 +5,16 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 if (MAPSERVERVERSION < 800) {
-	function msGetErrorObj(){
-		return ms_GetErrorObj();
+	if (!function_exists('msGetErrorObj')) {
+		function msGetErrorObj() {
+			return ms_GetErrorObj();
+		}
 	}
 
-	function msResetErrorList(){
-		return ms_ResetErrorList();
+	if (!function_exists('msResetErrorList')) {
+		function msResetErrorList(){
+			return ms_ResetErrorList();
+		}
 	}
 }
 
@@ -331,6 +335,51 @@ function get_exif_data($img_path, $force_identify = false) {
 }
 
 /**
+ * Function write exif data to file given in $img_path
+ * It uses php function iptcembed to write the exif data
+ * @param string $img_path Absolute Path of file with Exif Data to write
+ * @param array $iptc Array with iptc tags to write. See https://exiftool.org/TagNames/IPTC.html#ApplicationRecord for tag names and meanings
+ * @return void
+ */
+function set_exif_data($img_path, $iptc = array()) {
+	if (count($iptc) == 0) {
+		return;
+	}
+	$data = '';
+	foreach ($iptc as $tag => $string) {
+		$tag = substr($tag, 2);
+		$data .= iptc_make_tag(2, $tag, $string);
+	}
+	$content = iptcembed($data, $img_path);
+	$fp = fopen($img_path, "wb");
+	fwrite($fp, $content);
+	fclose($fp);
+}
+
+/**
+ * Create an IPTC tag
+ * originaly created by Thies C. Arntzen
+ */
+function iptc_make_tag($rec, $data, $value) {
+	// echo 'iptc_make_tag: ' . $rec . ', ' . $data . ', ' . $value . '<br>';
+	$length = strlen($value);
+	$retval = chr(0x1C) . chr($rec) . chr($data);
+
+	if ($length < 0x8000) {
+		$retval .= chr($length >> 8) .  chr($length & 0xFF);
+	}
+	else {
+		$retval .= chr(0x80) . 
+							 chr(0x04) . 
+							 chr(($length >> 24) & 0xFF) . 
+							 chr(($length >> 16) & 0xFF) . 
+							 chr(($length >> 8) & 0xFF) . 
+							 chr($length & 0xFF);
+	}
+	return $retval . $value;
+}
+
+/**
 * Function create a float value from a text
 * where numerator and denominator are delimited by a slash e.g. 23/100
 *
@@ -450,8 +499,8 @@ function ie_check(){
 	}
 }
 
-if(!function_exists('mb_strrpos')){		# Workaround, falls es die Funktion nicht gibt
-	function mb_strrpos($str, $search, $offset = 0, $encoding){
+if (!function_exists('mb_strrpos')) {		# Workaround, falls es die Funktion nicht gibt
+	function mb_strrpos($str, $search, $offset = 0, $encoding = 'UTF-8') {
 		return strrpos($str, $search, $offset);
 	}
 }
@@ -1434,6 +1483,25 @@ function copy_file_to_tmp($frompath, $dateiname = ''){
 	#return TEMPPATH_REL.$dateiname;
 }
 
+/**
+ * Löscht ein Verzeichnis und alle darin befindlichen Dateien
+ * Sicherheitsabfrage: Verzeichnis muß unter /var/www/data/ liegen und dort auch existieren
+ * @param string $dir Pfad des zu löschenden Verzeichnisses
+ * @return boolean true wenn Verzeichnis gelöscht wurde, sonst false
+ */
+function delete_dir_with_files($dir) {
+	if ($dir == '' OR strpos($dir, '/var/www/data/') === false OR !is_dir($dir)) {
+		return false;
+	}
+
+	foreach (glob($dir . '/*') as $file) {
+		if (is_file($file)) {
+			unlink($file);
+		}
+	}
+	return rmdir($dir);
+}
+
 function read_epsg_codes($database) {
   $epsg_codes = $database->read_epsg_codes();
   return $epsg_codes;
@@ -1720,7 +1788,8 @@ function emailcheck($email) {
     $Meldung.='<br>E-Mail enthält kein @.';
   }
 
-  $postfix=strlen(strrchr($email,"."))-1;
+  $postfix = strlen(strrchr($email, ".")) - 1;
+
   if (!($postfix > 1 AND $postfix < 8)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
@@ -2384,6 +2453,10 @@ function send_image_not_found($img) {
 	imagedestroy($empty_img);
 }
 
+/**
+ * Prüft ob der Wert $key im Array $array existiert und gibt den Wert zurück.
+ * Wenn der Wert nicht existiert, wird ein leerer String zurückgegeben.
+ */
 function value_of($array, $key) {
 	if (!is_array($array)) {
 		$array = array();
@@ -2438,7 +2511,7 @@ function str_replace_last($search , $replace, $str) {
 /**
  * Liefert den Namen der Thumb-Datei vom Originalnamen in $path
  * @param String $path Name of original file.
- * @return String Name of thump file.
+ * @return String Name of thumb file.
  */
 function get_thumb_from_name($path) {
 	return before_last($path, '.') . '_thumb.jpg';
@@ -2472,8 +2545,8 @@ function detect_delimiter($line) {
 
 /**
 * Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
-* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
-* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
+* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumbnails
+* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thumb.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
 *
 * @param string $txt Der Text von dem der Teilstring extrahiert werden soll.
 *

@@ -23,7 +23,7 @@ class PackLog extends PgObject {
 
 	public static function write($gui, $package, $msg) {
 		$packlog = new PackLog($gui);
-    $packlog = $packlog->create(array(
+    $packlog->create(array(
       'msg' => pg_escape_string($msg),
       'package_id' => $package->get_id(),
       'ressource_id' => $package->get('ressource_id')

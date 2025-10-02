@@ -34,12 +34,14 @@ class LayerClass extends MyObject {
 	}
 
 	function copy_styles2classes($new_class) {
+		include_once(CLASSPATH . 'Style2Class.php');
 		foreach(Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier)) AS $style2class) {
 			$style2class->copy($new_class->get($new_class->identifier));
 		}
 	}
 
 	function copy_labels2classes($new_class) {
+		include_once(CLASSPATH . 'Label2Class.php');
 		foreach(Label2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier)) AS $label2class) {
 			$label2class->copy($this->get('id'));
 		}
@@ -49,7 +51,7 @@ class LayerClass extends MyObject {
 		#echo '<br>LayerClass->get_first_style for Class id: ' . $this->get($this->identifier);
 		include_once(CLASSPATH . 'Style2Class.php');
 		include_once(CLASSPATH . 'LayerStyle.php');
-		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier));
+		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier) . ' AND style_id > 0');
 		if (count($styles2class) == 0) {
 			return '';
 		}
@@ -66,14 +68,14 @@ class LayerClass extends MyObject {
 		if ($this->get('Expression') == '') {
 			$def = '';
 		}
-		elseif (preg_match('/^\([^\[]*\[[^\]]*\][^\)]*\)$/', $this->get('Expression'))) {
+		elseif (preg_match("/'\\[[^\\]]+\\]'\\s+in\\s+\\('[^']*'\\)/", $this->get('Expression'))) {
 			$def = trim($this->get('Expression'));
 		}
 		elseif ($classitem == '') {
 			$def = '';
 		}
 		else {
-			$def = '([' . $classitem . '] = ' . $this->get('Expression') . ')';
+			$def = "([" . $classitem . "] = '" . $this->get('Expression') . "')";
 		}
 
 		$first_style = $this->get_first_style($datentyp);
