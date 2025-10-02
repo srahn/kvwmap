@@ -2766,10 +2766,10 @@ function getAllFiles($dir) {
 			$files = array_merge($files, getAllFiles($item));
 		}
 		else {
-			$files[pathinfo($item, PATHINFO_EXTENSION)] = $item;
+			// $files[pathinfo($item, PATHINFO_EXTENSION)][] = $item;
+			$files[] = $item;
 		}
 	}
-
 	return $files;
 }
 

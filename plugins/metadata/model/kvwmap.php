@@ -9,6 +9,7 @@
 	// metadata_download_bundle_package
 	// metadata_download_data_package
 	// metadata_download_metadata_document
+	// metadata_list_files
 	// metadata_order_bundle_package
 	// metadata_order_data_package
 	// metadata_reorder_data_packages
