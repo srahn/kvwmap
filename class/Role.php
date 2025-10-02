@@ -57,100 +57,101 @@ class Role extends PgObject {
 	 */
 	public function set_rolle_from_default_user_or_parent_stelle($user_id, $stelle_id, $default_user_id, $parent_stelle_id) {
 		$sql = "
-			INSERT IGNORE INTO `rolle` (
-				`user_id`,
-				`stelle_id`,
-				`nImageWidth`, `nImageHeight`,
-				`auto_map_resize`,
-				`minx`, `miny`, `maxx`, `maxy`,
-				`nZoomFactor`,
-				`selectedButton`,
-				`epsg_code`,
-				`epsg_code2`,
-				`coordtype`,
-				`active_frame`,
-				`gui`,
-				`language`,
-				`hidemenue`,
-				`hidelegend`,
-				`tooltipquery`,
-				`buttons`,
-				`scrollposition`,
-				`result_color`,
-				`result_hatching`,
-				`result_transparency`,
-				`always_draw`,
-				`runningcoords`,
-				`showmapfunctions`,
-				`showlayeroptions`,
-				`showrollenfilter`,
-				`singlequery`,
-				`querymode`,
-				`geom_edit_first`,
-				`dataset_operations_position`,
-				`immer_weiter_erfassen`,
-				`upload_only_file_metadata`,
-				`overlayx`, `overlayy`,
-				`instant_reload`,
-				`menu_auto_close`,
-				`layer_params`,
-				`visually_impaired`,
-				`font_size_factor`,
-				`menue_buttons`,
-				`redline_text_color`,
-				`redline_font_family`,
-				`redline_font_size`,
-				`redline_font_weight`
-			)
-			SELECT " .
-				$user_id . ", " .
-				$stelle_id . ",
-				`nImageWidth`, `nImageHeight`,
-				`auto_map_resize`,
-				`minx`, `miny`, `maxx`, `maxy`,
-				`nZoomFactor`,
-				`selectedButton`,
-				`epsg_code`,
-				`epsg_code2`,
-				`coordtype`,
-				`active_frame`,
-				`gui`,
-				`language`,
-				`hidemenue`,
-				`hidelegend`,
-				`tooltipquery`,
-				`buttons`,
-				`scrollposition`,
-				`result_color`,
-				`result_hatching`,
-				`result_transparency`,
-				`always_draw`,
-				`runningcoords`,
-				`showmapfunctions`,
-				`showlayeroptions`,
-				`showrollenfilter`,
-				`singlequery`,
-				`querymode`,
-				`geom_edit_first`,
-				`dataset_operations_position`,
-				`immer_weiter_erfassen`,
-				`upload_only_file_metadata`,
-				`overlayx`, `overlayy`,
-				`instant_reload`,
-				`menu_auto_close`,
-				`layer_params`,
-				`visually_impaired`,
-				`font_size_factor`,
-				`menue_buttons`,
-				`redline_text_color`,
-				`redline_font_family`,
-				`redline_font_size`,
-				`redline_font_weight`
-			FROM
-				`rolle`
-			WHERE
-				`user_id` = " . $default_user_id . " AND
-				`stelle_id` = " . ($parent_stelle_id ?? $stelle_id) . "
+			INSERT INTO kvwmap.rolle (
+					user_id,
+					stelle_id,
+					nimageWidth, nimageHeight,
+					auto_map_resize,
+					minx, miny, maxx, maxy,
+					nzoomfactor,
+					selectedbutton,
+					epsg_code,
+					epsg_code2,
+					coordtype,
+					active_frame,
+					gui,
+					language,
+					hidemenue,
+					hidelegend,
+					tooltipquery,
+					buttons,
+					scrollposition,
+					result_color,
+					result_hatching,
+					result_transparency,
+					always_draw,
+					runningcoords,
+					showmapfunctions,
+					showlayeroptions,
+					showrollenfilter,
+					singlequery,
+					querymode,
+					geom_edit_first,
+					dataset_operations_position,
+					immer_weiter_erfassen,
+					upload_only_file_metadata,
+					overlayx, overlayy,
+					instant_reload,
+					menu_auto_close,
+					layer_params,
+					visually_impaired,
+					font_size_factor,
+					menue_buttons,
+					redline_text_color,
+					redline_font_family,
+					redline_font_size,
+					redline_font_weight
+				)
+				SELECT " .
+					$user_id . ", " .
+					$stelle_id . ",
+					nImageWidth, nImageHeight,
+					auto_map_resize,
+					minx, miny, maxx, maxy,
+					nZoomFactor,
+					selectedButton,
+					epsg_code,
+					epsg_code2,
+					coordtype,
+					active_frame,
+					gui,
+					language,
+					hidemenue,
+					hidelegend,
+					tooltipquery,
+					buttons,
+					scrollposition,
+					result_color,
+					result_hatching,
+					result_transparency,
+					always_draw,
+					runningcoords,
+					showmapfunctions,
+					showlayeroptions,
+					showrollenfilter,
+					singlequery,
+					querymode,
+					geom_edit_first,
+					dataset_operations_position,
+					immer_weiter_erfassen,
+					upload_only_file_metadata,
+					overlayx, overlayy,
+					instant_reload,
+					menu_auto_close,
+					layer_params,
+					visually_impaired,
+					font_size_factor,
+					menue_buttons,
+					redline_text_color,
+					redline_font_family,
+					redline_font_size,
+					redline_font_weight
+				FROM
+					kvwmap.rolle
+				WHERE
+					user_id = " . $default_user_id . " AND
+					stelle_id = " . ($parent_stelle_id ?? $stelle_id) . "
+				ON CONFLICT (user_id, stelle_id) DO NOTHING
 		";
 		$ret = $this->database->execSQL($sql);
 		if (!$ret['success']) {
@@ -178,19 +179,20 @@ class Role extends PgObject {
 	function set_rolle_from_stelle_default($user_id, $stelle_id) {
 		# Default - Rolleneinstellungen verwenden
 		$sql = "
-			INSERT IGNORE INTO rolle (user_id, stelle_id, epsg_code, minx, miny, maxx, maxy)
+			INSERT INTO kvwmap.rolle (user_id, stelle_id, epsg_code, minx, miny, maxx, maxy)
 			SELECT " .
 				$user_id . ",
-				ID,
+				id,
 				epsg_code,
 				minxmax,
 				minymax,
 				maxxmax,
 				maxymax
 			FROM
-				stelle
+				kvwmap.stelle
 			WHERE
-				ID = " . $stelle_id . "
+				id = " . $stelle_id . "
+			ON CONFLICT (user_id, stelle_id) DO NOTHING
 		";
 		$ret = $this->database->execSQL($sql);
 		if (!$ret['success']) {
@@ -209,12 +211,11 @@ class Role extends PgObject {
 	}
 
 	/**
-	 * Function rectify layer parameter of this rolle object with the given $layer_params.
+	 * Function rectify layer parameter of this role object with the given $layer_params.
 	 * If a parameter value is not available for this rolle in the options of the LayerParam,
 	 * the first value of the options will be set.
 	 * The function changes the layer_params attribut of this rolle object in the database and
 	 * set it in static var rolle::$layer_params
-	 * @param MyObject The MyObject of the rolle.
 	 * @return Array with success and msg
 	 */
 	function rectify_layer_params($layer_params) {
