@@ -4,8 +4,12 @@
   // Running this script with a cron job like this:
   // cd /var/www/apps/kvwmap/plugins/metadata/tools; php -f packages_cron.php login_name=pkorduan >> /var/www/logs/cron/packages_cron.log 2>&1
   //error_reporting(E_ALL);
-  // error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
-  error_reporting(E_ERROR | E_WARNING);
+  error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
+
+  function include_($filename) {
+    include_once $filename;
+  }
+
   try {
     include('../../../credentials.php');
     include('../../../config.php');
