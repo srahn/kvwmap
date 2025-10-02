@@ -15,13 +15,15 @@
   $strOwsTitle =  'Titel des Dienstes';
   $strOwsTitleHint = 'Eine kurze Überschrift unter der der Dienst in Suchergebnissen angezeigt werden soll. Der Text sollte sich von anderen unterscheiden aber nicht zu lang sein.';
 	$strOwsNameSpace = 'Namespace des Dienstes';
-	$strOwsNameSpaceHint = 'Der Namespace ist der Namensraum in dem die im Dienst verwendeten Identifikatoren eindeutig sind. Der Identifikator eines Datenobjektes in einem INSPIRE-Datensatz setzt sich z.B. immer aus einem namespace und einer ID zusammen. Dadurch wird sicher gestellt, dass der Identifikator wirklich eindeutig ist auch über den Dienst und die Dienststelle, die den Dienst bereitstellt hinweg.';
+	$strOwsNameSpaceHint = 'Der Namespace ist der Namensraum in dem die im Dienst verwendeten Identifikatoren eindeutig sind. Der Identifikator eines Datenobjektes in einem INSPIRE-Datensatz setzt sich z.B. immer aus einem namespace und einer ID zusammen. Dadurch wird sicher gestellt, dass der Identifikator wirklich eindeutig ist auch über den Dienst und die Dienststelle, die den Dienst bereitstellt hinweg. Bei eigenem Namensraum setzen Sie sich bitte mit der Projektleitung in Verbindung. Dann wird das weitere Vorgehen besprochen';
   $strOwsAbstract = 'Kurzbeschreibung';
   $strOwsAbstractHint = 'Kurze Darstellung zu den Inhalten und der räumlichen Ausdehnung der Daten, die über den Dienst verfügbar gemacht werden.';
   $strWmsAccessConstraints = 'Zugangsbeschränkungen';
   $strWmsAccessConstraintsHint = 'Beschreibung der Bedingungen unter denen der Zugang zum Dienst gewährt wird. Gibt es keine Beschränkungen hier "keine" eintragen.';
   $strOwsFees = 'Kosten';
 	$strOwsFeesHint = 'Beschreibung des Kostenmodells für die Nutzung des Dienstes. Ist er Kostenfrei hier "keine" eintragen.';
+	$strOwsInspireidentifiziert = 'inspireidentifiziert';
+	$strOwsInspireidentifiziertHint = 'Über PlanDigital stellen Sie den FNP im Datenmodell XPlanGML bereit. Falls Sie den FNP anderweitig bereits im INSPIRE-Datenmodell bereitstellen, muss diese Option ausgeschaltet sein.';
   $strOwsSrs = 'Koordinatenreferenzsystem';
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'Organisation';
@@ -33,7 +35,7 @@
   $strOwsContactPosition = 'Position der Person';
   $strOwsContactPositionHint = 'Position der zuständigen Person. Das kann eine Abteilung oder Funktion sein, z.B. Sachgebietsleiter';
 	$strOwsContactVoicephone = 'Telefonnummer';
-	$strOwsContactVoicephoneHint = 'Telefonnummer der zuständigen Person oder Organisation.';
+	$strOwsContactVoicephoneHint = 'Telefonnummer der zuständigen Person oder Organisation nach DIN 5008 mit Landescode +49. Beispiel: Beispiel: +49 30 3432622-113 bei einer Durchwahlnummer.';
 	$strOwsContactFacsimile = 'Fax-Nummer';
 	$strOwsContactFacsimileHint = 'Fax-Nummer der zuständigen Person oder Organisation';
 	$strOwsContactAddress = 'Strasse HausNr';

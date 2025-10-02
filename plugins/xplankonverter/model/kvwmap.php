@@ -751,7 +751,11 @@
 	};
 
   $GUI->xplankonverter_remove_failed_konvertierungen = function() use ($GUI) {
-    $konvertierungen = Konvertierung::find_konvertierungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
+    $konvertierungen = Konvertierung::find_konvertierungen(
+			$GUI,
+			$GUI->formvars['planart'],
+			$GUI->plan_class
+		);
     foreach($konvertierungen['faulty'] AS $faulty_zusammenzeichnung) {
 			$GUI->debug->write('Lösche zuvor fehlgeschlagene Konvertierung id: ', $faulty_zusammenzeichnung->get('id'));
       $faulty_zusammenzeichnung->destroy();
@@ -764,11 +768,15 @@
   };
 	
 	$GUI->xplankonverter_remove_old_konvertierungen = function() use ($GUI) {
-    $zusammenzeichnungen = Konvertierung::find_konvertierungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
-    foreach($zusammenzeichnungen['draft'] AS $draft_zusammenzeichnung) {
+    $zusammenzeichnungen = Konvertierung::find_konvertierungen(
+			$GUI,
+			$GUI->formvars['planart'],
+			$GUI->plan_class
+		);
+		foreach($zusammenzeichnungen['draft'] AS $draft_zusammenzeichnung) {
 			$GUI->debug->write('Lösche alte (draft) Konvertierung id: ', $draft_zusammenzeichnung->get('id'));
-      $draft_zusammenzeichnung->destroy();
-    }
+			$draft_zusammenzeichnung->destroy();
+		}
 
     return array(
       'success' => true,

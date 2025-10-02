@@ -55,6 +55,11 @@ class Gml_extractor {
 				$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
 			}
 		}
+		
+		if(XPLANKONVERTER_AUTOCOMPLETE_FP_BEBAUUNGSFLAECHE) {
+			$this->autocomplete_fp_bebauungsflaeche_attributes($this->gmlas_schema);
+		}
+		
 		return array(
 			'success' => true,
 			'msg' => 'ogr2ogr_gmlas output: ' . $result['msg'],
@@ -2988,6 +2993,63 @@ class Gml_extractor {
 		// echo '<br>feature has ' . $result['num_entries'] . ' entries.';
 		return $result['num_entries'] > 0;
 	}
-
+	
+	/**
+	* autocompletes allgartderbaulnutzung and besondereartderbaulnutzung
+	* for fp_bebauungsflaeche with attributes
+	* desired feature for QGIS-Plugin-Support (PlanDigital)
+	* see Konformitaetsbedingugng 5.3.1.1 and 5.3.1.2 (XPlan 5.4)
+	* @param string $schema
+	*/
+	function autocomplete_fp_bebauungsflaeche_attributes($schema) {
+		// table might not exist in all loaded source data
+		if($this->check_if_table_exists_in_schema('fp_bebauungsflaeche', $schema)) {
+			//besondereartderbaulnutzung should be filled before allgartderbaulnutzung in separate query, as it might require filled attributes
+			$sql = "UPDATE
+								" . $schema . ".fp_bebauungsflaeche
+							SET
+								besondereartderbaulnutzung = 
+								CASE 
+									WHEN
+										besondereartderbaulnutzung IS NULL AND sondernutzung IN ('1000','1100','1200','1300','1400')
+									THEN
+										'2000'
+									WHEN
+										besondereartderbaulnutzung IS NULL AND sondernutzung IN ('1500','1600','16000','16001','16002','1700','1800',
+											'1900','2000','2100','2200','2300','23000','2400','2500','2600','2700','2720','2800','2900','9999')
+									THEN
+										'2100'
+									ELSE
+										besondereartderbaulnutzung
+							END;";
+			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+			
+			$sql = "UPDATE
+								" . $schema . ".fp_bebauungsflaeche
+							SET
+								allgartderbaulnutzung = 
+								CASE 
+									WHEN
+										allgartderbaulnutzung IS NULL AND besondereartderbaulnutzung IN ('1000','1100','1200','1300')
+									THEN
+										'1000'
+									WHEN
+										allgartderbaulnutzung IS NULL AND besondereartderbaulnutzung IN ('1400','1450','1500','1550','1600')
+									THEN
+										'2000'
+									WHEN
+										allgartderbaulnutzung IS NULL AND besondereartderbaulnutzung IN ('1700','1800')
+									THEN
+										'3000'
+									WHEN
+										allgartderbaulnutzung IS NULL AND besondereartderbaulnutzung IN ('2000','2100','3000')
+									THEN
+										'4000'
+									ELSE
+										allgartderbaulnutzung
+							END;";
+			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		}
+	}
 }
 ?>

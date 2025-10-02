@@ -857,7 +857,7 @@ class Validierung extends PgObject {
 	* Ermittelt die faces, die zu mehr als einem Polygon zugeordnet sind (Überlappungen)
 	* @param object $plan, Der Plan der validiert wird
 	* @return array mit success boolean True wenn keine Überlappungen und Lücken gefunden wurden. 
-	* wenn welche gefunden wurden, succes = false und eine err_msg, die angibt welche Objekte sich überlappen oder wo Lücken sind.
+	* wenn welche gefunden wurden, success = false und eine err_msg, die angibt welche Objekte sich überlappen oder wo Lücken sind.
 	*/
 	function flaechenschluss_ueberlappungen($plan) {
 		$success = true;

@@ -8304,7 +8304,7 @@ echo '			</table>
 			$this->user->rolle->setGroups($users['ID'][$j], $Stelle->id, 0, array($this->formvars['selected_layer_id']));
 		}
 		# u_groups2rolle aufräumen
-		rolle::clear_groups2rolle($this->database);
+		// rolle::clear_groups2rolle($this->database);
     $this->Layer2Stelle_Editor();
   }
 
@@ -8359,7 +8359,7 @@ echo '			</table>
 			$result = $this->layergruppe->update();
 		}
 		rolle::setGroupsForAll($this->database);
-		rolle::clear_groups2rolle($this->database);
+		// rolle::clear_groups2rolle($this->database);
 	}
 
 	function Layer2Stelle_Reihenfolge() {
@@ -9277,7 +9277,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       }
       # /Löschen der in der Selectbox entfernten Stellen
 			# u_groups2rolle aufräumen
-			rolle::clear_groups2rolle($this->database);
+			// rolle::clear_groups2rolle($this->database);
     }
 
 		for ($i = 0; $i < count($stellen_ids); $i++) {
@@ -13256,7 +13256,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
     }
 		# u_groups2rolle aufräumen
-		rolle::clear_groups2rolle($this->database);
+		// rolle::clear_groups2rolle($this->database);
 
     $this->Stelleneditor();
   }
@@ -13494,6 +13494,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['ows_distributioncity'] = $this->stellendaten['ows_distributioncity'];
 			$this->formvars['ows_distributionadministrativearea'] = $this->stellendaten['ows_distributionadministrativearea'];
       $this->formvars['ows_fees'] = $this->stellendaten['ows_fees'];
+			$this->formvars['ows_inspireidentifiziert'] = $this->stellendaten['ows_inspireidentifiziert'];
       $this->formvars['ows_srs'] = $this->stellendaten['ows_srs'];
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
 			$this->formvars['wappen_link'] = $this->stellendaten['wappen_link'];
