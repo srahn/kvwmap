@@ -2,7 +2,8 @@
 
 $branches = [
 	'kvwmap',
-	'master'
+	'master',
+	'dev'
 ];
 
 	$folder = getcwd();

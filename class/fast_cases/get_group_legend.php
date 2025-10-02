@@ -1450,7 +1450,7 @@ class GUI {
 						<a href="javascript:getlegend(\'' . $group_id . '\')">
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>';
-				if (true) {
+				if ($this->groupset[$group_id]['checkbox']) {
 					$legend .= '
 						<input id="group_checkbox[' . $group_id . ']" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="selectgroupthema(this, ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
 					';
@@ -2843,7 +2843,8 @@ class db_mapObj {
 				g.id,
 				" . $gruppenname_column . " AS gruppenname,
 				g.obergruppe,
-				g.selectable_for_shared_layers " .
+				g.selectable_for_shared_layers,
+				g.checkbox" .
 				(!$all ? ", g2r.status" : "") . "
 			FROM
 				kvwmap.u_groups AS g" . ($all ? "" : "
@@ -2863,6 +2864,7 @@ class db_mapObj {
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
 			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];
+			$groups[$rs['id']]['checkbox'] = ($rs['checkbox'] == 't');
 			if ($rs['obergruppe']) {
 				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
 			}

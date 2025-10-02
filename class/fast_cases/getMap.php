@@ -2251,7 +2251,8 @@ class db_mapObj {
 				g.id,
 				" . $gruppenname_column . " AS gruppenname,
 				g.obergruppe,
-				g.selectable_for_shared_layers " .
+				g.selectable_for_shared_layers,
+				g.checkbox" .
 				(!$all ? ", g2r.status" : "") . "
 			FROM
 				kvwmap.u_groups AS g" . ($all ? "" : "
@@ -2271,6 +2272,7 @@ class db_mapObj {
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
 			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];
+			$groups[$rs['id']]['checkbox'] = ($rs['checkbox'] == 't');
 			if ($rs['obergruppe']) {
 				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
 			}
