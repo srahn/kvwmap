@@ -156,11 +156,15 @@ class MyObject {
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$ret = $this->database->execSQL($sql);
 		if (!$ret['success']) {
+			echo '<br>Fehler bei find_by_ids: ' . $ret['err_msg'];
 			return $this;
 		}
 		$rs = $this->database->result->fetch_assoc();
 		if ($rs !== false) {
 			$this->data = $rs;
+		}
+		else {
+			// Hier auch eine Fehlermeldung?
 		}
 		return $this;
 	}

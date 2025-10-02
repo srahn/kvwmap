@@ -194,7 +194,7 @@
 		</div>
 
 		<div class="form_formular-input form_formular-aic">
-			<div><? echo $strForeName;?></div>
+			<div><? echo $strForeName;?>&nbsp;*</div>
 			<div><input name="vorname" type="text" value="<? echo $this->formvars['vorname']; ?>" maxlength="100"></div>
 		</div>
 

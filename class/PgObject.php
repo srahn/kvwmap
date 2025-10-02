@@ -663,7 +663,6 @@ class PgObject {
 		return $results;
 	}
 
-
 	function setKeysFromTable() {
 		#$this->debug->show('setKeysFromTable', PgObject::$write_debug);
 		$columns = $this->get_attribute_types();
