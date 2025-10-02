@@ -18238,8 +18238,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$classes = $mapDB->read_Classes($this->layerdaten['layer_id']);
 			$anzahl = count($classes);
 			for ($i = 0; $i < $anzahl; $i++) {
-				if ($classes[$i]['Expression'] != '' AND strpos($classes[$i]['Expression'], 'Cluster_FeatureCount') === false) {
-					$expressions[$classes[$i]['classification']][] = mapserverExp2SQL($classes[$i]['Expression'], $this->layerdaten['classitem']);
+				if ($classes[$i]['expression'] != '' AND strpos($classes[$i]['expression'], 'Cluster_FeatureCount') === false) {
+					$expressions[$classes[$i]['classification']][] = mapserverExp2SQL($classes[$i]['expression'], $this->layerdaten['classitem']);
 				}
 			}
 			if (empty($expressions)) {
@@ -22565,7 +22565,7 @@ DO $$
 				class_id = " . $attrib['new_class_id'] . ",
 				".$names.",
 				layer_id = " . $attrib['layer_id'] . ",
-				expression = '" . str_replace('\\', '\\\\', $attrib['expression']) . "',
+				expression = '" . pg_escape_string(str_replace('\\', '\\\\', $attrib['expression'])) . "',
 				text = '" . $attrib['text'] . "',
 				classification = '" . $attrib['classification'] . "',
 				legendgraphic= '" . $attrib['legendgraphic'] . "',
