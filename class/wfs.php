@@ -34,14 +34,22 @@ class wfs{
 	function get_featuretypes() {
 		$values = $this->values;
 		$indexes = $this->indexes;
+		$featuretype_name_pattern = "/^(wfs:name|name)/i";
+		$featuretype_name_tag = array_values(preg_grep($featuretype_name_pattern, array_keys($indexes)))[0] ?? 'NAME';
+		// echo '<br>featuretype_name_tag: ' . $featuretype_name_tag;
+		// echo '<br>featuretype_name indexes: ' . implode(', ', array_keys($indexes[$featuretype_name_tag]));
+		$featuretype_title_pattern = "/^(wfs:title|title)/i";
+		$featuretype_title_tag = array_values(preg_grep($featuretype_title_pattern, array_keys($indexes)))[0] ?? 'TITLE';
+		// echo '<br>featuretype_title_tag: ' . $featuretype_title_tag;
+		// echo '<br>featuretype_title indexes: ' . implode(', ', array_keys($indexes[$featuretype_title_tag]));
 		$featuretype_names = array_map(
-			function ($i) use ($values, $indexes) {
+			function ($i) use ($values, $indexes, $featuretype_name_tag, $featuretype_title_tag) {
 				return array(
-					'name' => $values[$indexes['NAME'][$i]]['value'],
-					'title' => $values[$indexes['TITLE'][$i]]['value']
+					'name' => $values[$indexes[$featuretype_name_tag][$i]]['value'],
+					'title' => $values[$indexes[$featuretype_title_tag][$i]]['value']
 				);
 			},
-			array_keys($indexes['NAME'])
+			array_keys($indexes[$featuretype_name_tag])
 		);
 		return $featuretype_names;
 	}
