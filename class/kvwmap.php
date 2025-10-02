@@ -17877,6 +17877,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$layer['export_privileg'] = 1;
 		$layer['editable'] 				= 1;
 		$layer['listed'] 					= 1;
+		$layer['drawingorder'] 		= 10000;
 		$layer['shared_from'] 		= $this->user->id;
 
 		# create share schema if not exists and copy rollenlayer table to shared layer table
