@@ -31,7 +31,12 @@ class LayerStyle extends MyObject {
 		if ($symbol_index == -1) {
 			return false;
 		}
-		$symbol = $map->getSymbolObjectById($symbol_index);
+		if (MAPSERVERVERSION >= 800) {
+			$symbol = $map->symbolset->getSymbol($symbol_index);
+		}
+		else {
+			$symbol = $map->getSymbolObjectById($symbol_index);
+		}
 		return in_array($symbol->type, array('1003', '1006'));
 	}
 
@@ -39,7 +44,12 @@ class LayerStyle extends MyObject {
 		$map = new mapObj('');
 		$map->setSymbolSet(SYMBOLSET);
 		$map->setFontSet(FONTSET);
-		$symbol = $map->getSymbolObjectById($map->getSymbolByName($this->get('symbolname')));
+		if (MAPSERVERVERSION >= 800) {
+			$symbol = $map->symbolset->getSymbol($map->getSymbolByName($this->get('symbolname')));
+		}
+		else {
+			$symbol = $map->getSymbolObjectById($map->getSymbolByName($this->get('symbolname')));
+		}
 		#echo '<br>symbol: ' . $symbol->name . ' imagepath: ' . $symbol->imagepath;
 		$iconSize = ($this->get('size') == null ? '12' : $this->get('size'));
 		$icondef = (Object) array(
@@ -57,41 +67,69 @@ class LayerStyle extends MyObject {
 				$iconSize / 2
 			)
 		);
+
+		if ($this->get('minsize')) {
+			$icondef->iconMinSize = array($this->get('minsize'), $this->get('minsize'));
+			if ($this->get('maxsize') == '') {
+				$icondef->iconMaxSize = $icondef->iconSize;
+			}
+		}
+		if ($this->get('maxsize')) {
+			$icondef->iconMaxSize = array($this->get('maxsize'), $this->get('maxsize'));
+			if ($this->get('minsize') == '') {
+				$icondef->iconMinSize = $icondef->iconSize;
+			}
+		}
+
 		return $icondef;
 	}
 
 	function get_styledef($datentyp = 0, $layer_opacity = 1) {
+		$color = trim($this->get('color'));
 		switch ($datentyp) {
 			case 1 : {
 				$layerdef = (Object) array(
 					'weight'			=> ($this->get('width') == null ? 1 : $this->get('width')),
-					'color'				=> 'rgb(' . $this->get('color') . ')',
+					'color'				=> (($color == '' OR $color == '-1 -1 -1') ? '#000000' : 'rgb(' . $color . ')')
 				);
 			} break;
 			case 2 : {
-				#echo '<br>color: ' . (($this->get('color') == '' OR $this->get('color') == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $this->get('color') . ')');
+				#echo '<br>color: ' . (($color == '' OR $color == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $color . ')');
 				$layerdef = (Object) array(
 					'symbolname'	=> ($this->get('symbolname') == null ? 'circle' : $this->get('symbolname')),
 					'size'				=> ($this->get('size') == null ? '12' : $this->get('size')),
 					'stroke'			=> ($this->get('outlinecolor') != '-1 -1 -1'),
 					'weight'			=> ($this->get('width') == null ? 1 : $this->get('width')),
 					'color'				=> 'rgb(' . $this->get('outlinecolor') . ')',
-					'fill'				=> ($this->get('color') != '' AND $this->get('color') != '-1 -1 -1'),
-					'fillColor'		=> (($this->get('color') == '' OR $this->get('color') == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $this->get('color') . ')'),
+					'fill'				=> ($color != '' AND $color != '-1 -1 -1'),
+					'fillColor'		=> (($color == '' OR $color == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $color . ')'),
 					'fillOpacity'	=> ($this->get('opacity') == '' ? $layer_opacity / 100 : $this->get('opacity') / 100)
 				);
 			} break;
 			default : {
+				// auch point (datentyp=0)
 				$layerdef = (Object) array(
 					'symbolname'	=> ($this->get('symbolname') == null ? 'circle' : $this->get('symbolname')),
 					'size'				=> ($this->get('size') == null ? '12' : $this->get('size')),
 					'stroke'			=> ($this->get('outlinecolor') != '-1 -1 -1'),
 					'weight'			=> ($this->get('width') == null ? 1 : $this->get('width')),
 					'color'				=> 'rgb(' . $this->get('outlinecolor') . ')',
-					'fill'				=> ($this->get('color') != '' AND $this->get('color') != '-1 -1 -1'),
-					'fillColor'		=> (($this->get('color') == '' OR $this->get('color') == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $this->get('color') . ')'),
+					'fill'				=> ($color != '' AND $color != '-1 -1 -1'),
+					'fillColor'		=> (($color == '' OR $color == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $color . ')'),
 					'fillOpacity'	=> ($this->get('opacity') == '' ? $layer_opacity / 100 : $this->get('opacity') / 100)
 				);
+				if ($this->get('minsize')) {
+					$layerdef->minsize = $this->get('minsize');
+					if ($this->get('maxsize') == '') {
+						$layerdef->maxsize = $layerdef->size;
+					}
+				}
+				if ($this->get('maxsize')) {
+					$layerdef->maxsize = $this->get('maxsize');
+					if ($this->get('minsize') == '') {
+						$layerdef->minsize = $layerdef->size;
+					}
+				}
 			}
 		}
 		#echo '<br>get_layerdef color: rgb(' . $this->get('outlinecolor') . ')';

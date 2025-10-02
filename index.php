@@ -303,7 +303,7 @@ function go_switch($go, $exit = false) {
 				$GUI->sanitize([
 					'layer_id' => 'int',
 					'oid' => 'text'
-				]);				
+				]);
 				$GUI->get_position_qrcode();
 			} break;
 
@@ -376,7 +376,7 @@ function go_switch($go, $exit = false) {
 					'zoom_to_layer_extent' => 'boolean'
 				]);
 				$GUI->activate_layer_only($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
-				// $GUI->saveMap('');
+				$GUI->saveMap('');
 				// $currenttime = date('Y-m-d H:i:s',time());
 				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				// $GUI->drawMap();
@@ -1677,6 +1677,9 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				include_once(CLASSPATH . 'Layer.php');
+				if ($GUI->plugin_loaded('mobile')) {
+					include_once(PLUGINS . 'mobile/model/kvwmap.php');
+				}
 				$GUI->LayerAendern($GUI->formvars);
 				$GUI->Layereditor();
 			} break;

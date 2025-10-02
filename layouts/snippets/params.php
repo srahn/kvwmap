@@ -14,11 +14,22 @@
 							layerParamsBar.fadeIn()
 			}
 
-			function updateLayerParams() {
-				var data = 'go=setLayerParams<?php
+			function updateLayerParams() { <?
 				foreach($params AS $param) {
-					echo '&layer_parameter_' . $param['key'] . "=' + document.getElementById('layer_parameter_" . $param['key'] . "').value + '";
-				} ?>';
+					if ($param['multiple'] == '1') {
+						echo "
+							const checkboxes = document.querySelectorAll('.layer_parameter_" . $param['key'] . ":checked');
+							const valuesArray = Array.from(checkboxes).map(cb => cb.value);
+							const valuesString = valuesArray.join(',');
+						";
+					}
+					else {
+						echo "
+							const valuesString = document.getElementById('layer_parameter_" . $param['key'] . "').value;
+						";
+					} ?>
+					let data = 'go=setLayerParams&layer_parameter_<? echo $param['key']; ?>=' + valuesString; <?
+				} ?>;
 				ahah('index.php', data, [''], ['execute_function']);
 				document.GUI.legendtouched.value = 1;
 				neuLaden();
@@ -57,18 +68,28 @@
 										<tr>
 											<td class="layerOptionHeader"><?php echo $param['alias']; ?></td>
 											<td><?php
-												echo FormObject::createSelectField(
-													'layer_parameter_' . $param['key'],		# name
-													$param['options'],										# options
-													rolle::$layer_params[$param['key']],	# value
-													1,																		# size
-													'',																		# style
-													'onLayerParameterChanged(this);',			# onchange
-													'layer_parameter_' . $param['key'],		# id
-													'',																		# multiple
-													'',																		# class
-													''																		# first option
-												); ?>
+												if ($param['multiple'] == '1') {
+													echo FormObject::createCheckboxList(
+														'layer_parameter_' . $param['key'],									# name
+														$param['options'],																	# options
+														rolle::$layer_params[$param['key']] === '' ? [] : explode(',', rolle::$layer_params[$param['key']]),	# values
+														'onLayerParameterChanged(this);'										# onchange
+													);
+												}
+												else {
+													echo FormObject::createSelectField(
+														'layer_parameter_' . $param['key'],		# name
+														$param['options'],										# options
+														rolle::$layer_params[$param['key']],	# value
+														1,																		# size
+														'',																		# style
+														'onLayerParameterChanged(this);',			# onchange
+														'layer_parameter_' . $param['key'],		# id
+														'',																		# multiple
+														'',																		# class
+														''																		# first option
+													);
+												}?>
 											</td>
 										</tr><?php
 									} ?>

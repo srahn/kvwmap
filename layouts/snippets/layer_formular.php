@@ -842,7 +842,7 @@ from
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="max_query_rows" type="text" value="<?php echo $this->formvars['max_query_rows']; ?>" size="50" maxlength="5">
 						</td>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_path; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">

@@ -560,8 +560,8 @@ class LENRIS {
 						aenderungsnummer = '" . $n['aenderungsnummer'] . "', 
 						antragsnummer_alt = '" . $n['antragsnummer_alt'] . "', 
 						rissfuehrer_id = " . ($n['rissfuehrer_id'] ?: 'NULL') . ", 
-						messungszahlen = " . ($n['messungszahlen'] ?: 'NULL') . ", 
-						bov_ersetzt = " . ($n['bov_ersetzt'] ?: 'NULL') . ", 
+						messungszahlen = " . (in_array($n['messungszahlen'], ['t', 'f'])? "'" . $n['messungszahlen'] . "'" : 'NULL') . ", 
+						bov_ersetzt = " . (in_array($n['bov_ersetzt'], ['t', 'f'])? "'" . $n['bov_ersetzt'] . "'" : 'NULL') . ", 
 						zeit_geprueft = " . ($n['zeit_geprueft'] ? "'" . $n['zeit_geprueft'] . "'" : 'NULL') . ", 
 						freigegeben = " . ($n['freigegeben'] ? "'" . $n['freigegeben'] . "'" : 'false') . "
 					WHERE

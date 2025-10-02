@@ -1670,6 +1670,11 @@ a.menuered:hover {
 	line-height: 17px;
 }
 
+.legend-group-checkbox {
+	vertical-align: text-top;
+  margin: 3px 0px 0px -2px;
+}
+
 .legend_layer_hidden{
 
 	font-size: <? echo $font_size_factor * 15; ?>px;
@@ -1754,10 +1759,18 @@ span.black {
 }
 
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
+
+.td_preview_image{
+	padding-top: 125px;
+}
+
 a .preview_image{
 	border:1px solid black;
 	max-width: 125px;
 	max-height: 125px;
+	position: absolute;
+	top: 0px;
+	right: 0px;
 	transition: all 0.25s ease;
 }
 
@@ -1765,7 +1778,9 @@ a:hover .preview_image{
 	max-width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
 	max-height: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
 	transition: all 0.25s ease;
-	transition-delay: 0.5s;
+	transition-delay: 0.2s;
+	right: -70px;
+	z-index: 9999999999;
 }
 
 .preview_doc{}
@@ -2441,7 +2456,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .rollenwahl-option-header {
-	width: 270px;
+	<!-- width: 270px; -->
 	padding : 4px;
 }
 

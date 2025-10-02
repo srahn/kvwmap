@@ -99,9 +99,9 @@ if (!$GUI->pgdatabase->open(POSTGRES_CONNECTION_ID)) {
 	exit;
 }
 
-/*
-*	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
-*/
+/**
+ * Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
+ */
 #$GUI->debug->write('Formularvariablen: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 # logout
 if (is_logout($GUI->formvars)) {
@@ -121,66 +121,96 @@ if (is_logout($GUI->formvars)) {
 	$GUI->formvars['go'] = '';
 }
 
-# login
-$show_login_form = false;
-$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-if (is_logged_in()) {
-	$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
-	if ($_SESSION['login_name'] == '') {
-		$GUI->debug->write('login_name in Session ist leer', 4, $GUI->echo);
-		logout();
-		$show_login_form = true;
-		$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-		$go = 'login';
-	}
-	$GUI->formvars['login_name'] = $_SESSION['login_name'];
-	$GUI->debug->write('Ist angemeldet als: ' . $_SESSION['login_name'], 4, $GUI->echo);
-	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
-	if ($GUI->user->login_name == '') {
-		$GUI->debug->write('Nutzer mit login_name: ' . $_SESSION['login_name'] . ' nicht in Datenbank vorhanden.', 4, $GUI->echo);
-		logout();
-		$show_login_form = true;
-		$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-		$go = 'login';
+/**
+ * Dies ist der Beipass für die Datenabfrage von kvportal one login
+ */
+$gast_export = false;
+if (
+	array_key_exists('go', $GUI->formvars) AND $GUI->formvars['go'] === 'Daten_Export_Exportieren' AND
+	array_key_exists('gast', $GUI->formvars) AND $GUI->formvars['gast'] != '' AND
+	array_key_exists('export_format', $GUI->formvars) AND $GUI->formvars['export_format'] === 'GeoJSON' AND
+	array_key_exists('selected_layer_id', $GUI->formvars) AND $GUI->formvars['selected_layer_id'] != '' AND
+	is_gast_login($GUI->formvars, $gast_stellen)
+) {
+	// header('Content-Type: application/json; charset=utf-8');
+	$GUI->user = new user('gast', 0, $GUI->database);
+	if (gast_rolle_allowed($GUI->user, $GUI->formvars['gast'])) {
+		$GUI->user->stelle_id = $GUI->formvars['gast'];
+		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
+		$gast_export = true;
+		$show_login_form = false;
+		unset($GUI->formvars['browserwidth']);
+		unset($GUI->formvars['browserheight']);
+		// echo 'Nutzer mit Login-Name ' . $GUI->user->login_name . ' erfolgreich in Gaststelle ' . $GUI->user->stelle_id . ' eingelogged.'; exit;
 	}
 	else {
-		$GUI->debug->write('Nutzerdaten gelesen von: ' . $GUI->user->login_name, 4, $GUI->echo);
+		header('Content-Type: application/json; charset=utf-8');
+		echo json_encode(array('success' => false, 'msg' => 'In der Gaststelle id: ' . $GUI->formvars['gast'] . ' fehlt ein Nutzer mit Login-Namen gast!'));
+		exit;
 	}
-	# login case 1
-	$GUI->debug->write('login case 1', 4, $GUI->echo);
 }
-else {
-	header('logout: true');		// damit ajax-Requests das auch mitkriegen
-	$GUI->debug->write('Nicht angemeldet.', 4, $GUI->echo);
-	if (is_gast_login($GUI->formvars, $gast_stellen)) {
-		$GUI->formvars['gast'] = intval($GUI->formvars['gast']);
-		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);
-		if (has_width_and_height($GUI->formvars)) {
-			if (width_or_height_empty($GUI->formvars)) {
-				$GUI->formvars = set_width_or_height_default($GUI->formvars);
-			}
-			$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $GUI->echo);
-			$gast = $userDb->create_new_gast($GUI->formvars['gast']);
-			$GUI->formvars['login_name'] = $gast['username'];
-			$GUI->formvars['passwort'] = $gast['passwort'];
-			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
-			$GUI->user->stelle_id = $GUI->formvars['gast']; # set new stelle
-			set_session_vars($GUI->formvars);
-			# login case 2
-			$GUI->debug->write('login case 2', 4, $GUI->echo);
-		}
-		else {
-			$GUI->debug->write('Hat kein width und height. Frage sie ab.', 4, $GUI->echo);
-			# // ToDo: frage browser width und height ab.
+
+if ($gast_export === false) {
+	# login
+	$show_login_form = false;
+	$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
+	if (is_logged_in()) {
+		$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
+		if ($_SESSION['login_name'] == '') {
+			$GUI->debug->write('login_name in Session ist leer', 4, $GUI->echo);
+			logout();
 			$show_login_form = true;
 			$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-			$go = 'login_browser_size';
-			# Test case 3
-			$GUI->debug->write('login case 3', 4, $GUI->echo);
+			$go = 'login';
 		}
+		$GUI->formvars['login_name'] = $_SESSION['login_name'];
+		$GUI->debug->write('Ist angemeldet als: ' . $_SESSION['login_name'], 4, $GUI->echo);
+		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
+		if ($GUI->user->login_name == '') {
+			$GUI->debug->write('Nutzer mit login_name: ' . $_SESSION['login_name'] . ' nicht in Datenbank vorhanden.', 4, $GUI->echo);
+			logout();
+			$show_login_form = true;
+			$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
+			$go = 'login';
+		}
+		else {
+			$GUI->debug->write('Nutzerdaten gelesen von: ' . $GUI->user->login_name, 4, $GUI->echo);
+		}
+		# login case 1
+		$GUI->debug->write('login case 1', 4, $GUI->echo);
 	}
-	else { # ist keine gastanmeldung
-		$GUI->debug->write('Es ist keine Gastanmeldung.', 4, $GUI->echo);
+	else {
+		header('logout: true');		// damit ajax-Requests das auch mitkriegen
+		$GUI->debug->write('Nicht angemeldet.', 4, $GUI->echo);
+		if (is_gast_login($GUI->formvars, $gast_stellen)) {
+			$GUI->formvars['gast'] = intval($GUI->formvars['gast']);
+			$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);
+			if (has_width_and_height($GUI->formvars)) {
+				if (width_or_height_empty($GUI->formvars)) {
+					$GUI->formvars = set_width_or_height_default($GUI->formvars);
+				}
+				$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $GUI->echo);
+				$gast = $userDb->create_new_gast($GUI->formvars['gast']);
+				$GUI->formvars['login_name'] = $gast['username'];
+				$GUI->formvars['passwort'] = $gast['passwort'];
+				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
+				$GUI->user->stelle_id = $GUI->formvars['gast']; # set new stelle
+				set_session_vars($GUI->formvars);
+				# login case 2
+				$GUI->debug->write('login case 2', 4, $GUI->echo);
+			}
+			else {
+				$GUI->debug->write('Hat kein width und height. Frage sie ab.', 4, $GUI->echo);
+				# // ToDo: frage browser width und height ab.
+				$show_login_form = true;
+				$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
+				$go = 'login_browser_size';
+				# Test case 3
+				$GUI->debug->write('login case 3', 4, $GUI->echo);
+			}
+		}
+		else { # ist keine gastanmeldung
+			$GUI->debug->write('Es ist keine Gastanmeldung.', 4, $GUI->echo);
 
 		if (is_login($GUI->formvars)) {
 			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4, $GUI->echo);
@@ -252,254 +282,256 @@ else {
 		else { # ist keine Anmeldung
 			$GUI->debug->write('Es ist keine Anmeldung.', 4, $GUI->echo);
 
-			if (is_registration($GUI->formvars)) {
-				$GUI->debug->write('Es ist eine Registrierung.', 4, $GUI->echo);
+				if (is_registration($GUI->formvars)) {
+					$GUI->debug->write('Es ist eine Registrierung.', 4, $GUI->echo);
 
-				if (is_new_password($GUI->formvars)) {
-					$GUI->debug->write('Registrierung mit neuem Passwort.', 4, $GUI->echo);
-					array_walk(
-						$GUI->formvars,
-						function(&$formvar, $key, $database) {
-							$formvar = $database->mysqli->real_escape_string($formvar);
-						},
-						$GUI->database
-					);
+					if (is_new_password($GUI->formvars)) {
+						$GUI->debug->write('Registrierung mit neuem Passwort.', 4, $GUI->echo);
+						array_walk(
+							$GUI->formvars,
+							function(&$formvar, $key, $database) {
+								$formvar = $database->mysqli->real_escape_string($formvar);
+							},
+							$GUI->database
+						);
 
-					$new_registration_err = checkRegistration($GUI);
+						$new_registration_err = checkRegistration($GUI);
 
-					if (is_registration_valid($new_registration_err)) {
-						$GUI->debug->write('Registrierung ist valide.', 4, $GUI->echo);
+						if (is_registration_valid($new_registration_err)) {
+							$GUI->debug->write('Registrierung ist valide.', 4, $GUI->echo);
 
-						$result = Nutzer::register($GUI, $GUI->formvars['Stelle_ID']);
+							$result = Nutzer::register($GUI, $GUI->formvars['Stelle_ID']);
 
-						if ($result['success']) {
-							$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
-							$invitation->set('completed', date("Y-m-d H:i:s"));
-							$invitation->update();
-							$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
-							$GUI->add_message('info', 'Nutzer erfolgreich angelegt.<br>Willkommen im WebGIS kvwmap.');
-							$GUI->debug->write('Set Session', 4, $GUI->echo);
-							set_session_vars($GUI->formvars);
-							unset($GUI->formvars['Stelle_ID']);
-							unset($GUI->formvars['token']);
-							unset($GUI->formvars['passwort']);
-							unset($GUI->formvars['new_password']);
-							unset($GUI->formvars['new_password_2']);
-							unset($GUI->formvars['email']);
-							unset($GUI->formvars['Name']);
-							unset($GUI->formvars['Vorname']);
-							unset($GUI->formvars['Namenszusatz']);
-							unset($GUI->formvars['phon']);
-							# login case 9
-							$GUI->debug->write('login case 9', 4, $GUI->echo);
+							if ($result['success']) {
+								$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
+								$invitation->set('completed', date("Y-m-d H:i:s"));
+								$invitation->update();
+								$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
+								$GUI->add_message('info', 'Nutzer erfolgreich angelegt.<br>Willkommen im WebGIS kvwmap.');
+								$GUI->debug->write('Set Session', 4, $GUI->echo);
+								set_session_vars($GUI->formvars);
+								unset($GUI->formvars['Stelle_ID']);
+								unset($GUI->formvars['token']);
+								unset($GUI->formvars['passwort']);
+								unset($GUI->formvars['new_password']);
+								unset($GUI->formvars['new_password_2']);
+								unset($GUI->formvars['email']);
+								unset($GUI->formvars['Name']);
+								unset($GUI->formvars['Vorname']);
+								unset($GUI->formvars['Namenszusatz']);
+								unset($GUI->formvars['phon']);
+								# login case 9
+								$GUI->debug->write('login case 9', 4, $GUI->echo);
+							}
+							else {
+								$GUI->add_message('error', 'Datenbankfehler beim Anlegen des Nutzers.<br>' . $result['msg']);
+								$show_login_form = true;
+								$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
+								$go = 'login_registration';
+								# login case 10
+								$GUI->debug->write('login case 10', 4, $GUI->echo);
+							}
 						}
 						else {
-							$GUI->add_message('error', 'Datenbankfehler beim Anlegen des Nutzers.<br>' . $result['msg']);
+							$GUI->debug->write('Registrierung ist nicht valid.', 4, $GUI->echo);
+							$GUI->add_message('error', $new_registration_err . '<br>Die Registrierung ist nicht erfolgreich.<br>Versuchen Sie es erneut oder lassen Sie sich erneut einladen.');
 							$show_login_form = true;
 							$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 							$go = 'login_registration';
-							# login case 10
-							$GUI->debug->write('login case 10', 4, $GUI->echo);
+							# login case 11
+							$GUI->debug->write('login case 11', 4, $GUI->echo);
 						}
 					}
 					else {
-						$GUI->debug->write('Registrierung ist nicht valid.', 4, $GUI->echo);
-						$GUI->add_message('error', $new_registration_err . '<br>Die Registrierung ist nicht erfolgreich.<br>Versuchen Sie es erneut oder lassen Sie sich erneut einladen.');
+						$GUI->debug->write('Es wurde noch kein neues Passwort für die Registrierung vergeben.', 4, $GUI->echo);
 						$show_login_form = true;
 						$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 						$go = 'login_registration';
-						# login case 11
-						$GUI->debug->write('login case 11', 4, $GUI->echo);
+						# login case 12
+						$GUI->debug->write('login case 12', 4, $GUI->echo);
 					}
 				}
-				else {
-					$GUI->debug->write('Es wurde noch kein neues Passwort für die Registrierung vergeben.', 4, $GUI->echo);
+				else { # keine Registrierung
+					$GUI->debug->write('Es ist keine Registrierung.', 4, $GUI->echo);
 					$show_login_form = true;
 					$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-					$go = 'login_registration';
-					# login case 12
-					$GUI->debug->write('login case 12', 4, $GUI->echo);
-				}
-			}
-			else { # keine Registrierung
-				$GUI->debug->write('Es ist keine Registrierung.', 4, $GUI->echo);
-				$show_login_form = true;
-				$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-				$go = 'login';
-				# login case 8
-				$GUI->debug->write('login case 8', 4, $GUI->echo);
-			} # ende keine Registrierung
-		} # ende keine Anmeldung
-	} # ende keine gastanmeldung
-} # ende nicht angemeldet
+					$go = 'login';
+					# login case 8
+					$GUI->debug->write('login case 8', 4, $GUI->echo);
+				} # ende keine Registrierung
+			} # ende keine Anmeldung
+		} # ende keine gastanmeldung
+	} # ende nicht angemeldet
 
-# $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10
-$GUI->debug->write('$show_login_form is ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-if (!$show_login_form) {
-	if (is_new_stelle($GUI->formvars, $GUI->user)) {
-		$GUI->debug->write('Neue Stelle ' . $GUI->formvars['Stelle_ID'] . ' angefragt.', 4, $GUI->echo);
-		$GUI->Stelle = new stelle($GUI->formvars['Stelle_ID'], $GUI->database);
-	}
-	else {
-		$GUI->debug->write('Keine neue Stelle angefragt. Stelle: ' . $GUI->user->stelle_id . ' bleibt.', 4, $GUI->echo);
-		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
-		if ($GUI->database->errormessage != '') {
-			$GUI->add_message('error', 'Die Stelle kann nicht abgefragt werden. Prüfen Sie ob das Datenmodell der Stelle aktuell ist!');
-			logout();
-			$show_login_form = true;
-			$go = 'login';
-		}
-	}
-
-	# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
-	if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars, $GUI->user)) {
-		$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
-
-		$GUI->user->Stellen = $GUI->user->getStellen(0);
-		$permission = get_permission_in_stelle($GUI);
-
-		if ($permission['allowed']) {
-			$GUI->debug->write('Nutzer ist in Stelle ' . $GUI->Stelle->id . ' erlaubt.', 4, $GUI->echo);
-			$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
-			$GUI->debug->write('Setze neue Stellen-ID: ' . $GUI->Stelle->id . ' für Nutzer: ' . $GUI->user->id, 4, $GUI->echo);
-			$GUI->user->updateStelleID($GUI->Stelle->id);
-			$_SESSION['stelle_angemeldet'] = true;
-			# login case 15
-			$GUI->debug->write('login case 15', 4, $GUI->echo);
+	# $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10
+	$GUI->debug->write('$show_login_form is ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
+	if (!$show_login_form) {
+		if (is_new_stelle($GUI->formvars, $GUI->user)) {
+			$GUI->debug->write('Neue Stelle ' . $GUI->formvars['Stelle_ID'] . ' angefragt.', 4, $GUI->echo);
+			$GUI->Stelle = new stelle($GUI->formvars['Stelle_ID'], $GUI->database);
 		}
 		else {
-			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'], 4, ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.' ? true : $GUI->echo));
-			if ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.') {
-				exit;
+			$GUI->debug->write('Keine neue Stelle angefragt. Stelle: ' . $GUI->user->stelle_id . ' bleibt.', 4, $GUI->echo);
+			$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
+			if ($GUI->database->errormessage != '') {
+				$GUI->add_message('error', 'Die Stelle kann nicht abgefragt werden. Prüfen Sie ob das Datenmodell der Stelle aktuell ist!');
+				logout();
+				$show_login_form = true;
+				$go = 'login';
 			}
+		}
 
-			if (is_ows_request($GUI->formvars)) {
-				$GUI->debug->write('OWS Request führt zu Exception.', 4);
-				$GUI->Fehlermeldung .= ' Der Zugang zur URL: ' . URL . ' ist mit dem Login oder in der Stelle nicht möglich. Melden Sie sich über einen Browser an dieser Adresse an und aktualisieren Sie ggf. Ihr Passwort oder passen Sie die URL an.';
-				$go = 'OWS_Exception';
-				# login case 13
-				$GUI->debug->write('login case 13', 4, $GUI->echo);
+		# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
+		if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars, $GUI->user)) {
+			$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
+
+			$GUI->user->Stellen = $GUI->user->getStellen(0);
+			$permission = get_permission_in_stelle($GUI);
+
+			if ($permission['allowed']) {
+				$GUI->debug->write('Nutzer ist in Stelle ' . $GUI->Stelle->id . ' erlaubt.', 4, $GUI->echo);
+				$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
+				$GUI->debug->write('Setze neue Stellen-ID: ' . $GUI->Stelle->id . ' für Nutzer: ' . $GUI->user->id, 4, $GUI->echo);
+				$GUI->user->updateStelleID($GUI->Stelle->id);
+				$_SESSION['stelle_angemeldet'] = true;
+				# login case 15
+				$GUI->debug->write('login case 15', 4, $GUI->echo);
 			}
 			else {
-				$GUI->debug->write('Kein OWS Request.', 4, $GUI->echo);
+				$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'], 4, ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.' ? true : $GUI->echo));
+				if ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.') {
+					exit;
+				}
 
-				if (in_array($permission['reason'], ['password_expired', 'password_age_expired'])) {
-					logout();
-					if (is_new_password($GUI->formvars)) {
-						$GUI->debug->write('Passwort ist abgelaufen. Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
-						$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
+				if (is_ows_request($GUI->formvars)) {
+					$GUI->debug->write('OWS Request führt zu Exception.', 4);
+					$GUI->Fehlermeldung .= ' Der Zugang zur URL: ' . URL . ' ist mit dem Login oder in der Stelle nicht möglich. Melden Sie sich über einen Browser an dieser Adresse an und aktualisieren Sie ggf. Ihr Passwort oder passen Sie die URL an.';
+					$go = 'OWS_Exception';
+					# login case 13
+					$GUI->debug->write('login case 13', 4, $GUI->echo);
+				}
+				else {
+					$GUI->debug->write('Kein OWS Request.', 4, $GUI->echo);
 
-						if (is_new_password_valid($new_password_err)) {
-							$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
-							update_password($GUI);
-							$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
-							session_start();
-							set_session_vars($GUI->formvars);
-							$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
-							$GUI->user->stelle_id = $GUI->Stelle->id;
-							# login case 17
-							$GUI->debug->write('login case 17', 4, $GUI->echo);
+					if (in_array($permission['reason'], ['password_expired', 'password_age_expired'])) {
+						logout();
+						if (is_new_password($GUI->formvars)) {
+							$GUI->debug->write('Passwort ist abgelaufen. Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
+							$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
+
+							if (is_new_password_valid($new_password_err)) {
+								$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
+								update_password($GUI);
+								$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
+								session_start();
+								set_session_vars($GUI->formvars);
+								$_SESSION['stelle_angemeldet'] = true;
+								$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
+								$GUI->user->stelle_id = $GUI->Stelle->id;
+								# login case 17
+								$GUI->debug->write('login case 17', 4, $GUI->echo);
+							}
+							else { # new password is not ok
+								$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
+								$GUI->Fehlermeldung = $new_password_err . '!<br>';
+								$show_login_form = true;
+								$go = 'login_new_password';
+								# login case 6
+								$GUI->debug->write('login case 6', 4, $GUI->echo);
+							}
 						}
-						else { # new password is not ok
-							$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
-							$GUI->Fehlermeldung = $new_password_err . '!<br>';
-							$show_login_form = true;
-							$go = 'login_new_password';
-							# login case 6
-							$GUI->debug->write('login case 6', 4, $GUI->echo);
+						else {
+							if ($permission['reason'] == 'password_expired' AND is_temporary_password_expired($GUI->user)) {
+								$GUI->add_message('error', 'Dieser Link zur Passwortvergabe ist nicht mehr gültig. Bitte fordern Sie bei Ihrem Administrator einen neuen Link an.');
+								$show_login_form = true;
+								$go = 'login';
+							}
+							else {
+								$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
+								if ($GUI->formvars['format'] == 'json') {
+									header('Content-Type: application/json; charset=utf-8');
+									$json = json_encode(
+										array(
+											'success' => false,
+											'err_msg' => $permission['errmsg']
+										)
+									);
+									echo utf8_decode($json);
+									exit;
+								}
+								else {
+									$GUI->add_message('error', $permission['errmsg']);
+								}
+								$GUI->formvars['Stelle_id'] = $GUI->Stelle->id;
+								$show_login_form = true;
+								$go = 'login_new_password';
+								# login case 19
+								$GUI->debug->write('login case 19', 4, $GUI->echo);
+							}
 						}
 					}
 					else {
-						if ($permission['reason'] == 'password_expired' AND is_temporary_password_expired($GUI->user)) {
-							$GUI->add_message('error', 'Dieser Link zur Passwortvergabe ist nicht mehr gültig. Bitte fordern Sie bei Ihrem Administrator einen neuen Link an.');
-							$show_login_form = true;
-							$go = 'login';
-						}
-						else {
-							$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
-							if ($GUI->formvars['format'] == 'json') {
-								header('Content-Type: application/json; charset=utf-8');
-								$json = json_encode(
-									array(
-										'success' => false,
-										'err_msg' => $permission['errmsg']
-									)
-								);
-								echo utf8_decode($json);
-								exit;
-							}
-							else {
-								$GUI->add_message('error', $permission['errmsg']);
-							}
-							$GUI->formvars['Stelle_id'] = $GUI->Stelle->id;
-							$show_login_form = true;
-							$go = 'login_new_password';
-							# login case 19
-							$GUI->debug->write('login case 19', 4, $GUI->echo);
-						}
+						$GUI->debug->write('Passwort ist nicht abgelaufen.', 4);
+						$GUI->add_message('error', $permission['errmsg'] . '<br>' . $permission['reason']);
+						$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
+						$go = 'Stelle_waehlen';
+						$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
+						# login case 14
+						$GUI->debug->write('login case 14', 4, $GUI->echo);
 					}
 				}
+			}
+		}
+	}
+
+	if (is_logged_in()) {
+		if (
+			!defined('AGREEMENT_MESSAGE') OR
+			!is_file(AGREEMENT_MESSAGE) OR
+			AGREEMENT_MESSAGE == '' OR
+			is_agreement_accepted($GUI->user)
+		) {
+			$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
+			# login case 4
+			$GUI->debug->write('login case 4', 4, $GUI->echo);
+		}
+		else {
+			$GUI->debug->write('Agreement wurde noch nicht akzeptiert.', 4, $GUI->echo);
+			if (array_key_exists('agreement', $GUI->formvars)) {
+				if ($GUI->formvars['agreement_accepted'] == '1') {
+					$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
+					$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
+					# login case 18
+					$GUI->debug->write('login case 18', 4, $GUI->echo);
+				}
 				else {
-					$GUI->debug->write('Passwort ist nicht abgelaufen.', 4);
-					$GUI->add_message('error', $permission['errmsg'] . '<br>' . $permission['reason']);
-					$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
-					$go = 'Stelle_waehlen';
-					$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
-					# login case 14
-					$GUI->debug->write('login case 14', 4, $GUI->echo);
+					$GUI->debug->write('Agreement wurde abgelehnt, logout.', 4, $GUI->echo);
+					unset($GUI->formvars['agreement']);
+					logout();
+					$show_login_form = true;
+					$go = 'login';
+					# login case 16
+					$GUI->debug->write('login case 16', 4, $GUI->echo);
+				}
+			}
+			else {
+				if (file_exists(AGREEMENT_MESSAGE)) {
+					$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
+					$show_login_form = true;
+					$go = 'login_agreement';
+				}
+				else {
+					logout();
+					$show_login_form = true;
+					$GUI->add_message('error', 'Die in der Konfiguration angegebene Datei ' . AGREEMENT_MESSAGE . ' für die Zustimmungserklärung konnte nicht gefunden werden. Informieren Sie den Administrator.');
+					$go = 'login';
 				}
 			}
 		}
 	}
-}
-
-if (is_logged_in()) {
-	if (
-		!defined('AGREEMENT_MESSAGE') OR
-		!is_file(AGREEMENT_MESSAGE) OR
-		AGREEMENT_MESSAGE == '' OR
-		is_agreement_accepted($GUI->user)
-	) {
-		$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
-		# login case 4
-		$GUI->debug->write('login case 4', 4, $GUI->echo);
-	}
 	else {
-		$GUI->debug->write('Agreement wurde noch nicht akzeptiert.', 4, $GUI->echo);
-		if (array_key_exists('agreement', $GUI->formvars)) {
-			if ($GUI->formvars['agreement_accepted'] == '1') {
-				$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
-				$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
-				# login case 18
-				$GUI->debug->write('login case 18', 4, $GUI->echo);
-			}
-			else {
-				$GUI->debug->write('Agreement wurde abgelehnt, logout.', 4, $GUI->echo);
-				unset($GUI->formvars['agreement']);
-				logout();
-				$show_login_form = true;
-				$go = 'login';
-				# login case 16
-				$GUI->debug->write('login case 16', 4, $GUI->echo);
-			}
-		}
-		else {
-			if (file_exists(AGREEMENT_MESSAGE)) {
-				$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
-				$show_login_form = true;
-				$go = 'login_agreement';
-			}
-			else {
-				logout();
-				$show_login_form = true;
-				$GUI->add_message('error', 'Die in der Konfiguration angegebene Datei ' . AGREEMENT_MESSAGE . ' für die Zustimmungserklärung konnte nicht gefunden werden. Informieren Sie den Administrator.');
-				$go = 'login';
-			}
-		}
+		$GUI->debug->write('is_logged_in liefert false', 4, $GUI->echo);
 	}
-}
-else {
-	$GUI->debug->write('is_logged_in liefert false', 4, $GUI->echo);
 }
 
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10, 11
@@ -662,8 +694,20 @@ function is_logged_out() {
 	return !is_logged_in();
 }
 
+/**
+ * Function check if param gast has been send, is not empty,
+ * param login_name is empty and stelle with id in param gast is a gast_stelle_id
+ */
 function is_gast_login($formvars, $gast_stellen) {
 	return array_key_exists('gast', $formvars) AND $formvars['gast'] != '' AND $formvars['login_name'] == '' AND in_array($formvars['gast'], $gast_stellen);
+}
+
+function gast_rolle_allowed($user, $gast_stelle_id) {
+	if ($user->id != '') {
+		$user->Stellen = $user->getStellen($gast_stelle_id);
+		return count($user->Stellen['ID']) === 1;
+	}
+	return false;
 }
 
 function has_width_and_height($var) {
@@ -697,7 +741,9 @@ function is_new_stelle($formvars, $user) {
 }
 
 function is_user_member_in_stelle($user_stelle_id, $allowed_stellen_ids) {
-	if($allowed_stellen_ids == NULL)return false;
+	if ($allowed_stellen_ids == NULL) {
+		return false;
+	}
 	return in_array($user_stelle_id, $allowed_stellen_ids);
 }
 
