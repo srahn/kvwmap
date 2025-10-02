@@ -1532,17 +1532,18 @@ class data_import_export {
 
 						case 'GeoJSONPlus': {
 							$exportfile = $exportfile.'.json';
-
 							$err = $this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
-
 							if (in_array('mobile', $kvwmap_plugins) AND $layerset[0]['sync'] > 0) {
 								$sql = "
 									SELECT
 										coalesce(max(version), 1) AS version
 									FROM
-										" . $layerset[0]['schema'] . "." . $layerset[0]['maintable'] . "_deltas
+										public.deltas_all
+									WHERE
+									  schema_name = '" . $layerset[0]['schema'] . "' AND
+										table_name = '" . $layerset[0]['maintable'] . "'
 								";
-								#echo '<p>SQL zur Abfrage der letzten Version in Delta Tabelle: ' . $sql;
+								// echo '<p>SQL zur Abfrage der letzten Version in Delta Tabelle: ' . $sql;
 								$ret = $layerdb->execSQL($sql, 4, 0, $suppress_err_msg);
 								if (!$ret[0]) {
 									$rs = pg_fetch_assoc($ret[1]);

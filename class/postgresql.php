@@ -903,7 +903,7 @@ FROM
 			if ($pseudo_realnames) {
 				include_once(CLASSPATH . 'sql.php');
 				$sql_object = new SQL($select);
-				$select_attr = $sql_object->get_attributes();
+				$select_attr = $sql_object->get_attributes(false);
 			}
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname

@@ -5,17 +5,34 @@
   "description": "Options for kvwmap formular element type SubformFK. SubformFK define a one to many foreign key relationship to a parent layer.",
   "type": "object",
   "properties": {
-    "parent_layer_id": {
-      "description": "The id of the parent layer that have the reference table of that foreign key relation as maintable.",
+    "ref_layer_id": {
+      "description": "The id of the referenced layer SubFormPK referenced to a sub layer, SubFormFK to a parent layer.",
       "type": "integer"
     },
-    "fk_id": {
-      "description": "The name of the foreign key attribute in the layer that have this attribute.",
-      "type": "string"
+    "ref_keys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pk_id": {
+            "description": "The name of the primary key attribute in parent layer respectively in there reference table.",
+            "type": "string"
+          },
+          "fk_id": {
+            "description": "The name of the foreign key attribute in the layer that have this attribute.",
+            "type": "string"
+          }
+        }
+      }
     },
-    "pk_id": {
-      "description": "The name of the primary key attribute in parent layer respectively in there reference table.",
-      "type": "string"
+    "window_type": {
+      "description": "The type of the window to show the result that is linked with this attribute.",
+      "anyOf": [
+        {
+          "const": "no_new_window",
+          "desctiption" : "Anzeige im gleichen Browser-Window bzw. Browser-Tab"
+        }
+      ]
     },
     "display": {
       "description": "An expression that define what to display in the formular. It is a string expression in sql that will be executed on the parent layer table and it can contain attribute variables from the layer that have that SubformFK attribute.",
@@ -84,5 +101,5 @@
       "default": "value"
     }
   },
-  "required": [ "parent_layer_id", "fk_id", "pk_id", "preview", "display_type" ]
+  "required": [ "ref_layer_id", "keys", "window_type", "display", "display_type", "link_type", "default_value_type" ]
 }

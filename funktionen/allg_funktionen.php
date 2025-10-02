@@ -83,7 +83,7 @@ function urlencode2($str){
 /**
  * die Konstante URL kann durch diese Funktion ersetzt werden
  */
-function get_url(){
+function get_url() {
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
@@ -1053,6 +1053,16 @@ function isTag($word) {
 		}
 	}
 	return false;
+}
+
+/**
+ * Function return the content of $text that is between the first occurence of tag
+ * and its first ending tag. If tag not exists it returns an empty string.
+ */
+function get_tag_content($text, $tag) {
+	$start_parts = explode('<' . $tag . '>', $text);
+	$end_parts = explode('</' . $tag . '>', $start_parts[1]);
+	return $end_parts[0];
 }
 
 function drawColorBox($color,$outlinecolor) {
@@ -2032,7 +2042,7 @@ function replace_params_link($str, $params, $layer_id) {
 * }
 * mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang);
 **/
-function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port) {
+function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
 	$success = false;
 	switch ($mode) {
 		case 'sendEmail async': {
@@ -2047,6 +2057,40 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 				$file,
 				json_encode($str)
 			);
+		} break;
+		case 'PHPMailer' : {
+			require WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/Exception.php';
+			require WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php';
+			require WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/SMTP.php'; // Yes, this exists
+			$mail = new PHPMailer();
+			// $mail->SMTPDebug = SMTP::DEBUG_CONNECTION;
+			$mail->isSMTP();
+			$mail->Host = $smtp_server . ':' . $smtp_port;
+			$mail->SMTPAuth = true;
+			$mail->Username = MAILSMTPUSER;
+			$mail->Password = MAILSMTPPASSWORD;
+			$mail->SMTPSecure = 'tls';
+			$mail->From = $from_email;
+			$mail->FromName = $from_name;
+			$mail->addAddress($to_email, $to_name);
+			$mail->addReplyTo($reply_email, $reply_name);
+			if ($cc_email) {
+				$mail->addCC($cc_email);
+			}
+			if ($bcc_email) {
+				$mail->addBCC($bcc_email);
+			}
+			// $mail->WordWrap = 50;
+			// $mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+			// $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+			$mail->isHTML(true);
+			$mail->CharSet = "UTF-8";
+			$mail->Subject = $subject;
+			$mail->Body    = $message;
+			// $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+			$result = $mail->send();
+
+			return $result;
 		} break;
 		default : {
 			$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";

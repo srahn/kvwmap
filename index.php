@@ -1677,6 +1677,9 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				include_once(CLASSPATH . 'Layer.php');
+				if ($GUI->plugin_loaded('mobile')) {
+					include_once(PLUGINS . 'mobile/model/kvwmap.php');
+				}
 				$GUI->LayerAendern($GUI->formvars);
 				$GUI->Layereditor();
 			} break;
