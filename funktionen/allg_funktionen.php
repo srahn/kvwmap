@@ -335,6 +335,51 @@ function get_exif_data($img_path, $force_identify = false) {
 }
 
 /**
+ * Function write exif data to file given in $img_path
+ * It uses php function iptcembed to write the exif data
+ * @param string $img_path Absolute Path of file with Exif Data to write
+ * @param array $iptc Array with iptc tags to write. See https://exiftool.org/TagNames/IPTC.html#ApplicationRecord for tag names and meanings
+ * @return void
+ */
+function set_exif_data($img_path, $iptc = array()) {
+	if (count($iptc) == 0) {
+		return;
+	}
+	$data = '';
+	foreach ($iptc as $tag => $string) {
+		$tag = substr($tag, 2);
+		$data .= iptc_make_tag(2, $tag, $string);
+	}
+	$content = iptcembed($data, $img_path);
+	$fp = fopen($img_path, "wb");
+	fwrite($fp, $content);
+	fclose($fp);
+}
+
+/**
+ * Create an IPTC tag
+ * originaly created by Thies C. Arntzen
+ */
+function iptc_make_tag($rec, $data, $value) {
+	// echo 'iptc_make_tag: ' . $rec . ', ' . $data . ', ' . $value . '<br>';
+	$length = strlen($value);
+	$retval = chr(0x1C) . chr($rec) . chr($data);
+
+	if ($length < 0x8000) {
+		$retval .= chr($length >> 8) .  chr($length & 0xFF);
+	}
+	else {
+		$retval .= chr(0x80) . 
+							 chr(0x04) . 
+							 chr(($length >> 24) & 0xFF) . 
+							 chr(($length >> 16) & 0xFF) . 
+							 chr(($length >> 8) & 0xFF) . 
+							 chr($length & 0xFF);
+	}
+	return $retval . $value;
+}
+
+/**
 * Function create a float value from a text
 * where numerator and denominator are delimited by a slash e.g. 23/100
 *
@@ -1426,6 +1471,25 @@ function copy_file_to_tmp($frompath, $dateiname = ''){
   }
 	#exec('ln -s '.$frompath.' '.$dateipfad.$dateiname);
 	#return TEMPPATH_REL.$dateiname;
+}
+
+/**
+ * Löscht ein Verzeichnis und alle darin befindlichen Dateien
+ * Sicherheitsabfrage: Verzeichnis muß unter /var/www/data/ liegen und dort auch existieren
+ * @param string $dir Pfad des zu löschenden Verzeichnisses
+ * @return boolean true wenn Verzeichnis gelöscht wurde, sonst false
+ */
+function delete_dir_with_files($dir) {
+	if ($dir == '' OR strpos($dir, '/var/www/data/') === false OR !is_dir($dir)) {
+		return false;
+	}
+
+	foreach (glob($dir . '/*') as $file) {
+		if (is_file($file)) {
+			unlink($file);
+		}
+	}
+	return rmdir($dir);
 }
 
 function read_epsg_codes($database) {
