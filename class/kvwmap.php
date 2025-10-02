@@ -14648,8 +14648,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           $deletestellen[] = $userstellen['ID'][$i];
         }
       }
-      $this->user->rolle->deleteRollen($this->formvars['selected_user_id'], $deletestellen);
-      $this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $deletestellen, 0);
+			$this->user->rolle->deleteRollen($this->formvars['selected_user_id'], $deletestellen);
+			$this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $deletestellen, 0);
       $this->user->rolle->deleteGroups($this->formvars['selected_user_id'], $deletestellen);
       $this->user->rolle->deleteLayer($this->formvars['selected_user_id'], $deletestellen, 0);
       # Überprüfen ob alte Stelle noch gültig ist
@@ -18067,7 +18067,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$layer['export_privileg'] = 1;
 		$layer['editable'] 				= 1;
 		$layer['listed'] 					= 1;
-		$layer['drawingorder'] 		= 10000;
+		$layer['drawingorder'] 		= 100000;
 		$layer['shared_from'] 		= $this->user->id;
 
 		# create share schema if not exists and copy rollenlayer table to shared layer table
