@@ -2206,6 +2206,25 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 }
 
 /**
+ * Function implode $list with $delimiter but with $last_delimiter for the last conjunction.
+ * If $list is a String it will be exploded with $delimiter first.
+ * @param Array|String $list The list of values to implode.
+ * @param String $delimiter
+ * @param String $last_delimiter
+ * @return String The imploded string
+ */
+function natural_join($list, $delimiter =', ', $last_delimiter = ' und ') {
+	if (gettype($list) === 'string') {
+		$list = explode($delimiter, $list);
+	}
+  $last = array_pop($list);
+  if ($list) {
+    return implode($delimiter, $list) . $last_delimiter . $last;
+  }
+  return $last;
+}
+
+/**
 * function replaced square brackets at the beginning and the end of the string
 * and return the elements of the string as array separated by the delimmiter.
 * The elements of the string will be replaced by slashes and timed from white spaces and ".
@@ -2883,10 +2902,10 @@ function getAllFiles($dir) {
 			$files = array_merge($files, getAllFiles($item));
 		}
 		else {
-			$files[pathinfo($item, PATHINFO_EXTENSION)] = $item;
+			// $files[pathinfo($item, PATHINFO_EXTENSION)][] = $item;
+			$files[] = $item;
 		}
 	}
-
 	return $files;
 }
 

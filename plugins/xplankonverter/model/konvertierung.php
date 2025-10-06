@@ -43,7 +43,20 @@ class Konvertierung extends PgObject {
 	// MARK: Konfiguration
 	function set_config($planart = null) {
 		$this->set('planart', $planart ?? $this->get('planart') ?? 'Plan');
-		switch ($this->get('planart')) {
+		$this->config = Konvertierung::get_config($this->get('planart'));
+		# Die Attribute des Objektes, die mit plan_ anfangen kommen noch in $config und
+		# als Klassenvariablen vor.
+		# ToDo 2 pk: config-Variablen nutzen und Klassenvariablen ablöschen und löschen, siehe auch ToDo 1 pk in index.php
+		$this->plan_title = $this->config['plan_title'];
+		$this->plan_short_title = $this->config['plan_short_title'];
+		$this->plan_class = $this->config['plan_class'];
+		$this->plan_abk = $this->config['plan_abk'];
+		$this->plan_layer_id = $this->config['plan_layer_id'];
+		return $this->config;
+	}
+
+	public static function get_config($planart) {
+		switch ($planart) {
 			case ('BP-Plan') : {
 				$config = array(
 					'title' => 'Bebauungsplan', //Nominativ
@@ -85,8 +98,7 @@ class Konvertierung extends PgObject {
 					);
 				}
 				$config['upload_bedingungen'] = "
-					<li>{$config['artikel']} {$config['plan_title']} muss im Attribut {$config['plan_attribut_aktualitaet']} des Objektes {$config['plan_class']} ein gültiges Datum beinhalten.</li>
-				";
+					<li>{$config['artikel']} {$config['plan_title']} muss im Attribut " . natural_join($config['plan_attribut_aktualitaet'], ', ', ' oder ') . " des Objektes {$config['plan_class']} ein gültiges Datum beinhalten.</li>";
 			} break;
 			case ('FP-Plan') : {
 				$config = array(
@@ -104,7 +116,7 @@ class Konvertierung extends PgObject {
 					'plan_abk' => 'fplan',
 					'plan_abk_plural' => 'fplaene',
 					'plan_layer_id' => XPLANKONVERTER_FP_PLAENE_LAYER_ID,
-					'plan_attribut_aktualitaet' => 'wirksamkeitsdatum, aenderungenbisdatum','genehmigungsdatum',
+					'plan_attribut_aktualitaet' => 'wirksamkeitsdatum, aenderungenbisdatum, genehmigungsdatum',
 					'plan_file_name' => 'Zusammenzeichnung.gml',
 					'mapfile_name' => 'zusammenzeichnung.map',
 					'upload_steps' => array(
@@ -125,7 +137,8 @@ class Konvertierung extends PgObject {
 					<li>Die Daten müssen in einem ZIP-Archiv abgelegt sein.</li>
 					<li>Die GML-Datei im ZIP-Archiv muss die Dateibezeichnung \"Zusammenzeichnung.gml\" aufweisen.</li>
 					<li>Es kann eine GML-Datei mit Geltungsbereichen von Änderungsplänen enthalten sein. Sie muss \"Geltungsbereiche.gml\" heißen.</li>
-					<li>Der {$config['plan_title']} muss im Attribut {$config['plan_attribut_aktualitaet']} oder aenderungenbisdatum des Objektes {$config['plan_class']} ein gültiges Datum beinhalten.</li>
+					<li>Der {$config['plan_title']} muss im Attribut " . natural_join($config['plan_attribut_aktualitaet'], ', ', ' oder ') . " des Objektes {$config['plan_class']} ein gültiges Datum beinhalten. Weiterhin muss das Attribut rechtsstand erfasst werden.</li>
+					<li>Die XPlanGML-Datei muss die gesamte Fläche der Kommune räumlich erfassen.</li>
 				";
 			} break;
 			case ('SO-Plan') : {
@@ -185,7 +198,7 @@ class Konvertierung extends PgObject {
 				$config['upload_bedingungen'] = "
 					<li>Die Daten müssen in einem ZIP-Archiv abgelegt sein.</li>
 					<li>In dem ZIP-Archiv muss mindestens eine GML-Datei vorhanden sein. Sind mehrere enthalten wird nur die alphabetisch sortiert erste verwendet.</li>
-					<li>{$config['artikel']} {$config['singular']} muss im Attribut {$config['plan_attribut_aktualitaet']} des Objektes {$config['plan_class']} ein gültiges Datum beinhalten.</li>
+					<li>{$config['artikel']} {$config['singular']} muss im Attribut " . natural_join($config['plan_attribut_aktualitaet'], ', ', ' oder ') . " des Objektes {$config['plan_class']} ein gültiges Datum beinhalten.</li>
 				";
 			} break;
 			default : {
@@ -216,19 +229,8 @@ class Konvertierung extends PgObject {
 		}
 		$config['plan_table_name'] = strtolower($config['plan_class']);
 		$config['plan_oid_name'] = $config['plan_table_name'] . '_oid';
-		$config['planart_abk'] = strtolower(substr($this->get('planart'), 0, 2));
-		$config['planart_short'] = strtolower(substr($this->get('planart'), 0, 1));
-
-		$this->config = $config;
-		# Die Attribute des Objektes, die mit plan_ anfangen kommen noch in $config und
-		# als Klassenvariablen vor.
-		# ToDo 2 pk: config-Variablen nutzen und Klassenvariablen ablöschen und löschen, siehe auch ToDo 1 pk in index.php
-		$this->plan_title = $config['plan_title'];
-		$this->plan_short_title = $config['plan_short_title'];
-		$this->plan_class = $config['plan_class'];
-		$this->plan_abk = $config['plan_abk'];
-		$this->plan_layer_id = $config['plan_layer_id'];
-		$this->plan_attribut_aktualitaet = $config['plan_attribut_aktualitaet'];
+		$config['planart_abk'] = strtolower(substr($planart, 0, 2));
+		$config['planart_short'] = strtolower(substr($planart, 0, 1));
 		return $config;
 	}
 
@@ -426,7 +428,7 @@ class Konvertierung extends PgObject {
 	 * vormals hieß die Funktion find_zusammenzeichnung. Sie findet jetzt aber auch Konvertierungen,
 	 * die keine Zusammenzeichnungen sind.
 	 */
-	public static function find_konvertierungen($gui, $planart, $plan_class, $plan_attribut_aktualitaet, $konvertierung_id = '') {
+	public static function find_konvertierungen($gui, $planart, $plan_class, $konvertierung_id = '') {
 		$konvertierungen = array(
 			'published' => array(),
 			'draft' => array(),
@@ -453,12 +455,18 @@ class Konvertierung extends PgObject {
 			WHERE
 				" . implode(" AND ", $where_conditions) . "
 			ORDER BY 
-				COALESCE(p." . $plan_attribut_aktualitaet . ($plan_class == 'SO_Plan' ? ", p.genehmigungsdatum" : ", p.aenderungenbisdatum") . ") DESC
+				COALESCE(" . implode(', ', array_map(
+					function($plan_attribut) {
+						return "p." . $plan_attribut;
+					},
+					explode(', ', Konvertierung::get_config($planart)['plan_attribut_aktualitaet'])
+				)) . ") DESC
 		";
 		// if ($gui->user->id == 41) {
 		// 	echo "<p>SQL zur Abfrage der Zusammenzeichnungen: " . $sql; exit;
 		// }
-
+		$gui->xlog->write('find_konvertierungen.');
+		//$gui->xlog->write('find_konvertierungen sql: ' . $sql);
 		$konvertierung->debug->show('find_konvertierungen sql: ' . $sql, false);
 		$query = pg_query($konvertierung->database->dbConn, $sql);
 		while ($konvertierung->data = pg_fetch_assoc($query)) {
@@ -482,6 +490,7 @@ class Konvertierung extends PgObject {
 			$konvertierungen[$konvertierung->art][] = clone $konvertierung;
 		}
     $archiv_dir = XPLANKONVERTER_FILE_PATH . 'archiv/' . $gui->Stelle->id . '/' . $konvertierung->config['plan_abk_plural'] . '/';
+		$gui->xlog->write('Archiv_Dir: ' . $archiv_dir);
 		if (file_exists($archiv_dir)) {
 			$konvertierungen['archived'] = glob($archiv_dir . '*');
 			rsort($konvertierungen['archived'],  SORT_STRING);
@@ -582,7 +591,7 @@ class Konvertierung extends PgObject {
 
 		$archive = new ZipArchive();
 
-		if ($archive->open($zip_path . $zip_file, (ZipArchive::CREATE | ZipArchive::OVERWRITE)) !== true) {
+		if ($archive->open($zip_path . $zip_file, ZipArchive::CREATE|ZipArchive::OVERWRITE) !== true) {
 			return array(
 				'success' => false,
 				'msg' => "Kann Zip-Archiv " . $zip_path . $zip_file . " nicht anlegen"
@@ -592,9 +601,9 @@ class Konvertierung extends PgObject {
 		$archive->addGlob($this->get_file_path('uploaded_xplan_gml') . '*.gml');
 		$this->gui->xlog->write('GML-Dateien aus Verzeichnis: ' . $this->get_file_path('uploaded_xplan_gml') . ' zur Zip-Datei hinzufügen.');
 		$this->gui->xlog->write('Files: ' . implode("\n", glob($this->get_file_path('uploaded_xplan_gml') . '*.gml')));
-		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
+		if ($archive->status != ZipArchive::ER_OK) {
 			try {
-				$this->gui->xlog->write('Fehler bei Hinzufügen der Datein in die ZIP-Datei. zipArchiv status: ' . $zipArchiv->status);
+				$this->gui->xlog->write('Fehler bei Hinzufügen der Dateien in die ZIP-Datei. zipArchiv status: ' . $archive->status);
 				$archive->close();
 			}
 			catch (Exception $e) {
@@ -609,10 +618,11 @@ class Konvertierung extends PgObject {
 		$geodata_metadata_url = METADATA_CATALOG . '/srv/api/records/' . $this->get('metadata_dataset_uuid') . '/formatters/xml?approved=true';
 		$geodata_metadata_file = @file_get_contents($geodata_metadata_url);
 		$this->gui->debug->write('Metadaten von URL: ' . $geodata_metadata_url . ' zur Zipdatei hinzufügen.');
+		$this->gui->xlog->write('Metadaten von URL: ' . $geodata_metadata_url . ' zur Zipdatei hinzufügen.');
 		if ($geodata_metadata_file !== FALSE) {
 			#add it to the zip
 			$archive->addFromString('Metadaten.xml', $geodata_metadata_file);
-			if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
+			if ($archive->status != ZipArchive::ER_OK) {
 				try {
 					$archive->close();
 				}
@@ -624,18 +634,19 @@ class Konvertierung extends PgObject {
 				}
 			}
 		}
-
+		
 		try {
-			$this->gui->xlog('Anzahl Files in ZIP-File: ' . $archive->numFiles);
-			$this->gui->debug->write('Löschen der archivierten Konvertierung id: ' . $this->get('id'));
-			$this->gui->xlog('Löschen der archivierten Konvertierung id: ' . $this->get('id'));
-			$this->destroy();
-			$this->gui->xlog('Konvertierung gelöscht.');
+			$this->gui->xlog->write('Anzahl Files in ZIP-File: ' . $archive->numFiles);
+			$this->gui->xlog->write('Zippath and zipfile: ' . $zip_path . $zip_file);
 			$archive->close();
-			$this->gui->xlog('Archiv geschlossen.');
+			$this->gui->debug->write('Löschen der archivierten Konvertierung id: ' . $this->get('id'));
+			$this->gui->xlog->write('Löschen der archivierten Konvertierung id: ' . $this->get('id'));
+			$this->destroy();
+			$this->gui->xlog->write('Konvertierung gelöscht.');
+			$this->gui->xlog->write('Archiv geschlossen.');
 		}
 		catch (Exception $e) {
-			$this->gui->xlog("Fehler beim Schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage());
+			$this->gui->xlog->write("Fehler beim Schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage());
 			if ($archive->numFiles > 0) {
 				return array(
 					'success' => false,
@@ -645,13 +656,13 @@ class Konvertierung extends PgObject {
 			else {
 				return array(
 					'success' => true,
-					'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' für die vorherige Konvertierung erfolgreich angelegt und Objekt in Datenbank gelöscht.'
+					'msg' => 'ZIP-Archiv ' . $zip_path . $zip_file . ' für die vorherige Konvertierung erfolgreich angelegt und Objekt in Datenbank gelöscht.'
 				);
 			}
 		}
 		return array(
 			'success' => true,
-			'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' für die vorherige Konvertierung erfolgreich angelegt und Objekt in Datenbank gelöscht.'
+			'msg' => 'ZIP-Archiv ' . $zip_path . $zip_file . ' für die vorherige Konvertierung erfolgreich angelegt und Objekt in Datenbank gelöscht.'
 		);
 	}
 
@@ -1188,22 +1199,20 @@ class Konvertierung extends PgObject {
 
 	/**
 	 * Diese Funktion liefert das Datum der Aktualität des Plans.
-	 * Wenn das Datum aus dem Attriubt $this->plan_attribut_aktualitaet nicht vorhanden ist,
-	 * wird bei SO-Plänen das Datum aus genehmigungsdatum und sonst aus aenderungenbisdatum ausgelesen.
 	 */
 	function get_aktualitaetsdatum() {
 		return $this->plan->get($this->get_plan_attribut_aktualitaet());
 	}
 
 	/**
-	 * Liefert den Namen des Attributes in dem die Aktualität des Planes steht
+	 * Liefert den Namen des Attributes in dem die Aktualität des Planes steht.
 	 * Es wird der Reihe nach geprüft ob in den Attributen, die in $this->config['plan_attribut_aktualitaet'] stehen
 	 * Datumsangaben stehen. Der Attributename in dem zuerst ein Datum gefunden wurde wird zurückgegeben.
 	 * Wird kein Datum gefunden, wird der erste definierte Attributname aus $this->config['plan_attribut_aktualitaet']
 	 * zurückgegeben.
 	 */
 	function get_plan_attribut_aktualitaet() {
-		$attributes = explode(',', $this->config['plan_attribut_aktualitaet']);
+		$attributes = explode(', ', $this->config['plan_attribut_aktualitaet']);
 		$result = array_reduce(
 			$attributes,
 			function($carry, $attribute) {
@@ -2461,7 +2470,7 @@ class Konvertierung extends PgObject {
 				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>HTTP Status 406 – Not Acceptable<br>Überprüfen Sie Ihre XPlanGML-Datei auf Wohlgeformtheit und Validität.';
 			}
 			else {
-				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>Fehler: ' . print_r($output, true);
+				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>Der XPlanValidator ist wahrscheinlich derzeit nicht online. Bitte versuchen Sie den Upload zu einem späteren Zeitpunkt erneut.<br>Fehler: ' . print_r($output, true);
 			}
 			return array(
 				'success' => false,
@@ -2642,7 +2651,7 @@ class Konvertierung extends PgObject {
 
 
 	/**
-	* Clear the topology from all flaechenschlussobjekten of the plan
+	* Clear the topology from all flaechenschlussobjekte of the plan
 	*/
 	function clearTopology() {
 		# Lösche die Topologie der flaechenschlussobjekte des Planes
@@ -2800,8 +2809,6 @@ class Konvertierung extends PgObject {
 			bereich_gml_id IS NULL
 		");
 		foreach($regeln AS $regel) {
-			# Wozu hier die Konvertierung holen wenn die Regel danach gelöscht wird?
-			#$regel->konvertierung = $regel->get_konvertierung();
 			$regel->destroy();
 		}
 
@@ -2878,7 +2885,7 @@ class Konvertierung extends PgObject {
 				split_part(id, '_', 2) AS plan_gml_id,
 				xplan_name AS plan_name,
 				nummer,
-				COALESCE(" . $this->gui->plan_attribut_aktualitaet . ($this->plan_class == 'SO_Plan' ? ", genehmigungsdatum" : ", aenderungenbisdatum") . "),
+				COALESCE(" . $this->config['plan_attribut_aktualitaet'] .") AS stand,
 				ST_Multi(raeumlichergeltungsbereich)
 			FROM
 				" . $gml_extractor->gmlas_schema . "." . strtolower($this->gui->plan_class) . "
@@ -2912,7 +2919,11 @@ class Konvertierung extends PgObject {
 	 */
 	function create_metadata_documents($md) {
 		$plan = $this->plan;
-		$konvertierungen = Konvertierung::find_konvertierungen($this->gui, $this->get('planart'), $this->plan_class, $this->get_plan_attribut_aktualitaet());
+		$konvertierungen = Konvertierung::find_konvertierungen(
+			$this->gui,
+			$this->get('planart'),
+			$this->plan_class
+		);
 		#echo '<br>' . $plan->get('gemeinde');
 		# Setzen der Metadaten für die Metadatendokumente
 		if (count($konvertierungen['published']) == 0) {

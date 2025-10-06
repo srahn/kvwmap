@@ -22,7 +22,9 @@
   $strWmsAccessConstraintsHint = 'Beschreibung der Bedingungen unter denen der Zugang zum Dienst gewährt wird. Gibt es keine Beschränkungen hier "keine" eintragen.';
   $strOwsFees = 'opłaty';
 	$strOwsFeesHint = 'Beschreibung des Kostenmodells für die Nutzung des Dienstes. Ist er Kostenfrei hier "keine" eintragen.';
-  $strOwsSrs = 'Coordinate Reference System';
+	$strOwsInspireidentifiziert = 'inspireidentifiziert';
+	$strOwsInspireidentifiziertHint = 'Über PlanDigital stellen Sie den FNP im Datenmodell XPlanGML bereit. Falls Sie den FNP anderweitig bereits im INSPIRE-Datenmodell bereitstellen, muss diese Option ausgeschaltet sein.';
+	$strOwsSrs = 'Coordinate Reference System';
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'adres organizacji posiadającej OWS';
 	$strOwsContactOrganizationHint = 'Name of responsible organization';

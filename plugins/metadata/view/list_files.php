@@ -1,12 +1,25 @@
 <style>
-  .dir {
+  .file-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    /* height: 300px; Predefined height */
+    overflow-y: auto; /* Scroll if content overflows */
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+
+  .dir-item {
     font-size: larger;
     color: darkblue;
     line-height: 1.2;
   }
 
-  .file {
-    margin-left: 20px;
+  .file-item {
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: left;
   }
 </style>
 <h2 style="margin: 10px;">Dateien unter <? echo $this->search_dir; ?></h2>
@@ -16,15 +29,14 @@
     include(LAYOUTPATH . "snippets/Fehlermeldung.php");
   }
 ?>
-<div style="margin: 25px; text-align: left"><?php
+<div class="file-container" style="margin: 25px; text-align: left"><?php
   $last_dir_name = '';
   foreach ($this->files AS $file) {
     $path_parts = pathinfo($file);
-    echo '<br>';
     if ($path_parts['dirname'] != $last_dir_name) {
-      $last_dir_name = $path_parts['dirname'];
-      ?><span class="dir"><? echo str_replace($this->search_dir, '', $path_parts['dirname']) . '/'; ?></span><br><?
+      $last_dir_name = $path_parts['dirname'] ?>
+      <div class="dir-item"><? echo str_replace($this->search_dir, '', $path_parts['dirname']) . '/'; ?></div><?
     } ?>
-    <span class="file"><? echo $path_parts['basename']; ?></span><?
+    <div class="file-item"><? echo $path_parts['basename']; ?></div><?
 	} ?>
 </div>

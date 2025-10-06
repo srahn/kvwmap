@@ -1042,7 +1042,7 @@ l.Name AS sub_layer_name
 			$generic_selects = array_merge($generic_selects, $generic_select);
 		}
 
-		// filter out these that are allready in data select statement and extract sql string
+		// filter out these that are already in data select statement and extract sql string
 		$additional_selects = array_map(
 			function ($select) {
 				return $select['sql'];
@@ -1058,7 +1058,7 @@ l.Name AS sub_layer_name
 		# fehlende Attribute in das data statement einfügen vor dem ersten Vorkommen von 'from' nach dem ersten Vorkommen von 'select'
 		$pos_select = stripos($data, 'select');
 		$pos_from = strripos($data, 'from', $pos_select);
-		if ($pos_from !== false) {
+		if ($pos_from !== false and count($additional_selects) > 0) {
 			$data = substr_replace(
 				$data,
 				"  ," . implode(",\n    ", $additional_selects) . "\n  from", 

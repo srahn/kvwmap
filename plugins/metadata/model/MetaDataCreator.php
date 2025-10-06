@@ -201,6 +201,33 @@ class MetaDataCreator {
 		";
 		return $element;
 	}
+	
+	function getInspireidentifiziertKeyword() {
+		$inspireidentifiziert = $this->md->get('stellendaten')['ows_inspireidentifiziert'];
+		$element = '';
+		if($inspireidentifiziert == true) {
+			$element = 
+				"<gmd:keyword>
+						<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
+					</gmd:keyword>";
+		}
+		return $element;
+	}
+	
+	function getTemporalExtent() {
+		$element =  
+			"<gmd:temporalElement>
+				<gmd:EX_TemporalExtent>
+					<gmd:extent>
+						<gml:TimePeriod>
+							<gml:beginPosition>" . $this->md->get('id_cite_date') . "</gml:beginPosition>
+							<gml:endPosition indeterminatePosition=\"now\"/>
+						</gml:TimePeriod>
+					</gmd:extent>
+				</gmd:EX_TemporalExtent>
+			</gmd:temporalElement>";
+			return $element;
+	}
 
 	public function createMetadataDownload() {
 		// old XSD: http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd
@@ -431,7 +458,8 @@ class MetaDataCreator {
 								</gmd:MD_Identifier>
 							</gmd:geographicIdentifier>
 						</gmd:EX_GeographicDescription>
-					</gmd:geographicElement>" : '') . "
+					</gmd:geographicElement>" : '') . 
+					  ($this->md->get('id_cite_date') ? $this->getTemporalExtent() : ''). "
 				</gmd:EX_Extent>
 			</srv:extent>
 			<srv:couplingType>
@@ -506,6 +534,13 @@ class MetaDataCreator {
 					</gmd:result>
 				</gmd:DQ_DomainConsistency>
 			</gmd:report>
+			<gmd:lineage>
+				<gmd:LI_Lineage>
+					<gmd:statement>
+						<gco:CharacterString>Die Daten wurden auf Grundlage rechtsverbindlicher Unterlagen im Standard XPlanung erstellt. Die Digitalisierung erfolgte auf Basis gescannter und georeferenzierter Papierpläne oder Rasterdaten und unter Berücksichtigung der ALKIS.</gco:CharacterString>
+					</gmd:statement>
+				</gmd:LI_Lineage>
+			</gmd:lineage>
 		</gmd:DQ_DataQuality>
 	</gmd:dataQualityInfo>
 </gmd:MD_Metadata>";
@@ -825,6 +860,13 @@ class MetaDataCreator {
 					</gmd:result>
 				</gmd:DQ_DomainConsistency>
 			</gmd:report>
+			<gmd:lineage>
+				<gmd:LI_Lineage>
+					<gmd:statement>
+						<gco:CharacterString>Die Daten wurden auf Grundlage rechtsverbindlicher Unterlagen im Standard XPlanung erstellt. Die Digitalisierung erfolgte auf Basis gescannter und georeferenzierter Papierpläne oder Rasterdaten und unter Berücksichtigung der ALKIS.</gco:CharacterString>
+					</gmd:statement>
+				</gmd:LI_Lineage>
+			</gmd:lineage>
 		</gmd:DQ_DataQuality>
 	</gmd:dataQualityInfo>
 </gmd:MD_Metadata>";
@@ -982,9 +1024,7 @@ class MetaDataCreator {
 			</gmd:descriptiveKeywords>
 			<gmd:descriptiveKeywords>
 				<gmd:MD_Keywords>
-					<gmd:keyword>
-						<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
-					</gmd:keyword>
+					" . $this->getInspireidentifiziertKeyword() . "
 					<gmd:keyword>
 						<gco:CharacterString>FNP</gco:CharacterString>
 					</gmd:keyword>
@@ -1244,12 +1284,12 @@ class MetaDataCreator {
 					</gmd:DQ_DomainConsistency>
 				</gmd:report>
 				<gmd:lineage>
-					<gmd:LI_Lineage>
-						<gmd:statement>
-							<gco:CharacterString>INSPIRE Richtlinie Durchführungsbestimmungen Datenspezifikation</gco:CharacterString>
-						</gmd:statement>
-					</gmd:LI_Lineage>
-				</gmd:lineage>
+				<gmd:LI_Lineage>
+					<gmd:statement>
+						<gco:CharacterString>Die Daten wurden auf Grundlage rechtsverbindlicher Unterlagen im Standard XPlanung erstellt. Die Digitalisierung erfolgte auf Basis gescannter und georeferenzierter Papierpläne oder Rasterdaten und unter Berücksichtigung der ALKIS.</gco:CharacterString>
+					</gmd:statement>
+				</gmd:LI_Lineage>
+			</gmd:lineage>
 			</gmd:DQ_DataQuality>
 		</gmd:dataQualityInfo>
 	</gmd:MD_Metadata>";
