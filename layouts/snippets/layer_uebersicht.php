@@ -12,7 +12,7 @@
 	natcasesort($this->keywords);
 
 	function compare_groups2($a, $b){
-		if($a['Gruppenname'] > $b['Gruppenname'])return 1;
+		if($a['gruppenname'] > $b['gruppenname'])return 1;
 		else return 0;
 	}
 	
