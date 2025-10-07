@@ -928,6 +928,7 @@ CREATE TABLE stelle (
   ows_distributionorganization varchar(150) DEFAULT NULL,
   ows_distributionemailaddress varchar(100) DEFAULT NULL,
   ows_fees varchar(255) DEFAULT NULL,
+  ows_inspireidentifiziert boolean default false,
   ows_srs varchar(255) DEFAULT NULL,
   protected boolean NOT NULL DEFAULT false,
   check_client_ip boolean NOT NULL DEFAULT false,
