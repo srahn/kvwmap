@@ -9535,7 +9535,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->layergruppe->update();
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			rolle::setGroupsForAll($this->pgdatabase);
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
