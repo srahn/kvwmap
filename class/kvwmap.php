@@ -19505,7 +19505,7 @@ class db_mapObj{
 							if (strpos($attributes['options'][$i], '{') === 0) {
 								$json = json_decode($attributes['options'][$i], true);
 								$attributes['subform_layer_id'][$i] = $json['layer_id'];
-								$attributes['subform_fkeys'][$i] = $json['keys'];
+								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
 								$attributes['no_new_window'][$i] = ($json['window_type'] == 'no_new_window');
 							}
 							else {
