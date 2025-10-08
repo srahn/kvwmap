@@ -211,7 +211,7 @@ class stelle {
 				`ows_updatesequence`,
 				`ows_geographicdescription`,
 				`ows_fees`,
-				`ows_inspireidentifiziert`,
+				#`ows_inspireidentifiziert`,
 				`ows_srs`,
 
 				`ows_contactorganization`,
