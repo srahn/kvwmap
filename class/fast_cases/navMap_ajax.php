@@ -2914,6 +2914,7 @@ class rolle {
 					kvwmap.u_rolle2used_layer
 				SET
 					aktivstatus = " . $aktiv_status . "
+					" . ($aktiv_status == 0 ? ',querystatus = 0' : '') . "
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
