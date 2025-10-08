@@ -16342,7 +16342,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$last_query_deleted = false;
 		if ($this->last_query != '') {
 			foreach($this->last_query['layer_ids'] as $layer_id) {
-				$this->formvars[$queryfield . '[' . $layer_id . ']'] = 1;
+				$this->formvars[$queryfield][$layer_id] = 1;
 			}
 		}
 		if (is_string($rect)){
