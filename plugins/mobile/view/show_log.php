@@ -33,13 +33,15 @@ h3 {
 <input type="button" value="Toggle Error" onclick="$('.errors').toggle()" style="margin: 10px;"><br><?
 echo 'Anzahl Client-Deltas: ' . count($this->mobile_logs) . '<p>'; ?>
 <div id="sql_div"><?php
-	foreach ($this->mobile_logs AS $log) {
-		echo '<h3><span class="dates">' . $log['timestamp'] . '</span></h3>
+  rsort($this->mobile_logs);
+	foreach ($this->mobile_logs AS $log) { ?>
+		<h3><span class="dates"><? echo $log['timestamp']; ?></span></h3>
     <input type="button" value="Toggle Textfield" onclick="$(this).next().next().toggle();" style="margin-top: 13px; float: right;">
     <div style="clear: both"></div>
-    <div class="client_deltas"><pre>' . $log['client_deltas'] . '</pre></div>';
-    if ($log['error'] != '') {
-      echo '<span class="errors" style="color: red; font-weight: bold">Fehler: ' . $log['error'] . '</span>';
+    <div class="client_deltas"><pre><? echo implode('<br>', array_map(function($l) { return $l->sql; }, $log['client_deltas'])); ?></pre></div><?
+    if ($log['error']) { ?>
+      <span class="errors" style="color: red; font-weight: bold">Fehler: <? echo $log['error']; ?></span><br>
+      <a href="index.php?go=mobile_fix_sync_delta&timestamp=<? echo $log['timestamp']; ?>&client_delta=<? echo urlencode($log['client_deltas'][0]->sql); ?>&csrf_token<? echo $_SESSION['CSRF_TOKEN']; ?>">Fehler beheben</a><br><?
     }
 	} ?>
 </div>

@@ -4,6 +4,7 @@
 // mobile_delete_images
 // mobile_drop_layer_sync
 // mobile_drop_layer_sync_all
+// mobile_fix_sync_delta
 // mobile_get_data_version
 // mobile_get_layers 
 // mobile_get_stellen
@@ -11,12 +12,75 @@
 // mobile_prepare_layer_sync
 // mobile_prepare_layer_sync_all
 // mobile_reformat_attributes
+// mobile_reformat_fk_attributes
 // mobile_reformat_layer
+// mobile_show_log
 // mobile_sync
 // mobile_sync_all
 // mobile_sync_all_parameter_valide
 // mobile_sync_parameter_valide
 // mobile_upload_image
+
+/**
+ * function create trigger for $layer that write deltas in deltas_all table.
+ * @param Layer $layer layer object
+ */
+$GUI->mobile_create_layer_sync_all = function ($layer) use ($GUI) {
+	$sql = "
+		--
+		-- INSERT Trigger
+		--
+		CREATE OR REPLACE TRIGGER create_" . $layer->get('maintable') . "_insert_delta_all_trigger
+		BEFORE INSERT
+		ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
+		FOR EACH STATEMENT
+		EXECUTE PROCEDURE create_insert_delta();
+
+		CREATE OR REPLACE TRIGGER create_" . $layer->get('maintable') . "_update_delta_all_trigger
+		BEFORE UPDATE
+		ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
+		FOR EACH STATEMENT
+		EXECUTE PROCEDURE create_update_delta();
+
+		CREATE OR REPLACE TRIGGER create_" . $layer->get('maintable') . "_delete_delta_all_trigger
+		BEFORE DELETE
+		ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
+		FOR EACH ROW
+		EXECUTE PROCEDURE create_delete_delta();
+	";
+	#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync_all, Create table and trigger for deltas SQL:<br>' . $sql;
+	$layer_db = $layer->get_layer_db();
+	$ret = $layer_db->execSQL($sql, 4, 0, true);
+	if ($ret[0]) {
+		$GUI->add_message('error', 'Fehler beim Anlegen der Sync-Trigger!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen ' . $ret['msg']);
+		return 0;
+	}
+	$GUI->add_message('info', 'Sync-Trigger für INSERT, UPDATE und DELETE auf Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . ' angelegt.');
+};
+
+$GUI->mobile_fix_sync_delta = function() use ($GUI) {
+	echo 'Funktion noch nicht fertig implementiert.<br>';
+	echo 'Hier soll es möglich sein für ein SQL, welches zu einem Fehler führt eine Alternative zu hinterlegen, die statt desssen ausgeführt wird wenn das SQL noch mal aufgerufen wird durch die Synchronisierung. Die Alternative soll zum Fixen von Sync-Problemen führen ohne dass der Nutzer etwas machen muss außer Auto-Sync wieder einschalten.';
+// 	include_once(CLASSPATH . 'PgObject.php');
+// 	include_once(CLASSPATH . 'sql.php');
+// 	$sql = $GUI->formvars['client_delta'];
+// 	$sql = "UPDATE kob.baum
+//         SET
+//  	      	kronenhabitus_ids = '{1,3,5}', updated_at_client = '2025-08-13T19:39:26', user_name = 'Peter Korduan-Mobil', user_id = 17
+//         WHERE
+//         	uuid = '6f812418-4af8-45df-8db4-055eaa7874e2'";
+// 	// echo 'sql: ' . $sql;
+// 	$pg_obj = new PgObject($GUI, 'kob', 'baum');
+// 	// Korrigieren der Deltas vom Client
+// 	$allowed_columns = $pg_obj->get_attribute_names();
+// 	array_splice($allowed_columns, 1, 30);
+// 	$sql_obj = new sql($sql);
+// 	$not_allowed_columns = $sql_obj->remove_not_allowed_columns($allowed_columns);
+// 	echo '<br>not_allowed_columns: ' . implode(', ', $not_allowed_columns);
+// #		return print_r($sql_obj_adjusted, true);
+// 	$adjusted_sql = $sql_obj->to_sql();
+// 	echo '<br>Korrekted SQL:<br>' . $adjusted_sql;
+};
 
 /**
  * This function return all stellen the authenticated user is assigned to
@@ -93,7 +157,11 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 					$layerdb,
 					null, // Null statt $privileges['attributenames'], weil in kvmobile immer alle attribute vorhanden sein müssen, nicht nur die die sichtbar sind.
 					false, // $all_languages
-					true // recursive
+					true, // recursive
+					false, // get_default,
+					true, // replace
+					array('options'), // replace_only
+					array() // attribute_kvps
 				);
 
 				# Zuordnen der Privilegien und Tooltips zu den Attributen
@@ -112,7 +180,6 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 
 				$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
 				$layer['classes'] = $GUI->mobile_reformat_classes($classes);
-
 				$mobile_layers[] = $layer;
 			}
 		}
@@ -237,8 +304,8 @@ $GUI->mobile_sync = function () use ($GUI) {
 	$GUI->deblog->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
 	$GUI->deblog->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
 	move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
-	$GUI->deblog->write('Run function mobile_sync_parameter_valide');
 
+	// $GUI->deblog->write('Run function mobile_sync_parameter_valide');
 	$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
 
 	if ($result['success']) {
@@ -266,17 +333,18 @@ $GUI->mobile_sync = function () use ($GUI) {
 $GUI->mobile_sync_all = function () use ($GUI) {
 	$mobile_log_dir = LOGPATH . 'kvmobile/';
 	$mobile_log_file = $GUI->user->login_name . '_debug_log.html';
+	$mobile_err_dir = LOGPATH . 'kvmobile/';
 	$mobile_err_file = '_error_log.html';
 	if (!is_dir($mobile_log_dir)) {
 		if (!mkdir($mobile_log_dir, 0770, true)) {
 			return array(
 				'success' => false,
-				'err_msg' => 'Logverzeichnis ' . $mobile_log_dir . ' konnte nicht angelegt werden.'
+				'message' => 'Logverzeichnis ' . $mobile_log_dir . ' konnte nicht angelegt werden.'
 			);
 		}
 	}
-	$GUI->mobile_log = new LogFile($mobile_log_dir . $mobile_log_file, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
-	$GUI->mobile_err = new LogFile($mobile_log_dir . $mobile_err_file, 'html', 'kvmobile Error-log', 'Debug: ' . date("Y-m-d H:i:s"));
+	$GUI->mobile_log = new LogFile($mobile_log_dir . $mobile_log_file, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', date("Y-m-d H:i:s"));
+	$GUI->mobile_err = new LogFile($mobile_err_dir . $mobile_err_file, 'html', 'kvmobile Error-log');
 
 	include_once(CLASSPATH . 'synchronisation.php');
 	# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
@@ -288,19 +356,24 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 	# sql muss vorhanden sein.
 	#		if ($GUI->formvars['selected_layer_id'] != '')
 	if (!array_key_exists('client_deltas', $_FILES)) {
+		$GUI->mobile_err->write('Error ' . date("Y-m-d H:i:s") . ' user_id: ' . $GUI->user->id);
+		$msg = 'Es wurde keine Datei mit Änderungsdaten zum Server geschickt.';
+		$GUI->mobile_err->write($msg);
 		return array(
 			'success' => false,
-			'err_msg' => ' Es wurde keine Datei mit Änderungsdaten zum Server geschickt.'
+			'message' => $msg
 		);
 	}
 
-	$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
-	$GUI->mobile_log->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
-	$GUI->mobile_log->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
-	$GUI->mobile_log->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
-	move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
-	$GUI->mobile_log->write('Run function mobile_sync_parameter_valide');
+	$client_deltas_json = file_get_contents($_FILES['client_deltas']['tmp_name']);
+	$GUI->formvars['client_deltas'] = json_decode($client_deltas_json);
 
+	$GUI->mobile_log->write('Client Deltas formvars: <client_deltas_json>' . $client_deltas_json . '</client_deltas_json>');
+	// $GUI->mobile_log->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
+	// $GUI->mobile_log->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
+	move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
+
+	// $GUI->mobile_log->write('Run function mobile_sync_parameter_valide');
 	$result = $GUI->mobile_sync_all_parameter_valide($GUI->formvars);
 
 	if ($result['success']) {
@@ -317,16 +390,25 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 				'last_client_version' => $GUI->formvars['last_delta_version'],
 				'deltas' => array(),
 				'failedDeltas' => array(),
-				'log'	=> 'In der Stelle wurden keine Sync-Layer gefunden. Es wurden keine Änderungen vom Client auf den Server übertragen und es gab auch keine Änderungen vom Server zu holen!'
+				'message'	=> 'In der Stelle wurden keine Sync-Layer gefunden. Es wurden keine Änderungen vom Client auf den Server übertragen und es gab auch keine Änderungen vom Server zu holen!'
 			);
 		}
 		$layerdb = $mapDB->getlayerdatabase($sync_layers[0]->get('Layer_ID'), $GUI->Stelle->pgdbhost);
-		$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $sync_layers[0]->get('Layer_ID');
+		$result['message'] = 'Layerdb abgefragt mit layer_id: ' . $sync_layers[0]->get('Layer_ID');
 		$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
 		$result = $sync->sync_all($GUI->formvars['client_id'], $GUI->user->Vorname . ' ' . $GUI->user->Name, $GUI->formvars['client_time'], $GUI->formvars['last_delta_version'], $GUI->formvars['client_deltas'], $sync_layers);
-		$GUI->debug->write('sync_all abgeschlossen.');
+		if (!$result['success']) {
+			$GUI->mobile_log->write($result['message']);
+			$GUI->mobile_err->write('Error ' . date("Y-m-d H:i:s") . ' user_id: ' . $GUI->user->id);
+			$GUI->mobile_err->write($result['message']);
+		}
+		else {
+			$GUI->mobile_log->write($result['message'] . '<br>sync_all abgeschlossen.');
+		}
 	} else {
-		$result['err_msg'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
+		$GUI->mobile_err->write('Error ' . date("Y-m-d H:i:s") . ' user_id: ' . $GUI->user->id);
+		$result['message'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['message'];
+		$GUI->mobile_err->write($result['message']);
 	}
 	return $result;
 };
@@ -578,9 +660,6 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 	$attributes = array();
 	foreach ($attr['name'] as $key => $value) {
-		if ($value == 'kartierergruppe_id') {
-			#echo '<br>enum: ' . print_r($attr['enum'][$key], true);
-		}
 		if ($attr['form_element_type'][$key] == 'Autovervollständigungsfeld') {
 			$sql = $attr['options'][$key];
 			$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
@@ -592,6 +671,7 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 				$attr['enum'][$key][$rs['value']] = $rs;
 			}
 		};
+
 		if ($attr['enum'][$key]) {
 			$attr['enums'][$key] = array();
 			foreach ($attr['enum'][$key] as $enum_key => $enum) {
@@ -607,27 +687,6 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 		} else {
 			$attr['enums'][$key] = array();
 		}
-		// if ($value == 'sorte_id') {
-		// 	echo '<br>options: ' . print_r($attr['options'][$key], true);
-		// }
-		// if ($attr['enum_value'][$key]) {
-		// 	$attr['options'][$key] = array();
-		// 	foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
-		// 		if ($attr['req'][$key]) {
-		// 			$attr['options'][$key][] = array(
-		// 				'value' => $attr['enum_value'][$key][$enum_key],
-		// 				'output' => $attr['enum_output'][$key][$enum_key],
-		// 				'requires_value' => $attr['enum_requires_value'][$key][$enum_key]
-		// 			);
-		// 		}
-		// 		else {
-		// 			$attr['options'][$key][] = array(
-		// 				'value' => $attr['enum_value'][$key][$enum_key],
-		// 				'output' => $attr['enum_output'][$key][$enum_key]
-		// 			);
-		// 		}
-		// 	}
-		// }
 
 		$attributes[$key] = array(
 			"index" => $attr['indizes'][$value],
@@ -665,7 +724,27 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 			$attributes[$key]['requires'] = $attr['req'][$key];
 		}
 	}
+	$attributes = $GUI->mobile_reformat_fk_attributes($attributes);
 	return $attributes;
+};
+
+$GUI->mobile_reformat_fk_attributes = function ($attributes) use ($GUI) {
+	include_once(CLASSPATH . 'LayerAttribute.php');
+	$new_attributes = $attributes;
+	foreach ($attributes AS $key => $attribute) {
+		if ($attribute['form_element_type'] === 'SubFormFK') {
+			$attribute_obj = new LayerAttribute($GUI);
+			$attribute_options = $attribute_obj->get_options($attribute['options'], 'SubFormFK');
+			$fk_attribute = array_filter($attributes, fn($attr) => $attr["name"] === $attribute_options['fk_name']);
+			foreach (array_keys($fk_attribute) as $fk_attr_key) {
+				$new_attributes[$fk_attr_key]['options'] = $attribute['options'];
+				$new_attributes[$fk_attr_key]['form_element_type'] = 'SubFormFK';
+			}
+			$new_attributes[$key]['form_element_type'] = 'Text';
+			$new_attributes[$key]['fk_options'] = $attribute['options'];
+		}
+	}
+	return $new_attributes;
 };
 
 $GUI->mobile_reformat_classes = function ($classes) use ($GUI) {
@@ -762,18 +841,29 @@ $GUI->mobile_show_log = function($log_file) use ($GUI) {
 	$GUI->mobile_log_file = $log_file . '_debug_log.html';
 	$GUI->mobile_log_path = $GUI->mobile_log_dir . $GUI->mobile_log_file;
 	$GUI->mobile_log_content = file_get_contents($GUI->mobile_log_path);
-	$parts = explode('<h1>', $GUI->mobile_log_content);
+	$parts = explode('<h1>', $GUI->mobile_log_content); // Die einzelnen Meldungen im Log
 	array_shift($parts);
 	$GUI->mobile_logs = array();
 	foreach ($parts AS $part) {
-		$end_parts = explode('</h1>', $part);
-		preg_match_all('/\+ 1\s*\);\s*(.*?)UPDATE syncs/s', $end_parts[1], $sql_matches);
-		if (count($sql_matches[1]) > 0) {
-			preg_match_all('/Fehler mit result:(.*?)(?:\s*<html>|$)/s', $end_parts[1], $error_matches);
+		$parts2 = explode('</h1>', $part);
+		$teil_vor_h1 = $parts2[0]; // Teil vor </h1>
+		$teil_nach_h1 = $parts2[1];
+		$client_deltas = json_decode(get_tag_content($teil_nach_h1, 'client_deltas_json'));
+		// preg_match_all('/\+ 1\s*\);\s*(.*?)UPDATE syncs/s', $end_parts[1], $sql_matches);
+		// if ($client_deltas) {
+		// 	$GUI->mobile_logs[] = array(
+		// 		'timestamp' => $end_parts[0],
+		// 		'client_deltas' => $sql_matches[1],
+		// 		'error' => (count($error_matches[1]) > 0 ? $error_matches[1][0] : '')
+		// 	);
+		// }
+		if (count($client_deltas->rows) > 0) {
+			// preg_match_all('/Fehler mit result:(.*?)(?:\s*<html>|$)/s', $end_parts[1], $error_matches);
+			$fehler_parts = explode('Fehler bei der Ausführung', $teil_nach_h1);
 			$GUI->mobile_logs[] = array(
-				'timestamp' => $end_parts[0],
-				'client_deltas' => $sql_matches[1][0],
-				'error' => (count($error_matches[1]) > 0 ? $error_matches[1][0] : '')
+				'timestamp' => $teil_vor_h1,
+				'client_deltas' => $client_deltas->rows,
+				'error' => (count($fehler_parts) > 1 ? 'Fehler bei der Ausführung' . $fehler_parts[1] : '')
 			);
 		}
 	}
@@ -837,43 +927,6 @@ $GUI->mobile_prepare_layer_sync = function ($layerdb, $id, $sync) use ($GUI) {
 	if ($rs['table_exists'] == 'f' and $sync == 1) {
 		$GUI->mobile_create_layer_sync($layerdb, $layer);
 	}
-};
-
-/**
- * function create trigger for $layer that write deltas in deltas_all table.
- * @param Layer $layer layer object
- */
-$GUI->mobile_create_layer_sync_all = function ($layer) use ($GUI) {
-	$sql = "
-		--
-		-- INSERT Trigger
-		--
-		CREATE OR REPLACE TRIGGER create_" . $layer->get('maintable') . "_insert_delta_all_trigger
-		BEFORE INSERT
-		ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
-		FOR EACH STATEMENT
-		EXECUTE PROCEDURE create_insert_delta();
-
-		CREATE OR REPLACE TRIGGER create_" . $layer->get('maintable') . "_update_delta_all_trigger
-		BEFORE UPDATE
-		ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
-		FOR EACH STATEMENT
-		EXECUTE PROCEDURE create_update_delta();
-
-		CREATE OR REPLACE TRIGGER create_" . $layer->get('maintable') . "_delete_delta_all_trigger
-		BEFORE DELETE
-		ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
-		FOR EACH ROW
-		EXECUTE PROCEDURE create_delete_delta();
-	";
-	#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync, Create table and trigger for deltas SQL:<br>' . $sql;
-	$layer_db = $layer->get_layer_db();
-	$ret = $layer_db->execSQL($sql, 4, 0, true);
-	if ($ret[0]) {
-		$GUI->add_message('error', 'Fehler beim Anlegen der Sync-Trigger!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen ' . $ret['msg']);
-		return 0;
-	}
-	$GUI->add_message('info', 'Sync-Trigger für INSERT, UPDATE und DELETE auf Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . ' angelegt.');
 };
 
 /**
