@@ -138,7 +138,7 @@ class rolle {
     return 1;
   }
 
-	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
+	function getLayer($LayerName, $only_active = false, $replace_params = true) {
 		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -176,8 +176,8 @@ class rolle {
 				) as privilegfk";
 		}
 
-		if ($only_active_or_requires) {
-			$active_filter = " AND (r2ul.aktivstatus = '1' OR ul.requires = 1)";
+		if ($only_active) {
+			$active_filter = " AND (r2ul.aktivstatus = 1)";
 		}
 		else {
 			$active_filter = '';
