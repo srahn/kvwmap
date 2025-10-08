@@ -141,7 +141,7 @@ if ($doit == true) {
 	} ?>
 	<div id="layer" onclick="remove_calendar();">
 		<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>"><?
-		if ($this->new_entry != true AND $layer['requires'] == '') { ?>
+		if ($this->new_entry != true) { ?>
 			<table border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tr>
 					<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
