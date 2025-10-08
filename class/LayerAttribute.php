@@ -117,7 +117,7 @@ class LayerAttribute extends PgObject {
 		return $options;
 	}
 
-	function get_SubFormFK_options($settings) {
+	function get_SubFormFK_options($settings) { // get_options
 		$options = array();
 		$semicolon_parts = explode(';', $settings);
 		$comma_parts = explode(',', $semicolon_parts[0]);

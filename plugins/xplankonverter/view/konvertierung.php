@@ -116,7 +116,7 @@
 					message(
 						[{
 							type: 'confirm',
-							msg: `Prüfen Sie ob Ihre Dienstmetadaten auf dem aktuellen Stand sind! Wählen Sie "Abbrechen" und Sie werden zu den Dienstmetadaten weitergeleitet.<p>Laden Sie anschließend falls vorhanden die zum Plan gehörenden Rasterdaten hoch, damit ggf. fehlende Planzeichen angelegt werden können.<br>`
+							msg: `Prüfen Sie ob Ihre Dienstmetadaten auf dem aktuellen Stand sind! Wählen Sie "Abbrechen" und Sie werden zu den Dienstmetadaten weitergeleitet.<br>`
 						}],
 						1000, 2000, 500, null, null, 'Weiter', 'Abbrechen', null, '500px'
 					);
@@ -367,7 +367,17 @@
 				text-align: left;
 				margin-left: 112px;
 				width: 75%;
-			">Sie können zusätzlich zur XPlanGML-Datei die Rasterdaten des Planes hochladen damit ggf. fehlende Planzeichen nachgetragen werden können. Nutzen Sie dazu die Upload-Funktion unter Dokumente in der Anzeige des Menüs RROP aktualisieren</p>
+			"><?
+			if ($konvertierung->get('planart') == 'RP-Plan') { ?>
+				Sie können zusätzlich zur XPlanGML-Datei die Rasterdaten des Planes hochladen damit ggf. fehlende Planzeichen nachgetragen werden können. Nutzen Sie dazu die Upload-Funktion unter Dokumente in der Anzeige des Menüs RROP aktualisieren<?
+			}
+			elseif ($konvertierung->get('planart') == 'FP-Plan') { ?>
+				Sie können zusätzlich zur XPlanGML-Datei die Rasterdaten des Planes hochladen damit ggf. fehlende Planzeichen nachgetragen werden können. Nutzen Sie dazu die Upload-Funktion über die Leiste an der linken Seite "Pläne > Zusammenzeichnung" und dann unter "Dokumente" über den Button "Hochladen von weiteren Dokumenten<?
+			}
+			else { ?>
+				&nbsp;
+				<?
+			}; ?></p>
 			<input id="cancel_zusammenzeichnung_button" type="button" value="Hochladen abbrechen" onclick="cancel_upload_zusammenzeichnung()" style="margin-bottom: 20px">
 			<div id="upload_result_msg_div" class="hidden"></div>
 		</div><?

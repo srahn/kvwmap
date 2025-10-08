@@ -42,6 +42,7 @@ class PgObject {
 	public $from;
 	public $where;
 	public $show;
+	public $attribute_names;
 	public $fkeys;
 	public $pkey;
 	public $data;
@@ -73,6 +74,7 @@ class PgObject {
 		$this->extent = array();
 		$this->extents = array();
 		$this->children_ids = array();
+		$this->attribute_names = array();
 		$this->fkeys = array();
 		$this->pkey = array();
 		$gui->debug->show('Create new Object PgObject with schema ' . $this->schema . ' table ' . $this->tableName, $this->show);
@@ -797,6 +799,26 @@ class PgObject {
 			return $constraint['type'] == 'PRIMARY KEY' AND in_array($column, $constraint['columns']);
 		})) > 0;
 		return $result;
+	}
+
+	function get_attribute_names() {
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '" . $this->schema . "' AND
+				table_name = '" . $this->tableName . "'
+		";
+		#echo '<p>sql zur Abfrage von attribut namen: ' . $sql;
+		$this->sql = $sql;
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->attribute_names = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$this->attribute_names[] = $rs['column_name'];
+		}
+		return $this->attribute_names;
 	}
 
 	function get_attribute_types() {

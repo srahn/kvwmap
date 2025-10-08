@@ -3788,7 +3788,7 @@ echo '			</table>
 		$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		# value und output ermitteln
 		$optionen = explode('<required by>', $attributes['options'][0]);
-		$optionen = explode(';', $optionen[0]);
+		$optionen = explode(';', $optionen[0]); // get_options
 		$sql = $optionen[0];
 		if ($optionen[1] != '') {
 			$further_options = explode(' ', $optionen[1]); # die weiteren Optionen exploden (opt1 opt2 opt3)
@@ -4486,8 +4486,8 @@ echo '			</table>
 	    		$subform_pks_realnames = array();
 	    		$subform_pks_realnames2 = array();
 					$pkvalues = array();
-	    		$next_update_values = array();;
-					$options = explode(';', $layerattributes['options'][$l]);
+	    		$next_update_values = array();
+					$options = explode(';', $layerattributes['options'][$l]); // get_options
 	        $subform = explode(',', $options[0]);
 	        $subform_layerid = $subform[0];
 					if($subform_layerid != $layer_id){			# Subforms auf den selben Layer werden ignoriert
@@ -4642,7 +4642,7 @@ echo '			</table>
     else {
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
-		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
+		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']])); // get_options
     $reqby_start = strpos(strtolower($options), "<required by>");
     if ($reqby_start > 0) {
 			$sql = substr($options, 0, $reqby_start);
@@ -5633,7 +5633,6 @@ echo '			</table>
 				$this->param['str1'] .= 'Layer: ' . $layer['name'] . '<br>';
 				$layerdb = $mapDB->getlayerdatabase($layer['layer_id'], $this->Stelle->pgdbhost);
 				$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
-
 				$mapDB->save_postgis_attributes($layerdb, $layer['layer_id'], $attributes, '', '');
 				$mapDB->delete_old_attributes($layer['layer_id'], $attributes);
 			}
@@ -9248,11 +9247,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$layerdb,
 							$formvars['sync']
 						);
-						$this->mobile_prepare_layer_sync(
-							$layerdb,
-							$formvars['selected_layer_id'],
-							$formvars['sync']
-						);
+						// $this->mobile_prepare_layer_sync(
+						// 	$layerdb,
+						// 	$formvars['selected_layer_id'],
+						// 	$formvars['sync']
+						// );
 						$this->mobile_prepare_layer_sync_all(
 							$layerdb,
 							$formvars['selected_layer_id'],
@@ -9622,17 +9621,27 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_once(CLASSPATH . 'Invitation.php');
 		$this->invitation = new Invitation($this);
 		$this->invitation->data = formvars_strip($this->formvars, $this->invitation->setKeysFromTable(), 'keep');
-
 		$results = $this->invitation->validate();
 		if (empty($results)) {
 			$results = $this->invitation->create();
 		}
 		if ($results['success']) {
 			$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
-			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
-				Zum Einladen per E-Mail<br>
-				klicken Sie <a href="mailto:' . $this->invitation->mailto_text() . '">hier</a>!<br>
-				Die E-Mail enthält den Link zur Einladung.');
+			if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
+				$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $this->invitation->get('email'), null, MAILREPLYADDRESS, $this->invitation->get_subject(), $this->invitation->get_body(), null, 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $this->invitation->get('vorname') . ' ' . $this->invitation->get('name'), PUBLISHERNAME);
+				if (!$mail) {
+					$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
+				}
+				else {
+					$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $this->invitation->get('email'));
+				}
+			}
+			else {
+				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+					Zum Einladen per E-Mail<br>
+					klicken Sie <a href="mailto:' . $this->invitation->mailto_text() . '">hier</a>!<br>
+					Die E-Mail enthält den Link zur Einladung.');
+			}
 			$this->invitations_list();
 		}
 		else {
@@ -9849,7 +9858,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									case 'LIKE' : case 'NOT LIKE' : {
 										################  Autovervollständigungsfeld ########################################
 										if($layerset[0]['attributes']['form_element_type'][$i] == 'Autovervollständigungsfeld' AND $layerset[0]['attributes']['options'][$i] != ''){
-											$optionen = explode(';', $layerset[0]['attributes']['options'][$i]);  # SQL; weitere Optionen
+											$optionen = explode(';', $layerset[0]['attributes']['options'][$i]);  # SQL; weitere Optionen // get_options
 											if(strpos($value, '%') === false)$value2 = '%'.$value.'%';else $value2 = $value;
 											$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE LOWER(CAST(output AS TEXT)) '.$operator.' LOWER(\''.$value2.'\')';
 											$ret=$layerdb->execSQL($sql,4,0);
@@ -11000,7 +11009,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$this->sanitize([$table['formfield'][$i] => $table['datatype'][$i]], true);
 						include_once(CLASSPATH . 'LayerAttribute.php');
 						$attribute = new LayerAttribute($this);
-						#echo '<br>' . $table['attributname'][$i] . ' type: ' . $table['type'][$i];
 						switch (true) {
 							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
 								if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
@@ -11125,11 +11133,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
 									$intersecting_parent_gefunden = false;
 									if (count($intersected_objects) > 0) {
-										$parent_feature = $parent_object[0];
+										$parent_feature = $intersected_objects[0];
 										$intersecting_parent_gefunden = true;
 									}
 									if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
-										$insert[$table['attributname'][$i]] = "'" . $parent_feature->get_id() . "'";
+										$insert[$table['attributname'][$i]] = "'" . $parent_feature->get($parent_layer->get('oid')) . "'";
 									}
 								}
 							} break;
@@ -11460,7 +11468,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$index = $attributes['indizes'][$attribute_name];
 
 					$layerset[0]['attributes']['privileg'][$j] = $layerset[0]['attributes']['privileg'][$attribute_name] = $privileges[$attribute_name];
-
 					if ($attributes['dont_use_for_new'][$index] == 1) {
 						$new_value = '';
 					}
@@ -13682,6 +13689,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['ows_distributioncity'] = $this->stellendaten['ows_distributioncity'];
 			$this->formvars['ows_distributionadministrativearea'] = $this->stellendaten['ows_distributionadministrativearea'];
       $this->formvars['ows_fees'] = $this->stellendaten['ows_fees'];
+			$this->formvars['ows_inspireidentifiziert'] = $this->stellendaten['ows_inspireidentifiziert'];
       $this->formvars['ows_srs'] = $this->stellendaten['ows_srs'];
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
 			$this->formvars['wappen_link'] = $this->stellendaten['wappen_link'];
@@ -19406,7 +19414,7 @@ class db_mapObj{
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {
 								# SQL-Abfrage wie select attr1 as value, atrr2 as output from table1
-								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen
+								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen  // get_options
 								# --------- weitere Optionen -----------
 								if (value_of($optionen, 1) != '') {
 									# die weiteren Optionen exploden (opt1 opt2 opt3)
@@ -19548,7 +19556,7 @@ class db_mapObj{
 					case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' : {
 						if ($attributes['options'][$i] != '') {
 							if (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
-								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen
+								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen // get_options
 								$attributes['options'][$i] = $optionen[0];
 
 								# ------<required by>------
@@ -19636,7 +19644,7 @@ class db_mapObj{
 
 					case 'Radiobutton' : {
 						if ($attributes['options'][$i] != '') {		 # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
-							$optionen = explode(';', $attributes['options'][$i]);	# Optionen; weitere Optionen
+							$optionen = explode(';', $attributes['options'][$i]);	# Optionen; weitere Optionen // get_options
 							$attributes['options'][$i] = $optionen[0];
 							if (strpos($attributes['options'][$i], "'") === 0) {			# Aufzählung wie 'wert1','wert2','wert3'
 								$explosion = explode(',', str_replace("'", "", $attributes['options'][$i]));
@@ -19678,7 +19686,7 @@ class db_mapObj{
 					# SubFormulare mit Primärschlüssel(n)
 					case 'SubFormPK' : {
 						if ($attributes['options'][$i] != '') {
-							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,pkey3...; weitere optionen
+							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,pkey3...; weitere optionen // get_options
 							$subform = explode(',', $options[0]);
 							$attributes['subform_layer_id'][$i] = $subform[0];
 							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
@@ -19699,12 +19707,12 @@ class db_mapObj{
 						if ($attributes['options'][$i] != '') {
 							if (strpos($attributes['options'][$i], '{') === 0) {
 								$json = json_decode($attributes['options'][$i], true);
-								$attributes['subform_layer_id'][$i] = $json['layer_id'];
-								$attributes['subform_fkeys'][$i] = $json['keys'];
-								$attributes['no_new_window'][$i] = ($json['window_type'] == 'no_new_window');
+								$attributes['subform_layer_id'][$i] = $json['ref_layer_id'];
+								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
+								$attributes['no_new_window'][$i] = ($json['window_type'] === 'no_new_window');
 							}
 							else {
-								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen
+								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options
 								$subform = explode(',', $options[0]);
 								$attributes['subform_layer_id'][$i] = $subform[0];
 								$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
@@ -19733,7 +19741,7 @@ class db_mapObj{
 					# eingebettete SubFormulare mit Primärschlüssel(n)
 					case 'SubFormEmbeddedPK' : {
 						if ($attributes['options'][$i] != '') {
-							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,preview_attribute; weitere Optionen
+							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,preview_attribute; weitere Optionen // get_options
 							$subform = explode(',', $options[0]);
 							$attributes['subform_layer_id'][$i] = $subform[0];
 							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
@@ -21500,6 +21508,16 @@ DO $$
 		return $attributes;
   }
 
+	/**
+	 * Function read the settings of attributes of layer with $layer_id.
+	 * If $attributenames is null settings for all attributes of layer will be read, else only those in $attributenames array.
+	 * @param array[string] $attributenames
+	 * @param boolean $recursive If true also settings of attributes of datatype attributes will be read.
+	 * @param boolean $get_default If true the default values will be calculated from a SELECT query if a default expression is given for attribute.
+	 * @param boolean $replace If true function replace_params_rolle will be applied on the value of attribute setting elements defined in $replace_only.
+	 * @param array[string] $replace_only Function replace_params_rolle will only applied on attribute settings defined in this param if $replace is true.
+	 * @param array[string] $attribute_values Attributenames and there values that shall be used when replace_params_rolle function will be applied. 
+	 */
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value'), $attribute_values = []) {
 		global $language;
 		$attributes = array(
@@ -21616,7 +21634,7 @@ DO $$
 			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
 			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
 			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];			
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
 
 			if ($replace) {
 				foreach($replace_only AS $column) {

@@ -428,7 +428,7 @@
 		# Hochgeladene Zusammenzeichnung hat Prüfung im XPlanValidator bestanden
 		# Create Konvertierung and get konvertierung_id
 		# Bezeichnung wird später wenn die Zusammenzeichnung eingelesen wurde noch entsprechend der Zusammenzeichnung.gml aktualisiert.
-		$result = $konvertierung->create(
+		$konvertierung_id = $result = $konvertierung->create(
 			$GUI->konvertierung->config['title'] . ' aus Datei ' . $upload_file['name'],
 			$GUI->Stelle->epsg_code,
 			$GUI->user->rolle->epsg_code,
