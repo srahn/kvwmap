@@ -1227,7 +1227,7 @@ class flurstueck {
 		#$sql.="AND (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
 		if(!$without_temporal_filter) $sql.= $this->database->build_temporal_filter(array('f', 's', 'g'));
 		$sql.="ORDER BY blatt";
-		#echo $sql;
+		#echo '<br>getGrundbuecher: ' . $sql;
     $ret=$this->database->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     while($rs=pg_fetch_assoc($ret[1])) {

@@ -2012,6 +2012,7 @@ class rolle {
 		return 1;
 	}
 
+
 	function setGroups($user_id, $stelle_id, $default_user_id, $layerids) {
 		# trägt die Gruppen und Obergruppen der übergebenen Stellenid und Layerids für einen Benutzer ein. Gruppen, die aktive Layer enthalten werden aufgeklappt
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
@@ -2033,9 +2034,8 @@ class rolle {
 			#echo '<br>SQL zum Zuordnen der Rolle zu den Layergruppen: '.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rolle:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) {
-				$msg = "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__;
-				$this->debug->write($msg, 4);
+			if (!$this->database->success) { 
+				$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); 
 				return 0;
 			}
 		}
@@ -2065,9 +2065,9 @@ class rolle {
 				#echo '<br>Gruppen: '.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) {
-					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
-					return 0;
+				if (!$this->database->success) { 
+					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); 
+					return 0; 
 				}
 			}
 		}
@@ -2088,6 +2088,7 @@ class rolle {
 		}
 		return 1;
 	}
+
 
 	static function setGroupsForAll($database) {
 		$sql = "

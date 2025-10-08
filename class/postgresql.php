@@ -1354,7 +1354,7 @@ FROM
 			if ($pseudo_realnames) {
 				include_once(CLASSPATH . 'sql.php');
 				$sql_object = new SQL($select);
-				$select_attr = $sql_object->get_attributes();
+				$select_attr = $sql_object->get_attributes(false);
 			}
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
@@ -1897,7 +1897,7 @@ FROM
     }		
 		if(!$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'gem'));
     $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>a')::integer,f.flurstueckskennzeichen";
-		#echo $sql;
+		#echo '<br>getBuchungenFromGrundbuch: ' . $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     while($rs=pg_fetch_assoc($ret[1])) {
@@ -2465,7 +2465,7 @@ FROM
     }
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
     $sql.= " ORDER BY order1, order2;";
-    #echo $sql.'<br><br>';
+    #echo 'getEigentuemerliste: ' . $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0] OR pg_num_rows($ret[1])==0) { return; }
 		$wurzel = new eigentuemer($Grundbuch,NULL, $this);

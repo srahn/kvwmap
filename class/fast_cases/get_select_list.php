@@ -256,7 +256,7 @@ class GUI {
     else {
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
-		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
+		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']])); // get_options
     $reqby_start = strpos(strtolower($options), "<required by>");
     if ($reqby_start > 0) {
 			$sql = substr($options, 0, $reqby_start);
