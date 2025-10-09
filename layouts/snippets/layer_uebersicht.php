@@ -240,7 +240,7 @@
 					}
 				}
 				else {
-					uksort($this->groups, 'compare_groups2');
+					uasort($this->groups, 'compare_groups2');
 					foreach ($this->groups as $group) {
 						if($group['obergruppe'] == '') {
 							echo $this->outputGroup($group)['output'];
