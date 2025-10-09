@@ -612,10 +612,18 @@ class rolle {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 			}
 			else {
+				$ewkt_extent = 'SRID=' . $this->epsg_code . ';POLYGON((
+							' . $this->oGeorefExt->minx . ' ' . $this->oGeorefExt->miny . ', 
+							' . $this->oGeorefExt->minx . ' ' . $this->oGeorefExt->maxy . ', 
+							' . $this->oGeorefExt->maxx . ' ' . $this->oGeorefExt->maxy . ', 
+							' . $this->oGeorefExt->maxx . ' ' . $this->oGeorefExt->miny . ', 
+							' . $this->oGeorefExt->minx . ' ' . $this->oGeorefExt->miny . '
+							))';
 				while ($param = pg_fetch_assoc($ret[1])) {
 					$sql = $param['options_sql'];
 					$sql = str_replace('$USER_ID', $this->user_id, $sql);
 					$sql = str_replace('$STELLE_ID', $this->stelle_id, $sql);
+					$sql = str_replace('$EXTENT', $ewkt_extent, $sql);
 					#echo '<br>SQL zur Abfrage der Optionen des Layerparameter ' . $param['key'] . ': ' . $sql;
 					$options_result = $pgdatabase->execSQL($sql, 4, 0, false);
 					if ($options_result['success']) {
