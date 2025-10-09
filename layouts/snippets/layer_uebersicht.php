@@ -10,6 +10,11 @@
 	}
 	$this->keywords = array_unique($this->keywords);
 	natcasesort($this->keywords);
+
+	function compare_groups2($a, $b){
+		if($a['Gruppenname'] > $b['Gruppenname'])return 1;
+		else return 0;
+	}
 	
 	$this->outputGroup = function($group, $indent = 0, $prefix = '', $upper_groups = []) use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
@@ -235,6 +240,7 @@
 					}
 				}
 				else {
+					uasort($this->groups, 'compare_groups2');
 					foreach ($this->groups as $group) {
 						if($group['obergruppe'] == '') {
 							echo $this->outputGroup($group)['output'];

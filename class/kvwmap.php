@@ -8325,7 +8325,7 @@ echo '			</table>
 			$this->user->rolle->setGroups($users['ID'][$j], $Stelle->id, 0, array($this->formvars['selected_layer_id']));
 		}
 		# u_groups2rolle aufräumen
-		// rolle::clear_groups2rolle($this->database);
+		rolle::clear_groups2rolle($this->database);
     $this->Layer2Stelle_Editor();
   }
 
@@ -8380,7 +8380,7 @@ echo '			</table>
 			$result = $this->layergruppe->update();
 		}
 		rolle::setGroupsForAll($this->database);
-		// rolle::clear_groups2rolle($this->database);
+		rolle::clear_groups2rolle($this->database);
 	}
 
 	function Layer2Stelle_Reihenfolge() {
@@ -9298,7 +9298,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       }
       # /Löschen der in der Selectbox entfernten Stellen
 			# u_groups2rolle aufräumen
-			// rolle::clear_groups2rolle($this->database);
+			rolle::clear_groups2rolle($this->database);
     }
 
 		for ($i = 0; $i < count($stellen_ids); $i++) {
@@ -13394,7 +13394,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
     }
 		# u_groups2rolle aufräumen
-		// rolle::clear_groups2rolle($this->database);
+		rolle::clear_groups2rolle($this->database);
 
     $this->Stelleneditor();
   }
@@ -19512,8 +19512,8 @@ class db_mapObj{
 						if ($attributes['options'][$i] != '') {
 							if (strpos($attributes['options'][$i], '{') === 0) {
 								$json = json_decode($attributes['options'][$i], true);
-								$attributes['subform_layer_id'][$i] = $json['parent_layer_id'];
-								$attributes['subform_fkeys'][$i] = array( 'fkey' => $json['fk_id'], 'pkey' => $json['pk_id']);
+								$attributes['subform_layer_id'][$i] = $json['ref_layer_id'];
+								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
 								$attributes['no_new_window'][$i] = ($json['window_type'] === 'no_new_window');
 							}
 							else {
