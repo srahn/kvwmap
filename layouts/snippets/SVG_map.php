@@ -1653,7 +1653,7 @@ function calculate_reduction(pathx, pathy){
 	k = 1;
 	em = 0;
 	hell = 0;
-	r = '.EARTH_RADIUS.';
+	r = top.earth_radius;
 	used_nbs = new Array();
 	if(r > 0 && top.nbh.length > 0){
 		for(i = 0; i < pathx.length; i++){
@@ -1683,7 +1683,7 @@ function calculate_reduction(pathx, pathy){
 
 function calculate_distance(x1, y1, x2, y2) {
 	if ({$this->user->rolle->epsg_code} == 4326) {
-		distance = '.EARTH_RADIUS.' * Math.acos(Math.sin(y1*Math.PI/180) * Math.sin(y2*Math.PI/180) + Math.cos(y1*Math.PI/180) * Math.cos(y2*Math.PI/180) * Math.cos((x2 - x1)*Math.PI/180))
+		distance = top.earth_radius * Math.acos(Math.sin(y1*Math.PI/180) * Math.sin(y2*Math.PI/180) + Math.cos(y1*Math.PI/180) * Math.cos(y2*Math.PI/180) * Math.cos((x2 - x1)*Math.PI/180))
 	}
 	else{
 		distance = Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)));

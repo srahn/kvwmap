@@ -6,7 +6,7 @@
 
 # Check if at least one argument (the URL file) is provided
 if [ "$#" -lt 1 ]; then
-  echo "Usage: $0 <url_file> <dest_path> [parallel_limit]"
+  echo "Usage: $0 <url_file> <dest_path> [parallel_limit] [only_missing]"
   exit 1
 fi
 
@@ -25,10 +25,17 @@ fi
 # Create a subdirectory for downloads
 mkdir -p "$DOWNLOAD_DIR"
 # Download files in parallel using xargs and wget
+if [ "$ONLY_MISSING" == 1 ] ; then
+  echo "Only downloading missing files."
+else
+  echo "Downloading all files in url file."
+fi
 cat "$URL_FILE" | while read url; do
-  file="${DOWNLOAD_DIR}/$(basename $url)"
+  file="${DOWNLOAD_DIR%/}/$(basename $url)"
   if [ "$ONLY_MISSING" == 0 ] || [ ! -f $file ] ; then
-    echo "wget \"${url}\" -q --show-progress -P ${DOWNLOAD_DIR}"
+    echo "wget \"${url}\" -q --show-progress -P ${DOWNLOAD_DIR} >> ${DOWNLOAD_DIR%/}/download.log 2>&1"
+  else
+    echo "echo \"File ${file} already exists, skipping download.\" >> ${DOWNLOAD_DIR%/}/download.log 2>&1"
   fi
 done | xargs -I {} -P $PARALLEL_LIMIT bash -c '{}'
 wait

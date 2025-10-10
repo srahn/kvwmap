@@ -18,6 +18,9 @@
       <div class="odr-cell odr-head-cell odr-checkbox">
         <input id="all_selector" type="checkbox" onclick="" title="Schaltet alle anderen Checkboxen ein oder aus."/>
       </div>
+      <div class="odr-cell odr-head-cell odr-id">
+        ID
+      </div>
       <div class="odr-cell odr-head-cell odr-ressource">
         Ressource
       </div>
@@ -49,6 +52,9 @@
       <div class="odr-row<? echo ($odd_row ? ' odr-alt' : ''); ?>">
         <div class="odr-cell odr-checkbox">
           <input id="checkbox_<? echo $ressource->get_id(); ?>" data-ressource_id="<? echo $ressource->get_id(); ?>" class="ressource_checkbox" type="checkbox" style="margin-top: 1px"/>
+        </div>
+        <div class="odr-cell odr-id">
+          <? echo $ressource->get_id(); ?>
         </div>
         <div class="odr-cell odr-ressource">
           <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo METADATA_RESSOURCES_LAYER_ID; ?>&value_id=<?php echo $ressource->get('id'); ?>&operator_id==">
