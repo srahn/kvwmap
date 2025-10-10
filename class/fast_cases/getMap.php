@@ -10,13 +10,13 @@ function count_or_0($val) {
 }
 
 if (MAPSERVERVERSION < 800) {
-	// function msGetErrorObj(){
-	// 	return ms_GetErrorObj();
-	// }
+	function msGetErrorObj(){
+		return ms_GetErrorObj();
+	}
 
-	// function msResetErrorList(){
-	// 	return ms_ResetErrorList();
-	// }
+	function msResetErrorList(){
+		return ms_ResetErrorList();
+	}
 }
 
 function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
