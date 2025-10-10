@@ -92,6 +92,14 @@ class PgObject {
 		return floatval($result['postgis_version']);
 	}
 
+	function setKeys($keys) {
+		foreach ($keys AS $key) {
+			if (!array_key_exists($key, $this->data)) {
+				$this->set($key, NULL);
+			}
+		}
+	}
+
 	function find_by($attribute, $value) {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, $this->show);
 		$sql = "
