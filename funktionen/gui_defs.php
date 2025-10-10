@@ -10,6 +10,7 @@
 	var upload_only_file_metadata = <? echo intval($this->user->rolle->upload_only_file_metadata); ?>;
 	var csrf_token = '<? echo $_SESSION['csrf_token']; ?>';
 	var hist_timestamp = <?	echo (rolle::$hist_timestamp != ''? 'new Date("' . rolle::$hist_timestamp . '");' : "'';"); ?>
+	var earth_radius = <? echo EARTH_RADIUS ?>;
  
 <?
  	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende

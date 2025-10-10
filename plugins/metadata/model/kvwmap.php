@@ -1,5 +1,6 @@
 <?php
 	// GUI functions of plugins/metadata
+	// metadata_add_urls
 	// metadata_cancel_data_package
 	// metadata_create_bundle_package
 	// metadata_create_data_package
@@ -30,6 +31,83 @@
 	}
 
 	// set_error_handler('exceptions_error_handler');
+
+	$GUI->metadata_add_urls = function($ressource_id) use ($GUI) {
+		$GUI->main = PLUGINS . 'metadata/view/add_urls.php';
+		$GUI->sanitize([
+			'ressource_id' => 'integer'
+		]);
+		if (!$ressource_id) {
+			$msg = 'Der Parameter ressource_id ist leer oder wurde nicht übergeben.';
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+
+		$GUI->ressource = Ressource::find_by_id($GUI, 'id', $ressource_id);
+		if ($GUI->ressource->data === false) {
+			$msg = 'Die Ressource mit id ' . $ressource_id . ' wurde nicht gefunden!';
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+
+		if ($GUI->formvars['action'] == 'URLs erzeugen') {
+			$GUI->sanitize([
+				'x' => 'numeric',
+				'y' => 'numeric',
+				'radius' => 'integer',
+				'tile_size' => 'integer',
+				'url_pattern' => 'text'
+			]);
+			$kmq_x = round($GUI->formvars['x'] / 1000);
+			$kmq_y = round($GUI->formvars['y'] / 1000);
+			$r = $GUI->formvars['radius'];
+			$n = $GUI->formvars['tile_size'] / 1000;
+			$url_pattern = $GUI->formvars['url_pattern'];
+			$download_url = $GUI->ressource->get('download_url');
+			$urls_file = $GUI->ressource->get_urls_file();
+			/**
+			 * Erzeugen der Links für den Download von DGM und DOM und speichern in den Dateien urls.txt 
+			 */
+			$GUI->new_urls = array();
+			for ($i = $r * -1; $i <= $r; $i += $n) {
+				for ($j = $r * -1; $j <= $r; $j += $n) {
+					$url = str_replace(
+						'${kmq_y}',
+						$kmq_y + $i,
+						str_replace(
+							'${kmq_x}',
+							$kmq_x + $j,
+							str_replace(
+								'${URL}',
+								$download_url,
+								$url_pattern
+							)
+						)
+					);
+					// echo '<br>put: ' . $url;
+					file_put_contents($urls_file, "\n" . $url, FILE_APPEND);
+					$GUI->new_urls[] = $url;
+				}
+			}
+			// urls in file schreiben
+			$cmd = "sort " . $urls_file . " | uniq > " . $urls_file . "_sorted; mv " . $urls_file . " " . $urls_file . "_backup; cp " . $urls_file . "_sorted " . $urls_file;
+			// echo '<br>' . $cmd;
+			exec($cmd, $output, $result);
+
+			if (count($output) > 0) {
+				echo '<br>output: ' . implode('<br>', $output);
+			}
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'View kann geladen werden.'
+		);
+	};
 
 	/**
 	 * Die Bestellung zum Packen eines Paketes wird beendet.
