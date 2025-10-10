@@ -99,6 +99,9 @@ class PgObject {
 		return floatval($result['postgis_version']);
 	}
 
+	/**
+	 * @return PgObject $this->data is false if nothing found.
+	 */
 	function find_by($attribute, $value) {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, $this->show);
 		$sql = "
