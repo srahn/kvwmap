@@ -559,10 +559,18 @@ class rolle {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 			}
 			else {
+				$ewkt_extent = 'SRID=' . $this->epsg_code . ';POLYGON((
+					' . $this->oGeorefExt->minx . ' ' . $this->oGeorefExt->miny . ', 
+					' . $this->oGeorefExt->minx . ' ' . $this->oGeorefExt->maxy . ', 
+					' . $this->oGeorefExt->maxx . ' ' . $this->oGeorefExt->maxy . ', 
+					' . $this->oGeorefExt->maxx . ' ' . $this->oGeorefExt->miny . ', 
+					' . $this->oGeorefExt->minx . ' ' . $this->oGeorefExt->miny . '
+					))';
 				while ($param = $this->database->result->fetch_assoc()) {
 					$sql = $param['options_sql'];
 					$sql = str_replace('$USER_ID', $this->user_id, $sql);
 					$sql = str_replace('$STELLE_ID', $this->stelle_id, $sql);
+					$sql = str_replace('$EXTENT', $ewkt_extent, $sql);
 					#echo '<br>SQL zur Abfrage der Optionen des Layerparameter ' . $param['key'] . ': ' . $sql;
 					$options_result = $pgdatabase->execSQL($sql, 4, 0, false);
 					if ($options_result['success']) {
@@ -1847,21 +1855,23 @@ class rolle {
 		$new_layer_params = array();
 		foreach (array_keys($layer_params) AS $key) {
 			$layer_param = LayerParam::find_by_key($this->gui_object, $key);
-			$result = $layer_param->get_options($this->user_id, $this->stelle_id);
-			if (!$result['success']) {
-				return $result;
+			if (strpos($layer_param->get('options_sql'), '$') === false) {	# Layer-Parameter mit dynamischem SQL nicht anpassen
+				$result = $layer_param->get_options($this->user_id, $this->stelle_id);
+				if (!$result['success']) {
+					return $result;
+				}
+				if (!in_array(
+					$layer_params[$key],
+					array_map(
+						function($option) {
+							return $option['value'];
+						},
+						$result['options']
+					)
+				)) {
+					$layer_params[$key] = $result['options']['value'][0];
+				};
 			}
-			if (!in_array(
-				$layer_params[$key],
-				array_map(
-					function($option) {
-						return $option['value'];
-					},
-					$result['options']
-				)
-			)) {
-				$layer_params[$key] = $result['options']['value'][0];
-			};
 		}
 		foreach ($layer_params AS $param_key => $value) {
 			$new_layer_params[] = '"' . $param_key . '":"' . $value . '"';
