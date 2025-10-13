@@ -505,7 +505,7 @@ INSERT INTO u_styles2classes (
 			$insert .= ') VALUES (';
 			for ($i = 0; $i < $feld_anzahl; $i++) {
 				if ($felder[$i] != $extra) {
-					if (strpos($rs[$i], '@') === 0) {
+					if (false and strpos($rs[$i], '@') === 0) {		# im Passwort kann z.B. vorne ein @ stehen
 						$insert .= pg_escape_string($rs[$i]);
 					}
 					else {
