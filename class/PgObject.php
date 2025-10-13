@@ -574,36 +574,42 @@ class PgObject {
 	}
 
 	function update_attr($attributes, $set = false) {
-		$quote = ($this->identifier_type == 'text' ? "'" : "");
-		$sql = "
-			UPDATE
-				\"" . $this->schema . "\".\"" . $this->tableName . "\"
-			SET
-				" . implode(', ', $attributes) . "
-			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
-		";
-		#echo $sql;
-		$this->debug->show('update sql: ' . $sql, $this->show);
-		try {
-			pg_query($this->database->dbConn, $sql);
-			if ($set) {
-				foreach($attributes AS $attribute) {
-					$parts = explode('=', $attribute);
-					$this->set(trim($parts[0]), trim($parts[1], "'"));
+		if (is_array($attributes) AND count($attributes) > 0) {
+			$quote = ($this->identifier_type == 'text' ? "'" : "");
+			$sql = "
+				UPDATE
+					\"" . $this->schema . "\".\"" . $this->tableName . "\"
+				SET
+					" . implode(', ', $attributes) . "
+				WHERE
+					" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+			";
+			#echo $sql;
+			$this->debug->show('update sql: ' . $sql, $this->show);
+			try {
+				pg_query($this->database->dbConn, $sql);
+				if ($set) {
+					foreach($attributes AS $attribute) {
+						$parts = explode('=', $attribute);
+						$this->set(trim($parts[0]), trim($parts[1], "'"));
+					}
 				}
+				return array(
+					'success' => true,
+					'msg' => 'Attributes erfolgreich geupdated mit sql:' . $sql
+				);
 			}
-			return array(
-				'success' => true,
-				'msg' => 'Attributes erfolgreich geupdated'
-			);
+			catch (Exception $e) {
+				return array(
+					'success' => false,
+					'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' .  $e->getMessage()
+				);
+			}
 		}
-		catch (Exception $e) {
-			return array(
-				'success' => false,
-				'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' .  $e->getMessage()
-			);
-		}
+		return array(
+			'success' => true,
+			'msg' => 'Nichts geupdated weil keine Werte übergeben wurden.'
+		);
 	}
 
 	function delete($where = NULL) {
