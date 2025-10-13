@@ -216,6 +216,7 @@ class Role extends PgObject {
 	 * the first value of the options will be set.
 	 * The function changes the layer_params attribut of this rolle object in the database and
 	 * set it in static var rolle::$layer_params
+	 * !Important: This is only done for parameters which have a static SQL.
 	 * @return Array with success and msg
 	 */
 	function rectify_layer_params($layer_params) {
@@ -224,21 +225,23 @@ class Role extends PgObject {
 		$new_layer_params = array();
 		foreach (array_keys($old_layer_params) AS $key) {
 			$layer_param = LayerParam::find_by_key($this->gui, $key);
-			$result = $layer_param->get_options($this->get('user_id'), $this->get('stelle_id'));
-			if (!$result['success']) {
-				return $result;
+			if (strpos($layer_param->get('options_sql'), '$') === false) {	# Layer-Parameter mit dynamischem SQL nicht anpassen
+				$result = $layer_param->get_options($this->get('user_id'), $this->get('stelle_id'));
+				if (!$result['success']) {
+					return $result;
+				}
+				if (!in_array(
+					$old_layer_params[$key],
+					array_map(
+						function($option) {
+							return $option['value'];
+						},
+						$result['options']
+					)
+				)) {
+					$old_layer_params[$key] = $result['options']['value'][0];
+				};
 			}
-			if (!in_array(
-				$old_layer_params[$key],
-				array_map(
-					function($option) {
-						return $option['value'];
-					},
-					$result['options']
-				)
-			)) {
-				$old_layer_params[$key] = $result['options']['value'][0];
-			};
 		}
 		foreach ($old_layer_params AS $param_key => $value) {
 			$new_layer_params[] = '"' . $param_key . '":"' . $value . '"';
