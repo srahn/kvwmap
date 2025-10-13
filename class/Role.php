@@ -216,6 +216,7 @@ class Role extends PgObject {
 	 * the first value of the options will be set.
 	 * The function changes the layer_params attribut of this rolle object in the database and
 	 * set it in static var rolle::$layer_params
+	 * !Important: This is only done for parameters which have a static SQL.
 	 * @return Array with success and msg
 	 */
 	function rectify_layer_params($layer_params) {
