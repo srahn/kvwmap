@@ -284,7 +284,7 @@ function go_switch($go, $exit = false) {
 					rolle::$layer_params = array_merge(rolle::$layer_params, $GUI->formvars['layer_params']);
 				}
 				$GUI->loadMap('DataBase');
-				$format = (($GUI->formvars['only_postgis_layer'] OR ($GUI->formvars['only_layer_id'] AND $GUI->layerset['layer_ids'][$GUI->formvars['only_layer_id']]['datentyp'] != 3)) ? 'png' : 'jpeg');
+				$format = (($GUI->formvars['only_postgis_layer'] OR $GUI->formvars['only_layer_id']) ? 'png' : 'jpeg');
 				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
 				$GUI->mime_type = 'image/' . $format;
