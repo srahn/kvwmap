@@ -1648,7 +1648,7 @@ class GUI {
 				if($layer['queryStatus'] == 1){
 					$legend .=  'checked="true"';
 				}
-				$legend .=' type="checkbox" name="pseudoqLayer'.$layer['layer_id'].'" disabled '.$style.'>';
+				$legend .=' name="pseudoqLayer'.$layer['layer_id'].'" disabled '.$style.'>';
 			}
 			$legend .=  '</td><td valign="top">';
 			// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
