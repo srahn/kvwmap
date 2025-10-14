@@ -23,7 +23,7 @@
   $strOwsFees = 'Fees';
 	$strOwsFeesHint = 'Beschreibung des Kostenmodells für die Nutzung des Dienstes. Ist er Kostenfrei hier "keine" eintragen.';
 	$strOwsInspireidentifiziert = 'inspireidentifiziert';
-	$strOwsInspireidentifiziertHint = 'Über PlanDigital stellen Sie den FNP im Datenmodell XPlanGML bereit. Falls Sie den FNP anderweitig bereits im INSPIRE-Datenmodell bereitstellen, muss diese Option ausgeschaltet sein.';
+	$strOwsInspireidentifiziertHint = 'Falls Sie die Daten anderweitig bereits im INSPIRE-Datenmodell bereitstellen, muss diese Option ausgeschaltet sein.';
   $strOwsSrs = 'Coordinate Reference System';
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'Organization';

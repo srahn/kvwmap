@@ -1,5 +1,6 @@
 <?php
 // Use Cases
+// metadata_add_urls
 // metadata_cancel_data_package
 // metadata_create_bundle_package
 // metadata_create_data_package
@@ -36,6 +37,18 @@ include_once(PLUGINS . 'metadata/model/PackLog.php');
 function go_switch_metadata($go){
 	global $GUI;
 	switch($go) {
+		case 'metadata_add_urls': {
+			$GUI->sanitize([
+				'ressource_id' => 'int'
+			]);
+			$GUI->checkCaseAllowed('metadata_add_urls');
+			$result = $GUI->metadata_add_urls($GUI->formvars['ressource_id']);
+			if (!$result['success']) {
+				$GUI->Fehlermeldung = $result['msg'];
+			}
+			$GUI->output();
+		} break;
+
 		case 'metadata_cancel_data_package': {
 			$GUI->sanitize([
 				'package_id' => 'int'

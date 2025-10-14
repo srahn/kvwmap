@@ -14,11 +14,11 @@
       "items": {
         "type": "object",
         "properties": {
-          "pk_id": {
+          "pkey": {
             "description": "The name of the primary key attribute in parent layer respectively in there reference table.",
             "type": "string"
           },
-          "fk_id": {
+          "fkey": {
             "description": "The name of the foreign key attribute in the layer that have this attribute.",
             "type": "string"
           }
