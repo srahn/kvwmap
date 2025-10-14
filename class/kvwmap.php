@@ -9606,6 +9606,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				array(
 					'token' => $this->formvars['token'],
 					'email' => $this->formvars['email'],
+					'anrede' => $this->formvars['anrede'],
 					'name' => $this->formvars['name'],
 					'vorname' => $this->formvars['vorname'],
 					'loginname' => $this->formvars['loginname'],
