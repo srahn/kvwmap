@@ -5679,13 +5679,13 @@ echo '			</table>
 	function getMenueWithAjax() {
 		// $this->loadMap('DataBase');
 		// $this->drawMap();
-		$this->user->rolle->hideMenue(0);
+		$this->user->rolle->hideMenue('false');
 		include(LAYOUTPATH . "snippets/menue.php");
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
 	}
 
 	function hideMenueWithAjax() {
-		$this->user->rolle->hideMenue(1);
+		$this->user->rolle->hideMenue('true');
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
 	}
 
