@@ -17,6 +17,11 @@
    td {font-size: 15px}
    input.class2 {border:none;background-color: transparent;text-align:right;}
    .titel {font-size: 17pt; font-weight: bold}
+
+		#contentdiv{
+			max-width: 100% !important;
+		}
+
 </STYLE>
 <script type="text/javascript">
 <!--
