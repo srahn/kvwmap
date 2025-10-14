@@ -1472,7 +1472,7 @@ echo '			</table>
 						$this->user->rolle->polyquery
 					) ? '' : 'style="display: none"');
 				$legend .=  '<input ';
-				if($layer['selectiontype'] == 'radio'){
+				if ($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio'){
 					$legend .=  'type="radio" ';
 				}
 				else{
@@ -1481,7 +1481,7 @@ echo '			</table>
 				if($layer['queryStatus'] == 1){
 					$legend .=  'checked="true"';
 				}
-				$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled '.$style.'>';
+				$legend .=' name="pseudoqLayer'.$layer['Layer_ID'].'" disabled '.$style.'>';
 			}
 			$legend .=  '</td><td valign="top">';
 			// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
