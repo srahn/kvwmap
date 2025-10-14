@@ -38,7 +38,7 @@
 			<label class="fetter" for="email"><? echo $strToken; ?>:</label>
 			<div style="float: left"><? echo $this->formvars['token']; ?></div>
 			<div class="clear"></div>
-			<div style="float: left"><a href="mailto:<?php echo $this->invitation->mailto_text(); ?>"><? echo $strSendInvitationPerEMail; ?></a></div><?
+			<div style="float: left"><a href="index.php?go=Einladung_E-Mail&selected_invitation_id=<? echo $this->invitation->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strSendInvitationPerEMail; ?></a></div><?
 		} ?>
 		<div class="clear"></div>
 		<div style="text-align: -webkit-center">

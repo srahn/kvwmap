@@ -720,7 +720,7 @@ class synchro {
 				deltas_all
 			WHERE
 				version > " . $last_delta_version . " AND
-				NOT (action = 'insert' OR COALESCE(client_id, '') = '" . $client_id . "')
+				NOT (COALESCE(client_id, '') = '" . $client_id . "')
 			ORDER BY version;
 		";
 		$log .= $sql;
