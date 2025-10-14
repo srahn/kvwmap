@@ -1639,7 +1639,7 @@ class GUI {
 						$this->user->rolle->polyquery
 					) ? '' : 'style="display: none"');
 				$legend .=  '<input ';
-				if($layer['selectiontype'] == 'radio'){
+				if ($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio'){
 					$legend .=  'type="radio" ';
 				}
 				else{
