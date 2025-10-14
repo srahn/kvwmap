@@ -39,12 +39,12 @@ function operatorchange(layer_id, attributname, searchmask_number){
 	}
 	if (document.getElementById("gsm_default_input2_" + attributname) != undefined) {
 		if (document.getElementById(prefix+"operator_" + attributname).value == "between"){
-			document.getElementById("gsm_default_input1_" + attributname).style.display = "block";
-			document.getElementById("gsm_default_input2_" + attributname).style.display = "block";
+			document.getElementById(prefix+"gsm_default_input1_" + attributname).style.display = "block";
+			document.getElementById(prefix+"gsm_default_input2_" + attributname).style.display = "block";
 		}
 		else {
 			if (typeof document.getElementById(prefix+"value2_"+attributname) !== 'undefined'){
-				document.getElementById("gsm_default_input2_" + attributname).style.display = "none";
+				document.getElementById(prefix+"gsm_default_input2_" + attributname).style.display = "none";
 			}
 		}
 	}
