@@ -2210,6 +2210,11 @@ function go_switch($go, $exit = false) {
 				$GUI->invitation_formular();
 			} break;
 
+			case 'Einladung_E-Mail' : {
+				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
+				$GUI->invitation_email();
+			} break;
+
 			case 'Einladung_Speichern' : {
 				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
 				$GUI->invitation_save();
