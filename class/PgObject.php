@@ -431,10 +431,12 @@ class PgObject {
 		*/
 		$query = pg_query($this->database->dbConn, $sql);
 		if (!$query) {
-			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), true);
+			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), $this->show);
 			return array(
 				'success' => false,
-				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn));
+				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn),
+				'sql' => $sql
+			);
 		}
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
@@ -516,7 +518,7 @@ class PgObject {
 				WHERE
 					" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 			";
-			#echo $sql;
+			// echo $sql;
 			$this->debug->show('update sql: ' . $sql, $this->show);
 			try {
 				pg_query($this->database->dbConn, $sql);
