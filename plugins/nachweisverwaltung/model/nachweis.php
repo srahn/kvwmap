@@ -1354,8 +1354,10 @@ class Nachweis {
 				             AND stelle_id " . ($stelle_id == ''? "IS NULL" : "= " . $stelle_id);
         }
         else {
-          $n2a = 'lenris.lea_nachweise2antrag';
-          $where = " AND n2a.lea_id = " . $lea_id;
+          $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise n2a';
+          $where = " AND ln2a.lea_id = " . $lea_id . "
+                     AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                     AND ln2a.client_id = n2a.client_id";
         }
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
 				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*, substr(flurid::text, 1, 6) as gemarkung, substr(flurid::text, 7, 3) as flur, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
@@ -1417,11 +1419,14 @@ class Nachweis {
     else {
       $sql = "
         SELECT 
-          * 
+          cn.nachweis_id 
         FROM 
-          lenris.lea_nachweise2antrag
+          lenris.lea_nachweise2antrag ln2a,
+          lenris.client_nachweise cn
         WHERE 
-          lea_id = " . $lea_id;
+          ln2a.client_nachweis_id = cn.client_nachweis_id AND 
+          ln2a.client_id = cn.client_id AND 
+          ln2a.lea_id = " . $lea_id;
     }
     # echo '<br>'.$sql;
     $queryret=$this->database->execSQL($sql,4, 0);
@@ -1490,10 +1495,16 @@ class Nachweis {
       else {
         $sql = "
           INSERT INTO lenris.lea_nachweise2antrag 
-            (nachweis_id, lea_id)
-          VALUES 
-            (" . $idselected[$i] . ", " . $lea_id . ")
-          ON CONFLICT (nachweis_id, lea_id) DO NOTHING";
+            (client_nachweis_id, client_id, lea_id)
+          SELECT
+            cn.client_nachweis_id, 
+            cn.client_id,
+            " . $lea_id . "
+          FROM
+            lenris.client_nachweise cn
+          WHERE
+            cn.nachweis_id = " . $idselected[$i] . "
+          ON CONFLICT (client_nachweis_id, client_id, lea_id) DO NOTHING";
       }
       $ret = $this->database->execSQL($sql,4, 1);    
       if ($ret[0]) {
@@ -1529,10 +1540,14 @@ class Nachweis {
       else {
         $sql = "
           DELETE FROM 
-            lenris.lea_nachweise2antrag
-          WHERE 
-            lea_id = " . $lea_id . " AND 
-            nachweis_id = " . $idselected[$i];
+            lenris.lea_nachweise2antrag ln2a
+          USING
+            lenris.client_nachweise cn
+          WHERE
+            ln2a.client_nachweis_id = cn.client_nachweis_id AND 
+            ln2a.client_id = cn.client_id AND 
+            ln2a.lea_id = " . $lea_id . " AND
+            cn.nachweis_id = " . $idselected[$i];
       }
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {

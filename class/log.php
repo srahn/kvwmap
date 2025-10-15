@@ -26,6 +26,10 @@ class Debugger {
 			$_SESSION = array();
 		}
 		$this->filename = LOGPATH . (dirname($filename) != '.' ? dirname($filename) . '/' : '') . (array_key_exists('login_name', $_SESSION) ? $_SESSION['login_name'] : '') . basename($filename);
+		if (!file_exists($this->filename)) {
+			touch($this->filename);
+			chmod($this->filename, 0775);
+		}
 		$this->fp = fopen($this->filename, $mode);
 		$this->mime_type = $mime_type;
 		$this->level;
