@@ -184,7 +184,7 @@ else {
   <tr> 
     <td colspan="3" style="height: 30px">
 			<? if ($this->formvars['lea_layer_id'] != '') { ?>
-				<div id="backlink"><a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->formvars['lea_layer_id']; ?>&value_lea_id=<? echo $this->formvars['lea_id'] ?>&operator_lea_id==&opentab=4"><span class="fett">zurück zum Antrag</span></a></div>
+				<div id="backlink"><a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->formvars['lea_layer_id']; ?>&value_lea_id=<? echo $this->formvars['lea_id'] ?>&operator_lea_id==&opentab=3"><span class="fett">zurück zum Antrag</span></a></div>
 			<? } ?>
 			<div align="center"><h2><?php echo $this->titel; ?></h2></div>
 		</td>
