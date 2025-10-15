@@ -93,7 +93,7 @@
 
     <div class="dpt-footer-cell" style="flex-grow: 100; text-align: right">
       Anzahl Pakete: <span id="num_packages_span"></span>
-      bestellt: <span id="num_ordered_packages_span"></span>
+      beauftragt: <span id="num_ordered_packages_span"></span>
       in Arbeit: <span id="num_packages_in_progress_span"></span>
       gepackt: <span id="num_packed_packages_span"></span>
     </div>
@@ -162,13 +162,13 @@
     });
 
     document.getElementById('order_data_packages_button').addEventListener('click', function() {
-      console.log('Click on order_data_packages_button');
+      // console.log('Click on order_data_packages_button');
       document.querySelectorAll("input[type='checkbox'].data_package_checkbox").forEach((chk) => {
         if (chk.checked) {
-          console.log('Checkbox %o is checked', chk);
+          // console.log('Checkbox %o is checked', chk);
           const ressource_id = parseInt(chk.dataset.ressource_id);
           const package = dataPackages.get(ressource_id);
-          console.log(`Pack_status_id of ressouce_id ${ressource_id}: ${package.get('pack_status_id')}`);
+          // console.log(`Pack_status_id of ressouce_id ${ressource_id}: ${package.get('pack_status_id')}`);
           if (package.get('pack_status_id') == 1) {
             orderDataPackage(ressource_id);
           }
@@ -214,7 +214,7 @@
           if (package.get('pack_status_id') == 2) {
             cancelDataPackage(ressource_id);
           }
-          if (package.get('pack_status_id') == 4) {
+          if ([3, 4].includes(package.get('pack_status_id'))) {
             deleteDataPackage(ressource_id);
           }
         }
@@ -269,7 +269,7 @@
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
-      } 
+      }
       const json = await response.json();
       let msg_type = 'notice';
       if (!json.success) {

@@ -1,5 +1,6 @@
 <?php
 	// GUI functions of plugins/metadata
+	// metadata_add_urls
 	// metadata_cancel_data_package
 	// metadata_create_bundle_package
 	// metadata_create_data_package
@@ -9,6 +10,7 @@
 	// metadata_download_bundle_package
 	// metadata_download_data_package
 	// metadata_download_metadata_document
+	// metadata_list_files
 	// metadata_order_bundle_package
 	// metadata_order_data_package
 	// metadata_reorder_data_packages
@@ -29,6 +31,83 @@
 	}
 
 	// set_error_handler('exceptions_error_handler');
+
+	$GUI->metadata_add_urls = function($ressource_id) use ($GUI) {
+		$GUI->main = PLUGINS . 'metadata/view/add_urls.php';
+		$GUI->sanitize([
+			'ressource_id' => 'integer'
+		]);
+		if (!$ressource_id) {
+			$msg = 'Der Parameter ressource_id ist leer oder wurde nicht übergeben.';
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+
+		$GUI->ressource = Ressource::find_by_id($GUI, 'id', $ressource_id);
+		if ($GUI->ressource->data === false) {
+			$msg = 'Die Ressource mit id ' . $ressource_id . ' wurde nicht gefunden!';
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+
+		if ($GUI->formvars['action'] == 'URLs erzeugen') {
+			$GUI->sanitize([
+				'x' => 'numeric',
+				'y' => 'numeric',
+				'radius' => 'integer',
+				'tile_size' => 'integer',
+				'url_pattern' => 'text'
+			]);
+			$kmq_x = round($GUI->formvars['x'] / 1000);
+			$kmq_y = round($GUI->formvars['y'] / 1000);
+			$r = $GUI->formvars['radius'];
+			$n = $GUI->formvars['tile_size'] / 1000;
+			$url_pattern = $GUI->formvars['url_pattern'];
+			$download_url = $GUI->ressource->get('download_url');
+			$urls_file = $GUI->ressource->get_urls_file();
+			/**
+			 * Erzeugen der Links für den Download von DGM und DOM und speichern in den Dateien urls.txt 
+			 */
+			$GUI->new_urls = array();
+			for ($i = $r * -1; $i <= $r; $i += $n) {
+				for ($j = $r * -1; $j <= $r; $j += $n) {
+					$url = str_replace(
+						'${kmq_y}',
+						$kmq_y + $i,
+						str_replace(
+							'${kmq_x}',
+							$kmq_x + $j,
+							str_replace(
+								'${URL}',
+								$download_url,
+								$url_pattern
+							)
+						)
+					);
+					// echo '<br>put: ' . $url;
+					file_put_contents($urls_file, "\n" . $url, FILE_APPEND);
+					$GUI->new_urls[] = $url;
+				}
+			}
+			// urls in file schreiben
+			$cmd = "sort " . $urls_file . " | uniq > " . $urls_file . "_sorted; mv " . $urls_file . " " . $urls_file . "_backup; cp " . $urls_file . "_sorted " . $urls_file;
+			// echo '<br>' . $cmd;
+			exec($cmd, $output, $result);
+
+			if (count($output) > 0) {
+				echo '<br>output: ' . implode('<br>', $output);
+			}
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'View kann geladen werden.'
+		);
+	};
 
 	/**
 	 * Die Bestellung zum Packen eines Paketes wird beendet.
@@ -164,7 +243,7 @@
 				);
 			}
 
-			$package->update_attr(array('pack_status_id = 3'));
+			$package->update_attr(array('pack_status_id = 3')); // in Arbeit
 			$GUI->formvars['selected_layer_id'] = $package->get('layer_id');
 			$GUI->formvars['epsg'] = $package->layer->get('epsg_code');
 			$export_path = $package->get_export_path();
@@ -192,8 +271,10 @@
 				include_once(CLASSPATH . 'data_import_export.php');
 				$data_import_export = new data_import_export();
 				$result = $data_import_export->export_exportieren($GUI->formvars, $GUI->Stelle, $GUI->user , $export_path, $exportfilename, true);
-				if (strtolower(pathinfo($result['success'])['extension']) !== 'zip') {
-					$data_import_export->zip_export_path($export_path);
+				if ($result['success']) {
+					if (strtolower(pathinfo($result['exportfile'])['extension']) !== 'zip') {
+						$data_import_export->zip_export_path($export_path);
+					}
 				}
 				else {
 					// Fehler loggen
@@ -210,17 +291,44 @@
 				$data_import_export->zip_export_path($export_path);
 			}
 
-			// Metadatendatei erzeugen und in ZIP packen
-			// von Ressource des Datenpaketes
 			$export_file = $package->get_export_file();
-			// Put the metadata document into the $xport_file.zip
+
+			// Metadatendatei der Ressouce erzeugen
+			$GUI->formvars['aktivesLayout'] = METADATA_PRINT_LAYOUT_ID;
+			$GUI->formvars['chosen_layer_id'] = METADATA_RESSOURCES_LAYER_ID;
+			$GUI->formvars['oid'] = $package->get('ressource_id');
+			$GUI->formvars['archivieren'] = 1;
+			$result = $GUI->generischer_sachdaten_druck_createPDF(
+				NULL, // pdfobject
+				NULL, // offsetx
+				NULL, // offsety
+				true, // output
+				false // append
+			);
+			$GUI->outputfile = basename($result['pdf_file']);
+			$GUI->pdf_archivieren(METADATA_RESSOURCES_LAYER_ID, $package->get('ressource_id'), $result['pdf_file']);
+
+			// Metadatendatei der Ressource in ZIP packen
 			$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf';
 			exec($command);
+
 			// An Ressourcen hängende Dokumente in ZIP packen
 			$ressource = Ressource::find_by_id($GUI, 'id', $package->get('ressource_id'));
-			#echo '<br>ressources documents: ' . print_r($ressource->get('documents'), true);
+			$ressource->append_docs($export_file);
 
-			// Metadaten und Dokumente von an Ressourcen hängenden Quellen
+			// Metadaten von Quellressourcen in ZIP packen
+			$sources = $ressource->get_sources();
+			foreach($sources AS $source) {
+				$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $source->get_id() . '.pdf';
+				exec($command);
+			}
+
+			// Metadaten von Zielressourcen in ZIP packen
+			$targets = $ressource->get_targets();
+			foreach($targets AS $target) {
+				$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $target->get_id() . '.pdf';
+				exec($command);
+			}
 
 			// Wenn ZIP-Datei existiert und etwas drin ist, chgrp www-data, chmod g+w und Verzeichnis löschen. (Aufräumen)
 			$package->delete_export_path();
@@ -238,6 +346,10 @@
 			);
 		}
 		catch (Exception $e) {
+			$package->log($e->message);
+			// Fehlerstatus setzen
+			$package->update_attr(array('pack_status_id = -1'));
+
 			return array(
 				'success' => false,
 				'msg' => 'Fehler: ' . print_r($e, true)
@@ -382,12 +494,15 @@
 				);
 			}
 
-			if (!$GUI->formvars['force'] != '' AND $package->get('pack_status_id') == 3) {
-				return array(
-					'success' => true,
-					'msg' => 'Der Auftrag wird abgebrochen, weil ein anderer Prozess gerade das Paket befüllt.'
-				);
-			}
+			// Das löschen von Paketen die in Arbeit sind wird auch unterstützt, weil wir davon ausgehen,
+			// das der Status in Arbeit nach einem Fehler stehen geblieben ist und solche Pakete auch zurück
+			// gesetzt werden können müssen.
+			// if (!$GUI->formvars['force'] != '' AND $package->get('pack_status_id') == 3) {
+			// 	return array(
+			// 		'success' => true,
+			// 		'msg' => 'Der Auftrag wird abgebrochen, weil ein anderer Prozess gerade das Paket befüllt.'
+			// 	);
+			// }
 
 			if (!$package->layer) {
 				return array(
@@ -664,17 +779,14 @@
 		foreach ($all_packages AS $package) {
 			$pfad = replace_params_rolle($package->layer->get('pfad'));
 			$where = "";
-			if ($package->layer->get('Datentyp') != 5) {
-				$where = "
-					WHERE
-						ST_MakeEnvelope(
-							" . $GUI->Stelle->MaxGeorefExt->minx . ",
-							" . $GUI->Stelle->MaxGeorefExt->miny . ",
-							" . $GUI->Stelle->MaxGeorefExt->maxx . ",
-							" . $GUI->Stelle->MaxGeorefExt->maxy . ",
-							25832
-						) && query." . $package->layer->get('geom_column') . "
-				";
+			if (in_array($package->layer->get('Datentyp'), array(0, 1, 2, 7, 8))) {
+				// Nur für Vektorlayer
+				$where = "WHERE " . $GUI->pgdatabase->get_extent_filter(
+					$GUI->Stelle->MaxGeorefExt,
+					$GUI->user->rolle->epsg_code,
+					$package->layer->get('geom_column'),
+					$package->layer->get('epsg_code')
+				);
 			}
 			$sql = "
 				SET search_path = " . $package->layer->get('schema') . ", public;
@@ -683,8 +795,8 @@
 				FROM
 					(
 						" . $pfad . "
-					) AS query" .
-				$where . "
+					) AS query
+				" . $where . "
 			";
 			// echo '<br>SQL zum Filtern der Daten ' . $package->get('bezeichnung') . ' im Datenpaket: ' . $sql;
 			$query = pg_query($sql);
@@ -694,14 +806,15 @@
 				$package->num_feature = $num_feature;
 				$GUI->metadata_data_packages[] = $package;
 			}
-
+			// else {
+			// 	echo '<br>Ressource: ' . $package->get('ressource_id') . ' Paket: ' . $package->get('id') . ' ' . $package->get('bezeichnung') . ' Layer-ID: ' . $package->get('layer_id') . ' Datentyp: ' . $package->layer->get('Datentyp') . ' geom_column: ' . $package->layer->get('geom_column') . ' hat keine Daten in dieser Stelle Abfrage:<br><textarea cols="60" rows="10">' . $sql . '</textarea>';
+			// }
 		}
 		$GUI->output();
 	};
 
 	$GUI->metadata_show_ressources_status = function($ressource_id) use ($GUI) {
 		$GUI->metadata_ressources = Ressource::find($GUI, "von_eneka OR use_for_datapackage", "auto_update, status_id");
-		$GUI->metadata_outdated_ressources = Ressource::find_outdated($GUI);
 		$command = "ps aux | grep -i 'ressources_cron.php' | grep -v grep";
 		$output = '';
 		$result_code = '';

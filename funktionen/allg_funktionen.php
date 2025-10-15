@@ -5,12 +5,16 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 if (MAPSERVERVERSION < 800) {
-	function msGetErrorObj(){
-		return ms_GetErrorObj();
+	if (!function_exists('msGetErrorObj')) {
+		function msGetErrorObj() {
+			return ms_GetErrorObj();
+		}
 	}
 
-	function msResetErrorList(){
-		return ms_ResetErrorList();
+	if (!function_exists('msResetErrorList')) {
+		function msResetErrorList(){
+			return ms_ResetErrorList();
+		}
 	}
 }
 
@@ -83,7 +87,7 @@ function urlencode2($str){
 /**
  * die Konstante URL kann durch diese Funktion ersetzt werden
  */
-function get_url(){
+function get_url() {
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
@@ -217,6 +221,47 @@ function url2filepath($url, $doc_path, $doc_url) {
 	}
 	$url_parts = explode($doc_url, $url);
 	return $doc_path . $url_parts[1];
+}
+
+/**
+ * Function return information about path to file named in $document_attribute_value.
+ * @param String $document_attribute_value The value of document attribute in the form /var/www/data/upload/test_125487.txt&original_name=test.txt
+ * @return Array  The result array contains dirname, basename, extension, filename and the original_basename, original_filename and original_extension.
+ */
+function document_info($document_attribute_value, $flag = NULL) {
+	$value_parts = explode('&original_name=', $document_attribute_value);
+	if ($flag === null) {
+		$document_info = pathinfo($value_parts[0]);
+		if (count($value_parts) > 1) {
+			$original_info = pathinfo($value_parts[1]);
+			$document_info['original_basename'] = $original_info['basename'];
+			$document_info['original_filename'] = $original_info['filename'];
+			$document_info['original_extension'] = $original_info['extension'];
+		}
+		else {
+			$document_info['original_basename'] = '';
+			$document_info['original_filename'] = '';
+			$document_info['original_extension'] = '';
+		}
+		return $document_info;
+	}
+	if (strpos($flag, 'original_') === 0) {
+		$path = (count($value_parts) > 1 ? $value_parts[1] : '');
+		$flag = str_replace('original_', '', $flag);
+	}
+	else {
+		$path = $value_parts[0];
+	}
+
+	switch ($flag) {
+		case 'path' : $document_info = $path; break;
+		case 'dirname' : $document_info =   pathinfo($path, PATHINFO_DIRNAME); break;
+		case 'basename' : $document_info =  pathinfo($path, PATHINFO_BASENAME); break;
+		case 'filename' : $document_info =  pathinfo($path, PATHINFO_FILENAME); break;
+		case 'extension' : $document_info = pathinfo($path, PATHINFO_EXTENSION); break;
+		default : $document_info = $path;
+	}
+	return $document_info;
 }
 
 function exif_identify_data($file) {
@@ -454,8 +499,8 @@ function ie_check(){
 	}
 }
 
-if(!function_exists('mb_strrpos')){		# Workaround, falls es die Funktion nicht gibt
-	function mb_strrpos($str, $search, $offset = 0, $encoding){
+if (!function_exists('mb_strrpos')) {		# Workaround, falls es die Funktion nicht gibt
+	function mb_strrpos($str, $search, $offset = 0, $encoding = 'UTF-8') {
 		return strrpos($str, $search, $offset);
 	}
 }
@@ -950,34 +995,37 @@ function password_erstellungs_hinweis($language) {
 * Vielen Dank an den Autor.
 *
 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-*
-* @return string ein achtstelliges Password
+*	@param Integer $passwordLength Die Länge des zu erzeugenden Passworts.
+* @param String $sonderzeichen Die Sonderzeichen, die im Passwort vorkommen dürfen. 
+* @return string ein Password der Länge $passwordLength, mindestens 8, maximal 24 Zeichen.
 *
 * @see    isPasswordValide(), checkPasswordAge, $GUI, $user, $stelle
 */
-function createRandomPassword($passwordLength) {
-	if ($passwordLength<8)
-		$passwordLength=8;
-	if ($passwordLength>16)
-	  $passwordLength=16;
-  $chars[0]= "abcdefghijkmnopqrstuvwxyz";
-  $chars[1]= "ABCDEFGHIJKMNOPQRSTUVWXYZ";
-  $chars[2]= "0234567890234567890234567";
-  $chars[3]= "()_+*-.:,;!§$%&=#()_+*-.:";
-  $password='';
-  $charListNumbers=array();
-  $charListNumber=rand(0,3);
-  $loops=0;
+function createRandomPassword($passwordLength, $sonderzeichen = "()_+*-.:,;!§$%&=#()_+*-.:") {
+	if ($passwordLength < 8) {
+		$passwordLength = 8;
+	}
+	if ($passwordLength > 24) {
+	  $passwordLength = 24;
+	}
+  $chars[0] = "abcdefghijkmnopqrstuvwxyz";
+  $chars[1] = "ABCDEFGHIJKMNOPQRSTUVWXYZ";
+  $chars[2] = "0234567890234567890234567";
+  $chars[3] = $sonderzeichen;
+  $password = '';
+  $charListNumbers = array();
+  $charListNumber = rand(0,3);
+  $loops = 0;
   while (strlen($password)<$passwordLength AND $loops++ < 100) {
   	while (count($charListNumbers)<4) {
   		if (!in_array($charListNumber,$charListNumbers)) { # wenn die charListNumber noch nicht in der Liste ist
-  			$charListNumbers[]=$charListNumber; # charListNumber in die Liste aufnehmen
-  			$char=substr($chars[$charListNumber],rand(0,24),1); # Character aus der Characterliste mit charListNumber entnehmen
+  			$charListNumbers[] = $charListNumber; # charListNumber in die Liste aufnehmen
+  			$char = substr($chars[$charListNumber], rand(0, 24), 1); # Character aus der Characterliste mit charListNumber entnehmen
   			#if ($char==' ') $char='_'; # darf nur auf keinen Fall ein Leerzeichen beinhalten
-  			$password.=$char;
+  			$password .= $char;
   			#echo '<br>'.strlen($password).' '.$password;
   		}
-  		$charListNumber=rand(0,3);
+  		$charListNumber = rand(0,3);
   	}
   	$charListNumbers = array();
   }
@@ -1054,6 +1102,16 @@ function isTag($word) {
 		}
 	}
 	return false;
+}
+
+/**
+ * Function return the content of $text that is between the first occurence of tag
+ * and its first ending tag. If tag not exists it returns an empty string.
+ */
+function get_tag_content($text, $tag) {
+	$start_parts = explode('<' . $tag . '>', $text);
+	$end_parts = explode('</' . $tag . '>', $start_parts[1]);
+	return $end_parts[0];
 }
 
 function drawColorBox($color,$outlinecolor) {
@@ -1140,9 +1198,10 @@ if (!function_exists('str_split')) {
     }
 }
 
-function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite=true){
+function unzip($src_file, $dest_dir = false, $create_zip_name_dir = true, $overwrite = true){
 	# 1. Methode über unzip (nur Linux) rausgenommen, da Umlaute kaputt gehen
 	$entries = NULL;
+	$success = false;
 	if ($dest_dir === false) {
 		$dest_dir = dirname($src_file);
 	}
@@ -1151,10 +1210,13 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 		for ($i = 0; $i < $zip->numFiles; $i++) {
 			$entries[] = $zip->getNameIndex($i);
 		}
-		$zip->extractTo($dest_dir); 
+		$success = $zip->extractTo($dest_dir); 
 		$zip->close(); 
 	}
-	return $entries;
+	return array(
+		'success' => $success,
+		'files' => $entries
+	);
 }
 
 /**
@@ -1726,7 +1788,8 @@ function emailcheck($email) {
     $Meldung.='<br>E-Mail enthält kein @.';
   }
 
-  $postfix=strlen(strrchr($email,"."))-1;
+  $postfix = strlen(strrchr($email, ".")) - 1;
+
   if (!($postfix > 1 AND $postfix < 8)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
@@ -2019,7 +2082,7 @@ function replace_params($str, $params) {
 function replace_params_link($str, $params, $layer_id) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerParamsForm(' . $layer_id .  ')">' . $value . '</a>', $str);
 		}
 	}
 	return $str;
@@ -2048,7 +2111,7 @@ function replace_params_link($str, $params, $layer_id) {
 * }
 * mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang);
 **/
-function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port) {
+function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
 	$success = false;
 	switch ($mode) {
 		case 'sendEmail async': {
@@ -2063,6 +2126,40 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 				$file,
 				json_encode($str)
 			);
+		} break;
+		case 'PHPMailer' : {
+			require WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/Exception.php';
+			require WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php';
+			require WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/SMTP.php'; // Yes, this exists
+			$mail = new PHPMailer();
+			// $mail->SMTPDebug = SMTP::DEBUG_CONNECTION;
+			$mail->isSMTP();
+			$mail->Host = $smtp_server . ':' . $smtp_port;
+			$mail->SMTPAuth = true;
+			$mail->Username = MAILSMTPUSER;
+			$mail->Password = MAILSMTPPASSWORD;
+			$mail->SMTPSecure = 'tls';
+			$mail->From = $from_email;
+			$mail->FromName = $from_name;
+			$mail->addAddress($to_email, $to_name);
+			$mail->addReplyTo($reply_email, $reply_name);
+			if ($cc_email) {
+				$mail->addCC($cc_email);
+			}
+			if ($bcc_email) {
+				$mail->addBCC($bcc_email);
+			}
+			// $mail->WordWrap = 50;
+			// $mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+			// $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+			$mail->isHTML(false);
+			$mail->CharSet = "UTF-8";
+			$mail->Subject = $subject;
+			$mail->Body    = $message;
+			// $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+			$result = $mail->send();
+
+			return $result;
 		} break;
 		default : {
 			$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
@@ -2109,16 +2206,35 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 }
 
 /**
+ * Function implode $list with $delimiter but with $last_delimiter for the last conjunction.
+ * If $list is a String it will be exploded with $delimiter first.
+ * @param Array|String $list The list of values to implode.
+ * @param String $delimiter
+ * @param String $last_delimiter
+ * @return String The imploded string
+ */
+function natural_join($list, $delimiter =', ', $last_delimiter = ' und ') {
+	if (gettype($list) === 'string') {
+		$list = explode($delimiter, $list);
+	}
+  $last = array_pop($list);
+  if ($list) {
+    return implode($delimiter, $list) . $last_delimiter . $last;
+  }
+  return $last;
+}
+
+/**
 * function replaced square brackets at the beginning and the end of the string
 * and return the elements of the string as array separated by the delimmiter.
 * The elements of the string will be replaced by slashes and timed from white spaces and ".
 */
-function arrStrToArr($str, $delimiter) {
+function arrStrToArr($str, $delimiter, $brackets = '[]') {
 #	if(is_string($delimiter) and in_array())
 #	echo gettype($delimiter);
-	$arr = explode($delimiter, trim($str, '[]'));
+	$arr = explode($delimiter, trim($str, $brackets));
 	foreach ($arr as &$value) {
-		$value = trim(stripslashes($value), '"[]"');
+		$value = trim(stripslashes($value), '"' . $brackets . '"');
 	}
 	return $arr;
 }
@@ -2414,7 +2530,7 @@ function str_replace_last($search , $replace, $str) {
 /**
  * Liefert den Namen der Thumb-Datei vom Originalnamen in $path
  * @param String $path Name of original file.
- * @return String Name of thump file.
+ * @return String Name of thumb file.
  */
 function get_thumb_from_name($path) {
 	return before_last($path, '.') . '_thumb.jpg';
@@ -2448,8 +2564,8 @@ function detect_delimiter($line) {
 
 /**
 * Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
-* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
-* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
+* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumbnails
+* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thumb.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
 *
 * @param string $txt Der Text von dem der Teilstring extrahiert werden soll.
 *
@@ -2641,7 +2757,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 		case 'int' :
 		case 'int4' :
 		case 'oid' :
-		case 'boolean':
+		case 'boolean' :
 		case 'int8' : {
 			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;
@@ -2786,10 +2902,10 @@ function getAllFiles($dir) {
 			$files = array_merge($files, getAllFiles($item));
 		}
 		else {
+			// $files[pathinfo($item, PATHINFO_EXTENSION)][] = $item;
 			$files[] = $item;
 		}
 	}
-
 	return $files;
 }
 

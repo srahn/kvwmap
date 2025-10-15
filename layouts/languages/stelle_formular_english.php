@@ -22,10 +22,14 @@
   $strWmsAccessConstraintsHint = 'Beschreibung der Bedingungen unter denen der Zugang zum Dienst gewährt wird. Gibt es keine Beschränkungen hier "keine" eintragen.';
   $strOwsFees = 'Fees';
 	$strOwsFeesHint = 'Beschreibung des Kostenmodells für die Nutzung des Dienstes. Ist er Kostenfrei hier "keine" eintragen.';
+	$strOwsInspireidentifiziert = 'inspireidentifiziert';
+	$strOwsInspireidentifiziertHint = 'Falls Sie die Daten anderweitig bereits im INSPIRE-Datenmodell bereitstellen, muss diese Option ausgeschaltet sein.';
   $strOwsSrs = 'Coordinate Reference System';
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'Organization';
-	$strOwsContactOrganizationHint = 'Name of responsible organization';
+  $strOwsContactOrganizationHint = 'Name of responsible organization';
+  $strOwsContactUrl = 'URL';
+  $strOwsContactUrlHint = 'Home page url with further informationen about the contact or the geodata.';
   $strOwsContactEmailAddress = 'E-Mail Address';
   $strOwsContactEmailAddressHint = '';
   $strOwsContactPerson = 'Responsible Person';
@@ -63,5 +67,5 @@
 	$strShowSharedLayersText = 'Show shared layer in this Stelle.';
 	$strShowSharedLayersDescription = 'When this permission is granted, all layers from users with the permission to share Rollenlayer will be assigned to this Stelle and shown to all Users of this Stelle. These Layers will be marked as Shared layers in the legend and it is shown who has shared the layer for other in the options form.';
   $strResetPasswordText = "Reset password text";
-  $strInvitationText = "Invitation text";
+  $strInvitationText = 'You have been invited to participate in the application "' . TITLE . '"';
 ?>

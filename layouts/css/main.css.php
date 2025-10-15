@@ -470,11 +470,11 @@ span[data-tooltip]:hover::after {
 .custom-select {
 	background-color: #e9e9ed;
   position: relative;
-  /*width: 250px;*/
+  width: 200px;
   border: 1px solid #888;
 	border-radius: 2px;
   align-items: center;
-	margin: 0 3px 3px 0;
+	margin: 0 0 3px 0;
 }
 
 .custom-select .dropdown {
@@ -491,10 +491,10 @@ span[data-tooltip]:hover::after {
   top: 1px;
   right: 0;
   left: 0;
-	max-height: 400px;
+	max-height: 350px;
 	overflow-y: auto;
 	overflow-x: hidden;
-	margin: 0;
+	margin: 0 0 0 -1px;
 }
 
 .custom-select .dropdown.upward {
@@ -1670,6 +1670,11 @@ a.menuered:hover {
 	line-height: 17px;
 }
 
+.legend-group-checkbox {
+	vertical-align: text-top;
+  margin: 3px 0px 0px -2px;
+}
+
 .legend_layer_hidden{
 
 	font-size: <? echo $font_size_factor * 15; ?>px;
@@ -1754,10 +1759,18 @@ span.black {
 }
 
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
+
+.td_preview_image{
+	padding-top: 125px;
+}
+
 a .preview_image{
 	border:1px solid black;
 	max-width: 125px;
 	max-height: 125px;
+	position: absolute;
+	top: 0px;
+	right: 0px;
 	transition: all 0.25s ease;
 }
 
@@ -1765,7 +1778,9 @@ a:hover .preview_image{
 	max-width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
 	max-height: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
 	transition: all 0.25s ease;
-	transition-delay: 0.5s;
+	transition-delay: 0.2s;
+	right: -70px;
+	z-index: 9999999999;
 }
 
 .preview_doc{}
@@ -1836,6 +1851,8 @@ a:hover .preview_image{
 	border:1px solid #999;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
+	margin: 7px 5px 11px 0;
+	width: fit-content;
 }
 
 #nds_edit .datensatz {
@@ -1930,7 +1947,7 @@ a:hover .preview_image{
 
 #contentdiv {
 	background: url(<? echo BG_IMAGE; ?>);
-	width: 100%;
+	width: fit-content;
 	position:relative;
 }
 
@@ -1971,8 +1988,30 @@ thead.gle th {
  text-align:left;
 }
 
+.gle-view {
+	display: flex;
+	position: sticky;
+  right: 18px;
+  height: 18px;
+	clip-path: polygon(100% 0px, 100% 18px, calc(100% - 18px) 18px, calc(100% - 18px) 0px);
+	transition: clip-path 0.2s ease;
+}
+
+.gle-view:hover {
+	clip-path: polygon(100% 0px, 100% 18px, 0px 18px, 0px 0px);
+}
+
+.gle-view-button.active {
+	order: 2;
+}
+
+#column_options_button{
+	cursor: pointer;
+  margin: 1px 8px 0 8px;
+}
+
 #gle_column_options_div {
-	position: absolute;
+	position: fixed;
 	right: 2px;
 	margin-right: 35px;
 	text-align: left;
@@ -2417,7 +2456,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .rollenwahl-option-header {
-	width: 270px;
+	<!-- width: 270px; -->
 	padding : 4px;
 }
 
@@ -2542,8 +2581,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .layerOptions, #legendOptions{
-	min-width: 220px;
-	border: 1px solid #cccccc;
+	min-width: 200px;
 	background: #EDEFEF;
 	padding:0px;
 	position:absolute;
@@ -2553,7 +2591,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .layerOptions{
 	top:300px;
-	right:210px;
+	right:240px;
 }
 
 .layerOptionsIcon{
@@ -2923,6 +2961,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nds_submit span {
 	margin: auto;
 	margin-left: 3px;
+}
+
+#dataset_operations {
+	text-align: left;
+  padding: 2;
 }
 
 #nds_edit #dataset_operations {

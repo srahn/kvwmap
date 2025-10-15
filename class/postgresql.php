@@ -800,7 +800,35 @@ FROM
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];    
   }
-  
+
+	/**
+	 * Function return the WHERE Expression-String to filter by $extent and if $null_geom true not the NULL-Geometries.
+	 * @param rectObj $extent A MapServer Rect-Object with the extent used to create the envelope.
+	 * @param Integer $extent_epsg The EPSG-Code of the extent in Rect-Object $extent.
+	 * @param String $geom_column The name of the geometry column used for the filter.
+	 * @param Integer $geom_column_epsg The EPSG-Code of the geometries in the geometry column
+	 * @param String $geom_column_tablealias An optional alias name of the table that has the geometry column.
+	 * @param Boolean $null_geom Optional parameter to append OR $geom_column IS NULL, if $null_geom is true, to the expression string.
+	 * @return String The resulting Expression-String enclosed in round brackets ().
+	 */
+	function get_extent_filter($extent, $extent_epsg, $geom_column, $geom_column_epsg, $geom_column_table_alias = NULL, $null_geom = true) {
+		$sql_envelope = "ST_MakeEnvelope(
+			" . $extent->minx . ", " . $extent->miny . ", " . $extent->maxx . ", " . $extent->maxy . ",
+			" . $extent_epsg . "
+		)";
+		if ($extent_epsg != $geom_column_epsg) {
+			$sql_envelope = "ST_Transform(
+				" . $sql_envelope . ",
+				" . $geom_column_epsg . "
+			)";
+		}
+		$extent_filter = $sql_envelope . " && " . ($geom_column_table_alias ? $geom_column_table_alias . "." : "") . $geom_column;
+		$null_filter = ($null_geom ? " OR " . $geom_column . " IS NULL" : "");
+		$sql = "(" . $extent_filter . $null_filter . ")";
+		// echo '<br>SQL-Extent-Filter: ' . $sql;
+		return $sql;
+	}
+
 	function pg_field_schema($table_oid){
 		if($table_oid != ''){
 			$sql = "select nspname as schema from pg_class c, pg_namespace ns
@@ -875,7 +903,7 @@ FROM
 			if ($pseudo_realnames) {
 				include_once(CLASSPATH . 'sql.php');
 				$sql_object = new SQL($select);
-				$select_attr = $sql_object->get_attributes();
+				$select_attr = $sql_object->get_attributes(false);
 			}
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
@@ -1092,7 +1120,11 @@ FROM
 				}
 				if ($attr_info['decimal_length'] == '') {
 					$attr_info['decimal_length'] = 'NULL';
-				}
+				}/*
+				if (strpos($attr_info['type_name'], 'xp_spezexternereferenzauslegung') !== false) {
+					$attr_info['type_name'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type_name']);
+					$attr_info['type'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type']);
+				}*/
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
@@ -1417,7 +1449,7 @@ FROM
     }		
 		if(!$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'gem'));
     $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>a')::integer,f.flurstueckskennzeichen";
-		#echo $sql;
+		#echo '<br>getBuchungenFromGrundbuch: ' . $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     while($rs=pg_fetch_assoc($ret[1])) {
@@ -1985,7 +2017,7 @@ FROM
     }
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
     $sql.= " ORDER BY order1, order2;";
-    #echo $sql.'<br><br>';
+    #echo 'getEigentuemerliste: ' . $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0] OR pg_num_rows($ret[1])==0) { return; }
 		$wurzel = new eigentuemer($Grundbuch,NULL, $this);

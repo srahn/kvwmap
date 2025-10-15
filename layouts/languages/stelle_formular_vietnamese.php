@@ -22,10 +22,14 @@
   $strWmsAccessConstraintsHint = 'Beschreibung der Bedingungen unter denen der Zugang zum Dienst gewährt wird. Gibt es keine Beschränkungen hier "keine" eintragen.';
   $strOwsFees = 'Phí OWS';
 	$strOwsFeesHint = 'Beschreibung des Kostenmodells für die Nutzung des Dienstes. Ist er Kostenfrei hier "keine" eintragen.';
-  $strOwsSrs = 'Coordinate Reference System';
+	$strOwsInspireidentifiziert = 'inspireidentifiziert';
+	$strOwsInspireidentifiziertHint = 'Falls Sie die Daten anderweitig bereits im INSPIRE-Datenmodell bereitstellen, muss diese Option ausgeschaltet sein.';
+	$strOwsSrs = 'Coordinate Reference System';
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'Tên cơ quan liên hệ OWS';
 	$strOwsContactOrganizationHint = 'Name of responsible organization';
+  $strOwsContactUrl = 'URL';
+  $strOwsContactUrlHint = 'Home page url with further informationen about the contact or the geodata.';
   $strOwsContactEmailAddress = '�?ịa chỉ email liên hệ OWS';
   $strOwsContactEmailAddressHint = '';
   $strOwsContactPerson = 'Ngư�?i liên hệ OWS';

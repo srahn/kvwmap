@@ -23,7 +23,7 @@ class Gml_extractor {
 		$result = $this->get_source_srid();
 		if (! $result['success']) {
 			return array(
-				'succes' => false,
+				'success' => false,
 				'msg' => 'Import der GML in die Datenbank mit ogr2ogr_gmlas fehlgeschlagen Fehler: ' . $result['msg']
 			);
 		}
@@ -55,6 +55,11 @@ class Gml_extractor {
 				$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
 			}
 		}
+		
+		if(XPLANKONVERTER_AUTOCOMPLETE_FP_BEBAUUNGSFLAECHE) {
+			$this->autocomplete_fp_bebauungsflaeche_attributes($this->gmlas_schema);
+		}
+		
 		return array(
 			'success' => true,
 			'msg' => 'ogr2ogr_gmlas output: ' . $result['msg'],
@@ -302,7 +307,7 @@ class Gml_extractor {
 		$epsg = $this->input_epsg;
 		$lines = file($this->gml_location);
 		foreach ($lines as $lineNumber => $line) {
-			if(strpos($line, 'Envelope') === false) {
+			if (strpos($line, 'Envelope') === false) {
 				continue;
 			}
 			# needs to check for both single and double quotes as both are permitted by XML spec
@@ -312,16 +317,16 @@ class Gml_extractor {
 			if (preg_match('/srsName=\'([^"]+)\'/', $line, $matched_epsg_str)) {
 				break; #found it
 			}
-			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
+			// echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>matched_epsg_str: ' . print_r($matched_epsg_str, true);
 		}
 
-		# echo $matched_epsg_str[1] . '<br>';
+		// echo $matched_epsg_str[1] . '<br>';
 
 		if (isset($matched_epsg_str[1])) {
 			// e.g. for EPSG:25832
 			$epsg_elements_array = explode(':',$matched_epsg_str[1]);
 			$matched_epsg = array_values(array_slice($epsg_elements_array, -1))[0];
-			if(is_numeric($matched_epsg)) {
+			if (is_numeric($matched_epsg)) {
 				# TODO should still be checked if it is a valid EPSG within the konverter or POSTGIS limit, e.g. through a check against the POSTGIS EPSG info
 				$epsg = $matched_epsg;
 			}
@@ -375,7 +380,7 @@ class Gml_extractor {
 				# to also match formatted multiline XPlanAuszug
 				$xml_bracket_is_opened = true;
 				if (strpos($line, '>') !== false) {
-					echo '<br>Enthält > setze xml bracket is open wieder auf false';
+					//echo '<br>Enthält > setze xml bracket is open wieder auf false';
 					$xml_bracket_is_opened = false;
 				}
 				$pattern = '/xmlns:xplan=["\'].*?\/(\d+)[\/\.](\d+)/';
@@ -1062,7 +1067,7 @@ class Gml_extractor {
 			};
 		}
 		// string needs to be lowered both to simplify cutting #gml_ in all forms and
-		// because uuid (e.g. in gml_id of the associated plan) is always lowercase when cast to text
+		// because uuid (e.g. in gml_id of the associated plan) is always lowercase when cast to text in postgres
 		// will take first plan encountered in gmlas-schema if bereich id is not set (or could not be read by ogr)
 		$sql .= "
 				CASE
@@ -1348,7 +1353,7 @@ class Gml_extractor {
 	function build_basic_tables() {
 		# Prepare schema 
 		if ($this->pgdatabase->schema_exists($this->gmlas_schema)) {
-			$this->pgdatabase->drop_schema($this->gmlas_schema);
+			$this->pgdatabase->drop_schema($this->gmlas_schema, TRUE);
 		}
 		$this->pgdatabase->create_schema($this->gmlas_schema);
 
@@ -2334,39 +2339,41 @@ class Gml_extractor {
 	/*
 	 * Finds and inserts all regeln from a specific konvertierung into the xplankonverter.regeln table
 	 */
-	function insert_all_regeln_into_db($konvertierung_id, $stelle_id) {
+	function insert_all_regeln_into_db($konvertierung_id, $stelle_id, $simplify_fachdaten_geom = null) {
 		$geometry_type = ''; # Default
 		$bereiche_ids = $this->get_all_bereiche_ids_of_konvertierung($konvertierung_id);
 		# TODO Check for each regel if bereich = bereich, and enter it accordingly in rule
 		#$bereich_gml_id = 'd48608a2-6f3c-11e8-8ca0-1f2b7a47118e'; #Placeholder
-		// echo '<br>Loop over bereiche_ids: ' . print_r($bereiche_ids, true);
+		$log = '<br>Loop over bereiche_ids: ' . print_r($bereiche_ids, true);
 
 		$gmlas_feature_tables = $this->get_gmlas_feature_tables_for_regeln($this->gmlas_schema);
-		echo '<br>classes: ' . print_r($gmlas_feature_tables, true);
+		$log .= '<br>classes: ' . print_r($gmlas_feature_tables, true);
 		# Loop over relevant bereiche -> gmlas_feature_tables -> geom
 		$bereich_index = 0;
 		foreach ($bereiche_ids as $bereich_gml_id) {
-			echo '<br>bereich_gml_id: ' . $bereich_gml_id;
+			$log .= '<br>bereich_gml_id: -' . $bereich_gml_id . '-';
 			# index is used for modifying regel by name
 			$bereich_index++;
 			foreach ($gmlas_feature_tables as $gmlas_feature_table) {
-				echo '<br>handle gmlas_feature_table: ' . $gmlas_feature_table;
+				$log .= '<br>handle gmlas_feature_table: ' . $gmlas_feature_table;
 				if ($this->check_if_table_has_entries_for_bereich($this->gmlas_schema, $gmlas_feature_table, $bereich_gml_id)) {
 					# Loop over all geom-types to get a rule for each
 					# use only ST_Point, ST_MultiPoint, ST_LineString, ST_MultiLineString, ST_Polygon and ST_MultiPolygon
 					$geometry_types = $this->get_geometry_types($gmlas_feature_table, $this->gmlas_schema);
-					// echo '<br>Geometrie-Types: ' . print_r($geometry_types, true);
+					$log .= '<br>Geometrie-Types: ' . print_r($geometry_types, true);
 					foreach ($geometry_types as $geometry_type) {
-						echo '<br>handle geometry_type: ' . $geometry_type;
-						$sql_regel = $this->get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_gml_id, $geometry_type);
-						$sql_regel = str_replace("'", "''", $sql_regel); # Replaces all single commas with 2x single commas to escape them in SQL
+						$log .= '<br>handle geometry_type: ' . $geometry_type;
+						$result = $this->get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_gml_id, $geometry_type, $simplify_fachdaten_geom);
+						$log .= $result['log'];
+						$sql_regel = str_replace("'", "''", $result['sql']); # Replaces all single commas with 2x single commas to escape them in SQL
 						# TODO: pk Hier vorher existierende Regeln der konvertierung des Bereiches löschen damit sie nicht mehrfach drin sind.
-						// echo '<br>gmlas_to_geml_regel: ' . $sql_regel;
+						$log .= '<br>gmlas_to_geml_regel: ' . $sql_regel;
 						$this->insert_regel_into_db($gmlas_feature_table, $sql_regel, $geometry_type, $konvertierung_id, $stelle_id, $bereich_gml_id, $bereich_index);
 					}
 				}
 			}
 		}
+		return $log;
 	}
 
 	/*
@@ -2396,11 +2403,13 @@ class Gml_extractor {
 	 * @param string $geom_type
 	 * @return string SQL der Regel die auf der gmlas_feature_table basiert
 	 */
-	function get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_id, $geom_type) {
-		echo '<p>Erzeuge Regel SQL für gmlas feature table: ' . $gmlas_feature_table . ' in Bereich: ' . $bereich_id . ' für Geometrietyp: '. $geom_type;
+	function get_gmlas_to_gml_regel($gmlas_feature_table, $bereich_id, $geom_type,$simplify_fachdaten_geom = null) {
+		#echo '<p>Erzeuge Regel SQL für gmlas feature table: ' . $gmlas_feature_table . ' in Bereich: ' . $bereich_id . ' für Geometrietyp: '. $geom_type, $simplify_fachdaten_geom = null;
+		$log = '';
+		$simplify_fachdaten_geom = floatval($simplify_fachdaten_geom);
 		$gml_class = $gmlas_feature_table; # Is this always the case?
 		$gmlas_attributes = $this->get_gmlas_attributes_with_content($this->gmlas_schema, $gmlas_feature_table);
-		echo '<br>gmlas_attribute with content: <pre>' . print_r($gmlas_attributes, true) . '</pre>';
+		$log .= '<br>gmlas_attribute with content: <pre>' . print_r($gmlas_attributes, true) . '</pre>';
 		$mappings = $this->get_gmlas_to_gml_mappings($gmlas_feature_table);
 
 		$select_sql = [];
@@ -2408,17 +2417,17 @@ class Gml_extractor {
 
 		# Loops through all gmlas_attributes, comparing them with the original column (and table)
 		# If matches are found, the target attributes are taken and the associated regel is added to the SQL
-		echo '<br>Loop through gmlas_attributes:';
+		$log .= '<br>Loop through gmlas_attributes:';
 		foreach ($gmlas_attributes AS $a) {
-			echo '<br>gmlas_attribute: ' . $a;
+			$log .= '<br>gmlas_attribute: ' . $a;
 			if(!in_array($a, array_column($mappings, 'o_column'))) {
 				continue;
 			}
-			echo '<br>Loop through mappings:';
+			$log .= '<br>Loop through mappings:';
 			foreach ($mappings as $mapping) {
-				echo '<br>Mapping for o_column: ' . $mapping['o_column'];
+				$log .= '<br>Mapping for o_column: ' . $mapping['o_column'];
 				if (($mapping['o_column'] == $a) and ($mapping['o_table'] == $gml_class)) {
-					echo '<br>gmlas_attribute is o_column and gml_class is o_table';
+					$log .= '<br>gmlas_attribute is o_column and gml_class is o_table';
 					# gehoertzubereich wird automatisiert bei der Konvertierung in die Regel eingearbeitet 
 					# muss deswegen für Attribute nicht verwendet werden, ggf aber für WHERE filter
 					if ($mapping['t_column'] == 'gehoertzubereich') {
@@ -2428,31 +2437,40 @@ class Gml_extractor {
 					# fix for varying encountered gml-geometry types that are valid for xplanung (according to konformitaetsbedingungen-document) but can cause problems
 					# e.g. in display, in export, for wms/wfs services or are not supported by the konverter
 					if ($mapping['t_column'] == 'position') {
-						if(($geom_type == 'ST_CurvePolygon') or
+						$mapping['regel'] = 'gmlas.position';
+						// Konvertiere curves to line
+						if (
+							($geom_type == 'ST_CurvePolygon') or
 							($geom_type == 'ST_MultiSurface') or
 							($geom_type == 'ST_CompoundCurve') or
-							($geom_type == 'ST_MultiCurve'))
-						{
-							$mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
+							($geom_type == 'ST_MultiCurve')
+						) {
+							$mapping['regel'] = 'ST_CurveToLine(' . $mapping['regel'] . ')';
 						}
 						// Cast to multi-geometries (konverter-convention)
 						else if(($geom_type == 'ST_Point') or
 							($geom_type == 'ST_LineString') or
 							($geom_type == 'ST_Polygon'))
 						{
-							$mapping['regel'] = 'ST_Multi(gmlas.position) AS position';
+							$mapping['regel'] = 'ST_Multi(gmlas.position)';
 						} else {
-							$mapping['regel'] = 'gmlas.position AS position';
+							$mapping['regel'] = 'gmlas.position';
 						}
+
+						// Simplify
+						if ($simplify_fachdaten_geom AND $simplify_fachdaten_geom > 0) {
+							$mapping['regel'] = 'ST_SimplifyPreserveTopology(' . $mapping['regel'] . ', ' . strval($simplify_fachdaten_geom) . ')';
+						}
+						$mapping['regel'] .= ' AS position';
 					}
-					echo '<br>Append column regel for gml_attribute ' . $mapping['t_column'] . ': '. $mapping['t_column'];
+
 					$gml_attributes[] = $mapping['t_column'];
 					$select_sql[] = $mapping['regel'];
 				}
 			}
 		}
-		echo '<br>GML-Attributes für die Regel: ' . implode(', ', $gml_attributes);
-		echo '<br>Select part of regel SQL nach Anpassung der Geometrietypen: ' . $select_sql;
+		$log .= '<br>GML-Attributes für die Regel: ' . implode(', ', $gml_attributes);
+		$log .= '<br>Select part of regel SQL nach Anpassung der Geometrietypen: ' . $select_sql;
 
 		// rules that representing the many to many relationship
 		$many_to_many_attributes = $this->get_many_to_many_attributes();
@@ -2477,8 +2495,7 @@ class Gml_extractor {
 
 		// Add INSERT INTO and FROM
 		// Filters only by relevant bereich (in case 2 rules target the same class with different bereich)
-		$sql  = "
-			INSERT INTO " . XPLANKONVERTER_CONTENT_SCHEMA . "." . $gml_class . " (" . implode(", ", $gml_attributes) . ")
+		$sql  = "INSERT INTO " . XPLANKONVERTER_CONTENT_SCHEMA . "." . $gml_class . " (" . implode(", ", $gml_attributes) . ")
 			SELECT
 				" . implode(", ", $select_sql) . "
 			FROM
@@ -2487,8 +2504,12 @@ class Gml_extractor {
 				gmlas.gehoertzubereich_href ILIKE '%" . $bereich_id . "' AND
 				ST_GeometryType(position) = '" . $geom_type . "'
 		";
-		echo '<br>SQL für Regel zur Konvertierung von gmlas table ' . $gmlas_feature_table . ' to gml class ' . $gml_class . ': '. $sql;
-		return $sql;
+		$log .= '<br>SQL für Regel zur Konvertierung von gmlas table ' . $gmlas_feature_table . ' to gml class ' . $gml_class . ': '. $sql;
+		return array(
+			'success' => true,
+			'sql' => $sql,
+			'log' => $log
+		);
 	}
 
 	/**
@@ -2500,10 +2521,10 @@ class Gml_extractor {
 
 	/**
 	 * Function to get rule for gmlas to gml conversion for many to many $attribute of $gml_class in step $i
-	 * currently it only consider the attributes:
+	 * currently it only considers the attributes:
 	 * "wirddargestelltdurch", "dientzurdarstellungvon", "reftextinhalt", "detailliertezweckbestimmung", "zweckbestimmung"
 	 * 
-	 * It considers that many to many relation tables in gmlas schemas are not direct related to bereich
+	 * It considers that many to many relation tables in gmlas schemas are not directly related to bereich
 	 * How to find out if the table is a n:m relation or not?
 	 * a) from uml schema and the multiplicity
 	 * b) from n:m-relation-table-names, In gmlas relations can be identified by the extension of tablenames
@@ -2565,7 +2586,7 @@ class Gml_extractor {
 						" . $this->gmlas_schema . "." . $class_and_attr . " ". $norm_1 . "
 					WHERE
 						gmlas.id = " .$norm_1 . ".parent_id
-				) AS " . $attribute . ",";
+				) AS " . $attribute;
 			}
 			if ($attribute == "detailliertezweckbestimmung" OR $attribute == "zweckbestimmung") {
 				$special_datatype = "";
@@ -2626,7 +2647,7 @@ class Gml_extractor {
 								)
 							]::xplan_gml." . $special_datatype . "[]
 							ELSE NULL
-						END AS " . $attribute . ",
+						END AS " . $attribute . "
 					";
 				}
 			}
@@ -2638,7 +2659,7 @@ class Gml_extractor {
 	 * Function return the attributes of $gml_class that have a special datatype
 	 * It returns only rules for attributes that fullfill the following conditions
 	 * - Attribute belongs to the $gml_class table in xplan_gml schema
-	 * - Attribute have a stereotype of datatype in xplan_uml.uml_class
+	 * - Attribute has a stereotype of datatype in xplan_uml.uml_class
 	 * - $gml_class table exists in $gmlas_schema
 	 * - A table with the name of attributes datatype exists in $gmlas_schema
 	 * @param string $gmlas_schema The name of the gmlas_schema.
@@ -2666,7 +2687,6 @@ class Gml_extractor {
 		";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$datatype_attributes = pg_fetch_all($ret[1], PGSQL_ASSOC);
-		return $datatype_attributes;
 	}
 
 	/**
@@ -2722,8 +2742,8 @@ class Gml_extractor {
 				FROM
 					information_schema.tables t
 				WHERE
-					c.table_schema = '" . $this->gmlas_schema . "' AND
-					c.table_name = LIKE " . $gml_class . "_" . $attribute['name'] . "%
+					t.table_schema = '" . $this->gmlas_schema . "' AND
+					t.table_name LIKE '" . $gml_class . "_" . $attribute['name'] . "%'
 			";
 			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 			if (pg_num_rows($ret[1]) > 0) {
@@ -2738,7 +2758,7 @@ class Gml_extractor {
   				xplan_gmlas_5007.bp_dachgestaltung data_tab ON rel_tab.bp_dachgestaltung_pkid = data_tab.ogr_pkid
 				*/
 				$regel = "(
-					SELECT array_agg(SELECT * FROM " . $this->gmlas_schema . "." . $rs['table_name'] . " AS rel_tab JOIN " . $this->gmlas_schema . "." . $attribute['datatype'] . " AS data_tab ON rel_tab." . $attribute['datatype'] . "_pkid = data_tab.ogr_pkid WHERE rel_tab.parent_id = gmlas.ogc_fid)
+					SELECT array_agg((SELECT * FROM " . $this->gmlas_schema . "." . $rs['table_name'] . " AS rel_tab JOIN " . $this->gmlas_schema . "." . $attribute['datatype'] . " AS data_tab ON rel_tab." . $attribute['datatype'] . "_pkid = data_tab.ogr_pkid WHERE rel_tab.parent_id::text = gmlas.ogc_fid::text))
 				)";
 			}
 
@@ -2889,7 +2909,7 @@ class Gml_extractor {
 				'sql'::xplankonverter.enum_factory AS factory,
 				'" . $regel . "' AS sql,
 				'" . $enum_geometrie_typ . "'::xplankonverter.enum_geometrie_typ AS geometrietyp,
-				'" . $uml_class . "_" . $bereich_index . "_" . $geometrietyp . "' AS name,
+				'" . $uml_class . "_" . $bereich_index . "_" .$name . "' AS name,
 				'regel created automatically from gmlas extraction' AS beschreibung,
 				" . $konvertierung_id . " AS konvertierung_id,
 				" . $stelle_id . " AS stelle_id,
@@ -2973,6 +2993,63 @@ class Gml_extractor {
 		// echo '<br>feature has ' . $result['num_entries'] . ' entries.';
 		return $result['num_entries'] > 0;
 	}
-
+	
+	/**
+	* autocompletes allgartderbaulnutzung and besondereartderbaulnutzung
+	* for fp_bebauungsflaeche with attributes
+	* desired feature for QGIS-Plugin-Support (PlanDigital)
+	* see Konformitaetsbedingugng 5.3.1.1 and 5.3.1.2 (XPlan 5.4)
+	* @param string $schema
+	*/
+	function autocomplete_fp_bebauungsflaeche_attributes($schema) {
+		// table might not exist in all loaded source data
+		if($this->check_if_table_exists_in_schema('fp_bebauungsflaeche', $schema)) {
+			//besondereartderbaulnutzung should be filled before allgartderbaulnutzung in separate query, as it might require filled attributes
+			$sql = "UPDATE
+								" . $schema . ".fp_bebauungsflaeche
+							SET
+								besondereartderbaulnutzung = 
+								CASE 
+									WHEN
+										besondereartderbaulnutzung IS NULL AND sondernutzung IN ('1000','1100','1200','1300','1400')
+									THEN
+										'2000'
+									WHEN
+										besondereartderbaulnutzung IS NULL AND sondernutzung IN ('1500','1600','16000','16001','16002','1700','1800',
+											'1900','2000','2100','2200','2300','23000','2400','2500','2600','2700','2720','2800','2900','9999')
+									THEN
+										'2100'
+									ELSE
+										besondereartderbaulnutzung
+							END;";
+			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+			
+			$sql = "UPDATE
+								" . $schema . ".fp_bebauungsflaeche
+							SET
+								allgartderbaulnutzung = 
+								CASE 
+									WHEN
+										allgartderbaulnutzung IS NULL AND besondereartderbaulnutzung IN ('1000','1100','1200','1300')
+									THEN
+										'1000'
+									WHEN
+										allgartderbaulnutzung IS NULL AND besondereartderbaulnutzung IN ('1400','1450','1500','1550','1600')
+									THEN
+										'2000'
+									WHEN
+										allgartderbaulnutzung IS NULL AND besondereartderbaulnutzung IN ('1700','1800')
+									THEN
+										'3000'
+									WHEN
+										allgartderbaulnutzung IS NULL AND besondereartderbaulnutzung IN ('2000','2100','3000')
+									THEN
+										'4000'
+									ELSE
+										allgartderbaulnutzung
+							END;";
+			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		}
+	}
 }
 ?>

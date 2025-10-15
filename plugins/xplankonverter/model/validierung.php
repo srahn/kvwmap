@@ -91,6 +91,8 @@ class Validierung extends PgObject {
 				konvertierung_id = " . $this->konvertierung_id . " AND
 				" . implode(' AND ', json_decode(str_replace('}', ']', str_replace('{', '[', $this->get('functionsargumente'))))) . "
 		";
+		#echo '<br>Test ob Attribute Werte hat mit SQL: ' . $sql;
+
 		$this->debug->write('plan_attribute_has_value sql: ' . $sql, false);
 		$result = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
 		$has_value = $result['has_value'] == 't';
@@ -857,7 +859,7 @@ class Validierung extends PgObject {
 	* Ermittelt die faces, die zu mehr als einem Polygon zugeordnet sind (Überlappungen)
 	* @param object $plan, Der Plan der validiert wird
 	* @return array mit success boolean True wenn keine Überlappungen und Lücken gefunden wurden. 
-	* wenn welche gefunden wurden, succes = false und eine err_msg, die angibt welche Objekte sich überlappen oder wo Lücken sind.
+	* wenn welche gefunden wurden, success = false und eine err_msg, die angibt welche Objekte sich überlappen oder wo Lücken sind.
 	*/
 	function flaechenschluss_ueberlappungen($plan) {
 		$success = true;

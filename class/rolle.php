@@ -37,6 +37,63 @@ class rolle {
 		$this->loglevel = 0;
 	}
 
+	/**
+	 * Function create a rolle for a user with $user_id and all relations to menues, layers and layergroups in stelle with $stelle_id.
+	 * If $default_user_id is given them settings will be used.
+	 * @param database $database MySQL-Database object from class database defined in classes/mysql.php
+	 * @param Integer $stelle_id
+	 * @param Integer $user_id
+	 * @param Integer $default_user_id Die id eines Default-Users.
+	 * @param Layer[] $layer Array with layer_ids to assign rolle to there groups.
+	 * @return Array Result with Boolean success and String $msg.
+	 */
+	public static	function create($database, $stelle_id, $user_id, $default_user_id = 0, $layer = array(), $parent_stelle_id = NULL) {
+		$rolle = new rolle($user_id, $stelle_id, $database);
+		# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der selektierten Obermenüs zur Rolle
+		if (!$rolle->setMenue($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen der Menüs der Stelle zum Nutzer.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der Layer zur Rolle
+		if (!$rolle->setLayer($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen des Layers zur Rolle.<br>' . $database->errormessage
+			);
+		}
+
+		# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+		if (!$rolle->setGroups($user_id, $stelle_id, $default_user_id, $layer)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Hinzufügen der Layergruppen der selektierten Layer zur Rolle.<br>' . $database->errormessage
+			);
+		};	
+
+		if (!$rolle->setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen von savedLayersFromDefaultUser.<br>' . $database->errormessage
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Anlegen der Rolle erfolgreich.'
+		);
+	}
+
 	/*
 	* Speichert den Status der Layergruppen
 	* @param $formvars array mit key group_<group_id> welcher den Status der Gruppe enthält 
@@ -180,8 +237,8 @@ class rolle {
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
-			$layer_name_filter . 
-			$active_filter . "
+				$layer_name_filter .
+				$active_filter . "
 			ORDER BY
 				l.drawingorder desc
 		";
@@ -330,13 +387,13 @@ class rolle {
 		return 1;
 	}
 
-	function switch_gle_view($layer_id) {
+	function switch_gle_view($layer_id, $mode) {
 		if ($layer_id > 0) {
 			$sql = "
 				UPDATE
 					u_rolle2used_layer
 				SET
-					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+					gle_view = " . $mode . "
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
@@ -348,7 +405,7 @@ class rolle {
 				UPDATE
 					rollenlayer
 				SET
-					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+					gle_view = " . $mode . "
 				WHERE
 					id = " . (-$layer_id) . "
 			";
@@ -495,7 +552,12 @@ class rolle {
 			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
-			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
+			rolle::$layer_params = array_map(
+				function ($layer_param) {
+					return ($layer_param === 'Array' ? '' : $layer_param);
+				},
+				(array)json_decode('{' . $rs['layer_params'] . '}')
+			);
 			$this->visually_impaired = $rs['visually_impaired'];
 			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
@@ -559,10 +621,18 @@ class rolle {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 			}
 			else {
+				$ewkt_extent = 'SRID=' . $this->epsg_code . ';POLYGON((
+					' . $this->oGeorefExt->minx . ' ' . $this->oGeorefExt->miny . ', 
+					' . $this->oGeorefExt->minx . ' ' . $this->oGeorefExt->maxy . ', 
+					' . $this->oGeorefExt->maxx . ' ' . $this->oGeorefExt->maxy . ', 
+					' . $this->oGeorefExt->maxx . ' ' . $this->oGeorefExt->miny . ', 
+					' . $this->oGeorefExt->minx . ' ' . $this->oGeorefExt->miny . '
+					))';
 				while ($param = $this->database->result->fetch_assoc()) {
 					$sql = $param['options_sql'];
 					$sql = str_replace('$USER_ID', $this->user_id, $sql);
 					$sql = str_replace('$STELLE_ID', $this->stelle_id, $sql);
+					$sql = str_replace('$EXTENT', $ewkt_extent, $sql);
 					#echo '<br>SQL zur Abfrage der Optionen des Layerparameter ' . $param['key'] . ': ' . $sql;
 					$options_result = $pgdatabase->execSQL($sql, 4, 0, false);
 					if ($options_result['success']) {
@@ -591,7 +661,7 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo $sql;
+		#echo '<br>SQL to set Layer params: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 1);
 		rolle::$layer_params = (array)json_decode('{' . $layer_params . '}');
 		return $ret;
@@ -1870,6 +1940,7 @@ class rolle {
 		return 1;
 	}
 
+
 	function setGroups($user_id, $stelle_id, $default_user_id, $layerids) {
 		# trägt die Gruppen und Obergruppen der übergebenen Stellenid und Layerids für einen Benutzer ein. Gruppen, die aktive Layer enthalten werden aufgeklappt
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
@@ -1892,7 +1963,7 @@ class rolle {
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		}
 		else {
-			for($j = 0; $j < count_or_0($layerids); $j++){
+			for ($j = 0; $j < count_or_0($layerids); $j++) {
 				if (MYSQLVERSION < 800) {
 					$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
@@ -1950,10 +2021,14 @@ class rolle {
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			if (!$this->database->success) {
+				$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+				return 0;
+			}
 		}
 		return 1;
 	}
+
 
 	static function setGroupsForAll($database) {
 		if (MYSQLVERSION < 800) {

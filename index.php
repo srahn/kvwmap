@@ -62,12 +62,27 @@ include('credentials.php');
 include('config.php');
 
 # Session
-if(!isset($_SESSION)){
+if (!isset($_SESSION)) {
 	$maxlifetime = 0;
 	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER) AND $_SERVER['CONTEXT_PREFIX'] != '') ? $_SERVER['CONTEXT_PREFIX'] : '/';
 	$samesite = 'strict';
 	session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
 	session_start();
+}
+
+if (
+	php_sapi_name() === 'cli' AND
+	array_key_exists('login_name', $_REQUEST) AND $_REQUEST['login_name'] != '' AND
+	array_key_exists('csrf_token', $_REQUEST) AND $_REQUEST['csrf_token'] != '' AND
+	array_key_exists('stelle_id', $_REQUEST) AND $_REQUEST['stelle_id'] != ''
+) {
+	$_SESSION = array(
+		'angemeldet' => true,
+		'login_name' => $_REQUEST['login_name'],
+		'login_routines' => null,
+		'csrf_token' => $_REQUEST['csrf_token'],
+		'stelle_angemeldet' => $_REQUEST['stelle_id']
+	);
 }
 
 # Laden der Plugins config.phps
@@ -273,7 +288,7 @@ function go_switch($go, $exit = false) {
 					rolle::$layer_params = array_merge(rolle::$layer_params, $GUI->formvars['layer_params']);
 				}
 				$GUI->loadMap('DataBase');
-				$format = (($GUI->formvars['only_postgis_layer'] OR ($GUI->formvars['only_layer_id'] AND $GUI->layerset['layer_ids'][$GUI->formvars['only_layer_id']]['Datentyp'] != 3)) ? 'png' : 'jpeg');
+				$format = (($GUI->formvars['only_postgis_layer'] OR $GUI->formvars['only_layer_id']) ? 'png' : 'jpeg');
 				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
 				$GUI->mime_type = 'image/' . $format;
@@ -424,9 +439,11 @@ function go_switch($go, $exit = false) {
 				$GUI->resetLegendOptions();
 			} break;
 
-			case 'toggle_gle_view' : {
+			case 'switch_gle_view' : {
 				$GUI->sanitize([
-					'chosen_layer_id' => 'int'
+					'chosen_layer_id' => 'int',
+					'mode' => 'int',
+					'reload' => 'int'
 				]);
 				$GUI->switch_gle_view();
 			} break;
@@ -448,11 +465,11 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'getLayerParamsForm' : {
-				echo $GUI->get_layer_params_form($GUI->formvars['stelle_id']);
+				echo $GUI->get_layer_params_form($GUI->formvars['stelle_id'], $GUI->formvars['layer_id'], '', true, $GUI->formvars['open']);
 			} break;
 
 			case 'setLayerParams' : {
-				$GUI->setLayerParams();
+				$GUI->setLayerParams($GUI->formvars['prefix']);
 				echo "onLayerParamsUpdated('success')";
 			} break;
 
@@ -1609,7 +1626,7 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor_info_from_maintable' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->sanitize([
-					'connection_id' => 'integer',
+					'connection_id' => 'int',
 					'schema_name' => 'text',
 					'table_name' => 'text'
 				]);
@@ -1624,7 +1641,7 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor_get_maintables' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->sanitize([
-					'connection_id' => 'integer'
+					'connection_id' => 'int'
 				]);
 				if ($GUI->formvars['connection_id'] == '') {
 					$result = array(
@@ -1660,6 +1677,9 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				include_once(CLASSPATH . 'Layer.php');
+				if ($GUI->plugin_loaded('mobile')) {
+					include_once(PLUGINS . 'mobile/model/kvwmap.php');
+				}
 				$GUI->LayerAendern($GUI->formvars);
 				$GUI->Layereditor();
 			} break;
@@ -2190,6 +2210,11 @@ function go_switch($go, $exit = false) {
 				$GUI->invitation_formular();
 			} break;
 
+			case 'Einladung_E-Mail' : {
+				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
+				$GUI->invitation_email();
+			} break;
+
 			case 'Einladung_Speichern' : {
 				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
 				$GUI->invitation_save();
@@ -2284,6 +2309,18 @@ function go_switch($go, $exit = false) {
 			*/
 			case 'get_user_notifications' : {
 				$GUI->get_user_notifications();
+			} break;
+
+			case 'start_background_task' : {
+				$GUI->start_background_task();
+			} break;
+
+			case 'run_background_jobs' : {
+				$GUI->run_background_jobs();
+			} break;
+
+			case 'show_background_jobs_log' : {
+				readfile(LOGPATH . 'background_jobs_log.htm');
 			} break;
 
 			default : {

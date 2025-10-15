@@ -20,7 +20,7 @@
 	text-align: center;
 }
 
-#nachweise-download  .nd-link div:last-child {
+#nachweise-download  .nd-link div {
 	text-align: center;
 	margin-top: 50px;
 }
@@ -65,6 +65,9 @@
   <tr class="nd-link">
   	<td>
 		<div><a href="<? echo $this->formvars['filename'] ?>"><? echo basename(parse_url($this->formvars['filename'], PHP_URL_PATH)); ?></a></div>
+		<? if ($this->formvars['lea_layer_id'] != '') { ?>
+			<div><a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->formvars['lea_layer_id']; ?>&value_lea_id=<? echo $this->formvars['lea_id'] ?>&operator_lea_id=="><span class="fett">zurück zum Antrag</span></a></div>
+		<? } ?>
 		<div><a href="index.php?go=default">zur Karte</a></div>
 	</td>
   </tr>

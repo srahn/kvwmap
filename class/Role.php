@@ -222,21 +222,23 @@ class Role extends MyObject {
 		$new_layer_params = array();
 		foreach (array_keys($old_layer_params) AS $key) {
 			$layer_param = LayerParam::find_by_key($this->gui, $key);
-			$result = $layer_param->get_options($this->get('user_id'), $this->get('stelle_id'));
-			if (!$result['success']) {
-				return $result;
+			if (strpos($layer_param->get('options_sql'), '$') === false) {	# Layer-Parameter mit dynamischem SQL nicht anpassen
+				$result = $layer_param->get_options($this->get('user_id'), $this->get('stelle_id'));
+				if (!$result['success']) {
+					return $result;
+				}
+				if (!in_array(
+					$old_layer_params[$key],
+					array_map(
+						function($option) {
+							return $option['value'];
+						},
+						$result['options']
+					)
+				)) {
+					$old_layer_params[$key] = $result['options']['value'][0];
+				};
 			}
-			if (!in_array(
-				$old_layer_params[$key],
-				array_map(
-					function($option) {
-						return $option['value'];
-					},
-					$result['options']
-				)
-			)) {
-				$old_layer_params[$key] = $result['options']['value'][0];
-			};
 		}
 		foreach ($old_layer_params AS $param_key => $value) {
 			$new_layer_params[] = '"' . $param_key . '":"' . $value . '"';

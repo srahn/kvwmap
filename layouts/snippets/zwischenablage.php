@@ -79,7 +79,7 @@ for ($i = 0; $i < count_or_0($this->layer); $i++) { ?>
 <div class="item layer-item"></div>
 
 <div class="item show-item">
-	<?php echo $this->num_rows == 0 ? '' : $this->all . ' ' . $strRecords; ?>
+	<?php echo $this->num_rows == 0 ? '' : $this->strAll . ' ' . $strRecords; ?>
 </div>
 
 <?

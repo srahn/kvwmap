@@ -38,9 +38,11 @@ class stelle {
 	var $ows_updatesequence;
 	var $ows_geographicdescription;
 	var $ows_fees;
+	var $ows_inspireidentifiziert;
 	var $ows_srs;
 
 	var $ows_contactorganization;
+	var $ows_contacturl;
 	var $ows_contactaddress;
 	var $ows_contactpostalcode;
 	var $ows_contactcity;
@@ -50,7 +52,9 @@ class stelle {
 	var $ows_contactposition;
 	var $ows_contactvoicephone;
 	var $ows_contactfacsimile;
+
 	var $ows_distributionorganization;
+	var $ows_distributionurl;
 	var $ows_distributionaddress;
 	var $ows_distributionpostalcode;
 	var $ows_distributioncity;
@@ -62,6 +66,7 @@ class stelle {
 	var $ows_distributionfacsimile;
 
 	var $ows_contentorganization;
+	var $ows_contenturl;
 	var $ows_contentaddress;
 	var $ows_contentpostalcode;
 	var $ows_contentcity;
@@ -206,9 +211,11 @@ class stelle {
 				`ows_updatesequence`,
 				`ows_geographicdescription`,
 				`ows_fees`,
+				#`ows_inspireidentifiziert`,
 				`ows_srs`,
 
 				`ows_contactorganization`,
+				`ows_contacturl`,
 				`ows_contactaddress`,
 				`ows_contactpostalcode`,
 				`ows_contactcity`,
@@ -220,6 +227,7 @@ class stelle {
 				`ows_contactfacsimile`,
 
 				`ows_distributionorganization`,
+				`ows_distributionurl`,
 				`ows_distributionaddress`,
 				`ows_distributionpostalcode`,
 				`ows_distributioncity`,
@@ -231,6 +239,7 @@ class stelle {
 				`ows_distributionfacsimile`,
 
 				`ows_contentorganization`,
+				`ows_contenturl`,
 				`ows_contentaddress`,
 				`ows_contentpostalcode`,
 				`ows_contentcity`,
@@ -270,9 +279,11 @@ class stelle {
 		$this->ows_updatesequence = $rs['ows_updatesequence'];
 		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
 		$this->ows_fees = $rs['ows_fees'];
+		$this->ows_inspireidentifiziert = $rs['ows_inspireidentifiziert'];
 		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
 
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contacturl = $rs['ows_contacturl'];
 		$this->ows_contactaddress = $rs['ows_contactaddress'];
 		$this->ows_contactpostalcode = $rs['ows_contactpostalcode'];
 		$this->ows_contactcity = $rs['ows_contactcity'];
@@ -284,6 +295,7 @@ class stelle {
 		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
 
 		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionurl = $rs['ows_distributionurl'];
 		$this->ows_distributionaddress = $rs['ows_distributionaddress'];
 		$this->ows_distributionpostalcode = $rs['ows_distributionpostalcode'];
 		$this->ows_distributioncity = $rs['ows_distributioncity'];
@@ -295,6 +307,7 @@ class stelle {
 		$this->ows_distributionfacsimile = $rs['ows_distributionfacsimile'];
 
 		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contenturl = $rs['ows_contenturl'];
 		$this->ows_contentaddress = $rs['ows_contentaddress'];
 		$this->ows_contentpostalcode = $rs['ows_contentpostalcode'];
 		$this->ows_contentcity = $rs['ows_contentcity'];
@@ -480,7 +493,9 @@ class stelle {
 		if (empty($stellendaten['ows_distributionorganization'])) {
 			$stellendaten['ows_distributionorganization'] = $stellendaten['ows_contactorganization'];
 		}
-
+		if (empty($stellendaten['ows_distributionurl'])) {
+			$stellendaten['ows_distributionurl'] = $stellendaten['ows_contacturl'];
+		}
 		if (empty($stellendaten['ows_contentperson'])) {
 			$stellendaten['ows_contentperson'] = $stellendaten['ows_contactperson'];
 		}
@@ -517,6 +532,7 @@ class stelle {
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
 				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
+				`ows_contacturl` = '" . $stellendaten['ows_contacturl'] . "',
 				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
 				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
@@ -527,6 +543,7 @@ class stelle {
 				`ows_contactcity` = '" . $stellendaten['ows_contactcity'] . "',
 				`ows_contactadministrativearea` = '" . $stellendaten['ows_contactadministrativearea'] . "',
 				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
+				`ows_contenturl` = '" . $stellendaten['ows_contenturl'] . "',
 				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
 				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
 				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
@@ -538,6 +555,7 @@ class stelle {
 				`ows_contentadministrativearea` = '" . $stellendaten['ows_contentadministrativearea'] . "',
 				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
 				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
+				`ows_distributionurl` = '" . $stellendaten['ows_distributionurl'] . "',
 				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
 				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
 				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
@@ -548,6 +566,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
+				`ows_inspireidentifiziert` = '" . ($stellendaten['ows_inspireidentifiziert'] == '1' ? "1" : "0") . "',
 				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
@@ -617,6 +636,7 @@ class stelle {
  				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
 				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
+				`ows_contacturl` = '" . $stellendaten['ows_contacturl'] . "',
 				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
 				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
@@ -627,6 +647,7 @@ class stelle {
 				`ows_contactcity` = '" . $stellendaten['ows_contactcity'] . "',
 				`ows_contactadministrativearea` = '" . $stellendaten['ows_contactadministrativearea'] . "',
 				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
+				`ows_contenturl` = '" . $stellendaten['ows_contenturl'] . "',
 				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
 				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
 				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
@@ -638,6 +659,7 @@ class stelle {
 				`ows_contentadministrativearea` = '" . $stellendaten['ows_contentadministrativearea'] . "',
 				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
 				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
+				`ows_distributionurl` = '" . $stellendaten['ows_distributionurl'] . "',
 				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
 				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
 				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
@@ -648,6 +670,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
+				`ows_inspireidentifiziert` = '" . ($stellendaten['ows_inspireidentifiziert'] == '1' ? "1" : "0") . "',
 				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
@@ -685,6 +708,7 @@ class stelle {
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
 				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
+				`ows_contacturl` = '" . $stellendaten['ows_contacturl'] . "',
 				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
 				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
@@ -695,6 +719,7 @@ class stelle {
 				`ows_contactcity` = '" . $stellendaten['ows_contactcity'] . "',
 				`ows_contactadministrativearea` = '" . $stellendaten['ows_contactadministrativearea'] . "',
 				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
+				`ows_contenturl` = '" . $stellendaten['ows_contenturl'] . "',
 				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
 				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
 				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
@@ -706,6 +731,7 @@ class stelle {
 				`ows_contentadministrativearea` = '" . $stellendaten['ows_contentadministrativearea'] . "',
 				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
 				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
+				`ows_distributionurl` = '" . $stellendaten['ows_distributionurl'] . "',
 				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
 				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
 				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
@@ -716,6 +742,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
+				`ows_inspireidentifiziert` = '" . ($stellendaten['ows_inspireidentifiziert'] == '1' ? "1" : "0") . "',
 				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "'
 			WHERE
 				ID = " . $this->id . "
@@ -1441,16 +1468,18 @@ class stelle {
 	}
 
 	/**
-	 * Function add layer with $layer_ids to stelle
+	 * Function assign layers with $layer_ids to this stelle
 	 * ToDo sr: Beschreibung der 3 verschiedenen Fälle hinzufügen
 	 * - !$assign_default_values
 	 * - $assign_default_values OR $this->database->mysqli->affected_rows == 0
 	 * - !$assign_default_values AND $this->database->mysqli->affected_rows > 0
-	 * @param array $layer_ids
-	 * @param string $filter
-	 * @param boolean $assign_default_values
-	 * @param string $privileg
-	 * @return integer 1 if success 0 if error
+	 * If $assign_default_values are defined these will be used for used_layers table
+	 * @param Array{String} $layer_ids
+	 * @param Integer $drawinorder
+	 * @param String $filter
+	 * @param Boolean $assign_default_values
+	 * @param String $privileg default 'default'
+	 * @return Boolean Always 1
 	 */
 	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
@@ -1527,7 +1556,10 @@ class stelle {
 				// echo $sql.'<br><br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 			if ($assign_default_values OR $this->database->mysqli->affected_rows == 0) {
 				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
@@ -1575,7 +1607,10 @@ class stelle {
 				#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 
 			if (!$assign_default_values AND $this->database->mysqli->affected_rows > 0) {
@@ -1617,7 +1652,10 @@ class stelle {
 				#echo 'SQL zum Anlegen eines used layers :' . $sql . '<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 				if ($this->database->mysqli->affected_rows != 0) {
 					# löschen der Einträge für "kein Zugriff" Rechte
 					$sql = "
@@ -1645,7 +1683,10 @@ class stelle {
 					#echo $sql.'<br>';
 					$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 					$this->database->execSQL($sql);
-					if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+					if (!$this->database->success) {
+						$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+						return 0;
+					}
 				}
 				else {
 					# wenn nicht von Elternstelle übernommen, Defaultrechte übernehmen
@@ -1665,7 +1706,10 @@ class stelle {
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 		}
 		return 1;

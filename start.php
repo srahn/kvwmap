@@ -212,77 +212,75 @@ if ($gast_export === false) {
 		else { # ist keine gastanmeldung
 			$GUI->debug->write('Es ist keine Gastanmeldung.', 4, $GUI->echo);
 
-			if (is_login($GUI->formvars)) {
-				$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4, $GUI->echo);
-				/**
-					This set the passwort with the sha1 method before each login
-					if not allready exists and only if it matches with the old md5 method.
-				*/
-				if (prepare_sha1(trim($GUI->database->mysqli->real_escape_string($GUI->formvars['login_name'])), trim($GUI->database->mysqli->real_escape_string($GUI->formvars['passwort'])))) {
-					if ($GUI->database->mysqli->affected_rows > 0) {
-						$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
-					}
-					$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
-					$GUI->debug->write('Nutzer mit login_name ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);
-					if ($GUI->database->success) {
-						if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'], $GUI->formvars['passwort'])) {
-							$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
-							set_session_vars($GUI->formvars);
-							$GUI->user->update_tokens($_SESSION['csrf_token']);
-							$GUI->user->has_logged_in = true;
-							$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
-							$nutzer = Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
-							$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = 0;
-							$GUI->user->login_locked_until 	= '';
-							if ($GUI->user->stelle_id == '') {
-								# Nutzer hat keine stellen_id
-								$GUI->user->Stellen = $GUI->user->getStellen(0);
-								if (count($GUI->user->Stellen['ID']) > 0) {
-									# Nutzer hat aber rollen, weise die stellen_id der ersten Rolle zu
-									$GUI->formvars['Stelle_ID'] = $GUI->user->Stellen['ID'][0];
-								}
+		if (is_login($GUI->formvars)) {
+			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4, $GUI->echo);
+			// This set the passwort with the sha1 method before each login
+			// if not allready exists and only if it matches with the old md5 method.
+			if (prepare_sha1(trim($GUI->database->mysqli->real_escape_string($GUI->formvars['login_name'])), trim($GUI->database->mysqli->real_escape_string($GUI->formvars['passwort'])))) {
+				if ($GUI->database->mysqli->affected_rows > 0) {
+					$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
+				}
+				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
+				$GUI->debug->write('Nutzer mit login_name ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);
+				if ($GUI->database->success) {
+					if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'], $GUI->formvars['passwort'])) {
+						$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
+						set_session_vars($GUI->formvars);
+						$GUI->user->update_tokens($_SESSION['csrf_token']);
+						$GUI->user->has_logged_in = true;
+						$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
+						$nutzer = Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
+						$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = 0;
+						$GUI->user->login_locked_until 	= '';
+						if ($GUI->user->stelle_id == '') {
+							# Nutzer hat keine stellen_id
+							$GUI->user->Stellen = $GUI->user->getStellen(0);
+							if (count($GUI->user->Stellen['ID']) > 0) {
+								# Nutzer hat aber rollen, weise die stellen_id der ersten Rolle zu
+								$GUI->formvars['Stelle_ID'] = $GUI->user->Stellen['ID'][0];
 							}
-						}
-						else {
-							# Anmeldung ist fehlgeschlagen
-							$GUI->debug->write('Anmeldung ist fehlgeschlagen. Grund: ' . $GUI->login_failed_reason, 4, $GUI->echo);
-							if ($GUI->login_failed_reason == 'authentication') {
-								$GUI->debug->write('Passwort passt nicht zum login_namen:', 4, $GUI->echo);
-								$nutzer = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
-								$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = $nutzer->get('num_login_failed');
-								$GUI->user->login_locked_until 	= $nutzer->get('login_locked_until');
-								$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
-								#							sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
-							}
-							if ($GUI->login_failed_reason == 'login_is_locked') {
-								$nutzer = Nutzer::find_by_login_name($GUI, $GUI->formvars['login_name']);
-								$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
-							}
-							$show_login_form = true;
-							$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-							$go = 'login_failed';
-							# login case 7
-							$GUI->debug->write('login case 7', 4, $GUI->echo);
 						}
 					}
 					else {
-						$GUI->add_message('error', 'Fehler bei der Abfrage des Nutzers. ' . $GUI->database->mysqli->error);
+						# Anmeldung ist fehlgeschlagen
+						$GUI->debug->write('Anmeldung ist fehlgeschlagen. Grund: ' . $GUI->login_failed_reason, 4, $GUI->echo);
+						if ($GUI->login_failed_reason == 'authentication') {
+							$GUI->debug->write('Passwort passt nicht zum login_namen:', 4, $GUI->echo);
+							$nutzer = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
+							$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = $nutzer->get('num_login_failed');
+							$GUI->user->login_locked_until 	= $nutzer->get('login_locked_until');
+							$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
+              #							sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+						}
+						if ($GUI->login_failed_reason == 'login_is_locked') {
+							$nutzer = Nutzer::find_by_login_name($GUI, $GUI->formvars['login_name']);
+							$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
+						}
 						$show_login_form = true;
 						$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 						$go = 'login_failed';
-						# login case 7 b
-						$GUI->debug->write('login case 7b', 4, $GUI->echo);
+						# login case 7
+						$GUI->debug->write('login case 7', 4, $GUI->echo);
 					}
 				}
 				else {
-					$GUI->add_message('error', 'Fehler beim Eintragen des SHA1 Passwortes. ' . $GUI->database->mysqli->error);
+					$GUI->add_message('error', 'Fehler bei der Abfrage des Nutzers. ' . $GUI->database->mysqli->error);
 					$show_login_form = true;
 					$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 					$go = 'login_failed';
-				};
+					# login case 7 b
+					$GUI->debug->write('login case 7b', 4, $GUI->echo);
+				}
 			}
-			else { # ist keine Anmeldung
-				$GUI->debug->write('Es ist keine Anmeldung.', 4, $GUI->echo);
+			else {
+				$GUI->add_message('error', 'Fehler beim Eintragen des SHA1 Passwortes. ' . $GUI->database->mysqli->error);
+				$show_login_form = true;
+				$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
+				$go = 'login_failed';
+			};
+		}
+		else { # ist keine Anmeldung
+			$GUI->debug->write('Es ist keine Anmeldung.', 4, $GUI->echo);
 
 				if (is_registration($GUI->formvars)) {
 					$GUI->debug->write('Es ist eine Registrierung.', 4, $GUI->echo);

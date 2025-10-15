@@ -38,9 +38,11 @@ class PgObject {
 	*
 	*/
 
-	private $select;
-	private $from;
-	private $where;
+	public $select;
+	public $from;
+	public $where;
+	public $show;
+	public $attribute_names;
 	public $fkeys;
 	public $pkey;
 	public $data;
@@ -70,9 +72,10 @@ class PgObject {
 		$this->geom_column = 'geom';
 		$this->extent = array();
 		$this->extents = array();
+		$this->attribute_names = array();
 		$this->fkeys = array();
 		$this->pkey = array();
-		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, $this->show);
+		$gui->debug->show('Create new Object PgObject with schema ' . $this->schema . ' table ' . $this->tableName, $this->show);
 	}
 
 	/**
@@ -96,6 +99,9 @@ class PgObject {
 		return floatval($result['postgis_version']);
 	}
 
+	/**
+	 * @return PgObject $this->data is false if nothing found.
+	 */
 	function find_by($attribute, $value) {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, $this->show);
 		$sql = "
@@ -126,14 +132,19 @@ class PgObject {
 
 	function find_by_ids($ids) {
 		$where_condition = $this->get_id_condition($ids);
-		$this->debug->show('find by ids: ' . $where_condition, $this->show);
 		$sql = "
 			SELECT
-				{$this->select}
+				*
 			FROM
-				{$this->from}
+				(
+					SELECT
+						{$this->select}
+					FROM
+						{$this->from}
+					" . ($this->where != '' ? 'WHERE ' . $this->where : '') . "
+				) foo
 			WHERE
-				" . ($this->where != '' ? ' AND ' : '') . $where_condition . "
+				" . $where_condition . "
 		";
 		$this->debug->show('find_by_ids sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
@@ -155,12 +166,11 @@ class PgObject {
 	 * @return array PgObject An array with all found object
 	 */
 	function find_where($where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
-		// echo '<br>PgObject->find_where';
 		$select = (empty($select) ? $this->select : $select);
-		$from = (empty($from) ? $this->schema . '."' . $this->tableName . '"' : $from);
-		$where = (empty($where) ? "true" : $where);
-		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
-		$limit = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
+		$from   = (empty($from) ? $this->schema . ".\"" . $this->tableName . "\"" : $from);
+		$where  = (empty($where) ? "true" : $where);
+		$order  = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
+		$limit  = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
 		$sql = "
 			SELECT
 				" . $select . "
@@ -168,13 +178,13 @@ class PgObject {
 				" . $from . "
 			WHERE
 				" . $where . "
-				" . $order . "
-				" . $limit . "
+			" . $order . "
+			" . $limit . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$results = array();
-		while($this->data = pg_fetch_assoc($query)) {
+		while ($this->data = pg_fetch_assoc($query)) {
 			$results[] = clone $this;
 		}
 		return $results;
@@ -233,6 +243,21 @@ class PgObject {
 			}
 		}
 		return $this->extent;
+	}
+
+	function exists($where) {
+		$sql = "
+			SELECT
+				count(*) num_rows
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				" . $where . "
+		";
+		$this->debug->show('find_by_id sql: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		$result = pg_fetch_assoc($query);
+		return ($result['num_rows'] > 0);
 	}
 
 	function delete_by($attribute, $value) {
@@ -312,6 +337,7 @@ class PgObject {
 	}
 
 	function get($attribute) {
+		// return (array_key_exists($attriubte, $this->data) ? $this->data[$attribute] : NULL);
 		return $this->data[$attribute];
 	}
 
@@ -521,7 +547,6 @@ class PgObject {
 	}
 
 	function delete() {
-		$quote = ($this->identifier_type == 'text') ? "'" : "";
 		$sql = "
 			DELETE
 			FROM
@@ -694,6 +719,26 @@ class PgObject {
 			return $constraint['type'] == 'PRIMARY KEY' AND in_array($column, $constraint['columns']);
 		})) > 0;
 		return $result;
+	}
+
+	function get_attribute_names() {
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '" . $this->schema . "' AND
+				table_name = '" . $this->tableName . "'
+		";
+		#echo '<p>sql zur Abfrage von attribut namen: ' . $sql;
+		$this->sql = $sql;
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->attribute_names = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$this->attribute_names[] = $rs['column_name'];
+		}
+		return $this->attribute_names;
 	}
 
 	function get_attribute_types() {

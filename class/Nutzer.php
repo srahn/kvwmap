@@ -92,26 +92,20 @@ class Nutzer extends MyObject {
 				'stelle_id' => $stelle_id
 			)
 		);
-
-		if ($results[0]['success']) {
-			$result['success'] = false;
-			$rolle = new rolle($user->get('ID'), $stelle_id, $gui->database);
-			if ($rolle->setRolle($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
-				if ($rolle->setMenue($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
-					if ($rolle->setLayer($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
-						$layers = $stelle->getLayers(NULL);
-						if ($rolle->setGroups($user->get('ID'), $stelle_id, $stelle->default_user_id, $layers['ID'])) {
-							$rolle->setSavedLayersFromDefaultUser($user->get('ID'), $stelle_id, $stelle->default_user_id);
-							$result['success'] = true;
-						}
-					}
-				}
-			}
-			if ($result['success'] == 0) {
-				$succsess['msg'] = $gui->database->error;
-			}
+		$result = $results[0];
+		if (!$result['success']) {
+			return $result;
 		}
-		return $result;
+
+		$create_rolle_result = rolle::create($gui->database, $stelle_id, $user->get('ID'), $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
+		if (!$create_rolle_result['success']) {
+			return $create_rolle_result;
+		}
+
+		return array(
+			'success' => true,
+			'msg' => $result['msg'] . '<br>' . $create_rolle_result['msg']
+		);
 	}
 
 	function get_rolle() {

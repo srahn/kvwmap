@@ -7,6 +7,8 @@
 // mobile_get_pmtiles
 // mobile_get_pmtiles_style
 // mobile_get_stellen
+// mobile_list_logs
+// mobile_show_log
 // mobile_sync
 // mobile_sync_all
 // mobile_upload_image'
@@ -18,6 +20,11 @@ if (strpos($go, '_') !== false AND substr($go, 0, strpos($go, '_')) === 'mobile'
 function go_switch_mobile($go) {
 	global $GUI;
 	switch ($GUI->go) {
+		case 'mobile_fix_sync_delta': {
+			$GUI->mobile_fix_sync_delta();
+		}
+		break;
+
 		case 'mobile_get_stellen': {
 			$result = $GUI->mobile_get_stellen();
 			echo json_encode($result);
@@ -92,6 +99,23 @@ function go_switch_mobile($go) {
 		}
 		break;
 
+		case 'mobile_list_logs' : {
+			$GUI->checkCaseAllowed('Administratorfunktionen');
+			include_once(CLASSPATH . 'administration.php');
+			$GUI->administration = new administration($GUI->database, $GUI->pgdatabase);	
+			$GUI->mobile_list_logs();
+			$GUI->output();
+		} break;
+
+		case 'mobile_show_log' : {
+			$GUI->checkCaseAllowed('Administratorfunktionen');
+			$GUI->sanitize(['log_file' => 'text']);
+			include_once(CLASSPATH . 'administration.php');
+			$GUI->administration = new administration($GUI->database, $GUI->pgdatabase);	
+			$GUI->mobile_show_log($GUI->formvars['log_file']);
+			$GUI->output();
+		} break;
+
 		case 'mobile_sync': {
 			$GUI->sanitize(['selected_layer_id' => 'int', 'table_name' => 'text', 'last_client_version' => 'int']);
 			$result = $GUI->mobile_sync();
@@ -113,7 +137,7 @@ function go_switch_mobile($go) {
 
 		case 'mobile_delete_images': {
 			$GUI->sanitize(['selected_layer_id' => 'int']);
-			$GUI->checkCaseAllowed($GUI->go);
+			$GUI->checkCaseAllowed($GUI->go, false);
 			$result = $GUI->mobile_delete_images($GUI->formvars['selected_layer_id'], $GUI->formvars['images']);
 			echo json_encode($result);
 		}

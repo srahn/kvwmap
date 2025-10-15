@@ -15,13 +15,15 @@
   $strOwsTitle =  'Titel des Dienstes';
   $strOwsTitleHint = 'Eine kurze Überschrift unter der der Dienst in Suchergebnissen angezeigt werden soll. Der Text sollte sich von anderen unterscheiden aber nicht zu lang sein.';
 	$strOwsNameSpace = 'Namespace des Dienstes';
-	$strOwsNameSpaceHint = 'Der Namespace ist der Namensraum in dem die im Dienst verwendeten Identifikatoren eindeutig sind. Der Identifikator eines Datenobjektes in einem INSPIRE-Datensatz setzt sich z.B. immer aus einem namespace und einer ID zusammen. Dadurch wird sicher gestellt, dass der Identifikator wirklich eindeutig ist auch über den Dienst und die Dienststelle, die den Dienst bereitstellt hinweg.';
+	$strOwsNameSpaceHint = 'Der Namespace ist der Namensraum in dem die im Dienst verwendeten Identifikatoren eindeutig sind. Der Identifikator eines Datenobjektes in einem INSPIRE-Datensatz setzt sich z.B. immer aus einem namespace und einer ID zusammen. Dadurch wird sicher gestellt, dass der Identifikator wirklich eindeutig ist auch über den Dienst und die Dienststelle, die den Dienst bereitstellt hinweg. Bei eigenem Namensraum setzen Sie sich bitte mit der Projektleitung in Verbindung. Dann wird das weitere Vorgehen besprochen';
   $strOwsAbstract = 'Kurzbeschreibung';
   $strOwsAbstractHint = 'Kurze Darstellung zu den Inhalten und der räumlichen Ausdehnung der Daten, die über den Dienst verfügbar gemacht werden.';
   $strWmsAccessConstraints = 'Zugangsbeschränkungen';
   $strWmsAccessConstraintsHint = 'Beschreibung der Bedingungen unter denen der Zugang zum Dienst gewährt wird. Gibt es keine Beschränkungen hier "keine" eintragen.';
   $strOwsFees = 'Kosten';
 	$strOwsFeesHint = 'Beschreibung des Kostenmodells für die Nutzung des Dienstes. Ist er Kostenfrei hier "keine" eintragen.';
+	$strOwsInspireidentifiziert = 'inspireidentifiziert';
+	$strOwsInspireidentifiziertHint = 'Falls Sie die Daten anderweitig bereits im INSPIRE-Datenmodell bereitstellen, muss diese Option ausgeschaltet sein.';
   $strOwsSrs = 'Koordinatenreferenzsystem';
 	$strOwsSrsHint = 'EPSG-Code in dem die beschriebenen Geodaten tatsächlich vorliegen, z.B. EPSG:5650. Wird hier nichts angegeben, wird der oben ausgewählte EPSG-Code der Stelle verwendet.';
   $strOwsContactOrganization = 'Organisation';
@@ -33,7 +35,7 @@
   $strOwsContactPosition = 'Position der Person';
   $strOwsContactPositionHint = 'Position der zuständigen Person. Das kann eine Abteilung oder Funktion sein, z.B. Sachgebietsleiter';
 	$strOwsContactVoicephone = 'Telefonnummer';
-	$strOwsContactVoicephoneHint = 'Telefonnummer der zuständigen Person oder Organisation.';
+	$strOwsContactVoicephoneHint = 'Telefonnummer der zuständigen Person oder Organisation nach DIN 5008 mit Landescode +49. Beispiel: Beispiel: +49 30 3432622-113 bei einer Durchwahlnummer.';
 	$strOwsContactFacsimile = 'Fax-Nummer';
 	$strOwsContactFacsimileHint = 'Fax-Nummer der zuständigen Person oder Organisation';
 	$strOwsContactAddress = 'Strasse HausNr';
@@ -44,7 +46,9 @@
 	$strOwsContactCityHint = 'Ortsname der Adresse der zuständigen Person oder Organisation.';
 	$strOwsContactAdministrativeArea = 'Bundesland';
 	$strOwsContactAdministrativeAreaHint = 'Bundesland oder andere administrative Einheit der Adresse der zuständigen Person oder Organisation.';
-	$strOwsGeographicDescription = 'Regionalschlüssel';
+  $strOwsContactUrl = 'URL';
+  $strOwsContactUrlHint = 'URL der Home-Page mit näheren Informationen zum Kontakt oder den Daten.';
+  $strOwsGeographicDescription = 'Regionalschlüssel';
 	$strOwsGeographicDescriptionHint = 'Amtlicher Regionalschlüssel (ARS) als 12-stelliger Schlüssel zur eindeutigen Identifizierung der Gebietseinheit mit den Bestandteilen: Bundesland (2 Stellen), Regierungsbezirk (1 Stelle, wenn nicht vorhanden: 0), Kreis (2 Stellen), Gemeindeverband (4 Stellen) und Gemeinde (3 Stellen). Gibt es keinen eindeutigen AGS, kann auch der Name der Verwaltungseiheit zu dem der Datensatz gehört angegeben werden.';
   $strLogo = 'Wappen';
   $strNoLogoSelected = 'kein Wappen ausgewählt';
