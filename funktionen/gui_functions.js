@@ -294,6 +294,17 @@ function Bestaetigung(link, text) {
 	}
 }
 
+Element.prototype.closestExcluding = function(selector, excludeSelector) {
+	let el = this;
+	while (el) {
+		if (el.matches(selector) && !el.matches(excludeSelector)) {
+			return el;
+		}
+		el = el.parentElement;
+	}
+	return null;
+};
+
 // closest() for IE
 if (!Element.prototype.matches)
     Element.prototype.matches = Element.prototype.msMatchesSelector || 

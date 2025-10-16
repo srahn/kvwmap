@@ -110,6 +110,7 @@ class Ressource extends PgObject {
 			$status_condition = "= 0";
 		}
 		$ressource->show = false;
+		$gui->debug->show('Suche Ressourcen die aktualisiert werden müssen mit SQL:', true);
 		$ressources = $ressource->find_where(
 			"
 				(von_eneka OR use_for_datapackage) AND
@@ -223,8 +224,7 @@ class Ressource extends PgObject {
 	 *  9 - Transformation fertig
 	 */
 	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $only_missing = false, $force = false) {
-		// $gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
-
+		$gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ' ohne Ressource id'), true);
 		$ressource = new Ressource($gui);
 		if ($ressource_id != null) {
 			$ressources = $ressource->find_where('id = ' . $ressource_id);
@@ -234,7 +234,11 @@ class Ressource extends PgObject {
 				SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0 AND status_id < 11;
 			");
 			if ($results[0]['num_running'] < 10) {
+				$gui->debug->show('Es laufen bereits ' . $results[0]['num_running'] . ' Updates.', true);
 				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running'], $force); // liefert nur die ersten 1 - 10 gefundenen zurück
+			}
+			else {
+				$gui->debug->show('Abbruch weil bereits 10 Updates laufen.', true);
 			}
 		}
 
@@ -245,8 +249,11 @@ class Ressource extends PgObject {
 				// Test it with a stack of pending ressources.
 				// if ($this->all_source_ressources_uptodate($ressource->get_id())) {
 					// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
+					if ($only_missing === false) {
+						$only_missing = $ressource->get('only_missing');
+					}
 					if ($gui->formvars['dry_run'] == 1) {
-						echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
+						echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '') . ($only_missing ? ' only_missing' : ' download all');
 					}
 					else {
 						$result = $ressource->run_update($method_only, $only_missing);
@@ -303,7 +310,7 @@ class Ressource extends PgObject {
 
 	function run_update($method_only = '', $only_missing = false) {
 		$this->debug->show('Update Ressource ' . $this->get_id(), true);
-		$this->update_status(1, $msg);
+		$this->update_status(1);
 
 		if ($this->must_be_executed('download', $method_only)) {
 			$result = $this->download($only_missing);
@@ -353,6 +360,7 @@ class Ressource extends PgObject {
 		}
 		$last_updated_at = date("Y-m-d H:i:s");
 		$this->update_status(0, '', $last_updated_at);
+		$this->gui->debug->show('run_update ' . $this->get_id() . ' am ' . $last_updated_at . ' beendet.', true);
 		return array(
 			'success' => true,
 			'msg' => $msg . '<br>Ressource ' . $this->get_id() . ' am ' . $last_updated_at . ' erfolgreich aktualisiert.'
@@ -391,7 +399,7 @@ class Ressource extends PgObject {
 	####################
 	function download($only_missing = false) {
 		// $this->debug->show('Starte Funktion download', true);
-		if ($this->get('download_method') != '') {
+		if ($this->get('download_method') != '' AND $this->get('download_method') != 'upload') {
 			$method_name = 'download_' . $this->get('download_method');
 			if (!method_exists($this, $method_name)) {
 				return array(
@@ -410,7 +418,7 @@ class Ressource extends PgObject {
 		}
 		return array(
 			'success' => true,
-			'msg' => 'Keine Downloadmethode angegeben.'
+			'msg' => 'Keine Downloadmethode ausgeführt.'
 		);
 	}
 	/**
@@ -610,11 +618,7 @@ class Ressource extends PgObject {
 				);
 			}
 
-			// urls.txt wird im Pfad oberhalb von download_path erwarte
-			$path_parts = explode('/', rtrim($download_path, '/'));
-			array_pop($path_parts);
-			$urls_file_path = implode('/', $path_parts) . '/';
-			$urls_file = $urls_file_path . 'urls.txt';
+			$urls_file = $this->get_urls_file();
 			if (!file_exists($urls_file)) {
 				return array(
 					'success' => false,
@@ -633,7 +637,7 @@ class Ressource extends PgObject {
 			// Script aufrufen zum Download der Dateien in urls.txt
 			$cmd = $parallel_download_script . ' ' . $urls_file . ' ' . $download_path . ' 10' . ($this->only_missing ? ' 1' : '');
 			$this->debug->show('Download Dateien aus urls.txt mit Befehl: ' . $cmd, true);
-			// // Befehl z.B. /var/www/apps/kvwmap/plugins/metadata/tools/download_parallel.sh /var/www/data/fdm/ressourcen/dgm/dgm1/NS/urls.txt /var/www/data/fdm/ressourcen/dgm/dgm1/NS/downloads/ 10
+			// // Befehl z.B. /var/www/apps/kvwmap/plugins/metadata/tools/download_parallel.sh /var/www/data/fdm/ressourcen/dgm/dgm1/NS/urls.txt /var/www/data/fdm/ressourcen/dgm/dgm1/NS/downloads/ 10 1
 			$descriptorspec = [
 				0 => ["pipe", "r"],  // stdin
 				1 => ["pipe", "w"],  // stdout
@@ -894,7 +898,10 @@ class Ressource extends PgObject {
 			mkdir($dest_path, 0777, true);
 		}
 		else {
-			array_map('unlink', glob("$dest_path/*.*"));
+			// Nicht löschen wenn nur fehlende Dateien ausgepackt werden sollen
+			if ($this->only_missing === false) {
+				array_map('unlink', glob("$dest_path/*.*"));
+			}
 		}
 
 		if ($this->get('download_method') === 'upload') {
@@ -903,8 +910,6 @@ class Ressource extends PgObject {
 			$zip_files = array(document_info($this->get('upload_file'), 'path'));
 			$this->debug->show('zipfiles: ' . implode(', ', $zip_files), true);
 		}
-
-
 		else {
 			// Daten wurden runtergeladen und liegen in download_path
 			$download_path = $this->get_full_path($this->get('download_path'));;
@@ -912,7 +917,7 @@ class Ressource extends PgObject {
 			$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
 			$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
 		}
-		$this->debug->show('Packe ZIP-Dateien ' . implode(', ', $zip_files) . ' aus nach ' . $dest_path, true);
+		$this->debug->show('Packe ZIP-Dateien aus:');
 		foreach ($zip_files as $zip_file) {
 			if (finfo_file($finfo, $zip_file) == 'application/zip') {
 				if ($this->only_missing == false OR !file_exists($dest_path . str_replace('.zip', '.tif', basename($zip_file)))) {
@@ -921,7 +926,7 @@ class Ressource extends PgObject {
 						$this->debug->show($zip_file . ' ausgepackt. ' . implode(', ', $result['files']), true);
 					}
 					else {
-						$err_msg[] = '<br>Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ID: ' . $this->get_id() . ' Überprüfen Sie die Schreibrechte im Verzeichnis ' . $dest_path;
+						$err_msg[] = "\nFehler beim Auspacken der Datei " . $zip_file . ' für Ressource ID: ' . $this->get_id() . ' Überprüfen Sie die Schreibrechte im Verzeichnis ' . $dest_path;
 					}
 				}
 			}
@@ -2043,22 +2048,22 @@ class Ressource extends PgObject {
 		$gdaltindex_params = $this->get('transform_command');
 		$gdaltindex_command = 'gdaltindex ' . $gdaltindex_params;
 		$this->debug->show("Erzeuge gdaltindex mit Befehl: " . $gdaltindex_command, true);
-		$descriptorspec = [
-			0 => ["pipe", "r"],  // stdin
-			1 => ["pipe", "w"],  // stdout
-			2 => ["pipe", "w"],  // stderr
-		];
-		$process = proc_open($gdaltindex_command, $descriptorspec, $pipes, dirname(__FILE__), null);
-		$stdout = stream_get_contents($pipes[1]);
-		fclose($pipes[1]);
-		$stderr = stream_get_contents($pipes[2]);
-		fclose($pipes[2]);
+		// $descriptorspec = [
+		// 	0 => ["pipe", "r"],  // stdin
+		// 	1 => ["pipe", "w"],  // stdout
+		// 	2 => ["pipe", "w"],  // stderr
+		// ];
+		// $process = proc_open($gdaltindex_command, $descriptorspec, $pipes, dirname(__FILE__), null);
+		// $stdout = stream_get_contents($pipes[1]);
+		// fclose($pipes[1]);
+		// $stderr = stream_get_contents($pipes[2]);
+		// fclose($pipes[2]);
 
-		// exec($gdaltindex_command, $output, $return_var);
-		if ($stderr != '') {
+		exec($gdaltindex_command, $output, $return_var);
+		if ($return_var !== 0) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Ausführen des Programms gdaltindex: ' . $stderr
+				'msg' => 'Fehler beim Ausführen des Programms gdaltindex: ' . implode(', ', $output)
 			);
 		}
 		return array(
@@ -2138,6 +2143,21 @@ class Ressource extends PgObject {
 		}
 		return $version;
 	}
+
+	/**
+	 * Liefert den Namen der Datei zurück, in der die Download-URL's liegen, die in
+	 * downloads abgelegt werden.
+	 * urls.txt wird von der Methode download_parallel_from_file im Pfad oberhalb von download_path erwarte
+	 */
+	function get_urls_file() {
+		$download_path = $this->get_full_path($this->get('download_path'));
+		$path_parts = explode('/', rtrim($download_path, '/'));
+		array_pop($path_parts);
+		$urls_file_path = implode('/', $path_parts) . '/';
+		$urls_file = $urls_file_path . 'urls.txt';
+		return $urls_file;
+	}
+
 }
 
 ?>

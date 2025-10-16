@@ -2152,7 +2152,7 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 			// $mail->WordWrap = 50;
 			// $mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
 			// $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
-			$mail->isHTML(true);
+			$mail->isHTML(false);
 			$mail->CharSet = "UTF-8";
 			$mail->Subject = $subject;
 			$mail->Body    = $message;

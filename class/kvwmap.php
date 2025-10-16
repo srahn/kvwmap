@@ -1472,7 +1472,7 @@ echo '			</table>
 						$this->user->rolle->polyquery
 					) ? '' : 'style="display: none"');
 				$legend .=  '<input ';
-				if($layer['selectiontype'] == 'radio'){
+				if ($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio'){
 					$legend .=  'type="radio" ';
 				}
 				else{
@@ -1481,7 +1481,7 @@ echo '			</table>
 				if($layer['queryStatus'] == 1){
 					$legend .=  'checked="true"';
 				}
-				$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled '.$style.'>';
+				$legend .=' name="pseudoqLayer'.$layer['Layer_ID'].'" disabled '.$style.'>';
 			}
 			$legend .=  '</td><td valign="top">';
 			// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
@@ -9588,21 +9588,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		if ($results[0]['success']) {
 			$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
-			if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
-				$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $this->invitation->get('email'), null, MAILREPLYADDRESS, $this->invitation->get_subject(), $this->invitation->get_body(), null, 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $this->invitation->get('vorname') . ' ' . $this->invitation->get('name'), PUBLISHERNAME);
-				if (!$mail) {
-					$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
-				}
-				else {
-					$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $this->invitation->get('email'));
-				}
-			}
-			else {
-				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
-					Zum Einladen per E-Mail<br>
-					klicken Sie <a href="mailto:' . $this->invitation->mailto_text() . '">hier</a>!<br>
-					Die E-Mail enthält den Link zur Einladung.');
-			}
+			$this->invitation_send_email($this->invitation);
 			$this->invitations_list();
 		}
 		else {
@@ -9620,6 +9606,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				array(
 					'token' => $this->formvars['token'],
 					'email' => $this->formvars['email'],
+					'anrede' => $this->formvars['anrede'],
 					'name' => $this->formvars['name'],
 					'vorname' => $this->formvars['vorname'],
 					'loginname' => $this->formvars['loginname'],
@@ -9647,6 +9634,32 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->invitation->delete();
 		$this->add_message('notice', 'Einladung erfolgreich gelöscht.');
 	}
+
+	function invitation_email() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
+		$this->invitation_send_email($this->invitation);
+		$this->invitation_formular();
+	}
+
+	function invitation_send_email($invitation) {
+		if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
+			$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $invitation->get('email'), null, MAILREPLYADDRESS, $invitation->get_subject(), $invitation->get_body(), null, 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $invitation->get('vorname') . ' ' . $invitation->get('name'), PUBLISHERNAME);
+			if (!$mail) {
+				$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
+			}
+			else {
+				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $invitation->get('email'));
+			}
+		}
+		else {
+			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+				Zum Einladen per E-Mail<br>
+				klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>
+				Die E-Mail enthält den Link zur Einladung.');
+		}
+	}
+
 	/**
 	 * @param array $attributes Attribut-Array des übergeordneten Layers
 	 * @param int $j Zähler in diesem Array mit dem SubForm-Attribut
