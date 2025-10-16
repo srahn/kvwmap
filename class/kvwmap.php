@@ -9194,6 +9194,24 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		);
 	}
 
+	/**
+	 * This function removes the given mapfile, header und footer templates and a wrapper file if they exist
+	 */
+	function remove_mapfile($mapfile, $wrapperfile) {
+		$msg = '';
+		if (file_exists(WMS_MAPFILE_PATH . $mapfile)) {
+			unlink(WMS_MAPFILE_PATH . $mapfile);
+		}
+		$wrapperpath = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE);
+		if (file_exists($wrapperpath . $wrapperfile)) {
+			unlink($wrapperpath . $wrapperfile);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ' und Wrapper-Datei ' . $wrapperfile . ' gelöscht.'
+		);
+	}
+
   /**
   * This function update layers settings of $formvars['selected_layer_id'] and
   * duplicate all layer that have the selected_layer_id in duplicate_from_layer_id
@@ -9347,6 +9365,34 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$stelle = new stelle($stellen_ids[$i], $this->pgdatabase);
 			$stelle->updateLayerParams();
 			$this->update_layer_parameter_in_rollen($stellen_ids[$i]);
+		}
+
+		$ows_mapfile_name = sonderzeichen_umwandeln($formvars['ows_mapfile_name'] ?? $formvars['name']) . '.map';
+		if ($formvars['ows_publication']) {
+			# Lade das MapObjekt (nur mit selected_layer_id)
+			global $admin_stellen;
+			$this->class_load_level = 2;
+			$this->formvars['only_layer_ids'] = $formvars['selected_layer_id'];
+			$start_stelle = $this->Stelle;
+			$ows_stelle_id = $formvars['ows_stelle_id'] ?? $admin_stellen[0];
+			$this->Stelle_ID = $ows_stelle_id;
+			$ows_stelle = new Stelle($ows_stelle_id, $this->pgdatabase);
+			$this->Stelle = $ows_stelle;
+			$this->loadMap('DataBase', array(), true); // Layer name immer aus Attribute Name
+			$result = $this->write_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
+			$this->Stelle_ID = $start_stelle_id; // setze Stelle_ID zurück
+			$this->Stelle = $start_stelle;
+		}
+		else {
+			$result = $this->remove_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
+		}
+
+		$this->t_visible = 5000;
+		if (!$result['success']) {
+			$this->add_message('error', $result['msg']);
+		}
+		else {
+			$this->add_message('notice', $result['msg']);
 		}
 
 		$this->update_duplicate_layers($formvars);
@@ -20746,7 +20792,9 @@ DO $$
 					'updatecycle',
 					'metalink',
 					'terms_of_use_link',
-					'comment'
+					'comment',
+					'ows_stelle_id',
+					'ows_publication'
 				) AS $key
 			) {
 				$attribute_sets[] = "" . $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
@@ -20817,7 +20865,9 @@ DO $$
 		# Schreibt alle Attribute, die getrimmt werden sollen
 		foreach(
 			array(
-				'connection'
+				'connection',
+				'ows_mapfile_name',
+				'ows_wrapper_name'
 			) AS $key
 		) {
 			if ($formvars[$key]	!= '') {
@@ -20904,7 +20954,7 @@ DO $$
 			WHERE
 				layer_id = " . $formvars['selected_layer_id'] . "
 		";
-		#echo '<br>SQL zum update eines Layers: ' . $sql;
+		// echo '<br>SQL zum update eines Layers: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>" . $sql, 4);
 		$ret = $this->db->execSQL($sql, 4, 1, true);
 		if (!$ret['success']) {
