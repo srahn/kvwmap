@@ -336,7 +336,8 @@ from
 
 	#labelitems_table tr:first-child:nth-last-child(2){
 		display: none;
-	}	
+	}
+
 </style>
 
 <table>
@@ -1016,6 +1017,83 @@ from
 								$this->strPleaseSelect
 							); ?>&nbsp;
 							<span data-tooltip="<?php echo $strWriteMapserverTemplatesHelp; ?>"></span>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right"><?php echo $strOWSPublication; ?></th>
+						<td colspan=2>
+							<input type="checkbox" name="ows_publication" value="1"
+								<?php echo ($this->formvars['ows_publication'] ? 'checked ' : ''); ?>onchange="document.getElementById('ows_publication_fields').style.display = this.checked ? 'table-row' : 'none';">
+							&nbsp;<span data-tooltip="<?php echo $strOWSPublicationHint; ?>"></span>
+						</td>
+					</tr>
+					<tr id="ows_publication_fields" style="display: <?php echo $this->formvars['ows_publication'] ? 'table-row' : 'none'; ?>">
+						<td colspan=3 style="border-top:1px solid #C3C7C3">
+							<div class="form-field">
+								<div class="form-label fetter">
+									<label><?php echo $this->strTask; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%"><?php
+									echo FormObject::createSelectField(
+										'ows_stelle_id',
+										array_map(
+											function($key) {
+												return array(
+													'value' => $this->formvars['selstellen']['ID'][$key],
+													'output' => $this->formvars['selstellen']['Bezeichnung'][$key]
+												);
+											},
+											array_keys($this->formvars['selstellen']['ID'])
+										),
+										$this->formvars['ows_stelle_id'],
+										1,
+										'width: 50%',
+										'',
+										'selstellen', // id
+										'',
+										''
+									); ?>&nbsp;<span data-tooltip="<? echo $strOWSStelleHint; ?>"></span>
+								</div>
+								<div style="clear: both; height: 5px;"></div>
+
+								<div class="form-label fetter">
+									<label><? echo $strMapFilePath; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%">
+									<? echo WMS_MAPFILE_PATH; ?>
+									&nbsp;<span data-tooltip="<? echo $strMapFilePathHint; ?>" ></span>
+									&nbsp;<? ($this->formvars['ows_mapfile_name'] != '' AND file_exists(WMS_MAPFILE_PATH . $this->formvars['ows_mapfile_name']) ? '<a href="show_map_file">erzeugte Map-Datei</a>' : ''); ?>
+								</div>
+								<div style="clear: both; height: 5px;"></div>
+
+								<div class="form-label fetter">
+									<label><? echo $strMapFileName; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%">
+									<input type="text" name="ows_mapfile_name" value="<?php echo $this->formvars['ows_mapfile_name']; ?>" size="50" placeholder="<? echo $this->formvars['name']; ?>" style="width: 50% !important">
+									&nbsp;<span data-tooltip="<? echo $strMapFileNameHint; ?>" ></span>
+									&nbsp;<? ($this->formvars['ows_mapfile_name'] != '' AND file_exists(WMS_MAPFILE_PATH . $this->formvars['ows_mapfile_name']) ? '<a href="show_map_file">erzeugte Map-Datei</a>' : ''); ?>
+								</div>
+								<div style="clear: both; height: 5px;"></div>
+
+								<div class="form-label fetter">
+									<label><? echo $strOWSWrapperPath; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%">
+									<? echo str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE); ?>
+									&nbsp;<span data-tooltip="<? echo $strOWSWrapperPathHint; ?>" ></span>
+									&nbsp;<? ($this->formvars['ows_wrapper_name'] != '' AND file_exists(WMS_MAPFILE_PATH . $this->formvars['ows_wrapper_name']) ? '<a href="show_wrapper_file">erzeugte Wrapper-Datei</a>' : ''); ?>
+								</div>
+								<div style="clear: both; height: 5px;"></div>
+
+								<div class="form-label fetter">
+									<label><? echo $strOWSWrapperName; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%">
+									<input type="text" name="ows_wrapper_name" value="<?php echo $this->formvars['ows_wrapper_name']; ?>" size="50"  style="width: 50% !important">
+									&nbsp;<span data-tooltip="<? echo $strOWSWrapperNameHint; ?>"></span>
+								</div>
+							</div>
 						</td>
 					</tr>
 				</table>
