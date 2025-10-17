@@ -1201,7 +1201,7 @@
 			}
 			$datapart .= '<select class="' . $field_class . '" tabindex="1" title="'.$alias.'" style="'.$select_width.'"';
 			if($req_by != ''){
-				$onchange = ($onchange ? $onchange . ';' : '') . 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributenames).'\'));';
+				$onchange = $onchange . 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributenames).'\'));';
 			}
 			$datapart .= ' onchange="'.$onchange.'" ';
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
