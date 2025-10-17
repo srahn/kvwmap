@@ -1495,7 +1495,7 @@ class user {
 			$password_columns = ",
 				password = kvwmap.sha1('" . pg_escape_string(trim($userdaten['password2'])) . "'),
 				password_setting_time = CURRENT_TIMESTAMP,
-				password_expired = " . ($userdaten['reset_password'] ? '1' : '0') . "
+				password_expired = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
 			";
 		}
 
