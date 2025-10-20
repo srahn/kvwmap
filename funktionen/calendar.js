@@ -38,6 +38,9 @@ function CalendarJS() {
 						this.parEl = document.getElementById('calendar_'+elementid);
 						this.attributefield = document.getElementById(elementid);
 	        	value = this.attributefield.value;
+						if (type == 'timestamptz') {
+							type = 'timestamp';
+						}
 	        	if(value != ''){
 							if(type == 'date'){
 								dateElements = value.split('.');
@@ -47,7 +50,7 @@ function CalendarJS() {
 								timeElements = value.split(':');
 								dateElements = [0, 0, 0];		// dummy
 							}
-							else if(type == 'timestamp' || type == 'timestamptz'){
+							else if(type == 'timestamp'){
 								type = 'timestamp';
 								elements = value.split(' ');
 								dateElements = elements[0].split('.');
