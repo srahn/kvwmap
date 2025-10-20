@@ -275,6 +275,9 @@ class GUI {
 			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
+			if ($this->formvars['attribute'] == $attributenames[$i]) {
+				$selected_value = $value;
+			}
 		}
 		#echo $sql;
 		@$ret = $layerdb->execSQL($sql, 4, 0);
@@ -286,7 +289,7 @@ class GUI {
 						$html .= '<option value="">-- Bitte Auswählen --</option>';
 					}
 					while($rs = pg_fetch_array($ret[1])){
-						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
+						$html .= '<option value="'.$rs['value'].'" ' . ($selected_value == $rs['value'] ? 'selected="true"' : '') . '>'.$rs['output'].'</option>';
 					}
 				}break;
 				
