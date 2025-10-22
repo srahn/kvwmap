@@ -232,8 +232,10 @@ function install() {
 			*/
 			/*
 		";
-		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
-		*/
+		$pgsqlKvwmapDb->execSQL($sql, 0, 1); */
+		
+		?>
+		
 		<h1>Lege Tabellen und Inhalte für die Administration an.</h1><?
 		$kvwmap_install_file = $installpath . LAYOUTPATH . 'db/postgresql/data/kvwmap_install.sql';
 		$sql = file_get_contents($kvwmap_install_file);
