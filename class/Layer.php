@@ -37,9 +37,8 @@ class Layer extends PgObject {
 				"fk" => 'layer_id'
 			)
 		);
-		parent::__construct($gui, 'kvwmap', 'layer');
+		parent::__construct($gui, 'kvwmap', 'layer', 'layer_id');
 		$this->stelle_id = ($gui->stelle ? $gui->stelle->id : null);
-		$this->identifier = 'layer_id';
 		$this->geometry_types = array('Point', 'LineString', 'Polygon');
 		$this->geom_column = 'geom';
 	}
@@ -81,7 +80,7 @@ class Layer extends PgObject {
 				'select' => 'l.*',
 				'from' => "
 					u_groups g JOIN
-					layer l ON (g.id = l.Gruppe)",
+					layer l ON (g.id = l.gruppe)",
 				'where' => "
 					g.obergruppe = " . $obergruppe_id . " AND
 					l.Name = '" . $layer_name . "'"
