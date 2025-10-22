@@ -18136,7 +18136,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$layer['privileg'] 				= 0;
 		$layer['export_privileg'] = 1;
 		$layer['editable'] 				= 1;
-		$layer['listed'] 					= 1;
+		$layer['listed'] 					= 0;
 		$layer['drawingorder'] 		= 100000;
 		$layer['shared_from'] 		= $this->user->id;
 
