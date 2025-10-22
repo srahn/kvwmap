@@ -9370,7 +9370,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->update_layer_parameter_in_rollen($stellen_ids[$i]);
 		}
 
-		$ows_mapfile_name = sonderzeichen_umwandeln($formvars['ows_mapfile_name'] ?? $formvars['name']) . '.map';
+		$ows_mapfile_name = sonderzeichen_umwandeln($formvars['ows_mapfile_name'] ?: $formvars['name']) . '.map';
+		$ows_publication_changed = false;
 		if ($formvars['ows_publication']) {
 			# Lade das MapObjekt (nur mit selected_layer_id)
 			global $admin_stellen;
@@ -9385,17 +9386,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$result = $this->write_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
 			$this->Stelle_ID = $start_stelle_id; // setze Stelle_ID zurück
 			$this->Stelle = $start_stelle;
+			$ows_publication_changed = true;
 		}
 		else {
-			$result = $this->remove_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
+			if ($formvars['ows_mapfile_name'] != '') {
+				$result = $this->remove_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
+				$ows_publication_changed = true;
+			}
 		}
 
-		$this->t_visible = 5000;
-		if (!$result['success']) {
-			$this->add_message('error', $result['msg']);
-		}
-		else {
-			$this->add_message('notice', $result['msg']);
+		if ($ows_publication_changed) {
+			$this->t_visible = 5000;
+			if (!$result['success']) {
+				$this->add_message('error', $result['msg']);
+			}
+			else {
+				$this->add_message('notice', $result['msg']);
+			}
 		}
 
 		$this->update_duplicate_layers($formvars);
@@ -14166,7 +14173,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->menue->create();
 		}
-		if ($results) {
+		if ($results['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
 			$this->menuedaten = Menue::find($this, '', 'name');
 			$this->titel='Menüdaten';
