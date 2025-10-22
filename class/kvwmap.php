@@ -2060,7 +2060,7 @@ echo '			</table>
 					$map = new mapObj(DEFAULTMAPFILE);
 				}
 
-        $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+				$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 				$num_default_layers = $map->numlayers;
 
 				# Allgemeine Parameter
@@ -2107,8 +2107,6 @@ echo '			</table>
 						$map->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 					}
 				}
-
-
 
 				# OWS Metadaten
 				$map->web->metadata->set("ows_title", $this->Stelle->ows_title ?: OWS_TITLE);
@@ -2317,7 +2315,6 @@ echo '			</table>
 		return $drawing_order;
 	}
 
-	
 	function loadlayer($map, $layerset, $strict_layer_name = false) {
 		$this->debug->write('<br>Lade Layer: ' . $layerset['name'], 4);
 		if ($strict_layer_name) {
@@ -9374,14 +9371,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->class_load_level = 2;
 			$this->formvars['only_layer_ids'] = $formvars['selected_layer_id'];
 			$start_stelle = $this->Stelle;
+			$start_extent = $this->user->rolle->oGeorefExt;
 			$ows_stelle_id = $formvars['ows_stelle_id'] ?? $admin_stellen[0];
 			$this->Stelle_ID = $ows_stelle_id;
 			$ows_stelle = new Stelle($ows_stelle_id, $this->pgdatabase);
 			$this->Stelle = $ows_stelle;
 			$this->loadMap('DataBase', array(), true); // Layer name immer aus Attribute Name
+			$this->map->web->metadata->set("ows_onlineresource", OWS_SERVICE_ONLINERESOURCE . $this->formvars['ows_wrapper_name']);
+			$this->map->web->metadata->set("ows_service_onlineresource", OWS_SERVICE_ONLINERESOURCE . $this->formvars['ows_wrapper_name']);
+			$this->map->web->metadata->set("wms_extent", $ows_stelle->MaxGeorefExt->minx . ' ' . $ows_stelle->MaxGeorefExt->miny . ' ' . $ows_stelle->MaxGeorefExt->maxx . ' ' . $ows_stelle->MaxGeorefExt->maxy);
 			$result = $this->write_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
 			$this->Stelle_ID = $start_stelle_id; // setze Stelle_ID zurück
 			$this->Stelle = $start_stelle;
+			$this->user->rolle->oGeorefExt = $start_extent;
 		}
 		else {
 			$result = $this->remove_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
