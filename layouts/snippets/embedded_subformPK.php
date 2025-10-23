@@ -83,7 +83,7 @@
 										<td class="gle-attribute-name" style="height: auto">
 										<? if ($layer['attributes']['labeling'][$j] != 2) { ?>
 											<a href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 1, '', '', '&orderby<? echo $layer['Layer_ID']; ?>=<? echo $layer['attributes']['name'][$j]; ?>')" title="Sortieren nach <? echo $layer['attributes']['name'][$j]; ?>"><?
-												echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, false); ?>
+												echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, false, NULL, false); ?>
 											</a>
 										<? } ?>
 										</td><?

@@ -56,7 +56,7 @@
 		}
 	}
 
-	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true, $field_id = NULL) {
+	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true, $field_id = NULL, $calendar = true) {
 		$field_id = $field_id ?: $layer_id.'_'.$attributes['name'][$j].'_'.$k;
 		$datapart = '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
@@ -81,7 +81,7 @@
 		}
 		$datapart .= attribute_tooltip($attributes, $j);
 
-		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
+		if($calendar AND in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 			$datapart .= '<td align="right" style="position: relative">'.calendar($attributes['type'][$j], $field_id, $attributes['privileg'][$j]).'</td>';
 		}
 		$datapart .= '</td></tr></table>';
