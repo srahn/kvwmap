@@ -2152,6 +2152,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	word-wrap: break-word;
 }
 
+.list_edit_div {
+	overflow-y:auto; 
+	max-height: 400px;
+}
+
 .gle1_table{
 	border-collapse: collapse;
 	position: relative;
