@@ -1049,7 +1049,7 @@ from
 										1,
 										'width: 50%',
 										'',
-										'selstellen', // id
+										'ows_stelle_id', // id
 										'',
 										''
 									); ?>&nbsp;<span data-tooltip="<? echo $strOWSStelleHint; ?>"></span>

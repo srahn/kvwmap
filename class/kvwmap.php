@@ -4658,6 +4658,9 @@ echo '			</table>
 			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
+			if ($this->formvars['attribute'] == $attributenames[$i]) {
+				$selected_value = $value;
+			}
 		}
 		#echo $sql;
 		@$ret = $layerdb->execSQL($sql, 4, 0);
@@ -4669,7 +4672,7 @@ echo '			</table>
 						$html .= '<option value="">-- Bitte Auswählen --</option>';
 					}
 					while($rs = pg_fetch_array($ret[1])){
-						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
+						$html .= '<option value="'.$rs['value'].'" ' . ($selected_value == $rs['value'] ? 'selected="true"' : '') . '>'.$rs['output'].'</option>';
 					}
 				}break;
 				
@@ -9364,7 +9367,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->update_layer_parameter_in_rollen($stellen_ids[$i]);
 		}
 
-		$ows_mapfile_name = sonderzeichen_umwandeln($formvars['ows_mapfile_name'] ?? $formvars['name']) . '.map';
+		$ows_mapfile_name = sonderzeichen_umwandeln($formvars['ows_mapfile_name'] ?: $formvars['name']) . '.map';
+		$ows_publication_changed = false;
 		if ($formvars['ows_publication']) {
 			# Lade das MapObjekt (nur mit selected_layer_id)
 			global $admin_stellen;
@@ -9384,17 +9388,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->Stelle_ID = $start_stelle_id; // setze Stelle_ID zurück
 			$this->Stelle = $start_stelle;
 			$this->user->rolle->oGeorefExt = $start_extent;
+			$ows_publication_changed = true;
 		}
 		else {
-			$result = $this->remove_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
+			if ($formvars['ows_mapfile_name'] != '') {
+				$result = $this->remove_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
+				$ows_publication_changed = true;
+			}
 		}
 
-		$this->t_visible = 5000;
-		if (!$result['success']) {
-			$this->add_message('error', $result['msg']);
-		}
-		else {
-			$this->add_message('notice', $result['msg']);
+		if ($ows_publication_changed) {
+			$this->t_visible = 5000;
+			if (!$result['success']) {
+				$this->add_message('error', $result['msg']);
+			}
+			else {
+				$this->add_message('notice', $result['msg']);
+			}
 		}
 
 		$this->update_duplicate_layers($formvars);
@@ -11505,6 +11515,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					for ($i = 0; $i < count($form_fields); $i++) {
 						if ($form_fields[$i] != '') {
 							$element = explode(';', $form_fields[$i]);
+							$this->sanitize([$form_fields[$i] => $element[6]], true);
 							$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
 							$dont_use_for_new = $layerset[0]['attributes']['dont_use_for_new'][$layerset[0]['attributes']['indizes'][$element[1]]];
 							if (
@@ -14164,7 +14175,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->menue->create();
 		}
-		if ($results) {
+		if ($results['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
 			$this->menuedaten = Menue::find($this, '', 'name');
 			$this->titel='Menüdaten';
@@ -18135,7 +18146,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$layer['privileg'] 				= 0;
 		$layer['export_privileg'] = 1;
 		$layer['editable'] 				= 1;
-		$layer['listed'] 					= 1;
+		$layer['listed'] 					= 0;
 		$layer['drawingorder'] 		= 100000;
 		$layer['shared_from'] 		= $this->user->id;
 
@@ -19502,7 +19513,7 @@ class db_mapObj{
 								# --------- weitere Optionen -----------
 								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
 									 # auch die oid abfragen
-									 $attributes['options'][$i] = str_replace(' from ', ', ' . $layer['oid'] . ' as oid from ', strtolower($optionen[0]));
+									 $attributes['options'][$i] = str_ireplace(' from ', ', ' . $layer['oid'] . ' as oid from ', $optionen[0]);
 								}
 								# ------------ SQL ---------------------
 								else {

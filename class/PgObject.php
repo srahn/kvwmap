@@ -427,7 +427,7 @@ class PgObject {
 
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
-				" . implode(', ', $this->getKeys()) . "
+				" . implode(', ', array_map(function($key) { return '"' . $key . '"'; }, $this->getKeys())) . "
 			)
 			VALUES (" .
 				implode(

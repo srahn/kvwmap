@@ -152,6 +152,11 @@
 		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
 			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
+
+			if ($attributes['form_element_type'][$j] == 'Auswahlfeld' AND $attributes['req_by'][$j] != '') {
+				$onchange .= 'update_require_attribute(this, \''.$attributes['req_by'][$j].'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributes['name']).'\'));';
+			}
+
 			$datapart .= '<input
 				type="hidden"
 				class="'.$field_class.'"
@@ -166,6 +171,7 @@
 			$attributes2 = $attributes;
 			#$attributes2['name'][$j] = '';		// rausgenommen weil sonst in dynamischen Links nicht richtig ersetzt wird, aber es hatte wahrscheinlich einen Grund
 			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
+			$attributes2['req_by'][$j] = '';				// Die Array-Elemente sollen bei abhängigen Auswahlfeldern nicht die Auswahlmöglichkeiten neu laden, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);
 			$dataset2 = [];
@@ -1201,7 +1207,7 @@
 			}
 			$datapart .= '<select class="' . $field_class . '" tabindex="1" title="'.$alias.'" style="'.$select_width.'"';
 			if($req_by != ''){
-				$onchange = 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributenames).'\'));'.$onchange;
+				$onchange = 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributenames).'\'));' . $onchange;
 			}
 			$datapart .= ' onchange="'.$onchange.'" ';
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';

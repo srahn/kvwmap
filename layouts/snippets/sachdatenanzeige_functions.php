@@ -1159,7 +1159,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		var id1 = id.substring(0, 1);
 		var id2 = id.substring(1);
 		//var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
-		var scope = object.closestExcluding('table', '.gle_arrayelement_table'); // zuerst in der gleichen Tabelle suchen aber die Array-Element-Table ignorieren
+		var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
 		if (scope.querySelector('#\\3' + id1 + ' ' + id2 + '_' + attributename + '_' + k) == undefined) {
 			scope = document; // ansonsten global
 		}
