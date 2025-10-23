@@ -72,7 +72,7 @@
 		else {
 			if ($this->formvars['list_edit']) {
 				$table_id = rand(0, 100000);			 ?>
-				<div style="overflow-y:auto; max-height: 500px">
+				<div class="list_edit_div">
 				<table id="<? echo $table_id; ?>" border="1" cellspacing="0" cellpadding="2" style="border-collapse: collapse" width="100%">
 					<tr><?
 						for ($j = 0; $j < count($attributes['name']); $j++) {
