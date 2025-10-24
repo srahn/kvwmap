@@ -9567,17 +9567,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (!$this->layergruppe->get('selectable_for_shared_layers')) {
 			$this->layergruppe->set('selectable_for_shared_layers', 0);
 		}
+		if (!$this->layergruppe->get('checkbox')) {
+			$this->layergruppe->set('checkbox', 0);
+		}
 		$results = $this->layergruppe->validate();
 		if (empty($results)) {
 			$results = $this->layergruppe->create();
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich angelegt.');
 			$this->formvars['order'] = 'gruppenname';
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
-			$this->add_message('array', array_values($results));
+			$this->add_message('error', $results['msg']);
 			$this->Layergruppe_Editor();
 		}
 	}
