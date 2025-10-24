@@ -95,6 +95,9 @@ convert_nas_files() {
 		
 			#/usr/local/gdal/bin/ogr2ogr -f PGDump -append -a_srs EPSG:25833 -nlt CONVERT_TO_LINEAR -lco SCHEMA=alkis -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "../config/alkis-schema.gfs" --config NAS_NO_RELATION_LAYER YES /var/www/data/alkis/ff/import/NAS/nba_landmv_lro_160112_1207von2024_288000_5986000.sql /var/www/data/alkis/ff/import/NAS/nba_landmv_lro_160112_1207von2024_288000_5986000.xml
 
+			# Beispiel für Import eines Bestandsdatenauszuges
+			# ogr2ogr -f "PostgreSQL" PG:"dbname=kvwmapsp user=kvwmap host=pgsql" /var/www/data/alkis/ff/import/auszuege/248137_0_ergb_0000IQAU.xml -progress -skipfailures -overwrite -lco GEOMETRY_NAME=geom -lco FID=ogc_fid -lco SCHEMA=alkis_auszug -nlt PROMOTE_TO_MULTI -nlt CONVERT_TO_LINEAR -explodecollections -s_srs EPSG:25833 -t_srs EPSG:25833
+
 			if [ -n "$(grep -i 'Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Konvertieren der Datei: ${NAS_FILE}."
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
