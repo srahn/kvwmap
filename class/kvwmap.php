@@ -9480,7 +9480,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->layergruppen = LayerGroup::find(
 			$this,
 			'', # default alle
-			($this->formvars['order'] == '' ? 'gruppenname' : $this->formvars['order'])  # default nach Name
+			($this->formvars['order'] == '' ? 'gruppenname' : '"' . $this->formvars['order'] . '"')  # default nach Name
 		);
 		$this->main = 'layergroups.php';
 		$this->output();
