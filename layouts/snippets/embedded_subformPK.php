@@ -7,6 +7,7 @@
 	$attributes = $layer['attributes'];
 
 	$size = 50;
+	$select_width = 'width: 235px';
 
 	$doit = false;
 	$anzObj = count_or_0($layer['shape']);
@@ -71,6 +72,7 @@
 		else {
 			if ($this->formvars['list_edit']) {
 				$table_id = rand(0, 100000);			 ?>
+				<div class="list_edit_div">
 				<table id="<? echo $table_id; ?>" border="1" cellspacing="0" cellpadding="2" style="border-collapse: collapse" width="100%">
 					<tr><?
 						for ($j = 0; $j < count($attributes['name']); $j++) {
@@ -115,6 +117,9 @@
 										$explosion = explode(';', $layer['attributes']['group'][$j]);
 										if ($explosion[1] != 'collapsed') { ?>
 											<td id="value_<? echo $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '_' . $k; ?>" <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
+												if (in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
+													echo calendar($layer['attributes']['type'][$j], $layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
+												}
 												echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname); ?>
 											</td><?
 										}
@@ -133,6 +138,7 @@
 						$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 					} ?>
 				</table>
+				</div>
 
 				<script type="text/javascript">
 					var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
