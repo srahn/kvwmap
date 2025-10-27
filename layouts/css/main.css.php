@@ -487,7 +487,9 @@ span[data-tooltip]:hover::after {
 	border-radius: 2px;
 	box-shadow: 1px 1px 6px 1px #ddd;
   position: absolute;
-	width: 200px;
+	width: max-content;
+	min-width: 200px;
+	max-width: 400px;
   top: 1px;
   right: 0;
   left: 0;
@@ -509,7 +511,9 @@ span[data-tooltip]:hover::after {
 
 .custom-select .dropdown li {
   display: flex;
-  align-items: center;
+  align-items: baseline;
+	max-width: 400px;
+	min-width: 200px;
   background-color: #fff;
 	min-height: 20px;
   padding: 3px;
