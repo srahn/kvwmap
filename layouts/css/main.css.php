@@ -521,6 +521,10 @@ span[data-tooltip]:hover::after {
   cursor: pointer;
 }
 
+.custom-select .dropdown li span {
+	white-space: nowrap;
+}
+
 .custom-select .dropdown li:not(:last-child) {
   border-bottom: 1px solid #cdcdcd;
 }
@@ -2643,7 +2647,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .layerOptions span, #legendOptions span, label{
 	color: #252525;
-	white-space: nowrap;
 }
 
 .layerOptions input[type="text"]{
