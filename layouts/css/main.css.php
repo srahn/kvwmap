@@ -1777,8 +1777,7 @@ a .preview_image{
 	max-width: 125px;
 	max-height: 125px;
 	position: absolute;
-	top: 0px;
-	right: 0px;
+	top: 5px;
 	transition: all 0.25s ease;
 }
 
@@ -1787,7 +1786,6 @@ a:hover .preview_image{
 	max-height: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
 	transition: all 0.25s ease;
 	transition-delay: 0.2s;
-	right: -70px;
 	z-index: 9999999999;
 }
 
