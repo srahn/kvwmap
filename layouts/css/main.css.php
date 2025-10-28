@@ -521,6 +521,10 @@ span[data-tooltip]:hover::after {
   cursor: pointer;
 }
 
+.custom-select .dropdown li span {
+	white-space: nowrap;
+}
+
 .custom-select .dropdown li:not(:last-child) {
   border-bottom: 1px solid #cdcdcd;
 }
