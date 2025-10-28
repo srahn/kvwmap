@@ -241,6 +241,7 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
     SET session_replication_role = 'origin';
     COMMIT;
   ";
+  file_put_contents(LOGPATH . 'mysql2postgres_dump.sql', $sql);
   $ret = $this->pgdatabase->execSQL($sql, 0, 0);
 
   # Sequenzen auf Max-Werte setzen
