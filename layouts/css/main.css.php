@@ -1789,6 +1789,10 @@ a:hover .preview_image{
 	z-index: 9999999999;
 }
 
+.tr_show a .preview_image{
+	position: relative;
+}
+
 .preview_doc{}
 
 .tr_show{}
