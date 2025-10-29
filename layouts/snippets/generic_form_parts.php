@@ -651,7 +651,7 @@
 						}
 						switch ($preview['doc_type']) {
 							case 'local_img' : { # Bilder mit Vorschaubild
-								$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_image" src="' . $preview['thumb_src'] . '" ' . $onmouseover . '></a>';
+								$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_image' . ($hover_preview ? '_hover' : '') . '" src="' . $preview['thumb_src'] . '" ' . $onmouseover . '></a>';
 							} break;
 
 							case 'local_doc' : case 'remote_url' : { # lokale Dateien oder fremde URLs

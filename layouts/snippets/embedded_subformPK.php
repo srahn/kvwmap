@@ -209,6 +209,7 @@
 										switch ($preview['doc_type']) {
 											case 'local_img' : {	# Bilder mit Vorschaubild
 												$preview_link = '<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_image" src="' . $preview['thumb_src'] . '"></a>';
+												$preview_link = '<table><tr><td class="td_preview_image">' . $preview_link . '</td></tr></table>';
 											}break;
 											
 											case 'local_doc' : case 'remote_url' : {	# lokale Dateien oder fremde URLs
