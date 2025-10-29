@@ -1769,9 +1769,12 @@ span.black {
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
 
 .td_preview_image{
-	padding-top: 125px;
+	padding-top: 125px;	
+  padding-right: 125px;
+	position: relative;
 }
 
+/* Klasse für Bilder, die sich beim Hovern vergrößern (alle die nicht im Rasterlayout angezeigt werden) */
 a .preview_image{
 	border:1px solid black;
 	max-width: 125px;
@@ -1789,8 +1792,12 @@ a:hover .preview_image{
 	z-index: 9999999999;
 }
 
-.tr_show a .preview_image{
-	position: relative;
+/* Klasse für Bilder im Rasterlayout, die bei Mouseover eine Vorschau rechts oben in der Ecke anzeigen */
+a .preview_image_hover{
+	border:1px solid black;
+	width: auto !important;
+	max-width: 125px;
+	max-height: 125px;
 }
 
 .preview_doc{}
@@ -1824,7 +1831,6 @@ a:hover .preview_image{
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input{width:130px;font-size: <? echo $font_size_factor * 15; ?>px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input[type=file]{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}		/* Das FileUpload-Inputfeld soll auch versteckt werden*/
-.raster_record .tr_show .preview_image{width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
 .raster_record .tr_show .preview_doc{width: auto;}																/* Vorschaubilder für andere Dokumente nicht */
 .raster_record .tr_show .buttonlink{display: none}
 /* Alle Attribute: */
@@ -1848,8 +1854,6 @@ a:hover .preview_image{
 .raster_record_open span{line-height:16px;font-size: <? echo $font_size_factor * 15; ?>px;transition: all 0.25s ease;}
 .raster_record_open img{width: auto; transition: all 0.25s ease;}
 .raster_record_open .tr_hide{visibility:visible;}
-.raster_record_open .preview_image{width: 125px;transition: all 0.25s ease;}
-.raster_record_open .preview_image:hover{width: 125px;transition: all 0.25s ease;}
 
 
 #layer	h2{
@@ -2179,6 +2183,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .subFormListItem{
 	height: 20px;
 	padding: 0 0 8px 0;
+	vertical-align: top;
 }
 
 .subFormListItem > a{
