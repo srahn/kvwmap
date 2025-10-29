@@ -1,5 +1,5 @@
 <?
-  ini_set('memory_limit', '8192M');
+  ini_set('memory_limit', '16000M');
   global $GUI;
 	global $kvwmap_plugins;
 
@@ -277,6 +277,7 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
     $result[0] = false; # Migration bestätigen
   }
   else {
+    echo substr($ret['msg'], 0, 1000);
     $result[0] = true; # Migration nicht bestätigen
   }
 
