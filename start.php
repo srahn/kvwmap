@@ -91,6 +91,23 @@ if ($gast_export === false) {
 	# login
 	$show_login_form = false;
 	$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
+
+	if (is_2fa_registration()) {
+    $code = trim($_POST['code']);
+    if (verify_totp($secret, $code)) {
+				$user = new PgObject($gui, 'kvwmap' ,'user');
+        echo 'UPDATE users SET totp_secret = ? WHERE username = ?';
+        #$_SESSION['user'] = $username; ?
+				$_SESSION['angemeldet'] = true;
+        unset($_SESSION['temp_user']);
+				unset($_SESSION['secret']);
+        header("Location: index.php");
+        exit;
+    } else {
+        echo "❌ Ungültiger Code, bitte erneut versuchen.";
+    }
+	}
+
 	if (is_logged_in()) {
 		$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
 		if ($_SESSION['login_name'] == '') {
@@ -158,6 +175,16 @@ if ($gast_export === false) {
 					$GUI->debug->write('Nutzer mit login_name ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);
 					if ($GUI->pgdatabase->success) {
 						if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'], $GUI->formvars['passwort'])) {
+							if (true) {
+								$_SESSION['temp_user'] = $GUI->formvars['login_name'];
+								if ($GUI->user->totp_secret != '') {
+									header("Location: verify_2fa.php");
+								} 
+								else {
+									#header("Location: enable_2fa.php");
+									include('enable_2fa.php');
+								}
+							}
 							$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
 							set_session_vars($GUI->formvars);
 							$GUI->user->update_tokens($_SESSION['csrf_token']);
@@ -625,6 +652,10 @@ function is_logged_in_stelle() {
 
 function is_logged_out() {
 	return !is_logged_in();
+}
+
+function is_2fa_registration() {
+	return ($_SESSION['secret'] != '' AND $_SESSION['temp_user'] != '');
 }
 
 /**
