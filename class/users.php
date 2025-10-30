@@ -861,6 +861,7 @@ class user {
 		$this->tokens = $rs['tokens'];
 		$this->num_login_failed = $rs['num_login_failed'];
 		$this->login_locked_until = $rs['login_locked_until'];
+		$this->totp_secret = $rs['totp_secret'];
 	}
 
 	/*
@@ -1158,6 +1159,20 @@ class user {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 	}
+
+	function update_totp_secret($secret) {
+		$sql = "
+			UPDATE
+				kvwmap.user
+			SET
+				totp_secret = '" . $secret . "'
+			WHERE
+				id = " . $this->id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->agreement_accepted - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
+	}	
 
 	function setOptions($stelle_id, $formvars) {
 		$nImageWidth = '';
