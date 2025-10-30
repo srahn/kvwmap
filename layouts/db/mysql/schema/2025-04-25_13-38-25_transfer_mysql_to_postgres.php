@@ -227,21 +227,27 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
 	";
   $ret = $this->database->execSQL($sql,4, 1);
   $res = $this->database->result;
+
+  $sql = "BEGIN;";
+  $ret = $this->pgdatabase->execSQL($sql, 0, 0);
+
   while ($r = $res->fetch_assoc()){
-    $inserts .= implode(chr(13), $this->database->create_insert_dump($r['table_name'], '', 'SELECT * FROM '. $r['table_name'])['insert']);
+    $inserts = implode(chr(13), $this->database->create_insert_dump($r['table_name'], '', 'SELECT * FROM '. $r['table_name'])['insert']);
+    $sql = "
+      SET search_path = kvwmap, public;
+      SET session_replication_role = 'replica';
+      " . $inserts . "
+      SET session_replication_role = 'origin';
+    ";
+    $ret = $this->pgdatabase->execSQL($sql, 0, 0);
+    if (!$ret['success']) {
+      echo substr($ret['msg'], 0, 1000).'<br>';
+    }
   }
   
   #echo $inserts;
 
-  $sql = "
-    BEGIN;
-    SET search_path = kvwmap, public;
-    SET session_replication_role = 'replica';
-    " . $inserts . "
-    SET session_replication_role = 'origin';
-    COMMIT;
-  ";
-  file_put_contents(LOGPATH . 'mysql2postgres_dump.sql', $sql);
+  $sql = "COMMIT;";
   $ret = $this->pgdatabase->execSQL($sql, 0, 0);
 
   # Sequenzen auf Max-Werte setzen
