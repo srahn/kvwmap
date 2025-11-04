@@ -232,16 +232,24 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
   $ret = $this->pgdatabase->execSQL($sql, 0, 0);
 
   while ($r = $res->fetch_assoc()){
-    $inserts = implode(chr(13), $this->database->create_insert_dump($r['table_name'], '', 'SELECT * FROM '. $r['table_name'])['insert']);
-    $sql = "
-      SET search_path = kvwmap, public;
-      SET session_replication_role = 'replica';
-      " . $inserts . "
-      SET session_replication_role = 'origin';
-    ";
-    $ret = $this->pgdatabase->execSQL($sql, 0, 0);
-    if (!$ret['success']) {
-      echo substr($ret['msg'], 0, 1000).'<br>';
+    $inserts = $this->database->create_insert_dump($r['table_name'], '', 'SELECT * FROM '. $r['table_name'])['insert'];
+
+    $batchSize = 1000;
+    $total = count($inserts);
+    
+    for ($i = 0; $i < $total; $i += $batchSize) {
+      $batch = array_slice($inserts, $i, $batchSize);    
+      $sql = "
+        SET search_path = kvwmap, public;
+        SET session_replication_role = 'replica';
+        " . implode("\n", $batch) . "
+        SET session_replication_role = 'origin';
+      ";
+      $ret = $this->pgdatabase->execSQL($sql, 0, 0);
+      if (!$ret['success']) {
+        echo $r['table_name'].':<br>';
+        echo substr($ret['msg'], 0, 1000).'<br>';
+      }
     }
   }
   
