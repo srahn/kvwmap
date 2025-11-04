@@ -284,7 +284,7 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
             column_name, 
             col_sequence,
             coalesce(max_val, 0) as max_val,
-            setval(col_sequence, coalesce(max_val, 1)) --<< this will change the sequence
+            setval(col_sequence, coalesce(max_val + 1, 1)) --<< this will change the sequence
       from maxvals;";
     $this->pgdatabase->execSQL($sql, 0, 0);
 
