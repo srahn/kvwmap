@@ -869,7 +869,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 					}
 				}
 				attributenames += attributenamesarray[i] + '|';
-				if(geom != '')attributevalues += 'SRID=<? echo $this->user->rolle->epsg_code; ?>;' + geom + '|';		// EWKT mit dem user-epsg draus machen
+				if(geom != '')attributevalues += 'st_geometryfromtext(\'SRID=<? echo $this->user->rolle->epsg_code; ?>;' + geom + '\')|';		// EWKT mit dem user-epsg draus machen
 				else attributevalues += 'POINT EMPTY|';		// leere Geometrie zurückliefern
 			}
 		}
