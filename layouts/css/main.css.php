@@ -146,7 +146,7 @@ body {
 	margin: auto;
 }
 
-.collapsed, .collapsedfull {
+.collapsed, .dstable .collapsedfull {
 	visibility: collapse;
   height: 0;
 	padding: 0 !important;
