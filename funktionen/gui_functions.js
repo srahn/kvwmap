@@ -1610,6 +1610,7 @@ function showMapParameter(epsg_code, width, height, l) {
 
 function showURL(params, headline) {
 	let url = `${document.baseURI.match(/.*\//)}index.php?${params}`;
+	navigator.clipboard.writeText(url);
 	let msg = `
 		<div style="text-align: left;">
 			<h2 style="margin-top: 2px; margin-buttom: 2px">${headline}</h2>
