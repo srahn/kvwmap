@@ -313,13 +313,13 @@ class GUI {
 		}
 
 		# check if the login is granted not yet
-		if ($user->start != '' AND date('Y-m-d') < $user->start) {
+		if ($user->start != '' AND date('d.m.Y') < $user->start) {
 			$this->login_failed_reason = 'not_yet_started';
 			return false;
 		}
 
 		# check if the login is not granted any more
-		if ($user->stop != '' AND date('Y-m-d') > $user->stop) {
+		if ($user->stop != '' AND date('d.m.Y') > $user->stop) {
 			$this->login_failed_reason = 'expired';
 			return false;
 		}
