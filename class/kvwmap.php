@@ -313,13 +313,13 @@ class GUI {
 		}
 
 		# check if the login is granted not yet
-		if ($user->start != '' AND date('Y-m-d') < $user->start) {
+		if ($user->start != '' AND date('Y-m-d') < DateTime::createFromFormat('d.m.Y', $user->start)->format('Y-m-d')) {
 			$this->login_failed_reason = 'not_yet_started';
 			return false;
 		}
 
 		# check if the login is not granted any more
-		if ($user->stop != '' AND date('Y-m-d') > $user->stop) {
+		if ($user->stop != '' AND date('Y-m-d') > DateTime::createFromFormat('d.m.Y', $user->stop)->format('Y-m-d')) {
 			$this->login_failed_reason = 'expired';
 			return false;
 		}
@@ -13552,19 +13552,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 			if ($this->formvars['create_referencemap']) {
 				$refmap_width = 250;
-				$refmap_height = $refmap_width * ($this->formvars['maxymax'] - $this->formvars['minymax']) / ($this->formvars['maxxmax'] - $this->formvars['minxmax']);
+				$refmap_height = (int)($refmap_width * ($this->formvars['maxymax'] - $this->formvars['minymax']) / ($this->formvars['maxxmax'] - $this->formvars['minxmax']));
 				$refmap = $this->createReferenceMap($refmap_width, $refmap_height, $refmap_width, $refmap_height, 0, $this->formvars['minxmax'], $this->formvars['minymax'], $this->formvars['maxxmax'], $this->formvars['maxymax'], 1, REFMAPFILE, 'png');
 				$refmap_file_name = 'refmap_' . $this->formvars['id'] . '.png';
 				rename(IMAGEPATH . basename($refmap), REFERENCEMAPPATH . $refmap_file_name);
 				// echo '<br>cp refmap: ' . IMAGEPATH . basename($refmap) . ' nach: ' . REFERENCEMAPPATH . $refmap_file_name;
 				$params = array(
 					'name' => 'refmap_' . $this->formvars['id'],
-					'Dateiname' => $refmap_file_name,
+					'dateiname' => $refmap_file_name,
 					'epsg_code' => $this->formvars['epsg_code'],
-					'xmin' => $this->formvars['minxmax'],
-					'ymin' => $this->formvars['minymax'],
-					'xmax' => $this->formvars['maxxmax'],
-					'ymax' => $this->formvars['maxymax'],
+					'minx' => $this->formvars['minxmax'],
+					'miny' => $this->formvars['minymax'],
+					'maxx' => $this->formvars['maxxmax'],
+					'maxy' => $this->formvars['maxymax'],
 					'width' => $refmap_width,
 					'height' => $refmap_height
 				);
@@ -13582,7 +13582,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$refmap_id = $result['id'];
 				}
 
-				if ($result[0]['success']) {
+				if ($result['success']) {
 					$this->formvars['referenzkarte_id'] = $refmap_id;
 				}
 				else {

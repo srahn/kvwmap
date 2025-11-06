@@ -3080,6 +3080,7 @@ class rolle {
 		$ret = $this->database->execSQL($sql);
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['queryable'] = ($rs['queryable'] === 't');
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
 					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
