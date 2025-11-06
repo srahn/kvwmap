@@ -181,16 +181,12 @@
 <?
 	$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
-?>
-</table>
-
-<?
 
 	for($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++){
 		echo $invisible_attributes[$layer['layer_id']][$l]."\n";
 	}
-
 ?>
+</table>
 
 <script type="text/javascript">
 	var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
