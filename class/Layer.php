@@ -37,9 +37,8 @@ class Layer extends PgObject {
 				"fk" => 'layer_id'
 			)
 		);
-		parent::__construct($gui, 'kvwmap', 'layer');
+		parent::__construct($gui, 'kvwmap', 'layer', 'layer_id');
 		$this->stelle_id = ($gui->stelle ? $gui->stelle->id : null);
-		$this->identifier = 'layer_id';
 		$this->geometry_types = array('Point', 'LineString', 'Polygon');
 		$this->geom_column = 'geom';
 	}
@@ -81,7 +80,7 @@ class Layer extends PgObject {
 				'select' => 'l.*',
 				'from' => "
 					u_groups g JOIN
-					layer l ON (g.id = l.Gruppe)",
+					layer l ON (g.id = l.gruppe)",
 				'where' => "
 					g.obergruppe = " . $obergruppe_id . " AND
 					l.Name = '" . $layer_name . "'"
@@ -1034,7 +1033,7 @@ class Layer extends PgObject {
 			$generic_selects = array_merge($generic_selects, $generic_select);
 		}
 
-		// filter out these that are allready in data select statement and extract sql string
+		// filter out these that are already in data select statement and extract sql string
 		$additional_selects = array_map(
 			function ($select) {
 				return $select['sql'];
@@ -1050,7 +1049,7 @@ class Layer extends PgObject {
 		# fehlende Attribute in das data statement einfügen vor dem ersten Vorkommen von 'from' nach dem ersten Vorkommen von 'select'
 		$pos_select = stripos($data, 'select');
 		$pos_from = strripos($data, 'from', $pos_select);
-		if ($pos_from !== false) {
+		if ($pos_from !== false and count($additional_selects) > 0) {
 			$data = substr_replace(
 				$data,
 				"  ," . implode(",\n    ", $additional_selects) . "\n  from", 

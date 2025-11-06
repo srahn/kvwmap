@@ -329,7 +329,7 @@ Dieses Snippet wird nicht mehr verwendet
 									} break;
 
 									case 'dynamicLink': {
-										$explosion = explode(';', $attributes['options'][$j]);		# url;alias;embedded
+										$explosion = explode(';', $attributes['options'][$j]);		# url;alias;embedded // get_options
 										$href = $explosion[0];
 										if($explosion[1] != ''){
 											$alias = $explosion[1];

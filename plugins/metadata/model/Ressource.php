@@ -4,6 +4,7 @@
 #############################
 include_once(CLASSPATH . 'PgObject.php');	
 include_once(PLUGINS . 'metadata/model/SubRessource.php');
+include_once(PLUGINS . 'metadata/model/Lineage.php');
 
 class Ressource extends PgObject {
 
@@ -108,7 +109,8 @@ class Ressource extends PgObject {
 			// only ressouces with state Uptodate will be find as outdated
 			$status_condition = "= 0";
 		}
-		$ressource->show = true;
+		$ressource->show = false;
+		$gui->debug->show('Suche Ressourcen die aktualisiert werden müssen mit SQL:', true);
 		$ressources = $ressource->find_where(
 			"
 				(von_eneka OR use_for_datapackage) AND
@@ -222,8 +224,7 @@ class Ressource extends PgObject {
 	 *  9 - Transformation fertig
 	 */
 	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $only_missing = false, $force = false) {
-		// $gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
-
+		$gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ' ohne Ressource id'), true);
 		$ressource = new Ressource($gui);
 		if ($ressource_id != null) {
 			$ressources = $ressource->find_where('id = ' . $ressource_id);
@@ -233,7 +234,11 @@ class Ressource extends PgObject {
 				SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0 AND status_id < 11;
 			");
 			if ($results[0]['num_running'] < 10) {
+				$gui->debug->show('Es laufen bereits ' . $results[0]['num_running'] . ' Updates.', true);
 				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running'], $force); // liefert nur die ersten 1 - 10 gefundenen zurück
+			}
+			else {
+				$gui->debug->show('Abbruch weil bereits 10 Updates laufen.', true);
 			}
 		}
 
@@ -244,8 +249,11 @@ class Ressource extends PgObject {
 				// Test it with a stack of pending ressources.
 				// if ($this->all_source_ressources_uptodate($ressource->get_id())) {
 					// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
+					if ($only_missing === false) {
+						$only_missing = $ressource->get('only_missing');
+					}
 					if ($gui->formvars['dry_run'] == 1) {
-						echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
+						echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '') . ($only_missing ? ' only_missing' : ' download all');
 					}
 					else {
 						$result = $ressource->run_update($method_only, $only_missing);
@@ -302,7 +310,7 @@ class Ressource extends PgObject {
 
 	function run_update($method_only = '', $only_missing = false) {
 		$this->debug->show('Update Ressource ' . $this->get_id(), true);
-		$this->update_status(1, $msg);
+		$this->update_status(1);
 
 		if ($this->must_be_executed('download', $method_only)) {
 			$result = $this->download($only_missing);
@@ -352,6 +360,7 @@ class Ressource extends PgObject {
 		}
 		$last_updated_at = date("Y-m-d H:i:s");
 		$this->update_status(0, '', $last_updated_at);
+		$this->gui->debug->show('run_update ' . $this->get_id() . ' am ' . $last_updated_at . ' beendet.', true);
 		return array(
 			'success' => true,
 			'msg' => $msg . '<br>Ressource ' . $this->get_id() . ' am ' . $last_updated_at . ' erfolgreich aktualisiert.'
@@ -390,7 +399,7 @@ class Ressource extends PgObject {
 	####################
 	function download($only_missing = false) {
 		// $this->debug->show('Starte Funktion download', true);
-		if ($this->get('download_method') != '') {
+		if ($this->get('download_method') != '' AND $this->get('download_method') != 'upload') {
 			$method_name = 'download_' . $this->get('download_method');
 			if (!method_exists($this, $method_name)) {
 				return array(
@@ -409,7 +418,7 @@ class Ressource extends PgObject {
 		}
 		return array(
 			'success' => true,
-			'msg' => 'Keine Downloadmethode angegeben.'
+			'msg' => 'Keine Downloadmethode ausgeführt.'
 		);
 	}
 	/**
@@ -509,16 +518,17 @@ class Ressource extends PgObject {
 		$url = $this->get('download_url');
 		// ToDo: query first capabilites to check if epsg is available
 		$epsg = ($this->get('import_epsg') ? $this->get('import_epsg') : '25832');
+		$version = $this->get_wfs_version($url, '1.1.0');
 		$params = array(
 			'Service' => 'WFS',
-			'Version' => $this->get_wfs_version($url, '1.1.0'),
+			'Version' => $version,
 			'Request' => 'GetFeature',
-			'TypeName' => $this->get('import_layer'),
 			'SRS' => 'urn:ogc:def:crs:EPSG::' . $epsg
 		);
+		$params['TypeName' . (strpos($version, '2.') !== false ? 's' : '')] = $this->get('import_layer');
 
 		try {
-			$this->debug->show('Download from URL:<br>' . $url, true);
+			$this->debug->show('Download WFS onlineressource: ' . $url, true);
 			if ($this->get('download_path') == '') {
 				return array(
 					'success' => false,
@@ -541,27 +551,39 @@ class Ressource extends PgObject {
 			array_map('unlink', glob($download_path . "/*"));
 			$this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 
+			$epsg = ($this->get('import_epsg') ? $this->get('import_epsg') : '25832');
+			$params = array(
+				'Service' => 'WFS',
+				'Version' => $this->get_wfs_version($url, '1.1.0'),
+				'Request' => 'GetFeature',
+				'SRS' => 'urn:ogc:def:crs:EPSG::' . $epsg
+			);
 
-			if ($this->get('import_table')) {
+			include_once(CLASSPATH . 'wfs.php');
+			$wfs = new wfs($url, $params['Version'], '', '', $this->get('import_epsg'));
+			$wfs->parse_capabilities($url);
+			// query featuretypes from capabilities and download all in separate gml-files.
+			$featuretypes = $wfs->get_featuretypes();
+			foreach ($featuretypes AS $featuretype) {
+				// If download_typenames given, only download those and only if found in service capabilities,
+				// else all from capabilities.
+				if (
+					$this->get('download_typenames') AND
+					!in_array($featuretype['name'], array_map('trim', explode(',', $this->get('download_typenames'))))
+				) {
+					continue;
+				}
+				$params['TypeNames'] = $featuretype['name'];
 				$download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
-				$download_file = $this->get('import_table') . '.gml';
-				$this->debug->show('Download ' . $download_file . ' from url: ' . $download_url . ' to ' . $download_path, true);
-				copy($download_url, $download_path .  $download_file);
-			}
-			else {
-				// query featuretypes from capabilities and download all in separate gml-files.
-				include_once(CLASSPATH . 'wfs.php');
-				$wfs = new wfs($url, $params['Version'], '', '', $this->get('import_epsg'));
-				$wfs->parse_capabilities($url);
-				$featuretypes = $wfs->get_featuretypes();
-				$this->debug->show('Download folgende FeatureTypes in gml files in download path:' . $download_path, true);
-				foreach ($featuretypes AS $featuretype) {
-					$params['TypeNames'] = $featuretype['name'];
-					// $this->debug->show('params: ' . http_build_query($params), true);
-					$download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
-					$download_file = strtolower(sonderzeichen_umwandeln(str_replace(':', '_', umlaute_umwandeln($featuretype['name'])))) . '.gml';
-					$this->debug->show($featuretype['name'] . ' (' . $featuretype['title'] . ') => ' . $download_file, true);
-					copy($download_url, $download_path .  $download_file);
+				$download_file = strtolower(sonderzeichen_umwandeln(str_replace(':', '_', umlaute_umwandeln($featuretype['name'])))) . '.gml';
+				$this->debug->show('Download FeatureType: ' . $featuretype['name'] . ' (' . $featuretype['title'] . ') from<br>' . $download_url . '<br>in Datei: ' . $download_path . $download_file, true);
+				#echo '<br>wget -O ' . $download_path . $download_file . ' "' . $download_url . '"';
+				$result = copy($download_url, $download_path . $download_file);
+				if (!$result) {
+					return array(
+						'success' => false,
+						'msg' => '<p>Download in Datei: ' . $download_path . $download_file . ' fehlgeschlagen!<br>owner von ' . $download_path . ' ' . fileowner($download_path) . ':' . filegroup($download_path)
+					);
 				}
 			}
 
@@ -596,11 +618,7 @@ class Ressource extends PgObject {
 				);
 			}
 
-			// urls.txt wird im Pfad oberhalb von download_path erwarte
-			$path_parts = explode('/', rtrim($download_path, '/'));
-			array_pop($path_parts);
-			$urls_file_path = implode('/', $path_parts) . '/';
-			$urls_file = $urls_file_path . 'urls.txt';
+			$urls_file = $this->get_urls_file();
 			if (!file_exists($urls_file)) {
 				return array(
 					'success' => false,
@@ -619,7 +637,7 @@ class Ressource extends PgObject {
 			// Script aufrufen zum Download der Dateien in urls.txt
 			$cmd = $parallel_download_script . ' ' . $urls_file . ' ' . $download_path . ' 10' . ($this->only_missing ? ' 1' : '');
 			$this->debug->show('Download Dateien aus urls.txt mit Befehl: ' . $cmd, true);
-			// // Befehl z.B. /var/www/apps/kvwmap/plugins/metadata/tools/download_parallel.sh /var/www/data/fdm/ressourcen/dgm/dgm1/NS/urls.txt /var/www/data/fdm/ressourcen/dgm/dgm1/NS/downloads/ 10
+			// // Befehl z.B. /var/www/apps/kvwmap/plugins/metadata/tools/download_parallel.sh /var/www/data/fdm/ressourcen/dgm/dgm1/NS/urls.txt /var/www/data/fdm/ressourcen/dgm/dgm1/NS/downloads/ 10 1
 			$descriptorspec = [
 				0 => ["pipe", "r"],  // stdin
 				1 => ["pipe", "w"],  // stdout
@@ -765,6 +783,71 @@ class Ressource extends PgObject {
 		);
 	}
 
+	/**
+	 * Download ressource from overpass-api
+	 * need download_url, overpass_filter aus <import_layer>.overpass, targetfile aus <import_layer>.json
+	 */
+	function download_overpass() {
+		// Download per curl --data-urlencode "data@query.txt" https://overpass-api.de/api/interpreter -o osm.json
+		// Wird später umgewandelt nach geojson mit osmtogeojson stromnetz-mv.json > stromnetz-mv.geojson
+		// Wird später importiert mit:
+		// ogr2ogr \
+		// 	-f "PostgreSQL" \
+		// 	PG:"host=pgsql dbname=kvwmapsp user=kvwmap password=secret" \
+		// 	stromnetz-mv.geojson \
+		// 	-nln stromnetz_osm \
+		// 	-nlt PROMOTE_TO_MULTI \
+		// 	-lco GEOMETRY_NAME=geom \
+		// 	-lco FID=gid \
+		// 	-lco PRECISION=NO \
+		// 	-lco SCHEMA=import \
+		// 	-lco SPATIAL_INDEX=GIST \
+		// 	-progress \
+		// 	-overwrite \
+		// 	-fieldTypeToString All
+		try {
+			$this->debug->show('Download from overpass-api:<br>' . $url, true);
+			if ($this->get('download_path') == '') {
+				return array(
+					'success' => false,
+					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
+				);
+			}
+			$download_path = $this->get_full_path($this->get('download_path'));
+			if (strpos($download_path, '/var/www/data/') !== 0) {
+				return array(
+					'success' => false,
+					'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit ' . '/var/www/data/' . ' an.'
+				);
+			}
+
+			if (!file_exists($download_path)) {
+				$this->debug->show('Lege Verzeichnis ' . $download_path . ' an, weil es noch nicht existiert!', true);
+				mkdir($download_path, 0777, true);
+			}
+
+			// ToDo make filter in supermaerkte.overpass dynamic
+			$cmd = 'curl --data-urlencode "data@' . $download_path . $this->get('import_layer') . '.overpass" ' . $this->get('download_url') . ' -o ' . $download_path . $this->get('import_layer') . '.json';
+			$this->debug->show("Download der OSM-Daten in Datei " . $download_path . "osm.json mit folgendem Befehl: {$cmd}", true);
+			exec($cmd, $output, $result_code);
+
+			// ToDo Fehler abfangen
+			$result = $output[0];
+			$this->debug->show($result, true);
+
+			return array(
+				'success' => true,
+				'msg' => 'Download von overpass-api erfolgreich beendet.'
+			);
+		}
+		catch (Exception $e) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Download der OSM-Daten: ', $e->getMessage()
+			);
+		}
+	}
+
 	##################
 	# Unpack methods #
 	##################
@@ -815,7 +898,10 @@ class Ressource extends PgObject {
 			mkdir($dest_path, 0777, true);
 		}
 		else {
-			array_map('unlink', glob("$dest_path/*.*"));
+			// Nicht löschen wenn nur fehlende Dateien ausgepackt werden sollen
+			if ($this->only_missing === false) {
+				array_map('unlink', glob("$dest_path/*.*"));
+			}
 		}
 
 		if ($this->get('download_method') === 'upload') {
@@ -824,8 +910,6 @@ class Ressource extends PgObject {
 			$zip_files = array(document_info($this->get('upload_file'), 'path'));
 			$this->debug->show('zipfiles: ' . implode(', ', $zip_files), true);
 		}
-
-
 		else {
 			// Daten wurden runtergeladen und liegen in download_path
 			$download_path = $this->get_full_path($this->get('download_path'));;
@@ -833,7 +917,7 @@ class Ressource extends PgObject {
 			$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
 			$zip_files = array_filter(glob($download_path . '*'), function($file) use ($finfo) { return finfo_file($finfo, $file) == 'application/zip'; });
 		}
-		$this->debug->show('Packe ZIP-Dateien ' . implode(', ', $zip_files) . ' aus nach ' . $dest_path, true);
+		$this->debug->show('Packe ZIP-Dateien aus:');
 		foreach ($zip_files as $zip_file) {
 			if (finfo_file($finfo, $zip_file) == 'application/zip') {
 				if ($this->only_missing == false OR !file_exists($dest_path . str_replace('.zip', '.tif', basename($zip_file)))) {
@@ -842,7 +926,7 @@ class Ressource extends PgObject {
 						$this->debug->show($zip_file . ' ausgepackt. ' . implode(', ', $result['files']), true);
 					}
 					else {
-						$err_msg[] = '<br>Fehler beim Auspacken der Datei ' . $zip_file . ' für Ressource ID: ' . $this->get_id() . ' Überprüfen Sie die Schreibrechte im Verzeichnis ' . $dest_path;
+						$err_msg[] = "\nFehler beim Auspacken der Datei " . $zip_file . ' für Ressource ID: ' . $this->get_id() . ' Überprüfen Sie die Schreibrechte im Verzeichnis ' . $dest_path;
 					}
 				}
 			}
@@ -1257,6 +1341,55 @@ class Ressource extends PgObject {
 		);
 	}
 
+	/**
+	 * Function konvert OSMJSON to GeoJSON
+	 * Need sourcefile aus <import_layer>.json), targetfile $this->get('import_file')
+	 */
+	function unpack_osmtogeojson() {
+		$this->debug->show('Starte Funktion unpack_osmtogeojson', true);
+		if ($this->get('dest_path') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
+			);
+		}
+		$dest_path = $this->get_full_path($this->get('dest_path'));
+		if (strpos($dest_path, '/var/www/data/') !== 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Das Auspackverzeichnis ' . $dest_path . ' fängt nicht mit /var/www/data/ an.'
+			);
+		}
+		if (!file_exists($dest_path)) {
+			$this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
+			mkdir($dest_path, 0777, true);
+		}
+
+		$err_msg = array(); 
+		$download_path = $this->get_full_path($this->get('download_path'));
+
+		$osm_file = $download_path . $this->get('import_layer') . '.json';
+		if (!file_exists($osm_file)) {
+			return array(
+				'success' => false,
+				'msg' => 'Die OSM-Datei ' . $osm_file . ' existiert nicht!'
+			);
+		}
+
+		// ToDo: Den Befehl im gdal-Container ausführen
+		$cmd = "osmtogeojson " . $osm_file . " > " . $dest_path . $this->get('import_file');
+		$this->debug->show("Konvertierung der OSM-Daten mit folgendem Befehl<br>{$cmd}", true);
+		exec($cmd, $output, $result_code);
+
+		// ToDo Fehler abfangen
+		$this->debug->show('Output: ' . print_r($output, true), true);
+
+		return array(
+			'success' => true,
+			'msg' => 'Konvertieren der OSMJSON-Datei erfolgreich beendet.'
+		);
+	}
+
 	##################
 	# Import methods #
 	##################
@@ -1304,7 +1437,7 @@ class Ressource extends PgObject {
 		if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Einlesen des Mastr!'
+				'msg' => 'Fehler beim Einlesen des Mastr!' . $output
 			);
 		}
 		else {
@@ -1443,6 +1576,79 @@ class Ressource extends PgObject {
 		return array(
 			'success' => true,
 			'msg' => 'GDB-Datei erfolgreich geladen!'
+		);
+	}
+
+	function import_ogr2ogr_geojson() {
+		$this->debug->show('Starte Funktion import_org2ogr_geojson', true);
+
+		if ($this->get('dest_path') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein Name für den Pfad der Importdatei angegeben!'
+			);
+		}
+
+		$dest_path = $this->get_full_path($this->get('dest_path'));
+
+		if ($this->get('import_file') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein Name für die Importdatei angegeben!'
+			);
+		}
+
+		$import_file = $dest_path . $this->get('import_file');
+		if (!file_exists($import_file)) {
+			return array(
+				'success' => false,
+				'msg' => 'Die Import-Datei ' . $import_file . ' existiert nicht!'
+			);
+		}
+
+		if ($this->get('import_schema') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein Name für das Importschema angegeben!'
+			);
+		}
+
+		if ($this->get('import_table') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein Name für die Importtabelle angegeben!'
+			);
+		}
+
+		$this->debug->show('GeoJSON-Datei ' . $import_file . ' gefunden.', true);
+
+		$result = $this->gui->data_import_export->ogr2ogr_import(
+			$this->get('import_schema'),
+			$this->get('import_table'),
+			$this->get('import_epsg') != '' ? $this->get('import_epsg') : 25833,
+			$import_file,
+			$this->database,
+			'',
+			NULL,
+			'-overwrite',
+			'UTF-8',
+			true,
+			$this->unlogged
+		);
+
+		if (!$result['success']) {
+			return array(
+				'success' => false,
+				'msg' => $result['msg']
+			);
+		}
+		else {
+			$this->debug->show('GeoJSON-Datei erfolgreich eingelesen!', true);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'GeoJSON-Datei erfolgreich geladen.'
 		);
 	}
 
@@ -1842,22 +2048,22 @@ class Ressource extends PgObject {
 		$gdaltindex_params = $this->get('transform_command');
 		$gdaltindex_command = 'gdaltindex ' . $gdaltindex_params;
 		$this->debug->show("Erzeuge gdaltindex mit Befehl: " . $gdaltindex_command, true);
-		$descriptorspec = [
-			0 => ["pipe", "r"],  // stdin
-			1 => ["pipe", "w"],  // stdout
-			2 => ["pipe", "w"],  // stderr
-		];
-		$process = proc_open($gdaltindex_command, $descriptorspec, $pipes, dirname(__FILE__), null);
-		$stdout = stream_get_contents($pipes[1]);
-		fclose($pipes[1]);
-		$stderr = stream_get_contents($pipes[2]);
-		fclose($pipes[2]);
+		// $descriptorspec = [
+		// 	0 => ["pipe", "r"],  // stdin
+		// 	1 => ["pipe", "w"],  // stdout
+		// 	2 => ["pipe", "w"],  // stderr
+		// ];
+		// $process = proc_open($gdaltindex_command, $descriptorspec, $pipes, dirname(__FILE__), null);
+		// $stdout = stream_get_contents($pipes[1]);
+		// fclose($pipes[1]);
+		// $stderr = stream_get_contents($pipes[2]);
+		// fclose($pipes[2]);
 
-		// exec($gdaltindex_command, $output, $return_var);
-		if ($stderr != '') {
+		exec($gdaltindex_command, $output, $return_var);
+		if ($return_var !== 0) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Ausführen des Programms gdaltindex: ' . $stderr
+				'msg' => 'Fehler beim Ausführen des Programms gdaltindex: ' . implode(', ', $output)
 			);
 		}
 		return array(
@@ -1937,6 +2143,21 @@ class Ressource extends PgObject {
 		}
 		return $version;
 	}
+
+	/**
+	 * Liefert den Namen der Datei zurück, in der die Download-URL's liegen, die in
+	 * downloads abgelegt werden.
+	 * urls.txt wird von der Methode download_parallel_from_file im Pfad oberhalb von download_path erwarte
+	 */
+	function get_urls_file() {
+		$download_path = $this->get_full_path($this->get('download_path'));
+		$path_parts = explode('/', rtrim($download_path, '/'));
+		array_pop($path_parts);
+		$urls_file_path = implode('/', $path_parts) . '/';
+		$urls_file = $urls_file_path . 'urls.txt';
+		return $urls_file;
+	}
+
 }
 
 ?>

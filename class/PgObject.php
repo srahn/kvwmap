@@ -42,6 +42,7 @@ class PgObject {
 	public $from;
 	public $where;
 	public $show;
+	public $attribute_names;
 	public $fkeys;
 	public $pkey;
 	public $data;
@@ -73,6 +74,7 @@ class PgObject {
 		$this->extent = array();
 		$this->extents = array();
 		$this->children_ids = array();
+		$this->attribute_names = array();
 		$this->fkeys = array();
 		$this->pkey = array();
 		$gui->debug->show('Create new Object PgObject with schema ' . $this->schema . ' table ' . $this->tableName, $this->show);
@@ -107,6 +109,9 @@ class PgObject {
 		}
 	}
 
+	/**
+	 * @return PgObject $this->data is false if nothing found.
+	 */
 	function find_by($attribute, $value) {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, $this->show);
 		$sql = '
@@ -422,7 +427,7 @@ class PgObject {
 
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
-				" . implode(', ', $this->getKeys()) . "
+				" . implode(', ', array_map(function($key) { return '"' . $key . '"'; }, $this->getKeys())) . "
 			)
 			VALUES (" .
 				implode(
@@ -472,10 +477,12 @@ class PgObject {
 		*/
 		$query = pg_query($this->database->dbConn, $sql);
 		if (!$query) {
-			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), true);
+			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), $this->show);
 			return array(
 				'success' => false,
-				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn));
+				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn),
+				'sql' => $sql
+			);
 		}
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
@@ -569,36 +576,42 @@ class PgObject {
 	}
 
 	function update_attr($attributes, $set = false) {
-		$quote = ($this->identifier_type == 'text' ? "'" : "");
-		$sql = "
-			UPDATE
-				\"" . $this->schema . "\".\"" . $this->tableName . "\"
-			SET
-				" . implode(', ', $attributes) . "
-			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
-		";
-		#echo $sql;
-		$this->debug->show('update sql: ' . $sql, $this->show);
-		try {
-			pg_query($this->database->dbConn, $sql);
-			if ($set) {
-				foreach($attributes AS $attribute) {
-					$parts = explode('=', $attribute);
-					$this->set(trim($parts[0]), trim($parts[1], "'"));
+		if (is_array($attributes) AND count($attributes) > 0) {
+			$quote = ($this->identifier_type == 'text' ? "'" : "");
+			$sql = "
+				UPDATE
+					\"" . $this->schema . "\".\"" . $this->tableName . "\"
+				SET
+					" . implode(', ', $attributes) . "
+				WHERE
+					" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+			";
+			// echo $sql;
+			$this->debug->show('update sql: ' . $sql, $this->show);
+			try {
+				pg_query($this->database->dbConn, $sql);
+				if ($set) {
+					foreach($attributes AS $attribute) {
+						$parts = explode('=', $attribute);
+						$this->set(trim($parts[0]), trim($parts[1], "'"));
+					}
 				}
+				return array(
+					'success' => true,
+					'msg' => 'Attributes erfolgreich geupdated mit sql:' . $sql
+				);
 			}
-			return array(
-				'success' => true,
-				'msg' => 'Attributes erfolgreich geupdated'
-			);
+			catch (Exception $e) {
+				return array(
+					'success' => false,
+					'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' .  $e->getMessage()
+				);
+			}
 		}
-		catch (Exception $e) {
-			return array(
-				'success' => false,
-				'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' .  $e->getMessage()
-			);
-		}
+		return array(
+			'success' => true,
+			'msg' => 'Nichts geupdated weil keine Werte übergeben wurden.'
+		);
 	}
 
 	function delete($where = NULL) {
@@ -662,7 +675,6 @@ class PgObject {
 		}
 		return $results;
 	}
-
 
 	function setKeysFromTable() {
 		#$this->debug->show('setKeysFromTable', PgObject::$write_debug);
@@ -798,6 +810,26 @@ class PgObject {
 			return $constraint['type'] == 'PRIMARY KEY' AND in_array($column, $constraint['columns']);
 		})) > 0;
 		return $result;
+	}
+
+	function get_attribute_names() {
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '" . $this->schema . "' AND
+				table_name = '" . $this->tableName . "'
+		";
+		#echo '<p>sql zur Abfrage von attribut namen: ' . $sql;
+		$this->sql = $sql;
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->attribute_names = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$this->attribute_names[] = $rs['column_name'];
+		}
+		return $this->attribute_names;
 	}
 
 	function get_attribute_types() {

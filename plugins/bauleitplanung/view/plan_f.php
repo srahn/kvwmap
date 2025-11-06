@@ -17,6 +17,11 @@
    td {font-size: 15px}
    input.class2 {border:none;background-color: transparent;text-align:right;}
    .titel {font-size: 17pt; font-weight: bold}
+
+	#contentdiv{
+		max-width: 100% !important;
+	}
+
 </STYLE>
 <script type="text/javascript">
 <!--
@@ -452,7 +457,7 @@ update_gebietstyp = function(){
 <br>
 <?php   
 		#  zusätzliches Hiddenfeld zum Merken des Offsets der Trefferliste, solange man in der Detailansicht ist 
-		echo '<input name="_offset_'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="'.$this->formvars['_offset_'.$this->qlayerset[$i]['layer_id']].'">';
+		echo '<input name="_offset_'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="'.$this->formvars['_offset_'.$this->qlayerset[$i]['layer_id']].'">
 		<input type="hidden" name="value_f_plan_stammdaten_oid" value="">';
 	}				# details == true
 	else{ ?>
@@ -530,7 +535,7 @@ else {
 ?>
 
 <? if($this->new_entry != true){ ?>
-<input type="hidden" name="selected_layer_id" value="<? echo $this->qlayerset[$i]['Layer_ID']; ?>">
+<input type="hidden" name="selected_layer_id" value="<? echo $this->qlayerset[$i]['layer_id']; ?>">
 <? } ?>
 
 

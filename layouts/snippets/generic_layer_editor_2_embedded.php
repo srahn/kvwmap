@@ -92,7 +92,7 @@
 								if($nl AND $layer['attributes']['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
 							}
 							if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-							$td = '	<td width="" id="value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" class="gle_attribute_value"'; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
+							$td = '	<td width="" id="value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" ' . get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j]));; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
 							$td.= 			attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname);
 							$td.= '	</td>';
 							if($nl)$next_line .= $td; else $datapart .= $td;
@@ -181,16 +181,12 @@
 <?
 	$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
-?>
-</table>
-
-<?
 
 	for($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++){
 		echo $invisible_attributes[$layer['layer_id']][$l]."\n";
 	}
-
 ?>
+</table>
 
 <script type="text/javascript">
 	var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');

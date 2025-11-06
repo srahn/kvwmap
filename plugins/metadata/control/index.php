@@ -1,5 +1,6 @@
 <?php
 // Use Cases
+// metadata_add_urls
 // metadata_cancel_data_package
 // metadata_create_bundle_package
 // metadata_create_data_package
@@ -36,6 +37,18 @@ include_once(PLUGINS . 'metadata/model/PackLog.php');
 function go_switch_metadata($go){
 	global $GUI;
 	switch($go) {
+		case 'metadata_add_urls': {
+			$GUI->sanitize([
+				'ressource_id' => 'int'
+			]);
+			$GUI->checkCaseAllowed('metadata_add_urls');
+			$result = $GUI->metadata_add_urls($GUI->formvars['ressource_id']);
+			if (!$result['success']) {
+				$GUI->Fehlermeldung = $result['msg'];
+			}
+			$GUI->output();
+		} break;
+
 		case 'metadata_cancel_data_package': {
 			$GUI->sanitize([
 				'package_id' => 'int'
@@ -206,17 +219,21 @@ function go_switch_metadata($go){
 		} break;
 
 		case 'metadata_test' : {
-			$handle = fopen('/var/www/data/fdm/dom/dom_atom.xml', "r");
-			if ($handle) {
-				$atom_url = 'https://www.geodaten-mv.de/dienste/dom_download?index=4&amp;dataset=us214578-a1n5-4v12-v31c-5tg2az3a2164&amp;file=dom1_33_$x_$y_2_gtiff.tif';
-				$regex = '/' . str_replace('$x', '(.*?)', str_replace('$y', '(.*?)', str_replace('?', '\?', str_replace('/', '\/', $atom_url)))) . '/';
-				while (($line = fgets($handle)) !== false) {
-					if (preg_match($regex, $line, $match) == 1) {
-						echo '<br>' . $match[0];
-					}
-				}
-				fclose($handle);
-			}
+			// $ressource = Ressource::find_by_id($GUI, 'id', 166);
+			// include_once(PLUGINS . 'metadata/model/Lineage.php');
+			// $targets = Lineage::find_targets($GUI, 166);
+			// echo '<br>targets: ' . count($targets);
+			// $handle = fopen('/var/www/data/fdm/dom/dom_atom.xml', "r");
+			// if ($handle) {
+			// 	$atom_url = 'https://www.geodaten-mv.de/dienste/dom_download?index=4&amp;dataset=us214578-a1n5-4v12-v31c-5tg2az3a2164&amp;file=dom1_33_$x_$y_2_gtiff.tif';
+			// 	$regex = '/' . str_replace('$x', '(.*?)', str_replace('$y', '(.*?)', str_replace('?', '\?', str_replace('/', '\/', $atom_url)))) . '/';
+			// 	while (($line = fgets($handle)) !== false) {
+			// 		if (preg_match($regex, $line, $match) == 1) {
+			// 			echo '<br>' . $match[0];
+			// 		}
+			// 	}
+			// 	fclose($handle);
+			// }
 		} break;
 
 		case 'Metadaten_Auswaehlen_Senden' : {

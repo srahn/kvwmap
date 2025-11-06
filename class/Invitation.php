@@ -55,9 +55,22 @@ class Invitation extends PgObject {
 
 	function mailto_text() {
 		include(LAYOUTPATH . 'languages/Invitation_' . rolle::$language . '.php');
+		$msg = $this->get('email') . 
+'?subject=' . $this->get_subject() .
+'&body=' . rawurlencode($this->get_body());
+		return $msg;
+	}
 
-		$link = URL . (substr(URL, -1) != '/' ? '/' : '') . APPLVERSION .
-			'index.php?go=logout&token=' . $this->get('token') .
+	function get_subject() {
+		return 'Einladung zur Registrierung bei ' . TITLE; 
+	}
+
+	function get_body() {
+		include(LAYOUTPATH . 'languages/Invitation_' . rolle::$language . '.php');
+		$br = chr(10);
+
+		$link = get_url() .
+			'?go=logout&token=' . $this->get('token') .
 			'&email=' . $this->get('email') .
 			'&stelle_id=' . $this->get('stelle_id')[0] .
 			'&name=' . urlencode($this->get('name')) .
@@ -65,24 +78,16 @@ class Invitation extends PgObject {
 			'&login_name=' . urlencode($this->get('loginname')) .
 			'&language=' . rolle::$language;
 
-		$text = str_replace('$link', $link, $this->stelle->get('invitation_text')) ?: $strInvitationText . '
-
-		' .  $strInvitationLink . ':
-		
-		' . $link . '
-		
-		' . $strInvitationLinkAlternative . ' "' . TITLE . '". ' . $strInvitationAfterLinkText . '
-		
-		' . $strInvitationQuestionsTo . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('name') . ': ' . $this->inviter->get('email') . '
-		
-		' . $strInvitationAutomationText;
-
-		$msg = $this->get('email') . 
-'?subject=Einladung zur Registrierung bei ' . TITLE .
-'&body=' . rawurlencode($strInvitationHeader . ($this->get('anrede') == 'Herr' ? 'r' : '') . ' ' . $this->get('anrede') . ' ' . $this->get('name') . ',
-
-' . $text);
-		return $msg;
+		$invitation_text = str_replace('<br>', $br, $this->stelle->get('invitation_text') ?: $strInvitationText);
+		$text = $strInvitationHeader
+			. ($this->get('anrede') == 'Herr' ? 'r' : '') . ' ' . $this->get('anrede') . ' ' . $this->get('name') . ',' . $br . $br
+			. str_replace('$link', $link, $invitation_text) . $br
+			. $strInvitationLink . ':' . $br . $br
+			. $link . $br . $br
+			. $strInvitationLinkAlternative . ' "' . TITLE . '". ' . $strInvitationAfterLinkText . $br . $br
+			. $strInvitationQuestionsTo . ' ' . $this->inviter->get('vorname') . ' ' . $this->inviter->get('name') . ': ' . $this->inviter->get('email') . $br . $br
+			. str_replace('<br>', $br, $strInvitationAutomationText);
+		return $text;
 	}
 }
 ?>

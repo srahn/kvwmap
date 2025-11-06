@@ -26,6 +26,10 @@ class Debugger {
 			$_SESSION = array();
 		}
 		$this->filename = LOGPATH . (dirname($filename) != '.' ? dirname($filename) . '/' : '') . (array_key_exists('login_name', $_SESSION) ? $_SESSION['login_name'] : '') . basename($filename);
+		if (!file_exists($this->filename)) {
+			touch($this->filename);
+			chmod($this->filename, 0775);
+		}
 		$this->fp = fopen($this->filename, $mode);
 		$this->mime_type = $mime_type;
 		$this->level;
@@ -100,7 +104,7 @@ class LogFile {
 	################################################################################
 
 	# öffnet die Logdatei
-	function __construct($filename, $format, $title, $headline, $with_timestamp = false) {
+	function __construct($filename, $format, $title, $headline = '', $with_timestamp = false) {
 		$file_is_new = !file_exists($filename);
 		$this->fp = fopen($filename, "a");
 		$this->name = $filename;
@@ -113,7 +117,7 @@ class LogFile {
 				fwrite($this->fp, "<html>\n<head>\n<title>" . $title . "</title>\n</head>\n<body>");
 			}
 			if ($headline != "") {
-				$ret = @fwrite($this->fp, "<h1>" . $headline . "</h1>");
+				$ret = @fwrite($this->fp, "\n<h1>" . $headline . "</h1>");
 			}
 		}
 		if ($format == "text") {

@@ -10,13 +10,13 @@ function count_or_0($val) {
 }
 
 if (MAPSERVERVERSION < 800) {
-	// function msGetErrorObj(){
-	// 	return ms_GetErrorObj();
-	// }
+	function msGetErrorObj(){
+		return ms_GetErrorObj();
+	}
 
-	// function msResetErrorList(){
-	// 	return ms_ResetErrorList();
-	// }
+	function msResetErrorList(){
+		return ms_ResetErrorList();
+	}
 }
 
 function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
@@ -911,7 +911,7 @@ class GUI {
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
-  function loadclasses($layer, $layerset, $classset, $map){
+	function loadclasses($layer, $layerset, $classset, $map){
 		$anzClass = count_or_0($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
@@ -927,7 +927,7 @@ class GUI {
 			if (value_of($layerset, 'template') != '') {
 				$klasse->template = value_of($layerset, 'template');
 			}
-			$klasse->setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['Expression']));
+			$klasse->setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['expression']));
       if ($classset[$j]['text'] != '' AND is_null($layerset['user_labelitem'])) {
 				$klasse->settext("'" . trim($classset[$j]['text'], "'") . "'");
       }
@@ -1123,7 +1123,12 @@ class GUI {
 					else $style->updateFromString("STYLE COLOR [" . $dbStyle['color']."] END");
         }
 				if ($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
-					$style->opacity = $dbStyle['opacity'];
+					if (MAPSERVERVERSION >= 800) {
+						$style->updateFromString("STYLE OPACITY " . $dbStyle['opacity'] . " END");
+					}
+					else {
+						$style->opacity = $dbStyle['opacity'];
+					}
 				}
         if ($dbStyle['outlinecolor']!='') {
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');

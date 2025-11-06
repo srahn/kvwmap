@@ -284,7 +284,7 @@ function go_switch($go, $exit = false) {
 					rolle::$layer_params = array_merge(rolle::$layer_params, $GUI->formvars['layer_params']);
 				}
 				$GUI->loadMap('DataBase');
-				$format = (($GUI->formvars['only_postgis_layer'] OR ($GUI->formvars['only_layer_id'] AND $GUI->layerset['layer_ids'][$GUI->formvars['only_layer_id']]['datentyp'] != 3)) ? 'png' : 'jpeg');
+				$format = (($GUI->formvars['only_postgis_layer'] OR $GUI->formvars['only_layer_id']) ? 'png' : 'jpeg');
 				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
 				$GUI->mime_type = 'image/' . $format;
@@ -1683,6 +1683,9 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				include_once(CLASSPATH . 'Layer.php');
+				if ($GUI->plugin_loaded('mobile')) {
+					include_once(PLUGINS . 'mobile/model/kvwmap.php');
+				}
 				$GUI->LayerAendern($GUI->formvars);
 				$GUI->Layereditor();
 			} break;
@@ -2215,6 +2218,11 @@ function go_switch($go, $exit = false) {
 			case 'Einladung_Editor' : {
 				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
 				$GUI->invitation_formular();
+			} break;
+
+			case 'Einladung_E-Mail' : {
+				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
+				$GUI->invitation_email();
 			} break;
 
 			case 'Einladung_Speichern' : {

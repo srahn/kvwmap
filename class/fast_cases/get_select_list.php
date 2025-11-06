@@ -256,7 +256,7 @@ class GUI {
     else {
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
-		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
+		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']])); // get_options
     $reqby_start = strpos(strtolower($options), "<required by>");
     if ($reqby_start > 0) {
 			$sql = substr($options, 0, $reqby_start);
@@ -268,6 +268,9 @@ class GUI {
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
+			if ($this->formvars['attribute'] == $attributenames[$i]) {
+				$selected_value = $attributevalues[$i];
+			}
 			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
@@ -282,7 +285,7 @@ class GUI {
 						$html .= '<option value="">-- Bitte Auswählen --</option>';
 					}
 					while($rs = pg_fetch_array($ret[1])){
-						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
+						$html .= '<option value="'.$rs['value'].'" ' . ($selected_value == $rs['value'] ? 'selected="true"' : '') . '>'.$rs['output'].'</option>';
 					}
 				}break;
 				

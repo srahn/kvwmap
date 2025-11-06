@@ -38,6 +38,7 @@ class stelle {
 	var $ows_updatesequence;
 	var $ows_geographicdescription;
 	var $ows_fees;
+	var $ows_inspireidentifiziert;
 	var $ows_srs;
 
 	var $ows_contactorganization;
@@ -209,6 +210,7 @@ class stelle {
 				ows_updatesequence,
 				ows_geographicdescription,
 				ows_fees,
+				ows_inspireidentifiziert,
 				ows_srs,
 
 				ows_contactorganization,
@@ -275,6 +277,7 @@ class stelle {
 		$this->ows_updatesequence = $rs['ows_updatesequence'];
 		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
 		$this->ows_fees = $rs['ows_fees'];
+		$this->ows_inspireidentifiziert = ($rs['ows_inspireidentifiziert'] == 't');
 		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
 
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
@@ -470,6 +473,9 @@ class stelle {
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$rs = pg_fetch_array($ret[1]);
+		$rs['ows_inspireidentifiziert'] = ($rs['ows_inspireidentifiziert'] == 't');
+		$rs['check_client_ip'] = ($rs['check_client_ip'] == 't');
+		$rs['check_password_age'] = ($rs['check_password_age'] == 't');
 		$this->data = $rs;
 		return $rs;
 	}
@@ -561,6 +567,7 @@ class stelle {
 				'ows_distributioncity',
 				'ows_distributionadministrativearea',
 				'ows_fees',
+				'ows_inspireidentifiziert',
 				'ows_srs',
 				'wappen_link',
 				'wappen',
@@ -585,7 +592,8 @@ class stelle {
 		$rows['use_layer_aliases'] = ($rows['use_layer_aliases'] == '1'	? "true" : "false");
 		$rows['hist_timestamp'] = ($rows['hist_timestamp'] == '1' ? 'true' : 'false');
 		$rows['show_shared_layers'] = ($rows['show_shared_layers'] ? 'true' : 'false');
-		$rows['version'] = ($rows['version'] ?: "1.0.0");		
+		$rows['version'] = ($rows['version'] ?: "1.0.0");
+		$rows['ows_inspireidentifiziert'] = ($rows['ows_inspireidentifiziert'] == '1' ? "true" : "false");
 		if ($rows['id'] == '') {
 			unset($rows['id']);
 		}
@@ -688,6 +696,7 @@ class stelle {
 				ows_distributioncity = '" . $stellendaten['ows_distributioncity'] . "',
 				ows_distributionadministrativearea = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				ows_fees = '" . $stellendaten['ows_fees'] . "',
+				ows_inspireidentifiziert = " . ($stellendaten['ows_inspireidentifiziert'] == '1' ? 'true' : 'false') . ",
 				ows_srs = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				wappen_link = '" . $stellendaten['wappen_link'] . "',
 				check_client_ip =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
@@ -705,7 +714,7 @@ class stelle {
 				id = " . $this->id . "
 		";
 
-		#echo '<br>sql' . $sql;
+		// echo '<br>sql' . $sql;
 		# Abfrage starten
 		$ret=$this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
@@ -759,6 +768,7 @@ class stelle {
 				ows_distributioncity = '" . $stellendaten['ows_distributioncity'] . "',
 				ows_distributionadministrativearea = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				ows_fees = '" . $stellendaten['ows_fees'] . "',
+				ows_inspireidentifiziert = " . ($stellendaten['ows_inspireidentifiziert'] == '1' ? 'true' : 'false') . ",
 				ows_srs = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "'
 			WHERE
 				id = " . $this->id . "

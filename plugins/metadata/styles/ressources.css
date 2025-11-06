@@ -59,7 +59,11 @@
 }
 
 .odr-checkbox {
-  width: 3%;
+  width: 2%;
+}
+
+.odr-id {
+  width: 1%;
 }
 
 .odr-ressource {

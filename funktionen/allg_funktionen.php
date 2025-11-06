@@ -87,7 +87,7 @@ function urlencode2($str){
 /**
  * die Konstante URL kann durch diese Funktion ersetzt werden
  */
-function get_url(){
+function get_url() {
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
@@ -332,6 +332,51 @@ function get_exif_data($img_path, $force_identify = false) {
 			);
 		}
 	}
+}
+
+/**
+ * Function write exif data to file given in $img_path
+ * It uses php function iptcembed to write the exif data
+ * @param string $img_path Absolute Path of file with Exif Data to write
+ * @param array $iptc Array with iptc tags to write. See https://exiftool.org/TagNames/IPTC.html#ApplicationRecord for tag names and meanings
+ * @return void
+ */
+function set_exif_data($img_path, $iptc = array()) {
+	if (count($iptc) == 0) {
+		return;
+	}
+	$data = '';
+	foreach ($iptc as $tag => $string) {
+		$tag = substr($tag, 2);
+		$data .= iptc_make_tag(2, $tag, $string);
+	}
+	$content = iptcembed($data, $img_path);
+	$fp = fopen($img_path, "wb");
+	fwrite($fp, $content);
+	fclose($fp);
+}
+
+/**
+ * Create an IPTC tag
+ * originaly created by Thies C. Arntzen
+ */
+function iptc_make_tag($rec, $data, $value) {
+	// echo 'iptc_make_tag: ' . $rec . ', ' . $data . ', ' . $value . '<br>';
+	$length = strlen($value);
+	$retval = chr(0x1C) . chr($rec) . chr($data);
+
+	if ($length < 0x8000) {
+		$retval .= chr($length >> 8) .  chr($length & 0xFF);
+	}
+	else {
+		$retval .= chr(0x80) . 
+							 chr(0x04) . 
+							 chr(($length >> 24) & 0xFF) . 
+							 chr(($length >> 16) & 0xFF) . 
+							 chr(($length >> 8) & 0xFF) . 
+							 chr($length & 0xFF);
+	}
+	return $retval . $value;
 }
 
 /**
@@ -1059,6 +1104,16 @@ function isTag($word) {
 	return false;
 }
 
+/**
+ * Function return the content of $text that is between the first occurence of tag
+ * and its first ending tag. If tag not exists it returns an empty string.
+ */
+function get_tag_content($text, $tag) {
+	$start_parts = explode('<' . $tag . '>', $text);
+	$end_parts = explode('</' . $tag . '>', $start_parts[1]);
+	return $end_parts[0];
+}
+
 function drawColorBox($color,$outlinecolor) {
 	# Funktion liefert eine Box als überlagerte Div in html,
 	# die die Farbe $color und die Border $outlinecolor hat.
@@ -1426,6 +1481,25 @@ function copy_file_to_tmp($frompath, $dateiname = ''){
   }
 	#exec('ln -s '.$frompath.' '.$dateipfad.$dateiname);
 	#return TEMPPATH_REL.$dateiname;
+}
+
+/**
+ * Löscht ein Verzeichnis und alle darin befindlichen Dateien
+ * Sicherheitsabfrage: Verzeichnis muß unter /var/www/data/ liegen und dort auch existieren
+ * @param string $dir Pfad des zu löschenden Verzeichnisses
+ * @return boolean true wenn Verzeichnis gelöscht wurde, sonst false
+ */
+function delete_dir_with_files($dir) {
+	if ($dir == '' OR strpos($dir, '/var/www/data/') === false OR !is_dir($dir)) {
+		return false;
+	}
+
+	foreach (glob($dir . '/*') as $file) {
+		if (is_file($file)) {
+			unlink($file);
+		}
+	}
+	return rmdir($dir);
 }
 
 function read_epsg_codes($database) {
@@ -2042,7 +2116,7 @@ function replace_params_link($str, $params, $layer_id) {
 * }
 * mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang);
 **/
-function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port) {
+function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
 	$success = false;
 	switch ($mode) {
 		case 'sendEmail async': {
@@ -2057,6 +2131,40 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 				$file,
 				json_encode($str)
 			);
+		} break;
+		case 'PHPMailer' : {
+			require WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/Exception.php';
+			require WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php';
+			require WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/SMTP.php'; // Yes, this exists
+			$mail = new PHPMailer();
+			// $mail->SMTPDebug = SMTP::DEBUG_CONNECTION;
+			$mail->isSMTP();
+			$mail->Host = $smtp_server . ':' . $smtp_port;
+			$mail->SMTPAuth = true;
+			$mail->Username = MAILSMTPUSER;
+			$mail->Password = MAILSMTPPASSWORD;
+			$mail->SMTPSecure = 'tls';
+			$mail->From = $from_email;
+			$mail->FromName = $from_name;
+			$mail->addAddress($to_email, $to_name);
+			$mail->addReplyTo($reply_email, $reply_name);
+			if ($cc_email) {
+				$mail->addCC($cc_email);
+			}
+			if ($bcc_email) {
+				$mail->addBCC($bcc_email);
+			}
+			// $mail->WordWrap = 50;
+			// $mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+			// $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+			$mail->isHTML(false);
+			$mail->CharSet = "UTF-8";
+			$mail->Subject = $subject;
+			$mail->Body    = $message;
+			// $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+			$result = $mail->send();
+
+			return $result;
 		} break;
 		default : {
 			$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
@@ -2100,6 +2208,25 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 		return 1;
 	else
 		return 0;
+}
+
+/**
+ * Function implode $list with $delimiter but with $last_delimiter for the last conjunction.
+ * If $list is a String it will be exploded with $delimiter first.
+ * @param Array|String $list The list of values to implode.
+ * @param String $delimiter
+ * @param String $last_delimiter
+ * @return String The imploded string
+ */
+function natural_join($list, $delimiter =', ', $last_delimiter = ' und ') {
+	if (gettype($list) === 'string') {
+		$list = explode($delimiter, $list);
+	}
+  $last = array_pop($list);
+  if ($list) {
+    return implode($delimiter, $list) . $last_delimiter . $last;
+  }
+  return $last;
 }
 
 /**
@@ -2780,10 +2907,10 @@ function getAllFiles($dir) {
 			$files = array_merge($files, getAllFiles($item));
 		}
 		else {
-			$files[pathinfo($item, PATHINFO_EXTENSION)] = $item;
+			// $files[pathinfo($item, PATHINFO_EXTENSION)][] = $item;
+			$files[] = $item;
 		}
 	}
-
 	return $files;
 }
 
