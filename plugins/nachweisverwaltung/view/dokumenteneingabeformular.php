@@ -481,7 +481,7 @@ $legendheight = $this->map->height + 20;
 							<select size="1" name="selected_group_id" onchange="ahah('index.php', 'go=getqueryableVectorLayers&group_id=' + this.value, [document.GUI.geom_from_layer], ['sethtml']);" <?php if(count_or_0($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
 								<option value="">  -- <?php echo $this->strGroup; ?> --  </option>
 								<?
-								for($i = 0; $i < count($this->layergruppen['ID']); $i++){         
+								for($i = 0; $i < count_or_0($this->layergruppen['ID']); $i++){         
 									echo '<option';
 									if($this->layergruppen['ID'][$i] == $this->formvars['selected_group_id']){
 										echo ' selected';
