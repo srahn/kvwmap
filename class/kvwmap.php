@@ -2508,11 +2508,9 @@ echo '			</table>
 			}
 			
 			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
-				$geom = explode(' ', $layer->data)[0];
-				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
-				$layer->data = str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data);
-				$layer->data;
+				$data_parts = getDataParts($layer->data);
+				$layer->data = 'geom1 from (select st_buffer(' . $data_parts['geom'] . $geography . ', ' . $layerset['buffer'] . ') as geom1, * from ('. $data_parts['select'] . ') as foo) as fooo ' . $data_parts['using'];
 				$layer->type = 2;
 			}
 
@@ -4104,7 +4102,7 @@ echo '			</table>
         	continue;
       	}
 				$layerdb = $mapDB->getlayerdatabase($layer[$i]['layer_id'], $this->Stelle->pgdbhost);
-				$select = $mapDB->getSelectFromData($layer[$i]['data']);
+				$select = getDataParts($layer[$i]['data'])['select'];
 				$data_attributes = $mapDB->getDataAttributes($layerdb, $layer[$i]['layer_id']);
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
@@ -4157,7 +4155,7 @@ echo '			</table>
 			$layerdb = $mapDB->getlayerdatabase($layer['layer_id'], $this->Stelle->pgdbhost);
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['layer_id']);
 			$geom = $data_attributes['the_geom'];
-    	$select = $mapDB->getSelectFromData($layer['data']);
+			$select = getDataParts($layer['data'])['select'];
 			$select = preg_replace ("/ FROM /", ' from ', $select);
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			# Filter hinzufügen
@@ -6166,9 +6164,9 @@ echo '			</table>
 	function createZoomRollenlayer($dbmap, $layerdb, $layerset, $oids, $auto_class_attribute = NULL, $result = NULL){
 		# Layer erzeugen
 		$data = $dbmap->getData($layerset[0]['layer_id']);
-		$explosion = explode(' ', $data);
-		$datageom = $explosion[0];
-		$select = $dbmap->getSelectFromData($data);		
+		$data_parts = getDataParts($data);
+		$datageom = $data_parts['geom'];
+		$select = $data_parts['select'];
 
 		$orderbyposition = strrpos(strtolower($select), 'order by');
 		$lastfromposition = strrpos(strtolower($select), 'from');
@@ -8184,7 +8182,7 @@ echo '			</table>
 			for ($i = 0; $i < $this->map->numlayers; $i++) {
 				$layer = $this->map->getLayer($i);
 				if ($layer->connectiontype == 6 AND $layer->data != '') {
-					$sql = $mapDB->getSelectFromData($layer->data);
+					$sql = getDataParts($layer->data)['select'];
 					$filters = array();
 					$layerdb = $mapDB->getlayerdatabase($layer->metadata->get('kvwmap_layer_id'), $this->Stelle->pgdbhost);
 					$attributes = $layerdb->getFieldsfromSelect($sql);
@@ -18256,7 +18254,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->show_attribute = [];
 			$this->layerdaten = $mapDB->get_Layer($this->formvars['layer_id'], true);
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			$select = $mapDB->getSelectFromData($this->layerdaten['data']);
+			$select = getDataParts($this->layerdaten['data'])['select'];
 			$classes = $mapDB->read_Classes($this->layerdaten['layer_id']);
 			$anzahl = count($classes);
 			for ($i = 0; $i < $anzahl; $i++) {
@@ -19315,26 +19313,6 @@ class db_mapObj{
 		}
 	}
 
-  function getSelectFromData($data){
-    if(strpos($data, '(') === false){
-      $from = stristr($data, ' from ');
-      $usingposition = strpos($from, 'using');
-      if($usingposition > 0){
-        $from = substr($from, 0, $usingposition);
-      }
-      $select = 'select * '.$from.' where 1=1';
-    }
-    else{
-      $select = stristr($data,'(');
-      $select = trim($select, '(');
-      $select = substr($select, 0, strrpos($select, ')'));
-    }
-		return replace_params_rolle(
-						$select,
-						['SCALE' => '1000']
-					);
-	}
-
 	/**
 	 * Liefert eine Liste von Attriubten wie sie im data-Feld des Layers stehen
 	 * Wenn Data leer ist werden die Attribute vom Path-Feld des Layers entnommen
@@ -19347,7 +19325,7 @@ class db_mapObj{
 		$options = array_merge($default_options, $options);
 		$data = $this->getData($layer_id);
 		if ($data != '') {
-			$select = $this->getSelectFromData($data);
+			$select = getDataParts($data)['select'];
 			if ($database->schema != '') {
 				$select = str_replace($database->schema . '.', '', $select);
 			}

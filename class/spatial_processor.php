@@ -716,7 +716,7 @@ class spatial_processor {
 				$data = $layerset[0]['data'];
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
-				$select = $dbmap->getSelectFromData($data);
+				$select = getDataParts($data)['select'];
 				$fromwhere = $select;
 				# order by rausnehmen
 				$orderby = '';
