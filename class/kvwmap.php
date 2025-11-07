@@ -9471,8 +9471,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		# layer_attributes löschen
 		$mapDB->delete_layer_attributes($this->formvars['selected_layer_id']);
-		# Filter löschen
-		$mapDB->delete_layer_filterattributes($this->formvars['selected_layer_id']);		# kann ab Version 3.5 weg da dann FK vorhanden
+
+		# gespeicherte Layerauswahlen updaten
+		$mapDB->remove_layer_from_rolle_saved_layers($this->formvars['selected_layer_id']);
 	}
 
   function DatentypenAnzeigen() {
@@ -16440,7 +16441,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->formvars[$queryfield][$layerset[$i]['requires']] == '1'
 				) AND
 				(
-					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 
+					($this->last_query == '' AND ($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)) OR 
 					($this->last_query[$layerset[$i]['layer_id']] != '')
 				)
 			) {
@@ -21414,6 +21415,16 @@ DO $$
     $ret = $this->db->execSQL($sql);
     if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
   }
+
+	function remove_layer_from_rolle_saved_layers($layer_id) {
+		$sql = '
+			UPDATE kvwmap.rolle_saved_layers
+			SET layers = array_remove(layers, ' . $layer_id . ')
+			WHERE ' . $layer_id . ' = ANY(layers);';
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->remove_layer_from_rolle_saved_layers:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+		if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+	}			
 
   function read_datatype_attributes($layer_id, $datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false, $replace = true){
 		global $language;

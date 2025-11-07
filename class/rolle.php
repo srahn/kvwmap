@@ -2423,7 +2423,7 @@ class rolle {
 			SELECT
 				id,
 				name,
-				layers,
+				array_to_string(layers, ',') as layers,
 				query
 			FROM
 				kvwmap.rolle_saved_layers
@@ -2497,7 +2497,7 @@ class rolle {
 			'user_id' => $this->user_id,
 			'stelle_id' => $this->stelle_id,
 			'name' => "'" . $comment . "'",
-			'layers' => "'" . implode(',', $layers) . "'",
+			'layers' => "'{" . implode(',', $layers) . "'}",
 			'query' => "'" . implode(',', $query) . "'"
 		];
 		$sql = "
