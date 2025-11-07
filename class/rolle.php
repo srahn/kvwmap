@@ -1552,12 +1552,12 @@ class rolle {
 		}
 	}
 	
-	function changeLegendType($formvars){
+	function changeLegendType(){
 		$sql ="
 			UPDATE
 				kvwmap.rolle
 			SET 
-				legendtype = " . $formvars['legendtype'] . "
+				legendtype = abs(legendtype - 1)
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "

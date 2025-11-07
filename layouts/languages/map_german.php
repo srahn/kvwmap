@@ -42,8 +42,7 @@
 	$strNoLayer="Es wurde kein Thema zur Sachdatenabfrage ausgewählt!";
 	$strLayerSearch="Themensuche";
 	$strLegendType="Themendarstellung";
-	$strLegendTypeGroups="Themen in Gruppen";
-	$strLegendTypeAlphabetical="Themen alphabetisch";
+	$strLegendTypeSwitch="zwischen gruppierter/alphabetischer Anzeige umschalten";
 	$strDrawingOrder="Zeichenreihenfolge anpassen";
 	$strRemoveAllImportLayers="alle eigenen Importe entfernen";
 	$strRemoveAllSearchLayers="alle eigenen Abfragen entfernen";
