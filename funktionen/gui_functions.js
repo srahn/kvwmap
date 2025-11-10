@@ -1347,7 +1347,7 @@ function resetLayerOptions(layer_id){
 
 function changeLegendType(){
 	var legende = document.getElementById('legend');
-	ahah('index.php', 'go=changeLegendType', new Array(legende), "");
+	ahah('index.php', 'go=changeLegendType', [legende], ['sethtml']);
 	document.getElementById('legendtype_switch').classList.toggle('in_groups');
 	document.getElementById('legendtype_switch').classList.toggle('alphabetical');
 	document.getElementById('layersearchdiv').classList.toggle('hidden');

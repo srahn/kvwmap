@@ -1242,11 +1242,19 @@ echo '			</table>
 			for($j = 0; $j < $layercount; $j++){
 				$layer = $this->sorted_layerset[$j];
 				$legend .= $this->create_layer_legend($layer);
+				if ($this->sorted_layerset[$j]['requires'] == '') {
+					$layernames[$this->sorted_layerset[$j]['Name_or_alias']][] = $this->sorted_layerset[$j]['layer_id'];
+				}
 			}
 			$legend .= '</table>';
 			foreach($this->groupset as $group){
 				$legend .= '<input type="hidden" name="radiolayers_'.$group['id'].'" value="'.$this->radiolayers[$group['id']].'">';
 			}
+			$legend .= '<script>';
+			foreach ($layernames as $layername => $layer_ids) {
+				$legend .=  "layernames['" . $layername . "'] = [" . implode(', ', $layer_ids) . "];\n";
+			}
+			$legend .= "</script>";
 		}
 		else{		# Layer in Zeichenreihenfolge in Gruppen
 			$legend = '';
