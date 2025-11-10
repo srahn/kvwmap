@@ -327,6 +327,14 @@ class GUI {
 		return true;
 	}
 
+	function is_trusted_device($user) {
+    if (empty($_COOKIE['trusted_device'])) return false;
+		$now = new DateTime('now');
+    $token = $_COOKIE['trusted_device'];
+    $token_hash = hash('sha256', $token);
+		return ($user->device_token == $token_hash AND $user->device_expires > $now);
+	}
+
 	function login_failed() {
 		$this->login_failed = true;
 		$this->expect = array('login_name', 'passwort', 'mobile');

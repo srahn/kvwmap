@@ -112,6 +112,9 @@ if ($gast_export === false) {
 		$code = trim($GUI->formvars['code']);
 		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->pgdatabase);
 		if (verify_totp($GUI->user->totp_secret, $code)) {
+			if (defined('TOTP_DEVICE_EXPIRATION') AND TOTP_DEVICE_EXPIRATION > 0) {
+				$GUI->user->generate_device_token();
+			}
 			$_SESSION['angemeldet'] = true;
 			unset($_SESSION['2fa_verification']);
 		}
@@ -194,9 +197,11 @@ if ($gast_export === false) {
 
 							if (defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION) {
 								if ($GUI->user->totp_secret != '') {
-									$_SESSION['2fa_verification'] = true;
-									include(SNIPPETS . '2fa_verify.php');
-									exit;
+									if ($GUI->is_trusted_device($GUI->user) == false) {
+										$_SESSION['2fa_verification'] = true;
+										include(SNIPPETS . '2fa_verify.php');
+										exit;
+									}
 								} 
 								else {
 									$_SESSION['2fa_registration'] = true;

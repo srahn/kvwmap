@@ -862,6 +862,8 @@ class user {
 		$this->num_login_failed = $rs['num_login_failed'];
 		$this->login_locked_until = $rs['login_locked_until'];
 		$this->totp_secret = $rs['totp_secret'];
+		$this->device_token = $rs['device_token'];
+		$this->device_expires = DateTime::createFromFormat('d.m.Y H:i:s', $rs['device_expires']);
 	}
 
 	/*
@@ -1169,10 +1171,29 @@ class user {
 			WHERE
 				id = " . $this->id . "
 		";
-		$this->debug->write("<p>file:users.php class:user->agreement_accepted - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
+		$this->debug->write("<p>file:users.php class:user->update_totp_secret - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
-	}	
+	}
+
+	function generate_device_token() {
+		$token = bin2hex(random_bytes(32)); // Zufälliges Token
+    $token_hash = hash('sha256', $token);
+    $expires = new DateTime('+' . TOTP_DEVICE_EXPIRATION . ' days');
+		setcookie('trusted_device',	$token,	['expires' => $expires->getTimestamp(), 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
+		$sql = "
+			UPDATE
+				kvwmap.user
+			SET
+				device_token = '" . $token_hash . "',
+				device_expires = '" . $expires->format('d.m.Y H:i:s') . "'
+			WHERE
+				id = " . $this->id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->generate_device_token - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
+	}
 
 	function setOptions($stelle_id, $formvars) {
 		$nImageWidth = '';
