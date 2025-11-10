@@ -11,20 +11,6 @@
 	var csrf_token = '<? echo $_SESSION['csrf_token']; ?>';
 	var hist_timestamp = <?	echo (rolle::$hist_timestamp != ''? 'new Date("' . rolle::$hist_timestamp . '");' : "'';"); ?>
 	var earth_radius = <? echo EARTH_RADIUS ?>;
- 
-<?
- 	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
-		echo "var layernames = new Array();\n";
-		$layercount = count_or_0($this->sorted_layerset);
-		for($j = 0; $j < $layercount; $j++){
-			if ($this->sorted_layerset[$j]['requires'] == '') {
-				$layernames[$this->sorted_layerset[$j]['Name_or_alias']][] = $this->sorted_layerset[$j]['layer_id'];
-			}
-		}
-		foreach ($layernames as $layername => $layer_ids) {
-			echo "layernames['" . $layername . "'] = [" . implode(', ', $layer_ids) . "];\n";
-		}
-	}
-?>
+	var layernames = new Array(); 	// für alphabetisch sortierte Legende
 
 </script>
