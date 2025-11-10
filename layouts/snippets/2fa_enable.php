@@ -37,21 +37,25 @@ QRcode::png($uri, IMAGEPATH . $qr_image);
 				justify-content: center;
 				align-items: center;
 				flex-flow: column;
+				font-family: Arial, Helvetica, sans-serif;
 			}
 			div {
 				text-align: center;
+				background: lightsteelblue;
+				border-radius: 5px;
+				padding: 10px;
 			}
 		</style>
 	</head>
 	<body>
 		<div>
 			<h2>2FA aktivieren</h2>
-			<p>Scanne den QR-Code mit Google Authenticator, Aegis oder Authy:</p>
+			<p>Scannen Sie den QR-Code mit Google Authenticator, Aegis oder Authy:</p>
 			<img src="<? echo TEMPPATH_REL . $qr_image; ?>">
-			<p>Oder Secret manuell eingeben: <b><?=$secret?></b></p>
+			<p>Oder Schlüssel manuell eingeben: <b><?=$secret?></b></p>
 
 			<form method="post">
-					<input name="code" placeholder="6-stelliger Code" required><br>
+					<input name="code" placeholder="6-stelliger Code" required><br><br>
 					<button type="submit">Aktivieren</button>
 			</form>
 		</div>

@@ -306,6 +306,13 @@
 		</div>
 
 		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strTOTPKey; ?></div>
+			<div>
+				<input name="totp_secret" type="text" value="<? echo $this->formvars['totp_secret']; ?>">
+			</div>
+		</div>		
+
+		<div class="form_formular-input form_formular-aic">
 			<div><? echo $strAllowedIps;?></div>
 			<div>
 				<input name="ips" type="text" value="<? echo $this->formvars['ips']; ?>">

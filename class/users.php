@@ -1478,6 +1478,9 @@ class user {
 		if ($userdaten['ips']!='') {
 			$columns['ips'] = "'" . $userdaten['ips'] . "'";
 		}
+		if ($userdaten['totp_secret']!='') {
+			$columns['totp_secret'] = "'" . $userdaten['totp_secret'] . "'";
+		}
 		if($stellen[0] != ''){
 			$columns['stelle_id'] = $stellen[0];
 		}
@@ -1532,6 +1535,7 @@ class user {
 				position = '" . $userdaten['position']."',
 				comment = '" . $userdaten['comment']."',
 				ips = '" . $userdaten['ips'] . "',
+				totp_secret = '" . $userdaten['totp_secret'] . "',
 				agreement_accepted = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
 				share_rollenlayer_allowed = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
 				layer_data_import_allowed = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
