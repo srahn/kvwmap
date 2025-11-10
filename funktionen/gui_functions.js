@@ -1332,10 +1332,12 @@ function resetLayerOptions(layer_id){
 	document.GUI.submit();
 }
 
-function changeLegendType(type){
-	document.GUI.go.value = 'changeLegendType';
-	document.GUI.legendtype.value = type;
-	document.GUI.submit();
+function changeLegendType(){
+	var legende = document.getElementById('legend');
+	ahah('index.php', 'go=changeLegendType', new Array(legende), "");
+	document.getElementById('legendtype_switch').classList.toggle('in_groups');
+	document.getElementById('legendtype_switch').classList.toggle('alphabetical');
+	document.getElementById('layersearchdiv').classList.toggle('hidden');
 }
 
 function saveDrawingorder(){

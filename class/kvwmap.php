@@ -960,13 +960,14 @@ echo '			</table>
 	}
 
 	function changeLegendType(){
-		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$this->user->rolle->changeLegendType($this->formvars);
-		$this->resizeMap2Window();
+		$this->loadMap('DataBase');
+		# Parameter $scale in Data ersetzen
+		for($i = 0; $i < count_or_0($this->layers_replace_scale); $i++){
+			$this->layers_replace_scale[$i]->data = str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data);
+		}
+		$this->user->rolle->changeLegendType();
 		$this->user->rolle->readSettings();
-		$this->neuLaden();
-		$this->legende = $this->create_dynamic_legend();
-		$this->output();
+		echo $this->create_dynamic_legend();
 	}
 
 	function saveDrawingorder(){
