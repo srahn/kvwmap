@@ -57,7 +57,7 @@
           <span class="metadata-tooltip" data-tooltip="Ressource ID: <?php echo $package->get('ressource_id'); ?> Format: <?php echo $package->export_format; ?> <?php echo $package->datatype; ?> Anzahl Objekte: <? echo $package->num_feature; ?>"></span>
         </div>
         <div class="dpt-cell dpt-inhaber">
-          <span id="inhaber_span_<? echo $package->get('ressource_id'); ?>"><a href="javascript:message([{ type: 'info', msg: '<? echo $package->get_inhaber_info(); ?>'}])"><?php echo $package->get('abk') ?: '' ; ?></a></span>
+          <span id="inhaber_span_<? echo $package->get('ressource_id'); ?>"><a href="javascript:message([{ type: 'info', msg: '<? echo $package->get_inhaber_info(); ?>'}])"><?php echo $package->get('dateninhaber_abk') ?: '' ; ?></a></span>
         </div>
         <div class="dpt-cell dpt-status">
           <span id="status_span_<? echo $package->get('ressource_id'); ?>"><?php echo $package->get('status') ?: '' ; ?></span><span id="package_id_span_<? echo $package->get('ressource_id'); ?>"></span>
