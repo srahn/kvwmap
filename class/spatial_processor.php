@@ -236,8 +236,65 @@ class spatial_processor {
     }
   }
 
-	function rotate($geom, $angle){
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_rotate(st_geomfromtext('".$geom."'), RADIANS(".$angle."), st_centroid(st_geomfromtext('".$geom."'))) as geom) as foo";
+	function rotate($geom, $angle, $mousex, $mousey){
+  	$sql = "
+			WITH
+			geom AS (
+				SELECT ST_GeomFromText('" . $geom . "') AS g
+			),
+			pt AS (
+				SELECT ST_MakePoint(" . $mousex . ", " . $mousey . ") AS p
+			),
+			parts AS (
+				SELECT (ST_Dump(g)).path[1] AS id, (ST_Dump(g)).geom AS part
+				FROM geom
+			),
+			selected_part AS (
+				SELECT id, part
+				FROM parts, pt
+				WHERE ST_Contains(part, pt.p)
+				LIMIT 1
+			),
+			rotated_parts  AS (
+				SELECT
+					p.id,
+					CASE
+						WHEN s.id IS NOT NULL THEN
+							ST_Rotate(
+								p.part,
+								radians(" . $angle . "),
+								ST_X(ST_Centroid(s.part)),
+								ST_Y(ST_Centroid(s.part))
+							)
+						ELSE
+							p.part
+					END AS geom
+				FROM parts p
+				LEFT JOIN selected_part s USING (id)
+			),
+			combined AS (
+				SELECT ST_Collect(geom) AS geom FROM rotated_parts
+			),
+			final AS (
+				SELECT
+					CASE
+						WHEN EXISTS (SELECT 1 FROM selected_part)
+						THEN c.geom
+						ELSE
+							ST_Rotate(
+								g.g,
+								radians(" . $angle . "),
+								ST_X(ST_Centroid(g.g)),
+								ST_Y(ST_Centroid(g.g))
+							)
+					END AS geom
+				FROM combined c, geom g
+			)
+			SELECT 
+				st_astext(geom) as wkt, 
+				st_assvg(geom, 0, 15) as svg 
+			FROM
+				final";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
@@ -262,15 +319,43 @@ class spatial_processor {
     }
   }
 	
-	function centroid($geom){
-  	$sql = "SELECT st_x(geom) as x, st_y(geom) as y FROM (SELECT st_centroid(st_geomfromtext('".$geom."')) as geom) as foo";
+	function centroid($geom, $mousex, $mousey){
+  	$sql = "
+			WITH
+			geom AS (
+				SELECT ST_GeomFromText('" . $geom . "') AS g
+			),
+			pt AS (
+				SELECT ST_MakePoint(" . $mousex . ", " . $mousey . ") AS p
+			),
+			parts AS (
+				SELECT (ST_Dump(g)).geom AS part
+				FROM geom
+			),
+			selected_part AS (
+				SELECT part
+				FROM parts, pt
+				WHERE ST_Contains(part, pt.p)
+				LIMIT 1
+			),
+			geom_to_rotate AS (
+				SELECT COALESCE(
+								(SELECT part FROM selected_part),
+								(SELECT g FROM geom)
+							) AS geom
+			)
+			SELECT
+				ST_X(ST_Centroid(geom)) AS x,
+				ST_Y(ST_Centroid(geom)) AS y,
+				ST_AsSVG(geom, 0, 15) AS svg
+			FROM geom_to_rotate;";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
-			$result = $rs['x'] . ' ' . $rs['y'];
+			$result = $rs['x'] . ' ' . $rs['y'] . '||' . $rs['svg'];
 			return $result;
     }
   }
@@ -357,7 +442,7 @@ class spatial_processor {
 			}break;
 
 			case 'rotate':{
-				$result = $this->rotate($polywkt1, $formvars['angle']);
+				$result = $this->rotate($polywkt1, $formvars['angle'], $formvars['mousex'], $formvars['mousey']);
 			}break;
 			
 			case 'reverse':{
@@ -365,7 +450,7 @@ class spatial_processor {
 			}break;
 
 			case 'centroid':{
-				$result = $this->centroid($polywkt1);
+				$result = $this->centroid($polywkt1, $formvars['mousex'], $formvars['mousey']);
 			}break;
 			
 			case 'buffer':{
