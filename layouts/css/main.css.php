@@ -2433,7 +2433,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fstanzeigecontainer{
-	width: 580px;
+	width: 620px;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
