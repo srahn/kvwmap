@@ -1745,8 +1745,9 @@ class stelle {
 						FROM 
 							kvwmap.layer_attributes 
 						WHERE 
-							layer_id = ".$layer_ids[$i]." AND 
-							privileg IS NOT NULL";
+							layer_id = " . $layer_ids[$i] . " AND 
+							privileg IS NOT NULL
+							ON CONFLICT (layer_id, attributename, stelle_id) DO NOTHING";
 				}
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
