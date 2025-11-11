@@ -182,11 +182,9 @@ if ($doit == true) {
 							<tr>
 								<th>
 									<div class="gle_tabs tab_' . $layer['layer_id'] . '_' . $k . '">';
-										$z = 100;
 										foreach ($layer['attributes']['tabs'] as $t => $tab) {
 											$tabname = sonderzeichen_umwandeln($tab);
-											echo '<div style="z-index: ' . $z . '" class="' . $layer['layer_id'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['layer_id'] . ', ' . $k . ', ' . $t . ', \'' . $tabname . '\');">' . $tab . '</div>';
-											$z--;
+											echo '<div class="' . $layer['layer_id'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['layer_id'] . ', ' . $k . ', ' . $t . ', \'' . $tabname . '\');">' . $tab . '</div>';
 										}
 										echo '
 									</div>
