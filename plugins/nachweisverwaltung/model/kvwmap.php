@@ -567,10 +567,11 @@
 			$sql = "
 				INSERT INTO 
 					kvwmap.rolle_nachweise 
-				(user_id, stelle_id)
+				(user_id, stelle_id, abfrageart)
 				VALUES (
 					" . $user_id . ", 
-					" . $stelle_id . ")";
+					" . $stelle_id . ",
+					'indiv_nr')";
 			$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
 			$GUI->pgdatabase->execSQL($sql,4, 1);
 		}
