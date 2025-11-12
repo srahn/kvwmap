@@ -249,6 +249,8 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
       if (!$ret['success']) {
         echo $r['table_name'].':<br>';
         echo substr($ret['msg'], 0, 1000).'<br>';
+        $sql = "ROLLBACK;";
+        $ret = $this->pgdatabase->execSQL($sql, 0, 0);
       }
     }
   }
