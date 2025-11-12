@@ -228,6 +228,7 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
   $ret = $this->database->execSQL($sql,4, 1);
   $res = $this->database->result;
 
+  $success = true;
   $sql = "BEGIN;";
   $ret = $this->pgdatabase->execSQL($sql, 0, 0);
 
@@ -247,10 +248,9 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
       ";
       $ret = $this->pgdatabase->execSQL($sql, 0, 0);
       if (!$ret['success']) {
+        $success = false;
         echo $r['table_name'].':<br>';
         echo substr($ret['msg'], 0, 1000).'<br>';
-        $sql = "ROLLBACK;";
-        $ret = $this->pgdatabase->execSQL($sql, 0, 0);
       }
     }
   }
@@ -261,7 +261,7 @@ define('POSTGRES_USER', '" . $credentials['user'] . "');
   $ret = $this->pgdatabase->execSQL($sql, 0, 0);
 
   # Sequenzen auf Max-Werte setzen
-  if ($ret['success']) {
+  if ($success) {
     $sql = "
       with sequences as (
         select *
