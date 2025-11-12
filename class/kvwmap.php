@@ -8350,7 +8350,6 @@ echo '			</table>
 			'template' => 'text',
 			'header' => 'text',
 			'footer' => 'text',
-			'logconsume' => 'int',
 			'queryable' => 'int',
 			'start_aktiv' => 'int',
 			'group_id' => 'int',
@@ -18617,7 +18616,6 @@ class db_mapObj{
 				rl.querystatus,
 				rl.gle_view,
 				rl.showclasses,
-				rl.logconsume,
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
@@ -18630,7 +18628,6 @@ class db_mapObj{
 				ul.header,
 				ul.footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,
@@ -20200,7 +20197,7 @@ DO $$
 								'vars_stelle_id_" . $stellen[$s]['extra'][0] . "' AS stelle_id,
 								queryable,
 								legendorder, minscale, maxscale, offsite, transparency, postlabelcache, filter,
-								template, header, footer, symbolscale, requires, logconsume, privileg, export_privileg,
+								template, header, footer, symbolscale, requires, privileg, export_privileg,
 								start_aktiv,
 								use_geom
 							FROM

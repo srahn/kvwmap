@@ -2559,7 +2559,7 @@ class stelle {
 				id," .
 				$name_column . ",
 				start,
-				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, authentifizierung, alb_status, wappen, wappen_link, logconsume,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, authentifizierung, alb_status, wappen, wappen_link
 				ows_namespace,
 				ows_title,
 				wms_accessconstraints,
@@ -3080,7 +3080,6 @@ class rolle {
 				header,
 				footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,
@@ -3449,17 +3448,14 @@ class rolle {
 				r2ul.layer_id 
 			FROM 
 				kvwmap.u_rolle2used_layer AS r2ul' . 
-    		($logconsume? ', kvwmap.used_layer AS ul, kvwmap.layer AS l, kvwmap.stelle AS s' : '') . '
+    		($logconsume? ', kvwmap.layer AS l' : '') . '
     	WHERE 
 				r2ul.user_id = ' . $this->user_id . ' AND 
 				r2ul.stelle_id = ' . $this->stelle_id;
     if ($logconsume) {
       $sql .= ' 
-				AND r2ul.layer_id = ul.layer_id 
-				AND r2ul.stelle_id = ul.stelle_id
-				AND ul.layer_id = l.layer_id 
-				AND ul.stelle_id = s.id
-				AND (s.logconsume OR l.logconsume OR ul.logconsume OR r2ul.logconsume)';
+				AND r2ul.layer_id = l.layer_id 
+				AND l.logconsume';
     }
     $anzaktivStatus=count($aktivStatus);
     if ($anzaktivStatus > 0) {
@@ -4139,7 +4135,6 @@ class db_mapObj{
 				rl.querystatus,
 				rl.gle_view,
 				rl.showclasses,
-				rl.logconsume,
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
@@ -4152,7 +4147,6 @@ class db_mapObj{
 				ul.header,
 				ul.footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,

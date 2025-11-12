@@ -202,7 +202,7 @@ class stelle {
 				id," .
 				$name_column . ",
 				start,
-				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, Authentifizierung, ALB_status, wappen, wappen_link, logconsume,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, Authentifizierung, ALB_status, wappen, wappen_link, 
 				ows_namespace,
 				ows_title,
 				wms_accessconstraints,
@@ -260,7 +260,7 @@ class stelle {
 			WHERE
 				id = " . $this->id . "
 		";
-		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
+		echo 'SQL zum Abfragen der Stelle: ' . $sql;exit;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
 		$ret = $this->database->execSQL($sql, 4, 0, true);
 		if(!$ret[0]) {
@@ -1401,7 +1401,6 @@ class stelle {
 				header, 
 				footer, 
 				symbolscale, 
-				logconsume, 
 				requires, 
 				privileg, 
 				export_privileg,
@@ -1845,7 +1844,6 @@ class stelle {
 				template 				= '" . $formvars['template'] 					. "',
 				header   				= '" . $formvars['header'] 						. "',
 				footer   				= '" . $formvars['footer'] 						. "',
-				logconsume 			= '" . $formvars['logconsume'] 				. "',
 				queryable				= '" . ($formvars['queryable'] 	== '0' ? "0" : "1") . "',
 				start_aktiv 		= '" . ($formvars['start_aktiv'] == '0' ? "0"  : "1") 	. "',
 				group_id				= "  . ($formvars['group_id'] 					? $formvars['group_id'] : "NULL")			. ",
@@ -1867,52 +1865,6 @@ class stelle {
 			return 0;
 		}
 	}
-
-	// function updateLayer($formvars){
-	// 	# Aktualisieren der LayerzuStelle-Eigenschaften
-	// 	$sql = 'UPDATE used_layer SET layer_id = '.$formvars['selected_layer_id'];
-	// 	$sql .= ', queryable = "'.$formvars['queryable'].'"';
-	// 	$sql .= ', use_geom = '.$formvars['use_geom'];
-	// 	if ($formvars['minscale']!='') {
-	// 		$sql .= ', minscale = '.$formvars['minscale'];
-	// 	}
-	// 	else{
-	// 		$sql .= ', minscale = NULL';
-	// 	}
-	// 	if ($formvars['maxscale']!='') {
-	// 		$sql .= ', maxscale = '.$formvars['maxscale'];
-	// 	}
-	// 	else{
-	// 		$sql .= ', maxscale = NULL';
-	// 	}
-	// 	$sql .= ', offsite = "'.$formvars['offsite'].'"';
-	// 	if ($formvars['transparency']!='') {
-	// 		$sql .= ', transparency = '.$formvars['transparency'];
-	// 	}
-	// 	else{
-	// 		$sql .= ', transparency = NULL';
-	// 	}
-	// 	$sql .= ', postlabelcache = "'.$formvars['postlabelcache'].'"';
-	// 	$sql .= ", Filter = '".$formvars['filter']."'";
-	// 	$sql .= ', template = "'.$formvars['template'].'"';
-	// 	$sql .= ', header = "'.$formvars['header'].'"';
-	// 	$sql .= ', footer = "'.$formvars['footer'].'"';
-	// 	if ($formvars['symbolscale']!='') {
-	// 		$sql .= ', symbolscale = '.$formvars['symbolscale'];
-	// 	}
-	// 	else{
-	// 		$sql .= ', symbolscale = NULL';
-	// 	}
-	// 	if($formvars['requires'] == '')$formvars['requires'] = 'NULL';
-	// 	$sql .= ', requires = '.$formvars['requires'];
-	// 	$sql .= ', start_aktiv = "'.$formvars['startaktiv'].'"';
-	// 	$sql .= ', logconsume = "'.$formvars['logconsume'].'"';
-	// 	$sql .= ' WHERE stelle_id = '.$formvars['selected_stelle_id'].' AND layer_id = '.$formvars['selected_layer_id'];
-	// 	#echo $sql.'<br>';
-	// 	$this->debug->write("<p>file:stelle.php class:stelle->updateLayer - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
-	// 	$this->database->execSQL($sql);
-	// 	if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-	// }
 
 	function updateLayerOrder($formvars){
 		# Aktualisieren der LayerzuStelle-Eigenschaften
@@ -2252,10 +2204,10 @@ class stelle {
 				ul.offsite, 
 				ul.transparency, 
 				ul.postlabelcache, 
-				ul.Filter, 
+				ul.filter, 
 				ul.template, 
 				ul.symbolscale, 
-				ul.logconsume, 
+				l.logconsume, 
 				ul.start_aktiv, 
 				ul.use_geom,
 				ul.group_id,
@@ -2283,10 +2235,10 @@ class stelle {
 				ul.offsite, 
 				ul.transparency, 
 				ul.postlabelcache, 
-				ul.Filter, 
+				ul.filter, 
 				ul.template, 
 				ul.symbolscale, 
-				ul.logconsume, 
+				l.logconsume, 
 				ul.start_aktiv, 
 				ul.use_geom,
 				ul.requires,
