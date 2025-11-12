@@ -253,11 +253,12 @@ class stelle {
 				style,
 				show_shared_layers,
 				reset_password_text,
-				invitation_text
+				invitation_text,
+				start_page_params
 			FROM
 				kvwmap.stelle s
 			WHERE
-				ID = " . $this->id . "
+				id = " . $this->id . "
 		";
 		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
@@ -328,6 +329,7 @@ class stelle {
 		$this->style = $rs['style'];
 		$this->reset_password_text = $rs['reset_password_text'];
 		$this->invitation_text = $rs['invitation_text'];
+		$this->start_page_params = $rs['start_page_params'];
 	}
 
 	function delete() {
@@ -581,7 +583,8 @@ class stelle {
 				'version',
 				'reset_password_text',
 				'invitation_text',
-				'comment'
+				'comment',
+				'start_page_params'
 			])
 		);
 		$rows['ows_srs'] = preg_replace(array('/: +/', '/ +:/'), ':', $rows['ows_srs']);
@@ -709,7 +712,8 @@ class stelle {
 				version = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				reset_password_text = '" . $stellendaten['reset_password_text'] . "',
 				invitation_text = '" . $stellendaten['invitation_text'] . "',
-				comment = '" . $stellendaten['comment'] . "'
+				comment = '" . $stellendaten['comment'] . "',
+				start_page_params = '" . $stellendaten['start_page_params'] . "'
 			WHERE
 				id = " . $this->id . "
 		";
