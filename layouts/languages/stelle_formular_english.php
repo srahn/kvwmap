@@ -68,4 +68,5 @@
 	$strShowSharedLayersDescription = 'When this permission is granted, all layers from users with the permission to share Rollenlayer will be assigned to this Stelle and shown to all Users of this Stelle. These Layers will be marked as Shared layers in the legend and it is shown who has shared the layer for other in the options form.';
   $strResetPasswordText = "Reset password text";
   $strInvitationText = 'You have been invited to participate in the application "' . TITLE . '"';
+  $strStartPageParams = 'Startpage Parameter';
 ?>
