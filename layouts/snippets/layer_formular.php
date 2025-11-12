@@ -1292,6 +1292,12 @@ from
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="listed" type="checkbox" value="1"<?php if ($this->formvars['listed']) echo ' checked'; ?>>
 						</td>
+					</tr>
+					<tr>
+						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogged; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="logconsume" type="checkbox" value="1"<?php if ($this->formvars['logconsume']) echo ' checked'; ?>>
+						</td>
 					</tr><?
 					if ($this->formvars['shared_from'] OR $this->is_admin_user($this->user->id)) { ?>
 						<tr>

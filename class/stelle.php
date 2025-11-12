@@ -260,7 +260,7 @@ class stelle {
 			WHERE
 				id = " . $this->id . "
 		";
-		echo 'SQL zum Abfragen der Stelle: ' . $sql;exit;
+		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
 		$ret = $this->database->execSQL($sql, 4, 0, true);
 		if(!$ret[0]) {

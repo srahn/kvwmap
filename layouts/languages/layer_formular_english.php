@@ -55,6 +55,7 @@
 	$strLegendGraphic = "legendgraphic";
 	$strLegendOrder = "legend order";	
 	$strListed = "show in Layer-List";
+	$strLogged = 'Logging enabled';
 	$strMaintable = "Main Table";
 	$strMap = "Map";
 	$strMapParameters = "Map Display";
