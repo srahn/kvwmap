@@ -275,7 +275,7 @@ class GUI {
 		}
 		else {
 			$this->expect = array('login_name', 'passwort', 'mobile');
-			if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
+			if (array_key_exists('go', $this->formvars) AND in_array($this->formvars['go'], ['login', 'logout'])) {
 				$this->expect[] = 'go';
 			}
 			$this->gui = LOGIN;
