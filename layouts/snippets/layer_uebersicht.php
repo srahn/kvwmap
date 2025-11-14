@@ -255,3 +255,8 @@
 		<td align="right">&nbsp;</td>
 	</tr>
 </table>
+<script>
+	window.addEventListener("pageshow", function() {
+    filter_by_full_text_search();
+});
+</script>
