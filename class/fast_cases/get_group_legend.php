@@ -1486,7 +1486,7 @@ class GUI {
 						</a>';
 				if ($this->groupset[$group_id]['checkbox']) {
 					$legend .= '
-						<input id="group_checkbox[' . $group_id . ']" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="selectgroupthema(this, ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
+						<input id="group_checkbox[' . $group_id . ']" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="selectgroupthemaAll(this, ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
 					';
 				}
 				$legend .= '
