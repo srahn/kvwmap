@@ -24,6 +24,7 @@ var loc = window.location.href.toString().split('index.php')[0];
 var mapimg, mapimg0, mapimg3, mapimg4;
 var compare_clipping = false;
 var formdata = new FormData();
+root.changed_form_fields = new Array();
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -397,7 +398,9 @@ function printMapFast(filetype = 'pdf'){
 function checkForUnsavedChanges(event){
 	var sure = true;
 	if(root.document.GUI.gle_changed.value == 1){
-		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
+		var c = root.changed_form_fields.length;
+		highlightChangedFormFields();
+		sure = confirm('Es gibt noch ungespeicherte Datensätze (' + c + ' Feld' + (c > 1 ? 'er' : '') + '). Wollen Sie dennoch fortfahren?');
 	}
 	if(!sure){
 		if(event != undefined)event.preventDefault();
@@ -408,6 +411,12 @@ function checkForUnsavedChanges(event){
 		root.allowSubmit();
 	}
 	return sure;
+}
+
+function highlightChangedFormFields(){
+	[].forEach.call(root.changed_form_fields, function (field)	{
+		field.classList.add('changed');
+	});
 }
 
 function startwaiting(lock) {

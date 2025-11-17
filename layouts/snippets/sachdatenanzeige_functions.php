@@ -1278,6 +1278,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				same_field.value = field.value;	// alle gleichen Felder auf den selben Wert setzen, falls der gleiche Datensatz im GLE nochmal vorkommt (durch Subforms)
 			});
 		}*/
+		root.changed_form_fields.push(field);
 		var flags = document.querySelectorAll('[name="' + flag_name + '"]');
 		[].forEach.call(flags, function (flag){
 			if(flag != undefined){

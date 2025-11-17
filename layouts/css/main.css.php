@@ -367,6 +367,10 @@ hr {
 	display: none !important;
 }
 
+.changed{
+	border: 3px solid tomato !important;
+}
+
 ul{
 	color: lightsteelblue;
 	margin: 5px;
