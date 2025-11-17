@@ -16275,7 +16275,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if (substr($json, 0, 5) == 'file:') {
 				$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
 			}
-			$json = addslashes($json);
+			$json = str_replace("'", "''", $json);
+			$json = str_replace('"', '\"', $json);
 			if ($json != '') {
 				$result = ($json == 'NULL' ? '' : (is_numeric($json) ? $json : $quote . $json . $quote));
 			}
