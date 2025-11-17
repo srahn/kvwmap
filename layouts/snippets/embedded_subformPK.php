@@ -7,6 +7,7 @@
 	$attributes = $layer['attributes'];
 
 	$size = 50;
+	$select_width = 'width: 235px';
 
 	$doit = false;
 	$anzObj = count_or_0($layer['shape']);
@@ -71,6 +72,7 @@
 		else {
 			if ($this->formvars['list_edit']) {
 				$table_id = rand(0, 100000);			 ?>
+				<div class="list_edit_div">
 				<table id="<? echo $table_id; ?>" border="1" cellspacing="0" cellpadding="2" style="border-collapse: collapse" width="100%">
 					<tr><?
 						for ($j = 0; $j < count($attributes['name']); $j++) {
@@ -81,7 +83,7 @@
 										<td class="gle-attribute-name" style="height: auto">
 										<? if ($layer['attributes']['labeling'][$j] != 2) { ?>
 											<a href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 1, '', '', '&orderby<? echo $layer['Layer_ID']; ?>=<? echo $layer['attributes']['name'][$j]; ?>')" title="Sortieren nach <? echo $layer['attributes']['name'][$j]; ?>"><?
-												echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, false); ?>
+												echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, false, NULL, false); ?>
 											</a>
 										<? } ?>
 										</td><?
@@ -115,6 +117,9 @@
 										$explosion = explode(';', $layer['attributes']['group'][$j]);
 										if ($explosion[1] != 'collapsed') { ?>
 											<td id="value_<? echo $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '_' . $k; ?>" <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
+												if (in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
+													echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
+												}
 												echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname); ?>
 											</td><?
 										}
@@ -133,6 +138,7 @@
 						$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 					} ?>
 				</table>
+				</div>
 
 				<script type="text/javascript">
 					var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
@@ -203,6 +209,7 @@
 										switch ($preview['doc_type']) {
 											case 'local_img' : {	# Bilder mit Vorschaubild
 												$preview_link = '<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_image" src="' . $preview['thumb_src'] . '"></a>';
+												$preview_link = '<table><tr><td class="td_preview_image">' . $preview_link . '</td></tr></table>';
 											}break;
 											
 											case 'local_doc' : case 'remote_url' : {	# lokale Dateien oder fremde URLs

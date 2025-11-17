@@ -57,6 +57,7 @@ class Invitation extends MyObject {
 
 	function get_body() {
 		include(LAYOUTPATH . 'languages/Invitation_' . rolle::$language . '.php');
+		$br = chr(10);
 
 		$link = get_url() .
 			'?go=logout&token=' . $this->get('token') .
@@ -67,14 +68,15 @@ class Invitation extends MyObject {
 			'&login_name=' . urlencode($this->get('loginname')) .
 			'&language=' . rolle::$language;
 
+		$invitation_text = str_replace('<br>', $br, $this->stelle->get('invitation_text') ?: $strInvitationText);
 		$text = $strInvitationHeader
-			. ($this->get('anrede') == 'Herr' ? 'r' : '') . ' ' . $this->get('anrede') . ' ' . $this->get('name') . ',<br><br>'
-			. (str_replace('$link', $link, $this->stelle->get('invitation_text')) ?: $strInvitationText) . '<br>'
-			. $strInvitationLink . ':<br><br>'
-			. '<a href="' . $link . '">' . $link . '</a><br><br>'
-			. $strInvitationLinkAlternative . ' "' . TITLE . '". ' . $strInvitationAfterLinkText . '<br><br>'
-			. $strInvitationQuestionsTo . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') . ': ' . $this->inviter->get('email') . '<br><br>'
-			. $strInvitationAutomationText;
+			. ($this->get('anrede') == 'Herr' ? 'r' : '') . ' ' . $this->get('anrede') . ' ' . $this->get('name') . ',' . $br . $br
+			. str_replace('$link', $link, $invitation_text) . $br
+			. $strInvitationLink . ':' . $br . $br
+			. $link . $br . $br
+			. $strInvitationLinkAlternative . ' "' . TITLE . '". ' . $strInvitationAfterLinkText . $br . $br
+			. $strInvitationQuestionsTo . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') . ': ' . $this->inviter->get('email') . $br . $br
+			. str_replace('<br>', $br, $strInvitationAutomationText);
 		return $text;
 	}
 }

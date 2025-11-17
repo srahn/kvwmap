@@ -1,5 +1,36 @@
 <?
 
+function before_last($txt, $delimiter) {
+	#echo '<br>Return the part of ' . $txt . ' before the last occurence of ' . $delimiter;
+	if (!$delimiter) {
+		return '';
+	}
+	$pos = strrpos($txt, $delimiter);
+  return $pos === false ? $txt : substr($txt, 0, $pos);
+}
+
+function getDataParts($data){
+	$first_space_pos = strpos($data, ' ');
+	$geom = substr($data, 0, $first_space_pos);					# geom am Anfang
+	$rest = substr($data, $first_space_pos);
+	$usingposition = strpos($rest, 'using');
+	$from = substr($rest, 0, $usingposition);						# from (alles zwischen geom und using)
+	$using = substr($rest, $usingposition);							# using ...
+	if(strpos($from, '(') === false){		# from table
+		$select = 'select * '.$from.' where 1=1';
+	}
+	else{		# from (select ... from ...) as foo
+		$select = stristr($from,'(');
+		$select = before_last($select, ')');
+		$select = ltrim($select, '(');
+	}
+	return [
+		'geom' => $geom,
+		'select' => $select,
+		'using' => $using
+	];
+}
+
 function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
 	if ($last) {
 		$word_pos = strripos($str, $word);
@@ -709,11 +740,9 @@ class GUI {
 			}
 			
 			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
-				$geom = explode(' ', $layer->data)[0];
-				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
-				$layer->data = str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data);
-				$layer->data;
+				$data_parts = getDataParts($layer->data);
+				$layer->data = 'geom1 from (select st_buffer(' . $data_parts['geom'] . $geography . ', ' . $layerset['buffer'] . ') as geom1, * from ('. $data_parts['select'] . ') as foo) as fooo ' . $data_parts['using'];
 				$layer->type = 2;
 			}
 

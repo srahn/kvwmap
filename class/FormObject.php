@@ -118,10 +118,6 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	foreach ($data AS $data_key => $data_value) {
 		$data[$data_key] = 'data-' . $data_key . '="' . $data_value . '"';
 	}
-	if ($title != '') $title = 'title="' . $title . '"';
-	foreach ($data AS $data_key => $data_value) {
-		$data[$data_key] = 'data-' . $data_key . '="' . $data_value . '"';
-	}
 
 	$options_html = array();
 	if ($first_option != '') {

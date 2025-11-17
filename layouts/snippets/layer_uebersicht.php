@@ -10,6 +10,11 @@
 	}
 	$this->keywords = array_unique($this->keywords);
 	natcasesort($this->keywords);
+
+	function compare_groups2($a, $b){
+		if($a['Gruppenname'] > $b['Gruppenname'])return 1;
+		else return 0;
+	}
 	
 	$this->outputGroup = function($group, $indent = 0, $prefix = '', $upper_groups = []) use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
@@ -115,7 +120,7 @@
 			group_tr.style.display = 'none';
 		});
 		[].forEach.call(layer_trs, function (layer_tr) {
-			if (search == '' || layer_tr.innerHTML.toLowerCase().includes(search)) {
+			if (search == '' || layer_tr.innerHTML.toLowerCase().includes(search.toLowerCase())) {
 				layer_tr.style.display = '';
 				let group_ids = layer_tr.dataset.upper_groups.split(' ');
 				[].forEach.call(group_ids, function (group_id) {
@@ -235,6 +240,7 @@
 					}
 				}
 				else {
+					uasort($this->groups, 'compare_groups2');
 					foreach ($this->groups as $group) {
 						if($group['obergruppe'] == '') {
 							echo $this->outputGroup($group)['output'];
@@ -249,3 +255,8 @@
 		<td align="right">&nbsp;</td>
 	</tr>
 </table>
+<script>
+	window.addEventListener("pageshow", function() {
+    filter_by_full_text_search();
+});
+</script>

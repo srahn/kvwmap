@@ -154,6 +154,7 @@ function verarbeiteXML($data_nwm, $con, $go){
 					$endet = getNodeValue($domNode, 'endet');
 					$nachweis['flurid'] = substr($gesamtschluessel, 0, 9);
 					$nachweis['fortfuehrung'] = (int)substr($gesamtschluessel, 11, 4);
+					$nachweis['aenderungsnummer'] = substr($gesamtschluessel, 9, 2) . substr($gesamtschluessel, 11, 4);
 					$nachweis['rissnummer'] = (int)substr($gesamtschluessel, 15, 4);
 					$nachweis['blattnummer'] = (int)substr($gesamtschluessel, 19, 3);					
 				}				

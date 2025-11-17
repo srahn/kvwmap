@@ -1472,7 +1472,7 @@ echo '			</table>
 						$this->user->rolle->polyquery
 					) ? '' : 'style="display: none"');
 				$legend .=  '<input ';
-				if($layer['selectiontype'] == 'radio'){
+				if ($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio'){
 					$legend .=  'type="radio" ';
 				}
 				else{
@@ -1481,7 +1481,7 @@ echo '			</table>
 				if($layer['queryStatus'] == 1){
 					$legend .=  'checked="true"';
 				}
-				$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled '.$style.'>';
+				$legend .=' name="pseudoqLayer'.$layer['Layer_ID'].'" disabled '.$style.'>';
 			}
 			$legend .=  '</td><td valign="top">';
 			// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
@@ -2509,11 +2509,9 @@ echo '			</table>
 			}
 			
 			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
-				$geom = explode(' ', $layer->data)[0];
-				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
-				$layer->data = str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data);
-				$layer->data;
+				$data_parts = getDataParts($layer->data);
+				$layer->data = 'geom1 from (select st_buffer(' . $data_parts['geom'] . $geography . ', ' . $layerset['buffer'] . ') as geom1, * from ('. $data_parts['select'] . ') as foo) as fooo ' . $data_parts['using'];
 				$layer->type = 2;
 			}
 
@@ -4098,7 +4096,7 @@ echo '			</table>
         	continue;
       	}
 				$layerdb = $mapDB->getlayerdatabase($layer[$i]['Layer_ID'], $this->Stelle->pgdbhost);
-				$select = $mapDB->getSelectFromData($layer[$i]['Data']);
+				$select = getDataParts($layer[$i]['Data'])['select'];
 				$data_attributes = $mapDB->getDataAttributes($layerdb, $layer[$i]['Layer_ID']);
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
@@ -4151,7 +4149,7 @@ echo '			</table>
 			$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['Layer_ID']);
 			$geom = $data_attributes['the_geom'];
-    	$select = $mapDB->getSelectFromData($layer['Data']);
+			$select = getDataParts($layer['Data'])['select'];
 			$select = preg_replace ("/ FROM /", ' from ', $select);
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			# Filter hinzufügen
@@ -4651,6 +4649,9 @@ echo '			</table>
 			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
+			if ($this->formvars['attribute'] == $attributenames[$i]) {
+				$selected_value = $value;
+			}
 		}
 		#echo $sql;
 		@$ret = $layerdb->execSQL($sql, 4, 0);
@@ -4662,7 +4663,7 @@ echo '			</table>
 						$html .= '<option value="">-- Bitte Auswählen --</option>';
 					}
 					while($rs = pg_fetch_array($ret[1])){
-						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
+						$html .= '<option value="'.$rs['value'].'" ' . ($selected_value == $rs['value'] ? 'selected="true"' : '') . '>'.$rs['output'].'</option>';
 					}
 				}break;
 				
@@ -6140,9 +6141,9 @@ echo '			</table>
 	function createZoomRollenlayer($dbmap, $layerdb, $layerset, $oids, $auto_class_attribute = NULL, $result = NULL){
 		# Layer erzeugen
 		$data = $dbmap->getData($layerset[0]['Layer_ID']);
-		$explosion = explode(' ', $data);
-		$datageom = $explosion[0];
-		$select = $dbmap->getSelectFromData($data);		
+		$data_parts = getDataParts($data);
+		$datageom = $data_parts['geom'];
+		$select = $data_parts['select'];
 
 		$orderbyposition = strrpos(strtolower($select), 'order by');
 		$lastfromposition = strrpos(strtolower($select), 'from');
@@ -8158,7 +8159,7 @@ echo '			</table>
 			for ($i = 0; $i < $this->map->numlayers; $i++) {
 				$layer = $this->map->getLayer($i);
 				if ($layer->connectiontype == 6 AND $layer->data != '') {
-					$sql = $mapDB->getSelectFromData($layer->data);
+					$sql = getDataParts($layer->data)['select'];
 					$filters = array();
 					$layerdb = $mapDB->getlayerdatabase($layer->metadata->get('kvwmap_layer_id'), $this->Stelle->pgdbhost);
 					$attributes = $layerdb->getFieldsfromSelect($sql);
@@ -8325,7 +8326,7 @@ echo '			</table>
 			$this->user->rolle->setGroups($users['ID'][$j], $Stelle->id, 0, array($this->formvars['selected_layer_id']));
 		}
 		# u_groups2rolle aufräumen
-		// rolle::clear_groups2rolle($this->database);
+		rolle::clear_groups2rolle($this->database);
     $this->Layer2Stelle_Editor();
   }
 
@@ -8380,7 +8381,7 @@ echo '			</table>
 			$result = $this->layergruppe->update();
 		}
 		rolle::setGroupsForAll($this->database);
-		// rolle::clear_groups2rolle($this->database);
+		rolle::clear_groups2rolle($this->database);
 	}
 
 	function Layer2Stelle_Reihenfolge() {
@@ -9298,7 +9299,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       }
       # /Löschen der in der Selectbox entfernten Stellen
 			# u_groups2rolle aufräumen
-			// rolle::clear_groups2rolle($this->database);
+			rolle::clear_groups2rolle($this->database);
     }
 
 		for ($i = 0; $i < count($stellen_ids); $i++) {
@@ -9588,21 +9589,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		if ($results[0]['success']) {
 			$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
-			if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
-				$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $this->invitation->get('email'), null, MAILREPLYADDRESS, $this->invitation->get_subject(), $this->invitation->get_body(), null, 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $this->invitation->get('vorname') . ' ' . $this->invitation->get('name'), PUBLISHERNAME);
-				if (!$mail) {
-					$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
-				}
-				else {
-					$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $this->invitation->get('email'));
-				}
-			}
-			else {
-				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
-					Zum Einladen per E-Mail<br>
-					klicken Sie <a href="mailto:' . $this->invitation->mailto_text() . '">hier</a>!<br>
-					Die E-Mail enthält den Link zur Einladung.');
-			}
+			$this->invitation_send_email($this->invitation);
 			$this->invitations_list();
 		}
 		else {
@@ -9620,6 +9607,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				array(
 					'token' => $this->formvars['token'],
 					'email' => $this->formvars['email'],
+					'anrede' => $this->formvars['anrede'],
 					'name' => $this->formvars['name'],
 					'vorname' => $this->formvars['vorname'],
 					'loginname' => $this->formvars['loginname'],
@@ -9647,6 +9635,32 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->invitation->delete();
 		$this->add_message('notice', 'Einladung erfolgreich gelöscht.');
 	}
+
+	function invitation_email() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
+		$this->invitation_send_email($this->invitation);
+		$this->invitation_formular();
+	}
+
+	function invitation_send_email($invitation) {
+		if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
+			$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $invitation->get('email'), null, MAILREPLYADDRESS, $invitation->get_subject(), $invitation->get_body(), null, 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $invitation->get('vorname') . ' ' . $invitation->get('name'), PUBLISHERNAME);
+			if (!$mail) {
+				$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
+			}
+			else {
+				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $invitation->get('email'));
+			}
+		}
+		else {
+			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+				Zum Einladen per E-Mail<br>
+				klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>
+				Die E-Mail enthält den Link zur Einladung.');
+		}
+	}
+
 	/**
 	 * @param array $attributes Attribut-Array des übergeordneten Layers
 	 * @param int $j Zähler in diesem Array mit dem SubForm-Attribut
@@ -11398,6 +11412,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					for ($i = 0; $i < count($form_fields); $i++) {
 						if ($form_fields[$i] != '') {
 							$element = explode(';', $form_fields[$i]);
+							$this->sanitize([$form_fields[$i] => $element[6]], true);
 							$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
 							$dont_use_for_new = $layerset[0]['attributes']['dont_use_for_new'][$layerset[0]['attributes']['indizes'][$element[1]]];
 							if (
@@ -13394,7 +13409,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
     }
 		# u_groups2rolle aufräumen
-		// rolle::clear_groups2rolle($this->database);
+		rolle::clear_groups2rolle($this->database);
 
     $this->Stelleneditor();
   }
@@ -16109,7 +16124,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if (substr($json, 0, 5) == 'file:') {
 				$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
 			}
-			$json = addslashes($json);
+			$json = str_replace("'", "''", $json);
+			$json = str_replace('"', '\"', $json);
 			if ($json != '') {
 				$result = ($json == 'NULL' ? '' : (is_numeric($json) ? $json : $quote . $json . $quote));
 			}
@@ -16292,7 +16308,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					value_of($this->formvars, $queryfield . $layerset[$i]['requires']) == '1'
 				) AND
 				(
-					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 
+					($this->last_query == '' AND ($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)) OR 
 					($this->last_query[$layerset[$i]['Layer_ID']] != '')
 				)
 			) {
@@ -18053,7 +18069,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->show_attribute = [];
 			$this->layerdaten = $mapDB->get_Layer($this->formvars['layer_id'], true);
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			$select = $mapDB->getSelectFromData($this->layerdaten['Data']);
+			$select = getDataParts($this->layerdaten['Data'])['select'];
 			$classes = $mapDB->read_Classes($this->layerdaten['Layer_ID']);
 			$anzahl = count($classes);
 			for ($i = 0; $i < $anzahl; $i++) {
@@ -19103,26 +19119,6 @@ class db_mapObj{
 		}
 	}
 
-  function getSelectFromData($data){
-    if(strpos($data, '(') === false){
-      $from = stristr($data, ' from ');
-      $usingposition = strpos($from, 'using');
-      if($usingposition > 0){
-        $from = substr($from, 0, $usingposition);
-      }
-      $select = 'select * '.$from.' where 1=1';
-    }
-    else{
-      $select = stristr($data,'(');
-      $select = trim($select, '(');
-      $select = substr($select, 0, strrpos($select, ')'));
-    }
-		return replace_params_rolle(
-						$select,
-						['SCALE' => '1000']
-					);
-	}
-
 	/**
 	 * Liefert eine Liste von Attriubten wie sie im data-Feld des Layers stehen
 	 * Wenn Data leer ist werden die Attribute vom Path-Feld des Layers entnommen
@@ -19135,7 +19131,7 @@ class db_mapObj{
 		$options = array_merge($default_options, $options);
 		$data = $this->getData($layer_id);
 		if ($data != '') {
-			$select = $this->getSelectFromData($data);
+			$select = getDataParts($data)['select'];
 			if ($database->schema != '') {
 				$select = str_replace($database->schema . '.', '', $select);
 			}
@@ -19240,7 +19236,7 @@ class db_mapObj{
 								# --------- weitere Optionen -----------
 								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
 									 # auch die oid abfragen
-									 $attributes['options'][$i] = str_replace(' from ', ', ' . $layer['oid'] . ' as oid from ', strtolower($optionen[0]));
+									 $attributes['options'][$i] = str_ireplace(' from ', ', ' . $layer['oid'] . ' as oid from ', $optionen[0]);
 								}
 								# ------------ SQL ---------------------
 								else {
@@ -19512,8 +19508,8 @@ class db_mapObj{
 						if ($attributes['options'][$i] != '') {
 							if (strpos($attributes['options'][$i], '{') === 0) {
 								$json = json_decode($attributes['options'][$i], true);
-								$attributes['subform_layer_id'][$i] = $json['parent_layer_id'];
-								$attributes['subform_fkeys'][$i] = array( 'fkey' => $json['fk_id'], 'pkey' => $json['pk_id']);
+								$attributes['subform_layer_id'][$i] = $json['ref_layer_id'];
+								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
 								$attributes['no_new_window'][$i] = ($json['window_type'] === 'no_new_window');
 							}
 							else {

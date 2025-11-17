@@ -211,7 +211,7 @@ class stelle {
 				`ows_updatesequence`,
 				`ows_geographicdescription`,
 				`ows_fees`,
-				`ows_inspireidentifiziert`,
+				#`ows_inspireidentifiziert`,
 				`ows_srs`,
 
 				`ows_contactorganization`,
@@ -566,7 +566,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_inspireidentifiziert` = '" . $stellendaten['ows_inspireidentifiziert'] . "',
+				`ows_inspireidentifiziert` = '" . ($stellendaten['ows_inspireidentifiziert'] == '1' ? "1" : "0") . "',
 				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
@@ -670,7 +670,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_inspireidentifiziert` = '" . $stellendaten['ows_inspireidentifiziert'] . "',
+				`ows_inspireidentifiziert` = '" . ($stellendaten['ows_inspireidentifiziert'] == '1' ? "1" : "0") . "',
 				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
@@ -742,7 +742,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_inspireidentifiziert` = '" . $stellendaten['ows_inspireidentifiziert'] . "',
+				`ows_inspireidentifiziert` = '" . ($stellendaten['ows_inspireidentifiziert'] == '1' ? "1" : "0") . "',
 				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "'
 			WHERE
 				ID = " . $this->id . "

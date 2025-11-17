@@ -171,7 +171,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							$array = '';
 							if($this->layerset[0]['connectiontype'] != MS_WFS AND substr($this->attributes['type'][$i], 0, 1) != '_'){		# bei WFS-Layern oder Array-Typen keine multible Auswahl
 								$array = '[]';
-								echo ' multiple size="1" style="display: block; min-height: 24px; height: calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px); z-index:'.($z_index-=1).';" onmousedown="this.focus();if(this.style.height==\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\'){this.style.height=\'180px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\';scrollToSelected(this);}"';
+								echo ' multiple size="1" style="display: block; min-height: 24px; height: calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px); z-index:'.($z_index-=1).';" onmousedown="this.focus();if(!navigator.userAgent.includes(\'Edg/142\') && this.style.height==\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\'){this.style.height=\'180px\';preventDefault(event);}" onmouseleave="if(!navigator.userAgent.includes(\'Edg/142\') && event.relatedTarget){this.style.height=\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\';scrollToSelected(this);}"';
 							}
 ?>
 							 name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
@@ -222,7 +222,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 						default : {
 ?>
 							<div class="gsm_default_input">
-								<div id="gsm_default_input1_<? echo $this->attributes['name'][$i]; ?>">
+								<div id="<? echo $prefix; ?>gsm_default_input1_<? echo $this->attributes['name'][$i]; ?>">
 									<input id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" style="<? if(array_key_exists($this->attributes['type'][$i], $date_types)) { ?>padding-left: 20px; <? } ?>" type="text" value="<? echo value_of($this->formvars, $prefix.'value_'.$this->attributes['name'][$i]); ?>" onkeyup="checknumbers(this, '<? echo $this->attributes['type'][$i]; ?>', '<? echo $this->attributes['length'][$i]; ?>', '<? echo $this->attributes['decimal_length'][$i]; ?>');">
 <? 
 									if(array_key_exists($this->attributes['type'][$i], $date_types)){	?>
@@ -232,7 +232,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 					
 ?>
 								</div>
-								<div id="gsm_default_input2_<? echo $this->attributes['name'][$i]; ?>" <? if(value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]) != null) { ?>style="display: block;"<? } ?>>
+								<div id="<? echo $prefix; ?>gsm_default_input2_<? echo $this->attributes['name'][$i]; ?>" <? if(value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]) != null) { ?>style="display: block;"<? } ?>>
 									<input id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" style="<? if(array_key_exists($this->attributes['type'][$i], $date_types)) { ?>padding-left: 20px; <? } ?>" type="text" value="<? echo value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]); ?>">
 <? 
 									if(array_key_exists($this->attributes['type'][$i], $date_types)){	?>
