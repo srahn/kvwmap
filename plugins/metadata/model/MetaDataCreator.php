@@ -287,11 +287,11 @@ class MetaDataCreator {
 			</gmd:citation>
 			<gmd:abstract>
 				<gco:CharacterString>" . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
-			</gmd:abstract>" . 
-			//<gmd:pointOfContact>
-				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			//</gmd:pointOfContact>
-			"<gmd:pointOfContact>
+			</gmd:abstract>
+			<!--<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			</gmd:pointOfContact>-->
+			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
@@ -459,7 +459,7 @@ class MetaDataCreator {
 							</gmd:geographicIdentifier>
 						</gmd:EX_GeographicDescription>
 					</gmd:geographicElement>" : '') . 
-					  ($this->md->get('id_cite_date') ? $this->getTemporalExtent() : ''). "
+					  ($this->md->get('id_cite_date') ? $this->getTemporalExtent() : '') . "
 				</gmd:EX_Extent>
 			</srv:extent>
 			<srv:couplingType>
@@ -603,11 +603,11 @@ class MetaDataCreator {
 			</gmd:citation>
 			<gmd:abstract>
 				<gco:CharacterString>" . $this->md->get('id_abstract')['viewservice'] . "</gco:CharacterString>
-			</gmd:abstract>" .
-			//<gmd:pointOfContact>
-				//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			//</gmd:pointOfContact>
-			"<gmd:pointOfContact>
+			</gmd:abstract>
+			<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			</gmd:pointOfContact>
+			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 			</gmd:pointOfContact>
 			<gmd:graphicOverview>
@@ -785,7 +785,8 @@ class MetaDataCreator {
 								</gmd:MD_Identifier>
 							</gmd:geographicIdentifier>
 						</gmd:EX_GeographicDescription>
-					</gmd:geographicElement>" : '') . "
+					</gmd:geographicElement>" : '') .
+					($this->md->get('id_cite_date') ? $this->getTemporalExtent() : '') . "
 				</gmd:EX_Extent>
 			</srv:extent>
 			<srv:couplingType>
@@ -933,13 +934,13 @@ class MetaDataCreator {
 				<gmd:abstract>
 					<gco:CharacterString>" . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
 				</gmd:abstract>
-				<gmd:pointOfContact>
+				<!--<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-				</gmd:pointOfContact>" .
-				//<gmd:pointOfContact>
-					//" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-				//</gmd:pointOfContact>
-				"<gmd:pointOfContact>
+				</gmd:pointOfContact>-->
+				<gmd:pointOfContact>
+					" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+				</gmd:pointOfContact>
+				<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 				</gmd:pointOfContact>
 				<gmd:resourceMaintenance>
@@ -1122,7 +1123,8 @@ class MetaDataCreator {
 									</gmd:MD_Identifier>
 								</gmd:geographicIdentifier>
 							</gmd:EX_GeographicDescription>
-						</gmd:geographicElement>" : '') . "
+						</gmd:geographicElement>" : '') . 
+						($this->md->get('id_cite_date') ? $this->getTemporalExtent() : '') . "
 					</gmd:EX_Extent>
 				</gmd:extent>
 			</gmd:MD_DataIdentification>
