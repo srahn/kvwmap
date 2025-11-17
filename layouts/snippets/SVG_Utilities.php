@@ -1096,7 +1096,7 @@ SCRIPTDEFINITIONS;
 				startMoveGeom(client_x, client_y);
 			break;
 			case 'rotate_geometry':
-				startRotateGeom(client_x, client_y);
+				startRotateGeom(world_x, world_y);
 			break;
 			
 			case 'ortho_point':
@@ -3872,21 +3872,15 @@ $transformfunctions = '
 		else if(linefunctions){
 			applylines();
 		}
-		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=centroid", new Array(enclosingForm.result), new Array("setvalue"));
 	}
 	
-	function startRotateGeom(clientx, clienty){
+	function startRotateGeom(world_x, world_y){
+		// centroid und zu drehende Geometrie berechnen
+		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=centroid&mousex="+world_x+"&mousey="+world_y, new Array(enclosingForm.result), new Array("setvalue"));
 		rotatinggeom  = true;
-		if (enclosingForm.result.value != "") {
-			var centroid_world = enclosingForm.result.value.split(" ");
-			centroid[0] = (centroid_world[0] - minx) / scale;
-			centroid[1] = (centroid_world[1] - miny) / scale;
-		}
-	  move_x[0] = clientx;
-	  move_y[0] = clienty;
-		move_dx = move_x[0] - centroid[0];
-	  move_dy = move_y[0] - centroid[1];
-		startangle = getAngle(move_dx, move_dy);
+		startangle = null;
+		mousex = world_x;
+		mousey = world_y;
 	}
 
 	function getAngle(a, b) {
@@ -3903,15 +3897,31 @@ $transformfunctions = '
 	}
 	
 	function rotateGeom(evt){
-		move_x[1] = evt.clientX;
-	  move_y[1] = resy - evt.clientY;
-	  move_dx = move_x[1] - centroid[0];
-	  move_dy = move_y[1] - centroid[1];
-		angle = getAngle(move_dx, move_dy);
-		angle = angle - startangle;
-		path = "translate(0 "+resy+") scale(1,-1) rotate(" + angle + ", " + centroid[0] + " " + centroid[1] + ")";
-	  document.getElementById("cartesian").setAttribute("transform", path);
-		rotated = true;
+		var obj = document.getElementById("polygon_second");
+		if (enclosingForm.result.value != "") {		// wenn centroid da ist, startangle berechnen
+			var centroid_result = enclosingForm.result.value.split("||");
+			var centroid_world = centroid_result[0].split(" ");
+			centroid[0] = (centroid_world[0] - minx) / scale;
+			centroid[1] = (centroid_world[1] - miny) / scale;
+			move_x[0] = evt.clientX;
+			move_y[0] = resy - evt.clientY;
+			move_dx = move_x[0] - centroid[0];
+			move_dy = move_y[0] - centroid[1];
+			startangle = getAngle(move_dx, move_dy);
+	  	obj.setAttribute("d", world2pixelsvg(centroid_result[1]));
+			enclosingForm.result.value = "";
+		}
+		if (startangle != null) {		// wenn startangle da ist, rotieren
+			move_x[1] = evt.clientX;
+			move_y[1] = resy - evt.clientY;
+			move_dx = move_x[1] - centroid[0];
+			move_dy = move_y[1] - centroid[1];
+			angle = getAngle(move_dx, move_dy);
+			angle = angle - startangle;
+			path = "rotate(" + angle + ", " + centroid[0] + " " + centroid[1] + ")";
+			obj.setAttribute("transform", path);
+			rotated = true;
+		}
 	}
 
 	function endRotateGeom(evt) {
@@ -3919,7 +3929,7 @@ $transformfunctions = '
 			enclosingForm.secondpoly.value = true;
 			enclosingForm.secondline.value = true;
 			must_redraw = true;
-			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&angle="+angle+"&operation=rotate&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&angle="+angle+"&operation=rotate&mousex="+mousex+"&mousey="+mousey+"&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 		}
 	  rotatinggeom  = false;
 	  rotated  = false;

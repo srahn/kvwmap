@@ -59,6 +59,7 @@
 	$strLegendGraphic = "Legendengrafik";
 	$strLegendOrder = "Legendenreihenfolge";
 	$strListed = "Themenübersicht";
+	$strLogged = 'wird geloggt';
 	$strMaintable = "Haupttabelle";
 	$strMap = "Karte";
 	$strMapFileName = "MapFile Name";

@@ -91,6 +91,40 @@ if ($gast_export === false) {
 	# login
 	$show_login_form = false;
 	$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
+
+	if ($_SESSION['2fa_registration']) {
+    $code = trim($GUI->formvars['code']);
+    if (verify_totp($_SESSION['secret'], $code)) {
+			$GUI->user = new user($_SESSION['login_name'], 0, $GUI->pgdatabase);
+			$GUI->user->update_totp_secret($_SESSION['secret']);
+			$_SESSION['angemeldet'] = true;
+			unset($_SESSION['2fa_registration']);
+			unset($_SESSION['secret']);
+    } 
+		else {
+			echo "❌ Ungültiger Code, bitte erneut versuchen.";
+			include(SNIPPETS . '2fa_enable.php');
+			exit;
+    }
+	}
+
+	if ($_SESSION['2fa_verification']) {
+		$code = trim($GUI->formvars['code']);
+		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->pgdatabase);
+		if (verify_totp($GUI->user->totp_secret, $code)) {
+			if (defined('TOTP_DEVICE_EXPIRATION') AND TOTP_DEVICE_EXPIRATION > 0) {
+				$GUI->user->generate_device_token();
+			}
+			$_SESSION['angemeldet'] = true;
+			unset($_SESSION['2fa_verification']);
+		}
+		else {
+			echo "❌ Ungültiger Code.";
+			include(SNIPPETS . '2fa_verify.php');
+			exit;
+		}
+	}
+
 	if (is_logged_in()) {
 		$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
 		if ($_SESSION['login_name'] == '') {
@@ -98,7 +132,7 @@ if ($gast_export === false) {
 			logout();
 			$show_login_form = true;
 			$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-			$go = 'login';
+			$GUI->formvars['go'] = 'login';
 		}
 		$GUI->formvars['login_name'] = $_SESSION['login_name'];
 		$GUI->debug->write('Ist angemeldet als: ' . $_SESSION['login_name'], 4, $GUI->echo);
@@ -108,7 +142,7 @@ if ($gast_export === false) {
 			logout();
 			$show_login_form = true;
 			$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-			$go = 'login';
+			$GUI->formvars['go'] = 'login';
 		}
 		else {
 			$GUI->debug->write('Nutzerdaten gelesen von: ' . $GUI->user->login_name, 4, $GUI->echo);
@@ -141,7 +175,7 @@ if ($gast_export === false) {
 				# // ToDo: frage browser width und height ab.
 				$show_login_form = true;
 				$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-				$go = 'login_browser_size';
+				$GUI->formvars['go'] = 'login_browser_size';
 				# Test case 3
 				$GUI->debug->write('login case 3', 4, $GUI->echo);
 			}
@@ -160,6 +194,22 @@ if ($gast_export === false) {
 						if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'], $GUI->formvars['passwort'])) {
 							$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
 							set_session_vars($GUI->formvars);
+
+							if (defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION) {
+								if ($GUI->user->totp_secret != '') {
+									if ($GUI->is_trusted_device($GUI->user) == false) {
+										$_SESSION['2fa_verification'] = true;
+										include(SNIPPETS . '2fa_verify.php');
+										exit;
+									}
+								} 
+								else {
+									$_SESSION['2fa_registration'] = true;
+									include(SNIPPETS . '2fa_enable.php');
+									exit;
+								}
+							}
+
 							$GUI->user->update_tokens($_SESSION['csrf_token']);
 							$GUI->user->has_logged_in = true;
 							$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
@@ -192,7 +242,7 @@ if ($gast_export === false) {
 							}
 							$show_login_form = true;
 							$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-							$go = 'login_failed';
+							$GUI->formvars['go'] = 'login_failed';
 							# login case 7
 							$GUI->debug->write('login case 7', 4, $GUI->echo);
 						}
@@ -201,7 +251,7 @@ if ($gast_export === false) {
 						$GUI->add_message('error', 'Fehler bei der Abfrage des Nutzers. ');
 						$show_login_form = true;
 						$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-						$go = 'login_failed';
+						$GUI->formvars['go'] = 'login_failed';
 						# login case 7 b
 						$GUI->debug->write('login case 7b', 4, $GUI->echo);
 					}
@@ -210,7 +260,7 @@ if ($gast_export === false) {
 					$GUI->add_message('error', 'Fehler beim Eintragen des SHA1 Passwortes. ');
 					$show_login_form = true;
 					$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-					$go = 'login_failed';
+					$GUI->formvars['go'] = 'login_failed';
 				};
 			}
 			else { # ist keine Anmeldung
@@ -259,7 +309,7 @@ if ($gast_export === false) {
 								$GUI->add_message('error', 'Datenbankfehler beim Anlegen des Nutzers.<br>' . $result['msg']);
 								$show_login_form = true;
 								$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-								$go = 'login_registration';
+								$GUI->formvars['go'] = 'login_registration';
 								# login case 10
 								$GUI->debug->write('login case 10', 4, $GUI->echo);
 							}
@@ -269,7 +319,7 @@ if ($gast_export === false) {
 							$GUI->add_message('error', $new_registration_err . '<br>Die Registrierung ist nicht erfolgreich.<br>Versuchen Sie es erneut oder lassen Sie sich erneut einladen.');
 							$show_login_form = true;
 							$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-							$go = 'login_registration';
+							$GUI->formvars['go'] = 'login_registration';
 							# login case 11
 							$GUI->debug->write('login case 11', 4, $GUI->echo);
 						}
@@ -278,7 +328,7 @@ if ($gast_export === false) {
 						$GUI->debug->write('Es wurde noch kein neues Passwort für die Registrierung vergeben.', 4, $GUI->echo);
 						$show_login_form = true;
 						$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-						$go = 'login_registration';
+						$GUI->formvars['go'] = 'login_registration';
 						# login case 12
 						$GUI->debug->write('login case 12', 4, $GUI->echo);
 					}
@@ -287,7 +337,7 @@ if ($gast_export === false) {
 					$GUI->debug->write('Es ist keine Registrierung.', 4, $GUI->echo);
 					$show_login_form = true;
 					$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
-					$go = 'login';
+					$GUI->formvars['go'] = 'login';
 					# login case 8
 					$GUI->debug->write('login case 8', 4, $GUI->echo);
 				} # ende keine Registrierung
@@ -309,7 +359,7 @@ if ($gast_export === false) {
 				$GUI->add_message('error', 'Die Stelle kann nicht abgefragt werden. Prüfen Sie ob das Datenmodell der Stelle aktuell ist!');
 				logout();
 				$show_login_form = true;
-				$go = 'login';
+				$GUI->formvars['go'] = 'login';
 			}
 		}
 	
@@ -338,7 +388,7 @@ if ($gast_export === false) {
 				if (is_ows_request($GUI->formvars)) {
 					$GUI->debug->write('OWS Request führt zu Exception.', 4);
 					$GUI->Fehlermeldung .= ' Der Zugang zur URL: ' . URL . ' ist mit dem Login oder in der Stelle nicht möglich. Melden Sie sich über einen Browser an dieser Adresse an und aktualisieren Sie ggf. Ihr Passwort oder passen Sie die URL an.';
-					$go = 'OWS_Exception';
+					$GUI->formvars['go'] = 'OWS_Exception';
 					# login case 13
 					$GUI->debug->write('login case 13', 4, $GUI->echo);
 				}
@@ -367,7 +417,7 @@ if ($gast_export === false) {
 								$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
 								$GUI->Fehlermeldung = $new_password_err . '!<br>';
 								$show_login_form = true;
-								$go = 'login_new_password';
+								$GUI->formvars['go'] = 'login_new_password';
 								# login case 6
 								$GUI->debug->write('login case 6', 4, $GUI->echo);
 							}
@@ -376,7 +426,7 @@ if ($gast_export === false) {
 							if ($permission['reason'] == 'password_expired' AND is_temporary_password_expired($GUI->user)) {
 								$GUI->add_message('error', 'Dieser Link zur Passwortvergabe ist nicht mehr gültig. Bitte fordern Sie bei Ihrem Administrator einen neuen Link an.');
 								$show_login_form = true;
-								$go = 'login';
+								$GUI->formvars['go'] = 'login';
 							}
 							else {
 								$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
@@ -396,7 +446,7 @@ if ($gast_export === false) {
 								}
 								$GUI->formvars['Stelle_id'] = $GUI->Stelle->id;
 								$show_login_form = true;
-								$go = 'login_new_password';
+								$GUI->formvars['go'] = 'login_new_password';
 								# login case 19
 								$GUI->debug->write('login case 19', 4, $GUI->echo);
 							}
@@ -406,7 +456,7 @@ if ($gast_export === false) {
 						$GUI->debug->write('Passwort ist nicht abgelaufen.', 4);
 						$GUI->add_message('error', $permission['errmsg'] . '<br>' . $permission['reason']);
 						$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->pgdatabase);
-						$go = 'Stelle_waehlen';
+						$GUI->formvars['go'] = 'Stelle_waehlen';
 						$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
 						# login case 14
 						$GUI->debug->write('login case 14', 4, $GUI->echo);
@@ -441,7 +491,7 @@ if ($gast_export === false) {
 					unset($GUI->formvars['agreement']);
 					logout();
 					$show_login_form = true;
-					$go = 'login';
+					$GUI->formvars['go'] = 'login';
 					# login case 16
 					$GUI->debug->write('login case 16', 4, $GUI->echo);
 				}
@@ -450,13 +500,13 @@ if ($gast_export === false) {
 				if (file_exists(AGREEMENT_MESSAGE)) {
 					$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
 					$show_login_form = true;
-					$go = 'login_agreement';
+					$GUI->formvars['go'] = 'login_agreement';
 				}
 				else {
 					logout();
 					$show_login_form = true;
 					$GUI->add_message('error', 'Die in der Konfiguration angegebene Datei ' . AGREEMENT_MESSAGE . ' für die Zustimmungserklärung konnte nicht gefunden werden. Informieren Sie den Administrator.');
-					$go = 'login';
+					$GUI->formvars['go'] = 'login';
 				}
 			}
 		}
@@ -501,7 +551,7 @@ else {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
-	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
+	if (!in_array($GUI->formvars['go'], $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
 		$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 		# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 		# wenn die EPSG-Codes voneinander abweichen
@@ -626,6 +676,7 @@ function is_logged_in_stelle() {
 function is_logged_out() {
 	return !is_logged_in();
 }
+
 
 /**
  * Function check if param gast has been send, is not empty,

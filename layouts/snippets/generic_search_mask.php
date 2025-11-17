@@ -171,7 +171,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							$array = '';
 							if($this->layerset[0]['connectiontype'] != MS_WFS AND substr($this->attributes['type'][$i], 0, 1) != '_'){		# bei WFS-Layern oder Array-Typen keine multible Auswahl
 								$array = '[]';
-								echo ' multiple size="1" style="display: block; min-height: 24px; height: calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px); z-index:'.($z_index-=1).';" onmousedown="this.focus();if(this.style.height==\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\'){this.style.height=\'180px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\';scrollToSelected(this);}"';
+								echo ' multiple size="1" style="display: block; min-height: 24px; height: calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px); z-index:'.($z_index-=1).';" onmousedown="this.focus();if(!navigator.userAgent.includes(\'Edg/142\') && this.style.height==\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\'){this.style.height=\'180px\';preventDefault(event);}" onmouseleave="if(!navigator.userAgent.includes(\'Edg/142\') && event.relatedTarget){this.style.height=\'calc((var(--tabelle-td-height) - var(--tabelle-td-height-padding)) * 1px)\';scrollToSelected(this);}"';
 							}
 ?>
 							 name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>

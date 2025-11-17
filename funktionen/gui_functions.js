@@ -1332,10 +1332,12 @@ function resetLayerOptions(layer_id){
 	document.GUI.submit();
 }
 
-function changeLegendType(type){
-	document.GUI.go.value = 'changeLegendType';
-	document.GUI.legendtype.value = type;
-	document.GUI.submit();
+function changeLegendType(){
+	var legende = document.getElementById('legend');
+	ahah('index.php', 'go=changeLegendType', [legende], ['sethtml']);
+	document.getElementById('legendtype_switch').classList.toggle('in_groups');
+	document.getElementById('legendtype_switch').classList.toggle('alphabetical');
+	document.getElementById('layersearchdiv').classList.toggle('hidden');
 }
 
 function saveDrawingorder(){
@@ -1610,6 +1612,7 @@ function showMapParameter(epsg_code, width, height, l) {
 
 function showURL(params, headline) {
 	let url = `${document.baseURI.match(/.*\//)}index.php?${params}`;
+	navigator.clipboard.writeText(url);
 	let msg = `
 		<div style="text-align: left;">
 			<h2 style="margin-top: 2px; margin-buttom: 2px">${headline}</h2>

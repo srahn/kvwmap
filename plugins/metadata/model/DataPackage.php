@@ -31,8 +31,8 @@ class DataPackage extends PgObject {
 			p.created_at,
 			p.created_from,
 			p.updated_at,
-			i.dateninhaber,
-			i.abk
+			i.beschreibung AS dateninhaber,
+			i.name AS dateninhaber_abk
 		";
 		$this->from = "
 			metadata.ressources r LEFT JOIN
@@ -44,7 +44,7 @@ class DataPackage extends PgObject {
 			) p ON r.id = p.ressource_id LEFT JOIN
 			metadata.pack_status s ON p.pack_status_id = s.id LEFT JOIN
 			kvwmap.layer l ON r.layer_id = l.layer_id LEFT JOIN
-			metadata.dateninhaber i ON r.dateninhaber_id = i.id
+			kvwmap.datasources i ON r.datasource_id = i.id
 		";
 		$this->where = "
 			r.use_for_datapackage AND
@@ -96,7 +96,7 @@ class DataPackage extends PgObject {
 				) p ON r.id = p.ressource_id LEFT JOIN
 				metadata.pack_status s ON p.pack_status_id = s.id LEFT JOIN
 				kvwmap.layer l ON r.layer_id = l.layer_id LEFT JOIN
-				metadata.dateninhaber i ON r.dateninhaber_id = i.id JOIN
+				kvwmap.datasources i ON r.datasource_id = i.id JOIN
 				kvwmap.used_layer ul ON r.layer_id = ul.layer_id
 			",
 			'where' => $package->where . " AND
@@ -206,8 +206,8 @@ class DataPackage extends PgObject {
 		if ($this->get('dateninhaber') != '') {
 			$infos[] = 'Dateninhaber: ' . $this->get('dateninhaber');
 		}
-		if ($this->get('abk') != '') {
-			$infos[] = 'Abkürzung: ' . $this->get('abk');
+		if ($this->get('dateninhaber_abk') != '') {
+			$infos[] = 'Abkürzung: ' . $this->get('dateninhaber_abk');
 		}
 		if ($this->get('ansprechperson') != '') {
 			$infos[] = 'Ansprechperson: ' . $this->get('ansprechperson');

@@ -12,6 +12,38 @@ function get_remote_ip() {
 	}
 	return $ip;
 }
+
+function before_last($txt, $delimiter) {
+	#echo '<br>Return the part of ' . $txt . ' before the last occurence of ' . $delimiter;
+	if (!$delimiter) {
+		return '';
+	}
+	$pos = strrpos($txt, $delimiter);
+  return $pos === false ? $txt : substr($txt, 0, $pos);
+}
+
+function getDataParts($data){
+	$first_space_pos = strpos($data, ' ');
+	$geom = substr($data, 0, $first_space_pos);					# geom am Anfang
+	$rest = substr($data, $first_space_pos);
+	$usingposition = stripos($rest, 'using');
+	$from = substr($rest, 0, $usingposition);						# from (alles zwischen geom und using)
+	$using = substr($rest, $usingposition);							# using ...
+	if(strpos($from, '(') === false){		# from table
+		$select = 'select * '.$from.' where 1=1';
+	}
+	else{		# from (select ... from ...) as foo
+		$select = stristr($from,'(');
+		$select = before_last($select, ')');
+		$select = ltrim($select, '(');
+	}
+	return [
+		'geom' => $geom,
+		'select' => $select,
+		'using' => $using
+	];
+}
+
 function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
 	if ($last) {
 		$word_pos = strripos($str, $word);
@@ -725,11 +757,9 @@ class GUI {
 			}
 			
 			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
-				$geom = explode(' ', $layer->data)[0];
-				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
-				$layer->data = str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data);
-				$layer->data;
+				$data_parts = getDataParts($layer->data);
+				$layer->data = 'geom1 from (select st_buffer(' . $data_parts['geom'] . $geography . ', ' . $layerset['buffer'] . ') as geom1, * from ('. $data_parts['select'] . ') as foo) as fooo ' . $data_parts['using'];
 				$layer->type = 2;
 			}
 
@@ -2529,7 +2559,7 @@ class stelle {
 				id," .
 				$name_column . ",
 				start,
-				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, authentifizierung, alb_status, wappen, wappen_link, logconsume,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, authentifizierung, alb_status, wappen, wappen_link
 				ows_namespace,
 				ows_title,
 				wms_accessconstraints,
@@ -3050,7 +3080,6 @@ class rolle {
 				header,
 				footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,
@@ -3080,6 +3109,7 @@ class rolle {
 		$ret = $this->database->execSQL($sql);
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['queryable'] = ($rs['queryable'] === 't');
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
 					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
@@ -3418,17 +3448,14 @@ class rolle {
 				r2ul.layer_id 
 			FROM 
 				kvwmap.u_rolle2used_layer AS r2ul' . 
-    		($logconsume? ', kvwmap.used_layer AS ul, kvwmap.layer AS l, kvwmap.stelle AS s' : '') . '
+    		($logconsume? ', kvwmap.layer AS l' : '') . '
     	WHERE 
 				r2ul.user_id = ' . $this->user_id . ' AND 
 				r2ul.stelle_id = ' . $this->stelle_id;
     if ($logconsume) {
       $sql .= ' 
-				AND r2ul.layer_id = ul.layer_id 
-				AND r2ul.stelle_id = ul.stelle_id
-				AND ul.layer_id = l.layer_id 
-				AND ul.stelle_id = s.id
-				AND (s.logconsume OR l.logconsume OR ul.logconsume OR r2ul.logconsume)';
+				AND r2ul.layer_id = l.layer_id 
+				AND l.logconsume';
     }
     $anzaktivStatus=count($aktivStatus);
     if ($anzaktivStatus > 0) {
@@ -4108,7 +4135,6 @@ class db_mapObj{
 				rl.querystatus,
 				rl.gle_view,
 				rl.showclasses,
-				rl.logconsume,
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
@@ -4121,7 +4147,6 @@ class db_mapObj{
 				ul.header,
 				ul.footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,

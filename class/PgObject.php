@@ -130,7 +130,8 @@ class PgObject {
 		$this->debug->show('find_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		if (!$query) {
-			echo $sql;exit;
+			echo $sql;
+			exit;
 		}
 		$this->data = pg_fetch_assoc($query);
 		return $this;
@@ -360,9 +361,10 @@ class PgObject {
 		return $values;
 	}
 
-	function getKVP($escaped = false, $without_identifier = false) {
+	function getKVP($escaped = false, $without_identifier = false, $data = array()) {
+		$data = (count($data) > 0 ? $data : $this->data);
 		$kvp = array();
-		foreach ($this->data AS $key => $value) {
+		foreach ($data AS $key => $value) {
 			if ($without_identifier AND ($key == $this->identifier)) {
 				# identifier nicht ausgehen
 			}
@@ -434,7 +436,7 @@ class PgObject {
 					", ",
 					array_map(
 						function($value) {
-							return (($value == '' OR $value === null) ? "NULL" : "'" . pg_escape_string($value) . "'");
+							return (($value === '' OR $value === null) ? "NULL" : "'" . pg_escape_string($value) . "'");
 						},
 						$values
 					)
@@ -549,7 +551,7 @@ class PgObject {
 		return $this->get('id');
 	} */
 
-	function update($data = array()) {
+	function update($data = array(), $update_all_attributes = true) {
 		$results = array();
 		if (!empty($data)) {
 			$this->data = array_merge($this->data, $data);
@@ -559,7 +561,7 @@ class PgObject {
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
 			SET
-				" . implode(', ', $this->getKVP(true, true)) . "
+				" . implode(', ', $this->getKVP(true, true, ($update_all_attributes ? $this->data : $data))) . "
 			WHERE
 				" . $this->get_id_condition() . "
 		";

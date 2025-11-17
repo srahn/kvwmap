@@ -232,8 +232,10 @@ function install() {
 			*/
 			/*
 		";
-		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
-		*/
+		$pgsqlKvwmapDb->execSQL($sql, 0, 1); */
+		
+		?>
+		
 		<h1>Lege Tabellen und Inhalte für die Administration an.</h1><?
 		$kvwmap_install_file = $installpath . LAYOUTPATH . 'db/postgresql/data/kvwmap_install.sql';
 		$sql = file_get_contents($kvwmap_install_file);
@@ -362,6 +364,7 @@ function init_config() {
 	define('POSTGRES_PASSWORD', ($formvars['POSTGRES_PASSWORD'] != '' ? $formvars['POSTGRES_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
 	define('POSTGRES_POSTGRES_PASSWORD', ($formvars['POSTGRES_POSTGRES_PASSWORD'] != '' ? $formvars['POSTGRES_POSTGRES_PASSWORD'] : getenv('POSTGRES_POSTGRES_PASSWORD')));
 	define('POSTGRES_DBNAME', ($formvars['POSTGRES_DBNAME'] != '' ? $formvars['POSTGRES_DBNAME'] : 'kvwmapsp'));
+	define('POSTGRES_CONNECTION_ID', 1);
 	define('POSTGRESVERSION', getenv('PGSQL_ENV_POSTGRES_MAJOR'));
 	define('POSTGRES_CHARSET', 'UTF8');
 	define('EPSGCODE_ALKIS', 25833);

@@ -1259,6 +1259,16 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 
 				<tr class="group-sonstiges">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strStartPageParams; ?>
+					</th>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3;">
+						<input name="start_page_params" type="text" value="<?php echo $this->formvars['start_page_params']; ?>" style="width: 690px">
+						<span style="vertical-align: top; margin-left: 3px" data-tooltip="<?php echo $strStartPageParamsDescription; ?>"></span>
+					</td>
+				</tr>
+
+				<tr class="group-sonstiges">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<?php echo $strResetPasswordText; ?>
 					</th>
 					<td colspan="2" valign="top" align="left" style="border-bottom:1px solid #C3C7C3">

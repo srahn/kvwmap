@@ -36,8 +36,8 @@
 
     if (!$GUI->is_tool_allowed('only_cli')) exit;
     $GUI->pgdatabase = new pgdatabase();
+    $GUI->pgdatabase->open();
     $ressources_layer = Layer::find_by_id($GUI, METADATA_RESSOURCES_LAYER_ID);
-    $GUI->pgdatabase->open($ressources_layer->get('connection_id'));
 
     include_once(PLUGINS . 'metadata/model/kvwmap.php');
     include_once(PLUGINS . 'metadata/model/Ressource.php');

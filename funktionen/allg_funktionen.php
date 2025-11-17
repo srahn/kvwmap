@@ -4,6 +4,60 @@
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
+
+ function base32_decode_custom($b32) {
+	$alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+	$b32 = strtoupper($b32);
+	$bits = '';
+	foreach (str_split($b32) as $char) {
+			$pos = strpos($alphabet, $char);
+			if ($pos === false) continue;
+			$bits .= str_pad(decbin($pos), 5, '0', STR_PAD_LEFT);
+	}
+	$binary = '';
+	foreach (str_split($bits, 8) as $byte) {
+			if (strlen($byte) < 8) continue;
+			$binary .= chr(bindec($byte));
+	}
+	return $binary;
+}
+
+function generate_totp($secret, $period = 30, $digits = 6) {
+	$counter = floor(time() / $period);
+	$key = base32_decode_custom($secret);
+	$bin_counter = pack('N*', 0) . pack('N*', $counter);
+	$hash = hash_hmac('sha1', $bin_counter, $key, true);
+	$offset = ord(substr($hash, -1)) & 0x0F;
+	$truncated = unpack('N', substr($hash, $offset, 4))[1] & 0x7FFFFFFF;
+	$code = $truncated % pow(10, $digits);
+	return str_pad($code, $digits, '0', STR_PAD_LEFT);
+}
+
+function verify_totp($secret, $code, $window = 1, $period = 30) {
+	// Prüfe aktuellen Zeitschritt ± window
+	for ($i = -$window; $i <= $window; $i++) {
+			$counter = floor(time() / $period) + $i;
+			$key = base32_decode_custom($secret);
+			$bin_counter = pack('N*', 0) . pack('N*', $counter);
+			$hash = hash_hmac('sha1', $bin_counter, $key, true);
+			$offset = ord(substr($hash, -1)) & 0x0F;
+			$truncated = unpack('N', substr($hash, $offset, 4))[1] & 0x7FFFFFFF;
+			$test_code = str_pad($truncated % 1000000, 6, '0', STR_PAD_LEFT);
+			if (hash_equals($test_code, $code)) return true;
+	}
+	return false;
+}
+
+function generate_random_base32($length = 16) {
+	$alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+	$secret = '';
+	for ($i = 0; $i < $length; $i++) {
+			$secret .= $alphabet[random_int(0, 31)];
+	}
+	return $secret;
+}
+
+
 if (MAPSERVERVERSION < 800) {
 	if (!function_exists('msGetErrorObj')) {
 		function msGetErrorObj() {
@@ -2584,29 +2638,35 @@ function before_last($txt, $delimiter) {
 	if (!$delimiter) {
 		return '';
 	}
-	$parts = explode($delimiter, $txt);
-	array_pop($parts);
-	return implode($delimiter , $parts);
+	$pos = strrpos($txt, $delimiter);
+  return $pos === false ? $txt : substr($txt, 0, $pos);
 }
 
 /**
- * Function return the inner part of the select in a mapserver data statement
- * normaly looks like this:
- * the_geom (select id, the_geom from schema.tabelle where true) using unique id using srid=25832
- * Function extract from first select until last closing bracket.
- * If no open pracket is before select like in this example:
- * select id, the_geom from schema.tabelle where true, return $data as it is
+ * Function returns the parts of a mapserver data statement
  * @param string $data Mapserver data statement
- * @return String inner sql
+ * @return Array (geom, inner select, using)
  */
-function get_sql_from_mapserver_data($data) {
-	$pos_select = stripos($data, 'select');
-	if (strpos(substr($data, 0, $pos_select), '(') === false) {
-		return $data;
+function getDataParts($data){
+	$first_space_pos = strpos($data, ' ');
+	$geom = substr($data, 0, $first_space_pos);					# geom am Anfang
+	$rest = substr($data, $first_space_pos);
+	$usingposition = stripos($rest, 'using');
+	$from = substr($rest, 0, $usingposition);						# from (alles zwischen geom und using)
+	$using = substr($rest, $usingposition);							# using ...
+	if(strpos($from, '(') === false){		# from table
+		$select = 'select * '.$from.' where 1=1';
 	}
-	$pos_last_closing_bracket = strrpos($data, ')');
-	$data = substr($data, $pos_select, $pos_last_closing_bracket - $pos_select);
-	return $data;
+	else{		# from (select ... from ...) as foo
+		$select = stristr($from,'(');
+		$select = before_last($select, ')');
+		$select = ltrim($select, '(');
+	}
+	return [
+		'geom' => $geom,
+		'select' => $select,
+		'using' => $using
+	];
 }
 
 /**

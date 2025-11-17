@@ -854,12 +854,17 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		var attributenames = '';
 		var attributevalues = '';
 		var geom = '';
+		var value = '';
 		for(i = 0; i < attributenamesarray.length; i++){
 			if(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k) != undefined){
+				value = document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value;
+				if (attributenamesarray[i] == geom_attribute) {
+					value = "'" + value + "'";
+				}
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += encodeURIComponent(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value) + '|';
+				attributevalues += encodeURIComponent(value) + '|';
 			}
-			else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
+			else if(attributenamesarray[i] == geom_attribute){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
 				if(enclosingForm.loc_x != undefined && enclosingForm.loc_x.value != ''){		// Punktgeometrie
 					geom = 'POINT('+enclosingForm.loc_x.value+' '+enclosingForm.loc_y.value+')';
 				}
@@ -869,8 +874,13 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 					}
 				}
 				attributenames += attributenamesarray[i] + '|';
-				if(geom != '')attributevalues += 'SRID=<? echo $this->user->rolle->epsg_code; ?>;' + geom + '|';		// EWKT mit dem user-epsg draus machen
-				else attributevalues += 'POINT EMPTY|';		// leere Geometrie zurückliefern
+				if (geom != '') {
+					geom = 'SRID=<? echo $this->user->rolle->epsg_code; ?>;' + geom;		// EWKT mit dem user-epsg draus machen
+				}
+				else {
+					geom = 'POINT EMPTY';		// leere Geometrie zurückliefern
+				}
+				attributevalues += 'st_geometryfromtext(\'' + geom + '\')|';
 			}
 		}
 		return new Array(attributenames, attributevalues);

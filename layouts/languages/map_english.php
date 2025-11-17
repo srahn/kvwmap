@@ -45,8 +45,7 @@
 	$strNoLayer="Please select a layer for the data query!";
 	$strLayerSearch="Search Layer";
 	$strLegendType="Legend Type";
-	$strLegendTypeGroups="layers in groups";
-	$strLegendTypeAlphabetical="layers alphabetical";
+	$strLegendTypeSwitch="switch between alphabetical/grouped display";
 	$strDrawingOrder="Change Drawingorder";
 	$strRemoveAllImportLayers="remove all import-layers";
 	$strRemoveAllSearchLayers="remove all search-layers";

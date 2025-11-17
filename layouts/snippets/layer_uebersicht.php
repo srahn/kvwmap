@@ -120,7 +120,7 @@
 			group_tr.style.display = 'none';
 		});
 		[].forEach.call(layer_trs, function (layer_tr) {
-			if (search == '' || layer_tr.innerHTML.toLowerCase().includes(search)) {
+			if (search == '' || layer_tr.innerHTML.toLowerCase().includes(search.toLowerCase())) {
 				layer_tr.style.display = '';
 				let group_ids = layer_tr.dataset.upper_groups.split(' ');
 				[].forEach.call(group_ids, function (group_id) {
@@ -255,3 +255,8 @@
 		<td align="right">&nbsp;</td>
 	</tr>
 </table>
+<script>
+	window.addEventListener("pageshow", function() {
+    filter_by_full_text_search();
+});
+</script>

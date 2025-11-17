@@ -55,19 +55,11 @@
 
 		<? if(!$this->simple_legend){ ?>
 
-		<? if ($this->user->rolle->legendtype == 0) { ?>
-			<div title="<? echo $strLegendTypeAlphabetical; ?>">
-				<a href="javascript:void(0)" onclick="changeLegendType(1);">
-					<div class="button in_groups"></div>
+			<div title="<? echo $strLegendTypeSwitch; ?>">
+				<a href="javascript:void(0)" onclick="changeLegendType();">
+					<div id="legendtype_switch" class="button <? echo ($this->user->rolle->legendtype == 0 ? 'in_groups' : 'alphabetical'); ?>"></div>
 				</a>
 			</div>
-		<? }else { ?>
-			<div title="<? echo $strLegendTypeGroups; ?>">
-				<a href="javascript:void(0)" onclick="changeLegendType(0);">
-					<div class="button alphabetical"></div>
-				</a>
-		</div>
-		<? } ?>
 
 		<div id="legendOptionsIcon" title="<? echo $strDrawingOrder; ?>">
 			<a href="javascript:void(0)" onclick="toggleDrawingOrderForm();">
@@ -112,12 +104,10 @@
 		</div>
 		<? } ?>		
 	</div>
-	<? if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende ?>
-	<div id="layersearchdiv">
+	<div id="layersearchdiv" class="<? if($this->user->rolle->legendtype == 0){echo 'hidden';} ?>">
 		<? echo $strLayerSearch; ?>
 		<input type="text" autocomplete="off" id="layer_search" onkeyup="jumpToLayer(this.value);" value="">
 	</div>
-	<? } ?>
 	</div>
 	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();">
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">

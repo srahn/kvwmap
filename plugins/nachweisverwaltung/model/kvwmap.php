@@ -355,6 +355,16 @@
       # zoom_to_max_layer_extent
 			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);
       $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
+
+			if ($GUI->queryable_vector_layers['gruppe']) {
+				$GUI->layergruppen['ID'] = array_values(array_unique($GUI->queryable_vector_layers['gruppe']));
+			}
+			$GUI->layergruppen = $GUI->mapDB->get_Groups($GUI->layergruppen); # Gruppen mit Pfaden versehen
+			# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
+			if (value_of($GUI->formvars, 'selected_group_id') AND $GUI->formvars['selected_layer_id'] == '') {
+				$GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, $GUI->formvars['selected_group_id'], NULL, NULL, true, true);
+			}
+
 	    if(!$GUI->formvars['geom_from_layer']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
 	      $GUI->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
@@ -557,10 +567,11 @@
 			$sql = "
 				INSERT INTO 
 					kvwmap.rolle_nachweise 
-				(user_id, stelle_id)
+				(user_id, stelle_id, abfrageart)
 				VALUES (
 					" . $user_id . ", 
-					" . $stelle_id . ")";
+					" . $stelle_id . ",
+					'indiv_nr')";
 			$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
 			$GUI->pgdatabase->execSQL($sql,4, 1);
 		}

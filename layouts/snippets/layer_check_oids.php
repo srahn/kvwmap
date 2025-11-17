@@ -220,7 +220,7 @@ switch ($this->formvars['action']) {
 		foreach ($this->formvars['layer_id'] as $layer_id) {
 			if ($this->formvars['check_' . $layer_id] AND strpos(strtolower($this->formvars['new_data_' . $layer_id]), 'using ') !== false) {
 				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-				$select = $mapDB->getSelectFromData($this->formvars['new_data_' . $layer_id]);
+				$select = getDataParts($this->formvars['new_data_' . $layer_id])['select'];
 				$from = substr($select, strrpos(strtolower($select), 'from') + 5);
 				if (strpos($from, ',') === false) {
 					$table = explode(' ', $from);

@@ -216,7 +216,6 @@ class rolle {
 				header,
 				footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,
@@ -246,6 +245,7 @@ class rolle {
 		$ret = $this->database->execSQL($sql);
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['queryable'] = ($rs['queryable'] === 't');
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
 					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
@@ -278,17 +278,14 @@ class rolle {
 				r2ul.layer_id 
 			FROM 
 				kvwmap.u_rolle2used_layer AS r2ul' . 
-    		($logconsume? ', kvwmap.used_layer AS ul, kvwmap.layer AS l, kvwmap.stelle AS s' : '') . '
+    		($logconsume? ', kvwmap.layer AS l' : '') . '
     	WHERE 
 				r2ul.user_id = ' . $this->user_id . ' AND 
 				r2ul.stelle_id = ' . $this->stelle_id;
     if ($logconsume) {
       $sql .= ' 
-				AND r2ul.layer_id = ul.layer_id 
-				AND r2ul.stelle_id = ul.stelle_id
-				AND ul.layer_id = l.layer_id 
-				AND ul.stelle_id = s.id
-				AND (s.logconsume OR l.logconsume OR ul.logconsume OR r2ul.logconsume)';
+				AND r2ul.layer_id = l.layer_id 
+				AND l.logconsume';
     }
     $anzaktivStatus=count($aktivStatus);
     if ($anzaktivStatus > 0) {
@@ -1574,12 +1571,12 @@ class rolle {
 		}
 	}
 	
-	function changeLegendType($formvars){
+	function changeLegendType(){
 		$sql ="
 			UPDATE
 				kvwmap.rolle
 			SET 
-				legendtype = " . $formvars['legendtype'] . "
+				legendtype = abs(legendtype - 1)
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
@@ -2262,7 +2259,6 @@ class rolle {
 					querystatus,
 					gle_view,
 					showclasses,
-					logconsume,
 					geom_from_layer
 				FROM
 					kvwmap.u_rolle2used_layer
@@ -2282,7 +2278,6 @@ class rolle {
 					start_aktiv::integer,
 					1,
 					1,
-					false,
 					layer_id
 				FROM
 					kvwmap.used_layer
@@ -2300,7 +2295,6 @@ class rolle {
 				querystatus,
 				gle_view,
 				showclasses,
-				logconsume,
 				geom_from_layer
 			) " .
 			$rolle2used_layer_select_sql . "
@@ -2422,7 +2416,7 @@ class rolle {
 			SELECT
 				id,
 				name,
-				layers,
+				array_to_string(layers, ',') as layers,
 				query
 			FROM
 				kvwmap.rolle_saved_layers
@@ -2496,7 +2490,7 @@ class rolle {
 			'user_id' => $this->user_id,
 			'stelle_id' => $this->stelle_id,
 			'name' => "'" . $comment . "'",
-			'layers' => "'" . implode(',', $layers) . "'",
+			'layers' => "'{" . implode(',', $layers) . "'}",
 			'query' => "'" . implode(',', $query) . "'"
 		];
 		$sql = "
