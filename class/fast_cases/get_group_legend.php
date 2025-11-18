@@ -1560,6 +1560,7 @@ class GUI {
 	function create_layer_legend($layer){
 		if (value_of($layer, 'requires') != '' )return;
 		$visible = $this->check_layer_visibility($layer);
+
 		$legend = '<tr id="legend_' . $layer['layer_id'] . '"><td valign="top">';
 		$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"><div class="layerOptions" id="options_content_'.$layer['layer_id'].'"></div></div>';
 
@@ -1581,7 +1582,7 @@ class GUI {
 			if ($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 				$input_attr['id'] = 'qLayer' . $layer['layer_id'];
 				$input_attr['name'] = 'qLayer[' . $layer['layer_id'] . ']';
-				$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
+				$input_attr['title'] = ($layer['querystatus'] == 1 ? $this->deactivatequery : $this->activatequery);
 				$input_attr['value'] = 1;
 				$input_attr['class'] = 'info-select-field';
 				$input_attr['type'] = (($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
@@ -1626,7 +1627,7 @@ class GUI {
 				foreach ($input_attr AS $key => $value) {
 					$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
 				}
-				$legend .= ($layer['queryStatus'] == 1 ? ' checked' : '');
+				$legend .= ($layer['querystatus'] == 1 ? ' checked' : '');
 				$legend .= '>';
 			}
 			else{
@@ -1653,7 +1654,7 @@ class GUI {
 			else{
 				$legend .=  ' title="'.$this->activatelayer.'"';
 			}
-			$legend .= ' ></td><td valign="middle" id="legend_layer_' . $layer['layer_id'] . '">';
+			$legend .= ' ></td><td valign="middle" style="width: 80%" id="legend_layer_' . $layer['layer_id'] . '">';
 
 			$legend .= $this->create_layername_legend($layer);
 			$legend .= $this->create_class_legend($layer);
@@ -2911,6 +2912,7 @@ class db_mapObj {
 		global $language;
 
 		if ($language != 'german') {
+			$language = str_replace('-', '_', $language);
 			$name_column = "
 			CASE
 				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "
