@@ -4868,7 +4868,7 @@ echo '			</table>
 				$this->classdaten[0]['Style'] = array_reverse($this->classdaten[0]['Style']);
 				for ($i = 0; $i < count($this->classdaten[0]['Style']); $i++) { ?>
 					<tr><?
-						$td_id = 'td1_style_' . $this->classdaten[0]['Style'][$i]['Style_ID'];
+						$td_id = 'td1_style_' . $this->classdaten[0]['Style'][$i]['style_id'];
 						$td_style = ($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['style_id'] ? 'background-color:lightsteelblue;' : '');
 						$td_onclick = 'get_style(' . $this->classdaten[0]['Style'][$i]['style_id'] . ')'; ?>
 						<td id="<? echo $td_id; ?>" style="<? echo $td_style; ?> cursor: pointer; border-top: 1px solid #aaa;" onclick="<? echo $td_onclick; ?>">
@@ -18884,7 +18884,7 @@ class db_mapObj{
 				kvwmap.styles AS s,
 				kvwmap.u_styles2classes AS s2c
 			WHERE 
-				s.Style_ID = s2c.style_id AND 
+				s.style_id = s2c.style_id AND 
 				s2c.class_id = ' . $Class_ID . '
 			ORDER BY drawingorder';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>",4);
@@ -20255,7 +20255,7 @@ DO $$
 				$styles = $database->create_insert_dump(
 					'kvwmap.styles', 
 					'style_id', 
-					'SELECT styles.style_id, symbol,symbolname,size,color,outlinecolor, colorrange, datarange, rangeitem, opacity, minsize,maxsize, minscale, maxscale, angle,angleitem,width,minwidth,maxwidth, offsetx, offsety, polaroffset, pattern, geomtransform, gap, initialgap, linecap, linejoin, linejoinmaxsize FROM kvwmap.styles, kvwmap.u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND class_id='.$classes['extra'][$j].' ORDER BY drawingorder',
+					'SELECT styles.style_id, symbol,symbolname,size,color,outlinecolor, colorrange, datarange, rangeitem, opacity, minsize,maxsize, minscale, maxscale, angle,angleitem,width,minwidth,maxwidth, offsetx, offsety, polaroffset, pattern, geomtransform, gap, initialgap, linecap, linejoin, linejoinmaxsize FROM kvwmap.styles, kvwmap.u_styles2classes WHERE u_styles2classes.style_id = styles.style_id AND class_id='.$classes['extra'][$j].' ORDER BY drawingorder',
 					'RETURNING style_id INTO vars_last_style_id'
 				);
 				for ($k = 0; $k < count_or_0($styles['insert']); $k++) {

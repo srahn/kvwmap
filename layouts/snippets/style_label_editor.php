@@ -314,19 +314,19 @@ function navigate(params) {
 										$this->classdaten[0]['Style'] = array_reverse($this->classdaten[0]['Style']);
 										for ($i = 0; $i < count($this->classdaten[0]['Style']); $i++) { ?>
 											<tr><?
-												$td_id = 'td1_style_' . $this->classdaten[0]['Style'][$i]['Style_ID'];
-												$td_style = ($this->formvars['selected_style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID'] ? 'background-color:lightsteelblue;' : '');
-												$td_onclick = 'get_style(' . $this->classdaten[0]['Style'][$i]['Style_ID'] . ');';
+												$td_id = 'td1_style_' . $this->classdaten[0]['Style'][$i]['style_id'];
+												$td_style = ($this->formvars['selected_style_id'] == $this->classdaten[0]['Style'][$i]['style_id'] ? 'background-color:lightsteelblue;' : '');
+												$td_onclick = 'get_style(' . $this->classdaten[0]['Style'][$i]['style_id'] . ');';
 											?>
 												<td id="<? echo $td_id; ?>" style="<? echo $td_style; ?>" onclick="<? echo $td_onclick; ?>">
-													<img src="<?php echo IMAGEURL . $this->getlegendimage($this->formvars['selected_layer_id'], $this->classdaten[0]['Style'][$i]['Style_ID']); ?>">
+													<img src="<?php echo IMAGEURL . $this->getlegendimage($this->formvars['selected_layer_id'], $this->classdaten[0]['Style'][$i]['style_id']); ?>">
 												</td><?
-													$td_id = 'td2_style_' . $this->classdaten[0]['Style'][$i]['Style_ID'];
+													$td_id = 'td2_style_' . $this->classdaten[0]['Style'][$i]['style_id'];
 												?>
 												<td id="<? echo $td_id; ?>" align="right" style="<? echo $td_style; ?>"><?
 												if ($i < count($this->classdaten[0]['Style']) - 1) { ?>
 													<a
-														href="javascript:movedown_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);"
+														href="javascript:movedown_style(<? echo $this->classdaten[0]['Style'][$i]['style_id']; ?>);"
 														title="in der Zeichenreihenfolge nach unten verschieben"
 													>
 														<img src="<? echo GRAPHICSPATH; ?>pfeil.gif" border="0">
@@ -334,13 +334,13 @@ function navigate(params) {
 												}
 												if ($i > 0) { ?>
 													&nbsp;<a
-														href="javascript:moveup_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);"
+														href="javascript:moveup_style(<? echo $this->classdaten[0]['Style'][$i]['style_id']; ?>);"
 														title="in der Zeichenreihenfolge nach oben verschieben"
 													>
 														<img src="<? echo GRAPHICSPATH; ?>pfeil2.gif" border="0">
 													</a><?
 												} ?>
-												&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);">löschen</a>
+												&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style(<? echo $this->classdaten[0]['Style'][$i]['style_id']; ?>);">löschen</a>
 											</td>
 										</tr><?
 									}
@@ -401,7 +401,7 @@ function navigate(params) {
 									} ?>
 									<tr>
 										<td height="30" colspan="2" valign="bottom" align="center">
-											<input type="button" name="style_save" value="Speichern" onclick="save_style(<? echo $this->styledaten['Style_ID']; ?>)">
+											<input type="button" name="style_save" value="Speichern" onclick="save_style(<? echo $this->styledaten['style_id']; ?>)">
 										</td>
 									</tr>
 								</table><?
