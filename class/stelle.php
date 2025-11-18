@@ -2294,6 +2294,7 @@ class stelle {
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['queryable'] = ($rs['queryable'] == 't');
 			$layer[] = ($result == 'only_ids' ? $rs['layer_id'] : $rs);
 		}
 		return $layer;
