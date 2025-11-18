@@ -40,7 +40,7 @@
 					<td bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett id-column">
 						<div style="margin-left: ' . $indent . 'px;"><a href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $group['id'] . '</a></div>
 					</td>
-					<td colspan="5" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett"">
+					<td colspan="6" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett"">
 						<div style="margin-left: ' . $indent . 'px;" class="layer-column">
 							' . ($indent > 0 ? '<img src="graphics/pfeil_unten-rechts.gif">' : '') . ' ' . $prefix . ' ' . $group['gruppenname'] . '
 						</div>
@@ -201,14 +201,14 @@
 			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" onclick="$('#column_options_div').toggle()"></i>
 			<div id="column_options_div">
 				<? if ($this->Stelle->isMenueAllowed('Layer_Anzeigen')) { ?>
-				<input type="checkbox" onclick="$('.id-column').toggle(); $('#column_options_div').toggle();" checked> ID<br>
+				<input type="checkbox" onclick="$('.id-column').toggle();" checked> ID<br>
 				<? } ?>
-				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Thema<br>
-				<input type="checkbox" onclick="$('.drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
-				<input type="checkbox" onclick="$('.wms_keywordlist-column').toggle(); $('#column_options_div').toggle();" checked> Stichworte<br>
-				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle(); $('#column_options_div').toggle();" checked> Kurzbeschreibung<br>
-				<input type="checkbox" onclick="$('.metadatenlink-column').toggle(); $('#column_options_div').toggle();" checked> Metadatenlink<br>
-				<input type="checkbox" onclick="$('.dataowner_name-column').toggle(); $('#column_options_div').toggle();" checked> <? echo $strDataOwnerName; ?>
+				<input type="checkbox" onclick="$('.layer-column').toggle();" checked> Thema<br>
+				<input type="checkbox" onclick="$('.drawingorder-column').toggle();"> Zeichenreihenfolge<br>
+				<input type="checkbox" onclick="$('.wms_keywordlist-column').toggle();" checked> Stichworte<br>
+				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle();" checked> Kurzbeschreibung<br>
+				<input type="checkbox" onclick="$('.metadatenlink-column').toggle();" checked> Metadatenlink<br>
+				<input type="checkbox" onclick="$('.dataowner_name-column').toggle();" checked> <? echo $strDataOwnerName; ?>
 			</div>
 		</td>
 	</tr>
