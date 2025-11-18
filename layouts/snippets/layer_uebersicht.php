@@ -257,6 +257,9 @@
 </table>
 <script>
 	window.addEventListener("pageshow", function() {
-    filter_by_full_text_search();
+		filter_by_full_text_search();
+		if (document.GUI.keyword_filter.value != '') {
+			filter_by_keyword();
+		}
 });
 </script>

@@ -93,20 +93,17 @@
 		if(id == 'stellenzuweisung'){
 			document.GUI.stellenzuweisung.value = 1;
 			document.getElementById('layerform').style.display = 'none';
-			document.getElementById('layerform_link').style.backgroundColor = '';
-			document.getElementById('layerform_link').style.color = '#888';
+			document.getElementById('layerform_link').classList.remove('navigation-selected');
 			document.getElementById('saveAsNewLayerButton').style.display = 'none';
 		}
 		else{
 			document.GUI.stellenzuweisung.value = 0;
 			document.getElementById('stellenzuweisung').style.display = 'none';
-			document.getElementById('stellenzuweisung_link').style.backgroundColor = '';
-			document.getElementById('stellenzuweisung_link').style.color = '#888';
+			document.getElementById('stellenzuweisung_link').classList.remove('navigation-selected');
 			document.getElementById('saveAsNewLayerButton').style.display = 'inline-block';
 		}
 		document.getElementById(id).style.display = 'inline-block';
-		document.getElementById(id+'_link').style.backgroundColor = '#c7d9e6';
-		document.getElementById(id+'_link').style.color = '#111';
+		document.getElementById(id+'_link').classList.add('navigation-selected');
 	}
 
 	function mandatoryValuesMissing() {
@@ -404,8 +401,8 @@ from
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th>
-						<a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a>
+					<th id="layerform_link">
+						<a href="javascript:toggleForm('layerform');"><div><? echo $strCommonData; ?></div></a>
 					</th><?
 					if (!in_array($this->formvars['datentyp'], [MS_LAYER_QUERY])) { ?>
 						<th>
@@ -420,8 +417,8 @@ from
 							<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a>
 						</th><?
 					} ?>
-					<th>
-						<a href="javascript:toggleForm('stellenzuweisung');"><div id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a>
+					<th id="stellenzuweisung_link">
+						<a href="javascript:toggleForm('stellenzuweisung');"><div><? echo $strStellenAsignment; ?></div></a>
 					</th><?
 					if (in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
 						<th>
