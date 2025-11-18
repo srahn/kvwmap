@@ -327,7 +327,7 @@ class Konvertierung extends PgObject {
 		if ($konvertierung->get('planart') != '') {
 			if ($konvertierung->get_plan()) {
 				$konvertierung->plan->get_center_coord();
-				$konvertierung->plan->get_extent(OWS_SRS);
+				$konvertierung->plan->get_extent(OWS_SRS, 'konvertierung_id = ' . $id);
 			}
 			$konvertierung->set_config($konvertierung->get('planart'));
 		}
@@ -1170,7 +1170,7 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-	 * Return plan of konvertierung, query first from database if not already asigned to plan attribute 
+	 * Return plan of konvertierung, query first from database if not already assigned to plan attribute
 	 * return false if not found, else plan
 	 */
 	function get_plan() {
@@ -1183,7 +1183,7 @@ class Konvertierung extends PgObject {
 			if (count($plan) > 0) {
 				$this->plan = $plan[0];
 				$this->plan->get_center_coord();
-				$this->plan->get_extent(OWS_SRS);
+				$this->plan->get_extent(OWS_SRS, 'konvertierung_id = ' . $this->get($this->identifier));
 				$this->debug->show('get_plan assign first plan with planart: ' . $this->plan->planart . ' gml_id: ' . $this->plan->get('gml_id') . ' to Konvertierung.', Konvertierung::$write_debug);
 			}
 			else {
@@ -2918,6 +2918,7 @@ class Konvertierung extends PgObject {
 	 * @return array of strings Die die Dokumente enthalten
 	 */
 	function create_metadata_documents($md) {
+		$this->plan = $this->get_plan();
 		$plan = $this->plan;
 		$konvertierungen = Konvertierung::find_konvertierungen(
 			$this->gui,
