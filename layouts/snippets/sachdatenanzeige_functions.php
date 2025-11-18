@@ -141,11 +141,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		tab.classList.add("active_tab");
 		var groups_to_close = dataset.querySelectorAll('.tab');
 		[].forEach.call(groups_to_close, function (group){
-			group.classList.add('collapsed');
+			group.classList.add('collapsedfull');
 		});
 		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
 		[].forEach.call(groups_to_open, function (group){
-			group.classList.remove('collapsed');
+			group.classList.remove('collapsedfull');
 		});
 	}
 
@@ -156,10 +156,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		tab.classList.add("active_tab");
 		var layer_to_close = document.querySelectorAll('.layer_results');
 		[].forEach.call(layer_to_close, function (layer){
-			layer.classList.add('collapsed');
+			layer.classList.add('collapsedfull');
 		});
 		var layer_to_open = document.querySelector('#result_' + layer_id);
-		layer_to_open.classList.remove('collapsed');
+		layer_to_open.classList.remove('collapsedfull');
 		scrollto_saved_position();
 		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}

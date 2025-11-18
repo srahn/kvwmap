@@ -897,7 +897,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					class="col-md-2"
 					data-filter-control="input"
 				>Genehmigung</th>
-				<? if ($this->plan_layer_id != XPLANKONVERTER_SO_PLAENE_LAYER_ID) { ?>
+				<? if ($this->plan_layer_id != XPLANKONVERTER_SO_PLAENE_LAYER_ID && $this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
 				<th
 					data-field="auslegungsstartdatum"
 					data-sortable="true"
