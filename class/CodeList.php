@@ -1,11 +1,11 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class CodeList extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class CodeList extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'codelists');
+		parent::__construct($gui, 'kvwmap', 'codelists');
 	}
 
 	// function get_generic_select($layer, $attr) {

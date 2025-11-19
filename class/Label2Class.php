@@ -1,10 +1,10 @@
 <?php
-class Label2Class extends MyObject {
+class Label2Class extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'u_labels2classes', 'class_id, label_id');
+		parent::__construct($gui, 'kvwmap', 'u_labels2classes', 'class_id, label_id');
 	}
 
 	public static	function find($gui, $where) {
