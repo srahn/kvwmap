@@ -26,12 +26,26 @@ var compare_clipping = false;
 var formdata = new FormData();
 root.changed_form_fields = new Array();
 
-window.onbeforeunload = function(){
-	document.activeElement.blur();
-	if(root.document && root.document.GUI && root.document.GUI.gle_changed.value == 1){
-		return "Es existieren ungespeicherte Datensätze. Wollen Sie wirklich fortfahren?";
+window.addEventListener("beforeunload", function (e) {
+	if (
+			root.document &&
+			root.document.GUI &&
+			root.document.GUI.gle_changed.value == 1
+	) {
+			highlightChangedFormFields();
+			// Browser-Warnung auslösen (eigener Text wird ignoriert)
+			e.preventDefault();
+			e.returnValue = "";
 	}
-}
+});
+
+window.addEventListener("unload", function () {
+	try {
+		if (window.opener && window.opener.document) {
+			window.opener.document.GUI.gle_changed.value = 0;
+		}
+	} catch (err) {}
+});
 
 /*
 * @param url string
@@ -404,6 +418,7 @@ function checkForUnsavedChanges(event){
 	}
 	if(!sure){
 		if(event != undefined)event.preventDefault();
+		query_tab?.focus();
 		preventSubmit();
 	}
 	else{
@@ -713,6 +728,7 @@ function auto_resize_overlay(){
 }
 
 function activate_overlay(){
+	root.changed_form_fields = [];
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
 	window.onmouseout = function(evt){
