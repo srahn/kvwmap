@@ -1,10 +1,10 @@
 <?php
-class LayerStyle extends MyObject {
+class LayerStyle extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'styles', 'Style_ID');
+		parent::__construct($gui, 'kvwmap', 'styles', 'style_id');
 	}
 
 	public static	function find_by_id($gui, $by, $id) {

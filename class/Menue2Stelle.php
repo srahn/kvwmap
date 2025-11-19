@@ -1,10 +1,10 @@
 <?php
-class Menue2Stelle extends MyObject {
+class Menue2Stelle extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'u_menue2stelle', 'stelle_id, menue_id');
+		parent::__construct($gui, 'kvwmap', 'u_menue2stelle', 'stelle_id, menue_id');
 	}
 
 	public static	function find($gui, $where) {

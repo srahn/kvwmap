@@ -414,7 +414,7 @@ class Layer extends PgObject {
 				kvwmap.used_layer ul ON la.layer_id = ul.layer_id JOIN
 				kvwmap.layer_attributes2stelle las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.stelle_id = las.stelle_id JOIN 
 				kvwmap.stelle s ON ul.stelle_id = s.ID LEFT JOIN
-				kvwmap.used_layer ul2 ON ul.stelle_id = ul2.stelle_id AND split_part(la.options, ',', 1) = ul2.layer_id
+				kvwmap.used_layer ul2 ON ul.stelle_id = ul2.stelle_id AND split_part(la.options, ',', 1)::integer = ul2.layer_id
 			WHERE
 				la.layer_id = " . $id. " AND
 				la.form_element_type = 'SubFormEmbeddedPK' AND
