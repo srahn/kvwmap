@@ -139,7 +139,7 @@ if ($doit == true) {
 			</script><?
 		}
 	} ?>
-	<div id="layer" onclick="remove_calendar();">
+	<div id="layer" class="gle_tabular" onclick="remove_calendar();">
 		<input type="hidden" value="" id="changed_<? echo $layer['layer_id']; ?>" name="changed_<? echo $layer['layer_id']; ?>"><?
 		if ($this->new_entry != true AND $layer['requires'] == '') { ?>
 			<table border="0" cellpadding="0" cellspacing="0" width="100%">
