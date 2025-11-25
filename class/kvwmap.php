@@ -9615,7 +9615,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', array_values($results));
+			$this->add_message('error', $results['msg']);
 		}
 		$this->Layergruppe_Editor();
 	}
