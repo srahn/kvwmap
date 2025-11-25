@@ -9522,13 +9522,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->layergruppe->create();
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich angelegt.');
 			$this->formvars['order'] = 'gruppenname';
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
-			$this->add_message('array', array_values($results));
+			$this->add_message('error', $results['msg']);
 			$this->Layergruppe_Editor();
 		}
 	}
@@ -9546,7 +9546,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', array_values($results));
+			$this->add_message('error', $results['msg']);
 		}
 		$this->Layergruppe_Editor();
 	}
