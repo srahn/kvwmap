@@ -20646,7 +20646,9 @@ DO $$
 		shuffle($result_colors);
 		$i = 0;
 		foreach($classes as $value => $name){
-			if($i == count($result_colors))return;				# Anzahl der Klassen ist auf die Anzahl der Colors beschränkt
+			if($i == count($result_colors)){
+				$i = 0;		# wenn alle Fraben verwendet wurden, die Farben nochmal benutzen
+			}
 			$classdata['name'] = $name.' ';
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
