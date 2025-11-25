@@ -14867,8 +14867,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
 		}
 		else {
-			$results = $this->pgobject->create();
-			$result = $results[0];
+			$result = $this->pgobject->create();
 		}
 		# return success and id of created connection or error and error msg in json format
 		$this->mime_type = 'application/json';
@@ -14911,7 +14910,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				else {
 					$results = $this->pgobject->update($this->pgobject->data, false);
-					if ($results[0]['success']) {
+					if ($results['success']) {
 						$result = array(
 							'success' => true,
 							'msg' => 'Der Datensatz mit der ID: ' . $this->pgobject->get('id') . ' konnte erfolgreich aktualisiert werden.'
@@ -14951,8 +14950,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 			else {
 				$result = $this->pgobject->delete();
-				if ($this->pgobject->database->success) {
-					$num_affected_rows = pg_affected_rows($result);
+				if ($result['success']) {
+					$num_affected_rows = pg_affected_rows($result['result']);
 					switch ($num_affected_rows) {
 						case (-1) : {
 							$result = array(

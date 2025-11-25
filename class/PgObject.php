@@ -627,12 +627,12 @@ class PgObject {
 		$this->debug->show('delete sql: ' . $sql, $this->show);
 		$result = pg_query($this->database->dbConn, $sql);
 		$err_msg = $this->database->errormessage;
-		$result = array(
+		return array(
 			'success' => ($err_msg == ''),
 			'msg' => ($err_msg == '' ? 'Abfrage zum Löschen erfolgreich' : 'Fehler bei Ausführung der Löschanfrage!'),
-			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
+			'result' => $result
 		);
-		return $result;
 	}
 
 	function getSQLResults($sql) {
