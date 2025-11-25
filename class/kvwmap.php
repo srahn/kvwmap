@@ -733,7 +733,7 @@ class GUI {
 														for ($i = 0; $i < count($attributes)-2; $i++){
 															$index = $query_attributes['indizes'][$attributes[$i]['name']];
 															if ($attributes['the_geom'] != $attributes[$i]['name']) {		# Attribut ist nicht das Geometrieattribut
-																echo '<option value="'.$attributes[$i]['name'].'">'.($query_attributes['alias'][$index] ?: $attributes[$i]['name']).'</option>';
+																echo '<option value="'.$attributes[$i]['name'].'" ' . ($layer[0]['classitem'] == $attributes[$i]['name']? 'selected' : '') . '>'.($query_attributes['alias'][$index] ?: $attributes[$i]['name']).'</option>';
 															}
 														}
 									echo 	 '</select>
@@ -1002,29 +1002,32 @@ echo '			</table>
 		$this->user->rolle->setRollenFilter($this->formvars);
 		$this->setLayerParams('options_');
 		if ($this->formvars['layer_options_open'] < 0) { # Rollenlayer
-			$this->user->rolle->setRollenLayerName($this->formvars);
-			$this->user->rolle->setRollenLayerAutoDelete($this->formvars);
-			$this->user->rolle->setBuffer($this->formvars);
+			$layerset = $this->user->rolle->getRollenlayer(-$this->formvars['layer_options_open']);
+			$this->formvars['classitem'] = $this->formvars['klass_' . $this->formvars['layer_options_open']];
+			$this->user->rolle->setRollenLayerParams($this->formvars);
 			$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
+			# alte Klassen löschen
+			$old_classes = $dbmap->read_Classes($this->formvars['layer_options_open']);
+			for($i = 0; $i < count($old_classes); $i++){
+				$dbmap->delete_Class($old_classes[$i]['class_id']);
+			}
 			# automatische Klassifizierung
-			if ($auto_class_attribute = $this->formvars['klass_' . $this->formvars['layer_options_open']]) {
+			if ($this->formvars['classitem']) {
 				$this->formvars['selected_layer_id'] = $this->formvars['layer_options_open'];
 				$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
 				$this->GenerischeSuche_Suchen();
 				$result= $this->qlayerset[0]['shape'];
-				# alte Klassen löschen
-				$old_classes = $dbmap->read_Classes($this->formvars['selected_layer_id']);
-				for($i = 0; $i < count($old_classes); $i++){
-					$dbmap->delete_Class($old_classes[$i]['class_id']);
-				}
 				for ($i = 0; $i < count($result); $i++) {
 					foreach ($result[$i] As $key => $value) {
-						if ($auto_class_attribute === $key) {
+						if ($this->formvars['classitem'] === $key) {
 							$classes[$value] = $value;
 						}
 					}
 				}
-				$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['datentyp'], $this->pgdatabase);
+				$dbmap->createAutoClasses(array_unique($classes), $this->formvars['classitem'], -$this->formvars['selected_layer_id'], $this->qlayerset[0]['datentyp'], $this->pgdatabase);
+			}
+			else {
+				$dbmap->addRollenLayerStyling(-$this->formvars['layer_options_open'], $layerset[0]['datentyp'], $this->formvars['labelitem'], $this->user, NULL);
 			}
 			$classes = $dbmap->read_Classes($this->formvars['layer_options_open']);
 			if (!empty($classes)) {
