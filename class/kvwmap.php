@@ -1023,7 +1023,7 @@ echo '			</table>
 			}
 			$classes = $dbmap->read_Classes($this->formvars['layer_options_open']);
 			if (!empty($classes)) {
-				if (!empty($classes[0]['Style'])) {
+				if ($this->formvars['classitem'] == '' AND !empty($classes[0]['Style'])) {	# Schraffur
 					$this->user->rolle->setStyle($classes[0]['Style'][0]['style_id'], $this->formvars);
 				}
 				foreach ($classes as $class) {	# bei Bedarf Label anlegen
