@@ -521,9 +521,9 @@ function navigate(params) {
 			          <td>
 			          <div align="center"><input type="button" name="neuladen_button" onclick="document.GUI.legendtouched.value = 1;neuLaden();" value="neu Laden"></div>
 			          <br>
-			        	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+			        	<div id="legenddiv" style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 									<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-				          <div id="legend" onclick="document.GUI.legendtouched.value = 1;">
+				          <div onclick="document.GUI.legendtouched.value = 1;">
 										<? echo $this->legende; ?>
 									</div>
 				        </div>
@@ -544,6 +544,7 @@ function navigate(params) {
 <input type="hidden" name="selected_label_id" value="<? echo $this->formvars['selected_label_id']; ?>">
 <input type="hidden" name="go" value="Style_Label_Editor">
 <input type="hidden" name="neuladen" value="">
+<input type="hidden" name="layer_options_open" value="">
 <script type="text/javascript">
 <!--
 
