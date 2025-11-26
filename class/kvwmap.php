@@ -790,17 +790,18 @@ class GUI {
 										</select>
 									</td>
 								</tr>';
-								
-							echo '
-								<tr>
-									<td>
-										<span>' . $this->strHatching.': </span>
-									</td>
-									<td>
-										<input type="checkbox" value="hatch" name="layer_options_hatching" ' . ($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
-									</td>
-								</tr>';
-								
+							
+							if ($layer[0]['datentyp'] == MS_LAYER_POLYGON) {
+								echo '
+									<tr>
+										<td>
+											<span>' . $this->strHatching.': </span>
+										</td>
+										<td>
+											<input type="checkbox" value="hatch" name="layer_options_hatching" ' . ($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
+										</td>
+									</tr>';
+							}
 							echo '
 								<tr>
 									<td>
