@@ -798,17 +798,18 @@ class GUI {
 										</select>
 									</td>
 								</tr>';
-								
-							echo '
-								<tr>
-									<td>
-										<span>' . $this->strHatching.': </span>
-									</td>
-									<td>
-										<input type="checkbox" value="hatch" name="layer_options_hatching" ' . ($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
-									</td>
-								</tr>';
-								
+							
+							if ($layer[0]['datentyp'] == MS_LAYER_POLYGON) {
+								echo '
+									<tr>
+										<td>
+											<span>' . $this->strHatching.': </span>
+										</td>
+										<td>
+											<input type="checkbox" value="hatch" name="layer_options_hatching" ' . ($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
+										</td>
+									</tr>';
+							}
 							echo '
 								<tr>
 									<td>
@@ -1031,7 +1032,7 @@ echo '			</table>
 			}
 			$classes = $dbmap->read_Classes($this->formvars['layer_options_open']);
 			if (!empty($classes)) {
-				if (!empty($classes[0]['Style'])) {
+				if ($this->formvars['classitem'] == '' AND !empty($classes[0]['Style'])) {	# Schraffur
 					$this->user->rolle->setStyle($classes[0]['Style'][0]['style_id'], $this->formvars);
 				}
 				foreach ($classes as $class) {	# bei Bedarf Label anlegen
@@ -20716,7 +20717,9 @@ DO $$
 		shuffle($result_colors);
 		$i = 0;
 		foreach($classes as $value => $name){
-			if($i == count($result_colors))return;				# Anzahl der Klassen ist auf die Anzahl der Colors beschränkt
+			if($i == count($result_colors)){
+				$i = 0;		# wenn alle Fraben verwendet wurden, die Farben nochmal benutzen
+			}
 			$classdata['name'] = $name.' ';
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
