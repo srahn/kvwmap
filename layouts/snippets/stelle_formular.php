@@ -331,14 +331,14 @@ else {
 				<tr class="group-stammdaten">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
 					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
-							<input name="start" type="date" value="<?php echo $this->formvars['start']; ?>" size="25" maxlength="100">
+							<input name="start" type="text" value="<?php echo $this->formvars['start']; ?>" size="15" maxlength="10">
 					</td>
 				</tr>
 
 				<tr class="group-stammdaten">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop; ?></th>
 					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
-							<input name="stop" type="date" value="<?php echo $this->formvars['stop']; ?>" size="25" maxlength="100">
+							<input name="stop" type="text" value="<?php echo $this->formvars['stop']; ?>" size="15" maxlength="10">
 					</td>
 				</tr>
 
