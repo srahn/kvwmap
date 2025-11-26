@@ -195,7 +195,7 @@ if ($gast_export === false) {
 							$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
 							set_session_vars($GUI->formvars);
 
-							if (defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION) {
+							if (defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $_SESSION['login_new_password'] != true) {
 								if ($GUI->user->totp_secret != '') {
 									if ($GUI->is_trusted_device($GUI->user) == false) {
 										$_SESSION['2fa_verification'] = true;
@@ -396,7 +396,7 @@ if ($gast_export === false) {
 					$GUI->debug->write('Kein OWS Request.', 4, $GUI->echo);
 	
 					if (in_array($permission['reason'], ['password_expired', 'password_age_expired'])) {
-						logout();
+						#logout();
 						if (is_new_password($GUI->formvars)) {
 							$GUI->debug->write('Passwort ist abgelaufen. Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
 							$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
@@ -407,6 +407,8 @@ if ($gast_export === false) {
 								$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 								session_start();
 								set_session_vars($GUI->formvars);
+								unset($_SESSION['login_new_password']);
+								$GUI->formvars['go'] = '';
 								$_SESSION['stelle_angemeldet'] = true;
 								$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
 								$GUI->user->stelle_id = $GUI->Stelle->id;
@@ -447,6 +449,7 @@ if ($gast_export === false) {
 								$GUI->formvars['Stelle_id'] = $GUI->Stelle->id;
 								$show_login_form = true;
 								$GUI->formvars['go'] = 'login_new_password';
+								$_SESSION['login_new_password'] = true;
 								# login case 19
 								$GUI->debug->write('login case 19', 4, $GUI->echo);
 							}
