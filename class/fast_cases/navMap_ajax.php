@@ -3180,9 +3180,12 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		$layer = array();
+		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Name_or_alias'] = $rs['name'];
-			$layer[] = $rs;
+			$layer[$i] = $rs;
+			$layer['layer_ids'][$rs['layer_id']] = &$layer[$i];
+			$i++;
 		}
 		return $layer;
 	}
