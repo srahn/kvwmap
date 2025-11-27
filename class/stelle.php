@@ -478,6 +478,7 @@ class stelle {
 		$rs['ows_inspireidentifiziert'] = ($rs['ows_inspireidentifiziert'] == 't');
 		$rs['check_client_ip'] = ($rs['check_client_ip'] == 't');
 		$rs['check_password_age'] = ($rs['check_password_age'] == 't');
+		$rs['show_shared_layers'] = ($rs['show_shared_layers'] == 't');
 		$this->data = $rs;
 		return $rs;
 	}
@@ -840,7 +841,7 @@ class stelle {
 			$stellen['ID'][] = $rs['id'];
 			$stellen['index'][$rs['id']] = $i;
 			$stellen['Bezeichnung'][] = $rs['bezeichnung'];
-			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
+			$stellen['show_shared_layers'][] = ($rs['show_shared_layers'] == 't');
 			$stellen['Bezeichnung_parent'][] = $rs['bezeichnung_parent'];
 			$stellen['last_time_id'][] = $rs['last_time_id'];
 			$i++;
@@ -1533,7 +1534,7 @@ class stelle {
 				symbolscale,
 				offsite,
 				transparency,
-				Filter,
+				filter,
 				template,
 				header,
 				footer,
@@ -2251,6 +2252,7 @@ class stelle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['queryable'] = ($rs['queryable'] == 't');
+			$rs['use_parent_privileges'] = ($rs['use_parent_privileges'] == 't');
 			$layer[] = ($result == 'only_ids' ? $rs['layer_id'] : $rs);
 		}
 		return $layer;
