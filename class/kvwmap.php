@@ -18727,7 +18727,7 @@ class db_mapObj{
 			$groups[$rs['id']]['gruppenname'] = $rs['gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
-			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];
+			$groups[$rs['id']]['selectable_for_shared_layers'] = ($rs['selectable_for_shared_layers'] == 't');
 			if ($rs['obergruppe']) {
 				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
 			}
