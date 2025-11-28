@@ -435,7 +435,7 @@ class PgObject {
 					", ",
 					array_map(
 						function($value) {
-							return (($value == '' OR $value === null) ? "NULL" : "'" . pg_escape_string($value) . "'");
+							return (($value === '' OR $value === null) ? "NULL" : "'" . pg_escape_string($value) . "'");
 						},
 						$values
 					)
