@@ -552,9 +552,10 @@ class Ressource extends PgObject {
 			$this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 
 			$epsg = ($this->get('import_epsg') ? $this->get('import_epsg') : '25832');
+			$version = $this->get_wfs_version($url, '1.1.0');
 			$params = array(
 				'Service' => 'WFS',
-				'Version' => $this->get_wfs_version($url, '1.1.0'),
+				'Version' => $version,
 				'Request' => 'GetFeature',
 				'SRS' => 'urn:ogc:def:crs:EPSG::' . $epsg
 			);
@@ -573,7 +574,7 @@ class Ressource extends PgObject {
 				) {
 					continue;
 				}
-				$params['TypeNames'] = $featuretype['name'];
+				$params['TypeName' . (strpos($version, '2.') !== false ? 's' : '')] = $featuretype['name'];
 				$download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
 				$download_file = strtolower(sonderzeichen_umwandeln(str_replace(':', '_', umlaute_umwandeln($featuretype['name'])))) . '.gml';
 				$this->debug->show('Download FeatureType: ' . $featuretype['name'] . ' (' . $featuretype['title'] . ') from<br>' . $download_url . '<br>in Datei: ' . $download_path . $download_file, true);
@@ -1737,7 +1738,7 @@ class Ressource extends PgObject {
 				$this->database,
 				$this->get('import_layer'),
 				NULL,
-				($first ? '-overwrite' : '-append') . ' -nlt MULTIPOLYGON',
+				($first ? '-overwrite' : '-append'), // . ' -nlt MULTIPOLYGON',
 				'UTF-8',
 				false,
 				$this->unlogged,
