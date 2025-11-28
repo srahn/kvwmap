@@ -294,6 +294,17 @@ function Bestaetigung(link, text) {
 	}
 }
 
+Element.prototype.closestExcluding = function(selector, excludeSelector) {
+	let el = this;
+	while (el) {
+		if (el.matches(selector) && !el.matches(excludeSelector)) {
+			return el;
+		}
+		el = el.parentElement;
+	}
+	return null;
+};
+
 // closest() for IE
 if (!Element.prototype.matches)
     Element.prototype.matches = Element.prototype.msMatchesSelector || 
@@ -1334,10 +1345,12 @@ function resetLayerOptions(layer_id){
 	document.GUI.submit();
 }
 
-function changeLegendType(type){
-	document.GUI.go.value = 'changeLegendType';
-	document.GUI.legendtype.value = type;
-	document.GUI.submit();
+function changeLegendType(){
+	var legende = document.getElementById('legend');
+	ahah('index.php', 'go=changeLegendType', [legende], ['sethtml']);
+	document.getElementById('legendtype_switch').classList.toggle('in_groups');
+	document.getElementById('legendtype_switch').classList.toggle('alphabetical');
+	document.getElementById('layersearchdiv').classList.toggle('hidden');
 }
 
 function saveDrawingorder(){

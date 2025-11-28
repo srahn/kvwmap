@@ -317,14 +317,14 @@ class stelle {
 		$this->ows_contentfacsimile = $rs['ows_contentfacsimile'];
 
 		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
-		$this->check_client_ip = $rs['check_client_ip'];
-		$this->checkPasswordAge = $rs['check_password_age'];
+		$this->check_client_ip = ($rs['check_client_ip'] == 't');
+		$this->checkPasswordAge = ($rs['check_password_age'] == 't');
 		$this->allowedPasswordAge = $rs['allowed_password_age'];
-		$this->useLayerAliases = $rs['use_layer_aliases'];
+		$this->useLayerAliases = ($rs['use_layer_aliases'] == 't');
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
-		$this->hist_timestamp = $rs['hist_timestamp'];
+		$this->hist_timestamp = ($rs['hist_timestamp'] == 't');
 		$this->default_user_id = $rs['default_user_id'];
-		$this->show_shared_layers = $rs['show_shared_layers'];
+		$this->show_shared_layers = ($rs['show_shared_layers'] == 't');
 		$this->style = $rs['style'];
 		$this->reset_password_text = $rs['reset_password_text'];
 		$this->invitation_text = $rs['invitation_text'];
@@ -476,6 +476,7 @@ class stelle {
 		$rs['ows_inspireidentifiziert'] = ($rs['ows_inspireidentifiziert'] == 't');
 		$rs['check_client_ip'] = ($rs['check_client_ip'] == 't');
 		$rs['check_password_age'] = ($rs['check_password_age'] == 't');
+		$rs['show_shared_layers'] = ($rs['show_shared_layers'] == 't');
 		$this->data = $rs;
 		return $rs;
 	}
@@ -836,7 +837,7 @@ class stelle {
 			$stellen['ID'][] = $rs['id'];
 			$stellen['index'][$rs['id']] = $i;
 			$stellen['Bezeichnung'][] = $rs['bezeichnung'];
-			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
+			$stellen['show_shared_layers'][] = ($rs['show_shared_layers'] == 't');
 			$stellen['Bezeichnung_parent'][] = $rs['bezeichnung_parent'];
 			$stellen['last_time_id'][] = $rs['last_time_id'];
 			$i++;
@@ -1530,7 +1531,7 @@ class stelle {
 				symbolscale,
 				offsite,
 				transparency,
-				Filter,
+				filter,
 				template,
 				header,
 				footer,
@@ -1745,8 +1746,9 @@ class stelle {
 						FROM 
 							kvwmap.layer_attributes 
 						WHERE 
-							layer_id = ".$layer_ids[$i]." AND 
-							privileg IS NOT NULL";
+							layer_id = " . $layer_ids[$i] . " AND 
+							privileg IS NOT NULL
+							ON CONFLICT (layer_id, attributename, stelle_id) DO NOTHING";
 				}
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
@@ -2293,6 +2295,8 @@ class stelle {
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['queryable'] = ($rs['queryable'] == 't');
+			$rs['use_parent_privileges'] = ($rs['use_parent_privileges'] == 't');
 			$layer[] = ($result == 'only_ids' ? $rs['layer_id'] : $rs);
 		}
 		return $layer;

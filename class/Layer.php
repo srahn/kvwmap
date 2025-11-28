@@ -37,9 +37,8 @@ class Layer extends PgObject {
 				"fk" => 'layer_id'
 			)
 		);
-		parent::__construct($gui, 'kvwmap', 'layer');
+		parent::__construct($gui, 'kvwmap', 'layer', 'layer_id');
 		$this->stelle_id = ($gui->stelle ? $gui->stelle->id : null);
-		$this->identifier = 'layer_id';
 		$this->geometry_types = array('Point', 'LineString', 'Polygon');
 		$this->geom_column = 'geom';
 	}
@@ -81,7 +80,7 @@ class Layer extends PgObject {
 				'select' => 'l.*',
 				'from' => "
 					u_groups g JOIN
-					layer l ON (g.id = l.Gruppe)",
+					layer l ON (g.id = l.gruppe)",
 				'where' => "
 					g.obergruppe = " . $obergruppe_id . " AND
 					l.Name = '" . $layer_name . "'"
@@ -141,7 +140,7 @@ class Layer extends PgObject {
 	}
 
 	function update_labelitems($gui, $names, $aliases) {
-		$layer_labelitems = new PgObject($gui, 'kvwmap', 'layer_labelitems', '');
+		$layer_labelitems = new PgObject($gui, 'kvwmap', 'layer_labelitems', 'layer_id');
 		$layer_labelitems->delete('layer_id = ' . $this->get_id());
 		for ($i = 1; $i < count($names); $i++) {
 			# der erste ist ein Dummy und wird ausgelassen
@@ -415,7 +414,7 @@ class Layer extends PgObject {
 				kvwmap.used_layer ul ON la.layer_id = ul.layer_id JOIN
 				kvwmap.layer_attributes2stelle las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.stelle_id = las.stelle_id JOIN 
 				kvwmap.stelle s ON ul.stelle_id = s.ID LEFT JOIN
-				kvwmap.used_layer ul2 ON ul.stelle_id = ul2.stelle_id AND split_part(la.options, ',', 1) = ul2.layer_id
+				kvwmap.used_layer ul2 ON ul.stelle_id = ul2.stelle_id AND split_part(la.options, ',', 1)::integer = ul2.layer_id
 			WHERE
 				la.layer_id = " . $id. " AND
 				la.form_element_type = 'SubFormEmbeddedPK' AND
@@ -816,7 +815,7 @@ class Layer extends PgObject {
 				$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
 				return $result;
 			}
-			$select = $mapDB->getSelectFromData($data);
+			$select = getDataParts($data)['select'];
 			if ($layerdb->schema != '') {
 				$select = str_replace($layerdb->schema . '.', '', $select);
 			}
@@ -1000,7 +999,7 @@ class Layer extends PgObject {
 			)
 		);
 		$data = str_replace('$SCALE', '1000', $mapDB->getData($this->get($this->identifier)));
-		$this->table_alias = get_table_alias(get_sql_from_mapserver_data($data), $this->get('schema'), $this->get('maintable'));
+		$this->table_alias = get_table_alias(getDataParts($data)['select'], $this->get('schema'), $this->get('maintable'));
 
 		// read the attributes from the maintable
 		$ret = $this->get_maintable_attributes($layerdb);

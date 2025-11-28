@@ -360,9 +360,10 @@ class PgObject {
 		return $values;
 	}
 
-	function getKVP($escaped = false, $without_identifier = false) {
+	function getKVP($escaped = false, $without_identifier = false, $data = array()) {
+		$data = (count($data) > 0 ? $data : $this->data);
 		$kvp = array();
-		foreach ($this->data AS $key => $value) {
+		foreach ($data AS $key => $value) {
 			if ($without_identifier AND ($key == $this->identifier)) {
 				# identifier nicht ausgehen
 			}
@@ -427,7 +428,7 @@ class PgObject {
 
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
-				" . implode(', ', $this->getKeys()) . "
+				" . implode(', ', array_map(function($key) { return '"' . $key . '"'; }, $this->getKeys())) . "
 			)
 			VALUES (" .
 				implode(
@@ -549,7 +550,7 @@ class PgObject {
 		return $this->get('id');
 	} */
 
-	function update($data = array()) {
+	function update($data = array(), $update_all_attributes = true) {
 		$results = array();
 		if (!empty($data)) {
 			$this->data = array_merge($this->data, $data);
@@ -559,7 +560,7 @@ class PgObject {
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
 			SET
-				" . implode(', ', $this->getKVP(true, true)) . "
+				" . implode(', ', $this->getKVP(true, true, ($update_all_attributes ? $this->data : $data))) . "
 			WHERE
 				" . $this->get_id_condition() . "
 		";
@@ -625,12 +626,12 @@ class PgObject {
 		$this->debug->show('delete sql: ' . $sql, $this->show);
 		$result = pg_query($this->database->dbConn, $sql);
 		$err_msg = $this->database->errormessage;
-		$result = array(
+		return array(
 			'success' => ($err_msg == ''),
 			'msg' => ($err_msg == '' ? 'Abfrage zum Löschen erfolgreich' : 'Fehler bei Ausführung der Löschanfrage!'),
-			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
+			'result' => $result
 		);
-		return $result;
 	}
 
 	function getSQLResults($sql) {

@@ -1,11 +1,11 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class BelatedFile extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class BelatedFile extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'belated_files');
+		parent::__construct($gui, 'kvwmap', 'belated_files');
 	}
 
 	public static	function find_by_id($gui, $id) {

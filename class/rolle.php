@@ -246,6 +246,7 @@ class rolle {
 		$ret = $this->database->execSQL($sql);
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['queryable'] = ($rs['queryable'] === 't');
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
 					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
@@ -1551,12 +1552,12 @@ class rolle {
 		}
 	}
 	
-	function changeLegendType($formvars){
+	function changeLegendType(){
 		$sql ="
 			UPDATE
 				kvwmap.rolle
 			SET 
-				legendtype = " . $formvars['legendtype'] . "
+				legendtype = abs(legendtype - 1)
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
@@ -1580,12 +1581,15 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
-	function setRollenLayerName($formvars){
+	function setRollenLayerParams($formvars){
 		$sql = "
 			UPDATE
 				kvwmap.rollenlayer
 			SET
-				name = '" . $formvars['layer_options_name'] . "'
+				name = '" . $formvars['layer_options_name'] . "',
+				autodelete = '" . ($formvars['layer_options_autodelete'] ?: '0') . "',
+				buffer = " . quote_or_null($formvars['layer_options_buffer']) . ",
+				classitem = " . quote_or_null($formvars['classitem']) . "
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . " AND
@@ -1594,21 +1598,6 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
-	
-	function setRollenLayerAutoDelete($formvars){
-		$sql = "
-			UPDATE
-				kvwmap.rollenlayer
-			SET
-				autodelete = '" . ($formvars['layer_options_autodelete'] ?: '0') . "'
-			WHERE
-				user_id = " . $this->user_id . " AND
-				stelle_id = " . $this->stelle_id . " AND
-				id = -1*" . $formvars['layer_options_open'] . "
-		";
-		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerAutoDelete:",4);
-		$this->database->execSQL($sql,4, $this->loglevel);
-	}	
 
 	function setLabelitem($formvars) {
 		if (isset($formvars['layer_options_labelitem'])) {
@@ -1699,23 +1688,6 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
-	
-	function setBuffer($formvars) {
-		if ($formvars['layer_options_open'] < 0) { # Rollenlayer
-			$sql = "
-				UPDATE
-					kvwmap.rollenlayer
-				SET
-					buffer = " . ($formvars['layer_options_buffer'] ?: 'NULL') . "
-				WHERE
-					user_id = " . $this->user_id . " AND
-					stelle_id = " . $this->stelle_id . " AND
-					id = -1* " . $formvars['layer_options_open'] . "
-			";
-			$this->debug->write("<p>file:rolle.php class:rolle->setBuffer:",4);
-			$this->database->execSQL($sql,4, $this->loglevel);
-		}
-	}	
 
 	function setTransparency($formvars) {
 		if ($formvars['layer_options_transparency'] < 0 OR $formvars['layer_options_transparency'] > 100) {
@@ -2399,7 +2371,7 @@ class rolle {
 			SELECT
 				id,
 				name,
-				layers,
+				array_to_string(layers, ',') as layers,
 				query
 			FROM
 				kvwmap.rolle_saved_layers
@@ -2473,7 +2445,7 @@ class rolle {
 			'user_id' => $this->user_id,
 			'stelle_id' => $this->stelle_id,
 			'name' => "'" . $comment . "'",
-			'layers' => "'" . implode(',', $layers) . "'",
+			'layers' => "'{" . implode(',', $layers) . "'}",
 			'query' => "'" . implode(',', $query) . "'"
 		];
 		$sql = "

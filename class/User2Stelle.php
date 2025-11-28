@@ -1,10 +1,10 @@
 <?php
-class User2Stelle extends MyObject {
+class User2Stelle extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'rolle');
+		parent::__construct($gui, 'kvwmap', 'rolle');
 		$this->identifiers = array(
 			array(
 				'column' => 'user_id',

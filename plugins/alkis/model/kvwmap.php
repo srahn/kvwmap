@@ -199,12 +199,12 @@
 		  $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 		  $data = $layerset[0]['data'];
     }
-		if($data == '')$data ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1) as foo using unique oid using srid=" . $epsg;
+		if($data == '')$data ="the_geom from (select distinct on (f.gml_id) f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1 order by gml_id, endet IS NULL desc, endet desc) as foo using unique oid using srid=" . $epsg;
 		$explosion = explode(' ', $data);
 		$datageom = $explosion[0];
 		$explosion = explode('using unique ', strtolower($data));
 		$end = $explosion[1];
-		$select = $dbmap->getSelectFromData($data);
+    $select = getDataParts($data)['select'];
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";

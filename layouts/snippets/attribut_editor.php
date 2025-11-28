@@ -255,14 +255,18 @@ function set_all(column){
 		padding: 3px;
 		padding: 9px 0 9px 0;
 	}	
-	
-	.navigation th a{
+		
+	.navigation th:not(.navigation-selected) a{
 		color: #888;
 	}	
-	
-	.navigation th:hover{
+	.navigation th:not(.navigation-selected):hover{
 		background-color: rgb(238, 238, 239);
-		color: #666;
+	}
+	.navigation-selected{
+		background-color: #c7d9e6;
+	}
+	.navigation-selected div{
+		color: #111;
 	}
 </style>
 
@@ -322,8 +326,8 @@ function set_all(column){
 							<a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a>
 						</th><?
 					} ?>
-					<th>
-						<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strAttributes; ?></div></a>
+					<th class="navigation-selected">
+						<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a>
 					</th>
 					<th>
 						<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a>

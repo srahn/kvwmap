@@ -23,6 +23,42 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 	return $err_msg;
 }
 
+function before_last($txt, $delimiter) {
+	#echo '<br>Return the part of ' . $txt . ' before the last occurence of ' . $delimiter;
+	if (!$delimiter) {
+		return '';
+	}
+	$pos = strrpos($txt, $delimiter);
+  return $pos === false ? $txt : substr($txt, 0, $pos);
+}
+
+/**
+ * Function returns the parts of a mapserver data statement (geom, inner select, using)
+ * @param string $data Mapserver data statement
+ * @return Array inner sql
+ */
+function getDataParts($data){
+	$first_space_pos = strpos($data, ' ');
+	$geom = substr($data, 0, $first_space_pos);					# geom am Anfang
+	$rest = substr($data, $first_space_pos);
+	$usingposition = stripos($rest, 'using');
+	$from = substr($rest, 0, $usingposition);						# from (alles zwischen geom und using)
+	$using = substr($rest, $usingposition);							# using ...
+	if(strpos($from, '(') === false){		# from table
+		$select = 'select * '.$from.' where 1=1';
+	}
+	else{		# from (select ... from ...) as foo
+		$select = stristr($from,'(');
+		$select = before_last($select, ')');
+		$select = ltrim($select, '(');
+	}
+	return [
+		'geom' => $geom,
+		'select' => $select,
+		'using' => $using
+	];
+}
+
 function count_or_0($val) {
 	if (is_null($val) OR !is_array($val)) {
 		return 0;
@@ -924,11 +960,9 @@ class GUI {
 			}
 			
 			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
-				$geom = explode(' ', $layer->data)[0];
-				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
-				$layer->data = str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data);
-				$layer->data;
+				$data_parts = getDataParts($layer->data);
+				$layer->data = 'geom1 from (select st_buffer(' . $data_parts['geom'] . $geography . ', ' . $layerset['buffer'] . ') as geom1, * from ('. $data_parts['select'] . ') as foo) as fooo ' . $data_parts['using'];
 				$layer->type = 2;
 			}
 
@@ -1522,6 +1556,7 @@ class GUI {
 	function create_layer_legend($layer){
 		if (value_of($layer, 'requires') != '' )return;
 		$visible = $this->check_layer_visibility($layer);
+
 		$legend = '<tr id="legend_' . $layer['layer_id'] . '"><td valign="top">';
 		$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"><div class="layerOptions" id="options_content_'.$layer['layer_id'].'"></div></div>';
 
@@ -1543,7 +1578,7 @@ class GUI {
 			if ($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 				$input_attr['id'] = 'qLayer' . $layer['layer_id'];
 				$input_attr['name'] = 'qLayer' . $layer['layer_id'];
-				$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
+				$input_attr['title'] = ($layer['querystatus'] == 1 ? $this->deactivatequery : $this->activatequery);
 				$input_attr['value'] = 1;
 				$input_attr['class'] = 'info-select-field';
 				$input_attr['type'] = (($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
@@ -1588,7 +1623,7 @@ class GUI {
 				foreach ($input_attr AS $key => $value) {
 					$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
 				}
-				$legend .= ($layer['queryStatus'] == 1 ? ' checked' : '');
+				$legend .= ($layer['querystatus'] == 1 ? ' checked' : '');
 				$legend .= '>';
 			}
 			else{
@@ -1615,7 +1650,7 @@ class GUI {
 			else{
 				$legend .=  ' title="'.$this->activatelayer.'"';
 			}
-			$legend .= ' ></td><td valign="middle" id="legend_layer_' . $layer['layer_id'] . '">';
+			$legend .= ' ></td><td valign="middle" style="width: 80%" id="legend_layer_' . $layer['layer_id'] . '">';
 
 			$legend .= $this->create_layername_legend($layer);
 			$legend .= $this->create_class_legend($layer);
@@ -2858,7 +2893,7 @@ class db_mapObj {
 			$groups[$rs['id']]['gruppenname'] = $rs['gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
-			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];
+			$groups[$rs['id']]['selectable_for_shared_layers'] = ($rs['selectable_for_shared_layers'] == 't');
 			if ($rs['obergruppe']) {
 				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
 			}
@@ -2871,6 +2906,7 @@ class db_mapObj {
 		global $language;
 
 		if ($language != 'german') {
+			$language = str_replace('-', '_', $language);
 			$name_column = "
 			CASE
 				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "

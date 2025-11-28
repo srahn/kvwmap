@@ -35,7 +35,7 @@ class XP_Plan extends PgObject {
 	public static	function find_by_id($gui, $by, $id, $planart) {
 		$xp_plan = new XP_Plan($gui, $planart);
 		$xp_plan->find_by($by, $id);
-		$xp_plan->get_extent();
+		$xp_plan->get_extent(OWS_SRS);
 		return $xp_plan;
 	}
 
@@ -199,6 +199,7 @@ class XP_Plan extends PgObject {
 	function get_extent($ows_srs = '', $where = '') {
 		if ($where == '') {
 			$where = $this->get_id_condition(array($this->get($this->identifier)));
+			//$where = 'p.gml_id = ' . $this->identifier;
 		}
 		$epsg_codes = explode(' ', trim(preg_replace('~[EPSGepsg: ]+~', ' ', $ows_srs)));
 		$extents = array();

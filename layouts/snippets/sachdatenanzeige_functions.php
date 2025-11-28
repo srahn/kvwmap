@@ -156,10 +156,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		tab.classList.add("active_tab");
 		var layer_to_close = document.querySelectorAll('.layer_results');
 		[].forEach.call(layer_to_close, function (layer){
-			layer.classList.add('collapsed');
+			layer.classList.add('collapsedfull');
 		});
 		var layer_to_open = document.querySelector('#result_' + layer_id);
-		layer_to_open.classList.remove('collapsed');
+		layer_to_open.classList.remove('collapsedfull');
 		scrollto_saved_position();
 		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
@@ -1158,6 +1158,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		var id = layer_id.toString();
 		var id1 = id.substring(0, 1);
 		var id2 = id.substring(1);
+		//var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
 		var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
 		if (scope.querySelector('#\\3' + id1 + ' ' + id2 + '_' + attributename + '_' + k) == undefined) {
 			scope = document; // ansonsten global

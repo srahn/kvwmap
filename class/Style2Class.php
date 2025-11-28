@@ -1,10 +1,10 @@
 <?php
-class Style2Class extends MyObject {
+class Style2Class extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'u_styles2classes');	}
+		parent::__construct($gui, 'kvwmap', 'u_styles2classes');	}
 
 	public static	function find($gui, $where) {
 		$style2class = new Style2Class($gui);
