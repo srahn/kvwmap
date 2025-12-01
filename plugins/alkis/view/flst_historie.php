@@ -111,7 +111,7 @@
 		var box = svg.getBBox();
 		svg.setAttribute('height', box.height + 200);
 		if (box.width > 700) {
-			svg.setAttribute('width', box.width + 200);
+			// svg.setAttribute('width', box.width + 200);
 		}
 	}
 
