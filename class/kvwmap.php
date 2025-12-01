@@ -13838,7 +13838,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->layergruppen = $this->mapDB->get_Groups($this->layergruppen); # Gruppen mit Pfaden versehen
 			# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
 			if (value_of($this->formvars, 'selected_group_id') AND $this->formvars['selected_layer_id'] == '') {
-				$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
+				$this->layerdaten = $stelle->getLayers($this->formvars['selected_group_id'], 'name');
 			}
 
       if ($this->formvars['selected_layers'] != '') {
