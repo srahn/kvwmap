@@ -109,7 +109,7 @@ class Layer extends PgObject {
 		# letzte Where Bedinung, damit keine Endlosschleifen entstehen beim Aufruf von update_layer falls
 		# Layer_ID fälschlicherweise identisch sein sollte mit duplicate_layer_id was nicht passieren sollte
 		# wenn das Layerformular genutzt wurde.
-		#echo	MyObject::$write_debug ? 'Layer find_by_duplicate_from_layer_id sql:<br> ' . $sql : '';
+		#echo	PgObject::$write_debug ? 'Layer find_by_duplicate_from_layer_id sql:<br> ' . $sql : '';
 		$ret = $database->execSQL($sql, 4, 1, true);
 		if (!$ret['success']) {
 			$database->gui->add_message('error', $ret[1]);
@@ -573,7 +573,7 @@ class Layer extends PgObject {
 	 * @return array{ label: String, options: array{}, shortLabel: String, img: String, url: String}
 	 */
 	function get_baselayers_def($stelle_id) {
-		$this->debug->show('<p>Layer->get_baselayers_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
+		$this->debug->show('<p>Layer->get_baselayers_def for stelle_id: ' . $stelle_id, PgObject::$write_debug);
 		#echo '<p>get_baselayer_def for Layer: ' . $this->get('name');
 
 		include_once(CLASSPATH . 'LayerClass.php');
@@ -635,7 +635,7 @@ class Layer extends PgObject {
 	 * Get layer definition from layer for stelle
 	 */
 	function get_overlays_def($stelle_id) {
-		$this->debug->show('<p>Layer->get_overlays_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
+		$this->debug->show('<p>Layer->get_overlays_def for stelle_id: ' . $stelle_id, PgObject::$write_debug);
 		#echo '<p>get_overlays_def for Layer: ' . $this->get('name');
 		include_once(CLASSPATH . 'LayerClass.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');

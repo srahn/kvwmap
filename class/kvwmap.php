@@ -11855,11 +11855,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	* @param integer $line_id It query for existing print layout with line_id
 	* @param string $line_attribute_name Name of the attribute that has to be changed with $line_attribute_value
 	* @param string $line_attribute_value Value of the attribute $line_attribute_name
-	* @return Json String with result from MyObject update function
+	* @return Json String with result from PgObject update function
 	*/
 	function sachdaten_druck_editor_linie_aendern($line_id, $line_attribute_name, $line_attribute_value) {
-		$myObj = new MyObject($this, 'druckfreilinien');
-		$druckfreilinie = $myObj->find_by_ids($line_id);
+		$pgObj = new PgObject($this, 'kvwmap', 'druckfreilinien');
+		$druckfreilinie = $pgObj->find_by_ids($line_id);
 		$druckfreilinie->set($line_attribute_name, $line_attribute_value);
 		$this->qlayerset[0]['shape'] = $druckfreilinie->update();
 		$this->mime_type = 'application/json';
@@ -13907,7 +13907,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->layergruppen = $this->mapDB->get_Groups($this->layergruppen); # Gruppen mit Pfaden versehen
 			# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
 			if (value_of($this->formvars, 'selected_group_id') AND $this->formvars['selected_layer_id'] == '') {
-				$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
+				$this->layerdaten = $stelle->getLayers($this->formvars['selected_group_id'], 'name');
 			}
 
       if ($this->formvars['selected_layers'] != '') {
