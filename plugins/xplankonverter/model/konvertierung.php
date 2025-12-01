@@ -2198,7 +2198,7 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
-			$layer_group = new MyObject($this->gui, 'u_groups');
+			$layer_group = new PgObject($this->gui, 'kvwmap', 'u_groups');
 			if ($layer_type == 'GML') {
 				$layer_group = $layer_group->find_by('gruppenname', 'XPlanung');
 				$layer_group->create(array(
@@ -2225,7 +2225,7 @@ class Konvertierung extends PgObject {
 		$this->debug->show('delete_layer_group typ: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (!empty($layer_group_id)) {
-			$layer_group = new MyObject($this->gui, 'u_groups');
+			$layer_group = new PgObject($this->gui, 'kvwmap', 'u_groups');
 			$layer_group->set($this->identifier, $layer_group_id);
 			$layer_group->identifier = 'id';
 			$layer_group->identifier_type = 'integer';
