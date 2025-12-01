@@ -86,7 +86,7 @@
 			
 			svg.attr("height", 100 + (120 * max_depth));	// Hoehe des SVGs auf die Hierarchietiefe anpassen
 
-			window.setTimeout(adjust_size, 1000);
+			window.setTimeout(adjust_size, 3000);
 			
 			force.on("tick", function(e) {
 				var ky =  e.alpha;
