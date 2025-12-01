@@ -48,7 +48,7 @@ class Layer2Stelle extends PgObject {
 		$layer2stelle->debug->show('<p>Find overlay layer with selectiontype != radio for stelle_id: ' . $stelle_id, PgObject::$write_debug);
 		return $layer2stelle->find_by_sql(array(
 			'select' => 'l.layer_id, ul.minscale, ul.maxscale, ul.transparency, ul.group_id',
-			'from' => 'kvwmap.used_layer ul JOIN kvwmap.layer l ON ul.layer_id = l.layer_id JOIN u_groups g ON COALESCE(ul.group_id, l.gruppe) = g.id',
+			'from' => 'kvwmap.used_layer ul JOIN kvwmap.layer l ON ul.layer_id = l.layer_id JOIN kvwmap.u_groups g ON COALESCE(ul.group_id, l.gruppe) = g.id',
 			'where' => 'ul.stelle_id = ' . $stelle_id . " AND l.selectiontype != 'radio'",
 			'order' => 'g."order", ul.legendorder'
 		));
