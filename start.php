@@ -59,7 +59,9 @@ if (is_logout($GUI->formvars)) {
 }
 
 /**
- * Dies ist der Beipass für die Datenabfrage von kvportal one login
+ * Dies ist der Beipass für die Datenabfrage von kvportal ohne login
+ * Für den Zugriff von kvportal auf kvwmap wird ein Nutzer in kvwmap benötigt, der login_name = gast haben muss 
+ * und der Gaststelle zugeordnet ist, die die Layer für kvportal zur Verfügung stellt.
  */
 $gast_export = false;
 if (

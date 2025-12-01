@@ -2917,6 +2917,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	color: red;
 }
 
+.inactive_class {
+	color: red;
+	font-style: italic;
+}
+
 .edit_button {
   margin-left: 5px;
 }

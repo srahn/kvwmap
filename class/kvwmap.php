@@ -1711,7 +1711,7 @@ echo '			</table>
 									$legend .= '</a>';
 								}
 							}
-							$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
+							$legend .= '&nbsp;<span class="px13 ' . ($this->mapDB->disabled_classes['status'][$classid] == '0'? 'inactive_class' : '') . '">'.html_umlaute($class->name).'</span></td></tr>';
 						}
 					}
 					$legend .= '</table>';
