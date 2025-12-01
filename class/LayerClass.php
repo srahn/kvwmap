@@ -57,7 +57,7 @@ class LayerClass extends PgObject {
 		}
 		#echo '<br>found ' . count($styles2class) . ' styles2class';
 		#echo '<br>first style_id: ' . $styles2class[0]->get('style_id');
-		$layer_style = LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'));
+		$layer_style = LayerStyle::find_by_id($this->gui, 'style_id', $styles2class[0]->get('style_id'));
 
 		return $layer_style;
 	}

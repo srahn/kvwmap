@@ -760,7 +760,7 @@ $GUI->mobile_reformat_classes = function ($classes) use ($GUI) {
 				'name' => $class['name'],
 				'expression' => $class['Expression'],
 				'style' => array(
-					'id' => $class['Style'][0]['Style_ID'],
+					'id' => $class['Style'][0]['style_id'],
 					'symbol' => $class['Style'][0]['symbol'],
 					'stroke' => ($class['Style'][0]['outlinecolor'] == '-1 -1 -1' ? false : true),
 					'fillColor' => $class['Style'][0]['color'],
