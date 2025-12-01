@@ -1885,7 +1885,7 @@ a .preview_image_hover{
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
 	margin: 7px 5px 11px 0;
-	width: fit-content;
+	<!-- width: fit-content; -->
 }
 
 #nds_edit .datensatz {
@@ -1980,7 +1980,7 @@ a .preview_image_hover{
 
 #contentdiv {
 	background: url(<? echo BG_IMAGE; ?>);
-	width: fit-content;
+	width: 100%;
 	position:relative;
 }
 
