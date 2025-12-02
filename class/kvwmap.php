@@ -2894,6 +2894,7 @@ echo '			</table>
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
+				$label->align = $dbLabel['align'];
 				$RGB=explode(" ",$dbLabel['color']);
 				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
 				$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
@@ -23062,6 +23063,7 @@ DO $$
     if($formvars["label_wrap"] != ''){$sql.="wrap = '" . $formvars["label_wrap"]."',";}else{$sql .= "wrap = NULL,";}
 		if($formvars["label_text"] != ''){$sql.="text = '" . $formvars["label_text"]."',";}else{$sql .= "text = NULL,";}
     if($formvars["label_the_force"] != ''){$sql.="the_force = '" . $formvars["label_the_force"]."',";}else{$sql.="the_force = NULL,";}
+		if($formvars["label_align"] != ''){$sql.="align = '" . $formvars["label_align"]."',";}else{$sql.="align = NULL,";}
     $sql.="label_id = " . $formvars["label_label_id"];
     $sql.=" WHERE label_id = " . $formvars["label_id"];
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Label - Speichern der Labeldaten:<br>" . $sql,4);

@@ -1213,6 +1213,7 @@ class GUI {
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
+				$label->align = $dbLabel['align'];
 				$RGB=explode(" ",$dbLabel['color']);
 				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
 				$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
