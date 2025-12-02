@@ -95,12 +95,14 @@
 			document.getElementById('layerform').style.display = 'none';
 			document.getElementById('layerform_link').classList.remove('navigation-selected');
 			document.getElementById('saveAsNewLayerButton').style.display = 'none';
+			document.getElementById('layer_formular_delete_button').style.display = 'none';
 		}
 		else{
 			document.GUI.stellenzuweisung.value = 0;
 			document.getElementById('stellenzuweisung').style.display = 'none';
 			document.getElementById('stellenzuweisung_link').classList.remove('navigation-selected');
 			document.getElementById('saveAsNewLayerButton').style.display = 'inline-block';
+			document.getElementById('layer_formular_delete_button').style.display = 'inline-block';
 		}
 		document.getElementById(id).style.display = 'inline-block';
 		document.getElementById(id+'_link').classList.add('navigation-selected');

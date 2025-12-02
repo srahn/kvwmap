@@ -13556,7 +13556,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					function ($user) {
 						return intval(trim($user));
 					},
-					explode(',', $this->formvars['selusers'])
+					array_filter(explode(',', $this->formvars['selusers']), 'strlen')
 				);
 				$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
 				
@@ -21994,7 +21994,9 @@ DO $$
 
 	function save_all_layer_params($formvars) {
 		$komma = false;
-		$sql = "TRUNCATE kvwmap.layer_parameter";
+		$sql = "
+			TRUNCATE kvwmap.layer_parameter;
+			select setval('kvwmap.layer_parameter_id_seq', 1);";
 		$this->db->execSQL($sql);
 		$sql = "
 			INSERT INTO kvwmap.layer_parameter 
