@@ -72,10 +72,10 @@ if (
 	is_gast_login($GUI->formvars, $gast_stellen)
 ) {
 	// header('Content-Type: application/json; charset=utf-8');
-	$GUI->user = new user('gast', 0, $GUI->database);
+	$GUI->user = new user('gast', 0, $GUI->pgdatabase);
 	if (gast_rolle_allowed($GUI->user, $GUI->formvars['gast'])) {
 		$GUI->user->stelle_id = $GUI->formvars['gast'];
-		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
+		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->pgdatabase);
 		$gast_export = true;
 		$show_login_form = false;
 		unset($GUI->formvars['browserwidth']);

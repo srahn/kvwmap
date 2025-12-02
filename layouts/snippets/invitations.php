@@ -32,7 +32,7 @@
 				<tr>
 					<th><a href="index.php?go=Einladungen_Anzeigen&order=token&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strToken; ?></a></th>
 					<th><a href="index.php?go=Einladungen_Anzeigen&order=email&csrf_token=<? echo $_SESSION['csrf_token']; ?>">E-Mail</a></th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=stelle_id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strTask; ?></a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=stelle_id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $this->strTask; ?></a></th>
 					<th><a href="index.php?go=Einladungen_Anzeigen&order=name&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $this->strUser; ?></th>
 					<th><a href="index.php?go=Einladungen_Anzeigen&order=completed&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strRegistered; ?></a></th>
 					<th>&nbsp;</th>
