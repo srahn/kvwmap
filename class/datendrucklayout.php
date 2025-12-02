@@ -723,9 +723,11 @@ class ddl {
 						$this->gui->formvars['layer_id'] = $selected_layer_id;
 						$this->gui->formvars['oid'] = $oid;
 						$this->gui->formvars['selektieren'] = 'false';
-						$rollenlayer_id = $this->gui->createZoomRollenlayer($this->gui->mapDB, $layerdb, array($this->layerset), array($oid));
-						$rollenlayer = $this->gui->mapDB->read_RollenLayer($rollenlayer_id);
-						$this->gui->loadlayer($this->gui->map, $rollenlayer[0]);
+						if ($this->layout['elements'][$attributes['name'][$j]]['border'] > 0) {
+							$rollenlayer_id = $this->gui->createZoomRollenlayer($this->gui->mapDB, $layerdb, array($this->layerset), array($oid));
+							$rollenlayer = $this->gui->mapDB->read_RollenLayer($rollenlayer_id);
+							$this->gui->loadlayer($this->gui->map, $rollenlayer[0]);
+						}
 						$this->gui->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
 					}
 					if ($this->gui->map->selectOutputFormat('jpeg_print') == 1) {
@@ -743,7 +745,7 @@ class ddl {
 					}
 					$image_map = $this->gui->map->draw();
 					# Rollenlayer wieder entfernen
-					if ($oid != '') {
+					if ($rollenlayer_id) {
 						$this->gui->mapDB->deleteRollenLayer($rollenlayer_id);
 						$this->gui->map->removeLayer($this->gui->map->numlayers - 1);		# der letzte Layer ist die Scalebar
 						$this->gui->map->removeLayer($this->gui->map->numlayers - 1);

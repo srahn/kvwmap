@@ -773,7 +773,22 @@
 											<td><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos']; ?>" size="5"></td>
 											<td width="60px">&nbsp;Breite:</td>
 											<td><input	type="text" name="width_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['width']; ?>" size="5"></td>
-											<td colspan="3"></td>
+											<td>
+												<label for="border_<? echo $this->ddl->attributes['the_geom']; ?>">
+														hervorheben:
+												</label>
+											</td>
+											<td>
+												<input
+													id="border_<? echo $this->ddl->attributes['the_geom']; ?>"
+													type="checkbox"
+													name="border_<? echo $this->ddl->attributes['the_geom']; ?>"
+													value="1"
+													style="margin-left: 0px;"<?
+													echo ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['border'] == '1' ? ' checked="true"' : ''); ?>
+												>
+											</td>
+											<td></td>
 										</tr>
 										<tr id="tr2_<? echo $this->ddl->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
 											<td>&nbsp;&nbsp;&nbsp;y:</td>
