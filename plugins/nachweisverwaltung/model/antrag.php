@@ -513,14 +513,32 @@ class antrag {
     return $ret;  
   }
     
-	function getDatei($flurid,$nr,$secondary, $withFileLinks) {
+	function getDatei($flurid, $nr, $secondary, $withFileLinks, $lea_id) {
     $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT n.link_datei, datum, lower(h.abkuerzung) as hauptart FROM nachweisverwaltung.n_nachweise AS n";
-		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
-		$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
-    if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+
+    if ($lea_id == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'";
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $lea_id . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+
+    $sql = "
+      SELECT 
+        n.link_datei, 
+        datum, 
+        lower(h.abkuerzung) as hauptart 
+      FROM 
+        nachweisverwaltung.n_nachweise AS n
+		    LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id
+		    LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
+    if ($this->nr != '' OR $lea_id != '') {
+      $sql.=", " . $n2a . " AS n2a WHERE n.id = n2a.nachweis_id " . $where;
     }
     else {
       $sql.=" WHERE (1=1)";
