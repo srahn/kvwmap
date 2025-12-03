@@ -494,7 +494,7 @@ class antrag {
       SELECT 
         ".$not_primary." 
       FROM 
-        nachweisverwaltung.n_nachweise AS n
+        nachweisverwaltung.n_nachweise AS n,
 		    " . $n2a . " AS n2a 
       WHERE 
         n.id = n2a.nachweis_id 
