@@ -455,14 +455,14 @@ class antrag {
 
       # Abfrage der Vermessungsstellen im Vorgang
       if($formvars['gemessendurch']){
-	      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+	      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 	      if ($ret[0]) { return $ret; }
 	      $FFR[$i]['gemessen durch']=utf8_decode($ret[1]);
       }
             
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
 	  if($formvars['Gueltigkeit']){
-		$ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+		$ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 		if ($ret[0]) { return $ret; }
 		$FFR[$i][utf8_decode('Gültigkeit')]=utf8_decode($ret[1]); 
 	  }
@@ -513,7 +513,7 @@ class antrag {
     return $ret;  
   }
     
-	function getDatei($flurid, $nr, $secondary, $withFileLinks, $lea_id) {
+	function getDatei($flurid, $nr, $secondary, $withFileLinks, $lea_id = NULL) {
     $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
 
@@ -557,12 +557,28 @@ class antrag {
     return $ret;  
   }
   
-  function getGueltigkeit($flurid,$nr,$secondary) {
+  function getGueltigkeit($flurid, $nr, $secondary, $lea_id = NULL) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.
-    $sql.="SELECT DISTINCT n.gueltigkeit FROM nachweisverwaltung.n_nachweise AS n";
-    if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+
+    if ($lea_id == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'";
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $lea_id . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+
+    $sql = "
+      SELECT DISTINCT 
+        n.gueltigkeit 
+      FROM 
+        nachweisverwaltung.n_nachweise AS n";
+    if ($this->nr != '' OR $lea_id != '') {
+      $sql.=", " . $n2a . " AS n2a WHERE n.id = n2a.nachweis_id " . $where;
     }
     else {
       $sql.=" WHERE (1=1)";
@@ -585,12 +601,29 @@ class antrag {
     return $ret;  
   }
   
-  function getVermessungsStellen($flurid,$nr,$secondary) {
+  function getVermessungsStellen($flurid, $nr, $secondary, $lea_id = NULL) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.',4);
     # Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.
-    $sql.="SELECT DISTINCT v.name FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_vermstelle AS v";
-    if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+
+    if ($lea_id == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'";
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $lea_id . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+
+    $sql = "
+      SELECT DISTINCT 
+        v.name 
+      FROM 
+        nachweisverwaltung.n_nachweise AS n, 
+        nachweisverwaltung.n_vermstelle AS v";
+    if ($this->nr != '' OR $lea_id != '') {
+      $sql.=", " . $n2a . " AS n2a WHERE n.id = n2a.nachweis_id " . $where;
     }
     else {
       $sql.=" WHERE (1=1)";
