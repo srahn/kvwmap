@@ -247,7 +247,7 @@ else {
 				} ?>
 
 				<tr class="group-stammdaten">
-					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel; ?></th>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel; ?>*</th>
 					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 						<input name="bezeichnung" type="text" value="<?php echo $this->formvars['bezeichnung']; ?>" size="25" maxlength="100">
 					</td>
