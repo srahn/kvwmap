@@ -396,7 +396,7 @@ class antrag {
     }
     else {
       $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
-      $where = " AND ln2a.lea_id = " . $lea_id . "
+      $where = " AND ln2a.lea_id = " . $formvars['lea_id'] . "
                  AND ln2a.client_nachweis_id = n2a.client_nachweis_id
                  AND ln2a.client_id = n2a.client_id";
     }
