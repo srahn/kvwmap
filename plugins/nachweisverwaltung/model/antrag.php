@@ -299,11 +299,11 @@ class antrag {
         " . ($lea_id? 'lenris.lea_vermessungsantrag' : 'nachweisverwaltung.n_antraege') . " AS a
         LEFT JOIN nachweisverwaltung.n_vermstelle vs ON a.vermstelle = vs.id
         LEFT JOIN nachweisverwaltung.n_vermart va ON a.vermart=va.id WHERE 1=1";
-    if ($lea_id == '' AND $id[0] != '') {
-      $sql .= " AND a.antr_nr IN ('" . implode("', '", $id) . "')";
-    }
-    else if ($lea_id != '') {
+    if ($lea_id != '') {
       $sql .= " AND lea_id = " . $lea_id;
+    }
+    else if ($id[0] != '') {
+      $sql .= " AND a.antr_nr IN ('" . implode("', '", $id) . "')";
     }
 		if(!in_array($current_stelle_id, $admin_stellen))$sql.= " AND stelle_id = ".$current_stelle_id;
     if ($order=='') {
