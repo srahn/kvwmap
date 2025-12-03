@@ -441,7 +441,7 @@ class antrag {
 			$FFR[$i][$not_primary]=$ret[1];
 
       # Abfrage der Anzahl der verschiedenen Dokumentarten zum Vorgang      
-			$anz_arten = $this->getAnzArten($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			$anz_arten = $this->getAnzArten($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 			foreach($anz_arten as $anz_art){
 				$FFR[$i][$anz_art['abkuerzung']] = $anz_art['anz'];
 			}
