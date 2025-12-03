@@ -474,15 +474,34 @@ class antrag {
     return $ret;
   }
 	
-	function getNotPrimary($flurid,$primary,$secondary){
+	function getNotPrimary($flurid, $primary, $secondary, $lea_id = NULL){
 		if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'stammnr';
 		else $not_primary = 'rissnummer';
+
+    if ($lea_id == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'";
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $lea_id . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+
     $this->debug->write('<br>antrag.php getNotPrimary Abfragen der NotPrimary zu einem Vorgang in der Nachweisführung.',4);
-    $sql.="SELECT ".$not_primary." FROM nachweisverwaltung.n_nachweise AS n";
-		$sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$primary."'";
-    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-		$sql.= "order by art, blattnummer";
+    $sql = "
+      SELECT 
+        ".$not_primary." 
+      FROM 
+        nachweisverwaltung.n_nachweise AS n
+		    " . $n2a . " AS n2a 
+      WHERE 
+        n.id = n2a.nachweis_id 
+        " . $where . "
+        n.flurid = " . $flurid . " AND n." . NACHWEIS_PRIMARY_ATTRIBUTE . " = '" . $primary . "'" . 
+        ($secondary != '' ? " AND n." . NACHWEIS_SECONDARY_ATTRIBUTE . " = '" . $secondary . "'" : "") . "
+		  order by art, blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       while($rs=pg_fetch_array($ret[1])) {
