@@ -448,7 +448,7 @@ class antrag {
       
     	# Abfrage der Dateinamen im Vorgang
       if($formvars['Datei']){
-	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $withFileLinks);
+	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $withFileLinks, $formvars['lea_id']);
 	      if ($ret[0]) { return $ret; }
 				$FFR[$i]['Datei - Messungsdatum'] = $ret[1];
       }
