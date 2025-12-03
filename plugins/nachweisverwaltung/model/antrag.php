@@ -244,7 +244,7 @@ class antrag {
 			if ($pagecount!=1)$footer .= 'n';
 			$pdf->addText(395,10,6, $footer);
 			$pdf->addText(765,$row+10,8, date('d.m.Y',time()));
-			$pdf->addText(30,$row-=12,10,'<b>Anlage der Vermessungsvorbereitung zu Auftragsnummer '.$this->nr.'</b>');
+			$pdf->addText(30,$row-=12,10,'<b>Anlage der Vermessungsvorbereitung zu Auftragsnummer ' . $this->antragsliste[0]['antr_nr'] . '</b>');
 			$pdf->addText(30,$row-=25,10,utf8_decode('Liste der ausgegebenen Unterlagen'));
 			if (defined('ZUSATZ_UEBERGABEPROTOKOLL') AND ZUSATZ_UEBERGABEPROTOKOLL != '') {
 				$pdf->addText(30,$row-=16,9,utf8_decode(ZUSATZ_UEBERGABEPROTOKOLL));
