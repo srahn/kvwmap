@@ -434,7 +434,7 @@ class antrag {
       }
 			
       # Abfrage der Riss-/Stammnummern (des nicht primären Ordnungskriteriums)
-			$ret=$this->getNotPrimary($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			$ret=$this->getNotPrimary($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 			if ($ret[0]) { return $ret; }
 			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'Antragsnummer';
 			else $not_primary = 'Rissnummer';
