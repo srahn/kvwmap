@@ -578,6 +578,42 @@ function set_all(column){
 									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 88px;' + this.options[this.selectedIndex].getAttribute('style'));"
 								); ?>
 							</td>
+
+							<? if ($this->attributes['style'][0] != '') { ?>
+							<td>
+								<?	if ($i == 0) {
+											echo '<div class="fett scrolltable_header">' . $strStyleAttribute . '</div>';
+										}
+										if ($i == count_or_0($this->attributes['type']) - 1) {
+											echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
+															FormObject::createSelectField(
+															'style_attribute',
+															$this->attributes['style'],
+															$this->attributes['style_attribute'][$i],
+															1,
+															'',
+															"set_all('style_attribute');",
+															'',
+															'',
+															'',
+															'- Auswahl -'
+														) .
+														'</div>';
+										}
+										echo FormObject::createSelectField(
+											'style_attribute_' . $this->attributes['name'][$i],
+											$this->attributes['style'],
+											$this->attributes['style_attribute'][$i],
+											1,
+											'',
+											'',
+											'',
+											'',
+											'',
+											'- Auswahl -'
+										); ?>
+							</td>
+							<? } ?>
 							
 							<td align="center" valign="top"><?
 								if($i == 0) {

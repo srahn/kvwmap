@@ -1194,7 +1194,7 @@ class db_mapObj{
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
-				$attributes['style'] = $rs['name'];
+				$attributes['style'][] = $rs['name'];
 				$attributes['visible'][$i] = 0;
 			}
 			if ($rs['form_element_type'] == 'Editiersperre') {

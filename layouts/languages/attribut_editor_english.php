@@ -22,4 +22,5 @@
 	$strOmitAttributeValues = 'Omit values of attribute';
 	$strYesWhen = 'yes, when';
 	$strDefault = 'Default';
+	$strStyleAttribute = 'Style Attribute';
 ?>

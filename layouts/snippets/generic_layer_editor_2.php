@@ -290,7 +290,7 @@ if ($doit == true) {
 										######### Attributwert #########
 										$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 										$cell['id'] = 'value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k;
-										$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j]));
+										$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style_attribute'][$j]], 'gle_attribute_value value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j]));
 										if ($nl){
 											$next_row['cells'][] = $cell;
 										}

@@ -21403,7 +21403,8 @@ DO $$
 					'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
 					'vcheck_attribute' => "'" . $formvars['vcheck_attribute_'.$attributes['name'][$i]] . "'",
 					'vcheck_operator' => "'" . $formvars['vcheck_operator_'.$attributes['name'][$i]] . "'",
-					'vcheck_value' => "'" . $formvars['vcheck_value_'.$attributes['name'][$i]] . "'"
+					'vcheck_value' => "'" . $formvars['vcheck_value_'.$attributes['name'][$i]] . "'",
+					'style_attribute' => "'" . $formvars['style_attribute_'.$attributes['name'][$i]] . "'"
 				] + $alias_rows;
 				$sql = "
 					INSERT INTO
@@ -21676,7 +21677,8 @@ DO $$
 				vcheck_value,
 				\"order\",
 				privileg,
-				query_tooltip
+				query_tooltip,
+				style_attribute
 			FROM
 				kvwmap.layer_attributes as a LEFT JOIN
 				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
@@ -21727,6 +21729,7 @@ DO $$
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
+			$attributes['style_attribute'][$i] = $rs['style_attribute'];
 			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
 			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
 			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
@@ -21772,7 +21775,7 @@ DO $$
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
-				$attributes['style'] = $rs['name'];
+				$attributes['style'][] = $rs['name'];
 				$attributes['visible'][$i] = 0;
 			}
 			if ($rs['form_element_type'] == 'Editiersperre') {

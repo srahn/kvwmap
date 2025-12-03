@@ -22,4 +22,5 @@
 	$strOmitAttributeValues = 'Werte nicht übernehmen';
 	$strYesWhen = 'ja, wenn';
 	$strDefault = 'Default';
+	$strStyleAttribute = 'Style-Attribut';
 ?>
