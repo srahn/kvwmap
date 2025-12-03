@@ -499,7 +499,7 @@ class antrag {
       WHERE 
         n.id = n2a.nachweis_id 
         " . $where . "
-        n.flurid = " . $flurid . " AND n." . NACHWEIS_PRIMARY_ATTRIBUTE . " = '" . $primary . "'" . 
+        AND n.flurid = " . $flurid . " AND n." . NACHWEIS_PRIMARY_ATTRIBUTE . " = '" . $primary . "'" . 
         ($secondary != '' ? " AND n." . NACHWEIS_SECONDARY_ATTRIBUTE . " = '" . $secondary . "'" : "") . "
 		  order by art, blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
