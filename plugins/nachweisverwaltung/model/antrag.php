@@ -592,18 +592,34 @@ class antrag {
     return $ret;    
   }
     
-  function getAnzArten($flurid,$nr,$secondary) {
+  function getAnzArten($flurid, $nr, $secondary, $lea_id = NULL) {
     $this->debug->write('<br>nachweis.php getAnzFFR Abfragen der Anzahl der Blätter eines FFR.',4);
     # Abfrag der Anzahl der zum Riss gehörenden Fortführungsrisse
-    $sql.="SELECT h.abkuerzung, CASE WHEN COUNT(n2a.nachweis_id) = 0 THEN '-' ELSE COUNT(n2a.nachweis_id)::text END AS anz FROM nachweisverwaltung.n_hauptdokumentarten h " ;
-		$sql.="LEFT JOIN nachweisverwaltung.n_dokumentarten d ON h.id = d.hauptart ";
-		$sql.="LEFT JOIN nachweisverwaltung.n_nachweise AS n ON n.art = d.id AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
-    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-    if ($this->nr!='') {
-			$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+
+    if ($lea_id == '') {
+      $join = "LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id = n2a.nachweis_id AND n2a.antrag_id = '" . $this->nr . "'";
     }
-    $sql.=" GROUP BY h.id, h.abkuerzung";
-		$sql.=" ORDER BY h.id";
+    else {
+      $join = "LEFT JOIN lenris.client_nachweise as n2a ON n.id = n2a.nachweis_id
+               LEFT JOIN lenris.lea_nachweise2antrag ln2a ON 
+                ln2a.lea_id = " . $lea_id . " AND 
+                ln2a.client_nachweis_id = n2a.client_nachweis_id AND 
+                ln2a.client_id = n2a.client_id";
+    }
+
+    $sql = "
+      SELECT 
+        h.abkuerzung, 
+        CASE WHEN COUNT(n2a.nachweis_id) = 0 THEN '-' ELSE COUNT(n2a.nachweis_id)::text END AS anz 
+      FROM 
+        nachweisverwaltung.n_hauptdokumentarten h 
+        LEFT JOIN nachweisverwaltung.n_dokumentarten d ON h.id = d.hauptart 
+        LEFT JOIN nachweisverwaltung.n_nachweise AS n ON n.art = d.id AND n.flurid = " . $flurid . " AND n." . NACHWEIS_PRIMARY_ATTRIBUTE . " = '" . $nr . "'" . 
+        ($secondary != '' ? " AND n." . NACHWEIS_SECONDARY_ATTRIBUTE . " = '" . $secondary . "'" : "") . 
+        ($this->nr != '' OR $lea_id != '' ? $join : "") . "
+      GROUP BY 
+        h.id, h.abkuerzung
+		  ORDER BY h.id";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { $ret=$queryret; }
     else {
