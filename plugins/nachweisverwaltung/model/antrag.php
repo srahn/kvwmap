@@ -302,6 +302,9 @@ class antrag {
     if ($lea_id == '' AND $id[0] != '') {
       $sql .= " AND a.antr_nr IN ('" . implode("', '", $id) . "')";
     }
+    else if ($lea_id != '') {
+      $sql .= " AND lea_id = " . $lea_id;
+    }
 		if(!in_array($current_stelle_id, $admin_stellen))$sql.= " AND stelle_id = ".$current_stelle_id;
     if ($order=='') {
       $order='antr_nr';
