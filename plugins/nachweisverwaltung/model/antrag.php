@@ -616,7 +616,7 @@ class antrag {
         LEFT JOIN nachweisverwaltung.n_dokumentarten d ON h.id = d.hauptart 
         LEFT JOIN nachweisverwaltung.n_nachweise AS n ON n.art = d.id AND n.flurid = " . $flurid . " AND n." . NACHWEIS_PRIMARY_ATTRIBUTE . " = '" . $nr . "'" . 
         ($secondary != '' ? " AND n." . NACHWEIS_SECONDARY_ATTRIBUTE . " = '" . $secondary . "'" : "") . 
-        ($this->nr != '' OR $lea_id != '' ? $join : "") . "
+        (($this->nr != '' OR $lea_id != '') ? $join : "") . "
       GROUP BY 
         h.id, h.abkuerzung
 		  ORDER BY h.id";
