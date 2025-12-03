@@ -387,18 +387,39 @@ class antrag {
     # mehr wird im Protokoll nicht erfasst, nicht jedes einzelne Blatt
     # Dieser Vorgang ist hier mit der Variable FFR belegt, weil zu einem Vorgang
     # meistens mindestens ein Fortführungsriss gehört.
-    $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
-    $sql ="SELECT DISTINCT max(datum) as datum, n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
-		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
-    $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a";
-    $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
-		else $sql.=" AND stelle_id=".$this->stelle_id;
-		$sql.=" GROUP BY n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
-		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
-    $sql.=" ORDER BY datum";
-		if(NACHWEIS_SECONDARY_ATTRIBUTE != '' AND $formvars['order'] == NACHWEIS_PRIMARY_ATTRIBUTE)$sql.=", ".NACHWEIS_SECONDARY_ATTRIBUTE;
-    #echo $sql;
+    $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);       
+    
+    if ($formvars['lea_id'] == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'
+                 AND stelle_id " . ($this->stelle_id == ''? "IS NULL" : "= " . $this->stelle_id);
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $lea_id . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+    
+    $sql = "
+      SELECT DISTINCT 
+        max(datum) as datum, 
+        n.flurid, n." . NACHWEIS_PRIMARY_ATTRIBUTE .
+		    (NACHWEIS_SECONDARY_ATTRIBUTE != '' ? ", n.".NACHWEIS_SECONDARY_ATTRIBUTE : "") . "
+      FROM 
+        nachweisverwaltung.n_nachweise AS n, 
+        " . $n2a . " AS n2a
+      WHERE 
+        n.id = n2a.nachweis_id  
+        " . $where . "
+		  GROUP BY 
+        n.flurid, 
+        n." . NACHWEIS_PRIMARY_ATTRIBUTE . 
+		    (NACHWEIS_SECONDARY_ATTRIBUTE != '' ? ",n." . NACHWEIS_SECONDARY_ATTRIBUTE : "") . "
+      ORDER BY 
+        datum " . 
+		  (NACHWEIS_SECONDARY_ATTRIBUTE != '' AND $formvars['order'] == NACHWEIS_PRIMARY_ATTRIBUTE ? ", " . NACHWEIS_SECONDARY_ATTRIBUTE : "");
+    // echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);    
     if ($ret[0]) { return $ret[1]; }
     else { $query_id=$ret[1]; }
