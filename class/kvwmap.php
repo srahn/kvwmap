@@ -17407,7 +17407,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['layer_id'], $disabled_class_expressions)) {
 					foreach($disabled_class_expressions[$layerset[$i]['layer_id']] as $disabled_class) {
-						$disabled_class_filter[$layerset[$i]['layer_id']][] = '(' . (mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
+						$disabled_class_filter[$layerset[$i]['layer_id']][] = '(' . (mapserverExp2SQL($disabled_class['expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
 					}
 					$sql_where .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter[$layerset[$i]['layer_id']]) . "), true)";
 				}	
@@ -22307,10 +22307,10 @@ DO $$
     }
     else{
       for($i = 0; $i < $anzahl; $i++){
-				if ($classes[$i]['Expression'] == '') {
+				if ($classes[$i]['expression'] == '') {
           return $classes[$i]['class_id'];
         }
-				$exp = mapserverExp2SQL($classes[$i]['Expression'], $classitem);
+				$exp = mapserverExp2SQL($classes[$i]['expression'], $classitem);
 				
 				$sql = 'SELECT * FROM ('.$select.") as foo WHERE (" . $exp.")";
         $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);

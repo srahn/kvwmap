@@ -758,7 +758,7 @@ $GUI->mobile_reformat_classes = function ($classes) use ($GUI) {
 			return array(
 				'id' => $class['class_id'],
 				'name' => $class['name'],
-				'expression' => $class['Expression'],
+				'expression' => $class['expression'],
 				'style' => array(
 					'id' => $class['Style'][0]['style_id'],
 					'symbol' => $class['Style'][0]['symbol'],

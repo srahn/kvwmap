@@ -489,7 +489,7 @@ function go_switch_xplankonverter($go) {
 									return '
 										<tr>
 											<td class="class-td">' . $class['name'] . '</td>
-											<td class="class-td">' . $class['Expression'] . '</td>
+											<td class="class-td">' . $class['expression'] . '</td>
 										</tr>
 									';
 								},
