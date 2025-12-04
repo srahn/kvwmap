@@ -11089,30 +11089,31 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							} break;
 
-							case ($table['type'][$i] == 'SubFormFK') : {
-								$attribute_options = $attribute->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
-								include_once(CLASSPATH . 'Layer.php');
-								$fk_field_is_empty = $this->formvars[$table['formfield'][$i]] == '';
-								$parent_layer = Layer::find_by_id($this, $attribute_options['parent_layer_id']);
-								$parent_layer_has_geom = $parent_layer->get('geom_column') != '';
-								$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
-								if ($result['success']) {
-									$new_feature_has_geometry = true;
-									$new_feature_geometry = $result['wkb_geometry'];
-									include_once(CLASSPATH . 'PgObject.php');
-									$pg_object = new PgObject($this, $parent_layer->get('schema'), $parent_layer->get('maintable'));
-									$pg_object->debug->user_funktion = 'admin'; $pg_object->show = true;
-									$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
-									$intersecting_parent_gefunden = false;
-									if (count($intersected_objects) > 0) {
-										$parent_feature = $intersected_objects[0];
-										$intersecting_parent_gefunden = true;
-									}
-									if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
-										$insert[$table['attributname'][$i]] = "'" . $parent_feature->get($parent_layer->get('oid')) . "'";
-									}
-								}
-							} break;
+							// Funktioniert nicht
+							// case ($table['type'][$i] == 'SubFormFK') : {
+							// 	$attribute_options = $attribute->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
+							// 	include_once(CLASSPATH . 'Layer.php');
+							// 	$fk_field_is_empty = $this->formvars[$table['formfield'][$i]] == '';
+							// 	$parent_layer = Layer::find_by_id($this, $attribute_options['parent_layer_id']);
+							// 	$parent_layer_has_geom = $parent_layer->get('geom_column') != '';
+							// 	$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
+							// 	if ($result['success']) {
+							// 		$new_feature_has_geometry = true;
+							// 		$new_feature_geometry = $result['wkb_geometry'];
+							// 		include_once(CLASSPATH . 'PgObject.php');
+							// 		$pg_object = new PgObject($this, $parent_layer->get('schema'), $parent_layer->get('maintable'));
+							// 		$pg_object->debug->user_funktion = 'admin'; $pg_object->show = true;
+							// 		$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
+							// 		$intersecting_parent_gefunden = false;
+							// 		if (count($intersected_objects) > 0) {
+							// 			$parent_feature = $intersected_objects[0];
+							// 			$intersecting_parent_gefunden = true;
+							// 		}
+							// 		if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
+							// 			$insert[$table['attributname'][$i]] = "'" . $parent_feature->get($parent_layer->get('oid')) . "'";
+							// 		}
+							// 	}
+							// } break;
 
 							case ($table['type'][$i] == 'Geometrie') : {
 								if ($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != '' OR $this->formvars['newpathwkt'] != '') {
