@@ -11413,9 +11413,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					for ($i = 0; $i < count($form_fields); $i++) {
 						if ($form_fields[$i] != '') {
 							$element = explode(';', $form_fields[$i]);
-							$this->sanitize([$form_fields[$i] => $element[6]], true);
 							$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
 							$dont_use_for_new = $layerset[0]['attributes']['dont_use_for_new'][$layerset[0]['attributes']['indizes'][$element[1]]];
+							if ($formElementType == 'Zahl') {
+								$this->formvars[$form_fields[$i]] = removeTausenderTrenner($this->formvars[$form_fields[$i]]);
+							}
 							if (
 								$element[3] == $oid AND
 								(
