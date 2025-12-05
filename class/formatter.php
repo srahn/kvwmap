@@ -83,6 +83,11 @@ class formatter {
 
 	function output_json() {
 		header('Content-Type: ' . $this->content_type . '; charset=utf-8');
+		foreach ($this->data as $key => $value) {
+			if (is_resource($value)) {
+				$this->data[$key] = (string)$value;
+			}
+		}
 		empty($this->data) ? $json = '[]' : $json = json_encode($this->data);
 		return utf8_decode($json);
 	}

@@ -805,7 +805,7 @@ class user {
 				kvwmap.user
 			WHERE
 				id = " . $this->id . " AND
-				password = kvwmap.sha1('" . $password . "')
+				password = kvwmap.sha1('" . pg_escape_string($password) . "')
 		";
 		$ret = $this->database->execSQL($sql, 4, 0, true);
 		return pg_num_rows($ret[1]) == 0;
