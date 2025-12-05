@@ -1161,7 +1161,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			}
 			if(scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k).value + '|';
+				attributevalues += encodeURIComponent(scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k).value) + '|';
 			}
 		}
 		attribute = attributes.split(',');
