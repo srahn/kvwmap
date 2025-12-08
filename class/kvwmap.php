@@ -19001,18 +19001,16 @@ class db_mapObj{
 				}
 			}
 		}
-
+		$lastwhereposition = strrpos(strtolower($path), 'where');
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($path), 'order by');
-		$lastfromposition = strrpos(strtolower($path), 'from');
-		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+		if($orderbyposition !== false AND $orderbyposition > $lastwhereposition){
 			$orderby = ' '.substr($path, $orderbyposition);
 			$path = substr($path, 0, $orderbyposition);
 		}
 
 		# group by rausnehmen
 		$groupbyposition = strrpos(strtolower($path), 'group by');
-		$lastwhereposition = strrpos(strtolower($path), 'where');
 		if($groupbyposition !== false AND $groupbyposition > $lastwhereposition){
 			$layerset['attributes']['groupby'] = ' '.substr($path, $groupbyposition);
 			$path = substr($path, 0, $groupbyposition);
