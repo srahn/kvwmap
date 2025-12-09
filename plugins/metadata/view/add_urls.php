@@ -83,7 +83,7 @@
 			<tr>
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">Radius</th>
 				<td style="border-bottom:1px solid #C3C7C3">
-					<input name="radius" type="text" placeholder="in Kilometern" style="width: 100px"> km
+					<input name="radius" type="number" max="50" placeholder="in Kilometern" style="width: 100px"> km
 				</td>
 			</tr>
 			<tr>
