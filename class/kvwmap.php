@@ -10788,12 +10788,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 				# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
 				$document_attributes = array();
+				$complex_attributes = array();
 				for ($i = 0; $i < count($attributes['name']); $i++) {
-					if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
+					if ($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
 						$document_attributes[] = $attributes['name'][$i];
 					}
+					if (POSTGRESVERSION >= 930 AND (substr($attributes['type'][$i], 0, 1) == '_' OR is_numeric($attributes['type'][$i]))) {
+						$complex_attributes[] = $attributes['name'][$i];
+					}
 				}
-				if(!empty($document_attributes)){
+				if (!empty($document_attributes) OR !empty($complex_attributes)){
 					$this->formvars['selected_layer_id'] = $layer['Layer_ID'];
 					$this->formvars['value_'.$layer['maintable'].'_oid'] = $oid;
 					$this->formvars['operator_'.$layer['maintable'].'_oid'] = '=';
@@ -10857,6 +10861,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($document_attributes AND is_array($document_attributes)) {
 					foreach($document_attributes as $document_attribute){
 						$this->deleteDokument($this->qlayerset[0]['shape'][0][$document_attribute], $layer['document_path'], $layer['document_url']);
+					}
+				}
+				if ($complex_attributes AND is_array($complex_attributes)) {
+					foreach ($complex_attributes as $complex_attribute){
+						$this->processJSON($this->qlayerset[0]['shape'][0][$complex_attribute], $layer['document_path'], $layer['document_url'], NULL, NULL, NULL, NULL, '', true);
 					}
 				}
 				$this->qlayerset[0]['shape'] = array();
@@ -16094,17 +16103,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	/**
-	 * Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
+	 * Diese rekursive Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
 	 * Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
 	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
+	 * Die Funktion wird auch beim Löschen eines Datensatzes mit komplexen Datentypen aufgerufen (dann ist der Parameter $delete = true). 
+	 * Dann übernimmt sie das Löschen der Dateien der Dokument-Attribute.
 	 */
-	function processJSON($json, $doc_path = NULL, $doc_url = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = '') {
+	function processJSON($json, $doc_path = NULL, $doc_url = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = '', $delete = false) {
 		if (is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)) {			// bei Bedarf den JSON-String decodieren
 			$json = json_decode($json);
 		}
 		if (is_array($json)) {		// Array-Datentyp
 			for ($i = 0; $i < count($json); $i++) {
-				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"');
+				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"', $delete);
 			}
 			$result = '{' . @implode(',', array_filter($elems)) . '}';		# leere Array-Elemente mit array_filter weglassen
 		}
@@ -16119,11 +16130,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$new_quote = $quote;
 			}
 			foreach ($json as $elem) {
-				$elems[] = $this->processJSON($elem, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $new_quote);
+				$elems[] = $this->processJSON($elem, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $new_quote, $delete);
 			}
 			$result = $quote . '(' . implode(',', $elems) . ')' . $quote;
 		}
 		else { // normaler Datentyp
+			if ($delete AND (strpos($json, $doc_path) !== false OR ($doc_url != '' and strpos($json, $doc_url) !== false))) {		# Datensatz wird gelöscht und $json entspricht Dokument-Attribut
+				$this->deleteDokument($json, $doc_path, $doc_url);
+			}
 			if (substr($json, 0, 5) == 'file:') {
 				$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
 			}
