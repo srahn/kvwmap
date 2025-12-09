@@ -202,10 +202,11 @@ function addMenues(){
 	<tr align="center">
 		<td><h2><? echo ($this->formvars['go'] == 'Dienstmetadaten' ? $this->strTask . ' ' . $this->Stelle->Bezeichnung : $strTitle); ?></h2></td>
 	</tr>
+	<? if (count_or_0($this->allstellendaten['ID']) > 0) { ?>
 	<tr>
     <td style="text-align: center">
 		<span class="px17 fetter"><? echo $this->strTask;?>:</span>
-			<select id="selected_stelle_id" style="min-width:250px" size="1" name="selected_stelle_id" onchange="document.GUI.submit();" <?php if(count_or_0($this->allstellendaten['ID'])==0){ echo 'disabled';}?>>
+			<select id="selected_stelle_id" style="min-width:250px" size="1" name="selected_stelle_id" onchange="document.GUI.submit();">
 				<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
 				for ($i = 0; $i < count_or_0($this->allstellendaten['ID']); $i++){
 					echo '<option';
@@ -216,7 +217,8 @@ function addMenues(){
 				} ?>
 			</select>
 		</td>
-	</tr	
+	</tr>
+	<? } ?>
 	<tr>
 		<td align="center"><?php
 if ($this->Meldung=='Daten der Stelle erfolgreich eingetragen!' OR $this->Meldung=='') {
@@ -245,7 +247,7 @@ else {
 				} ?>
 
 				<tr class="group-stammdaten">
-					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel; ?></th>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel; ?>*</th>
 					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 						<input name="bezeichnung" type="text" value="<?php echo $this->formvars['bezeichnung']; ?>" size="25" maxlength="100">
 					</td>
@@ -313,7 +315,7 @@ else {
 				</tr>
 
 				<tr class="group-stammdaten">
-					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?>*</th>
 					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 						<select name="epsg_code" style="width: auto">
 							<option value=""><?php echo $this->strPleaseSelect; ?></option><? 

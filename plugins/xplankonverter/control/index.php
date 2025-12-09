@@ -53,7 +53,6 @@
 if (strpos($go, '_') !== false AND (strpos($go, 'xplankonverter') !== false || strpos($go, 'neuer_Layer_Datensatz') !== false)) {
 	include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 	include_once(CLASSPATH . 'PgObject.php');
-	include_once(CLASSPATH . 'MyObject.php');
 	include_once(CLASSPATH . 'Layer.php');
 	include_once(CLASSPATH . 'LayerClass.php');
 	include_once(CLASSPATH . 'LayerAttribute.php');
@@ -490,7 +489,7 @@ function go_switch_xplankonverter($go) {
 									return '
 										<tr>
 											<td class="class-td">' . $class['name'] . '</td>
-											<td class="class-td">' . $class['Expression'] . '</td>
+											<td class="class-td">' . $class['expression'] . '</td>
 										</tr>
 									';
 								},
@@ -1035,7 +1034,7 @@ function go_switch_xplankonverter($go) {
 			// check stelle
 			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) return;
 
-			$stelle = new MyObject($GUI, 'stelle');
+			$stelle = new PgObject($GUI, 'kvwmap', 'stelle');
 			$validation_msg = $stelle->validate_date_format($GUI->formvars['veroeffentlichungsdatum'], 'Y-M-D');
 			if ($validation_msg != '') {
 				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn das Attribut Veroeffentlichungsdatum leer ist oder einen gültigen Datumswert hat.';

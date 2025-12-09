@@ -95,12 +95,14 @@
 			document.getElementById('layerform').style.display = 'none';
 			document.getElementById('layerform_link').classList.remove('navigation-selected');
 			document.getElementById('saveAsNewLayerButton').style.display = 'none';
+			document.getElementById('layer_formular_delete_button').style.display = 'none';
 		}
 		else{
 			document.GUI.stellenzuweisung.value = 0;
 			document.getElementById('stellenzuweisung').style.display = 'none';
 			document.getElementById('stellenzuweisung_link').classList.remove('navigation-selected');
 			document.getElementById('saveAsNewLayerButton').style.display = 'inline-block';
+			document.getElementById('layer_formular_delete_button').style.display = 'inline-block';
 		}
 		document.getElementById(id).style.display = 'inline-block';
 		document.getElementById(id+'_link').classList.add('navigation-selected');
@@ -1461,7 +1463,7 @@ from
 					}
 				} ?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<textarea name="expression[<?php echo $this->classes[$i]['class_id']; ?>]" cols="28" rows="3"><?php echo $this->classes[$i]['Expression']; ?></textarea>
+					<textarea name="expression[<?php echo $this->classes[$i]['class_id']; ?>]" cols="28" rows="3"><?php echo $this->classes[$i]['expression']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<textarea name="text[<?php echo $this->classes[$i]['text']; ?>]" cols="18" rows="3"><?php echo $this->classes[$i]['text']; ?></textarea>

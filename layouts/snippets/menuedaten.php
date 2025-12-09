@@ -43,8 +43,8 @@
 					<th><a href="index.php?go=Menues_Anzeigen&view_sort=name&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
 					<th><a href="index.php?go=Menues_Anzeigen&view_sort=obermenue&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strTopMenue; ?></a></th>
 					<th><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strMenueLevel; ?></th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strMenueOrder; ?></a></th>
-					<th colspan="2"><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strMenueLevel . ' ' . $this->strAnd . ' ' . $strMenueOrder; ?></a><br><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,name&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strMenueLevel . ' ' . $this->strAnd . ' ' . $this->strName; ?></a></td>
+					<th><a href='index.php?go=Menues_Anzeigen&view_sort="order"&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'><? echo $strMenueOrder; ?></a></th>
+					<th colspan="2"><a href='index.php?go=Menues_Anzeigen&view_sort=menueebene,"order"&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'><? echo $strMenueLevel . ' ' . $this->strAnd . ' ' . $strMenueOrder; ?></a><br><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,name&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strMenueLevel . ' ' . $this->strAnd . ' ' . $this->strName; ?></a></td>
 				</tr><?php
 				for ($i = 0; $i < count($this->menuedaten); $i++) {
 					$font_size = ($this->menuedaten[$i]->get('menueebene') == '1' ? 16 : 12);

@@ -64,7 +64,7 @@ class Funktion extends PgObject {
 	}
 
 	/**
-	 * ToDo: Use MyObject functions for CRUD
+	 * ToDo: Use PgObject functions for CRUD
 	 */
 	function NeuAnlegen($formvars){
 		$sql = "

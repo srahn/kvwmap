@@ -1177,7 +1177,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			field = get_attribute_field(object, k, layer_id, attributenamesarray[i])[0];
 			if (field != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += field.value + '|';
+				attributevalues += encodeURIComponent(field.value) + '|';
 			}
 		}
 		return {

@@ -85,6 +85,8 @@
 			});
 			
 			svg.attr("height", 100 + (120 * max_depth));	// Hoehe des SVGs auf die Hierarchietiefe anpassen
+
+			window.setTimeout(adjust_size, 3000);
 			
 			force.on("tick", function(e) {
 				var ky =  e.alpha;
@@ -102,6 +104,12 @@
 				
 			});
 		
+	}
+
+	function adjust_size(){
+		var svg = document.getElementById('svg_hierarchy');
+		var box = svg.getBBox();
+		svg.setAttribute('height', box.height + 200);
 	}
 
 	function calculate_depth(node, depth){

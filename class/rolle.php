@@ -1835,7 +1835,7 @@ class rolle {
 
 	/**
 	 * Function set the layer parameter for rolle attribut layer_params as string
-	 * @param MyObject The MyObject of the rolle.
+	 * @param PgObject The PgObject of the rolle.
 	 * @param Array The assoziative array with layer params of rolle.
 	 * @return void
 	 */

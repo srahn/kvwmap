@@ -30,13 +30,13 @@ if ($anzLayer==0 AND $this->user->rolle->singlequery == 2) { ?>
 if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') {
 	global $sizes;
 	$size = $sizes[$this->user->rolle->gui];	?>
-	<div id="contentdiv" onscroll="save_scrollposition();" style="scroll-behavior: smooth; max-height:<? echo $this->user->rolle->nImageHeight; ?>px; width: min-content; max-width: calc(100vw - <? echo ($size['menue']['width'] + 20); ?>px); overflow-y: auto;overflow-x: auto; border-bottom: 1px solid #bbb">
+	<div id="contentdiv" onscroll="save_scrollposition();" style="scroll-behavior: smooth; max-height:<? echo $this->user->rolle->nImageHeight; ?>px; width: max-content; max-width: calc(100vw - <? echo ($size['menue']['width'] + 20); ?>px); overflow-y: auto;overflow-x: auto; border-bottom: 1px solid #bbb">
 		<div style="margin-right: 10px; width: fit-content;">
 <? }
 
 $queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
 $active_layer_tab = null;
-$layer_visibility = 'collapsedfull';
+$layer_visibility = '';
 $zindex = 100;
 
 for ($i = 0; $i < $anzLayer; $i++) {	

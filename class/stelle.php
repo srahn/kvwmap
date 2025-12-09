@@ -1958,7 +1958,7 @@ class stelle {
 
 		$condition = "
 			ul.stelle_id = " . $this->id .
-			($group != NULL ? " AND COALESCE(ul.group_id, l.Gruppe) = " . $group : "") . "
+			($group != NULL ? " AND COALESCE(ul.group_id, l.gruppe) = " . $group : "") . "
 		";
 		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY ul.legendorder, l.drawingorder desc');
 
@@ -1966,8 +1966,8 @@ class stelle {
 		$sql = "
 			SELECT
 				l.layer_id,
-				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
-				l.Name,
+				COALESCE(ul.group_id, l.gruppe) AS gruppe,
+				l.name,
 				l.alias,
 				l.drawingorder,
 				ul.legendorder
