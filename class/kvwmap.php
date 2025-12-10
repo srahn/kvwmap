@@ -8393,7 +8393,7 @@ echo '			</table>
 
 	function Layer_Zeichenreihenfolge() {
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$this->layerdaten = $mapDB->getall_Layer('drawingorder', false, $this->user->id, $this->Stelle->id);
+		$this->layerdaten = $mapDB->getall_Layer(($this->formvars['auto_order'] ? 'datentyp DESC' : 'drawingorder'), false, $this->user->id, $this->Stelle->id);
 		$this->titel = 'Zeichenreihenfolge';
 		$this->main = 'layer_zeichenreihenfolge.php';
 		$this->output();
