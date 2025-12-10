@@ -10291,7 +10291,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		elseif (value_of($this->formvars, 'embedded_subformPK') != '') {
 			header('Content-type: text/html; charset=UTF-8');
-			include(LAYOUTPATH . 'snippets/embedded_subformPK.php'); # listenförmige Ausgabe mit Links untereinander
+			include(LAYOUTPATH . 'snippets/embedded_subformPK.php'); # listenförmige Ausgabe mit Links untereinander oder list_edit Anzeige
 			if (!$ret['success']) {
 				// Diese Variante funktioniert nicht wenn in $ret['msg'] Zeilenumbrüche drin sind, wie das hier z.B.
 				// 				WHERE
@@ -10303,10 +10303,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				// ', '', $ret['msg'])) . "'}]);</script>";
 				echo "<script>message([{ \"type\" : 'error', \"msg\" : " . json_encode($ret['msg']) . "}]);</script>";
 			}
-		}
-		elseif (value_of($this->formvars, 'embedded_subformPK_liste') != '') {
-			header('Content-type: text/html; charset=UTF-8');
-			include(LAYOUTPATH . 'snippets/embedded_subformPK_list.php'); # listenförmige Ausgabe zum schnellen editieren
 		}
 		elseif(value_of($this->formvars, 'embedded') != '') {
 			ob_end_clean();

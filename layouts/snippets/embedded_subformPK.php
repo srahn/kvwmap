@@ -106,6 +106,12 @@
 						<tr id="<? echo $element_id; ?>">
 							<td style="display: none">
 								<input type="hidden" value="" onchange="root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['layer_id'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
+								<input
+									id="<? echo $layer['layer_id'] . '_' . $k; ?>"
+									type="checkbox"
+									class="check_<? echo $layer['layer_id']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
+									name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['layer_id']; ?>"
+								>
 							</td><?
 							$editable = false;
 							for ($j = 0; $j < count($attributes['name']); $j++) {
@@ -157,6 +163,7 @@
 			<? }
 			if($editable OR $layer['template'] == 'generic_layer_editor_doc_raster.php'){ ?>
 				<a id="subform_save_button_<? echo $layer['layer_id']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subsave_data(<? echo $layer['layer_id']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>Speichern</span></a>
+				<a id="subdelete_all_button_<? echo $layer['layer_id']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subdelete_all(<? echo $layer['layer_id']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>alle Löschen</span></a>
 	<?	}
 		}
 		
@@ -304,5 +311,6 @@
 	echo '
 		<script type="text/javascript">
 			root.open_subform_requests--;
+			auto_resize_overlay();
 		</script>';
 ?>

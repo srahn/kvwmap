@@ -685,6 +685,30 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 
+	subdelete_all = function(layer_id, fromobject, targetobject, reload) {
+		// layer_id ist die von dem Layer, in dem die Datensätze gespeichert werden soll
+		// fromobject ist die id von dem div, welches das Formular der Datensätze enthält
+		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
+		if (confirm('Wollen Sie die Datensätze wirklich löschen?')) {
+			checkboxes = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.check_' + layer_id));
+			checkbox_names = '';
+			var formData = new FormData();
+			for (i = 0; i < checkboxes.length; i++) {
+				checkbox_names += checkboxes[i].name + '|';
+				formData.append(checkboxes[i].name, 'on');
+			}
+			formData.append('go', 'Layer_Datensaetze_Loeschen');
+			if (reload) {
+				formData.append('reload', reload);
+			}
+			formData.append('chosen_layer_id', layer_id);
+			formData.append('targetobject', targetobject);
+			formData.append('checkbox_names_' + layer_id, checkbox_names);
+			formData.append('embedded', 'true');
+			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
+		}
+	}
+
 	subsave_data = function(layer_id, fromobject, targetobject, reload) {
 		// layer_id ist die von dem Layer, in dem die Datensätze gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular der Datensätze enthält
