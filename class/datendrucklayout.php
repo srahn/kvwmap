@@ -1041,7 +1041,7 @@ class ddl {
 	* @param ...
 	* @return array $return_values Full path to created pdf document if $output is true and else only the last y-value of cursor in page
 	*/
-	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true, $append = false ) {
+	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true, $append = false, $use_variable_layouts = false) {
 		$result = (!$result ? array() : $result);
 		$this->layerset = $layerset[0];
 		$this->layout = $layout;
@@ -1099,7 +1099,7 @@ class ddl {
 			$rowcount = ceil(count($result) / 3);
 		}
 		for ($i = 0; $i < count_or_0($result); $i++) {
-			if (true AND is_numeric($result[$i][$this->layerset['ddl_attribute']])) {
+			if ($use_variable_layouts AND is_numeric($result[$i][$this->layerset['ddl_attribute']])) {
 				$this->layout = $this->load_layouts(NULL, $result[$i][$this->layerset['ddl_attribute']], NULL, array(0,1))[0];
 			}
 			$lastpage = end($this->pdf->objects['3']['info']['pages']) + 1;
