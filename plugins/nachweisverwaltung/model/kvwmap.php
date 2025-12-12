@@ -1,4 +1,79 @@
 <?
+
+$GUI->nachweis_columns = [
+	'id' => [
+		'alias' => 'ID',
+		'width' => 15
+	],
+	'gemarkung' => [
+		'alias' => 'Gemkg',
+		'width' => 45
+	],
+	'flur' => [
+		'alias' => 'Flur',
+		'width' => 25
+	],
+	'stammnr' => [
+		'alias' => 'Antragsnr.',
+		'width' => 65
+	],	
+	'blattnummer' => [
+		'alias' => 'Blattnr.',
+		'width' => 55
+	],
+	'rissnummer' => [
+		'alias' => 'Rissnr.',
+		'width' => 45
+	],
+	'art' => [
+		'alias' => 'Dokumentart',
+		'width' => 85
+	],
+	'datum' => [
+		'alias' => 'Datum',
+		'width' => 45
+	],
+	'datum_bis' => [
+		'alias' => 'Datum bis',
+		'width' => 75
+	],
+	'rissfuehrer' => [
+		'alias' => 'Rissführer',
+		'width' => 75
+	],
+	'fortfuehrung' => [
+		'alias' => 'Fortführung',
+		'width' => 83
+	],
+	'vermst' => [
+		'alias' => 'Vermstelle',
+		'width' => 65
+	],
+	'antragsnummer_alt' => [
+		'alias' => 'GB/C-Nr.',
+		'width' => 60
+	],
+	'gueltigkeit' => [
+		'alias' => 'gültig',
+		'width' => 42
+	],
+	'geprueft' => [
+		'alias' => 'geprüft',
+		'width' => 52
+	],	
+	'format' => [
+		'alias' => 'Format',
+		'width' => 45
+	],	
+	'zeit' => [
+		'alias' => 'Zeit',
+		'width' => 25
+	],	
+	'erstellungszeit' => [
+		'alias' => 'Erstellungszeit',
+		'width' => 100
+	]
+];
 	
 	/**
 	* Trigger für Bearbeitung im GLE
@@ -500,6 +575,26 @@
 		return 1;
 	};
 
+	$GUI->setColumns = function() use ($GUI){
+		foreach ($GUI->nachweis_columns as $column => $c) {
+			if ($GUI->formvars['column_' . $column]) {
+				$new_columns[] = $column;
+			}
+		}
+		$sql = "
+			UPDATE 
+				kvwmap.rolle_nachweise 
+			SET 
+				columns = '" . json_encode($new_columns) . "' 
+			WHERE 
+				user_id = " . $GUI->user->rolle->user_id . " AND 
+				stelle_id = " . $GUI->user->rolle->stelle_id;
+		#echo $sql;
+		$GUI->debug->write("<p>setColumns - Setzen der Spaltenauswahl für die Nachweisanzeige",4);
+		$GUI->pgdatabase->execSQL($sql,4, 1);
+		return 1;
+	};
+
 	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchfortfuehrung2,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $suchbemerkung, $flur_thematisch, $alle_der_messung, $order) use ($GUI){
 		if($suchhauptart == NULL)$suchhauptart = array();
 		if($suchunterart == NULL)$suchunterart = array();
@@ -584,6 +679,7 @@
 		$rs['suchunterart'] = array_filter(explode(',', $rs['suchunterart']));
 		$rs['showhauptart'] = array_filter(explode(',', $rs['showhauptart']));
 		$rs['markhauptart'] = array_filter(explode(',', $rs['markhauptart']));
+		$rs['columns'] = json_decode($rs['columns']);
 		return $rs;
 	};
 	

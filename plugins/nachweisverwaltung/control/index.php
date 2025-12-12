@@ -171,6 +171,9 @@ function go_switch_nachweisverwaltung($go){
 			if (isset($GUI->formvars['order'])) {
 				$GUI->setNachweisOrder($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['order']);
 			}
+			if ($GUI->formvars['columns_changed']) {
+				$GUI->setColumns();
+			}
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$GUI->savedformvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);

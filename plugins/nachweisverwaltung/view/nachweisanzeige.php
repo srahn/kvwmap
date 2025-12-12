@@ -255,111 +255,50 @@ function save_bearbeitungshinweis(id){
 	overlay_submit(currentform, false);
 }
 
+function update_columns() {
+	currentform.columns_changed.value = 1;
+	overlay_submit(currentform, false);
+}
+
 //-->
 </script>
 
 <? 
-
-	$this->nachweis_columns = [
-		'gemarkung' => [
-			'alias' => 'Gemkg',
-			'width' => 45
-		],
-		'flur' => [
-			'alias' => 'Flur',
-			'width' => 25
-		],
-		'stammnr' => [
-			'alias' => 'Antragsnr.',
-			'width' => 65
-		],	
-		'blattnummer' => [
-			'alias' => 'Blattnr.',
-			'width' => 55
-		],
-		'rissnummer' => [
-			'alias' => 'Rissnr.',
-			'width' => 45
-		],
-		'art' => [
-			'alias' => 'Dokumentart',
-			'width' => 85
-		],
-		'datum' => [
-			'alias' => '&nbsp;&nbsp;&nbsp;&nbsp;Datum',
-			'width' => 45
-		],
-		'datum_bis' => [
-			'alias' => 'Datum bis',
-			'width' => 75
-		],
-		'rissfuehrer' => [
-			'alias' => 'Rissführer',
-			'width' => 75
-		],
-		'fortfuehrung' => [
-			'alias' => 'Fortführung',
-			'width' => 83
-		],
-		'vermst' => [
-			'alias' => 'Vermstelle',
-			'width' => 65
-		],
-		'gueltigkeit' => [
-			'alias' => 'gültig',
-			'width' => 42
-		],
-		'geprueft' => [
-			'alias' => 'geprüft',
-			'width' => 52
-		],	
-		'format' => [
-			'alias' => 'Format',
-			'width' => 45
-		],	
-		'zeit' => [
-			'alias' => '&nbsp;&nbsp;&nbsp;&nbsp;Zeit',
-			'width' => 25
-		],	
-		'erstellungszeit' => [
-			'alias' => 'Erstellungszeit',
-			'width' => 100
-		]
-	];
-
 	function output_columns($gui, $i, $columns) {
 		foreach ($columns as $column) {
-			$c = $gui->nachweis_columns[$column];
-			switch ($column) {
-				case 'blattnummer' : {
-					$output = str_pad($gui->nachweis->Dokumente[$i]['blattnummer'], BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
-				}break;
-				case 'art' : {
-					$output = ($gui->nachweis->Dokumente[$i]['unterart_name']? $gui->nachweis->Dokumente[$i]['unterart_name'] : $gui->hauptdokumentarten[$gui->nachweis->Dokumente[$i]['art']]['abkuerzung']);
-				}break;
-				case 'gueltigkeit' : case 'geprueft' : {
-					$output = ($gui->nachweis->Dokumente[$i][$column] ? 'ja' : 'nein');
-				}break;
-				default : {
-					$output = $gui->nachweis->Dokumente[$i][$column];
+			if (in_array($column, $gui->formvars['columns'])) {
+				$c = $gui->nachweis_columns[$column];
+				switch ($column) {
+					case 'blattnummer' : {
+						$output = str_pad($gui->nachweis->Dokumente[$i]['blattnummer'], BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+					}break;
+					case 'art' : {
+						$output = ($gui->nachweis->Dokumente[$i]['unterart_name']? $gui->nachweis->Dokumente[$i]['unterart_name'] : $gui->hauptdokumentarten[$gui->nachweis->Dokumente[$i]['art']]['abkuerzung']);
+					}break;
+					case 'gueltigkeit' : case 'geprueft' : {
+						$output = ($gui->nachweis->Dokumente[$i][$column] ? 'ja' : 'nein');
+					}break;
+					default : {
+						$output = $gui->nachweis->Dokumente[$i][$column];
+					}
 				}
-			}
-			echo '
-				<td>
-					<div style="min-width: ' . $c['width'] . 'px">';
-						if ($i == 0) {
-							echo '<div class="fett scrolltable_header">';
-							if (strpos($gui->formvars['order'], $column) === false) {
-								echo '<a href="javascript:add_to_order(\'' . $column . '\');" title="nach ' . $c['alias'] . ' sortieren"><span class="fett">' . $c['alias'] . '</span></a>';
-							} 
-							else {
-								echo '<span class="fett">' . $c['alias'] . '</span>';
+				echo '
+					<td>
+						<div style="min-width: ' . $c['width'] . 'px">';
+							if ($i == 0) {
+								echo '<div class="fett scrolltable_header">';
+								if (strpos($gui->formvars['order'], $column) === false) {
+									echo '<a href="javascript:add_to_order(\'' . $column . '\');" title="nach ' . $c['alias'] . ' sortieren"><span class="fett">' . $c['alias'] . '</span></a>';
+								} 
+								else {
+									echo '<span class="fett">' . $c['alias'] . '</span>';
+								}
+								echo '</div>';
 							}
-							echo '</div>';
-						}
-						echo '<div>' . $output . '</div>
-					</div>
-				</td>';
+							echo '<div>' . $output . '</div>
+						</div>
+					</td>';
+			}
 		}
 	}
 
@@ -456,6 +395,7 @@ function save_bearbeitungshinweis(id){
 <input type="hidden" name="bearbeitungshinweis_id" value="">
 <input type="hidden" name="bearbeitungshinweis_text" value="">
 <input type="hidden" name="geom_from_layer" value="<? echo $this->formvars['geom_from_layer']; ?>">
+<input type="hidden" name="columns_changed" value="">
 
 	
 <table width="0%" border="0" cellpadding="8" cellspacing="0">
@@ -518,11 +458,20 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             }
               ?></span>                </td>
         </tr>
-		<tr> 
-			<td>Sortiert nach:
-				<span class="fett"><? echo build_order_links($this, $this->formvars['order'], $this->formvars['richtung']); ?></span>
-			</td>
-        </tr>
+				<tr> 
+					<td>Sortiert nach:
+						<span class="fett"><? echo build_order_links($this, $this->formvars['order'], $this->formvars['richtung']); ?></span>
+					</td>
+					<td>
+					<i id="column_options_button" class="fa fa-columns" aria-hidden="true" title="Spaltenauswahl" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
+					<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">
+		<? 			foreach ($this->nachweis_columns as $column => $c) {
+							echo '<input type="checkbox" name="column_' . $column . '" ' . (in_array($column, $this->formvars['columns']) ? 'checked' : '') . '>' . $c['alias'] . '<br>'; 
+						}	?>
+						<input type="button" style="margin: 8 0 5 40;" onclick="update_columns();" value="ok">
+					</div>
+					</td>
+				</tr>
     	</table>
 		</td>
   </tr>
@@ -591,13 +540,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						</div>
           </td>
 
-          <td style="width: 45">
-						<? echo ($i == 0 ? '<div class="fett scrolltable_header">ID</div>' : ''); ?>
-						<div><? echo $this->nachweis->Dokumente[$i]['id']; ?></div>
-					</td>
-
 					<?
-						output_columns($this, $i, ['gemarkung', 'flur']);
+						output_columns($this, $i, ['id', 'gemarkung', 'flur']);
 
        			if (NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer') {
 							output_columns($this, $i, ['stammnr', 'blattnummer']);
