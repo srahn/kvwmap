@@ -301,7 +301,7 @@ function save_bearbeitungshinweis(id){
 			'alias' => 'Fortführung',
 			'width' => 83
 		],
-		'vermstelle' => [
+		'vermst' => [
 			'alias' => 'Vermstelle',
 			'width' => 65
 		],
@@ -330,6 +330,20 @@ function save_bearbeitungshinweis(id){
 	function output_columns($gui, $i, $columns) {
 		foreach ($columns as $column) {
 			$c = $gui->nachweis_columns[$column];
+			switch ($column) {
+				case 'blattnummer' : {
+					$output = str_pad($gui->nachweis->Dokumente[$i]['blattnummer'], BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+				}break;
+				case 'art' : {
+					$output = ($gui->nachweis->Dokumente[$i]['unterart_name']? $gui->nachweis->Dokumente[$i]['unterart_name'] : $gui->hauptdokumentarten[$gui->nachweis->Dokumente[$i]['art']]['abkuerzung']);
+				}break;
+				case 'gueltigkeit' : case 'geprueft' : {
+					$output = ($gui->nachweis->Dokumente[$i][$column] ? 'ja' : 'nein');
+				}break;
+				default : {
+					$output = $gui->nachweis->Dokumente[$i][$column];
+				}
+			}
 			echo '
 				<td>
 					<div style="min-width: ' . $c['width'] . 'px">';
@@ -343,35 +357,17 @@ function save_bearbeitungshinweis(id){
 							}
 							echo '</div>';
 						}
-						echo '<div>' . $gui->nachweis->Dokumente[$i][$column] . '</div>
+						echo '<div>' . $output . '</div>
 					</div>
 				</td>';
 		}
 	}
 
-	function build_order_links($orderstring, $richtung){
+	function build_order_links($gui, $orderstring, $richtung){
 		if($orderstring != ''){
-			$orderaliases = array(
-												'gemarkung' => 
-												'Gemarkung', 
-												'flur' => 
-												'Flur', 
-												'stammnr' => 'Antragsnr.', 
-												'rissnummer' => 'Rissnr.', 
-												'art' => 'Dokumentart', 
-												'blattnummer' => 'Blattnr.', 
-												'datum' => 'Datum', 
-												'fortfuehrung' => 'Fortfuehrung', 
-												'vermstelle' => 'Vermstelle', 
-												'gueltigkeit' => 'Gueltigkeit', 
-												'geprueft' => 'geprueft', 
-												'format' => 'Format',
-												'zeit' => 'Zeit',
-												'erstellungszeit' => 'Erstellungszeit'
-											);
 			$orders = explode(',', $orderstring);
 			foreach($orders as $order){
-				$orderlinks[] = '<a href="javascript:remove_from_order(\''.$order.'\');" title="'.$orderaliases[$order].' aus Sortierung entfernen">'.$orderaliases[$order].'</a>';
+				$orderlinks[] = '<a href="javascript:remove_from_order(\''.$order.'\');" title="' . $gui->nachweis_columns[$order]['alias'] . ' aus Sortierung entfernen">' . $gui->nachweis_columns[$order]['alias'] . '</a>';
 			}
 			if($richtung == 'DESC')$richtungslink = '&nbsp;<a href="javascript:set_richtung(\'ASC\');" title="absteigend"><img src="'.GRAPHICSPATH.'pfeil.gif"></a>';
 			else $richtungslink = '&nbsp;<a href="javascript:set_richtung(\'DESC\');" title="aufsteigend"><img src="'.GRAPHICSPATH.'pfeil2.gif"></a>';
@@ -524,7 +520,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         </tr>
 		<tr> 
 			<td>Sortiert nach:
-				<span class="fett"><? echo build_order_links($this->formvars['order'], $this->formvars['richtung']); ?></span>
+				<span class="fett"><? echo build_order_links($this, $this->formvars['order'], $this->formvars['richtung']); ?></span>
 			</td>
         </tr>
     	</table>
@@ -613,7 +609,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 							output_columns($this, $i, ['blattnummer', 'stammnr']);
       			}
 
-						output_columns($this, $i, ['art', 'datum', 'datum_bis', 'rissfuehrer', 'fortfuehrung', 'antragsnummer_alt', 'vermstelle']);
+						output_columns($this, $i, ['art', 'datum', 'datum_bis', 'rissfuehrer', 'fortfuehrung', 'antragsnummer_alt', 'vermst']);
 
 						if (!$this->plugin_loaded('lenris')) {
 							output_columns($this, $i, ['gueltigkeit', 'geprueft']);

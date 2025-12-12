@@ -1308,7 +1308,7 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-					$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+					$sql ="SELECT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
