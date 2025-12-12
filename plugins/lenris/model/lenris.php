@@ -555,7 +555,7 @@ class LENRIS {
 						the_geom = " . ($geom != 'NULL' ? $geom : 'the_geom') . ", 
 						fortfuehrung = " . ($n['fortfuehrung'] ?: 'NULL') . ", 
 						rissnummer = '" . $n['rissnummer'] . "', 
-						bemerkungen = " . ($n['bemerkungen'] ? "'" . $n['bemerkungen'] . "'" : 'NULL') . ", 
+						bemerkungen = " . ($n['bemerkungen'] ? "'" . pg_escape_string($n['bemerkungen']) . "'" : 'NULL') . ", 
 						bearbeiter = " . ($n['bearbeiter'] ? "'" . $n['bearbeiter'] . "'" : 'NULL') . ", 
 						zeit = " . ($n['zeit'] ? "'" . $n['zeit'] . "'" : 'NULL') . ", 
 						erstellungszeit = " . ($n['erstellungszeit'] ? "'" . $n['erstellungszeit'] . "'" : 'NULL') . ", 
