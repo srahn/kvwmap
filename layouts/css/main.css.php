@@ -2168,6 +2168,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .readonly_text{
 	word-wrap: break-word;
+	width: max-content;
+  max-width: 700px;
 }
 
 .list_edit_div {
