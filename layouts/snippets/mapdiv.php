@@ -127,7 +127,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php'); ?>
 	</div>
 </div>
 
-
+<? if (defined('LAGEBEZEICHNUNGSART')) { ?>
 <div id="lagebezeichnung_bar">
 	<div id="lagebezeichnung">
 	<? if (is_array($this->Lagebezeichung) AND $this->Lagebezeichung['gemeindename'] != '') { ?>
@@ -137,6 +137,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php'); ?>
 		}  ?>
 	</div>
 </div>
+<? } ?>
 
 <?
 if ($this->user->rolle->showmapfunctions) { ?>
