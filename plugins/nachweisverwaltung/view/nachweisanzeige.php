@@ -259,6 +259,96 @@ function save_bearbeitungshinweis(id){
 </script>
 
 <? 
+
+	$this->nachweis_columns = [
+		'gemarkung' => [
+			'alias' => 'Gemkg',
+			'width' => 45
+		],
+		'flur' => [
+			'alias' => 'Flur',
+			'width' => 25
+		],
+		'stammnr' => [
+			'alias' => 'Antragsnr.',
+			'width' => 65
+		],	
+		'blattnummer' => [
+			'alias' => 'Blattnr.',
+			'width' => 55
+		],
+		'rissnummer' => [
+			'alias' => 'Rissnr.',
+			'width' => 45
+		],
+		'art' => [
+			'alias' => 'Dokumentart',
+			'width' => 85
+		],
+		'datum' => [
+			'alias' => '&nbsp;&nbsp;&nbsp;&nbsp;Datum',
+			'width' => 45
+		],
+		'datum_bis' => [
+			'alias' => 'Datum bis',
+			'width' => 75
+		],
+		'rissfuehrer' => [
+			'alias' => 'Rissführer',
+			'width' => 75
+		],
+		'fortfuehrung' => [
+			'alias' => 'Fortführung',
+			'width' => 83
+		],
+		'vermstelle' => [
+			'alias' => 'Vermstelle',
+			'width' => 65
+		],
+		'gueltigkeit' => [
+			'alias' => 'gültig',
+			'width' => 42
+		],
+		'geprueft' => [
+			'alias' => 'geprüft',
+			'width' => 52
+		],	
+		'format' => [
+			'alias' => 'Format',
+			'width' => 45
+		],	
+		'zeit' => [
+			'alias' => '&nbsp;&nbsp;&nbsp;&nbsp;Zeit',
+			'width' => 25
+		],	
+		'erstellungszeit' => [
+			'alias' => 'Erstellungszeit',
+			'width' => 100
+		]
+	];
+
+	function output_columns($gui, $i, $columns) {
+		foreach ($columns as $column) {
+			$c = $gui->nachweis_columns[$column];
+			echo '
+				<td>
+					<div style="min-width: ' . $c['width'] . 'px">';
+						if ($i == 0) {
+							echo '<div class="fett scrolltable_header">';
+							if (strpos($gui->formvars['order'], $column) === false) {
+								echo '<a href="javascript:add_to_order(\'' . $column . '\');" title="nach ' . $c['alias'] . ' sortieren"><span class="fett">' . $c['alias'] . '</span></a>';
+							} 
+							else {
+								echo '<span class="fett">' . $c['alias'] . '</span>';
+							}
+							echo '</div>';
+						}
+						echo '<div>' . $gui->nachweis->Dokumente[$i][$column] . '</div>
+					</div>
+				</td>';
+		}
+	}
+
 	function build_order_links($orderstring, $richtung){
 		if($orderstring != ''){
 			$orderaliases = array(
@@ -301,7 +391,7 @@ function save_bearbeitungshinweis(id){
 	}
 
 	.nw_treffer_table td {
-		padding: 5 0 5 8;
+		padding: 5 0 5 5;
 	}
 	
 	.nw_treffer_table td:first-child {
@@ -313,8 +403,6 @@ function save_bearbeitungshinweis(id){
 	}
 
 	.bearbeitungshinweise{
-		float:right;
-		margin-right: 15px;
 		font-size: 19px;
 		cursor: pointer;
 	}
@@ -471,7 +559,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             ?>
 			"> 
 					<td align="left">
-						<div style="min-width: 60px">
+						<div style="min-width: 77px">
 							<? echo ($i == 0 ? '<div style="padding-left: 5px;" class="fett scrolltable_header">Auswahl</div>' : ''); ?>
 							<a name="<? echo $this->nachweis->Dokumente[$i]['id']; ?>">
 							<input type="checkbox" name="id[]" id="id_<? echo $this->nachweis->Dokumente[$i]['id']; ?>" onchange="save_selection(); clear_selections('markhauptart[]', '');" value="<? echo $this->nachweis->Dokumente[$i]['id']; ?>"<? 
@@ -512,304 +600,34 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						<div><? echo $this->nachweis->Dokumente[$i]['id']; ?></div>
 					</td>
 
-          <td style="width: 60">
-						<?
-							if ($i == 0) {
-								echo '<div class="fett scrolltable_header">';
-								if (strpos($this->formvars['order'], 'gemarkung') === false){ ?>
-									<a href="javascript:add_to_order('gemarkung');" title="nach Gemarkung sortieren"><span class="fett">Gemkg</span></a> <? 
-								} 
-								else { ?>
-									<span class="fett">Gemkg</span> <?
-								}
-								echo '</div>';
-							}
-						?>
-						<div><? echo $this->formvars['gemarkung']=$this->nachweis->Dokumente[$i]['gemarkung']; ?></div>
-					</td>
+					<?
+						output_columns($this, $i, ['gemarkung', 'flur']);
 
-					<td style="width: 40">
-						<?
-							if ($i == 0) {
-								echo '<div class="fett scrolltable_header">';
-								if (strpos($this->formvars['order'], 'flur') === false){ ?>
-									<a href="javascript:add_to_order('flur');" title="nach Flur sortieren"><span class="fett">Flur</span></a> <? 
-								} 
-								else { ?>
-									<span class="fett">Flur</span> <?
-								}
-								echo '</div>';
-							}
-						?>
-						<div><? echo $this->formvars['flur']=$this->nachweis->Dokumente[$i]['flur']; ?></div>
-					</td>
+       			if (NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer') {
+							output_columns($this, $i, ['stammnr', 'blattnummer']);
+      			}
 
-      <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  
-          <td>
-						<div style="min-width: 65px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'stammnr') === false){ ?>
-										<a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Antragsnr.</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div>
-						</div>
-					</td>
+						output_columns($this, $i, ['rissnummer']);
 
-					<td>
-						<div style="min-width: 45px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'blattnummer') === false){ ?>
-										<a href="javascript:add_to_order('blattnummer');" title="nach Blattnr. sortieren"><span class="fett">Blattnr.</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Blattnr.</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div>
-						</div>
-					</td>
-      <? } ?>
+      			if (NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer') {
+							output_columns($this, $i, ['blattnummer', 'stammnr']);
+      			}
 
-          <td>
-						<div style="min-width: 45px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'rissnummer') === false){ ?>
-										<a href="javascript:add_to_order('rissnummer');" title="nach Rissnr. sortieren"><span class="fett">Rissnr.</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Rissnr.</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['rissnummer']=$this->nachweis->Dokumente[$i]['rissnummer']; ?></div>
-						</div>
-					</td>
+						output_columns($this, $i, ['art', 'datum', 'datum_bis', 'rissfuehrer', 'fortfuehrung', 'antragsnummer_alt', 'vermstelle']);
 
-      <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
-					<td>
-						<div style="min-width: 45px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'blattnummer') === false){ ?>
-										<a href="javascript:add_to_order('blattnummer');" title="nach Blattnr. sortieren"><span class="fett">Blattnr.</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Blattnr.</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div>
-						</div>
-					</td>
+						if (!$this->plugin_loaded('lenris')) {
+							output_columns($this, $i, ['gueltigkeit', 'geprueft']);
+						}
 
-          <td>
-						<div style="min-width: 65px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'stammnr') === false){ ?>
-										<a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Antragsnr.</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div>
-						</div>
-					</td>
-      <? } ?>
-
-          <td>
-						<div style="min-width: 85px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'art') === false){ ?>
-										<a href="javascript:add_to_order('art');" title="nach Dokumentart sortieren"><span class="fett">Dokumentart</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Dokumentart</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo ($this->nachweis->Dokumente[$i]['unterart_name']? $this->nachweis->Dokumente[$i]['unterart_name'] : $this->hauptdokumentarten[$this->nachweis->Dokumente[$i]['art']]['abkuerzung']); ?></div>
-						</div>
-					</td>
-
-          <td>
-						<div style="min-width: 45px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'datum') === false){ ?>
-										<a href="javascript:add_to_order('datum');" title="nach Datum sortieren"><span class="fett">&nbsp;&nbsp;&nbsp;&nbsp;Datum</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">&nbsp;&nbsp;&nbsp;&nbsp;Datum</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->nachweis->Dokumente[$i]['datum']; ?></div>
-						</div>
-					</td>
-
-          <td>
-						<div style="min-width: 75px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'fortfuehrung') === false){ ?>
-										<a href="javascript:add_to_order('fortfuehrung');" title="nach Fortführung sortieren"><span class="fett">Fortführung</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Fortführung</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div>
-						</div>
-					</td>
-
-          <td>
-						<div style="min-width: 65px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'vermstelle') === false){ ?>
-										<a href="javascript:add_to_order('vermstelle');" title="nach Vermessungsstelle sortieren"><span class="fett">Vermstelle</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Vermstelle</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div>
-						</div>
-					</td>
+						output_columns($this, $i, ['format', 'zeit', 'erstellungszeit']);
 					
-			<? if (!$this->plugin_loaded('lenris')) { ?>
 					
-					<td>
-						<div style="min-width: 35px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'gueltigkeit') === false){ ?>
-										<a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">gültig</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">gültig</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? if($this->nachweis->Dokumente[$i]['gueltigkeit']){echo 'ja';} else {echo 'nein';} ?></div>
-						</div>
-					</td>
-
-					<td>
-						<div style="min-width: 45px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'geprueft') === false){ ?>
-										<a href="javascript:add_to_order('geprueft');" title="nach geprüft sortieren"><span class="fett">geprüft</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">geprüft</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? if($this->nachweis->Dokumente[$i]['geprueft']){echo 'ja';} else {echo 'nein';} ?></div>
-						</div>
-					</td>
-					
-			<? } ?>
-					
-          <td>
-						<div style="min-width: 45px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'format') === false){ ?>
-										<a href="javascript:add_to_order('format');" title="nach Format sortieren"><span class="fett">Format</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Format</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?></div>
-						</div>
-					</td>
-
-					<td>
-						<div style="min-width: 25px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'zeit') === false){ ?>
-										<a href="javascript:add_to_order('zeit');" title="nach Zeit sortieren"><span class="fett">&nbsp;&nbsp;&nbsp;&nbsp;Zeit</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">&nbsp;&nbsp;&nbsp;&nbsp;Zeit</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['zeit']=$this->nachweis->Dokumente[$i]['zeit']; ?></div>
-						</div>
-					</td>
-
-					<td>
-						<div style="min-width: 100px">
-							<?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">';
-									if (strpos($this->formvars['order'], 'erstellungszeit') === false){ ?>
-										<a href="javascript:add_to_order('erstellungszeit');" title="nach Erstellungszeit sortieren"><span class="fett">Erstellungszeit</span></a> <? 
-									} 
-									else { ?>
-										<span class="fett">Zeit</span> <?
-									}
-									echo '</div>';
-								}
-							?>
-							<div><? echo $this->formvars['erstellungszeit']=$this->nachweis->Dokumente[$i]['erstellungszeit']; ?></div>
-						</div>
-					</td>
-					
-			<? if ($this->plugin_loaded('lenris')) { ?>
-					
-					<td style="width: 80"></td>
-					<td style="width: 80"></td>
-					
-			<? } ?>
+						if ($this->plugin_loaded('lenris')) { ?>
+							
+							<td style="width: 80"></td>
+							<td style="width: 80"></td>
+							
+					<? } ?>
 					
 					<td style="width: 30">
 						<?
