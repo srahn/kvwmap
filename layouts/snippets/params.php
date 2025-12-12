@@ -28,7 +28,7 @@
 							valuesString = document.getElementById('layer_parameter_" . $param['key'] . "').value;
 						";
 					} ?>
-					let data = 'go=setLayerParams&layer_parameter_<? echo $param['key']; ?>=' + valuesString; <?
+					data = 'go=setLayerParams&layer_parameter_<? echo $param['key']; ?>=' + valuesString; <?
 				} ?>;
 				ahah('index.php', data, [''], ['execute_function']);
 				document.GUI.legendtouched.value = 1;
