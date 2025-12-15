@@ -1,5 +1,6 @@
 <?
   ini_set('memory_limit', '16000M');
+  set_time_limit(1800);
   global $GUI;
 	global $kvwmap_plugins;
 
