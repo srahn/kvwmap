@@ -1236,7 +1236,7 @@ echo '			</table>
 		for($i = 0; $i < count_or_0($this->layers_replace_scale ?: []); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
-    echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
+    echo $this->create_group_legend($this->formvars['group']);
   }
 
   function close_group_legend() {
@@ -1281,13 +1281,11 @@ echo '			</table>
 		return $legend;
   }
 
-	function create_group_legend($group_id, $status = NULL){
-		include_once(CLASSPATH . 'LayerGroup.php');
+	function create_group_legend($group_id) {
+		if (!$this->group_has_layers[$group_id] ) {		# wenns keine Layer in der Gruppe oder in Untergruppen gibt, Gruppe weglassen
+			return;
+		}
 		$layerlist = $this->layerset['list'];
-		// $group = new LayerGroup($this);
-		// $group_aktiv_status = $group->get_aktiv_status($this->Stelle->id, $this->user->id, $group_id);
-
-		if (@$this->groupset[$group_id]['untergruppen'] == NULL AND @$this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
     $legend =  '
@@ -1328,7 +1326,7 @@ echo '			</table>
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
 					$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="6" height="1" border="0"></td><td style="width: 100%">';
-					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u], $status);
+					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
 					$legend .= '</td></tr></table></td></tr>';
 				}
 			}
@@ -2251,7 +2249,7 @@ echo '			</table>
         }
 
 				if (count($layerset) == 0) {
-					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
+					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')), $this->user->rolle->layer_selection);
 					$rollenlayer = $mapDB->read_RollenLayer();
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
@@ -2269,11 +2267,20 @@ echo '			</table>
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['layer_id'].'|';							# alle Layer-IDs hintereinander in einem String
 
+					if ($group = value_of($this->groupset, $layerset['list'][$i]['gruppe'])){			# die Gruppe des Layers
+						if ($this->group_has_layers[$layerset['list'][$i]['gruppe']] != 1) {				# wenn group_has_layers noch nicht gesetzt
+							$this->group_has_layers[$layerset['list'][$i]['gruppe']] = 1;  						# die Gruppe hat Layer
+							while ($group['obergruppe'] != '' AND $this->group_has_layers[$group['obergruppe']] != 1){
+								$group = $this->groupset[$group['obergruppe']];
+								$this->group_has_layers[$group['id']] = 1;  														# auch die Obergruppen durchlaufen
+							}
+						}
+					}
+
 					if (value_of($layerset['list'][$i], 'requires') != '') {
 						$layerset['list'][$i]['aktivstatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivstatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
-
 					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivstatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
@@ -2411,23 +2418,14 @@ echo '			</table>
 		// 		}
 		// 	}
 		// }
-		
+
 		if ($group = value_of($this->groupset, $layerset['gruppe'])){						# die Gruppe des Layers
 			if ($layerset['aktivstatus'] != 0) {																	# wenn Layer aktiv
 				if ($this->group_has_active_layers[$layerset['gruppe']] != 1) {			# wenn group_has_active_layers noch nicht gesetzt
 					$this->group_has_active_layers[$layerset['gruppe']] = 1;  				# die Gruppe hat aktive Layer
-					while($group['obergruppe'] != ''){
+					while ($group['obergruppe'] != '' AND $this->group_has_active_layers[$group['obergruppe']] != 1){
 						$group = $this->groupset[$group['obergruppe']];
 						$this->group_has_active_layers[$group['id']] = 1;  							# auch alle Obergruppen durchlaufen
-					}
-				}
-			}
-			else {																																# Layer nicht aktiv
-				if ($this->group_has_inactive_layers[$layerset['gruppe']] != 1) {		# wenn group_has_inactive_layers noch nicht gesetzt
-					$this->group_has_inactive_layers[$layerset['gruppe']] = 1;  			# die Gruppe hat inaktive Layer
-					while($group['obergruppe'] != ''){
-						$group = $this->groupset[$group['obergruppe']];
-						$this->group_has_inactive_layers[$group['id']] = 1;  						# auch alle Obergruppen durchlaufen
 					}
 				}
 			}
@@ -15432,42 +15430,50 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
 	function layerCommentLoad() {
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$groups = $mapDB->read_Groups();
-		$ret = $this->user->rolle->getLayerComments(
-			$this->formvars['id'],
-			($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id)
-		);
-		if ($ret[1] == NULL) {
-			$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
-		}
-		else {
-			$layerset = $this->user->rolle->getLayer('');
-			for ($i = 0; $i < count($layerset); $i++){
-				$formvars['thema'][$layerset[$i]['layer_id']] = 0;		# erstmal alle ausschalten
-				$formvars['qLayer'][$layerset[$i]['layer_id']] = 0;		# erstmal alle ausschalten
+		if ($this->formvars['id']) {
+			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+			$groups = $mapDB->read_Groups();
+			$ret = $this->user->rolle->getLayerComments(
+				$this->formvars['id'],
+				($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id)
+			);
+			if ($ret[1] == NULL) {
+				$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
 			}
-			foreach($groups as $group){
-				if($group['obergruppe'] == ''){
-					$formvars['group_'.$group['id']] = 0;		# und alle Obergruppen zuklappen
+			else {
+				$layerset = $this->user->rolle->getLayer('');
+
+				$this->reset_layers(NULL);
+				for ($i = 0; $i < count($layerset); $i++){
+					unset($formvars['thema'][$layerset[$i]['layer_id']]);
+					unset($formvars['qLayer'][$layerset[$i]['layer_id']]);
 				}
+				foreach($groups as $group){
+					if($group['obergruppe'] == ''){
+						$formvars['group_'.$group['id']] = 0;		# und alle Obergruppen zuklappen
+					}
+				}
+				$layer_ids = explode(',', $ret[1][0]['layers']);
+				foreach($layer_ids as $layer_id){
+					$formvars['thema'][$layer_id] = 1;
+					$groupid = $layerset['layer_ids'][$layer_id]['gruppe'];
+					do{
+						$formvars['group_'.$groupid] = 1;
+						$groupid = $groups[$groupid]['obergruppe'];
+					} while ($groupid != '');
+				}
+				$query_ids = explode(',', $ret[1][0]['query']);
+				foreach($query_ids as $layer_id){
+					$formvars['qLayer'][$layer_id] = 1;
+				}
+				$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
+				$this->user->rolle->setQueryStatus($formvars);
+				$this->user->rolle->setGroupStatus($formvars);
 			}
-      $layer_ids = explode(',', $ret[1][0]['layers']);
-			foreach($layer_ids as $layer_id){
-				$formvars['thema'][$layer_id] = 1;
-				$groupid = $layerset['layer_ids'][$layer_id]['gruppe'];
-				do{
-					$formvars['group_'.$groupid] = 1;
-					$groupid = $groups[$groupid]['obergruppe'];
-				} while ($groupid != '');
-			}
-			$query_ids = explode(',', $ret[1][0]['query']);
-			foreach($query_ids as $layer_id){
-				$formvars['qLayer'][$layer_id] = 1;
-			}
-			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
-			$this->user->rolle->setQueryStatus($formvars);
-			$this->user->rolle->setGroupStatus($formvars);
+		}
+		if ($this->user->rolle->layer_selection_mode == 1) {
+			$this->user->rolle->setLayerSelection($this->formvars['id']);
+			$this->user->rolle->readSettings();
 		}
 		$this->loadMap('DataBase');
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
@@ -15756,12 +15762,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select =  "nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
-    $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, hist_timestamp";
+    $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, hist_timestamp, layer_selection_mode";
     $from = "kvwmap.rolle";
     $where = "stelle_id='+this.form.stelle_id.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
-			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp,layer_selection_mode));" : "")
 			. ((value_of($this->formvars, 'show_layer_parameter')) ? "ahah('index.php','go=getLayerParamsForm&stelle_id='+document.GUI.stelle_id.value, new Array(document.getElementById('layer_parameters_div')), new Array('sethtml'))" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
@@ -18612,7 +18618,7 @@ class db_mapObj{
 		return $Layer;
 	}
 
-	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL) {
+	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL, $layer_selection = NULL) {
 		global $language;
 
 		if ($language != 'german') {
@@ -18634,7 +18640,7 @@ class db_mapObj{
 		}
 
 		$sql = "
-			SELECT DISTINCT
+			SELECT 
 				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency,
 				rl.aktivstatus,
@@ -18695,6 +18701,7 @@ class db_mapObj{
 				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.gruppe) = g.id LEFT JOIN
 				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				kvwmap.connections as c ON l.connection_id = c.id
+				" . ($layer_selection? "join kvwmap.rolle_saved_layers rsl on l.layer_id = any(rsl.layers) and rsl.id = " . $layer_selection : "") . "
 			WHERE
 				rl.stelle_id = ul.stelle_id AND
 				rl.layer_id = ul.layer_id AND

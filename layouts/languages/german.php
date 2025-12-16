@@ -102,4 +102,5 @@
 	$this->strYes = 'Ja';
 	$this->TaskChangeWarning = 'Sie sind nicht berechtigt zur Ausführung der Funktion in dieser Stelle.';
 	$this->transparency = 'Deckkraft';
+	$this->strLayerSelection = 'Themenauswahl';
 ?>

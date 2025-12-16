@@ -2476,6 +2476,14 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	border-right: 1px solid #CCCCCC;
 }
 
+#layer_selection_div, #schnellsprung_div{
+	display: flex;
+  flex-flow: column;
+  border: 1px solid #bbb;
+  margin: 4px;
+  padding: 3px;
+}
+
 #rollenwahl_main_div {
 	width: 830px; 
 	min-height: 430px
@@ -2501,7 +2509,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .rollenwahl-option-header {
-	<!-- width: 270px; -->
+	width: 285px;
 	padding : 4px;
 }
 

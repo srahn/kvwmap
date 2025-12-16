@@ -27,10 +27,38 @@
 	}
 } ?>
 <div id="legend_layer">
-	<div class="button_background" style="box-shadow: none; border-bottom: 1px solid #bbb">
-	<?	if(!$this->simple_legend AND defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
-				include(SNIPPETS.'schnellsprung.php');
-			} ?>
+	<div class="button_background" style="box-shadow: none; border-bottom: 1px solid #bbb">		<?	
+		if (!$this->simple_legend AND defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != '') {
+			include(SNIPPETS.'schnellsprung.php');
+		}
+		if ($this->user->rolle->layer_selection) {
+			include_once(CLASSPATH.'FormObject.php');
+			$ret = $this->user->rolle->getLayerComments(NULL, $this->user->id);
+      $layer_selections = $ret[1];
+			echo '<div id="layer_selection_div">' . $this->strLayerSelection . ':';
+			echo FormObject::createSelectField(
+				'layer_selection',
+				array_map(
+					function($layer_selection) {
+						return array(
+							'value' => $layer_selection['id'],
+							'output' => $layer_selection['name']
+						);
+					},
+					$layer_selections
+				),
+				$this->user->rolle->layer_selection,
+				1,
+				'', 
+				"window.location.href='index.php?go=Layerauswahl_Laden&id=' + this.value",
+				'',
+				'',
+				'',
+				' - alle Themen - '
+			);
+			echo '</div>';
+		}
+		?>
 	<div id="legendcontrol">
 		<? if(!$this->simple_legend){
 					if ($this->user->rolle->singlequery < 2) { ?>
