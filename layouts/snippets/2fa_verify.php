@@ -32,6 +32,7 @@ if (!isset($_SESSION['2fa_verification'])) {
 			<form method="post">
 				<h2>2FA-Code eingeben:</h2>
 				<input name="code" placeholder="6-stelliger Code" required><br><br>
+				<? echo hidden_formvars_fields(array_intersect_key($_REQUEST, array_flip(['browserwidth', 'browserheight'])), []); ?>
 				<button type="submit">Bestätigen</button>
 			</form>
 		</div>

@@ -395,7 +395,7 @@ if ($doit == true) {
 																	</td>
 																	<td style="position: relative">
 																		<a 
-																			title="QR-Code" 
+																			title="Position in Karten-App anzeigen" 
 																			href="javascript:void(0);" 
 																			onmouseenter="get_position_qrcode(<? echo $layer['layer_id']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"
 																			onmouseleave="remove_position_qrcode(<? echo $layer['layer_id']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"

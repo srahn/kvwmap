@@ -187,6 +187,12 @@
 		}
 	}
 
+	function for_other_layer(){
+		other_layer_select = document.getElementById('other_layer_select');
+		other_layer_select.classList.toggle('hidden');
+		other_layer_select.disabled = !other_layer_select.disabled;
+	}
+
 	function save_layout(){
 		if(document.GUI.name.value == ''){
 			alert('Bitte geben Sie einen Namen für das Layout ein.');
@@ -1011,7 +1017,26 @@
 			<input type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;
 			<input id="save_submit_button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;
 <? } ?>
+
 			<input type="button" name="go_plus" onclick="save_layout();" value="als neues Layout speichern">
+			<select style="width:240px" size="1" id="other_layer_select" name="selected_layer_id" title="Auswahl des anderen Layers" class="hidden" disabled>
+				<option value="">--- bitte wählen ---</option><?
+				for($i = 0; $i < count($this->layerdaten['ID']); $i++){
+					echo '<option';
+					if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+						echo ' selected';
+					}
+					echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+				} ?>
+			</select>
+			<i
+				id="show_attributes_for_other_layer_button"
+				title="Als neues Layout für anderen Layer speichern"
+				class="fa fa-magic"
+				aria-hidden="true"
+				onclick="for_other_layer();"
+			></i>
+
 		</div>
 <? } ?>
 	</div>

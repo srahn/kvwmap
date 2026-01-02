@@ -1008,8 +1008,9 @@ class Nachweis {
         else {
           # Suche nach einer einzelnen Nachweis_id
           # echo '<br>Suche nach einer einzelnen ID.';
-          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst, h.id as hauptart, n.art as unterart FROM nachweisverwaltung.n_nachweise AS n";
+          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art as unterart FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+          $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
           $sql.=" WHERE n.id=".(int)$id;
@@ -1034,8 +1035,9 @@ class Nachweis {
       } break;
       
       case "MergeIDs" : {
-        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst, h.id as hauptart, n.art as unterart FROM nachweisverwaltung.n_nachweise AS n";
+        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art as unterart FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+        $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
         $sql.=" WHERE n.id=".(int)$idselected[0];
@@ -1085,6 +1087,7 @@ class Nachweis {
             substr(flurid::text, 7, 3) as flur,
 						st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,
 						v.name AS vermst, 
+            r.name as rissfuehrer, 
 						h.id as hauptart, 
 						lower(h.abkuerzung) as hauptart_abk, 
 						n.art AS unterart, 
@@ -1094,6 +1097,7 @@ class Nachweis {
 						nachweisverwaltung.n_nachweise AS n " .
 						($this->lenris_plugin? 'JOIN lenris.client_nachweise cn ON cn.nachweis_id = n.id	JOIN lenris.clients c ON c.client_id = cn.client_id' : '') . "
 						LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id 
+            LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id 
 						LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id 
 						LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart
 					WHERE 
@@ -1168,13 +1172,14 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT DISTINCT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+          $sql ="SELECT DISTINCT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == 0){
 						$sql.=" alkis.pp_flur as flur, ";
 					}
 					$sql.=" nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+          $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
 					if($alle_der_messung){
@@ -1303,9 +1308,10 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-					$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+					$sql ="SELECT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+          $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
 					if($alle_der_messung){
@@ -1360,9 +1366,10 @@ class Nachweis {
                      AND ln2a.client_id = n2a.client_id";
         }
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
-				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*, substr(flurid::text, 1, 6) as gemarkung, substr(flurid::text, 7, 3) as flur, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*, substr(flurid::text, 1, 6) as gemarkung, substr(flurid::text, 7, 3) as flur, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
         $sql.=" FROM " . $n2a . " AS n2a, nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+        $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";				
         $sql.=" WHERE n.id = n2a.nachweis_id";

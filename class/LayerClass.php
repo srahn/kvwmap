@@ -65,17 +65,17 @@ class LayerClass extends PgObject {
 	function get_layerdef($classitem = null, $datentyp = 0, $layer_opacity = 1) {
 		#echo 'get_layerdef for Class: ' . $this->get('name') . '(' . $this->get('class_id') . ')';
 
-		if ($this->get('Expression') == '') {
+		if ($this->get('expression') == '') {
 			$def = '';
 		}
-		elseif (preg_match("/'\\[[^\\]]+\\]'\\s+in\\s+\\('[^']*'\\)/", $this->get('Expression'))) {
-			$def = trim($this->get('Expression'));
+		elseif (preg_match("/'\\[[^\\]]+\\]'\\s+in\\s+\\('[^']*'\\)/", $this->get('expression'))) {
+			$def = trim($this->get('expression'));
 		}
 		elseif ($classitem == '') {
 			$def = '';
 		}
 		else {
-			$def = "([" . $classitem . "] = '" . $this->get('Expression') . "')";
+			$def = "([" . $classitem . "] = '" . $this->get('expression') . "')";
 		}
 
 		$first_style = $this->get_first_style($datentyp);

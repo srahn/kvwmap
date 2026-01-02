@@ -408,6 +408,14 @@ if ($this->Fehlermeldung!='') {
 										<span data-tooltip="<? echo $strHintMenueButtons; ?>"></span>
 									</td>
 								</tr>
+								<tr>
+									<td class="rollenwahl-option-header">
+										<? echo $strLayerSelectionMode; ?>:
+									</td>
+									<td class="rollenwahl-option-data">
+										<input name="layer_selection_mode" type="checkbox" value="1" <? if ($this->user->rolle->layer_selection_mode == '1'){echo 'checked="true"';} ?> >&nbsp;
+									</td>
+								</tr>
 							</table>
 						</td>
 					</tr>

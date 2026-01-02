@@ -138,6 +138,20 @@ class rolle {
     return 1;
   }
 
+	function setLayerSelection($id) {
+    $sql = "
+			UPDATE 
+				kvwmap.rolle 
+			SET 
+				layer_selection = " . ($id ?: 'NULL') . "
+    	WHERE 
+				user_id = " . $this->user_id . ' 
+				AND stelle_id = ' . $this->stelle_id;
+    $this->debug->write("<p>file:rolle.php class:rolle->setLayerSelection:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
+
 	function getLayer($LayerName, $only_active = false, $replace_params = true) {
 		$layer = [];
 		$layer_name_filter = '';
@@ -528,6 +542,8 @@ class rolle {
 			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
+			$this->layer_selection_mode=$rs['layer_selection_mode'];
+			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
@@ -539,6 +555,7 @@ class rolle {
 			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
+			$this->menu_auto_close=$rs['layer_selection_mode'];
 			rolle::$layer_params = array_map(
 				function ($layer_param) {
 					return ($layer_param === 'Array' ? '' : $layer_param);

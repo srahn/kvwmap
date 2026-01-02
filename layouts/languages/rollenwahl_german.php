@@ -18,6 +18,7 @@
 	$strMapFunctions="Zeige Kartenfunktionen";
 	$strShowLayerOptions="Zeige Themenoptionen";
 	$strMenueButtons="Menüs als Schaltflächen";
+	$strLayerSelectionMode='nur Layer der Themenauswahl anzeigen';
 	$strMapSize="Kartenfenstergr&ouml;&szlig;e";
 	$strAutoResize="automatisch";
 	$strTask="Stelle";

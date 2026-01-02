@@ -40,7 +40,7 @@ class Nutzer extends PgObject {
 	}
 
 	function get_name() {
-		return ($this->get('name') ? $this->get('name') . ', ' : '') . ($this->get('Vorname') ? $this->get('Vorname') : $this->login_name);
+		return ($this->get('name') ? $this->get('name') . ', ' : '') . ($this->get('vorname') ? $this->get('vorname') : $this->login_name);
 	}
 
 	public static function increase_num_login_failed($gui, $login_name) {
