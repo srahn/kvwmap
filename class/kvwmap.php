@@ -15051,13 +15051,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
 		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getKeys(), 'keep');
 		$results = $this->cronjob->update();
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			#		$this->cronjob->set('query', $this->cronjob->get('query'));
 			$this->cronjobs = CronJob::find($this);
 			$this->main = 'cronjobs.php';
 		}
 		else {
-			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);
+			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $results['err_msg']);
 			$this->main = 'cronjob_formular.php';
 		}
 		$this->output();
