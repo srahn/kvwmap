@@ -16,6 +16,7 @@
 	// metadata_reorder_data_packages
 	// metadata_set_ressource_status
 	// metadata_show_data_packages
+	// metadata_show_outdated
 	// metadata_show_ressources_status
 	// metadata_upload_to_geonetwork
 	// Metadaten_Auswaehlen_Senden
@@ -810,6 +811,21 @@
 			// 	echo '<br>Ressource: ' . $package->get('ressource_id') . ' Paket: ' . $package->get('id') . ' ' . $package->get('bezeichnung') . ' Layer-ID: ' . $package->get('layer_id') . ' Datentyp: ' . $package->layer->get('Datentyp') . ' geom_column: ' . $package->layer->get('geom_column') . ' hat keine Daten in dieser Stelle Abfrage:<br><textarea cols="60" rows="10">' . $sql . '</textarea>';
 			// }
 		}
+		$GUI->output();
+	};
+
+	$GUI->metadata_show_outdated = function() use ($GUI) {
+		$GUI->metadata_outdated_ressources = Ressource::find_outdated($GUI);
+		$results = $GUI->metadata_outdated_ressources[0]->getSQLResults("
+			SELECT count(id) AS num_running FROM metadata.ressources WHERE use_for_datapackage AND status_id > 0 AND status_id < 11;
+		");
+		$GUI->metadata_num_running = $results[0]['num_running'];
+		$command = "ps aux | grep -i 'ressources_cron.php' | grep -v grep";
+		$output = '';
+		$result_code = '';
+		exec($command, $outputs, $result_code);
+		$GUI->metadata_processes = $outputs;
+		$GUI->main = PLUGINS . 'metadata/view/outdated_ressources.php';
 		$GUI->output();
 	};
 

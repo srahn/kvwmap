@@ -37,7 +37,7 @@
 
     // if (!$GUI->is_tool_allowed('only_cli')) exit;
     $GUI->pgdatabase = new pgdatabase();
-    $GUI->pgdatabase->open(1);
+    $GUI->pgdatabase->open();
 
     if (isset($argv)) {
       array_shift($argv);
