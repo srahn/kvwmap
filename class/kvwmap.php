@@ -1461,7 +1461,7 @@ echo '			</table>
 			else{
 				$legend .=  ' title="'.$this->activatelayer.'"';
 			}
-			$legend .= ' ></td><td valign="middle" style="width: 80%" id="legend_layer_' . $layer['layer_id'] . '">';
+			$legend .= ' ></td><td valign="middle" style="width: 95%" id="legend_layer_' . $layer['layer_id'] . '">';
 
 			$legend .= $this->create_layername_legend($layer);
 			$legend .= $this->create_class_legend($layer);
