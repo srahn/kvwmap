@@ -4,7 +4,7 @@
 		<form name="login" action="index.php" method="post">
 			<input type="hidden" name="browserwidth">
 			<input type="hidden" name="browserheight"><?
-			echo hidden_formvars_fields($this->formvars); ?>
+			echo hidden_formvars_fields($this->formvars, ['browserwidth', 'browserheight', 'go']); ?>
 			<table align="center" cellspacing="4" cellpadding="22" id="login_table">
 				<tr>
 					<td align="center"><h1>Bitte warten...</h1></td>
