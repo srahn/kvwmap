@@ -1842,6 +1842,9 @@
       # Nur Navigieren
       $GUI->navMap($GUI->formvars['CMD']);
     }
+		elseif($GUI->formvars['lea_id'] != '') {
+			$GUI->zoomToLEA($nachweis, $GUI->formvars['lea_id'], 10);
+		}
 	
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
     
@@ -1895,6 +1898,23 @@
 			else {
 				$GUI->map_scaledenom = $GUI->map->scale;
 			}
+    }
+  };
+
+	$GUI->zoomToLEA = function($nachweis, $lea_id, $border) use ($GUI){
+    # Abfragen der Ausdehnung des Umringes des Nachweises
+    $ret = $nachweis->getLeaBBoxAsRectObj($lea_id);
+    if ($ret[0]) {
+      # Fehler bei der Abfrage der BoundingBox
+      # Es erfolgt keine Änderung der aktuellen Ausdehnung
+    }
+    else {
+      $rect=$ret[1];
+      # Berechnen des Randes in Abhängigkeit vom Parameter border gegeben in Prozent
+      $randx=($rect->maxx-$rect->minx)*$border/100;
+      $randy=($rect->maxy-$rect->miny)*$border/100;
+      $GUI->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+			$GUI->map_scaledenom = $GUI->map->scaledenom;
     }
   };
 	
