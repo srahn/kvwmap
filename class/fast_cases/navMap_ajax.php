@@ -2901,7 +2901,7 @@ class rolle {
 		$this->layerset = $this->getLayer('');
 		if (!$ignore_rollenlayer) {
 			$rollenlayer = $this->getRollenLayer('', NULL);
-			$this->layerset = array_merge($this->layerset, $rollenlayer);
+			$this->layerset = array_merge_recursive($this->layerset, $rollenlayer);
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		foreach ($formvars['thema'] as $layer_id => $aktiv_status) {
