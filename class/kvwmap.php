@@ -4720,6 +4720,9 @@ echo '			</table>
 	function showMapImage() {
 		include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php');
   	$this->loadMap('DataBase');
+		if ($this->map->selectOutputFormat('jpeg_print') == 1){
+			$this->map->selectOutputFormat('jpeg');
+		}
   	$this->drawMap(true);
   	$randomnumber = rand(0, 1000000);
   	$svgfile  = $randomnumber.'.svg';
@@ -4738,7 +4741,7 @@ echo '			</table>
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
-  	exec(IMAGEMAGICKPATH . 'convert ' . IMAGEPATH . $svgfile . ' ' . IMAGEPATH . $jpgfile);
+  	exec(IMAGEMAGICKPATH . 'convert ' . IMAGEPATH . $svgfile . ' -quality 100 ' . IMAGEPATH . $jpgfile);
 		// echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
 
     if (function_exists('imagecreatefromjpeg')) {
@@ -4751,7 +4754,7 @@ echo '			</table>
       }
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
-      ImageJPEG($mainimage, IMAGEPATH.$jpgfile);
+      ImageJPEG($mainimage, IMAGEPATH.$jpgfile, 100);
     } 
 		//readfile(IMAGEPATH . $svgfile);
 		include(SNIPPETS . 'map_image.php');
@@ -8046,7 +8049,7 @@ echo '			</table>
 			if ($preview == true) {
 				$resize = '-resize 595x1000';
 			}
-			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+			exec(IMAGEMAGICKPATH.'convert -density 300x300 -quality 100 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg');
 			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if (!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				$this->outputfile = $name.'-'.$currenttime.'-0.jpg';;
