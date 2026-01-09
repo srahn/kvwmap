@@ -20,6 +20,21 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 	}
 }
 
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false) {
+	if ($last) {
+		$word_pos = strripos($str, $word);
+	}
+	else {
+		$word_pos = stripos($str, $word);
+	}
+	if ($word_pos !== false) {
+		$str_from_word_pos = substr($str, $word_pos + strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return trim($parts[0]);
+	}
+	return '';
+}
+
 function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
@@ -30,6 +45,11 @@ function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
+	if (strpos($exp, ' IN ') != false) {
+		$array = get_first_word_after($exp, ' IN');
+		$exp = str_replace(' IN ', ' = ANY(', $exp);
+		$exp = str_replace($array, $array . ')', $exp);
+	}
 
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex

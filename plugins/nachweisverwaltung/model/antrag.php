@@ -244,7 +244,7 @@ class antrag {
 			if ($pagecount!=1)$footer .= 'n';
 			$pdf->addText(395,10,6, $footer);
 			$pdf->addText(765,$row+10,8, date('d.m.Y',time()));
-			$pdf->addText(30,$row-=12,10,'<b>Anlage der Vermessungsvorbereitung zu Auftragsnummer '.$this->nr.'</b>');
+			$pdf->addText(30,$row-=12,10,'<b>Anlage der Vermessungsvorbereitung zu Auftragsnummer ' . $this->antragsliste[0]['antr_nr'] . '</b>');
 			$pdf->addText(30,$row-=25,10,utf8_decode('Liste der ausgegebenen Unterlagen'));
 			if (defined('ZUSATZ_UEBERGABEPROTOKOLL') AND ZUSATZ_UEBERGABEPROTOKOLL != '') {
 				$pdf->addText(30,$row-=16,9,utf8_decode(ZUSATZ_UEBERGABEPROTOKOLL));
@@ -299,7 +299,10 @@ class antrag {
         " . ($lea_id? 'lenris.lea_vermessungsantrag' : 'nachweisverwaltung.n_antraege') . " AS a
         LEFT JOIN nachweisverwaltung.n_vermstelle vs ON a.vermstelle = vs.id
         LEFT JOIN nachweisverwaltung.n_vermart va ON a.vermart=va.id WHERE 1=1";
-    if ($lea_id == '' AND $id[0] != '') {
+    if ($lea_id != '') {
+      $sql .= " AND lea_id = " . $lea_id;
+    }
+    else if ($id[0] != '') {
       $sql .= " AND a.antr_nr IN ('" . implode("', '", $id) . "')";
     }
 		if(!in_array($current_stelle_id, $admin_stellen))$sql.= " AND stelle_id = ".$current_stelle_id;
@@ -387,18 +390,39 @@ class antrag {
     # mehr wird im Protokoll nicht erfasst, nicht jedes einzelne Blatt
     # Dieser Vorgang ist hier mit der Variable FFR belegt, weil zu einem Vorgang
     # meistens mindestens ein Fortführungsriss gehört.
-    $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
-    $sql ="SELECT DISTINCT max(datum) as datum, n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
-		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
-    $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a";
-    $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
-		else $sql.=" AND stelle_id=".$this->stelle_id;
-		$sql.=" GROUP BY n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
-		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
-    $sql.=" ORDER BY datum";
-		if(NACHWEIS_SECONDARY_ATTRIBUTE != '' AND $formvars['order'] == NACHWEIS_PRIMARY_ATTRIBUTE)$sql.=", ".NACHWEIS_SECONDARY_ATTRIBUTE;
-    #echo $sql;
+    $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);       
+    
+    if ($formvars['lea_id'] == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'
+                 AND stelle_id " . ($this->stelle_id == ''? "IS NULL" : "= " . $this->stelle_id);
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $formvars['lea_id'] . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+    
+    $sql = "
+      SELECT DISTINCT 
+        max(datum) as datum, 
+        n.flurid, n." . NACHWEIS_PRIMARY_ATTRIBUTE .
+		    (NACHWEIS_SECONDARY_ATTRIBUTE != '' ? ", n.".NACHWEIS_SECONDARY_ATTRIBUTE : "") . "
+      FROM 
+        nachweisverwaltung.n_nachweise AS n, 
+        " . $n2a . " AS n2a
+      WHERE 
+        n.id = n2a.nachweis_id  
+        " . $where . "
+		  GROUP BY 
+        n.flurid, 
+        n." . NACHWEIS_PRIMARY_ATTRIBUTE . 
+		    (NACHWEIS_SECONDARY_ATTRIBUTE != '' ? ",n." . NACHWEIS_SECONDARY_ATTRIBUTE : "") . "
+      ORDER BY 
+        datum " . 
+		  (NACHWEIS_SECONDARY_ATTRIBUTE != '' AND $formvars['order'] == NACHWEIS_PRIMARY_ATTRIBUTE ? ", " . NACHWEIS_SECONDARY_ATTRIBUTE : "");
+    // echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);    
     if ($ret[0]) { return $ret[1]; }
     else { $query_id=$ret[1]; }
@@ -413,35 +437,35 @@ class antrag {
       }
 			
       # Abfrage der Riss-/Stammnummern (des nicht primären Ordnungskriteriums)
-			$ret=$this->getNotPrimary($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			$ret=$this->getNotPrimary($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 			if ($ret[0]) { return $ret; }
 			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'Antragsnummer';
 			else $not_primary = 'Rissnummer';
 			$FFR[$i][$not_primary]=$ret[1];
 
       # Abfrage der Anzahl der verschiedenen Dokumentarten zum Vorgang      
-			$anz_arten = $this->getAnzArten($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			$anz_arten = $this->getAnzArten($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 			foreach($anz_arten as $anz_art){
 				$FFR[$i][$anz_art['abkuerzung']] = $anz_art['anz'];
 			}
       
     	# Abfrage der Dateinamen im Vorgang
       if($formvars['Datei']){
-	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $withFileLinks);
+	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $withFileLinks, $formvars['lea_id']);
 	      if ($ret[0]) { return $ret; }
 				$FFR[$i]['Datei - Messungsdatum'] = $ret[1];
       }
 
       # Abfrage der Vermessungsstellen im Vorgang
       if($formvars['gemessendurch']){
-	      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+	      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 	      if ($ret[0]) { return $ret; }
 	      $FFR[$i]['gemessen durch']=utf8_decode($ret[1]);
       }
             
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
 	  if($formvars['Gueltigkeit']){
-		$ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+		$ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 		if ($ret[0]) { return $ret; }
 		$FFR[$i][utf8_decode('Gültigkeit')]=utf8_decode($ret[1]); 
 	  }
@@ -453,15 +477,34 @@ class antrag {
     return $ret;
   }
 	
-	function getNotPrimary($flurid,$primary,$secondary){
+	function getNotPrimary($flurid, $primary, $secondary, $lea_id = NULL){
 		if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'stammnr';
 		else $not_primary = 'rissnummer';
+
+    if ($lea_id == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'";
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $lea_id . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+
     $this->debug->write('<br>antrag.php getNotPrimary Abfragen der NotPrimary zu einem Vorgang in der Nachweisführung.',4);
-    $sql.="SELECT ".$not_primary." FROM nachweisverwaltung.n_nachweise AS n";
-		$sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$primary."'";
-    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-		$sql.= "order by art, blattnummer";
+    $sql = "
+      SELECT 
+        ".$not_primary." 
+      FROM 
+        nachweisverwaltung.n_nachweise AS n,
+		    " . $n2a . " AS n2a 
+      WHERE 
+        n.id = n2a.nachweis_id 
+        " . $where . "
+        AND n.flurid = " . $flurid . " AND n." . NACHWEIS_PRIMARY_ATTRIBUTE . " = '" . $primary . "'" . 
+        ($secondary != '' ? " AND n." . NACHWEIS_SECONDARY_ATTRIBUTE . " = '" . $secondary . "'" : "") . "
+		  order by art, blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       while($rs=pg_fetch_array($ret[1])) {
@@ -473,14 +516,32 @@ class antrag {
     return $ret;  
   }
     
-	function getDatei($flurid,$nr,$secondary, $withFileLinks) {
+	function getDatei($flurid, $nr, $secondary, $withFileLinks, $lea_id = NULL) {
     $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT n.link_datei, datum, lower(h.abkuerzung) as hauptart FROM nachweisverwaltung.n_nachweise AS n";
-		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
-		$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
-    if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+
+    if ($lea_id == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'";
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $lea_id . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+
+    $sql = "
+      SELECT 
+        n.link_datei, 
+        datum, 
+        lower(h.abkuerzung) as hauptart 
+      FROM 
+        nachweisverwaltung.n_nachweise AS n
+		    LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id
+		    LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
+    if ($this->nr != '' OR $lea_id != '') {
+      $sql.=", " . $n2a . " AS n2a WHERE n.id = n2a.nachweis_id " . $where;
     }
     else {
       $sql.=" WHERE (1=1)";
@@ -499,12 +560,28 @@ class antrag {
     return $ret;  
   }
   
-  function getGueltigkeit($flurid,$nr,$secondary) {
+  function getGueltigkeit($flurid, $nr, $secondary, $lea_id = NULL) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.
-    $sql.="SELECT DISTINCT n.gueltigkeit FROM nachweisverwaltung.n_nachweise AS n";
-    if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+
+    if ($lea_id == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'";
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $lea_id . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+
+    $sql = "
+      SELECT DISTINCT 
+        n.gueltigkeit 
+      FROM 
+        nachweisverwaltung.n_nachweise AS n";
+    if ($this->nr != '' OR $lea_id != '') {
+      $sql.=", " . $n2a . " AS n2a WHERE n.id = n2a.nachweis_id " . $where;
     }
     else {
       $sql.=" WHERE (1=1)";
@@ -527,12 +604,29 @@ class antrag {
     return $ret;  
   }
   
-  function getVermessungsStellen($flurid,$nr,$secondary) {
+  function getVermessungsStellen($flurid, $nr, $secondary, $lea_id = NULL) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.',4);
     # Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.
-    $sql.="SELECT DISTINCT v.name FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_vermstelle AS v";
-    if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+
+    if ($lea_id == '') {
+      $n2a = 'nachweisverwaltung.n_nachweise2antraege';
+      $where = " AND n2a.antrag_id = '" . $this->nr . "'";
+    }
+    else {
+      $n2a = 'lenris.lea_nachweise2antrag ln2a, lenris.client_nachweise';
+      $where = " AND ln2a.lea_id = " . $lea_id . "
+                 AND ln2a.client_nachweis_id = n2a.client_nachweis_id
+                 AND ln2a.client_id = n2a.client_id";
+    }
+
+    $sql = "
+      SELECT DISTINCT 
+        v.name 
+      FROM 
+        nachweisverwaltung.n_nachweise AS n, 
+        nachweisverwaltung.n_vermstelle AS v";
+    if ($this->nr != '' OR $lea_id != '') {
+      $sql.=", " . $n2a . " AS n2a WHERE n.id = n2a.nachweis_id " . $where;
     }
     else {
       $sql.=" WHERE (1=1)";
@@ -552,18 +646,34 @@ class antrag {
     return $ret;    
   }
     
-  function getAnzArten($flurid,$nr,$secondary) {
+  function getAnzArten($flurid, $nr, $secondary, $lea_id = NULL) {
     $this->debug->write('<br>nachweis.php getAnzFFR Abfragen der Anzahl der Blätter eines FFR.',4);
     # Abfrag der Anzahl der zum Riss gehörenden Fortführungsrisse
-    $sql.="SELECT h.abkuerzung, CASE WHEN COUNT(n2a.nachweis_id) = 0 THEN '-' ELSE COUNT(n2a.nachweis_id)::text END AS anz FROM nachweisverwaltung.n_hauptdokumentarten h " ;
-		$sql.="LEFT JOIN nachweisverwaltung.n_dokumentarten d ON h.id = d.hauptart ";
-		$sql.="LEFT JOIN nachweisverwaltung.n_nachweise AS n ON n.art = d.id AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
-    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-    if ($this->nr!='') {
-			$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+
+    if ($lea_id == '') {
+      $join = "LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id = n2a.nachweis_id AND n2a.antrag_id = '" . $this->nr . "'";
     }
-    $sql.=" GROUP BY h.id, h.abkuerzung";
-		$sql.=" ORDER BY h.id";
+    else {
+      $join = "LEFT JOIN lenris.client_nachweise as n2a ON n.id = n2a.nachweis_id
+               LEFT JOIN lenris.lea_nachweise2antrag ln2a ON 
+                ln2a.lea_id = " . $lea_id . " AND 
+                ln2a.client_nachweis_id = n2a.client_nachweis_id AND 
+                ln2a.client_id = n2a.client_id";
+    }
+
+    $sql = "
+      SELECT 
+        h.abkuerzung, 
+        CASE WHEN COUNT(n2a.nachweis_id) = 0 THEN '-' ELSE COUNT(n2a.nachweis_id)::text END AS anz 
+      FROM 
+        nachweisverwaltung.n_hauptdokumentarten h 
+        LEFT JOIN nachweisverwaltung.n_dokumentarten d ON h.id = d.hauptart 
+        LEFT JOIN nachweisverwaltung.n_nachweise AS n ON n.art = d.id AND n.flurid = " . $flurid . " AND n." . NACHWEIS_PRIMARY_ATTRIBUTE . " = '" . $nr . "'" . 
+        ($secondary != '' ? " AND n." . NACHWEIS_SECONDARY_ATTRIBUTE . " = '" . $secondary . "'" : "") . 
+        (($this->nr != '' OR $lea_id != '') ? $join : "") . "
+      GROUP BY 
+        h.id, h.abkuerzung
+		  ORDER BY h.id";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { $ret=$queryret; }
     else {

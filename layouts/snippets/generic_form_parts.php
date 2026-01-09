@@ -56,7 +56,7 @@
 		}
 	}
 
-	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true, $field_id = NULL) {
+	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true, $field_id = NULL, $calendar = true) {
 		$field_id = $field_id ?: $layer_id.'_'.$attributes['name'][$j].'_'.$k;
 		$datapart = '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
@@ -81,7 +81,7 @@
 		}
 		$datapart .= attribute_tooltip($attributes, $j);
 
-		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
+		if($calendar AND in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 			$datapart .= '<td align="right" style="position: relative">'.calendar($attributes['type'][$j], $field_id, $attributes['privileg'][$j]).'</td>';
 		}
 		$datapart .= '</td></tr></table>';
@@ -152,6 +152,11 @@
 		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
 			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
+
+			if ($attributes['form_element_type'][$j] == 'Auswahlfeld' AND $attributes['req_by'][$j] != '') {
+				$onchange .= 'update_require_attribute(this, \''.$attributes['req_by'][$j].'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributes['name']).'\'));';
+			}
+
 			$datapart .= '<input
 				type="hidden"
 				class="'.$field_class.'"
@@ -166,6 +171,7 @@
 			$attributes2 = $attributes;
 			#$attributes2['name'][$j] = '';		// rausgenommen weil sonst in dynamischen Links nicht richtig ersetzt wird, aber es hatte wahrscheinlich einen Grund
 			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
+			$attributes2['req_by'][$j] = '';				// Die Array-Elemente sollen bei abhängigen Auswahlfeldern nicht die Auswahlmöglichkeiten neu laden, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);
 			$dataset2 = [];
@@ -296,7 +302,7 @@
 				else{
 					$datapart .= ' tabindex="1" style="width: 100%;"';
 				}
-				$datapart .= ' rows="3" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
+				$datapart .= ' rows="' . ($size <= 50 ? '2' : '3') . '" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
 				if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 					if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
 						$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
@@ -639,13 +645,13 @@
 				if ($value != '') {
 					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url'], $attributes['type'][$j], $layer_id, $oid, $name);
 					if ($preview['doc_src'] != '') {
-						$datapart .= '<table border="0"><tr><td class="td_preview_image">';
+						$datapart .= '<table border="0"><tr><td class="' . ($preview['doc_type'] == 'local_img'? 'td_preview_image' : '') . '">';
 						if ($hover_preview) {
 							$onmouseover = 'onmouseenter="root.document.getElementById(\'vorschau\').style.border=\'1px solid grey\';root.document.getElementById(\'preview_img\').src=this.src" onmouseleave="root.document.getElementById(\'vorschau\').style.border=\'none\';root.document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 						}
 						switch ($preview['doc_type']) {
 							case 'local_img' : { # Bilder mit Vorschaubild
-								$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_image" src="' . $preview['thumb_src'] . '" ' . $onmouseover . '></a>';
+								$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_image' . ($hover_preview ? '_hover' : '') . '" src="' . $preview['thumb_src'] . '" ' . $onmouseover . '></a>';
 							} break;
 
 							case 'local_doc' : case 'remote_url' : { # lokale Dateien oder fremde URLs
@@ -1190,7 +1196,7 @@
 			}
 			$datapart .= '<select class="' . $field_class . '" tabindex="1" title="'.$alias.'" style="'.$select_width.'"';
 			if($req_by != ''){
-				$onchange = $onchange . 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributenames).'\'));';
+				$onchange = 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributenames).'\'));' . $onchange;
 			}
 			$datapart .= ' onchange="'.$onchange.'" ';
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';

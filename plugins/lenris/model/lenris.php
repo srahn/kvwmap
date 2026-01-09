@@ -302,6 +302,9 @@ class LENRIS {
 	}
 	
 	function get_new_nachweise($client){
+		set_time_limit(1800);
+		ini_set('memory_limit', '8192M');
+		ini_set('default_socket_timeout', 1800);
 		$result = trim(file_get_contents($client['url'] . 'go=LENRIS_get_new_nachweise'));
 		$result = substr($result, strpos($result, '['));
 		if (strpos($result, '[') !== false) {
@@ -320,6 +323,9 @@ class LENRIS {
 	}
 	
 	function get_changed_nachweise($client){
+		set_time_limit(1800);
+		ini_set('memory_limit', '8192M');
+		ini_set('default_socket_timeout', 1800);
 		$result = trim(file_get_contents($client['url'] . 'go=LENRIS_get_changed_nachweise'));
 		$result = substr($result, strpos($result, '['));
 		if (strpos($result, '[') !== false) {
@@ -549,7 +555,7 @@ class LENRIS {
 						the_geom = " . ($geom != 'NULL' ? $geom : 'the_geom') . ", 
 						fortfuehrung = " . ($n['fortfuehrung'] ?: 'NULL') . ", 
 						rissnummer = '" . $n['rissnummer'] . "', 
-						bemerkungen = " . ($n['bemerkungen'] ? "'" . $n['bemerkungen'] . "'" : 'NULL') . ", 
+						bemerkungen = " . ($n['bemerkungen'] ? "'" . pg_escape_string($n['bemerkungen']) . "'" : 'NULL') . ", 
 						bearbeiter = " . ($n['bearbeiter'] ? "'" . $n['bearbeiter'] . "'" : 'NULL') . ", 
 						zeit = " . ($n['zeit'] ? "'" . $n['zeit'] . "'" : 'NULL') . ", 
 						erstellungszeit = " . ($n['erstellungszeit'] ? "'" . $n['erstellungszeit'] . "'" : 'NULL') . ", 

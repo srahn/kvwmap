@@ -365,7 +365,6 @@ span[data-tooltip] {
 	position: relative;
 	width: 100%;
 	min-height: 24px;
-	height: calc(100% - (var(--tabelle-td-height-padding) * 1px));
 	border: var(--el-default-border);
 	cursor: pointer;
 	line-height: normal !important;
@@ -377,10 +376,6 @@ span[data-tooltip] {
 	height: calc(calc(var(--tabelle-td-height) * 1px) - calc(var(--tabelle-td-height-padding) * 1px) - 2px);
 	padding: 0 0.5em;
 	margin: 0;
-	display: flex;
-	flex-flow: column nowrap;
-	justify-content: center;
-	align-content: center;
 }
 .gsm_tabelle_attribute .gsm_tabelle_td_third table, 
 #autofeld_zweispaltig_auswahl_und_suggest_div, 
