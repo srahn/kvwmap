@@ -295,7 +295,7 @@ class Ressource extends PgObject {
 					}
 					else {
 						$result = $ressource->run_update($method_only, $only_missing);
-						$msg .= 'Ressource ' . $ressource->get_idj() . ' aktualisiert';
+						$msg .= 'Ressource ' . $ressource->get_id() . ' aktualisiert';
 						$ressource->log($result, false);
 					}
 					$num_updated += 1;

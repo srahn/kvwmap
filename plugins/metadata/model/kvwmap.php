@@ -815,11 +815,14 @@
 	};
 
 	$GUI->metadata_show_outdated = function() use ($GUI) {
+		$GUI->metadata_num_running = 0;
 		$GUI->metadata_outdated_ressources = Ressource::find_outdated($GUI);
-		$results = $GUI->metadata_outdated_ressources[0]->getSQLResults("
-			SELECT count(id) AS num_running FROM metadata.ressources WHERE use_for_datapackage AND status_id > 0 AND status_id < 11;
-		");
-		$GUI->metadata_num_running = $results[0]['num_running'];
+		if (count($GUI->metadata_outdated_ressources) > 0) {
+			$results = $GUI->metadata_outdated_ressources[0]->getSQLResults("
+				SELECT count(id) AS num_running FROM metadata.ressources WHERE use_for_datapackage AND status_id > 0 AND status_id < 11;
+			");
+			$GUI->metadata_num_running = $results[0]['num_running'];
+		}
 		$command = "ps aux | grep -i 'ressources_cron.php' | grep -v grep";
 		$output = '';
 		$result_code = '';
