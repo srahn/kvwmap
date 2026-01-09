@@ -2899,8 +2899,7 @@ class rolle {
 
 	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
 		$this->layerset = $this->getLayer('');
-		if (!$ignore_rollenlayer) {
-			$rollenlayer = $this->getRollenLayer('', NULL);
+		if (!$ignore_rollenlayer AND $rollenlayer = $this->getRollenLayer('', NULL)) {
 			$this->layerset['layer_ids'] = $this->layerset['layer_ids'] + $rollenlayer['layer_ids'];
 			$this->layerset = $this->layerset + $rollenlayer;
 		}

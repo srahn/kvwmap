@@ -52,7 +52,11 @@
 			else {
 				$title_link = 'href="javascript:void(0);"';
 			}
-			return '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"></a></td>';
+			return '<td align="right">
+								<a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '">
+									<div class="gle_attribute_tooltip" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"></div>
+								</a>
+							</td>';
 		}
 	}
 

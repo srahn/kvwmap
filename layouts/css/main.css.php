@@ -2149,6 +2149,12 @@ thead.gle th {
 	vertical-align: bottom;
 }
 
+.gle_attribute_tooltip {
+	width: 16px;
+	height: 16px;
+	background-image: url(<? echo GRAPHICSPATH; ?>emblem-important.png);
+}
+
 table.tgle .glehead tr {
 	height: 26px;
 }
