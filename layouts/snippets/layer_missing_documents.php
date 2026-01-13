@@ -1,4 +1,8 @@
 <?
+
+	ini_set('memory_limit', '8192M');
+	set_time_limit(1800);
+
 	include_once(CLASSPATH . 'PgObject.php');
 	include_once(CLASSPATH . 'LayerAttribute.php');
 	/**
