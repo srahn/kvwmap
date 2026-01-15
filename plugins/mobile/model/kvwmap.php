@@ -14,6 +14,7 @@
 // mobile_reformat_attributes
 // mobile_reformat_fk_attributes
 // mobile_reformat_layer
+// mobile_reset_log
 // mobile_set_sync_reset_needed
 // mobile_show_log
 // mobile_sync
@@ -58,6 +59,20 @@ $GUI->mobile_create_layer_sync_all = function ($layer) use ($GUI) {
 		return 0;
 	}
 	$GUI->add_message('info', 'Sync-Trigger für INSERT, UPDATE und DELETE auf Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . ' angelegt.');
+};
+
+$GUI->mobile_reset_log = function($log_name) use ($GUI) {
+	$logfile = LOGPATH . 'kvmobile/' . $log_name . '_debug_log.html';
+	$backupfile = LOGPATH . 'kvmobile/archiv/' . $log_name . '_debug_log_' . date('Y-m-d_H-i-s') . '.html';
+	if (!file_exists(LOGPATH . 'kvmobile/archiv/')) {
+		mkdir(LOGPATH . 'kvmobile/archiv/', 0777, true);
+	}
+	copy($logfile, $backupfile);
+	$handle = fopen($logfile, 'w');
+	ftruncate($handle, 0);
+	rewind($handle);
+	fclose($handle);
+	$GUI->add_message('info', 'Datei ' . $logfile . ' nach ' . $backupfile . ' gesichert und anschließend geleert.');
 };
 
 $GUI->mobile_set_sync_reset_needed = function($log_name) use ($GUI) {

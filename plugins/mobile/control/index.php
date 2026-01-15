@@ -8,6 +8,7 @@
 // mobile_get_pmtiles_style
 // mobile_get_stellen
 // mobile_list_logs
+// mobile_reset_log
 // mobile_set_sync_reset_needed
 // mobile_show_log
 // mobile_sync
@@ -110,6 +111,16 @@ function go_switch_mobile($go) {
 			$GUI->checkCaseAllowed('Administratorfunktionen');
 			include_once(CLASSPATH . 'administration.php');
 			$GUI->administration = new administration($GUI->database, $GUI->pgdatabase);	
+			$GUI->mobile_list_logs();
+			$GUI->output();
+		} break;
+
+		case 'mobile_reset_log' : {
+			$GUI->checkCaseAllowed('Administratorfunktionen');
+			$GUI->sanitize(['log_name' => 'text']);
+			include_once(CLASSPATH . 'administration.php');
+			$GUI->administration = new administration($GUI->database, $GUI->pgdatabase);	
+			$GUI->mobile_reset_log($GUI->formvars['log_name']);
 			$GUI->mobile_list_logs();
 			$GUI->output();
 		} break;

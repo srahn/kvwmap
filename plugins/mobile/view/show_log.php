@@ -45,7 +45,7 @@ else { ?>
       <h3><span class="dates"><? echo $log['timestamp']; ?></span></h3>
       <input type="button" value="Toggle Textfield" onclick="$(this).next().next().toggle();" style="margin-top: 13px; float: right;">
       <div style="clear: both"></div>
-      <div class="client_deltas"><pre><? echo implode('<br>', array_map(function($l) { return $l->sql; }, $log['client_deltas'])); ?></pre></div><?
+      <div class="client_deltas"><pre><? echo implode('<br>', array_map(function($l) { return $l->sql . ';'; }, $log['client_deltas'])); ?></pre></div><?
       if ($log['error']) { ?>
         <span class="errors" style="color: red; font-weight: bold">Fehler: <? echo $log['error']; ?></span><br>
         <a href="index.php?go=mobile_set_sync_reset_needed&log_name=<? echo $this->formvars['log_name']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Fehler beheben</a><br><?
