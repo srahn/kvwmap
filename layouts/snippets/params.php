@@ -18,17 +18,17 @@
 				foreach($params AS $param) {
 					if ($param['multiple'] == '1') {
 						echo "
-							const checkboxes = document.querySelectorAll('.layer_parameter_" . $param['key'] . ":checked');
-							const valuesArray = Array.from(checkboxes).map(cb => cb.value);
-							const valuesString = valuesArray.join(',');
+							checkboxes = document.querySelectorAll('.layer_parameter_" . $param['key'] . ":checked');
+							valuesArray = Array.from(checkboxes).map(cb => cb.value);
+							valuesString = valuesArray.join(',');
 						";
 					}
 					else {
 						echo "
-							const valuesString = document.getElementById('layer_parameter_" . $param['key'] . "').value;
+							valuesString = document.getElementById('layer_parameter_" . $param['key'] . "').value;
 						";
 					} ?>
-					let data = 'go=setLayerParams&layer_parameter_<? echo $param['key']; ?>=' + valuesString; <?
+					data = 'go=setLayerParams&layer_parameter_<? echo $param['key']; ?>=' + valuesString; <?
 				} ?>;
 				ahah('index.php', data, [''], ['execute_function']);
 				document.GUI.legendtouched.value = 1;

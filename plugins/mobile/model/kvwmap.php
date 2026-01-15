@@ -735,7 +735,12 @@ $GUI->mobile_reformat_fk_attributes = function ($attributes) use ($GUI) {
 		if ($attribute['form_element_type'] === 'SubFormFK') {
 			$attribute_obj = new LayerAttribute($GUI);
 			$attribute_options = $attribute_obj->get_options($attribute['options'], 'SubFormFK');
-			$fk_attribute = array_filter($attributes, fn($attr) => $attr["name"] === $attribute_options['fk_name']);
+			$fk_attribute = array_filter(
+				$attributes,
+				function ($attr) use ($attribute_options) {
+					$attr["name"] === $attribute_options['fk_name'];
+				}
+			);
 			foreach (array_keys($fk_attribute) as $fk_attr_key) {
 				$new_attributes[$fk_attr_key]['options'] = $attribute['options'];
 				$new_attributes[$fk_attr_key]['form_element_type'] = 'SubFormFK';

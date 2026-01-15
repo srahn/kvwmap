@@ -146,7 +146,7 @@ body {
 	margin: auto;
 }
 
-.collapsed, .collapsedfull {
+.collapsed, div:not(.gle_tabular)~.collapsedfull {
 	visibility: collapse;
   height: 0;
 	padding: 0 !important;
@@ -487,7 +487,9 @@ span[data-tooltip]:hover::after {
 	border-radius: 2px;
 	box-shadow: 1px 1px 6px 1px #ddd;
   position: absolute;
-	width: 200px;
+	width: max-content;
+	min-width: 200px;
+	max-width: 400px;
   top: 1px;
   right: 0;
   left: 0;
@@ -509,12 +511,18 @@ span[data-tooltip]:hover::after {
 
 .custom-select .dropdown li {
   display: flex;
-  align-items: center;
+  align-items: baseline;
+	max-width: 400px;
+	min-width: 200px;
   background-color: #fff;
 	min-height: 20px;
   padding: 3px;
 	margin-bottom: 0;
   cursor: pointer;
+}
+
+.custom-select .dropdown li span {
+	white-space: nowrap;
 }
 
 .custom-select .dropdown li:not(:last-child) {
@@ -1761,16 +1769,18 @@ span.black {
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
 
 .td_preview_image{
-	padding-top: 125px;
+	padding-top: 125px;	
+  padding-right: 125px;
+	position: relative;
 }
 
+/* Klasse für Bilder, die sich beim Hovern vergrößern (alle die nicht im Rasterlayout angezeigt werden) */
 a .preview_image{
 	border:1px solid black;
 	max-width: 125px;
 	max-height: 125px;
 	position: absolute;
-	top: 0px;
-	right: 0px;
+	top: 5px;
 	transition: all 0.25s ease;
 }
 
@@ -1779,8 +1789,15 @@ a:hover .preview_image{
 	max-height: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
 	transition: all 0.25s ease;
 	transition-delay: 0.2s;
-	right: -70px;
 	z-index: 9999999999;
+}
+
+/* Klasse für Bilder im Rasterlayout, die bei Mouseover eine Vorschau rechts oben in der Ecke anzeigen */
+a .preview_image_hover{
+	border:1px solid black;
+	width: auto !important;
+	max-width: 125px;
+	max-height: 125px;
 }
 
 .preview_doc{}
@@ -1814,7 +1831,6 @@ a:hover .preview_image{
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input{width:130px;font-size: <? echo $font_size_factor * 15; ?>px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input[type=file]{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}		/* Das FileUpload-Inputfeld soll auch versteckt werden*/
-.raster_record .tr_show .preview_image{width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
 .raster_record .tr_show .preview_doc{width: auto;}																/* Vorschaubilder für andere Dokumente nicht */
 .raster_record .tr_show .buttonlink{display: none}
 /* Alle Attribute: */
@@ -1838,8 +1854,6 @@ a:hover .preview_image{
 .raster_record_open span{line-height:16px;font-size: <? echo $font_size_factor * 15; ?>px;transition: all 0.25s ease;}
 .raster_record_open img{width: auto; transition: all 0.25s ease;}
 .raster_record_open .tr_hide{visibility:visible;}
-.raster_record_open .preview_image{width: 125px;transition: all 0.25s ease;}
-.raster_record_open .preview_image:hover{width: 125px;transition: all 0.25s ease;}
 
 
 #layer	h2{
@@ -2131,6 +2145,13 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .readonly_text{
 	word-wrap: break-word;
+	width: max-content;
+  max-width: 700px;
+}
+
+.list_edit_div {
+	overflow-y:auto; 
+	max-height: 400px;
 }
 
 .gle1_table{
@@ -2169,6 +2190,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .subFormListItem{
 	height: 20px;
 	padding: 0 0 8px 0;
+	vertical-align: top;
 }
 
 .subFormListItem > a{
@@ -2229,7 +2251,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position: absolute;
 	z-index: 1000000;
 	right: 0px;
-	left: 0px;
+	left: 240px;
 	bottom: 30px;
 	width: 220px;
 	height: fit-content;

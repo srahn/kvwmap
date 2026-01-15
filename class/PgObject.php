@@ -190,6 +190,34 @@ class PgObject {
 		return $results;
 	}
 
+	function find_where_ohne_clone($where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
+		$select = (empty($select) ? $this->select : $select);
+		$from   = (empty($from) ? $this->schema . ".\"" . $this->tableName . "\"" : $from);
+		$where  = (empty($where) ? "true" : $where);
+		$order  = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
+		$limit  = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
+		$sql = "
+			SELECT
+				" . $select . "
+			FROM
+				" . $from . "
+			WHERE
+				" . $where . "
+			" . $order . "
+			" . $limit . "
+		";
+		$this->debug->show('find_where sql: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		if ($query == false) {
+			echo $sql; exit;
+		}
+		$results = array();
+		while ($data = pg_fetch_assoc($query)) {
+			$results[] = $data;
+		}
+		return $results;
+	}
+
 	/**
 	 * Function query, set and return extent of all features in epsg of $this->geom_column in $this->extent variable
 	 * additional it query and set the extents in epsg given in $ows_srs string
@@ -431,12 +459,10 @@ class PgObject {
 		*/
 		$query = pg_query($this->database->dbConn, $sql);
 		if (!$query) {
-			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), $this->show);
+			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), true);
 			return array(
 				'success' => false,
-				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn),
-				'sql' => $sql
-			);
+				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn));
 		}
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
@@ -508,42 +534,36 @@ class PgObject {
 	}
 
 	function update_attr($attributes, $set = false) {
-		if (is_array($attributes) AND count($attributes) > 0) {
-			$quote = ($this->identifier_type == 'text' ? "'" : "");
-			$sql = "
-				UPDATE
-					\"" . $this->schema . "\".\"" . $this->tableName . "\"
-				SET
-					" . implode(', ', $attributes) . "
-				WHERE
-					" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
-			";
-			// echo $sql;
-			$this->debug->show('update sql: ' . $sql, $this->show);
-			try {
-				pg_query($this->database->dbConn, $sql);
-				if ($set) {
-					foreach($attributes AS $attribute) {
-						$parts = explode('=', $attribute);
-						$this->set(trim($parts[0]), trim($parts[1], "'"));
-					}
+		$quote = ($this->identifier_type == 'text' ? "'" : "");
+		$sql = "
+			UPDATE
+				\"" . $this->schema . "\".\"" . $this->tableName . "\"
+			SET
+				" . implode(', ', $attributes) . "
+			WHERE
+				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+		";
+		#echo $sql;
+		$this->debug->show('update sql: ' . $sql, $this->show);
+		try {
+			pg_query($this->database->dbConn, $sql);
+			if ($set) {
+				foreach($attributes AS $attribute) {
+					$parts = explode('=', $attribute);
+					$this->set(trim($parts[0]), trim($parts[1], "'"));
 				}
-				return array(
-					'success' => true,
-					'msg' => 'Attributes erfolgreich geupdated mit sql:' . $sql
-				);
 			}
-			catch (Exception $e) {
-				return array(
-					'success' => false,
-					'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' .  $e->getMessage()
-				);
-			}
+			return array(
+				'success' => true,
+				'msg' => 'Attributes erfolgreich geupdated'
+			);
 		}
-		return array(
-			'success' => true,
-			'msg' => 'Nichts geupdated weil keine Werte übergeben wurden.'
-		);
+		catch (Exception $e) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' .  $e->getMessage()
+			);
+		}
 	}
 
 	function delete() {

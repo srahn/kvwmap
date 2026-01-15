@@ -473,6 +473,11 @@
 							<td>Ergebnisse der internen Konvertierung:</td><td><a href="index.php?go=xplankonverter_validierungsergebnisse&page=zusammenzeichnung&planart=<?php echo $konvertierung->get('planart'); ?>&konvertierung_id=<? echo $konvertierung->get_id(); ?>"><i class="fa fa-list-alt" aria-hidden="true"></i> Anzeigen</a><td>
 						</tr>
 						<tr>
+							<td>
+								Erzeugte XLog-Datei:</td><td><a href="index.php?go=xplankonverter_download_xlog&page=zusammenzeichnung&planart=<?php echo $konvertierung->get('planart'); ?>&konvertierung_id=<? echo $konvertierung->get_id(); ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> Download</a>
+							</td>
+						</tr>
+						<tr>
 							<td>Erzeugte XPlanGML-Datei in Version <?php echo $xplan_version; ?>:</td><td><a href="index.php?go=xplankonverter_download_xplan_gml&page=zusammenzeichnung&planart=<?php echo $konvertierung->get('planart'); ?>&konvertierung_id=<? echo $konvertierung->get_id(); ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> Download</a><td>
 						</tr>
 						<tr>

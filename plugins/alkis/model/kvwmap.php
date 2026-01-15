@@ -204,7 +204,7 @@
 		$datageom = $explosion[0];
 		$explosion = explode('using unique ', strtolower($data));
 		$end = $explosion[1];
-		$select = $dbmap->getSelectFromData($data);
+    $select = getDataParts($data)['select'];
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";

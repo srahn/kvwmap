@@ -46,6 +46,11 @@ function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
+	if (strpos($exp, ' IN ') != false) {
+		$array = get_first_word_after($exp, ' IN');
+		$exp = str_replace(' IN ', ' = ANY(', $exp);
+		$exp = str_replace($array, $array . ')', $exp);
+	}
 
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
@@ -2579,29 +2584,35 @@ function before_last($txt, $delimiter) {
 	if (!$delimiter) {
 		return '';
 	}
-	$parts = explode($delimiter, $txt);
-	array_pop($parts);
-	return implode($delimiter , $parts);
+	$pos = strrpos($txt, $delimiter);
+  return $pos === false ? $txt : substr($txt, 0, $pos);
 }
 
 /**
- * Function return the inner part of the select in a mapserver data statement
- * normaly looks like this:
- * the_geom (select id, the_geom from schema.tabelle where true) using unique id using srid=25832
- * Function extract from first select until last closing bracket.
- * If no open pracket is before select like in this example:
- * select id, the_geom from schema.tabelle where true, return $data as it is
+ * Function returns the parts of a mapserver data statement
  * @param string $data Mapserver data statement
- * @return String inner sql
+ * @return Array (geom, inner select, using)
  */
-function get_sql_from_mapserver_data($data) {
-	$pos_select = stripos($data, 'select');
-	if (strpos(substr($data, 0, $pos_select), '(') === false) {
-		return $data;
+function getDataParts($data){
+	$first_space_pos = strpos($data, ' ');
+	$geom = substr($data, 0, $first_space_pos);					# geom am Anfang
+	$rest = substr($data, $first_space_pos);
+	$usingposition = strpos($rest, 'using');
+	$from = substr($rest, 0, $usingposition);						# from (alles zwischen geom und using)
+	$using = substr($rest, $usingposition);							# using ...
+	if(strpos($from, '(') === false){		# from table
+		$select = 'select * '.$from.' where 1=1';
 	}
-	$pos_last_closing_bracket = strrpos($data, ')');
-	$data = substr($data, $pos_select, $pos_last_closing_bracket - $pos_select);
-	return $data;
+	else{		# from (select ... from ...) as foo
+		$select = stristr($from,'(');
+		$select = before_last($select, ')');
+		$select = ltrim($select, '(');
+	}
+	return [
+		'geom' => $geom,
+		'select' => $select,
+		'using' => $using
+	];
 }
 
 /**

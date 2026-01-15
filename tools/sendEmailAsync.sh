@@ -42,7 +42,6 @@ else
     #tls=auto will only use tls if available
     if [[ -z $attachment ]]; then
       #echo Ohne Attachement sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -u ${subject} -m ${message}
-      #sendEmail -v -t "peter.korduan@gdi-service.de" -f "app@pomologen-verein.de" -s "smtp.1und1.de:587" -o tls=auto -xu "app@pomologen-verein.de" -xp "DnebpV*25*" -o "message-charset=utf8" -u "Subject" -m "Message"
       sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -u "${subject}" -m "${message}" > $logfile 2>&1
       echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=utf8 -u \"${subject}\" -m \"${message}\"" >> $job_log_file
       #sendEmail -v -t 'peter.korduan@gdi-service.de' -f 'info@gdi-service.de' -s smtp.ionos.de:587 -o tls=yes -xu 'peter.korduan@gdi-backup.de' -xp '*****' -o message-charset=utf8 -u "Testkvwmap" -m "TestMessage"
