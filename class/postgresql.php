@@ -70,6 +70,7 @@ class pgdatabase {
 		# und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
 		# Dazu Fehlerausschriften bearchten.
 		$this->blocktransaction=0;
+		$this->debug_level=4;
 	}
 
 	/**
@@ -85,7 +86,7 @@ class pgdatabase {
 		}
 		else {
 			#echo '<br>Öffne Datenbank mit connection_id: ' . $connection_id;
-			$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
+			$this->debug->write("Open Database connection with connection_id: " . $connection_id, $this->debug_level);
 			$this->connection_id = $connection_id;
 			$connection_string = $this->get_connection_string();
 		}
@@ -104,7 +105,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection successfully opend.", 4);
+			$this->debug->write("Database connection successfully opend.", $this->debug_level);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
@@ -420,7 +421,7 @@ class pgdatabase {
 	* @return boolean true if exists else false
 	*/
 	function database_exists() {
-		$this->debug->write("Open Database " . $credentials['dbname'] . " to test if exists", 4);
+		$this->debug->write("Open Database " . $credentials['dbname'] . " to test if exists", $this->debug_level);
 
 		$this->dbConn = pg_connect(
 		$this->get_connection_string()
@@ -430,7 +431,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", $this->debug_level);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
@@ -2480,7 +2481,7 @@ FROM
 			GROUP BY lmh.land, lmh.regierungsbezirk, lmh.kreis, lmh.gemeinde, lmh.lage, lmh.hausnummer, r
 			ORDER BY r[1]::int, trim(r[2]) NULLS FIRST, r[3]::int NULLS FIRST";
     #echo $sql;
-    $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>" . $sql, 4);
+    $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>" . $sql, $this->debug_level);
     $queryret = $this->execSQL($sql, 4, 0);
     while ($rs = pg_fetch_assoc($queryret[1])) {
       $Liste['HausID'][] = $rs['id'];
@@ -2534,7 +2535,7 @@ FROM
     $sql.= $this->build_temporal_filter_fachdatenverbindung(array('lke'));
     $sql.= " GROUP BY lke.gemeinde, lke.bezeichnung ORDER BY gemeinde, strassenname, strasse";
     #echo $sql;
-    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>" . $sql, 4);
+    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>" . $sql, $this->debug_level);
     $queryret = $this->execSQL($sql, 4, 0);
     while ($rs = pg_fetch_assoc($queryret[1])) {
 			$Liste['Gemeinde'][] = $rs['gemeinde'];
