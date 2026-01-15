@@ -824,7 +824,7 @@ l.Name AS sub_layer_name
 				$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
 				return $result;
 			}
-			$select = $mapDB->getSelectFromData($data);
+			$select = getDataParts($data)['select'];
 			if ($layerdb->schema != '') {
 				$select = str_replace($layerdb->schema . '.', '', $select);
 			}
@@ -1008,7 +1008,7 @@ l.Name AS sub_layer_name
 			)
 		);
 		$data = str_replace('$SCALE', '1000', $mapDB->getData($this->get($this->identifier)));
-		$this->table_alias = get_table_alias(get_sql_from_mapserver_data($data), $this->get('schema'), $this->get('maintable'));
+		$this->table_alias = get_table_alias(getDataParts($data)['select'], $this->get('schema'), $this->get('maintable'));
 
 		// read the attributes from the maintable
 		$ret = $this->get_maintable_attributes($layerdb);

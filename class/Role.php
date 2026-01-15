@@ -243,7 +243,7 @@ class Role extends MyObject {
 		foreach ($old_layer_params AS $param_key => $value) {
 			$new_layer_params[] = '"' . $param_key . '":"' . $value . '"';
 		}
-		$this->update(array('layer_params' => implode(',', $new_layer_params)));
+		$this->update(array('layer_params' => implode(',', $new_layer_params)), false);
 		return array(
 			'success' => true,
 			'msg' => 'Layerparameter erfolgreich für Rolle angepasst.'

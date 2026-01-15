@@ -14,6 +14,7 @@
 // xplankonverter_download_xplan_shapes
 // xplankonverter_download_files_query
 // xplankonverter_extract_gml_to_form
+// xplankonverter_download_xlog
 // xplankonverter_extract_standardshapes_to_regeln
 // xplankonverter_gml_generieren
 // xplankonverter_go_to_plan
@@ -101,7 +102,8 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	else {
 		if ($konvertierung->get('stelle_id') != Rolle::$stelle_ID) {
 			$GUI->add_message('warning', 'Die Konvertierung mit der id ' . $GUI->formvars['konvertierung_id'] . ' gehört nicht zu dieser Stelle!');
-			if (stripos($GUI->go, 'xplankonverter_create_geoweb_service') !== 0) {
+			// some functions can also be run from administration, e.g. updating multiple services or metadata
+			if (stripos($GUI->go, 'xplankonverter_create_geoweb_service') !== 0 && stripos($GUI->go, 'xplankonverter_create_metadata')  !== 0) {
 				$GUI->formvars['konvertierung_id'] = '';
 			}
 		}
@@ -514,10 +516,9 @@ function go_switch_xplankonverter($go) {
 				'konvertierung_id' => 'int',
 				'planart' => 'text'
 			]);
-				
+			$konvertierung_id = $GUI->formvars['konvertierung_id'];
 			$md = new metadata($GUI);
-
-			if ($GUI->formvars['konvertierung_id'] == '') {
+			if ($konvertierung_id == '') {
 				if ($GUI->formvars['planart'] == 'Plan') {
 					send_error('Fehler beim Erzeugen der Metadaten!<p>Wenn Keine Konvertierung-ID angegeben ist, muss mindestens die planart angegeben sein.', false, false);
 					break;
@@ -526,7 +527,17 @@ function go_switch_xplankonverter($go) {
 				$metadata_documents = $GUI->xplankonverter_create_metadata_documents($md);
 			}
 			else {
-				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+				if (
+					$GUI->Stelle->id != $GUI->konvertierung->get('stelle_id') AND
+					in_array($GUI->Stelle->id, $admin_stellen)
+				) {
+
+					# Wechsel zur Stelle der Konvertierung
+					$start_stelle_id = $GUI->Stelle->id;
+					$GUI->Stelle->id = $GUI->konvertierung->get('stelle_id');
+					$GUI->Stelle->readDefaultValues();
+				}
 				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
 					send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
 						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
@@ -535,7 +546,7 @@ function go_switch_xplankonverter($go) {
 					);
 					break;
 				}
-				
+
 				/* 
 				* Updates letzte_aktualisierung in gemeindeverbaende-Tabelle, so ARL's can track these dates (date is also manually editable)
 				* As the date will also end up in the metadata, it needs to be set before the metadata is created/updated
@@ -547,10 +558,11 @@ function go_switch_xplankonverter($go) {
 					$ret_akt = $GUI->konvertierung->update_letztes_aktualisierungsdatum_gebietstabelle();
 					
 					if (!$ret_akt['success']) {
+						$GUI->write_xlog('Fehler beim Update der Datums letzte Aktualisierung in Gebietseinheiten-Tabelle!');
 						$GUI->add_message('Fehler', 'Fehler beim Update der Datums letzte Aktualisierung in Gebietseinheiten-Tabelle!');
 					}
 				}
-			
+
 				# Erzeugt die Metadatendokumente für einen einzelnen Plan
 				$metadata_documents = $GUI->konvertierung->create_metadata_documents($md);
 			}
@@ -581,6 +593,9 @@ function go_switch_xplankonverter($go) {
 				'msg' => 'Metadaten über Daten und Dienste erfolgreich in das Metainformationssystem hochgeladen.',
 				'infos' => $creatorInfos
 			);
+
+			$GUI->Stelle_ID = $start_stelle_id; // setze Stelle_ID zurück auf die ID der Stelle die diese Funktion aufgerufen hat.
+
 			header('Content-Type: application/json');
 			echo json_encode($result);
 		} break;
@@ -1978,6 +1993,20 @@ function go_switch_xplankonverter($go) {
 			}
 			header('Content-Disposition: attachment; filename="zusammenzeichnung-neu_' . $GUI->formvars['konvertierung_id'] . '.gml"; subtype="gml/3.3"');
 			echo fread(fopen($filename, "r"), filesize($filename));
+		} break;
+
+		case 'xplankonverter_download_xlog' : {
+			if ($GUI->xplankonverter_is_case_forbidden()) return;
+			$logfilename = XPLANKONVERTER_FILE_PATH . $GUI->formvars['konvertierung_id'] . '/xplankonverter.log';
+
+			if (!file_exists($logfilename)) {
+				$GUI->add_message('warning', 'Diese Datei ist nicht vorhanden. Prüfen Sie ob die Konvertierung schon korrekt ausgeführt wurde. Wenn ja, wenden Sie sich an den Support.');
+				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				$GUI->output();
+				return;
+			}
+			header('Content-Disposition: attachment; filename="xplankonverter.log"; subtype="text/plan"');
+			echo fread(fopen($logfilename, "r"), filesize($logfilename));
 		} break;
 
 		case 'xplankonverter_download_inspire_gml' : {
