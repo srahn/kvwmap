@@ -157,6 +157,13 @@ function delete_dokauswahl(){
 		alert('Es wurde keine Dokumentauswahl ausgewählt.');
 	}
 }
+
+function set_all_hauptarten(checked){
+	var dokument_arten = document.getElementsByName('suchhauptart[]');
+	[].forEach.call(dokument_arten, function (d){
+		d.checked = checked;
+	});
+}
   
 //-->
 </script>
@@ -206,19 +213,19 @@ else {
 				</tr>
 				<tr>
 					<td colspan="2">
-						<table border="0" cellpadding="4" cellspacing="0" style="margin-left: -8px;">
+						<table border="0" cellpadding="0" cellspacing="0" style="margin-left: -8px;">
 					<?	$z_index = count($this->hauptdokumentarten)+1;
 							foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
 								<tr> 
 									<td>
 										<div style="display: flex;">
-											<div style="width: 209px;display: flex;justify-content: flex-start">
-												<div><input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php } ?>>&nbsp;</div>
+											<div style="width: 219px;padding: 4px;display: flex;justify-content: flex-start">
+												<div><input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php }else{$art_unchecked = true;} ?>>&nbsp;</div>
 												<div><? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?></div>
 											</div>
 											<div style="width: 215px;">
 							<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-												&nbsp;<select name="suchunterart[]" multiple="true" style="overflow: hidden;height: 24px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
+												&nbsp;<select name="suchunterart[]" multiple="true" style="overflow: hidden;height: 24px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 210px" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
 													<option value="">alle</option>
 													<? foreach($this->dokumentarten[$hauptdokumentart['id']] as $dokumentart){ ?>
 														<option <? if(in_array($dokumentart['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $dokumentart['id']; ?>"><? echo $dokumentart['art']; ?></option>	
@@ -230,6 +237,16 @@ else {
 									</td>
 								</tr>
 					<? } ?>
+								<tr> 
+									<td>
+										<div style="display: flex;">
+											<div style="width: 209px;padding: 4px;display: flex;justify-content: flex-start">
+												<div><input type="checkbox" name="suchhauptart_alle" onclick="set_all_hauptarten(this.checked);" value="" <? if (!$art_unchecked) { ?> checked<?} ?>>&nbsp;</div>
+												<div>- alle -</div>
+											</div>
+										</div>
+									</td>
+								</tr>
 						</table>
 					</td>
 				</tr>
@@ -460,7 +477,8 @@ else {
 					<td colspan="2"><hr align="center"></td>
 				</tr>
 				<tr>
-					<td colspan="2">Geometrie übernehmen von:<br>
+					<td colspan="2">
+						Geometrie übernehmen von:<br>
 						<select size="1" style="width: 250px" name="selected_group_id" onchange="ahah('index.php', 'go=getqueryableVectorLayers&group_id=' + this.value, [document.GUI.geom_from_layer], ['sethtml']);" <?php if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
 							<option value="">  -- <?php echo $this->strGroup; ?> --  </option>
 							<?
@@ -483,13 +501,9 @@ else {
 								}
 							?>
 						</select> 
+						<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>Einzelgeometrien
 					</td>
 				</tr>
-				<tr>
-					<td colspan="2" style="padding-top: 5px">
-						<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
-					</td>
-				</tr>	
 				<tr> 
 					<td align="center" colspan="2" style="height: 55px"><input type="button" name="senden" value="Suchen" onclick="save();"> </td>
 				</tr>
