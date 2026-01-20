@@ -6278,6 +6278,7 @@ echo '			</table>
 		}
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
+		$select = str_replace('$SCALE', '1000', $select);
 		$attributes = $dbmap->load_attributes($layerdb, $select);
 		$dbmap->save_postgis_attributes($layerdb, -$layer_id, $attributes, '', '');
 
