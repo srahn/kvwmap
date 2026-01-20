@@ -5036,11 +5036,11 @@ echo '			</table>
 
   function add_label(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$empty_label = new stdClass();
-    $empty_label->font = 'arial';
-    $empty_label->size = '8';
-    $empty_label->minsize = '6';
-    $empty_label->maxsize = '10';
+		$empty_label['color'] = '0 0 0';
+    $empty_label['font'] = 'arial';
+    $empty_label['size'] = '8';
+    $empty_label['minsize'] = '6';
+    $empty_label['maxsize'] = '10';
     $new_label_id = $mapDB->new_Label($empty_label);
     $mapDB->addLabel2Class($this->formvars['class_id'], $new_label_id, 0);
     $this->get_labels();
