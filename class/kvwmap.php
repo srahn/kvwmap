@@ -2830,7 +2830,7 @@ echo '			</table>
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
 					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
+					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");
         }
 				if($dbStyle['colorrange'] != '') {
 					$style->updateFromString("STYLE COLORRANGE " . $dbStyle['colorrange']." END");
@@ -2875,12 +2875,24 @@ echo '			</table>
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
-				$RGB=explode(" ",$dbLabel['color']);
-				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-				$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				$RGB = explode(" ",$dbLabel['color']);
+				if ($RGB[0] == '') { 
+					$RGB[0]=0; $RGB[1]=0; $RGB[2]=0; 
+				}
+				if (is_numeric($RGB[0])) {
+					$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				}
+				else {
+					$label->updateFromString("LABEL COLOR [" . $dbLabel['color']."] END");
+				}
 				if($dbLabel['outlinecolor'] != ''){
 					$RGB=explode(" ",$dbLabel['outlinecolor']);
-					$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$label->updateFromString("LABEL OUTLINECOLOR [" . $dbLabel['outlinecolor']."] END");
+					}
 				}
 				if ($dbLabel['shadowcolor']!='') {
 					$RGB=explode(" ",$dbLabel['shadowcolor']);
@@ -2915,9 +2927,19 @@ echo '			</table>
 						$style = new styleObj();
 					}
 					$style->setGeomTransform('labelpoly');
-					$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$style->updateFromString("STYLE COLOR [" . $dbLabel['backgroundcolor']."] END");
+					}
 					if ($dbLabel['buffer']!='') {
-						$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						if (is_numeric($RGB[0])) {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						}
+						else {
+							$style->updateFromString("STYLE OUTLINECOLOR [" . $dbLabel['backgroundcolor']."] END");
+						}
 						$style->width = $dbLabel['buffer'];
 					}
 					$label->insertStyle($style);
@@ -4995,11 +5017,11 @@ echo '			</table>
 
   function add_label(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$empty_label = new stdClass();
-    $empty_label->font = 'arial';
-    $empty_label->size = '8';
-    $empty_label->minsize = '6';
-    $empty_label->maxsize = '10';
+		$empty_label['color'] = '0 0 0';
+    $empty_label['font'] = 'arial';
+    $empty_label['size'] = '8';
+    $empty_label['minsize'] = '6';
+    $empty_label['maxsize'] = '10';
     $new_label_id = $mapDB->new_Label($empty_label);
     $mapDB->addLabel2Class($this->formvars['class_id'], $new_label_id, 0);
     $this->get_labels();
@@ -6220,6 +6242,7 @@ echo '			</table>
 		}
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
+		$select = str_replace('$SCALE', '1000', $select);
 		$attributes = $dbmap->load_attributes($layerdb, $select);
 		$dbmap->save_postgis_attributes($layerdb, -$layer_id, $attributes, '', '');
 
@@ -15915,7 +15938,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
 					}
 				}
-				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
+				if ($update != '') {
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
+				}
 			}
 		}
 		if ($this->formvars['delete_documents'] != '') {
@@ -16228,6 +16253,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				else {
 					echo '<br>Datei: '.$_files[$input_name]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+					$db_input = '';
 				}
 			}
 			else {

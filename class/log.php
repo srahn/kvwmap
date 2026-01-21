@@ -157,6 +157,10 @@ class LogFile {
 		fclose($this->fp);
 	}
 
+	function get_content() {
+		return file_get_contents($this->name);
+	}
+
 	function delete() {
 		unlink($this->name);
 	}

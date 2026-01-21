@@ -4,21 +4,24 @@
 // mobile_delete_images
 // mobile_drop_layer_sync
 // mobile_drop_layer_sync_all
-// mobile_fix_sync_delta
 // mobile_get_data_version
 // mobile_get_layers 
 // mobile_get_stellen
 // mobile_list_logs
+// mobile_open_logfile
 // mobile_prepare_layer_sync
 // mobile_prepare_layer_sync_all
 // mobile_reformat_attributes
 // mobile_reformat_fk_attributes
 // mobile_reformat_layer
+// mobile_reset_log
+// mobile_set_sync_reset_needed
 // mobile_show_log
 // mobile_sync
 // mobile_sync_all
 // mobile_sync_all_parameter_valide
 // mobile_sync_parameter_valide
+// mobile_sync_reset_needed
 // mobile_upload_image
 
 /**
@@ -58,28 +61,32 @@ $GUI->mobile_create_layer_sync_all = function ($layer) use ($GUI) {
 	$GUI->add_message('info', 'Sync-Trigger für INSERT, UPDATE und DELETE auf Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . ' angelegt.');
 };
 
-$GUI->mobile_fix_sync_delta = function() use ($GUI) {
-	echo 'Funktion noch nicht fertig implementiert.<br>';
-	echo 'Hier soll es möglich sein für ein SQL, welches zu einem Fehler führt eine Alternative zu hinterlegen, die statt desssen ausgeführt wird wenn das SQL noch mal aufgerufen wird durch die Synchronisierung. Die Alternative soll zum Fixen von Sync-Problemen führen ohne dass der Nutzer etwas machen muss außer Auto-Sync wieder einschalten.';
-// 	include_once(CLASSPATH . 'PgObject.php');
-// 	include_once(CLASSPATH . 'sql.php');
-// 	$sql = $GUI->formvars['client_delta'];
-// 	$sql = "UPDATE kob.baum
-//         SET
-//  	      	kronenhabitus_ids = '{1,3,5}', updated_at_client = '2025-08-13T19:39:26', user_name = 'Peter Korduan-Mobil', user_id = 17
-//         WHERE
-//         	uuid = '6f812418-4af8-45df-8db4-055eaa7874e2'";
-// 	// echo 'sql: ' . $sql;
-// 	$pg_obj = new PgObject($GUI, 'kob', 'baum');
-// 	// Korrigieren der Deltas vom Client
-// 	$allowed_columns = $pg_obj->get_attribute_names();
-// 	array_splice($allowed_columns, 1, 30);
-// 	$sql_obj = new sql($sql);
-// 	$not_allowed_columns = $sql_obj->remove_not_allowed_columns($allowed_columns);
-// 	echo '<br>not_allowed_columns: ' . implode(', ', $not_allowed_columns);
-// #		return print_r($sql_obj_adjusted, true);
-// 	$adjusted_sql = $sql_obj->to_sql();
-// 	echo '<br>Korrekted SQL:<br>' . $adjusted_sql;
+$GUI->mobile_reset_log = function($log_name) use ($GUI) {
+	$logfile = LOGPATH . 'kvmobile/' . $log_name . '_debug_log.html';
+	$backupfile = LOGPATH . 'kvmobile/archiv/' . $log_name . '_debug_log_' . date('Y-m-d_H-i-s') . '.html';
+	if (!file_exists(LOGPATH . 'kvmobile/archiv/')) {
+		mkdir(LOGPATH . 'kvmobile/archiv/', 0777, true);
+	}
+	copy($logfile, $backupfile);
+	$handle = fopen($logfile, 'w');
+	ftruncate($handle, 0);
+	rewind($handle);
+	fclose($handle);
+	$GUI->add_message('info', 'Datei ' . $logfile . ' nach ' . $backupfile . ' gesichert und anschließend geleert.');
+};
+
+$GUI->mobile_set_sync_reset_needed = function($log_name) use ($GUI) {
+	$GUI->main = '../../plugins/mobile/view/set_sync_reset_needed.php';
+	$GUI->titel = 'kvmobile Log: ' . $log_name;
+	$GUI->log_name = $log_name;
+	$GUI->msg = 'sync_reset_needed';
+	if (!$GUI->mobile_sync_reset_needed($log_name)) {
+		$fp = fopen(LOGPATH . 'kvmobile/' . $log_name . '_debug_log.html', "a");
+		fwrite($fp, "\nsync_reset_needed");
+		$GUI->msg .= 'in Log-Datei für Nutzer '. $log_name . ' geschrieben';
+	} else {
+		$GUI->msg .= 'ist bereits in der Log-Datei für Nutzer ' . $log_name . ' vorhanden';
+	}
 };
 
 /**
@@ -268,17 +275,8 @@ $GUI->mobile_get_data_version = function () use ($GUI) {
 };
 
 $GUI->mobile_sync = function () use ($GUI) {
-	$deblogdir = LOGPATH . 'kvmobile/';
-	$deblogfile = $GUI->user->login_name . '_debug_log.html';
-	if (!is_dir($deblogdir)) {
-		if (!mkdir($deblogdir, 0770, true)) {
-			return array(
-				'success' => false,
-				'err_msg' => 'Logverzeichnis ' . $deblogdir . ' konnte nicht angelegt werden.'
-			);
-		}
-	}
-	$GUI->deblog = new LogFile($deblogdir . $deblogfile, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
+	if (!$GUI->mobile_open_logfile($GUI->user->login_name)) { return array("success" => false, "msg" => $GUI->errmsg); };
+
 	include_once(CLASSPATH . 'synchronisation.php');
 	# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 	# $selected_layer_id (existiert und ist in mysql-Datenbank?)
@@ -300,12 +298,12 @@ $GUI->mobile_sync = function () use ($GUI) {
 	$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
 	unset($GUI->formvars['passwort']);
 	unset($GUI->formvars['passwort']);
-	$GUI->deblog->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
-	$GUI->deblog->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
-	$GUI->deblog->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
+	$GUI->mobile_log->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
+	$GUI->mobile_log->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
+	$GUI->mobile_log->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
 	move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
 
-	// $GUI->deblog->write('Run function mobile_sync_parameter_valide');
+	// $GUI->mobile_log->write('Run function mobile_sync_parameter_valide');
 	$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
 
 	if ($result['success']) {
@@ -331,19 +329,9 @@ $GUI->mobile_sync = function () use ($GUI) {
  * Sync all deltas from Client to Server and vice versa.
  */
 $GUI->mobile_sync_all = function () use ($GUI) {
-	$mobile_log_dir = LOGPATH . 'kvmobile/';
-	$mobile_log_file = $GUI->user->login_name . '_debug_log.html';
+	if (!$GUI->mobile_open_logfile($GUI->user->login_name)) { return array("success" => false, "msg" => $GUI->errmsg); };
 	$mobile_err_dir = LOGPATH . 'kvmobile/';
 	$mobile_err_file = '_error_log.html';
-	if (!is_dir($mobile_log_dir)) {
-		if (!mkdir($mobile_log_dir, 0770, true)) {
-			return array(
-				'success' => false,
-				'message' => 'Logverzeichnis ' . $mobile_log_dir . ' konnte nicht angelegt werden.'
-			);
-		}
-	}
-	$GUI->mobile_log = new LogFile($mobile_log_dir . $mobile_log_file, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', date("Y-m-d H:i:s"));
 	$GUI->mobile_err = new LogFile($mobile_err_dir . $mobile_err_file, 'html', 'kvmobile Error-log');
 
 	include_once(CLASSPATH . 'synchronisation.php');
@@ -411,6 +399,13 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 		$GUI->mobile_err->write($result['message']);
 	}
 	return $result;
+};
+
+$GUI->mobile_sync_reset_needed = function($log_name) use ($GUI) {
+	$last_line = trim(shell_exec("tail -n 1 " . LOGPATH . 'kvmobile/' . $log_name . '_debug_log.html'));
+	$word_exists = strpos($last_line, "sync_reset_needed") !== false;
+	// echo '<br>sync_reset_needed ' . ($word_exists ? 'ist' : 'ist nicht') . ' vorhanden.';
+	return $word_exists;
 };
 
 $GUI->mobile_sync_parameter_valide = function ($params) use ($GUI) {
@@ -738,7 +733,7 @@ $GUI->mobile_reformat_fk_attributes = function ($attributes) use ($GUI) {
 			$fk_attribute = array_filter(
 				$attributes,
 				function ($attr) use ($attribute_options) {
-					$attr["name"] === $attribute_options['fk_name'];
+					return $attr["name"] === $attribute_options['fk_name'];
 				}
 			);
 			foreach (array_keys($fk_attribute) as $fk_attr_key) {
@@ -838,38 +833,60 @@ $GUI->mobile_list_logs = function() use ($GUI) {
 	$GUI->titel = 'kvmobile Logs';
 };
 
-$GUI->mobile_show_log = function($log_file) use ($GUI) {
+$GUI->mobile_open_logfile = function($log_name, $with_timestamp = true) use ($GUI) {
+	$dir = LOGPATH . 'kvmobile/';
+	$file = $log_name . '_debug_log.html';
+	if ($GUI->mobile_log instanceof LogFile AND $GUI->mobile_log->name == $dir . $file AND file_exists($GUI->mobile_log->name)) {
+		return true;
+	}
+	if (!is_dir($dir)) {
+		if (!mkdir($dir, 0770, true)) {
+			$GUI->errmsg = 'Logverzeichnis ' . $dir . ' konnte nicht angelegt werden.';
+			return false;
+		}
+	}
+	$GUI->mobile_log = new LogFile($dir . $file, 'html', 'kvmobile Logfile für Nutzer mit Login-Name: ' . $log_name, $with_timestamp ? 'Debug: ' . date("Y-m-d H:i:s") : '');
+	return true;
+};
+
+$GUI->mobile_show_log = function($log_name) use ($GUI) {
+	$GUI->filesize_exceeded = false;
 	$GUI->main = '../../plugins/mobile/view/show_log.php';
-	$GUI->titel = 'kvmobile Log: ' . $log_file;
-	$GUI->log_file = $log_file;
+	$GUI->titel = 'kvmobile Log: ' . $log_name;
+	$GUI->log_name = $log_name;
 	$GUI->mobile_log_dir = LOGPATH . 'kvmobile/';
-	$GUI->mobile_log_file = $log_file . '_debug_log.html';
+	$GUI->mobile_log_file = $log_name . '_debug_log.html';
 	$GUI->mobile_log_path = $GUI->mobile_log_dir . $GUI->mobile_log_file;
-	$GUI->mobile_log_content = file_get_contents($GUI->mobile_log_path);
-	$parts = explode('<h1>', $GUI->mobile_log_content); // Die einzelnen Meldungen im Log
-	array_shift($parts);
-	$GUI->mobile_logs = array();
-	foreach ($parts AS $part) {
-		$parts2 = explode('</h1>', $part);
-		$teil_vor_h1 = $parts2[0]; // Teil vor </h1>
-		$teil_nach_h1 = $parts2[1];
-		$client_deltas = json_decode(get_tag_content($teil_nach_h1, 'client_deltas_json'));
-		// preg_match_all('/\+ 1\s*\);\s*(.*?)UPDATE syncs/s', $end_parts[1], $sql_matches);
-		// if ($client_deltas) {
-		// 	$GUI->mobile_logs[] = array(
-		// 		'timestamp' => $end_parts[0],
-		// 		'client_deltas' => $sql_matches[1],
-		// 		'error' => (count($error_matches[1]) > 0 ? $error_matches[1][0] : '')
-		// 	);
-		// }
-		if (count($client_deltas->rows) > 0) {
-			// preg_match_all('/Fehler mit result:(.*?)(?:\s*<html>|$)/s', $end_parts[1], $error_matches);
-			$fehler_parts = explode('Fehler bei der Ausführung', $teil_nach_h1);
-			$GUI->mobile_logs[] = array(
-				'timestamp' => $teil_vor_h1,
-				'client_deltas' => $client_deltas->rows,
-				'error' => (count($fehler_parts) > 1 ? 'Fehler bei der Ausführung' . $fehler_parts[1] : '')
-			);
+	if (filesize($GUI->mobile_log_path) > 2147483648) {	 // 2 GB
+		$GUI->filesize_exceeded = true;
+	}
+	else {
+		$GUI->mobile_log_content = file_get_contents($GUI->mobile_log_path);
+		$parts = explode('<h1>', $GUI->mobile_log_content); // Die einzelnen Meldungen im Log
+		array_shift($parts);
+		$GUI->mobile_logs = array();
+		foreach ($parts AS $part) {
+			$parts2 = explode('</h1>', $part);
+			$teil_vor_h1 = $parts2[0]; // Teil vor </h1>
+			$teil_nach_h1 = $parts2[1];
+			$client_deltas = json_decode(get_tag_content($teil_nach_h1, 'client_deltas_json'));
+			// preg_match_all('/\+ 1\s*\);\s*(.*?)UPDATE syncs/s', $end_parts[1], $sql_matches);
+			// if ($client_deltas) {
+			// 	$GUI->mobile_logs[] = array(
+			// 		'timestamp' => $end_parts[0],
+			// 		'client_deltas' => $sql_matches[1],
+			// 		'error' => (count($error_matches[1]) > 0 ? $error_matches[1][0] : '')
+			// 	);
+			// }
+			if (count($client_deltas->rows) > 0) {
+				// preg_match_all('/Fehler mit result:(.*?)(?:\s*<html>|$)/s', $end_parts[1], $error_matches);
+				$fehler_parts = explode('Fehler bei der Ausführung', $teil_nach_h1);
+				$GUI->mobile_logs[] = array(
+					'timestamp' => $teil_vor_h1,
+					'client_deltas' => $client_deltas->rows,
+					'error' => (count($fehler_parts) > 1 ? 'Fehler bei der Ausführung' . $fehler_parts[1] : '')
+				);
+			}
 		}
 	}
 };
@@ -1301,35 +1318,12 @@ $GUI->mobile_validate_layer_sync = function ($layerdb, $layer_id, $sync) use ($G
  * to move the uploaded images to layers document path
  */
 $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
-	$deblogdir = LOGPATH . 'kvmobile/';
-	$deblogfile = $GUI->user->login_name . '_debug_log.html';
-	if (!is_dir($deblogdir)) {
-		if (!mkdir($deblogdir, 0770, true)) {
-			return array(
-				'success' => false,
-				'err_msg' => 'Logverzeichnis ' . $deblogdir . ' konnte nicht angelegt werden.'
-			);
-		}
-	}
-	$GUI->deblog = new LogFile($deblogdir . $deblogfile, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
-
-	$deblogdir = LOGPATH . 'kvmobile/';
-	$deblogfile = $GUI->user->login_name . '_debug_log.html';
-	if (!is_dir($deblogdir)) {
-		if (!mkdir($deblogdir, 0770, true)) {
-			return array(
-				'success' => false,
-				'err_msg' => 'Logverzeichnis ' . $deblogdir . ' konnte nicht angelegt werden.'
-			);
-		}
-	}
-	$GUI->deblog = new LogFile($deblogdir . $deblogfile, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
+	if (!$GUI->mobile_open_logfile($GUI->user->login_name)) { return array("success" => false, "msg" => $GUI->errmsg); };
 
 	# Bestimme den Uploadpfad des Layers
 	if (intval($layer_id) == 0) {
-
 		$msg = 'Sie müssen eine korrekte Layer_id angeben!';
-		$GUI->deblog->write($msg);
+		$GUI->mobile_log->write($msg);
 		return array(
 			"success" => false,
 			"msg" => $msg
@@ -1356,7 +1350,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	if ($files['image'] == '') {
 
 		$msg = 'Es wurde keine Datei hochgeladen!';
-		$GUI->deblog->write($msg);
+		$GUI->mobile_log->write($msg);
 		return array(
 			"success" => false,
 			"msg" => $msg
@@ -1366,7 +1360,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	if (file_exists($doc_path . $files['image']['name'])) {
 
 		$msg = 'Datei ' . $doc_path . $files['image']['name'] . 'existiert schon auf dem Server!';
-		$GUI->deblog->write($msg);
+		$GUI->mobile_log->write($msg);
 		return array(
 			"success" => true,
 			"msg" => $msg
@@ -1383,7 +1377,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 		$success = true;
 		$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
 	}
-	$GUI->deblog->write($msg);
+	$GUI->mobile_log->write($msg);
 	return array(
 		"success" => $success,
 		"msg" => $msg
