@@ -9943,9 +9943,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
 										}
 										$instring = implode(',', $parts);
-										if($layerset[0]['attributes']['type'][$i] != 'bool')$attr = 'LOWER(CAST('.$attr.' AS TEXT))';
-										$sql_where .= ' AND '.$attr.' '.$operator.' ';
-										$sql_where .= '('.mb_strtolower($instring).')';
+										if($layerset[0]['attributes']['type'][$i] != 'bool')$attr = 'CAST('.$attr.' AS TEXT)';
+										$sql_where .= ' AND ' . $attr . ' ' . $operator . ' (' . $instring . ')';
 										if($value_like != ''){			# Parameter wieder auf die der LIKE-Suche setzen
 											$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] = $operator_like;
 											$this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]] = $value_like;

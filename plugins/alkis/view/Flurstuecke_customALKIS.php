@@ -124,7 +124,7 @@ hide_versions = function(flst){
         if($j > 0){ $attribute .= ';';}
         $attribute .= $this->qlayerset[$i]['attributes']['name'][$j];
       }
-    }		
+    }
     for ($a=0;$a<$anzObj;$a++){
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
