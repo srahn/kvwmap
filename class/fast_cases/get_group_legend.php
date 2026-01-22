@@ -1498,6 +1498,11 @@ class GUI {
 		if (!$this->group_has_layers[$group_id] ) {		# wenns keine Layer in der Gruppe oder in Untergruppen gibt, Gruppe weglassen
 			return;
 		}
+		$import_types = [
+			'eigene Abfragen' => 'search',
+			'Eigene Importe' => 'import',
+			'WMS-Importe' => 'wms_import'
+		];
 		$layerlist = $this->layerset['list'];
     $groupname = $this->groupset[$group_id]['gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
@@ -1525,8 +1530,7 @@ class GUI {
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a-->' .
 							html_umlaute($groupname) . '
-							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
-							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							' . ($import_types[$groupname] != NULL ? '<a href="javascript:deleteRollenlayer(\'' . $import_types[$groupname] . '\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '') . '
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>

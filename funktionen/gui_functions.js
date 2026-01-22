@@ -1517,13 +1517,13 @@ function slide_legend_out(evt) {
 function switchlegend(){
 	if (document.getElementById('legenddiv').className == 'normallegend') {
 		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
-		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
+		ahah('index.php', 'go=changeLegendDisplay&hide=true', new Array('', ''), new Array("", "execute_function"));
 		document.getElementById('LegendMinMax').src = 'graphics/maximize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}
 	else {
 		document.getElementById('legenddiv').className = 'normallegend';
-		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
+		ahah('index.php', 'go=changeLegendDisplay&hide=false', new Array('', ''), new Array("", "execute_function"));
 		document.getElementById('LegendMinMax').src = 'graphics/minimize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende verstecken";
 	}
