@@ -132,13 +132,13 @@ hide_versions = function(flst){
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
 
-			$eigentuemer_visible = true;
+			$flst->eigentuemer_visible = true;
 			$j = $this->qlayerset[$i]['attributes']['indizes']['eigentuemer'];
 			if ($vcheck_attribute = $this->qlayerset[$i]['attributes']['vcheck_attribute'][$j]) {
-				$eigentuemer_visible = $this->qlayerset[$i]['shape'][$a][$vcheck_attribute] == $this->qlayerset[$i]['attributes']['vcheck_value'][$j];
+				$flst->eigentuemer_visible = $this->qlayerset[$i]['shape'][$a][$vcheck_attribute] == $this->qlayerset[$i]['attributes']['vcheck_value'][$j];
 			}
 
-			if ($privileg_['bestandsnr'] and $privileg_['eigentuemer'] and $eigentuemer_visible) {
+			if ($privileg_['bestandsnr'] and $privileg_['eigentuemer'] and $flst->eigentuemer_visible) {
 				for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
 					$flst->Buchungen[$b]['eigentuemerliste'] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 				}
@@ -844,7 +844,7 @@ hide_versions = function(flst){
 												<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
 											</tr>
 										<? }
-										if ($privileg_['eigentuemer'] AND $eigentuemer_visible) {
+										if ($privileg_['eigentuemer'] AND $flst->eigentuemer_visible) {
 											?>
 											<tr>
 												<td class="fett">
