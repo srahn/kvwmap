@@ -1274,6 +1274,11 @@ echo '			</table>
   }
 
 	function create_group_legend($group_id, $status = NULL){
+		$import_types = [
+			'eigene Abfragen' => 'search',
+			'Eigene Importe' => 'import',
+			'WMS-Importe' => 'wms_import'
+		];
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$layerlist = $this->layerset['list'];
 		// $group = new LayerGroup($this);
@@ -1306,8 +1311,7 @@ echo '			</table>
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a-->' .
 							html_umlaute($groupname) . '
-							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
-							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							' . ($import_types[$groupname] != NULL ? '<a href="javascript:deleteRollenlayer(\'' . $import_types[$groupname] . '\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '') . '
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>
@@ -8326,7 +8330,7 @@ echo '			</table>
 			$this->formvars['stelle_id'] = $this->Stelle->id;
 			$this->formvars['aktivstatus'] = 1;
 			$this->formvars['gruppe'] = $groupid;
-			$this->formvars['typ'] = 'import';
+			$this->formvars['typ'] = 'wms_import';
 			$this->formvars['datentyp'] = MS_LAYER_RASTER;
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
