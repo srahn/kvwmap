@@ -3925,11 +3925,13 @@ $transformfunctions = '
 	}
 
 	function endRotateGeom(evt) {
+		var obj = document.getElementById("polygon_second");
 	  if(rotated){
 			enclosingForm.secondpoly.value = true;
 			enclosingForm.secondline.value = true;
 			must_redraw = true;
 			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&angle="+angle+"&operation=rotate&mousex="+mousex+"&mousey="+mousey+"&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+			obj.setAttribute("transform", "");
 		}
 	  rotatinggeom  = false;
 	  rotated  = false;
