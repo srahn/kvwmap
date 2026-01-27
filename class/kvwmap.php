@@ -1274,6 +1274,11 @@ echo '			</table>
   }
 
 	function create_group_legend($group_id, $status = NULL){
+		$import_types = [
+			'eigene Abfragen' => 'search',
+			'Eigene Importe' => 'import',
+			'WMS-Importe' => 'wms_import'
+		];
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$layerlist = $this->layerset['list'];
 		// $group = new LayerGroup($this);
@@ -1306,8 +1311,7 @@ echo '			</table>
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a-->' .
 							html_umlaute($groupname) . '
-							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
-							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							' . ($import_types[$groupname] != NULL ? '<a href="javascript:deleteRollenlayer(\'' . $import_types[$groupname] . '\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '') . '
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>
@@ -1461,7 +1465,7 @@ echo '			</table>
 			else{
 				$legend .=  ' title="'.$this->activatelayer.'"';
 			}
-			$legend .= ' ></td><td valign="middle" style="width: 80%" id="legend_layer_' . $layer['layer_id'] . '">';
+			$legend .= ' ></td><td valign="middle" style="width: 95%" id="legend_layer_' . $layer['layer_id'] . '">';
 
 			$legend .= $this->create_layername_legend($layer);
 			$legend .= $this->create_class_legend($layer);
@@ -2840,7 +2844,7 @@ echo '			</table>
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
 					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
+					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");
         }
 				if($dbStyle['colorrange'] != '') {
 					$style->updateFromString("STYLE COLORRANGE " . $dbStyle['colorrange']." END");
@@ -2885,12 +2889,24 @@ echo '			</table>
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
-				$RGB=explode(" ",$dbLabel['color']);
-				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-				$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				$RGB = explode(" ",$dbLabel['color']);
+				if ($RGB[0] == '') { 
+					$RGB[0]=0; $RGB[1]=0; $RGB[2]=0; 
+				}
+				if (is_numeric($RGB[0])) {
+					$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				}
+				else {
+					$label->updateFromString("LABEL COLOR [" . $dbLabel['color']."] END");
+				}
 				if($dbLabel['outlinecolor'] != ''){
 					$RGB=explode(" ",$dbLabel['outlinecolor']);
-					$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$label->updateFromString("LABEL OUTLINECOLOR [" . $dbLabel['outlinecolor']."] END");
+					}
 				}
 				if ($dbLabel['shadowcolor']!='') {
 					$RGB=explode(" ",$dbLabel['shadowcolor']);
@@ -2925,9 +2941,19 @@ echo '			</table>
 						$style = new styleObj();
 					}
 					$style->setGeomTransform('labelpoly');
-					$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$style->updateFromString("STYLE COLOR [" . $dbLabel['backgroundcolor']."] END");
+					}
 					if ($dbLabel['buffer']!='') {
-						$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						if (is_numeric($RGB[0])) {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						}
+						else {
+							$style->updateFromString("STYLE OUTLINECOLOR [" . $dbLabel['backgroundcolor']."] END");
+						}
 						$style->width = $dbLabel['buffer'];
 					}
 					$label->insertStyle($style);
@@ -4739,6 +4765,9 @@ echo '			</table>
 	function showMapImage() {
 		include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php');
   	$this->loadMap('DataBase');
+		if ($this->map->selectOutputFormat('jpeg_print') == 1){
+			$this->map->selectOutputFormat('jpeg');
+		}
   	$this->drawMap(true);
   	$randomnumber = rand(0, 1000000);
   	$svgfile  = $randomnumber.'.svg';
@@ -4757,7 +4786,7 @@ echo '			</table>
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
-  	exec(IMAGEMAGICKPATH . 'convert ' . IMAGEPATH . $svgfile . ' ' . IMAGEPATH . $jpgfile);
+  	exec(IMAGEMAGICKPATH . 'convert ' . IMAGEPATH . $svgfile . ' -quality 100 ' . IMAGEPATH . $jpgfile);
 		// echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
 
     if (function_exists('imagecreatefromjpeg')) {
@@ -4770,7 +4799,7 @@ echo '			</table>
       }
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
-      ImageJPEG($mainimage, IMAGEPATH.$jpgfile);
+      ImageJPEG($mainimage, IMAGEPATH.$jpgfile, 100);
     } 
 		//readfile(IMAGEPATH . $svgfile);
 		include(SNIPPETS . 'map_image.php');
@@ -5011,11 +5040,11 @@ echo '			</table>
 
   function add_label(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$empty_label = new stdClass();
-    $empty_label->font = 'arial';
-    $empty_label->size = '8';
-    $empty_label->minsize = '6';
-    $empty_label->maxsize = '10';
+		$empty_label['color'] = '0 0 0';
+    $empty_label['font'] = 'arial';
+    $empty_label['size'] = '8';
+    $empty_label['minsize'] = '6';
+    $empty_label['maxsize'] = '10';
     $new_label_id = $mapDB->new_Label($empty_label);
     $mapDB->addLabel2Class($this->formvars['class_id'], $new_label_id, 0);
     $this->get_labels();
@@ -6253,6 +6282,7 @@ echo '			</table>
 		}
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
+		$select = str_replace('$SCALE', '1000', $select);
 		$attributes = $dbmap->load_attributes($layerdb, $select);
 		$dbmap->save_postgis_attributes($layerdb, -$layer_id, $attributes, '', '');
 
@@ -8082,7 +8112,7 @@ echo '			</table>
 			if ($preview == true) {
 				$resize = '-resize 595x1000';
 			}
-			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+			exec(IMAGEMAGICKPATH.'convert -density 300x300 -quality 100 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg');
 			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if (!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				$this->outputfile = $name.'-'.$currenttime.'-0.jpg';;
@@ -8300,7 +8330,7 @@ echo '			</table>
 			$this->formvars['stelle_id'] = $this->Stelle->id;
 			$this->formvars['aktivstatus'] = 1;
 			$this->formvars['gruppe'] = $groupid;
-			$this->formvars['typ'] = 'import';
+			$this->formvars['typ'] = 'wms_import';
 			$this->formvars['datentyp'] = MS_LAYER_RASTER;
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
@@ -9917,9 +9947,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
 										}
 										$instring = implode(',', $parts);
-										if($layerset[0]['attributes']['type'][$i] != 'bool')$attr = 'LOWER(CAST('.$attr.' AS TEXT))';
-										$sql_where .= ' AND '.$attr.' '.$operator.' ';
-										$sql_where .= '('.mb_strtolower($instring).')';
+										if($layerset[0]['attributes']['type'][$i] != 'bool')$attr = 'CAST('.$attr.' AS TEXT)';
+										$sql_where .= ' AND ' . $attr . ' ' . $operator . ' (' . $instring . ')';
 										if($value_like != ''){			# Parameter wieder auf die der LIKE-Suche setzen
 											$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] = $operator_like;
 											$this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]] = $value_like;
@@ -15996,7 +16025,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
 					}
 				}
-				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
+				if ($update != '') {
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
+				}
 			}
 		}
 		if ($this->formvars['delete_documents'] != '') {
@@ -16309,6 +16340,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				else {
 					echo '<br>Datei: '.$_files[$input_name]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+					$db_input = '';
 				}
 			}
 			else {
@@ -19354,6 +19386,7 @@ class db_mapObj{
 		$options = array_merge($default_options, $options);
 		$data = $this->getData($layer_id);
 		if ($data != '') {
+			$data = str_replace('$SCALE', '1000', $data);
 			$select = getDataParts($data)['select'];
 			if ($database->schema != '') {
 				$select = str_replace($database->schema . '.', '', $select);
@@ -21685,7 +21718,8 @@ DO $$
 
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
+				$default = (substr($attributes['type'][$i], 0, 1) == '_' ? 'to_json(' . $attributes['default'][$i] . ')' : $attributes['default'][$i]); # to_json für Array-Datentyp
+				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}

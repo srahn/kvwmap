@@ -2445,7 +2445,7 @@ class rolle {
 			'user_id' => $this->user_id,
 			'stelle_id' => $this->stelle_id,
 			'name' => "'" . $comment . "'",
-			'layers' => "'{" . implode(',', $layers) . "'}",
+			'layers' => "'{" . implode(',', $layers) . "}'",
 			'query' => "'" . implode(',', $query) . "'"
 		];
 		$sql = "

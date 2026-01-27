@@ -2367,6 +2367,12 @@ class stelle {
 					}
 				},
 				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
+			),
+			'geocoder' => (Object) array(
+				'type' => 'nominatim',
+				'params' => (Object) array(
+					'viewbox' => round($stellenextent->minx, 5) . ',' . round($stellenextent->miny, 5) . ',' . round($stellenextent->maxx, 5) . ',' . round($stellenextent->maxy, 5)
+				)
 			)
 		);
 		return $layerdef;

@@ -124,14 +124,21 @@ hide_versions = function(flst){
         if($j > 0){ $attribute .= ';';}
         $attribute .= $this->qlayerset[$i]['attributes']['name'][$j];
       }
-    }		
+    }
     for ($a=0;$a<$anzObj;$a++){
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter'], $this->qlayerset[$i]['oid']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
-			if ($privileg_['bestandsnr'] and $privileg_['eigentuemer']) {
+
+			$flst->eigentuemer_visible = true;
+			$j = $this->qlayerset[$i]['attributes']['indizes']['eigentuemer'];
+			if ($vcheck_attribute = $this->qlayerset[$i]['attributes']['vcheck_attribute'][$j]) {
+				$flst->eigentuemer_visible = $this->qlayerset[$i]['shape'][$a][$vcheck_attribute] == $this->qlayerset[$i]['attributes']['vcheck_value'][$j];
+			}
+
+			if ($privileg_['bestandsnr'] and $privileg_['eigentuemer'] and $flst->eigentuemer_visible) {
 				for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
 					$flst->Buchungen[$b]['eigentuemerliste'] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 				}
@@ -837,7 +844,7 @@ hide_versions = function(flst){
 												<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
 											</tr>
 										<? }
-										if ($privileg_['eigentuemer']) {
+										if ($privileg_['eigentuemer'] AND $flst->eigentuemer_visible) {
 											?>
 											<tr>
 												<td class="fett">

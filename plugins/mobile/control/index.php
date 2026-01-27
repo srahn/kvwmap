@@ -8,6 +8,8 @@
 // mobile_get_pmtiles_style
 // mobile_get_stellen
 // mobile_list_logs
+// mobile_reset_log
+// mobile_set_sync_reset_needed
 // mobile_show_log
 // mobile_sync
 // mobile_sync_all
@@ -20,8 +22,11 @@ if (strpos($go, '_') !== false AND substr($go, 0, strpos($go, '_')) === 'mobile'
 function go_switch_mobile($go) {
 	global $GUI;
 	switch ($GUI->go) {
-		case 'mobile_fix_sync_delta': {
-			$GUI->mobile_fix_sync_delta();
+		case 'mobile_set_sync_reset_needed': {
+			$GUI->checkCaseAllowed('Administratorfunktionen');
+			$GUI->sanitize(['log_name' => 'text']);
+			$GUI->mobile_set_sync_reset_needed($GUI->formvars['log_name']);
+			$GUI->output();
 		}
 		break;
 
@@ -33,6 +38,9 @@ function go_switch_mobile($go) {
 
 		case 'mobile_get_layers': {
 			$result = $GUI->mobile_get_layers();
+			if ($GUI->mobile_sync_reset_needed($GUI->user->login_name)) {
+				$result['layers'][0]['version'] .= '_reset_needed';
+			}
 			echo json_encode($result);
 		}
 		break;
@@ -107,12 +115,22 @@ function go_switch_mobile($go) {
 			$GUI->output();
 		} break;
 
-		case 'mobile_show_log' : {
+		case 'mobile_reset_log' : {
 			$GUI->checkCaseAllowed('Administratorfunktionen');
-			$GUI->sanitize(['log_file' => 'text']);
+			$GUI->sanitize(['log_name' => 'text']);
 			include_once(CLASSPATH . 'administration.php');
 			$GUI->administration = new administration($GUI->database, $GUI->pgdatabase);	
-			$GUI->mobile_show_log($GUI->formvars['log_file']);
+			$GUI->mobile_reset_log($GUI->formvars['log_name']);
+			$GUI->mobile_list_logs();
+			$GUI->output();
+		} break;
+
+		case 'mobile_show_log' : {
+			$GUI->checkCaseAllowed('Administratorfunktionen');
+			$GUI->sanitize(['log_name' => 'text']);
+			include_once(CLASSPATH . 'administration.php');
+			$GUI->administration = new administration($GUI->database, $GUI->pgdatabase);	
+			$GUI->mobile_show_log($GUI->formvars['log_name']);
 			$GUI->output();
 		} break;
 
@@ -131,6 +149,9 @@ function go_switch_mobile($go) {
 			]);
 			// If the user is allowed to execute the deltas in this stelle will be checkt in GUI->mobile_sync_all() > sync->sync_allowed(delta, sync_layers)
 			$result = $GUI->mobile_sync_all();
+			if ($GUI->mobile_sync_reset_needed($GUI->user->login_name)) {
+				$GUI->mobile_log->write('<br>sync_reset_proceeded');
+			}
 			echo json_encode($result);
 		}
 		break;

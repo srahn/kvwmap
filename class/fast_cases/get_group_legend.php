@@ -1056,7 +1056,7 @@ class GUI {
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
-  function loadclasses($layer, $layerset, $classset, $map){
+	function loadclasses($layer, $layerset, $classset, $map){
 		$anzClass = count_or_0($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
@@ -1092,7 +1092,7 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->maxscaledenom = $dbStyle['maxscale'];
 				}
-				if ($layerset['datentyp'] == 0 AND value_of($layerset, 'buffer') != 0) {
+				if ($layerset['datentyp'] == 0 AND value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 					$dbStyle['symbolname'] = NULL;
 					$dbStyle['symbol'] = NULL;
 				}
@@ -1268,13 +1268,18 @@ class GUI {
 					else $style->updateFromString("STYLE COLOR [" . $dbStyle['color']."] END");
         }
 				if ($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
-					$style->opacity = $dbStyle['opacity'];
+					if (MAPSERVERVERSION >= 800) {
+						$style->updateFromString("STYLE OPACITY " . $dbStyle['opacity'] . " END");
+					}
+					else {
+						$style->opacity = $dbStyle['opacity'];
+					}
 				}
         if ($dbStyle['outlinecolor']!='') {
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
 					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
+					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");
         }
 				if($dbStyle['colorrange'] != '') {
 					$style->updateFromString("STYLE COLORRANGE " . $dbStyle['colorrange']." END");
@@ -1319,12 +1324,24 @@ class GUI {
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
-				$RGB=explode(" ",$dbLabel['color']);
-				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-				$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				$RGB = explode(" ",$dbLabel['color']);
+				if ($RGB[0] == '') { 
+					$RGB[0]=0; $RGB[1]=0; $RGB[2]=0; 
+				}
+				if (is_numeric($RGB[0])) {
+					$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				}
+				else {
+					$label->updateFromString("LABEL COLOR [" . $dbLabel['color']."] END");
+				}
 				if($dbLabel['outlinecolor'] != ''){
 					$RGB=explode(" ",$dbLabel['outlinecolor']);
-					$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$label->updateFromString("LABEL OUTLINECOLOR [" . $dbLabel['outlinecolor']."] END");
+					}
 				}
 				if ($dbLabel['shadowcolor']!='') {
 					$RGB=explode(" ",$dbLabel['shadowcolor']);
@@ -1359,9 +1376,19 @@ class GUI {
 						$style = new styleObj();
 					}
 					$style->setGeomTransform('labelpoly');
-					$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$style->updateFromString("STYLE COLOR [" . $dbLabel['backgroundcolor']."] END");
+					}
 					if ($dbLabel['buffer']!='') {
-						$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						if (is_numeric($RGB[0])) {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						}
+						else {
+							$style->updateFromString("STYLE OUTLINECOLOR [" . $dbLabel['backgroundcolor']."] END");
+						}
 						$style->width = $dbLabel['buffer'];
 					}
 					$label->insertStyle($style);
@@ -1463,6 +1490,11 @@ class GUI {
   }
 
 	function create_group_legend($group_id, $status = NULL){
+		$import_types = [
+			'eigene Abfragen' => 'search',
+			'Eigene Importe' => 'import',
+			'WMS-Importe' => 'wms_import'
+		];
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$layerlist = $this->layerset['list'];
 		// $group = new LayerGroup($this);
@@ -1495,8 +1527,7 @@ class GUI {
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a-->' .
 							html_umlaute($groupname) . '
-							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
-							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							' . ($import_types[$groupname] != NULL ? '<a href="javascript:deleteRollenlayer(\'' . $import_types[$groupname] . '\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '') . '
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>
@@ -1650,7 +1681,7 @@ class GUI {
 			else{
 				$legend .=  ' title="'.$this->activatelayer.'"';
 			}
-			$legend .= ' ></td><td valign="middle" style="width: 80%" id="legend_layer_' . $layer['layer_id'] . '">';
+			$legend .= ' ></td><td valign="middle" style="width: 95%" id="legend_layer_' . $layer['layer_id'] . '">';
 
 			$legend .= $this->create_layername_legend($layer);
 			$legend .= $this->create_class_legend($layer);
