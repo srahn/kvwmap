@@ -903,6 +903,10 @@
 
     $j = $GUI->qlayerset[0]['attributes']['indizes']['eigentuemer'];
     if ($GUI->qlayerset[0]['attributes']['vcheck_attribute'][$j]) {
+      $path = $layer[0]['pfad'];
+      $lastwhereposition = strrpos(strtolower($path), 'where');
+      $path = substr($path, 0, $lastwhereposition);
+      $GUI->formvars['query'] = $path;
       $GUI->formvars['selected_layer_id'] = $layer[0]['layer_id'];
       $GUI->formvars['value_flurstkennz'] = implode('|', $FlurstKennzListe);
       $GUI->formvars['operator_flurstkennz'] = 'IN';
