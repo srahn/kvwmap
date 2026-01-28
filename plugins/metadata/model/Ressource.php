@@ -1617,7 +1617,7 @@ class Ressource extends PgObject {
 		$this->debug->show('Starte mit Einlesen der GDB-Datei ' . $gdb_file, true);
 		$result = $this->gui->data_import_export->ogr2ogr_import(
 			$this->get('import_schema'),
-			'',
+			$this->get('import_table') != '' ? $this->get('import_table') : '',
 			$this->get('import_epsg') != '' ? $this->get('import_epsg') : 25833,
 			$gdb_file,
 			$this->database,

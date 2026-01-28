@@ -105,6 +105,10 @@ class LogFile {
 
 	# öffnet die Logdatei
 	function __construct($filename, $format, $title, $headline = '', $with_timestamp = false) {
+		$file_info = pathinfo($filename);
+		if ($file_info['dirname'] != '.' AND !is_dir($file_info['dirname'])) {
+			mkdir($file_info['dirname'], 0775, true);
+		}
 		$file_is_new = !file_exists($filename);
 		$this->fp = fopen($filename, "a");
 		$this->name = $filename;

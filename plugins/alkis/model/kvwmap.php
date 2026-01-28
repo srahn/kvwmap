@@ -204,10 +204,11 @@
 		$datageom = $explosion[0];
 		$explosion = explode('using unique ', strtolower($data));
 		$end = $explosion[1];
+    $data = str_replace('$SCALE', '1000', $data);
     $select = getDataParts($data)['select'];
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
-		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
+		if(strpos(strtolower($select), 'where') === false)$select .= " WHERE ";
 		else $select .= " AND ";
 		$select .= " flurstueckskennzeichen IN ('" . implode("','", $FlurstListe) . "')";
     $legendentext = "Flurstück" . (count_or_0($FlurstListe) > 1 ? 'e' : '');
