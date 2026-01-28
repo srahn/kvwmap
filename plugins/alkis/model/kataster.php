@@ -1551,9 +1551,9 @@ class flurstueck {
     return $Vorgaenger;
   }
 
-  function readALB_Data($FlurstKennz, $without_temporal_filter = false, $oid_column) {
+  function readALB_Data($FlurstKennz, $without_temporal_filter = false, $oid_column, $eigentuemer_vcheck = NULL) {
     $this->debug->write("<p>kataster.php flurstueck->readALB_Data (vom Flurstück)",4);
-    $ret=$this->database->getALBData($FlurstKennz, $without_temporal_filter, $oid_column);
+    $ret=$this->database->getALBData($FlurstKennz, $without_temporal_filter, $oid_column, $eigentuemer_vcheck);
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<p>kvwmap readALB_Data Abfragen der ALB-Flurstücksdaten';
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
@@ -1620,6 +1620,9 @@ class flurstueck {
 		}
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
+		if ($eigentuemer_vcheck) {
+			$this->eigentuemer_vcheck_value = $rs[$eigentuemer_vcheck['attribute']];
+		}
   }
 
   function getFlstListe($GemID, $GemkgID, $FlurID, $FlstID, $history_mode = 'aktuell') {
