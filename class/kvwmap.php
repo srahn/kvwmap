@@ -4141,7 +4141,8 @@ echo '			</table>
         	continue;
       	}
 				$layerdb = $mapDB->getlayerdatabase($layer[$i]['layer_id'], $this->Stelle->pgdbhost);
-				$select = getDataParts($layer[$i]['data'])['select'];
+				$data = str_replace('$SCALE', '1000', $layer[$i]['data']);
+				$select = getDataParts($data)['select'];
 				$data_attributes = $mapDB->getDataAttributes($layerdb, $layer[$i]['layer_id']);
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
@@ -4194,7 +4195,8 @@ echo '			</table>
 			$layerdb = $mapDB->getlayerdatabase($layer['layer_id'], $this->Stelle->pgdbhost);
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['layer_id']);
 			$geom = $data_attributes['the_geom'];
-			$select = getDataParts($layer['data'])['select'];
+			$data = str_replace('$SCALE', '1000', $layer['data']);
+			$select = getDataParts($data)['select'];
 			$select = preg_replace ("/ FROM /", ' from ', $select);
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			# Filter hinzufügen
