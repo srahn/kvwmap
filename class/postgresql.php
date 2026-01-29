@@ -2176,7 +2176,7 @@ FROM
     return $FlurstKennz;
   }
   
-  function getALBData($FlurstKennz, $without_temporal_filter = false, $oid_column){		
+  function getALBData($FlurstKennz, $without_temporal_filter = false, $oid_column, $eigentuemer_vcheck = NULL){		
 		$sql ="
 			SELECT  
 				f." . $oid_column . "::text as oid, 
@@ -2201,7 +2201,8 @@ FROM
 				f.beginnt, 
 				f.endet,
 				gem.endet as gem_endet,
-				g.endet as g_endet 
+				g.endet as g_endet
+				" . ($eigentuemer_vcheck? ',' . $eigentuemer_vcheck['expression'] : '') . "
 			FROM 
 				alkis.ax_kreisregion AS k, 
 				alkis.ax_gemeinde as g, 
@@ -2247,7 +2248,8 @@ FROM
 					f.beginnt, 
 					f.endet,
 					gem.endet as gem_endet,
-					g.endet as g_endet 
+					g.endet as g_endet
+					" . ($eigentuemer_vcheck? ", true as " . $eigentuemer_vcheck['attribute'] : '') . "
 				FROM 
 					alkis.ax_historischesflurstueckohneraumbezug as f 
 					LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land 

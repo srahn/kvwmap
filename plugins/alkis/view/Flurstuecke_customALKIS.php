@@ -117,6 +117,21 @@ hide_versions = function(flst){
 			}
 		}
 		$flst_array = array();
+
+		# abhängige Sichtbarkeit Eigentümer
+		$j = $this->qlayerset[$i]['attributes']['indizes']['eigentuemer'];
+    if ($vcheck_attribute = $this->qlayerset[$i]['attributes']['vcheck_attribute'][$j]) {
+			$j = $this->qlayerset[$i]['attributes']['indizes'][$vcheck_attribute];
+      $parts = get_select_parts(extract_select_clause($this->qlayerset[$i]['pfad']));
+			foreach ($parts as $part) {
+				if (strpos($part, $vcheck_attribute) !== false) {
+					$eigentuemer_vcheck = [
+						'attribute' => $vcheck_attribute,
+						'expression' => $part
+					];
+				}
+			}
+		}
 		
     for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
       if($this->qlayerset[$i]['attributes']['privileg'][$this->qlayerset[$i]['attributes']['name'][$j]] != ''){
@@ -128,14 +143,14 @@ hide_versions = function(flst){
     for ($a=0;$a<$anzObj;$a++){
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
-      $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter'], $this->qlayerset[$i]['oid']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
+      $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter'], $this->qlayerset[$i]['oid'], $eigentuemer_vcheck);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
 
 			$flst->eigentuemer_visible = true;
 			$j = $this->qlayerset[$i]['attributes']['indizes']['eigentuemer'];
 			if ($vcheck_attribute = $this->qlayerset[$i]['attributes']['vcheck_attribute'][$j]) {
-				$flst->eigentuemer_visible = $this->qlayerset[$i]['shape'][$a][$vcheck_attribute] == $this->qlayerset[$i]['attributes']['vcheck_value'][$j];
+				$flst->eigentuemer_visible = $flst->eigentuemer_vcheck_value == $this->qlayerset[$i]['attributes']['vcheck_value'][$j];
 			}
 
 			if ($privileg_['bestandsnr'] and $privileg_['eigentuemer'] and $flst->eigentuemer_visible) {

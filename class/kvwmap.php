@@ -4149,7 +4149,8 @@ echo '			</table>
         	continue;
       	}
 				$layerdb = $mapDB->getlayerdatabase($layer[$i]['layer_id'], $this->Stelle->pgdbhost);
-				$select = getDataParts($layer[$i]['data'])['select'];
+				$data = str_replace('$SCALE', '1000', $layer[$i]['data']);
+				$select = getDataParts($data)['select'];
 				$data_attributes = $mapDB->getDataAttributes($layerdb, $layer[$i]['layer_id']);
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
@@ -4202,7 +4203,8 @@ echo '			</table>
 			$layerdb = $mapDB->getlayerdatabase($layer['layer_id'], $this->Stelle->pgdbhost);
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['layer_id']);
 			$geom = $data_attributes['the_geom'];
-			$select = getDataParts($layer['data'])['select'];
+			$data = str_replace('$SCALE', '1000', $layer['data']);
+			$select = getDataParts($data)['select'];
 			$select = preg_replace ("/ FROM /", ' from ', $select);
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			# Filter hinzufügen
@@ -9909,7 +9911,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		switch ($layerset[0]['connectiontype']) {
 			case MS_POSTGIS : {
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-				$path = $layerset[0]['pfad'];
+				$layerset[0]['pfad'] = $this->formvars['query'] ?: $layerset[0]['pfad'];	// $this->formvars['query'] ist optional, falls man query vom Layer angepasst verwenden will
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
 				if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
