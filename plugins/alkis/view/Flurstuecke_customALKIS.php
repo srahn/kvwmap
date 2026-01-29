@@ -813,7 +813,7 @@ hide_versions = function(flst){
 									</td>
 								</tr>
 								<? } ?>
-								<? if($privileg_['bestandsnr']){
+								<? if($privileg_['bestandsnr'] AND $flst->eigentuemer_visible){
 										$currenttime=date('Y-m-d H:i:s',time());
 										$this->user->rolle->setConsumeALB($currenttime, 'Flurstücksanzeige', array($flst->FlurstKennz), 0, 'NULL');		# das Flurstückskennzeichen wird geloggt
 								?>
@@ -859,7 +859,7 @@ hide_versions = function(flst){
 												<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
 											</tr>
 										<? }
-										if ($privileg_['eigentuemer'] AND $flst->eigentuemer_visible) {
+										if ($privileg_['eigentuemer']) {
 											?>
 											<tr>
 												<td class="fett">
