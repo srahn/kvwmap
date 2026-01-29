@@ -123,10 +123,14 @@ hide_versions = function(flst){
     if ($vcheck_attribute = $this->qlayerset[$i]['attributes']['vcheck_attribute'][$j]) {
 			$j = $this->qlayerset[$i]['attributes']['indizes'][$vcheck_attribute];
       $parts = get_select_parts(extract_select_clause($this->qlayerset[$i]['pfad']));
-			$eigentuemer_vcheck = [
-				'attribute' => $vcheck_attribute,
-				'expression' => $parts[$j]
-			];
+			foreach ($parts as $part) {
+				if (strpos($part, $vcheck_attribute) !== false) {
+					$eigentuemer_vcheck = [
+						'attribute' => $vcheck_attribute,
+						'expression' => $part
+					];
+				}
+			}
 		}
 		
     for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
