@@ -36,7 +36,7 @@ if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != '
 
 $queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
 $active_layer_tab = null;
-$layer_visibility = '';
+$layer_visibility = 'collapsedfull';
 $zindex = 100;
 
 for ($i = 0; $i < $anzLayer; $i++) {	
