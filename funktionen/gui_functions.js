@@ -718,7 +718,7 @@ function auto_resize_overlay(){
 		root.resized = 0;
 		var contentWidth = Math.max(document.getElementById("overlayheader")?.offsetWidth, document.getElementById("contentdiv")?.scrollWidth);
 		if (contentWidth < screen.width) {
-			window.resizeTo(contentWidth + 50, 800);
+			window.resizeTo(contentWidth + 33, 800);
 		}
 		else {
 			window.resizeTo(screen.width, screen.height);
