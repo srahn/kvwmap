@@ -6,10 +6,12 @@
   "type": "object",
   "example": {
     "vorher": "287,standort_uuid:uuid;no_new_window",
-    "ref_layer_id": "289",
+    "ref_layer_id": 289,
     "ref_keys": [
-      { "pkey": "uuid" },
-      { "fkey": "baum_uuid" }
+      {
+        "pkey": "uuid",
+        "fkey": "baum_uuid"
+      }
     ],
     "window_type": "no_new_window",
     "ref_constraint": "within"
