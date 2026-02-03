@@ -214,7 +214,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			if (scope.querySelector('#visibility_rules_'+dependent) == undefined){
 				scope = document;			// ansonsten global
 			}
-			var rules = ruleObject = JSON.parse(scope.querySelector('#visibility_rules_'+dependent).value);
+			var rules = JSON.parse(scope.querySelector('#visibility_rules_'+dependent).value);
 			
 			if(operator == '=')operator = '==';
 			// visibility of attribute
@@ -222,7 +222,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 
 			// if (field_has_value(object, operator, value)){
-			if (check_visibility(rules)){
+			if (check_visibility(rules, scope, k)){
 				if (name_dependent != null) {
 					name_dependent.classList.remove('collapsedfull');
 				}
