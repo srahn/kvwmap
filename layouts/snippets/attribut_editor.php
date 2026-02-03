@@ -446,6 +446,10 @@ function render(i){
 		display: none;
 	}
 
+	.group.child:not(:has(> :nth-child(6))) > :first-child {
+		display: none;
+	}
+
 	.child {
 		margin: 0px 2px 2px 10px;
 	}
