@@ -509,7 +509,7 @@ function art_hide(){
         <tr>
           <td  colspan=8 style="border-bottom:1px solid #C3C7C3">
           	&nbsp;<span class="fett">Name:</span>
-          	<input type="text" name="Name" value="<? echo $this->Document->selectedframe[0]['name'] ?>" size="27">
+          	<input type="text" name="name" value="<? echo $this->Document->selectedframe[0]['name'] ?>" size="27">
           </td>
         </tr>
       </table>
