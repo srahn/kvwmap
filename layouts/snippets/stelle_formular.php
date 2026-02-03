@@ -477,7 +477,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 											<select name="selectedframes" size="6" multiple style="width: 340px">
 											<?
 											for($i=0; $i < count_or_0($this->formvars['selframes']); $i++){
-													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selframes'][$i]["Name"]).' value="'.$this->formvars['selframes'][$i]["id"].'">'.$this->formvars['selframes'][$i]["Name"].'</option>';
+													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selframes'][$i]["name"]).' value="'.$this->formvars['selframes'][$i]["id"].'">'.$this->formvars['selframes'][$i]["name"].'</option>';
 												 }
 											?>
 											</select>
@@ -489,7 +489,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<td>
 											<select name="allframes" size="6" multiple style="width: 340px">
 											<? for($i=0; $i < count($this->formvars['frames']); $i++){
-													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['frames'][$i]["Name"]).'	value="'.$this->formvars['frames'][$i]["id"].'">'.$this->formvars['frames'][$i]["Name"].'</option>';
+													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['frames'][$i]["name"]).'	value="'.$this->formvars['frames'][$i]["id"].'">'.$this->formvars['frames'][$i]["name"].'</option>';
 													 }
 											?>
 											</select>
