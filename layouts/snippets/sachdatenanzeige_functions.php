@@ -163,22 +163,66 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		scrollto_saved_position();
 		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
+
+	check_visibility = function(rules) {
+		// Leaf-Regel (kein logic → einfache Bedingung)
+		if (!rule.logic && rule.attribute) {
+			const actual = values[rule.attribute];
+			const expected = rule.value;
+
+			switch (rule.operator) {
+				case '=':
+					return actual == expected;
+
+				case '!=':
+					return actual != expected;
+
+				case 'IN':
+					return Array.isArray(expected) && expected.includes(actual);
+
+				case 'NOT IN':
+					return Array.isArray(expected) && !expected.includes(actual);
+
+				default:
+					console.warn('Unbekannter Operator:', rule.operator);
+					return false;
+			}
+		}
+
+		// Logische Gruppe (AND / OR)
+		if (rule.logic && Array.isArray(rule.rules)) {
+			const results = rule.rules.map(r => check_visibility(r, values));
+
+			if (rule.logic === 'AND') {
+				return results.every(Boolean);
+			}
+
+			if (rule.logic === 'OR') {
+				return results.some(Boolean);
+			}
+		}
+
+		// Fallback (ungültige Regel)
+		return false;
+	}
 	
-	check_visibility = function(layer_id, object, dependents, k){
+	check_visibility_dependents = function(layer_id, object, dependents, k){
 		if(object == null)return;
 		var group_display;
 		dependents.forEach(function(dependent){
 			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen
-			if(scope.querySelector('#vcheck_operator_'+dependent) == undefined){
+			if (scope.querySelector('#visibility_rules_'+dependent) == undefined){
 				scope = document;			// ansonsten global
 			}
-			var operator = scope.querySelector('#vcheck_operator_'+dependent).value;
-			var value = scope.querySelector('#vcheck_value_'+dependent).value;
+			var rules = ruleObject = JSON.parse(scope.querySelector('#visibility_rules_'+dependent).value);
+			
 			if(operator == '=')operator = '==';
 			// visibility of attribute
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
-			if(field_has_value(object, operator, value)){
+
+			// if (field_has_value(object, operator, value)){
+			if (check_visibility(rules)){
 				if (name_dependent != null) {
 					name_dependent.classList.remove('collapsedfull');
 				}

@@ -234,6 +234,147 @@ function set_all(column){
 	}
 }
 
+
+
+// ----------------- Visibility Rules ----------------------
+let visibilityRules = [];
+<?	for ($i = 0; $i < count_or_0($this->attributes['type']); $i++) { ?>
+	visibilityRules.push(JSON.parse('<? echo $this->attributes['visibility_rules'][$i]; ?>'));
+<?	} ?>
+
+const operators = ['=', '!=', '<', '>', 'IN'];
+
+function syncHiddenField(i) {
+  const input = document.getElementById('visibilityRulesInput_' + i);
+  if(input) input.value = JSON.stringify(visibilityRules[i]);
+}
+
+// --------------------
+// Rekursiver Renderer
+// --------------------
+function renderNode(node, i, parent=null, index=null){
+  if(node.rules) return renderGroup(node, i, parent, index);
+  return renderRule(node, i, parent, index);
+}
+
+function renderGroup(group, i, parent=null, index=null){
+  const div = document.createElement('div');
+  div.className = 'group';
+
+  // Logic
+  const logicSelect = document.createElement('select');
+  ['AND','OR'].forEach(op => {
+    const option = document.createElement('option');
+    option.textContent = option.value = op;
+    if(group.logic===op) option.selected=true;
+    logicSelect.appendChild(option);
+  });
+  logicSelect.onchange = () => { group.logic = logicSelect.value; syncHiddenField(i); };
+  div.appendChild(logicSelect);
+
+  // Kinder
+  group.rules.forEach((child, idx) => {
+    const childEl = renderNode(child, i, group, idx);
+    childEl.classList.add('child');
+    div.appendChild(childEl);
+  });
+
+  // Buttons
+  div.appendChild(createAddRuleButton(group, i));
+  div.appendChild(createAddGroupButton(group, i));
+
+  // Delete-Button für Gruppe, außer Root
+  if(parent){
+    const delBtn = document.createElement('button');
+    delBtn.type='button';
+    delBtn.textContent='Löschen';
+    delBtn.onclick = () => { parent.rules.splice(index,1); render(i); };
+    div.appendChild(delBtn);
+  }
+
+  return div;
+}
+
+function renderRule(rule, i, parent=null, index=null){
+  const div = document.createElement('div');
+  div.className = 'rule';
+
+  // Attribut
+  const attrSelect = document.createElement('select');
+  attributes.forEach(attr => {
+    const o = document.createElement('option');
+    o.value = attr; o.textContent = attr;
+    if(rule.attribute===attr) o.selected=true;
+    attrSelect.appendChild(o);
+  });
+  attrSelect.onchange = () => { rule.attribute=attrSelect.value; syncHiddenField(i); };
+
+  // Operator
+  const opSelect = document.createElement('select');
+  operators.forEach(op => {
+    const o = document.createElement('option');
+    o.value = op; o.textContent = op;
+    if(rule.operator===op) o.selected=true;
+    opSelect.appendChild(o);
+  });
+  opSelect.onchange = () => { rule.operator=opSelect.value; syncHiddenField(i); };
+
+  // Value
+  const valueInput = document.createElement('input');
+  if(rule.operator==='IN'){
+    valueInput.value = Array.isArray(rule.value)?rule.value.join('|'):'';
+  } else {
+    valueInput.value = rule.value || '';
+  }
+  valueInput.oninput = () => {
+    if(rule.operator==='IN') rule.value=valueInput.value.split('|').map(s=>s.trim());
+    else rule.value=valueInput.value;
+    syncHiddenField(i);
+  };
+
+  div.append(attrSelect, opSelect, valueInput);
+
+  // Delete-Button
+  if(parent){
+    const delBtn = document.createElement('button');
+    delBtn.type='button';
+    delBtn.textContent='Löschen';
+    delBtn.onclick = () => { parent.rules.splice(index,1); render(i); };
+    div.appendChild(delBtn);
+  }
+
+  return div;
+}
+
+// --------------------
+// Buttons hinzufügen
+// --------------------
+function createAddRuleButton(group, i){
+  const btn = document.createElement('button');
+  btn.type='button';
+  btn.textContent='+ Bedingung';
+  btn.onclick = () => { group.rules.push({attribute:'', operator:'=', value:''}); render(i); };
+  return btn;
+}
+
+function createAddGroupButton(group, i){
+  const btn = document.createElement('button');
+  btn.type='button';
+  btn.textContent='+ Gruppe';
+  btn.onclick = () => { group.rules.push({logic:'AND', rules:[]}); render(i); };
+  return btn;
+}
+
+// --------------------
+// Render-Funktion für Attribut i
+// --------------------
+function render(i){
+  const container = document.getElementById('rulesDiv_' + i);
+  container.innerHTML='';
+  container.appendChild(renderNode(visibilityRules[i], i));
+  syncHiddenField(i);
+}
+
 //-->
 </script>
 
@@ -268,6 +409,43 @@ function set_all(column){
 	.navigation-selected div{
 		color: #111;
 	}
+
+	td {
+		vertical-align: top;
+	}
+
+	.rulediv {
+		overflow: hidden;
+		max-height: 24px; /* Höhe des ersten Elements */
+		transition: max-height 0.3s ease;
+	}
+
+	.rulediv.open {
+		max-height: 500px; /* ausreichend groß */
+		transition: max-height 0.3s ease;
+	}
+
+	.rule {
+		display: flex;
+	}
+
+	.rule *, .group *{
+		margin: 0 1px 2px 1px;
+	}
+
+	.rulediv.open .group {
+		border: 1px solid #aaa;
+		padding: 2px;
+	}
+
+	.group:not(:has(> :nth-child(5))) > :first-child {
+		display: none;
+	}
+
+	.child {
+		margin: 0px 2px 2px 10px;
+	}
+
 </style>
 
 <table style="width: 700px; margin: 15px 40px 0 40px">
@@ -730,30 +908,11 @@ function set_all(column){
 											); ?>
 										</td>
 										<td id="visibility_form_<? echo $this->attributes['name'][$i]; ?>" style="<? echo ($this->attributes['visible'][$i] == 2 ? '' : 'display:none') ?>">
-											<table style="width: 100%" cellspacing="0" cellpadding="0">
-												<tr>
-													<td><?
-														echo FormObject::createSelectField(
-															'vcheck_attribute_' . $this->attributes['name'][$i],
-															$this->attributes['name'],
-															$this->attributes['vcheck_attribute'][$i],
-															1
-														); ?>
-													</td>
-													<td><?
-														echo FormObject::createSelectField(
-															'vcheck_operator_' . $this->attributes['name'][$i],
-															array('=', '!=', '<', '>', 'IN'),
-															$this->attributes['vcheck_operator'][$i],
-															1,
-															'width: 35px'
-														); ?>
-													</td>
-													<td>
-														<input type="text" style="width: 60px" name="vcheck_value_<? echo $this->attributes['name'][$i]; ?>" value="<? echo htmlentities($this->attributes['vcheck_value'][$i]); ?>">
-													</td>
-												</tr>
-											</table>
+											<div id="rulesDiv_<? echo $i; ?>" class="rulediv" onmouseenter="this.classList.add('open');" onmouseleave="this.classList.remove('open');"></div>
+  										<input type="hidden" id="visibilityRulesInput_<? echo $i; ?>" name="visibility_rules_<? echo $this->attributes['name'][$i]; ?>">
+											<script>
+												render(<? echo $i; ?>);
+											</script>
 										</td>
 									</tr>
 								</table>
