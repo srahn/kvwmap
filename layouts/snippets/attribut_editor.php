@@ -238,9 +238,11 @@ function set_all(column){
 
 // ----------------- Visibility Rules ----------------------
 let visibilityRules = [];
-<?	for ($i = 0; $i < count_or_0($this->attributes['type']); $i++) { ?>
-	visibilityRules.push(JSON.parse('<? echo $this->attributes['visibility_rules'][$i]; ?>'));
-<?	} ?>
+<?	for ($i = 0; $i < count_or_0($this->attributes['type']); $i++) { 
+			if ($this->attributes['visibility_rules'][$i]) { ?>
+				visibilityRules[<? echo $i; ?>] = JSON.parse('<? echo $this->attributes['visibility_rules'][$i]; ?>');
+<?		}
+		} ?>
 
 const operators = ['=', '!=', '<', '>', 'IN'];
 
@@ -371,7 +373,9 @@ function createAddGroupButton(group, i){
 function render(i){
   const container = document.getElementById('rulesDiv_' + i);
   container.innerHTML='';
-  container.appendChild(renderNode(visibilityRules[i], i));
+	if (visibilityRules[i]) {
+  	container.appendChild(renderNode(visibilityRules[i], i));
+	}
   syncHiddenField(i);
 }
 

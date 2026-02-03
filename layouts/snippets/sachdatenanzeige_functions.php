@@ -164,34 +164,15 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
 
-	check_visibility = function(rules) {
+	check_visibility_rule = function(layer_id, rule, scope, k) {
 		// Leaf-Regel (kein logic → einfache Bedingung)
 		if (!rule.logic && rule.attribute) {
-			const actual = values[rule.attribute];
-			const expected = rule.value;
-
-			switch (rule.operator) {
-				case '=':
-					return actual == expected;
-
-				case '!=':
-					return actual != expected;
-
-				case 'IN':
-					return Array.isArray(expected) && expected.includes(actual);
-
-				case 'NOT IN':
-					return Array.isArray(expected) && !expected.includes(actual);
-
-				default:
-					console.warn('Unbekannter Operator:', rule.operator);
-					return false;
-			}
+			const field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+			return field_has_value(field, rule.operator, rule.value);
 		}
-
 		// Logische Gruppe (AND / OR)
 		if (rule.logic && Array.isArray(rule.rules)) {
-			const results = rule.rules.map(r => check_visibility(r, values));
+			const results = rule.rules.map(r => check_visibility_rule(layer_id, r, scope, k));
 
 			if (rule.logic === 'AND') {
 				return results.every(Boolean);
@@ -201,12 +182,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				return results.some(Boolean);
 			}
 		}
-
 		// Fallback (ungültige Regel)
 		return false;
 	}
 	
-	check_visibility_dependents = function(layer_id, object, dependents, k){
+	check_visibility_dependents = function(layer_id, object, dependents, k) {
 		if(object == null)return;
 		var group_display;
 		dependents.forEach(function(dependent){
@@ -214,15 +194,13 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			if (scope.querySelector('#visibility_rules_'+dependent) == undefined){
 				scope = document;			// ansonsten global
 			}
-			var rules = JSON.parse(scope.querySelector('#visibility_rules_'+dependent).value);
+			var rule = JSON.parse(scope.querySelector('#visibility_rules_'+dependent).value);
 			
-			if(operator == '=')operator = '==';
 			// visibility of attribute
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 
-			// if (field_has_value(object, operator, value)){
-			if (check_visibility(rules, scope, k)){
+			if (check_visibility_rule(layer_id, rule, scope, k)){
 				if (name_dependent != null) {
 					name_dependent.classList.remove('collapsedfull');
 				}
@@ -277,6 +255,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	}
 
 	field_has_value = function(field, operator, value) {
+		if (operator == '=')operator = '==';
 		var field_value = field.value;
 		if (field.type == 'radio') {
 			field_value = '';
@@ -300,13 +279,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 		else {
 			if (operator == 'IN') {
-				value_array = value.split('|');
-				if (value_array.indexOf(field_value) > -1) {
-					return true;
-				}
-				else {
-					return false;
-				}
+				return Array.isArray(value) && value.includes(field_value);
 			}
 			else {
 				return eval("'" + field_value + "' " + operator + " '" + value + "'");
