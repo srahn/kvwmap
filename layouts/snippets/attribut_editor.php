@@ -251,6 +251,11 @@ function syncHiddenField(i) {
   if(input) input.value = JSON.stringify(visibilityRules[i]);
 }
 
+function addEmptyRule(i){
+	visibilityRules[i] = JSON.parse('{"logic":"AND","rules":[{"attribute":"","operator":"=","value":""}]}');
+	render(i);
+}
+
 // --------------------
 // Rekursiver Renderer
 // --------------------
@@ -912,7 +917,7 @@ function render(i){
 												$this->attributes['visible'][$i],
 												1,
 												'outline: 1px solid lightgrey; border: none; width: 75px; background-color: white;',
-												'update_visibility_form(this.value, \''.$this->attributes['name'][$i].'\')'
+												'update_visibility_form(this.value, \''.$this->attributes['name'][$i].'\');addEmptyRule(' . $i . ');'
 											); ?>
 										</td>
 										<td id="visibility_form_<? echo $this->attributes['name'][$i]; ?>" style="<? echo ($this->attributes['visible'][$i] == 2 ? '' : 'display:none') ?>">
