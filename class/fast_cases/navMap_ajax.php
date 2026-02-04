@@ -1731,9 +1731,14 @@ class GUI {
 				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
-				$label->size = $dbLabel['size'];
-				$label->minsize = $dbLabel['minsize'];
-				$label->maxsize = $dbLabel['maxsize'];
+				if (is_numeric($dbLabel['size'])) {
+					$label->size = $dbLabel['size'];
+					$label->minsize = $dbLabel['minsize'];
+					$label->maxsize = $dbLabel['maxsize'];
+				}
+				else {
+					$label->updateFromString("LABEL SIZE [" . $dbLabel['size']."] END");
+				}
 				$label->minfeaturesize = $dbLabel['minfeaturesize'];
 				if ($dbLabel['maxscale'] != '') {
 					$label->maxscaledenom = $dbLabel['maxscale'];

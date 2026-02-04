@@ -1419,7 +1419,14 @@ class GUI {
 				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
-				$label->size = $dbLabel['size'];
+				if (is_numeric($dbLabel['size'])) {
+					$label->size = $dbLabel['size'];
+					$label->minsize = $dbLabel['minsize'];
+					$label->maxsize = $dbLabel['maxsize'];
+				}
+				else {
+					$label->updateFromString("LABEL SIZE [" . $dbLabel['size']."] END");
+				}
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
 				$label->minfeaturesize = $dbLabel['minfeaturesize'];
