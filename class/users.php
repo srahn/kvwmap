@@ -1443,7 +1443,7 @@ class user {
 		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
 		else {
 			$ret = $this->loginname_exists($userdaten['loginname'], $userdaten['id']);
-			if ($ret[1] == 1) {
+			if ($ret['user']) {
 				$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
 			}
 		}
