@@ -1663,7 +1663,7 @@ class rolle {
 				UPDATE
 					kvwmap." . $table_name . "
 				SET
-					rollenfilter = '" . pg_escape_string($formvars['layer_options_rollenfilter']) . "'
+					rollenfilter = '" . $formvars['layer_options_rollenfilter'] . "'
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
