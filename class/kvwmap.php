@@ -22307,16 +22307,18 @@ DO $$
 		$ret = $this->db->execSQL($sql);
 		if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$layer = pg_fetch_array($ret[1]);
-		$layer['sync'] = ($layer['sync'] == 't');
-		$layer['queryable'] = ($layer['queryable'] == 't');
-		$layer['querymap'] = ($layer['querymap'] == 't');
-		$layer['logconsume'] = ($layer['logconsume'] == 't');
-		if ($replace_params) {
-			foreach (array('classitem', 'classification', 'data', 'pfad') AS $key) {
-				$layer[$key] = replace_params_rolle(
-					$layer[$key],
-					['duplicate_criterion' => $layer['duplicate_criterion']]
-				);
+		if ($layer) {
+			$layer['sync'] = ($layer['sync'] == 't');
+			$layer['queryable'] = ($layer['queryable'] == 't');
+			$layer['querymap'] = ($layer['querymap'] == 't');
+			$layer['logconsume'] = ($layer['logconsume'] == 't');
+			if ($replace_params) {
+				foreach (array('classitem', 'classification', 'data', 'pfad') AS $key) {
+					$layer[$key] = replace_params_rolle(
+						$layer[$key],
+						['duplicate_criterion' => $layer['duplicate_criterion']]
+					);
+				}
 			}
 		}
 		return $layer;
