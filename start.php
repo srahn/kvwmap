@@ -549,7 +549,7 @@ else {
 			$GUI->setHistTimestamp();
 		}
 		# Zurücksetzen der veränderten Klassen
-		#$GUI->user->rolle->resetClasses();
+		$GUI->user->rolle->resetClasses();
 		if (defined('LOGIN_ROUTINE') AND LOGIN_ROUTINE != '' AND file_exists(LOGIN_ROUTINE) AND is_file(LOGIN_ROUTINE)) {
 			include(LOGIN_ROUTINE);
 		}
