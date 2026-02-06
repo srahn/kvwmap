@@ -86,8 +86,13 @@
   }
   
   function get_map($url, $format){
-		$ctx = stream_context_create(array('http' => array('timeout' => 10)));
-		return file_get_contents($url, 0, $ctx);
+		$ctx = stream_context_create(array('http' => array('timeout' => 10)));		
+		if($result = @file_get_contents($url, 0, $ctx)) {
+			return $result;
+		}
+		else {
+			return file_get_contents('../graphics/inactive18.jpg');
+		}
   }
   
   wms_proxy();
