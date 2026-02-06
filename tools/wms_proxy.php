@@ -87,7 +87,7 @@
   
   function get_map($url, $format){
 		$ctx = stream_context_create(array('http' => array('timeout' => 10)));		
-		if($result = file_get_contents($url, 0, $ctx)) {
+		if($result = @file_get_contents($url, 0, $ctx)) {
 			return $result;
 		}
 		else {
