@@ -555,7 +555,6 @@ class rolle {
 			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
-			$this->menu_auto_close=$rs['layer_selection_mode'];
 			rolle::$layer_params = array_map(
 				function ($layer_param) {
 					return ($layer_param === 'Array' ? '' : $layer_param);
