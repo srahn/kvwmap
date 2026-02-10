@@ -1124,12 +1124,10 @@ class ddl {
 			// else $new_column = false;
 			# spaltenweiser Typ von links nach rechts
 			if ($this->layout['columns'] AND $this->i_on_page > 0) {
-				$column_i = 1;
-				if ((($this->layout['maxx'] - $offsetx) * ($column_i + 1) / $column_i) > ($this->layout['width'] - $this->layout['margin_right'] - $offsetx)) {
+				if (($this->xoffset_onpage + $this->layout['maxx'] - $offsetx + $this->layout['gap'] + 60) > ($this->layout['width'] - $this->layout['margin_right'] - $offsetx)) {
 					$this->xoffset_onpage = 0;
 					$new_column = false;
 					$this->layout['maxx'] = 0;
-					$column_i = 1;
 				}
 				else {
 					$this->xoffset_onpage = $this->xoffset_onpage + $this->layout['maxx'] - $offsetx + $this->layout['gap'];
@@ -1137,7 +1135,6 @@ class ddl {
 						$this->yoffset_onpage = 0;
 					}
 					$new_column = true;
-					$column_i++;
 				}
 			}
 			if (!$new_column AND $this->i_on_page > 0) {

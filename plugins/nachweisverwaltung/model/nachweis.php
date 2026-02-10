@@ -480,6 +480,47 @@ class Nachweis {
     }
     return $ret;
   }
+
+  function getLeaBBoxAsRectObj($lea_id) {
+    # ermittelt die Boundingbox der Nachweise
+    $sql ='
+			SELECT 
+				st_xmin(extent) AS minx,
+				st_ymin(extent) AS miny,
+				st_xmax(extent) AS maxx,
+				st_ymax(extent) AS maxy
+			FROM (
+				SELECT st_extent(st_transform(the_geom, '.$this->client_epsg.')) as extent
+				FROM 
+					lenris.lea_vermessungsantrag 
+				WHERE lea_id = ' . $lea_id . '
+			) as foo';
+    $ret=$this->database->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $ret[1].='Fehler bei der Abfrage der Boundingbox des LEA! \n';
+    }
+    else {
+      # Abfrage fehlerfrei
+      # Abfragen und zuordnen der Koordinaten der Box
+      $rs=pg_fetch_array($ret[1]);
+      if ($rs['maxx']-$rs['minx']==0) {
+        $rs['maxx']=$rs['maxx']+1;
+        $rs['minx']=$rs['minx']-1;        
+      }
+      if ($rs['maxy']-$rs['miny']==0) {
+        $rs['maxy']=$rs['maxy']+1;
+        $rs['miny']=$rs['miny']-1;        
+      }
+      $rect = rectObj(
+        $rs['minx'],
+        $rs['miny'],        
+        $rs['maxx'],
+        $rs['maxy']
+      );
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }
   
   function check_poly_in_flur($polygon, $flur, $gemarkung, $epsg){
   	$sql = "SELECT st_isvalid(st_geomfromtext('".$polygon."', ".$epsg."))";

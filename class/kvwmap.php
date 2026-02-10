@@ -2830,7 +2830,7 @@ echo '			</table>
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
 					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
+					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");
         }
 				if($dbStyle['colorrange'] != '') {
 					$style->updateFromString("STYLE COLORRANGE " . $dbStyle['colorrange']." END");
@@ -2875,12 +2875,24 @@ echo '			</table>
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
-				$RGB=explode(" ",$dbLabel['color']);
-				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-				$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				$RGB = explode(" ",$dbLabel['color']);
+				if ($RGB[0] == '') { 
+					$RGB[0]=0; $RGB[1]=0; $RGB[2]=0; 
+				}
+				if (is_numeric($RGB[0])) {
+					$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				}
+				else {
+					$label->updateFromString("LABEL COLOR [" . $dbLabel['color']."] END");
+				}
 				if($dbLabel['outlinecolor'] != ''){
 					$RGB=explode(" ",$dbLabel['outlinecolor']);
-					$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$label->updateFromString("LABEL OUTLINECOLOR [" . $dbLabel['outlinecolor']."] END");
+					}
 				}
 				if ($dbLabel['shadowcolor']!='') {
 					$RGB=explode(" ",$dbLabel['shadowcolor']);
@@ -2915,9 +2927,19 @@ echo '			</table>
 						$style = new styleObj();
 					}
 					$style->setGeomTransform('labelpoly');
-					$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$style->updateFromString("STYLE COLOR [" . $dbLabel['backgroundcolor']."] END");
+					}
 					if ($dbLabel['buffer']!='') {
-						$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						if (is_numeric($RGB[0])) {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						}
+						else {
+							$style->updateFromString("STYLE OUTLINECOLOR [" . $dbLabel['backgroundcolor']."] END");
+						}
 						$style->width = $dbLabel['buffer'];
 					}
 					$label->insertStyle($style);
@@ -4096,7 +4118,8 @@ echo '			</table>
         	continue;
       	}
 				$layerdb = $mapDB->getlayerdatabase($layer[$i]['Layer_ID'], $this->Stelle->pgdbhost);
-				$select = getDataParts($layer[$i]['Data'])['select'];
+				$data = str_replace('$SCALE', '1000', $layer[$i]['Data']);
+				$select = getDataParts($data)['select'];
 				$data_attributes = $mapDB->getDataAttributes($layerdb, $layer[$i]['Layer_ID']);
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
@@ -4149,7 +4172,8 @@ echo '			</table>
 			$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['Layer_ID']);
 			$geom = $data_attributes['the_geom'];
-			$select = getDataParts($layer['Data'])['select'];
+			$data = str_replace('$SCALE', '1000', $layer['Data']);
+			$select = getDataParts($data)['select'];
 			$select = preg_replace ("/ FROM /", ' from ', $select);
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			# Filter hinzufügen
@@ -4720,6 +4744,9 @@ echo '			</table>
 	function showMapImage() {
 		include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php');
   	$this->loadMap('DataBase');
+		if ($this->map->selectOutputFormat('jpeg_print') == 1){
+			$this->map->selectOutputFormat('jpeg');
+		}
   	$this->drawMap(true);
   	$randomnumber = rand(0, 1000000);
   	$svgfile  = $randomnumber.'.svg';
@@ -4738,7 +4765,7 @@ echo '			</table>
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
-  	exec(IMAGEMAGICKPATH . 'convert ' . IMAGEPATH . $svgfile . ' ' . IMAGEPATH . $jpgfile);
+  	exec(IMAGEMAGICKPATH . 'convert ' . IMAGEPATH . $svgfile . ' -quality 100 ' . IMAGEPATH . $jpgfile);
 		// echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
 
     if (function_exists('imagecreatefromjpeg')) {
@@ -4751,7 +4778,7 @@ echo '			</table>
       }
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
-      ImageJPEG($mainimage, IMAGEPATH.$jpgfile);
+      ImageJPEG($mainimage, IMAGEPATH.$jpgfile, 100);
     } 
 		//readfile(IMAGEPATH . $svgfile);
 		include(SNIPPETS . 'map_image.php');
@@ -4992,11 +5019,11 @@ echo '			</table>
 
   function add_label(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$empty_label = new stdClass();
-    $empty_label->font = 'arial';
-    $empty_label->size = '8';
-    $empty_label->minsize = '6';
-    $empty_label->maxsize = '10';
+		$empty_label['color'] = '0 0 0';
+    $empty_label['font'] = 'arial';
+    $empty_label['size'] = '8';
+    $empty_label['minsize'] = '6';
+    $empty_label['maxsize'] = '10';
     $new_label_id = $mapDB->new_Label($empty_label);
     $mapDB->addLabel2Class($this->formvars['class_id'], $new_label_id, 0);
     $this->get_labels();
@@ -6217,6 +6244,7 @@ echo '			</table>
 		}
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
+		$select = str_replace('$SCALE', '1000', $select);
 		$attributes = $dbmap->load_attributes($layerdb, $select);
 		$dbmap->save_postgis_attributes($layerdb, -$layer_id, $attributes, '', '');
 
@@ -8046,7 +8074,7 @@ echo '			</table>
 			if ($preview == true) {
 				$resize = '-resize 595x1000';
 			}
-			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+			exec(IMAGEMAGICKPATH.'convert -density 300x300 -quality 100 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg');
 			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if (!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				$this->outputfile = $name.'-'.$currenttime.'-0.jpg';;
@@ -10788,12 +10816,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 				# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
 				$document_attributes = array();
+				$complex_attributes = array();
 				for ($i = 0; $i < count($attributes['name']); $i++) {
-					if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
+					if ($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
 						$document_attributes[] = $attributes['name'][$i];
 					}
+					if (POSTGRESVERSION >= 930 AND (substr($attributes['type'][$i], 0, 1) == '_' OR is_numeric($attributes['type'][$i]))) {
+						$complex_attributes[] = $attributes['name'][$i];
+					}
 				}
-				if(!empty($document_attributes)){
+				if (!empty($document_attributes) OR !empty($complex_attributes)){
 					$this->formvars['selected_layer_id'] = $layer['Layer_ID'];
 					$this->formvars['value_'.$layer['maintable'].'_oid'] = $oid;
 					$this->formvars['operator_'.$layer['maintable'].'_oid'] = '=';
@@ -10857,6 +10889,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($document_attributes AND is_array($document_attributes)) {
 					foreach($document_attributes as $document_attribute){
 						$this->deleteDokument($this->qlayerset[0]['shape'][0][$document_attribute], $layer['document_path'], $layer['document_url']);
+					}
+				}
+				if ($complex_attributes AND is_array($complex_attributes)) {
+					foreach ($complex_attributes as $complex_attribute){
+						$this->processJSON($this->qlayerset[0]['shape'][0][$complex_attribute], $layer['document_path'], $layer['document_url'], NULL, NULL, NULL, NULL, '', true);
 					}
 				}
 				$this->qlayerset[0]['shape'] = array();
@@ -11089,30 +11126,31 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							} break;
 
-							case ($table['type'][$i] == 'SubFormFK') : {
-								$attribute_options = $attribute->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
-								include_once(CLASSPATH . 'Layer.php');
-								$fk_field_is_empty = $this->formvars[$table['formfield'][$i]] == '';
-								$parent_layer = Layer::find_by_id($this, $attribute_options['parent_layer_id']);
-								$parent_layer_has_geom = $parent_layer->get('geom_column') != '';
-								$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
-								if ($result['success']) {
-									$new_feature_has_geometry = true;
-									$new_feature_geometry = $result['wkb_geometry'];
-									include_once(CLASSPATH . 'PgObject.php');
-									$pg_object = new PgObject($this, $parent_layer->get('schema'), $parent_layer->get('maintable'));
-									$pg_object->debug->user_funktion = 'admin'; $pg_object->show = true;
-									$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
-									$intersecting_parent_gefunden = false;
-									if (count($intersected_objects) > 0) {
-										$parent_feature = $intersected_objects[0];
-										$intersecting_parent_gefunden = true;
-									}
-									if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
-										$insert[$table['attributname'][$i]] = "'" . $parent_feature->get($parent_layer->get('oid')) . "'";
-									}
-								}
-							} break;
+							// Funktioniert nicht
+							// case ($table['type'][$i] == 'SubFormFK') : {
+							// 	$attribute_options = $attribute->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
+							// 	include_once(CLASSPATH . 'Layer.php');
+							// 	$fk_field_is_empty = $this->formvars[$table['formfield'][$i]] == '';
+							// 	$parent_layer = Layer::find_by_id($this, $attribute_options['parent_layer_id']);
+							// 	$parent_layer_has_geom = $parent_layer->get('geom_column') != '';
+							// 	$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
+							// 	if ($result['success']) {
+							// 		$new_feature_has_geometry = true;
+							// 		$new_feature_geometry = $result['wkb_geometry'];
+							// 		include_once(CLASSPATH . 'PgObject.php');
+							// 		$pg_object = new PgObject($this, $parent_layer->get('schema'), $parent_layer->get('maintable'));
+							// 		$pg_object->debug->user_funktion = 'admin'; $pg_object->show = true;
+							// 		$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
+							// 		$intersecting_parent_gefunden = false;
+							// 		if (count($intersected_objects) > 0) {
+							// 			$parent_feature = $intersected_objects[0];
+							// 			$intersecting_parent_gefunden = true;
+							// 		}
+							// 		if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
+							// 			$insert[$table['attributname'][$i]] = "'" . $parent_feature->get($parent_layer->get('oid')) . "'";
+							// 		}
+							// 	}
+							// } break;
 
 							case ($table['type'][$i] == 'Geometrie') : {
 								if ($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != '' OR $this->formvars['newpathwkt'] != '') {
@@ -11412,9 +11450,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					for ($i = 0; $i < count($form_fields); $i++) {
 						if ($form_fields[$i] != '') {
 							$element = explode(';', $form_fields[$i]);
-							$this->sanitize([$form_fields[$i] => $element[6]], true);
 							$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
 							$dont_use_for_new = $layerset[0]['attributes']['dont_use_for_new'][$layerset[0]['attributes']['indizes'][$element[1]]];
+							if ($formElementType == 'Zahl') {
+								$this->formvars[$form_fields[$i]] = removeTausenderTrenner($this->formvars[$form_fields[$i]]);
+							}
 							if (
 								$element[3] == $oid AND
 								(
@@ -15900,7 +15940,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
 					}
 				}
-				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
+				if ($update != '') {
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
+				}
 			}
 		}
 		if ($this->formvars['delete_documents'] != '') {
@@ -16091,17 +16133,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	/**
-	 * Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
+	 * Diese rekursive Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
 	 * Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
 	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
+	 * Die Funktion wird auch beim Löschen eines Datensatzes mit komplexen Datentypen aufgerufen (dann ist der Parameter $delete = true). 
+	 * Dann übernimmt sie das Löschen der Dateien der Dokument-Attribute.
 	 */
-	function processJSON($json, $doc_path = NULL, $doc_url = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = '') {
+	function processJSON($json, $doc_path = NULL, $doc_url = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = '', $delete = false) {
 		if (is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)) {			// bei Bedarf den JSON-String decodieren
 			$json = json_decode($json);
 		}
 		if (is_array($json)) {		// Array-Datentyp
 			for ($i = 0; $i < count($json); $i++) {
-				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"');
+				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"', $delete);
 			}
 			$result = '{' . @implode(',', array_filter($elems)) . '}';		# leere Array-Elemente mit array_filter weglassen
 		}
@@ -16116,11 +16160,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$new_quote = $quote;
 			}
 			foreach ($json as $elem) {
-				$elems[] = $this->processJSON($elem, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $new_quote);
+				$elems[] = $this->processJSON($elem, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $new_quote, $delete);
 			}
 			$result = $quote . '(' . implode(',', $elems) . ')' . $quote;
 		}
 		else { // normaler Datentyp
+			if ($delete AND (strpos($json, $doc_path) !== false OR ($doc_url != '' and strpos($json, $doc_url) !== false))) {		# Datensatz wird gelöscht und $json entspricht Dokument-Attribut
+				$this->deleteDokument($json, $doc_path, $doc_url);
+			}
 			if (substr($json, 0, 5) == 'file:') {
 				$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
 			}
@@ -16208,6 +16255,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				else {
 					echo '<br>Datei: '.$_files[$input_name]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+					$db_input = '';
 				}
 			}
 			else {
@@ -19131,6 +19179,7 @@ class db_mapObj{
 		$options = array_merge($default_options, $options);
 		$data = $this->getData($layer_id);
 		if ($data != '') {
+			$data = str_replace('$SCALE', '1000', $data);
 			$select = getDataParts($data)['select'];
 			if ($database->schema != '') {
 				$select = str_replace($database->schema . '.', '', $select);
@@ -21347,7 +21396,8 @@ class db_mapObj{
 
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
+				$default = (substr($attributes['type'][$i], 0, 1) == '_' ? 'to_json(' . $attributes['default'][$i] . ')' : $attributes['default'][$i]); # to_json für Array-Datentyp
+				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}

@@ -46,6 +46,11 @@ function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
+	if (strpos($exp, ' IN ') != false) {
+		$array = get_first_word_after($exp, ' IN');
+		$exp = str_replace(' IN ', ' = ANY(', $exp);
+		$exp = str_replace($array, $array . ')', $exp);
+	}
 
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
@@ -2592,7 +2597,7 @@ function getDataParts($data){
 	$first_space_pos = strpos($data, ' ');
 	$geom = substr($data, 0, $first_space_pos);					# geom am Anfang
 	$rest = substr($data, $first_space_pos);
-	$usingposition = strpos($rest, 'using');
+	$usingposition = stripos($rest, 'using');
 	$from = substr($rest, 0, $usingposition);						# from (alles zwischen geom und using)
 	$using = substr($rest, $usingposition);							# using ...
 	if(strpos($from, '(') === false){		# from table

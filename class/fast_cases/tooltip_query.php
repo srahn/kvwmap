@@ -20,6 +20,21 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 	}
 }
 
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false) {
+	if ($last) {
+		$word_pos = strripos($str, $word);
+	}
+	else {
+		$word_pos = stripos($str, $word);
+	}
+	if ($word_pos !== false) {
+		$str_from_word_pos = substr($str, $word_pos + strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return trim($parts[0]);
+	}
+	return '';
+}
+
 function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
@@ -30,6 +45,11 @@ function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
+	if (strpos($exp, ' IN ') != false) {
+		$array = get_first_word_after($exp, ' IN');
+		$exp = str_replace(' IN ', ' = ANY(', $exp);
+		$exp = str_replace($array, $array . ')', $exp);
+	}
 
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
@@ -2435,18 +2455,34 @@ class db_mapObj{
 					# SubFormulare mit Fremdschlüssel
 					case 'SubFormFK' : {
 						if ($attributes['options'][$i] != '') {
-							$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options
-							$subform = explode(',', $options[0]);
-							$attributes['subform_layer_id'][$i] = $subform[0];
-							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-							for($k = 1; $k < count($subform); $k++) {
-								$attributes['subform_fkeys'][$i][] = $subform[$k];
-								$attributes['SubFormFK_hidden'][$attributes['indizes'][$subform[$k]]] = 1;
+							if (strpos($attributes['options'][$i], '{') === 0) {
+								$json = json_decode($attributes['options'][$i], true);
+								$attributes['subform_layer_id'][$i] = $json['ref_layer_id'];
+								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
+								$attributes['no_new_window'][$i] = ($json['window_type'] === 'no_new_window');
 							}
-							if ($options[1] != '') {
-								if ($options[1] == 'no_new_window') {
-									$attributes['no_new_window'][$i] = true;
+							else {
+								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options
+								$subform = explode(',', $options[0]);
+								$attributes['subform_layer_id'][$i] = $subform[0];
+								$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+								$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+								for ($k = 1; $k < count($subform); $k++) {
+									if (strpos($subform[$k], ':')) {
+										$exp = explode(':', $subform[$k]);
+										$keys['fkey'] = $exp[0];	# Verknüpfungsattribut in diesem Layer
+										$keys['pkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
+									}
+									else {
+										$keys['fkey'] = $keys['pkey'] = $subform[$k];
+									}
+									$attributes['subform_fkeys'][$i][] = $keys;
+									$attributes['SubFormFK_hidden'][$attributes['indizes'][$keys['fkey']]] = 1;
+								}
+								if ($options[1] != '') {
+									if ($options[1] == 'no_new_window') {
+										$attributes['no_new_window'][$i] = true;
+									}
 								}
 							}
 						}

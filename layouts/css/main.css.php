@@ -146,7 +146,7 @@ body {
 	margin: auto;
 }
 
-.collapsed, .dstable .collapsedfull {
+.collapsed, div:not(.gle_tabular)~.collapsedfull {
 	visibility: collapse;
   height: 0;
 	padding: 0 !important;
@@ -2145,6 +2145,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .readonly_text{
 	word-wrap: break-word;
+	width: max-content;
+  max-width: 700px;
 }
 
 .list_edit_div {
