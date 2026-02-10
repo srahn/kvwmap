@@ -1490,7 +1490,7 @@ function go_switch($go, $exit = false) {
 				$result = $GUI->layer_chart_Speichern($chart);
 				if ($result['success']) {
 					$GUI->add_message('notice', $result['msg']);
-					$GUI->layer_charts_Anzeigen();
+					header('location: index.php?go=layer_charts_Anzeigen&layer_id=' . $GUI->formvars['layer_id'] . '&csrf_token=' . $_REQUEST['csrf_token']);
 				}
 				else {
 					$GUI->add_message('error', $result['err_msg']);
