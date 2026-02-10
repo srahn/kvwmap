@@ -12205,14 +12205,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			if ($chart->get_id() == '') {
 				$results = $chart->create();
-				if ($results[0]['success']) {
-					$results[0]['msg'] = 	$strLayerChartSaveSuccessMsg;
+				if ($results['success']) {
+					$results['msg'] = 	$strLayerChartSaveSuccessMsg;
 				}
 			}
 			else {
 				$results = $chart->update();
-				if ($results[0]['success']) {
-					$results[0]['msg'] = $strLayerChartUpdateSuccessMsg;
+				if ($results['success']) {
+					$results['msg'] = $strLayerChartUpdateSuccessMsg;
 				}
 			}
 		}
@@ -12229,7 +12229,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
 		}
 
-		return $results[0];
+		return $results;
 	}
 
 	function layer_chart_Loeschen() {
