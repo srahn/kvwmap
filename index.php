@@ -1505,9 +1505,7 @@ function go_switch($go, $exit = false) {
 					'layer_id' => 'int'
 				]);
 				include_once(CLASSPATH . 'LayerChart.php');
-				$response = $GUI->layer_chart_Loeschen();
-				header('Content-Type: application/json');
-				echo json_encode($response);
+				$GUI->layer_chart_Loeschen();
 			} break;
 
 			case 'generisches_sachdaten_diagramm' : {
