@@ -12313,6 +12313,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	function layer_chart_Loeschen() {
+		include_once(CLASSPATH . 'formatter.php');
 		if ($this->formvars['id'] != '') {
 			$chart = LayerChart::find_by_id($this, $this->formvars['id']);
 			$response = $chart->delete();
@@ -12324,7 +12325,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				'err_msg' => ''
 			);
 		}
-		return $response;
+		$formatter = new formatter($response, 'json', 'application/json');
+		echo $formatter->output();
 	}
 
 	function generisches_sachdaten_diagramm($width, $datei = NULL){
