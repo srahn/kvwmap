@@ -37,7 +37,6 @@ else
     subject=`cat $file | jq -r '.subject'`
     message=`cat $file | jq -r '.message'`
     attachment=`cat $file | jq -r '.attachment'`
-    attachment=${attachement/var/home/gisadmin}
 
     #tls=auto will only use tls if available
     if [[ -z $attachment ]]; then
