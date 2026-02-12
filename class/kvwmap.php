@@ -23251,7 +23251,7 @@ DO $$
 	function updateLabel2Class_ClassID($old_class_id, $new_class_id){
     $sql = '
 			UPDATE 
-				u_labels2classes 
+				kvwmap.u_labels2classes 
 			SET
 				class_id = ' . $new_class_id . '
 			WHERE 
