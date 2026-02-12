@@ -1205,9 +1205,6 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 					if (type == 'text'){
 						action = 'setvalue';
 					}
-					if (type == 'hidden') {	// image-select
-						target = scope.querySelector('#image_select_' + element.id + ' .dropdown');
-					}
 					ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attribute_data['attributenames']+"&attributevalues="+attribute_data['attributevalues']+"&type="+type, new Array(target), new Array(action));
 				}
 			})
