@@ -2473,7 +2473,7 @@ class rolle {
 		for($i=0; $i < count($layerset['list']); $i++){
 			if($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivstatus'] == 1){
 				$layers[] = $layerset['list'][$i]['layer_id'];
-				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
+				if($layerset['list'][$i]['querystatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
 			}
 		}
 		$rows = [
