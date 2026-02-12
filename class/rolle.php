@@ -1476,12 +1476,12 @@ class rolle {
 			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'layer_id'));
 			if($query_status !== ''){	
 				if($this->layerset[$i]['layer_id'] > 0){
-					$sql ='UPDATE kvwmap.u_rolle2used_layer set queryStatus='.$query_status;
+					$sql ='UPDATE kvwmap.u_rolle2used_layer set querystatus='.$query_status;
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND layer_id='.$this->layerset[$i]['layer_id'];
 				}
 				else{		# Rollenlayer
-					$sql ='UPDATE kvwmap.rollenlayer set queryStatus='.$query_status;
+					$sql ='UPDATE kvwmap.rollenlayer set querystatus='.$query_status;
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$sql.=' AND id='.-$this->layerset[$i]['layer_id'];
 				}
@@ -2438,7 +2438,7 @@ class rolle {
 		for($i=0; $i < count($layerset['list']); $i++){
 			if($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivstatus'] == 1){
 				$layers[] = $layerset['list'][$i]['layer_id'];
-				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
+				if($layerset['list'][$i]['querystatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
 			}
 		}
 		$rows = [
