@@ -360,7 +360,13 @@ if ($doit == true) {
 						}
 					}
 					else{
-						$invisible_attributes[$layer['layer_id']][] = '<input type="hidden" readonly="true" name="'.$layer['layer_id'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+						$vc_class = '';
+						$onchange = '';
+						if ($layer['attributes']['dependents'][$j] != NULL) {
+							$vc_class = ' visibility_changer';
+							$onchange = 'this.oninput();" oninput="check_visibility('.$layer['layer_id'].', this, [\''.implode('\',\'', $layer['attributes']['dependents'][$j]).'\'], '.$k.');';
+						}
+						$invisible_attributes[$layer['layer_id']][] = '<input type="hidden" id="' . $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '_' . $k . '" onchange="'.$onchange.'" class="attr_' . $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . ' ' . $vc_class . '" name="'.$layer['layer_id'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" readonly="true" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 						$this->form_field_names .= $layer['layer_id'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 					}
 				}
@@ -561,6 +567,10 @@ if ($doit == true) {
 			<?  } ?>
 						</tbody>
 					</table>
+					<?
+					for ($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++) {
+						echo $invisible_attributes[$layer['layer_id']][$l]."\n";
+					} ?>
 				</td>
 			</tr>
 		</table>
@@ -568,10 +578,6 @@ if ($doit == true) {
 			if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {
 				include('dataset_operations.php');
 			} ?>
-		<?
-		for ($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++) {
-			echo $invisible_attributes[$layer['layer_id']][$l]."\n";
-		} ?>
 		<script type="text/javascript">
 			var filters = document.querySelectorAll('.gle_result_filter');
 			[].forEach.call(filters, function(filter){
