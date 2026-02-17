@@ -507,7 +507,7 @@ class Konvertierung extends PgObject {
 	// 	$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 	// 	$this->gui->debug->write('Archiviere Plan in zip_file: ' . $zip_file);
 	// 	if (!file_exists($zip_path)) {
-	// 		mkdir($zip_path, 0775, true);
+	// 		mkdir($zip_path, 0660, true);
 	// 	}
 
 	// 	$archive = new ZipArchive();
@@ -586,7 +586,7 @@ class Konvertierung extends PgObject {
 		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
 		if (!file_exists($zip_path)) {
-			mkdir($zip_path, 0775, true);
+			mkdir($zip_path, 0660, true);
 		}
 
 		$archive = new ZipArchive();
@@ -672,7 +672,7 @@ class Konvertierung extends PgObject {
 		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
 		if (!file_exists($zip_path)) {
-			mkdir($zip_path, 0775, true);
+			mkdir($zip_path, 0660, true);
 		}
 
 		$archive = new ZipArchive();
@@ -784,7 +784,7 @@ class Konvertierung extends PgObject {
 			if (!is_dir($path)) {
 				$this->debug->show('Create directory', Konvertierung::$write_debug);
 				$old = umask(0);
-				mkdir($path, 0775, true);
+				mkdir($path, 0660, true);
 				umask($old);
 			}
 		}
@@ -953,7 +953,7 @@ class Konvertierung extends PgObject {
 	function create_xplan_shapes() {
 		$path = $this->get_file_path('xplan_shapes');
 		if (!file_exists($path)) {
-			mkdir($path, 0775);
+			mkdir($path, 0660);
 		}
 
 		// Delete existing shapes

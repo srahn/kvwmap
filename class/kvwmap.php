@@ -9202,7 +9202,7 @@ END $$;
 
 			# Schreibe MapFile
 			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0775, true);
+				mkdir($path_parts['dirname'], 0660, true);
 			}
 			$this->saveMap(WMS_MAPFILE_PATH . $mapfile);
 			// Replacing 'OUTLINEWIDTH 1.00001' is a workaround to the bug that mapserver did not write 'GEOMTRANSFORM "centroid"' to Mapfile.
@@ -9218,7 +9218,7 @@ END $$;
 			$wrapperpath = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE);
 			$path_parts = pathinfo($wrapperpath . $wrapperfile);
 			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0775, true);
+				mkdir($path_parts['dirname'], 0660, true);
 				$this->write_xlog('MapFile-Pfad ' . $path_parts['dirname'] . ' angelegt.');
 			}
 			else {
@@ -9229,7 +9229,7 @@ END $$;
 MAPSERV="/usr/lib/cgi-bin/mapserv"
 MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->write_xlog('MapFile-Wrapper ' . $wrapperpath . $wrapperfile . ' geschrieben.');
-				chmod($wrapperpath . $wrapperfile, 0775);
+				chmod($wrapperpath . $wrapperfile, 0660);
 			}
 		} catch (Exception $ex) {
 			return array(
@@ -15125,7 +15125,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		foreach ($this->crontab_lines AS $user => $lines) {
 			$crontab_file = $this->crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
 			// $crontab_file = $this->crontab_dir . 'crontab_' . $user;
-			// echo '<br>' . $user . ': ' . $crontab_file;
+			// echo '<br>' . $user . ': ' . $crontab_file . ' num lines: ' . count($lines);
 			$fp = fopen($crontab_file, 'w');
 			if (count($lines) > 0) {
 				foreach($lines AS $line) {
@@ -16302,7 +16302,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	/**
 	 * Diese rekursive Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
 	 * Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
-	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
+	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die entprechende Stelle im String eingefügt
 	 * Die Funktion wird auch beim Löschen eines Datensatzes mit komplexen Datentypen aufgerufen (dann ist der Parameter $delete = true). 
 	 * Dann übernimmt sie das Löschen der Dateien der Dokument-Attribute.
 	 */

@@ -333,7 +333,7 @@
 		if (!file_exists($tmp_dir)) {
 			$deb_msg = '<br>Dir ' . $tmp_dir . ' angelegt.';
 			try {
-				mkdir($tmp_dir, 0775);
+				mkdir($tmp_dir, 0660);
 			} catch (Exception $ex) {
 				return array(
 					'success' => false,
