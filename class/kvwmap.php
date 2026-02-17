@@ -9211,7 +9211,7 @@ END $$;
 
 			# Schreibe MapFile
 			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0660, true);
+				mkdir($path_parts['dirname'], 0770, true);
 			}
 			$this->saveMap(WMS_MAPFILE_PATH . $mapfile);
 			// Replacing 'OUTLINEWIDTH 1.00001' is a workaround to the bug that mapserver did not write 'GEOMTRANSFORM "centroid"' to Mapfile.
@@ -9227,7 +9227,7 @@ END $$;
 			$wrapperpath = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE);
 			$path_parts = pathinfo($wrapperpath . $wrapperfile);
 			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0660, true);
+				mkdir($path_parts['dirname'], 0770, true);
 				$this->write_xlog('MapFile-Pfad ' . $path_parts['dirname'] . ' angelegt.');
 			}
 			else {
