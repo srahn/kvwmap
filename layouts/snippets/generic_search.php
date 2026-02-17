@@ -207,9 +207,9 @@ function add_searchmask(layer_id){
 }
 
 $(document).on('click', function(e){
-	if(e.target.id != 'gsl_abfrage_speichern_form_link' && e.target.closest('div').id != 'gsl_abfrage_speichern_form'){
+	if(e.target.id != 'gsl_abfrage_speichern_form_link' && e.target.closest('div')?.id != 'gsl_abfrage_speichern_form'){
 		$('#gsl_abfrage_speichern_form').css('display','none');
-		if(e.target.id != 'gsl_abfrage_laden_form_link' && e.target.closest('div').id != 'gsl_abfrage_laden_form'){
+		if(e.target.id != 'gsl_abfrage_laden_form_link' && e.target.closest('div')?.id != 'gsl_abfrage_laden_form'){
 			$('#gsl_abfrage_laden_form').css('display','none');
 		}
 	}
