@@ -13617,6 +13617,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			showAlert('Füllen Sie alle mit * gekennzeichneten Formularfelder aus.');
 		}
 		else {
+			$this->formvars['wappen'] = $this->formvars['wappen_save'];
 			if ($_files['wappen']['name']) {
 				$this->formvars['wappen'] = $_files['wappen']['name'];
 				$nachDatei = WWWROOT . APPLVERSION . WAPPENPATH . $_files['wappen']['name'];

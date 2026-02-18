@@ -589,7 +589,6 @@ class stelle {
 			])
 		);
 		$rows['ows_srs'] = preg_replace(array('/: +/', '/ +:/'), ':', $rows['ows_srs']);
-		$rows['wappen'] = ($rows['wappen'] ? $_files['wappen']['name'] : $rows['wappen_save']);
 		$rows['check_client_ip'] = ($rows['checkClientIP'] == '1'	? "true" : "false");
 		$rows['check_password_age'] = ($rows['checkPasswordAge'] == '1' ? "true" : "false");
 		$rows['allowed_password_age'] = ($rows['allowedPasswordAge'] ?: "6");
