@@ -2231,24 +2231,8 @@ function replace_params_link($str, $params, $layer_id) {
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe [http://www.php-einfach.de/codeschnipsel_1114.php](http://www.php-einfach.de/codeschnipsel_1114.php)
 *
-* @param $anhang Array mit den Elementen "name", "size" und "data" oder Array mit Elementen solcher Arrays
-* $pfad = array();
-* $pfad[] = "ordner/datei1.exe";
-* $pfad[] = "ordner/datei2.zip";
-* $pfad[] = "ordner/datei3.gif";
-*
-* $anhang = array();
-* foreach($pfad AS $name) {
-*   $name = basename($name);
-*   $size = filesize($name);
-*   $data = implode("",file($name));
-*   if (function_exists("mime_content_type"))
-*     $type = mime_content_type($name);
-*   else
-*     $type = "application/octet-stream";
-*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data);
-* }
-* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang);
+* @param $attachement String Pfad zur Datei, die als Anhang an die E-Mail angehängt werden soll.
+* mail_att("from name", "from@domain", "empf@domain", "ccempf@dmain", "reply@domain", "Email mit Anhang", "Im Anhang sind mehrere Datei", '/var/www/logs/kvwmap/mail_queue/anhang.txt', 'to name');
 **/
 function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
 	$success = false;
@@ -2331,11 +2315,11 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 				$botschaft.="\n\n";
 				$botschaft.="--$grenze";
 			}
-			#  echo 'to_email: '.$to_email.'<br>';
-			#  echo 'subject: '.$subject.'<br>';
-			#  echo 'botschaft: '.$botschaft.'<br>';
-			#  echo 'headers: '.$headers.'<br>';
-			$success = @mail($to_email, $subject, $botschaft, $headers);
+			// echo "\nto_email: ".$to_email."<br>";
+			// echo "\nsubject: ".$subject."<br>";
+			// echo "\nbotschaft: ".$botschaft."<br>";
+			// echo "\nheaders: ".$headers."<br>";
+			$success = mail($to_email, $subject, $botschaft, $headers);
 		}
 	}
 	if ($success)
