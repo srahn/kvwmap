@@ -14256,15 +14256,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		if ($results['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
-			$this->menuedaten = Menue::find($this, '', 'name');
-			$this->titel='Menüdaten';
-			$this->main='menuedaten.php';
+			header('location: index.php?go=Menues_Anzeigen&csrf_token=' . $_REQUEST['csrf_token']);
 		}
 		else {
 			$this->add_message('array', array_values($results));
 			$this->main = 'menue_formular.php';
+			$this->output();
 		}
-		$this->output();
 	}
 
 	function MenueAendern() {
