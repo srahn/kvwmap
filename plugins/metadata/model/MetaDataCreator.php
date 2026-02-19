@@ -276,7 +276,7 @@ class MetaDataCreator {
 					<gmd:identifier>
 						<gmd:MD_Identifier>
 							<gmd:code>
-								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
+								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_downloadservice_uuid'] . "</gco:CharacterString>
 							</gmd:code>
 						</gmd:MD_Identifier>
 					</gmd:identifier>
@@ -401,6 +401,30 @@ class MetaDataCreator {
 					</gmd:type>
 				</gmd:MD_Keywords>
 			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gmx:Anchor xlink:href=\"http://data.europa.eu/bna/c_dd313021\">Erdbeobachtung und Umwelt</gmx:Anchor>
+					</gmd:keyword>
+					<gmd:thesaurusName>
+						 <gmd:CI_Citation>
+							<gmd:title>
+								<gmx:Anchor xlink:href=\"http://data.europa.eu/bna/asd487ae75\">High-value dataset categories</gmx:Anchor>
+							</gmd:title>
+							<gmd:date>
+								<gmd:CI_Date>
+									<gmd:date>
+										<gco:Date>2023-09-27</gco:Date>
+									</gmd:date>
+									<gmd:dateType>
+										<gmd:CI_DateTypeCode codeList=\"https://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</gmd:CI_DateTypeCode>
+									</gmd:dateType>
+								</gmd:CI_Date>
+							</gmd:date>
+						</gmd:CI_Citation>
+					</gmd:thesaurusName>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
 			" . ($this->md->get('withRegionalKeyword') ? $this->getRegionalKeyword() : ''). "
 			<gmd:resourceConstraints>
 					<gmd:MD_LegalConstraints>
@@ -408,7 +432,7 @@ class MetaDataCreator {
 								<gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\" />
 						</gmd:accessConstraints>
 						<gmd:otherConstraints>
-								<gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\">no limitations to public access</gmx:Anchor>
+								<gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\" xlink:type=\"simple\">Es gelten keine Zugriffsbeschränkungen</gmx:Anchor>
 						</gmd:otherConstraints>
 				</gmd:MD_LegalConstraints>
 			</gmd:resourceConstraints>
@@ -424,12 +448,15 @@ class MetaDataCreator {
 							</gmd:otherConstraints>
 					</gmd:MD_LegalConstraints>
 			</gmd:resourceConstraints>	
-      <gmd:topicCategory >
+      <!--<gmd:topicCategory>
         <gmd:MD_TopicCategoryCode>planningCadastre</gmd:MD_TopicCategoryCode>
-      </gmd:topicCategory>
+      </gmd:topicCategory>-->
       <srv:serviceType>
         <gco:LocalName>download</gco:LocalName>
       </srv:serviceType>
+			<srv:serviceTypeVersion>
+				<gco:CharacterString>OGC:WFS 2.0.0</gco:CharacterString>
+			</srv:serviceTypeVersion>
 			<srv:extent>
 				<gmd:EX_Extent>
 					<gmd:geographicElement>
@@ -459,7 +486,7 @@ class MetaDataCreator {
 							</gmd:geographicIdentifier>
 						</gmd:EX_GeographicDescription>
 					</gmd:geographicElement>" : '') . 
-					  ($this->md->get('id_cite_date') ? $this->getTemporalExtent() : '') . "
+					/*($this->md->get('id_cite_date') ? $this->getTemporalExtent() : '') . */"
 				</gmd:EX_Extent>
 			</srv:extent>
 			<srv:couplingType>
@@ -482,9 +509,30 @@ class MetaDataCreator {
 					</srv:connectPoint>
 				</srv:SV_OperationMetadata>
 			</srv:containsOperations>
-			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
+			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_dataset_uuid'] . "\"/>
 		</srv:SV_ServiceIdentification>
 	</gmd:identificationInfo>
+	<gmd:distributionInfo>
+		<gmd:MD_Distribution>
+			<gmd:transferOptions>
+				<gmd:MD_DigitalTransferOptions>
+					<gmd:onLine>
+						<gmd:CI_OnlineResource>
+							<gmd:linkage>
+								<gmd:URL>" . $this->wfs_link . "</gmd:URL>
+							</gmd:linkage>
+							<gmd:protocol>
+								<gco:CharacterString>OGC:WFS-2.0.0-http-get-feature</gco:CharacterString>
+							</gmd:protocol>
+							<gmd:function>
+								<gmd:CI_OnLineFunctionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode\" codeListValue=\"information\"/>
+							</gmd:function>
+						</gmd:CI_OnlineResource>
+					</gmd:onLine>
+				</gmd:MD_DigitalTransferOptions>
+			</gmd:transferOptions>
+		</gmd:MD_Distribution>
+	</gmd:distributionInfo>
 	<gmd:dataQualityInfo xmlns:geonet=\"http://www.fao.org/geonetwork\">
 		<gmd:DQ_DataQuality>
 			<gmd:scope>
@@ -515,7 +563,7 @@ class MetaDataCreator {
 									<gmd:date>
 										<gmd:CI_Date>
 											<gmd:date>
-												<gco:Date>2010-12-08</gco:Date>
+												<gco:Date>2009-10-20</gco:Date>
 											</gmd:date>
 											<gmd:dateType>
 												<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
@@ -751,12 +799,15 @@ class MetaDataCreator {
           </gmd:classification>
         </gmd:MD_SecurityConstraints>
       </gmd:resourceConstraints>
-      <gmd:topicCategory>
+      <!--<gmd:topicCategory>
         <gmd:MD_TopicCategoryCode>planningCadastre</gmd:MD_TopicCategoryCode>
-      </gmd:topicCategory>
+      </gmd:topicCategory>-->
       <srv:serviceType>
 				<gco:LocalName>view</gco:LocalName>
 			</srv:serviceType>
+			<srv:serviceTypeVersion>
+				<gco:CharacterString>OGC:WMS 1.3.0</gco:CharacterString>
+			</srv:serviceTypeVersion>
       <srv:extent>
 				<gmd:EX_Extent>
 					<gmd:geographicElement>
@@ -786,7 +837,7 @@ class MetaDataCreator {
 							</gmd:geographicIdentifier>
 						</gmd:EX_GeographicDescription>
 					</gmd:geographicElement>" : '') .
-					($this->md->get('id_cite_date') ? $this->getTemporalExtent() : '') . "
+					/*($this->md->get('id_cite_date') ? $this->getTemporalExtent() : '') .*/ "
 				</gmd:EX_Extent>
 			</srv:extent>
 			<srv:couplingType>
@@ -809,9 +860,30 @@ class MetaDataCreator {
 					</srv:connectPoint>
 				</srv:SV_OperationMetadata>
 			</srv:containsOperations>
-			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
+			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_dataset_uuid'] . "\"/>
 		</srv:SV_ServiceIdentification>
 	</gmd:identificationInfo>
+	<gmd:distributionInfo>
+		<gmd:MD_Distribution>
+			<gmd:transferOptions>
+				<gmd:MD_DigitalTransferOptions>
+					<gmd:onLine>
+						<gmd:CI_OnlineResource>
+							<gmd:linkage>
+								<gmd:URL>" . $this->wms_link . "</gmd:URL>
+							</gmd:linkage>
+							<gmd:protocol>
+								<gco:CharacterString>OGC:WMS-1.3.0-http-get-map</gco:CharacterString>
+							</gmd:protocol>
+							<gmd:function>
+								<gmd:CI_OnLineFunctionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode\" codeListValue=\"information\"/>
+							</gmd:function>
+						</gmd:CI_OnlineResource>
+					</gmd:onLine>
+				</gmd:MD_DigitalTransferOptions>
+			</gmd:transferOptions>
+		</gmd:MD_Distribution>
+	</gmd:distributionInfo>
 	<gmd:dataQualityInfo xmlns:geonet=\"http://www.fao.org/geonetwork\">
 		<gmd:DQ_DataQuality>
 			<gmd:scope>
@@ -842,7 +914,7 @@ class MetaDataCreator {
 									<gmd:date>
 										<gmd:CI_Date>
 											<gmd:date>
-												<gco:Date>2010-10-20</gco:Date>
+												<gco:Date>2009-10-20</gco:Date>
 											</gmd:date>
 											<gmd:dateType>
 												<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
@@ -876,7 +948,7 @@ class MetaDataCreator {
 
 	public function createMetadataGeodatensatz() {
 		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
-	<gmd:MD_Metadata xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:igctx=\"https://www.ingrid-oss.eu/schemas/igctx\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd\">
+	<gmd:MD_Metadata xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd\">
 		<gmd:fileIdentifier>
 			<gco:CharacterString>" . $this->md->get('uuids')['metadata_dataset_uuid'] . "</gco:CharacterString>
 		</gmd:fileIdentifier>
@@ -922,7 +994,7 @@ class MetaDataCreator {
 						<gmd:identifier>
 							<gmd:MD_Identifier>
 								<gmd:code>
-								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
+								<gco:CharacterString>" . $this->md->get('namespace') . $this->md->get('uuids')['metadata_dataset_uuid'] . "</gco:CharacterString>
 								</gmd:code>
 							</gmd:MD_Identifier>
 						</gmd:identifier>
@@ -1052,6 +1124,30 @@ class MetaDataCreator {
 					</gmd:type>
 				</gmd:MD_Keywords>
 			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gmx:Anchor xlink:href=\"http://data.europa.eu/bna/c_dd313021\">Erdbeobachtung und Umwelt</gmx:Anchor>
+					</gmd:keyword>
+					<gmd:thesaurusName>
+						 <gmd:CI_Citation>
+							<gmd:title>
+								<gmx:Anchor xlink:href=\"http://data.europa.eu/bna/asd487ae75\">High-value dataset categories</gmx:Anchor>
+							</gmd:title>
+							<gmd:date>
+								<gmd:CI_Date>
+									<gmd:date>
+										<gco:Date>2023-09-27</gco:Date>
+									</gmd:date>
+									<gmd:dateType>
+										<gmd:CI_DateTypeCode codeList=\"https://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</gmd:CI_DateTypeCode>
+									</gmd:dateType>
+								</gmd:CI_Date>
+							</gmd:date>
+						</gmd:CI_Citation>
+					</gmd:thesaurusName>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
 			" . ($this->md->get('withRegionalKeyword') ? $this->getRegionalKeyword() : ''). "
 				<gmd:resourceConstraints>
           <gmd:MD_LegalConstraints>
@@ -1124,7 +1220,7 @@ class MetaDataCreator {
 								</gmd:geographicIdentifier>
 							</gmd:EX_GeographicDescription>
 						</gmd:geographicElement>" : '') . 
-						($this->md->get('id_cite_date') ? $this->getTemporalExtent() : '') . "
+						/*($this->md->get('id_cite_date') ? $this->getTemporalExtent() : '') . */"
 					</gmd:EX_Extent>
 				</gmd:extent>
 			</gmd:MD_DataIdentification>
@@ -1141,11 +1237,13 @@ class MetaDataCreator {
 						</gmd:version>
 					</gmd:MD_Format>
 				</gmd:distributionFormat>
-				<gmd:MD_Distributor>
-					<gmd:distributorContact>" .
-						$this->getResponsibleParty('ows_distribution', 'distributor') . "
-					</gmd:distributorContact>
-				</gmd:MD_Distributor>" .
+				<gmd:distributor>
+					<gmd:MD_Distributor>
+						<gmd:distributorContact>" .
+							$this->getResponsibleParty('ows_distribution', 'distributor') . "
+						</gmd:distributorContact>
+					</gmd:MD_Distributor>
+				</gmd:distributor>" .
 					$this->download_transfer_option .
 					$this->search_transfer_option . "
 				<gmd:transferOptions>
