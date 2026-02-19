@@ -156,7 +156,12 @@ class PgObject {
 			$ids = $this->get_ids();
 		}
 		foreach ($this->identifiers AS $identifier) {
-			$quote = (array_filter(array('text', 'varchar', 'character', 'date', 'time', 'uuid'), fn($teil) => strpos($identifier['type'], $teil) !== false) ? "'" : "");
+			$quote = (array_filter(
+				array('text', 'varchar', 'character', 'date', 'time', 'uuid'),
+				function ($teil) use ($identifier) {
+						return strpos($identifier['type'], $teil) !== false;
+				}
+			) ? "'" : "");
 			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
 		}
 		return implode(' AND ', $parts);
