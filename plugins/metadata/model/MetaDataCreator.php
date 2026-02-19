@@ -86,6 +86,7 @@ class MetaDataCreator {
 		// certain elements and subelements should only be filled if they actually exist
 		$person = $this->md->get('stellendaten')[$ows_var . 'person'];
 		$organization = $this->md->get('stellendaten')[$ows_var . 'organization'];
+		$position = $this->md->get('stellendaten')[$ows_var . 'position'];
 		$voicephone = $this->md->get('stellendaten')[$ows_var . 'voicephone'];
 		$facsimile = $this->md->get('stellendaten')[$ows_var . 'facsimile'];
 		$address = $this->md->get('stellendaten')[$ows_var . 'address'];
@@ -99,8 +100,14 @@ class MetaDataCreator {
 						</gmd:individualName>
 						<gmd:organisationName>
 							<gco:CharacterString>" . $organization . "</gco:CharacterString>
-						</gmd:organisationName>
-						<gmd:contactInfo>
+						</gmd:organisationName>";
+		//position only added to citedResponsibleParty
+		if(!empty($position AND $role == 'owner' AND $ows_var == 'content')) {
+			$sb .= "<gmd:positionName>
+							<gco:CharacterString>" . $position . "</gco:CharacterString>
+						</gmd:positionName>";
+		}
+			$sb .="<gmd:contactInfo>
 							<gmd:CI_Contact>";
 		if(!empty($voicephone) or !empty($facsimile)) {
 			$sb .= "
@@ -287,10 +294,10 @@ class MetaDataCreator {
 			</gmd:citation>
 			<gmd:abstract>
 				<gco:CharacterString>" . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
-			</gmd:abstract>
-			<!--<gmd:pointOfContact>
+			</gmd:abstract>"
+			/*<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>-->
+			</gmd:pointOfContact>*/ . "
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 			</gmd:pointOfContact>
@@ -645,16 +652,16 @@ class MetaDataCreator {
 						</gmd:MD_Identifier>
 					</gmd:identifier>
 					<gmd:citedResponsibleParty>
-						" . $this->getResponsibleParty('ows_content', 'owner') . "
+						" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 					</gmd:citedResponsibleParty>
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
 				<gco:CharacterString>" . $this->md->get('id_abstract')['viewservice'] . "</gco:CharacterString>
-			</gmd:abstract>
-			<gmd:pointOfContact>
+			</gmd:abstract>"
+			/*<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-			</gmd:pointOfContact>
+			</gmd:pointOfContact>*/ . "
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 			</gmd:pointOfContact>
@@ -752,9 +759,6 @@ class MetaDataCreator {
 					</gmd:keyword>
 					<gmd:keyword>
 						<gco:CharacterString>Zusammenzeichnung</gco:CharacterString>
-					</gmd:keyword>
-					<gmd:keyword>
-						<gco:CharacterString>Darstellungsdienst</gco:CharacterString>
 					</gmd:keyword>
 					<gmd:keyword>
 						<gco:CharacterString>Darstellungsdienst</gco:CharacterString>
@@ -1005,13 +1009,12 @@ class MetaDataCreator {
 				</gmd:citation>
 				<gmd:abstract>
 					<gco:CharacterString>" . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
-				</gmd:abstract>
-				<!--<gmd:pointOfContact>
+				</gmd:abstract>"
+				/*<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-				</gmd:pointOfContact>-->
-				<gmd:pointOfContact>
+				</gmd:pointOfContact<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
-				</gmd:pointOfContact>
+				</gmd:pointOfContact>*/ . "
 				<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 				</gmd:pointOfContact>
@@ -1290,8 +1293,8 @@ class MetaDataCreator {
 							<gmd:MD_ScopeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode\" codeListValue=\"dataset\"/>
 						</gmd:level>
 					</gmd:DQ_Scope>
-				</gmd:scope>
-				<!--
+				</gmd:scope>"
+				/*
 				<gmd:report>
 					<gmd:DQ_CompletenessOmission>
 						<gmd:nameOfMeasure>
@@ -1324,8 +1327,8 @@ class MetaDataCreator {
 						</gmd:result>
 					</gmd:DQ_CompletenessOmission>
 				</gmd:report>
-				-->
-				<gmd:report>
+				*/
+				. "<gmd:report>
 					<gmd:DQ_DomainConsistency>
 						<gmd:result>
 						<gmd:DQ_ConformanceResult>
