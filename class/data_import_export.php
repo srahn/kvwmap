@@ -1347,7 +1347,7 @@ class data_import_export {
 			# Where-Klausel aus Sachdatenabfrage-SQL
 			$where = substr(
 				$this->formvars['sql_' . $this->formvars['selected_layer_id']],
-				strrpos(strtolower($this->formvars['sql_' . $this->formvars['selected_layer_id']]), 'where')
+				strrpos(strtolower($this->formvars['sql_' . $this->formvars['selected_layer_id']]), 'as query') + 9
 			);
 
 			# Zusammensammeln der Attribute, die abgefragt werden müssen
