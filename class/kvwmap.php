@@ -1335,14 +1335,9 @@ echo '			</table>
 				}
 			}
 			if ($layercount > 0) {		# Layer vorhanden
-				if (value_of($this->layerset['layer_group_has_legendorder'], $group_id) != ''){			# Gruppe hat Legendenreihenfolge -> sortieren
-					usort($this->layerset['layers_of_group'][$group_id], function($a, $b) use ($layerlist) {
-						return $layerlist[$a]['legendorder'] - $layerlist[$b]['legendorder'];
-					});
-				}
-				else {
-					$this->layerset['layers_of_group'][$group_id] = array_reverse($this->layerset['layers_of_group'][$group_id]);		# umgedrehte Zeichenreihenfolge verwenden
-				}
+				usort($this->layerset['layers_of_group'][$group_id], function($a, $b) use ($layerlist) {
+					return $layerlist[$a]['legendorder'] - $layerlist[$b]['legendorder'];
+				});
 				if (!value_of($this->formvars, 'nurFremdeLayer')) {
 					if (!is_array($this->layer_ids_of_group[$group_id])) {
 						$this->layer_ids_of_group[$group_id] = [];
@@ -8454,6 +8449,7 @@ echo '			</table>
 	}
 
 	function Layer_Legendenreihenfolge_Speichern() {
+		### Gruppen ###
 		include_once(CLASSPATH . 'LayerGroup.php');
 		for ($i = 0; $i < count($this->formvars['group_ids']); $i++) {
 			$this->layergruppe = new LayerGroup($this);
@@ -8464,6 +8460,17 @@ echo '			</table>
 			];
 			$result = $this->layergruppe->update();
 		}
+		### Layer ###
+		include_once(CLASSPATH . 'Layer.php');
+		for ($i = 0; $i < count($this->formvars['layer_ids']); $i++) {
+			$this->layer = new Layer($this);
+			$this->layer->data = [
+				'layer_id' => $this->formvars['layer_ids'][$i],
+				'legendorder' => $this->formvars['layer_orders'][$i],
+				'gruppe' => $this->formvars['layer_groups'][$i]
+			];
+			$result = $this->layer->update();
+		}
 		rolle::setGroupsForAll($this->pgdatabase);
 		rolle::clear_groups2rolle($this->pgdatabase);
 	}
@@ -8472,25 +8479,14 @@ echo '			</table>
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
 		$this->main = 'layer2stelle_order.php';
 		if ($this->formvars['order'] == '') {
-			$this->formvars['order'] = 'ul.legendorder, l.drawingorder desc';
+			$this->formvars['order'] = 'l.legendorder';
 		}
-		if ($this->formvars['order'] == 'ul.legendorder, l.drawingorder desc') {
+		if ($this->formvars['order'] == 'l.legendorder') {
 			$this->groups = $this->selected_stelle->getGroups();
 		}
 		$this->layers = $this->selected_stelle->getLayers(NULL, $this->formvars['order']);
 		$this->output();
 	}
-
-  function Layer2Stelle_ReihenfolgeSpeichern(){
-    $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
-    $this->layers = $Stelle->getLayers(NULL);
-    for($i = 0; $i < count($this->layers['ID']); $i++){
-      $this->formvars['selected_layer_id'] = $this->layers['ID'][$i];
-			$this->formvars['legendorder'] = $this->formvars['legendorder_layer'.$this->layers['ID'][$i]];
-      $Stelle->updateLayerOrder($this->formvars);
-    }
-    $this->Layer2Stelle_Reihenfolge();
-  }
 
   function layer_export(){
   	# Abfragen aller Layer
@@ -18694,7 +18690,7 @@ class db_mapObj{
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale, ul.maxscale,
 				ul.offsite,
 				ul.postlabelcache,
@@ -20270,8 +20266,7 @@ DO $$
 							SELECT
 								'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id,
 								'vars_stelle_id_" . $stellen[$s]['extra'][0] . "' AS stelle_id,
-								queryable,
-								legendorder, minscale, maxscale, offsite, transparency, postlabelcache, filter,
+								queryable, minscale, maxscale, offsite, transparency, postlabelcache, filter,
 								template, header, footer, symbolscale, requires, privileg, export_privileg,
 								start_aktiv,
 								use_geom
