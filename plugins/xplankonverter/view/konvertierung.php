@@ -84,13 +84,18 @@
 			}
 		}
 
-		function get_rechtsstand($rechtsstand) {
+		function get_rechtsstand($rechtsstand, $planart) {
 			global $GUI;
+			if(empty($rechtsstand)) return '';
+			$enum_rechtsstand_table = 'enum_fp_rechtsstand';
+			if	($planart == 'RP-Plan') {
+				$enum_rechtsstand_table = 'enum_rp_rechtsstand';
+			}
 			$sql = "
 				SELECT
 					beschreibung
 				FROM
-					xplan_gml.enum_fp_rechtsstand
+					xplan_gml." . $enum_rechtsstand_table . "
 				WHERE
 					wert = " . $rechtsstand . "
 			";
@@ -411,7 +416,7 @@
 							} ?>
 						</tr>
 						<tr>
-							<td>Rechtsstand:</td><td><? echo get_rechtsstand($plandaten['rechtsstand']); ?> (<? echo $plandaten['rechtsstand']; ?>)<td>
+							<td>Rechtsstand:</td><td><? echo get_rechtsstand($plandaten['rechtsstand'],$konvertierung->get('planart')); ?> (<? echo $plandaten['rechtsstand']; ?>)<td>
 						</tr>
 						<tr>
 							<td>Aktualitätsdatum (<? echo $konvertierung->get_plan_attribut_aktualitaet(); ?>)</td><td><? echo $plandaten['aktualitaet']; ?><td>
