@@ -593,8 +593,9 @@ class PgObject {
 		";
 		$this->debug->show('update sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
-		if(!$query){echo $sql; exit;}
-		$err_msg = $this->database->errormessage;
+		if (!$query) {
+			$err_msg = pg_last_error($this->database->dbConn);
+		}
 		$results = array(
 			'success' => ($err_msg == ''),
 			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
