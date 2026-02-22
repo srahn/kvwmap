@@ -2994,7 +2994,16 @@ echo '			</table>
 				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
-				$label->size = $dbLabel['size'];
+
+				if (is_numeric($dbLabel['size'])) {
+					$label->size = $dbLabel['size'];
+					$label->minsize = $dbLabel['minsize'];
+					$label->maxsize = $dbLabel['maxsize'];
+				}
+				else {
+					$label->updateFromString("LABEL SIZE [" . $dbLabel['size']."] END");
+				}
+
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
 				$label->minfeaturesize = $dbLabel['minfeaturesize'];
@@ -4156,7 +4165,8 @@ echo '			</table>
         	continue;
       	}
 				$layerdb = $mapDB->getlayerdatabase($layer[$i]['layer_id'], $this->Stelle->pgdbhost);
-				$select = getDataParts($layer[$i]['data'])['select'];
+				$data = str_replace('$SCALE', '1000', $layer[$i]['data']);
+				$select = getDataParts($data)['select'];
 				$data_attributes = $mapDB->getDataAttributes($layerdb, $layer[$i]['layer_id']);
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
@@ -4209,7 +4219,8 @@ echo '			</table>
 			$layerdb = $mapDB->getlayerdatabase($layer['layer_id'], $this->Stelle->pgdbhost);
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['layer_id']);
 			$geom = $data_attributes['the_geom'];
-			$select = getDataParts($layer['data'])['select'];
+			$data = str_replace('$SCALE', '1000', $layer['data']);
+			$select = getDataParts($data)['select'];
 			$select = preg_replace ("/ FROM /", ' from ', $select);
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			# Filter hinzufügen
@@ -9207,7 +9218,7 @@ END $$;
 
 			# Schreibe MapFile
 			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0775, true);
+				mkdir($path_parts['dirname'], 0660, true);
 			}
 			$this->saveMap(WMS_MAPFILE_PATH . $mapfile);
 			// Replacing 'OUTLINEWIDTH 1.00001' is a workaround to the bug that mapserver did not write 'GEOMTRANSFORM "centroid"' to Mapfile.
@@ -9223,7 +9234,7 @@ END $$;
 			$wrapperpath = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE);
 			$path_parts = pathinfo($wrapperpath . $wrapperfile);
 			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0775, true);
+				mkdir($path_parts['dirname'], 0660, true);
 				$this->write_xlog('MapFile-Pfad ' . $path_parts['dirname'] . ' angelegt.');
 			}
 			else {
@@ -9234,7 +9245,7 @@ END $$;
 MAPSERV="/usr/lib/cgi-bin/mapserv"
 MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->write_xlog('MapFile-Wrapper ' . $wrapperpath . $wrapperfile . ' geschrieben.');
-				chmod($wrapperpath . $wrapperfile, 0775);
+				chmod($wrapperpath . $wrapperfile, 0660);
 			}
 		} catch (Exception $ex) {
 			return array(
@@ -9916,7 +9927,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		switch ($layerset[0]['connectiontype']) {
 			case MS_POSTGIS : {
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-				$path = $layerset[0]['pfad'];
+				$layerset[0]['pfad'] = $this->formvars['query'] ?: $layerset[0]['pfad'];	// $this->formvars['query'] ist optional, falls man query vom Layer angepasst verwenden will
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
 				if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
@@ -12281,14 +12292,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			if ($chart->get_id() == '') {
 				$results = $chart->create();
-				if ($results[0]['success']) {
-					$results[0]['msg'] = 	$strLayerChartSaveSuccessMsg;
+				if ($results['success']) {
+					$results['msg'] = 	$strLayerChartSaveSuccessMsg;
 				}
 			}
 			else {
 				$results = $chart->update();
-				if ($results[0]['success']) {
-					$results[0]['msg'] = $strLayerChartUpdateSuccessMsg;
+				if ($results['success']) {
+					$results['msg'] = $strLayerChartUpdateSuccessMsg;
 				}
 			}
 		}
@@ -12305,10 +12316,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
 		}
 
-		return $results[0];
+		return $results;
 	}
 
 	function layer_chart_Loeschen() {
+		include_once(CLASSPATH . 'formatter.php');
 		if ($this->formvars['id'] != '') {
 			$chart = LayerChart::find_by_id($this, $this->formvars['id']);
 			$response = $chart->delete();
@@ -12320,7 +12332,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				'err_msg' => ''
 			);
 		}
-		return $response;
+		$formatter = new formatter($response, 'json', 'application/json');
+		echo $formatter->output();
 	}
 
 	function generisches_sachdaten_diagramm($width, $datei = NULL){
@@ -13051,7 +13064,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'newpathwkt' => 'text',
 			'precision' => 'int'
 		]);
-		$this->formvars['sql_' . $this->formvars['selected_layer_id']] = str_ireplace([';', 'union ', 'select '], '', $this->formvars['sql_' . $this->formvars['selected_layer_id']]);
+		$this->formvars['sql_' . $this->formvars['selected_layer_id']] = str_ireplace([';', 'union '], '', $this->formvars['sql_' . $this->formvars['selected_layer_id']]);
 		if (!(array_key_exists('selected_layer_id', $this->formvars) AND $this->formvars['selected_layer_id'] != '')) {
 			$this->add_message('error', 'Es muss der Parameter selected_layer_id angegeben werden!');
 			$this->loadMap('DataBase');
@@ -13623,6 +13636,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			showAlert('Füllen Sie alle mit * gekennzeichneten Formularfelder aus.');
 		}
 		else {
+			$this->formvars['wappen'] = $this->formvars['wappen_save'];
 			if ($_files['wappen']['name']) {
 				$this->formvars['wappen'] = $_files['wappen']['name'];
 				$nachDatei = WWWROOT . APPLVERSION . WAPPENPATH . $_files['wappen']['name'];
@@ -14204,7 +14218,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (empty($results)) {
 			$results = $this->role->update();
 		}
-		if ($results[0]['success']) {
+		if ($results['success']) {
 			$this->add_message('notice', 'Nutzerrolle erfolgreich aktualisiert.');
 		}
 		else {
@@ -14261,15 +14275,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		if ($results['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
-			$this->menuedaten = Menue::find($this, '', 'name');
-			$this->titel='Menüdaten';
-			$this->main='menuedaten.php';
+			header('location: index.php?go=Menues_Anzeigen&csrf_token=' . $_REQUEST['csrf_token']);
 		}
 		else {
 			$this->add_message('array', array_values($results));
 			$this->main = 'menue_formular.php';
+			$this->output();
 		}
-		$this->output();
 	}
 
 	function MenueAendern() {
@@ -15142,7 +15154,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		foreach ($this->crontab_lines AS $user => $lines) {
 			$crontab_file = $this->crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
 			// $crontab_file = $this->crontab_dir . 'crontab_' . $user;
-			// echo '<br>' . $user . ': ' . $crontab_file;
+			// echo '<br>' . $user . ': ' . $crontab_file . ' num lines: ' . count($lines);
 			$fp = fopen($crontab_file, 'w');
 			if (count($lines) > 0) {
 				foreach($lines AS $line) {
@@ -15812,7 +15824,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $select =  "nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
     $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, hist_timestamp, layer_selection_mode";
     $from = "kvwmap.rolle";
-    $where = "stelle_id='+this.form.stelle_id.value+' AND user_id=" . $this->user->id;
+    $where = "stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
 			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp,layer_selection_mode));" : "")
@@ -16319,7 +16331,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	/**
 	 * Diese rekursive Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
 	 * Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
-	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
+	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die entprechende Stelle im String eingefügt
 	 * Die Funktion wird auch beim Löschen eines Datensatzes mit komplexen Datentypen aufgerufen (dann ist der Parameter $delete = true). 
 	 * Dann übernimmt sie das Löschen der Dateien der Dokument-Attribute.
 	 */
@@ -20351,10 +20363,8 @@ DO $$
 					dont_use_for_new, 
 					mandatory, 
 					quicksearch, 
-					visible, 
-					vcheck_attribute, 
-					vcheck_operator, 
-					vcheck_value, 
+					visible,
+					visibility_rules, 
 					"order", 
 					privileg, 
 					query_tooltip 
@@ -20440,7 +20450,7 @@ DO $$
 							'vars_datatype_id_' || datatype_id AS datatype_id,
 							name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, \"default\", form_element_type,
 							options, alias, alias_low_german, alias_english, alias_polish, alias_vietnamese, tooltip, \"group\", raster_visibility, mandatory, quicksearch,
-							\"order\", privileg, query_tooltip, visible, vcheck_attribute, vcheck_operator, vcheck_value, arrangement, labeling
+							\"order\", privileg, query_tooltip, visible, visibility_rules, arrangement, labeling
 						FROM
 							kvwmap.datatype_attributes
 						WHERE
@@ -21371,10 +21381,8 @@ DO $$
 					$alias_rows["alias_" . $language] = "'" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
 				}
 			}
-			if($formvars['visible_' . $attributes['name'][$i]] != 2 OR $formvars['vcheck_value_'.$attributes['name'][$i]] == ''){
-				$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
-				$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
-				$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
+			if($formvars['visible_' . $attributes['name'][$i]] != 2){
+				$formvars['visibility_rules_'.$attributes['name'][$i]] = '';
 			}
 
 			$rows = [
@@ -21392,9 +21400,7 @@ DO $$
 				'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
 				'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
 				'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
-				'vcheck_attribute' => "'" . $formvars['vcheck_attribute_'.$attributes['name'][$i]] . "'",
-				'vcheck_operator' => "'" . $formvars['vcheck_operator_'.$attributes['name'][$i]] . "'",
-				'vcheck_value' => "'" . $formvars['vcheck_value_'.$attributes['name'][$i]] . "'"
+				'visibility_rules_' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]])
 			] + $alias_rows;
 				
 			if ($formvars['for_all_layers'] != 1) {
@@ -21449,9 +21455,7 @@ DO $$
 					}
 				}
 				if ($formvars['visible_' . $attributes['name'][$i]] != 2){
-					$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
-					$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
-					$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
+					$formvars['visibility_rules_'.$attributes['name'][$i]] = '';
 				}
 				if ($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
 					$formvars['group_' . $attributes['name'][$i]] = $last_group;
@@ -21478,9 +21482,7 @@ DO $$
 					'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
 					'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
 					'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
-					'vcheck_attribute' => "'" . $formvars['vcheck_attribute_'.$attributes['name'][$i]] . "'",
-					'vcheck_operator' => "'" . $formvars['vcheck_operator_'.$attributes['name'][$i]] . "'",
-					'vcheck_value' => "'" . $formvars['vcheck_value_'.$attributes['name'][$i]] . "'",
+					'visibility_rules' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]]),
 					'style_attribute' => "'" . $formvars['style_attribute_'.$attributes['name'][$i]] . "'"
 				] + $alias_rows;
 				$sql = "
@@ -21574,9 +21576,7 @@ DO $$
 				privileg,
 				query_tooltip,
 				visible,
-				vcheck_attribute,
-				vcheck_operator,
-				vcheck_value,
+				visibility_rules,
 				arrangement,
 				labeling
 			FROM
@@ -21671,11 +21671,33 @@ DO $$
 			$attributes['privileg'][$i]= $rs['privileg'];
 			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
 			$attributes['visible'][$i]= $rs['visible'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
+
+			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
+			// Referenz auf dependents
+    	$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			// JSON parsen
+			$rulesJson = $rs['visibility_rules'] ?? '';
+			$rules = $rulesJson ? json_decode($rulesJson, true) : null;
+
+			// Abhängige Attribute sammeln
+			$dependentAttributes = [];
+			if ($rules) {
+				$collectAttributes = function($node) use (&$dependentAttributes, &$collectAttributes) {
+						if (isset($node['rules'])) {
+								foreach ($node['rules'] as $child) $collectAttributes($child);
+						} elseif (isset($node['attribute'])) {
+								$dependentAttributes[] = $node['attribute'];
+						}
+				};
+				$collectAttributes($rules);
+				$dependentAttributes = array_unique($dependentAttributes);
+			}
+
+			// Abhängigkeiten eintragen
+			foreach ($dependentAttributes as $depAttr) {
+					$dependents[$depAttr][] = $rs['name'];
+			}
+
 			$attributes['arrangement'][$i]= $rs['arrangement'];
 			$attributes['labeling'][$i]= $rs['labeling'];
 			$i++;
@@ -21693,7 +21715,7 @@ DO $$
 	 * @param array[string] $replace_only Function replace_params_rolle will only applied on attribute settings defined in this param if $replace is true.
 	 * @param array[string] $attribute_values Attributenames and there values that shall be used when replace_params_rolle function will be applied. 
 	 */
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value'), $attribute_values = []) {
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -21749,13 +21771,12 @@ DO $$
 				mandatory,
 				quicksearch,
 				visible,
-				vcheck_attribute,
-				vcheck_operator,
-				vcheck_value,
+				visibility_rules,
 				\"order\",
 				privileg,
 				query_tooltip,
-				style_attribute
+				style_attribute,
+				visibility_rules
 			FROM
 				kvwmap.layer_attributes as a LEFT JOIN
 				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
@@ -21807,11 +21828,33 @@ DO $$
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['style_attribute'][$i] = $rs['style_attribute'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
+			
+			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
+			// Referenz auf dependents
+    	$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			// JSON parsen
+			$rulesJson = $rs['visibility_rules'] ?? '';
+			$rules = $rulesJson ? json_decode($rulesJson, true) : null;
+
+			// Abhängige Attribute sammeln
+			$dependentAttributes = [];
+			if ($rules) {
+				$collectAttributes = function($node) use (&$dependentAttributes, &$collectAttributes) {
+						if (isset($node['rules'])) {
+								foreach ($node['rules'] as $child) $collectAttributes($child);
+						} elseif (isset($node['attribute'])) {
+								$dependentAttributes[] = $node['attribute'];
+						}
+				};
+				$collectAttributes($rules);
+				$dependentAttributes = array_unique($dependentAttributes);
+			}
+
+			// Abhängigkeiten eintragen
+			foreach ($dependentAttributes as $depAttr) {
+					$dependents[$depAttr][] = $rs['name'];
+			}
+
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
@@ -22284,16 +22327,18 @@ DO $$
 		$ret = $this->db->execSQL($sql);
 		if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$layer = pg_fetch_array($ret[1]);
-		$layer['sync'] = ($layer['sync'] == 't');
-		$layer['queryable'] = ($layer['queryable'] == 't');
-		$layer['querymap'] = ($layer['querymap'] == 't');
-		$layer['logconsume'] = ($layer['logconsume'] == 't');
-		if ($replace_params) {
-			foreach (array('classitem', 'classification', 'data', 'pfad') AS $key) {
-				$layer[$key] = replace_params_rolle(
-					$layer[$key],
-					['duplicate_criterion' => $layer['duplicate_criterion']]
-				);
+		if ($layer) {
+			$layer['sync'] = ($layer['sync'] == 't');
+			$layer['queryable'] = ($layer['queryable'] == 't');
+			$layer['querymap'] = ($layer['querymap'] == 't');
+			$layer['logconsume'] = ($layer['logconsume'] == 't');
+			if ($replace_params) {
+				foreach (array('classitem', 'classification', 'data', 'pfad') AS $key) {
+					$layer[$key] = replace_params_rolle(
+						$layer[$key],
+						['duplicate_criterion' => $layer['duplicate_criterion']]
+					);
+				}
 			}
 		}
 		return $layer;
@@ -23224,7 +23269,7 @@ DO $$
 	function updateLabel2Class_ClassID($old_class_id, $new_class_id){
     $sql = '
 			UPDATE 
-				u_labels2classes 
+				kvwmap.u_labels2classes 
 			SET
 				class_id = ' . $new_class_id . '
 			WHERE 

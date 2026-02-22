@@ -204,10 +204,11 @@
 		$datageom = $explosion[0];
 		$explosion = explode('using unique ', strtolower($data));
 		$end = $explosion[1];
+    $data = str_replace('$SCALE', '1000', $data);
     $select = getDataParts($data)['select'];
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
-		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
+		if(strpos(strtolower($select), 'where') === false)$select .= " WHERE ";
 		else $select .= " AND ";
 		$select .= " flurstueckskennzeichen IN ('" . implode("','", $FlurstListe) . "')";
     $legendentext = "Flurstück" . (count_or_0($FlurstListe) > 1 ? 'e' : '');
@@ -900,18 +901,8 @@
 		$GUI->user->rolle->delete_last_query();
 		$GUI->user->rolle->save_last_query('Flurstueck_Anzeigen', $layer[0]['layer_id'], implode(';', $FlurstKennzListe), NULL, NULL, NULL);
 
-    $j = $GUI->qlayerset[0]['attributes']['indizes']['eigentuemer'];
-    if ($GUI->qlayerset[0]['attributes']['vcheck_attribute'][$j]) {
-      $GUI->formvars['selected_layer_id'] = $layer[0]['layer_id'];
-      $GUI->formvars['value_flurstkennz'] = implode('|', $FlurstKennzListe);
-      $GUI->formvars['operator_flurstkennz'] = 'IN';
-      $GUI->formvars['no_output'] = true;
-      $GUI->GenerischeSuche_Suchen();
-    }
-    else {
-      for ($i=0;$i<$anzFlurst;$i++) {
-        $GUI->qlayerset[0]['shape'][$i]['flurstkennz'] = $FlurstKennzListe[$i];
-      }
+    for ($i=0;$i<$anzFlurst;$i++) {
+      $GUI->qlayerset[0]['shape'][$i]['flurstkennz'] = $FlurstKennzListe[$i];
     }
     $i = 0;
   };

@@ -757,7 +757,7 @@ if($this->formvars['offset'] > 0){
 ?>
 
 <? if($this->formvars['gml_id'] != ''){ ?>
-		<a href="index.php?go=get_last_query">zurück</a>
+		<a href="index.php?go=get_last_query&csrf_token=<? echo $_SESSION['csrf_token']; ?>">zurück</a>
 		<input name="withflurst" type="hidden" value="<?php echo $this->formvars['withflurst']; ?>">
 <? } ?>
 <input type="submit" onclick="save();" style="width: 0px; height: 0px; border: none">

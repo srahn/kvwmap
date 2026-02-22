@@ -37,6 +37,13 @@ class PgObject {
 	*
 	*/
 	static $write_debug = false;
+	static $schema;
+	static $tableName;
+	static $identifier;
+	public $debug;
+	public $gui;
+	public $database;
+	public $qualifiedTableName;
 	public $children_ids;
 	public $select;
 	public $from;
@@ -46,6 +53,12 @@ class PgObject {
 	public $fkeys;
 	public $pkey;
 	public $data;
+	public $identifier_type;
+	public $identifiers;
+	public $attribute_types;
+	public $geom_column;
+	public $extent;
+	public $extents;
 
 	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
@@ -143,12 +156,20 @@ class PgObject {
 			$ids = $this->get_ids();
 		}
 		foreach ($this->identifiers AS $identifier) {
-			$quote = ($identifier['type'] == 'text' ? "'" : "");
+			$quote = (array_filter(
+				array('text', 'varchar', 'character', 'date', 'time', 'uuid'),
+				function ($teil) use ($identifier) {
+						return strpos($identifier['type'], $teil) !== false;
+				}
+			) ? "'" : "");
 			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
 		}
 		return implode(' AND ', $parts);
 	}
 
+	/**
+	 * @return PgObject $this->data is false if nothing found.
+	 */
 	function find_by_ids($ids) {
 		$where_condition = $this->get_id_condition($ids);
 		$sql = "
@@ -604,7 +625,7 @@ class PgObject {
 		return $results;
 	}
 
-	function update_attr($attributes, $set = false) {
+	function update_attr($attributes, $set = false, $where = NULL) {
 		$quote = ($this->identifier_type == 'text' ? "'" : "");
 		$sql = "
 			UPDATE
@@ -612,7 +633,7 @@ class PgObject {
 			SET
 				" . implode(', ', $attributes) . "
 			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+				" . ($where !== NULL ? $where : $this->get_id_condition()) . "
 		";
 		#echo $sql;
 		$this->debug->show('update sql: ' . $sql, $this->show);

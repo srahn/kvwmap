@@ -141,15 +141,13 @@
 		$old_field_class = $field_class;
 		if ($attributes['dependents'][$j] != NULL) {
 			$field_class .= ' visibility_changer';
-			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
+			$onchange .= 'this.oninput();" oninput="check_visibility_dependents('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
 		}
 
 		$field_class = ($field_class != '' ? $field_class . ' ' : '') . 'attr_' . $layer_id . '_' . $name; 
 
-		if($attributes['vcheck_attribute'][$j] != ''){
-			$after_attribute .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
-			$after_attribute .= '<input type="hidden" id="vcheck_operator_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_operator'][$j].'">';
-			$after_attribute .= '<input type="hidden" id="vcheck_value_'.$attributes['name'][$j].'" value="'.htmlentities($attributes['vcheck_value'][$j]).'">';
+		if($attributes['visibility_rules'][$j] != ''){
+			$after_attribute .= '<input type="hidden" id="visibility_rules_'.$attributes['name'][$j].'" value="'.htmlentities($attributes['visibility_rules'][$j]).'">';
 		}
 
 		###### Array-Typ #####
@@ -1021,7 +1019,7 @@
 									}
 								"
 								onkeyup="
-									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'ok\', ' . $k . ', [\'' . implode(',', $req) . '\'], \'' . $req_by . '\');
+									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'ok\', \'' . $k . '\', [\'' . implode(',', $req) . '\'], \'' . $req_by . '\');
 								"
 								onchange="
 									if (!document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked && document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
@@ -1129,7 +1127,7 @@
 									}
 								"
 								onkeyup="
-									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'zweispaltig\', ' . $k . ');
+									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'zweispaltig\', \'' . $k . '\');
 								"
 								onchange="
 									if (document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {

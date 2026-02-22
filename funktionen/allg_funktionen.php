@@ -1505,21 +1505,96 @@ function searchdir($path, $recursive){
     return ($dirlist);
 }
 
-function get_select_parts($select) {
-	$column = explode(',', $select); # an den Kommas splitten
-	for($i = 0; $i < count($column); $i++) {
-		$klammerauf = substr_count($column[$i], '(');
-		$klammerzu = substr_count($column[$i], ')');
-		$hochkommas = substr_count($column[$i], "'");
-		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
-		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
-		if ($hochkommas % 2 != 0 OR $klammerauf > $klammerzu) {
-			$column[$i] = $column[$i] . ',' . $column[$i + 1];
-			array_splice($column, $i + 1, 1);
-			$i--; # und nochmal prüfen, falls mehrere Kommas drin sind
-		}
+function extract_select_clause($sql) {
+	$sql = trim($sql);
+	$len = strlen($sql);
+	$buffer = '';
+	$klammer = 0;
+	$inString = false;
+	$i = 0;
+
+	// Groß-/Kleinschreibung ignorieren
+	$upperSql = strtoupper($sql);
+
+	// Stelle sicher, dass es mit SELECT beginnt
+	if (substr($upperSql, 0, 6) !== "SELECT") {
+			throw new Exception("Not a SELECT query");
 	}
-	return $column;
+
+	// Start nach "SELECT "
+	$i = 6;
+	while ($i < $len) {
+			$char = $sql[$i];
+			$prev = $i > 0 ? $sql[$i - 1] : '';
+
+			// String beginnen / beenden
+			if ($char === "'" && $prev !== "\\") {
+					$inString = !$inString;
+					$buffer .= $char;
+					$i++;
+					continue;
+			}
+
+			// Klammern zählen
+			if (!$inString) {
+					if ($char === '(') $klammer++;
+					if ($char === ')') $klammer--;
+			}
+
+			// Prüfen, ob hier ein FROM kommt (außerhalb von Strings/Klammern)
+			if (!$inString && $klammer === 0) {
+					// Prüfe 4 Zeichen ab Position
+					if (strtoupper(substr($sql, $i, 4)) === "FROM") {
+							break; // oberster FROM gefunden
+					}
+			}
+
+			$buffer .= $char;
+			$i++;
+	}
+
+	return trim($buffer);
+}
+
+function get_select_parts($select) {
+	$parts = [];
+	$buffer = '';
+	$klammer = 0;        // Verschachtelte Klammern
+	$inString = false;   // Innerhalb von Hochkommas
+	$len = strlen($select);
+
+	for ($i = 0; $i < $len; $i++) {
+			$char = $select[$i];
+			$prev = $i > 0 ? $select[$i - 1] : '';
+
+			// String beginnen / beenden (Hochkomma)
+			if ($char === "'" && $prev !== "\\") {
+					$inString = !$inString;
+					$buffer .= $char;
+					continue;
+			}
+
+			// Klammern zählen, aber nur außerhalb von Strings
+			if (!$inString) {
+					if ($char === '(') $klammer++;
+					if ($char === ')') $klammer--;
+			}
+
+			// Komma als Trennzeichen nur außerhalb von Klammern und Strings
+			if ($char === ',' && !$inString && $klammer === 0) {
+					$parts[] = trim($buffer);
+					$buffer = '';
+			} else {
+					$buffer .= $char;
+			}
+	}
+
+	// Letzten Teil hinzufügen
+	if (trim($buffer) !== '') {
+			$parts[] = trim($buffer);
+	}
+
+	return $parts;
 }
 
 function microtime_float(){
@@ -2156,24 +2231,8 @@ function replace_params_link($str, $params, $layer_id) {
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe [http://www.php-einfach.de/codeschnipsel_1114.php](http://www.php-einfach.de/codeschnipsel_1114.php)
 *
-* @param $anhang Array mit den Elementen "name", "size" und "data" oder Array mit Elementen solcher Arrays
-* $pfad = array();
-* $pfad[] = "ordner/datei1.exe";
-* $pfad[] = "ordner/datei2.zip";
-* $pfad[] = "ordner/datei3.gif";
-*
-* $anhang = array();
-* foreach($pfad AS $name) {
-*   $name = basename($name);
-*   $size = filesize($name);
-*   $data = implode("",file($name));
-*   if (function_exists("mime_content_type"))
-*     $type = mime_content_type($name);
-*   else
-*     $type = "application/octet-stream";
-*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data);
-* }
-* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang);
+* @param $attachement String Pfad zur Datei, die als Anhang an die E-Mail angehängt werden soll.
+* mail_att("from name", "from@domain", "empf@domain", "ccempf@dmain", "reply@domain", "Email mit Anhang", "Im Anhang sind mehrere Datei", '/var/www/logs/kvwmap/mail_queue/anhang.txt', 'to name');
 **/
 function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
 	$success = false;
@@ -2256,11 +2315,11 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 				$botschaft.="\n\n";
 				$botschaft.="--$grenze";
 			}
-			#  echo 'to_email: '.$to_email.'<br>';
-			#  echo 'subject: '.$subject.'<br>';
-			#  echo 'botschaft: '.$botschaft.'<br>';
-			#  echo 'headers: '.$headers.'<br>';
-			$success = @mail($to_email, $subject, $botschaft, $headers);
+			// echo "\nto_email: ".$to_email."<br>";
+			// echo "\nsubject: ".$subject."<br>";
+			// echo "\nbotschaft: ".$botschaft."<br>";
+			// echo "\nheaders: ".$headers."<br>";
+			$success = mail($to_email, $subject, $botschaft, $headers);
 		}
 	}
 	if ($success)

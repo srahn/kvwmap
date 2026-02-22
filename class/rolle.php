@@ -555,7 +555,6 @@ class rolle {
 			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
-			$this->menu_auto_close=$rs['layer_selection_mode'];
 			rolle::$layer_params = array_map(
 				function ($layer_param) {
 					return ($layer_param === 'Array' ? '' : $layer_param);
@@ -1702,7 +1701,7 @@ class rolle {
 				UPDATE
 					kvwmap." . $table_name . "
 				SET
-					rollenfilter = '" . pg_escape_string($formvars['layer_options_rollenfilter']) . "'
+					rollenfilter = '" . $formvars['layer_options_rollenfilter'] . "'
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
@@ -2474,7 +2473,7 @@ class rolle {
 		for($i=0; $i < count($layerset['list']); $i++){
 			if($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivstatus'] == 1){
 				$layers[] = $layerset['list'][$i]['layer_id'];
-				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
+				if($layerset['list'][$i]['querystatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
 			}
 		}
 		$rows = [

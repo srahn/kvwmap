@@ -676,7 +676,7 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".bp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
 				(
-					SElECT
+					SELECT
 						COUNT(*) AS count_externeref,
 						externereferenzlink_sub.parent_id,
 						array_agg((e_sub.georefurl,
@@ -711,7 +711,7 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id
 			WHERE
-				gmlas.id ='" . $gml_id . "'
+				gmlas.id = '" . $gml_id . "'
 			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_assoc($ret[1]);
@@ -783,7 +783,7 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".fp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
 				(
-					SElECT
+					SELECT
 						COUNT(*) AS count_externeref,
 						externereferenzlink_sub.parent_id,
 						array_agg((e_sub.georefurl,
@@ -818,7 +818,7 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id
 			WHERE
-				gmlas.id ='" . $gml_id . "'
+				gmlas.id = '" . $gml_id . "'
 			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_assoc($ret[1]);
@@ -874,7 +874,7 @@ class Gml_extractor {
 				/*" . $this->gmlas_schema . ".so_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN*/
 				/*" . $this->gmlas_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN*/
 				(
-					SElECT
+					SELECT
 						COUNT(*) AS count_externeref,
 						externereferenzlink_sub.parent_id,
 						array_agg((e_sub.georefurl,
@@ -905,7 +905,7 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".so_plan_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid
 			WHERE
-				gmlas.id ='" . $gml_id . "'
+				gmlas.id = '" . $gml_id . "'
 			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_assoc($ret[1]);
@@ -960,17 +960,17 @@ class Gml_extractor {
 				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum,
 				to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY') AS entwurfsbeschlussdatum,
 				array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
-				(gmlas.sonstplanart_codespace, gmlas.sonstplanart)::xplan_gml.rp_sonstplanart AS sonstplanart,
+				(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.rp_sonstplanart AS sonstplanart,
 				array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
 				array_to_json(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsstartdatum,
 				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
-				to_json((gmlas.status_codespace, gmlas.status)::xplan_gml.rp_status) AS status,
+				to_json((gmlas.status_codespace, gmlas.status, NULL)::xplan_gml.rp_status) AS status,
 				array_to_json(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsenddatum,
 				gmlas.planart::xplan_gml.rp_art AS planart
 			FROM
 				" . $this->gmlas_schema . ".rp_plan gmlas LEFT JOIN
 				(
-					SElECT
+					SELECT
 						COUNT(*) AS count_externeref,
 						externereferenzlink_sub.parent_id,
 						array_agg((e_sub.georefurl,
@@ -981,10 +981,9 @@ class Gml_extractor {
 								e_sub.referenzurl,
 								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 								e_sub.beschreibung,
-								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp,
-								false
-							)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
+								e_sub.datum,
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".rp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid

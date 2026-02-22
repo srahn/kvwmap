@@ -163,22 +163,44 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		scrollto_saved_position();
 		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
+
+	check_visibility_rule = function(layer_id, rule, scope, k) {
+		// Leaf-Regel (kein logic → einfache Bedingung)
+		if (!rule.logic && rule.attribute) {
+			const field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+			return field_has_value(field, rule.operator, rule.value);
+		}
+		// Logische Gruppe (AND / OR)
+		if (rule.logic && Array.isArray(rule.rules)) {
+			const results = rule.rules.map(r => check_visibility_rule(layer_id, r, scope, k));
+
+			if (rule.logic === 'AND') {
+				return results.every(Boolean);
+			}
+
+			if (rule.logic === 'OR') {
+				return results.some(Boolean);
+			}
+		}
+		// Fallback (ungültige Regel)
+		return false;
+	}
 	
-	check_visibility = function(layer_id, object, dependents, k){
+	check_visibility_dependents = function(layer_id, object, dependents, k) {
 		if(object == null)return;
 		var group_display;
 		dependents.forEach(function(dependent){
 			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen
-			if(scope.querySelector('#vcheck_operator_'+dependent) == undefined){
+			if (scope.querySelector('#visibility_rules_'+dependent) == undefined){
 				scope = document;			// ansonsten global
 			}
-			var operator = scope.querySelector('#vcheck_operator_'+dependent).value;
-			var value = scope.querySelector('#vcheck_value_'+dependent).value;
-			if(operator == '=')operator = '==';
+			var rule = JSON.parse(scope.querySelector('#visibility_rules_'+dependent).value);
+			
 			// visibility of attribute
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
-			if(field_has_value(object, operator, value)){
+
+			if (check_visibility_rule(layer_id, rule, scope, k)){
 				if (name_dependent != null) {
 					name_dependent.classList.remove('collapsedfull');
 				}
@@ -233,6 +255,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	}
 
 	field_has_value = function(field, operator, value) {
+		if (operator == '=')operator = '==';
 		var field_value = field.value;
 		if (field.type == 'radio') {
 			field_value = '';
@@ -256,13 +279,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 		else {
 			if (operator == 'IN') {
-				value_array = value.split('|');
-				if (value_array.indexOf(field_value) > -1) {
-					return true;
-				}
-				else {
-					return false;
-				}
+				return Array.isArray(value) && value.includes(field_value);
 			}
 			else {
 				return eval("'" + field_value + "' " + operator + " '" + value + "'");
@@ -1238,9 +1255,6 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				if(['text', 'select-one', 'hidden'].indexOf(type) !== -1){
 					if (type == 'text'){
 						action = 'setvalue';
-					}
-					if (type == 'hidden') {	// image-select
-						target = scope.querySelector('#image_select_' + element.id + ' .dropdown');
 					}
 					ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attribute_data['attributenames']+"&attributevalues="+attribute_data['attributevalues']+"&type="+type, new Array(target), new Array(action));
 				}

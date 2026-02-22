@@ -128,7 +128,14 @@
 				
 				$konvertierung_id = $konvertierung->get_id();
 				$xp_plan->set('konvertierung_id', $konvertierung_id);
-				$xp_plan->update();
+				//$xp_plan->update();
+				$sql = "
+						UPDATE xplan_gml.xp_plan
+						SET konvertierung_id = " . $konvertierung_id . " 
+						WHERE gml_id = '" . $oid . "';
+					";
+				#echo $sql;
+				$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
 				
 				$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
 				// $GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
@@ -333,7 +340,7 @@
 		if (!file_exists($tmp_dir)) {
 			$deb_msg = '<br>Dir ' . $tmp_dir . ' angelegt.';
 			try {
-				mkdir($tmp_dir, 0775);
+				mkdir($tmp_dir, 0660);
 			} catch (Exception $ex) {
 				return array(
 					'success' => false,

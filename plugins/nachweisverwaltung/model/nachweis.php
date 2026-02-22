@@ -1710,7 +1710,7 @@ class Festpunkte {
 			}
 			$kvzPfad.='KVZ/';
 			if (!is_dir($kvzPfad)) {
-				mkdir($kvzPfad,0775); # erzeugt das Verzeichnis für das KVZ, weil es das noch nicht gibt
+				mkdir($kvzPfad,0660); # erzeugt das Verzeichnis für das KVZ, weil es das noch nicht gibt
 			}
 			# Dateinamen bilden mit Pfadangabe
 			$dateiname=$kvzPfad.KVZAUSGABEDATEINAME;

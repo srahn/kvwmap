@@ -507,7 +507,7 @@ class Konvertierung extends PgObject {
 	// 	$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 	// 	$this->gui->debug->write('Archiviere Plan in zip_file: ' . $zip_file);
 	// 	if (!file_exists($zip_path)) {
-	// 		mkdir($zip_path, 0775, true);
+	// 		mkdir($zip_path, 0660, true);
 	// 	}
 
 	// 	$archive = new ZipArchive();
@@ -586,7 +586,7 @@ class Konvertierung extends PgObject {
 		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
 		if (!file_exists($zip_path)) {
-			mkdir($zip_path, 0775, true);
+			mkdir($zip_path, 0660, true);
 		}
 
 		$archive = new ZipArchive();
@@ -672,7 +672,7 @@ class Konvertierung extends PgObject {
 		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
 		if (!file_exists($zip_path)) {
-			mkdir($zip_path, 0775, true);
+			mkdir($zip_path, 0660, true);
 		}
 
 		$archive = new ZipArchive();
@@ -784,7 +784,7 @@ class Konvertierung extends PgObject {
 			if (!is_dir($path)) {
 				$this->debug->show('Create directory', Konvertierung::$write_debug);
 				$old = umask(0);
-				mkdir($path, 0775, true);
+				mkdir($path, 0660, true);
 				umask($old);
 			}
 		}
@@ -953,7 +953,7 @@ class Konvertierung extends PgObject {
 	function create_xplan_shapes() {
 		$path = $this->get_file_path('xplan_shapes');
 		if (!file_exists($path)) {
-			mkdir($path, 0775);
+			mkdir($path, 0660);
 		}
 
 		// Delete existing shapes
@@ -2993,7 +2993,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		$md->set('service_layer_name', sonderzeichen_umwandeln($plan->get('name')));
 		$md->set('onlineresource', URL . 'ows/' . $this->gui->Stelle->id . '/fplan?');
 		$md->set('download_name', 'Download der XPlan-GML Dateien');
-		$md->set('download_url', URL . APPLVERSION . 'index.php?go=xplankonverter_download_uploaded_xplan_gml&amp;konvertierung_id=' . $this->get_id());
+		$md->set('download_url', URL . APPLVERSION . 'index.php?go=xplankonverter_download_uploaded_xplan_gml&amp;konvertierung_id=' . $this->get($this->identifier));
 		$md->set('search_name', 'Suche im UVP-Portal Niedersachsen');
 		$md->set('search_url', 'https://uvp.niedersachsen.de/kartendienste?layer=blp&amp;N=' . $this->plan->center_coord['lat'] . '&amp;E=' . $this->plan->center_coord['lon'] . '&amp;zoom=13');
 		$md->set('dataset_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Datensatz.png');
@@ -3054,7 +3054,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 				xplankonverter.konvertierungen ko JOIN
 				plandigital.stelle_to_arl sa ON ko.stelle_id = sa.stelle_id
 			WHERE
-				ko.id = " . $this->get_id() . "
+				ko.id = " . $this->get($this->identifier) . "
 			LIMIT 1
 		";
 		#echo $sql;
@@ -3105,7 +3105,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 			LEFT JOIN
 				xplankonverter.zusammenzeichnung_der_stellen zs ON gv.stelle_id = zs.stelle_id
 			WHERE
-				zs.konvertierung_id = " . $this->get_id() . ";";
+				zs.konvertierung_id = " . $this->get($this->identifier) . ";";
 		#echo $sql;
 		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
 		$rs = pg_fetch_assoc($ret[1]);
@@ -3127,7 +3127,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 				FROM
 					gebietseinheiten.gemeindeverbaende AS gv
 					LEFT JOIN xplankonverter.zusammenzeichnung_der_stellen zs ON gv.stelle_id = zs.stelle_id
-				WHERE zs.konvertierung_id = " . $this->get_id() . "
+				WHERE zs.konvertierung_id = " . $this->get($this->identifier) . "
 			) AS sub
 			WHERE sub.gvb_name = gemvb.gvb_name
 			AND sub.idderstelle = gemvb.stelle_id

@@ -31,9 +31,10 @@
 	
 	$this->outputLayer = function($i) use ($GUI) {
     echo '
-		  <div class="llr_layer">
+		  <div id="' . $group['id'] . '" class="llr_layer dragObject closed" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
 			  ' . $GUI->layers['Bezeichnung'][$i] . '
 			</div>
+      <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>
 			';
 	};
 
