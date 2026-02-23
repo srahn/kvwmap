@@ -2994,6 +2994,9 @@ echo '			</table>
 					$label->size = $dbLabel['size'];
 					$label->minsize = $dbLabel['minsize'];
 					$label->maxsize = $dbLabel['maxsize'];
+					if($this->map_factor != ''){
+						$label->size = $dbLabel['size']*$this->map_factor/1.414;
+					}
 				}
 				else {
 					$label->updateFromString("LABEL SIZE [" . $dbLabel['size']."] END");
@@ -3011,8 +3014,7 @@ echo '			</table>
 				# Skalierung der Labelschriftgröße, wenn map_factor gesetzt
 				if($this->map_factor != ''){
 					$label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
-					$label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
-					$label->size = $dbLabel['size']*$this->map_factor/1.414;
+					$label->maxsize = $dbLabel['maxsize']*$this->map_factor/1.414;
 				}
 				if ($dbLabel['position']!='') {
 					switch ($dbLabel['position']){
