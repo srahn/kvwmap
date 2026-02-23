@@ -34,6 +34,7 @@
     echo '
 		  <div id="' . $GUI->layers['ID'][$i] . '" class="llr_layer dragObject closed" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
 			  ' . $GUI->layers['Bezeichnung'][$i] . '
+        <a title="bearbeiten" class="llr_edit_link" href="index.php?go=Layereditor&selected_layer_id=' . $GUI->layers['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '"><i class="fa fa-pencil" style="padding: 3px"></i></a>
 			</div>
       <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>
 			';
@@ -122,6 +123,7 @@
 
   .llr_layer {
     padding: 1 0 1 5px;
+    margin-right: 6;
   }
 
   .llr_group>.groupname::before {
@@ -143,9 +145,7 @@
   }
 
   .llr_edit_link {
-    position: absolute;
-    right: 10px;
-    top: 3px;
+    float: right;
   }
 
   .dropZone.ready {

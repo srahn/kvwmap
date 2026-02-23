@@ -8444,7 +8444,7 @@ echo '			</table>
 		$this->titel = 'Themenbaum bearbeiten';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->groups = $mapDB->read_Groups(true);
-		$this->layers = $mapDB->getall_Layer();
+		$this->layers = $mapDB->getall_Layer('legendorder');
 		$this->output();
 	}
 
@@ -22021,6 +22021,7 @@ DO $$
 				l.uptodateness,
 				l.updatecycle,
 				l.drawingorder,
+				l.legendorder,
 				l.alias,
 				l.shared_from
 				" . ($this->GUI->plugin_loaded('mobile') ? ', l.sync' : '') . "
