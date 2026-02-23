@@ -172,6 +172,10 @@ function quote_or_null($var) {
 	return (($var === '' OR $var === null) ? 'NULL' : quote($var));
 }
 
+function value_or_null($var) {
+	return (($var === '' OR $var === null) ? 'NULL' : $var);
+}
+
 function append_slash($var) {
 	return $var . ((trim($var) != '' AND substr(trim($var), -1) != '/') ? '/' : '');
 }
