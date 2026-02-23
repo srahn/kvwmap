@@ -700,6 +700,13 @@ class GUI {
 							}
 						}
 						echo '<li><a href="javascript:void(0);" onclick="compare_view_for_layer(' . $this->formvars['layer_id'] . ');closeLayerOptions(' . $this->formvars['layer_id'] . ');">' . $this->strCompareView . '</a></li>';
+						if (
+							$layer[0]['datentyp'] == MS_LAYER_RASTER AND
+							preg_match('/\.(tif|tiff)$/i', $layer[0]['data']) AND
+							$layer[0]['export_privileg']
+						) {
+							echo '<li><a href="index.php?go=Daten_Export_Exportieren&selected_layer_id=' . $layer[0]['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">Download</a></li>';
+						}
 						if ($layer[0]['Class'][0]['name'] != '') {
 							if ($layer[0]['showclasses'] != '') {
 								echo '<li><a href="javascript:void(0);" onclick="get_layer_legend(\'' . $this->formvars['layer_id'] . '\', \'\', true);closeLayerOptions(' . $this->formvars['layer_id'] . ')">';
@@ -13063,14 +13070,26 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->output();
 		}
 		else {
-			include_(CLASSPATH . 'data_import_export.php');
-			$this->data_import_export = new data_import_export();
-			// $this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
-			$result = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
-			if (!$result['success']) {
-				$this->add_message('error', $result['msg']);
-				$this->daten_export();
-				return $result;
+			include_(CLASSPATH . 'Layer.php');
+			$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+			if (
+				$layer->get('datentyp') == MS_LAYER_RASTER AND
+				preg_match('/\.(tif|tiff)$/i', $layer->get('data')) AND
+				$layer->get('export_privileg')
+			) {
+				$result['contenttype'] = 'image/tiff';
+				$result['exportfile'] = replace_params_rolle(SHAPEPATH . $layer->get('data'));
+			}
+			else {
+				include_(CLASSPATH . 'data_import_export.php');
+				$this->data_import_export = new data_import_export();
+				// $this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+				$result = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+				if (!$result['success']) {
+					$this->add_message('error', $result['msg']);
+					$this->daten_export();
+					return $result;
+				}
 			}
 			ob_end_clean();
 			header('Content-type: ' . $result['contenttype']);
