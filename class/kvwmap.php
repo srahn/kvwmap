@@ -6291,6 +6291,7 @@ echo '			</table>
 		$this->formvars['data'] = $datastring;
 		$this->formvars['query'] = $select;
 		$this->formvars['datentyp'] = $layerset[0]['datentyp'];
+		$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$this->formvars['connectiontype'] = 6;
 		if ($layerset[0]['labelitem'] != 'Cluster_FeatureCount') {
 			$this->formvars['labelitem'] = $layerset[0]['labelitem'];
