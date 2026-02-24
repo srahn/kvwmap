@@ -21399,7 +21399,7 @@ DO $$
 				'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
 				'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
 				'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
-				'visibility_rules_' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]])
+				'visibility_rules' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]])
 			] + $alias_rows;
 				
 			if ($formvars['for_all_layers'] != 1) {
