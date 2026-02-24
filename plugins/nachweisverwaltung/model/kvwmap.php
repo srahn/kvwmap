@@ -45,13 +45,13 @@ $GUI->nachweis_columns = [
 		'alias' => 'Fortführung',
 		'width' => 83
 	],
-	'vermst' => [
-		'alias' => 'Vermstelle',
-		'width' => 65
-	],
 	'antragsnummer_alt' => [
 		'alias' => 'GB/C-Nr.',
 		'width' => 60
+	],	
+	'vermst' => [
+		'alias' => 'Vermstelle',
+		'width' => 65
 	],
 	'gueltigkeit' => [
 		'alias' => 'gültig',
