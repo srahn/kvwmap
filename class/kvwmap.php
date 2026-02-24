@@ -13886,6 +13886,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['reset_password_text'] = $this->stellendaten['reset_password_text'];
 			$this->formvars['invitation_text'] = $this->stellendaten['invitation_text'];
 			$this->formvars['comment'] = $this->stellendaten['comment'];
+			$this->formvars['start_page_params'] = $this->stellendaten['start_page_params'];
 			$where = 'id != '.$this->formvars['selected_stelle_id'];
 
 			$children_ids = array_map(function($child) {return $child['id'];}, $this->formvars['selchildren']);
