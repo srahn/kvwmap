@@ -701,9 +701,7 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 			"privilege" => $attr['privileg'][$key],
 			"default" => $attr['default'][$key],
 			'visible' => $attr['visible'][$key],
-			'vcheck_attribute' => $attr['vcheck_attribute'][$key],
-			'vcheck_operator' => $attr['vcheck_operator'][$key],
-			'vcheck_value' => $attr['vcheck_value'][$key]
+			'visibility_rules' => $attr['visibility_rules'][$key]
 		);
 		if ($GUI->formvars['kvmobile_version'] >= '1.13.0') {
 			$attributes[$key]['options'] = $attr['options'][$key];
