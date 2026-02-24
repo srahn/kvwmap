@@ -1555,14 +1555,9 @@ class GUI {
 				}
 			}
 			if ($layercount > 0) {		# Layer vorhanden
-				if (value_of($this->layerset['layer_group_has_legendorder'], $group_id) != ''){			# Gruppe hat Legendenreihenfolge -> sortieren
-					usort($this->layerset['layers_of_group'][$group_id], function($a, $b) use ($layerlist) {
-						return $layerlist[$a]['legendorder'] - $layerlist[$b]['legendorder'];
-					});
-				}
-				else {
-					$this->layerset['layers_of_group'][$group_id] = array_reverse($this->layerset['layers_of_group'][$group_id]);		# umgedrehte Zeichenreihenfolge verwenden
-				}
+				usort($this->layerset['layers_of_group'][$group_id], function($a, $b) use ($layerlist) {
+					return $layerlist[$a]['legendorder'] - $layerlist[$b]['legendorder'];
+				});
 				if (!value_of($this->formvars, 'nurFremdeLayer')) {
 					if (!is_array($this->layer_ids_of_group[$group_id])) {
 						$this->layer_ids_of_group[$group_id] = [];
@@ -2979,7 +2974,7 @@ class db_mapObj {
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale, ul.maxscale,
 				ul.offsite,
 				ul.postlabelcache,

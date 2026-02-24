@@ -156,7 +156,12 @@ class PgObject {
 			$ids = $this->get_ids();
 		}
 		foreach ($this->identifiers AS $identifier) {
-			$quote = (array_filter(array('text', 'varchar', 'character', 'date', 'time', 'uuid'), fn($teil) => strpos($identifier['type'], $teil) !== false) ? "'" : "");
+			$quote = (array_filter(
+				array('text', 'varchar', 'character', 'date', 'time', 'uuid'),
+				function ($teil) use ($identifier) {
+						return strpos($identifier['type'], $teil) !== false;
+				}
+			) ? "'" : "");
 			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
 		}
 		return implode(' AND ', $parts);
@@ -609,8 +614,9 @@ class PgObject {
 		";
 		$this->debug->show('update sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
-		if(!$query){echo $sql; exit;}
-		$err_msg = $this->database->errormessage;
+		if (!$query) {
+			$err_msg = pg_last_error($this->database->dbConn);
+		}
 		$results = array(
 			'success' => ($err_msg == ''),
 			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),

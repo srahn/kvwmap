@@ -2383,7 +2383,7 @@ class db_mapObj {
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale, ul.maxscale,
 				ul.offsite,
 				ul.postlabelcache,

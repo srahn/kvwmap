@@ -21,6 +21,12 @@ class Menue extends PgObject {
 				'option' => null
 			),
 			array(
+				'attribute' => 'obermenue',
+				'condition' => 'not_null',
+				'description' => 'Es muss das Obermenue angegeben werden (oder 0 falls es keins gibt).',
+				'option' => array(1, 2)
+			),				
+			array(
 				'attribute' => 'menueebene',
 				'condition' => 'not_null',
 				'description' => 'Es muss eine Menüebene angegeben werden.',

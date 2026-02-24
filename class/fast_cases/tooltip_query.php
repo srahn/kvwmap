@@ -1448,7 +1448,7 @@ class rolle {
 				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
 				ul.queryable,
 				l.drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale,
 				ul.maxscale,
 				ul.offsite,
