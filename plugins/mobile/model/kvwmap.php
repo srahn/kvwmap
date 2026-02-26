@@ -647,7 +647,7 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 			},
 			$layerset['datasources']
 		)),
-		"sync" => $layerset['sync'],
+		"sync" => ($layerset['sync'] == 't' ? 1 : 0),
 		"version" => $layerset['version']
 	);
 	# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
