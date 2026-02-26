@@ -5817,6 +5817,7 @@ echo '			</table>
 			}
 
 			$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			$this->layer_epsg_code = $layerset[0]['epsg_code'];
 			$ret = $pointeditor->eintragenPunkt(
 				$this->formvars['loc_x'],
 				$this->formvars['loc_y'],
@@ -5985,6 +5986,7 @@ echo '			</table>
 	 * @return array key value pairs as strings for update statements
 	 */
 	function get_auto_attribute_kvps() {
+		include_once(CLASSPATH . 'Layer.php');
 		$kvps = array();
 		for ($i = 0; $i < count($this->attributes['type']); $i++) {
 			if ($this->attributes['name'][$i] != 'oid') {
@@ -6026,12 +6028,29 @@ echo '			</table>
 						$this->attributes['form_element_type'][$i] == 'Fläche'
 					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['area'] ?: 'NULL');
 					break;
+					case ($this->attributes['form_element_type'][$i] == 'SubFormFK') : {
+						$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+						if (
+							$layer->get('Datentyp') == 0 AND
+							$layer->has_fk_constraint('within') AND
+							$parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])
+						) {
+							$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
+						}
+						else {
+							$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+							$kvps = array(
+								'success' => false,
+								'msg' => $msg
+							);
+						}
+					}
+					break;
 				}
 			}
 		}
 		return $kvps;
 	}
-
 	
 	function create_auto_classes_for_rollenlayer(){
 		$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -10907,6 +10926,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	function neuer_Layer_Datensatz_speichern() {
+		include_once(CLASSPATH . 'PgObject.php');
+		include_once(CLASSPATH . 'Layer.php');
+
 		foreach ($this->formvars as $key => $value) {
 			if (is_string($value)) {
 				$this->formvars[$key] = replace_tags($value, 'script|embed');
@@ -11225,6 +11247,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						} # end of switch
 					}
 				}
+
+				$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+				if (
+					$layer->get('Datentyp') == 0 AND
+					$layer->has_fk_constraint('within')
+				) {
+					if ($parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])) {
+						$insert[$layer->fk_options['fk_name']] = "'" . $parent_feature->get_id() . "'";
+					}
+					else {
+						$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+						$insert = array();
+						$this->success = false;
+						$this->add_message('error', 'Eintrag fehlgeschlagen. ' . $msg);
+					}
+				}
+
 				if (!empty($insert)) {
 					if (!$layerset[0]['maintable_is_view']) {
 						$sql = "LOCK TABLE " . pg_quote($table['tablename']) . " IN SHARE ROW EXCLUSIVE MODE;";
@@ -19560,6 +19599,7 @@ class db_mapObj{
 								$attributes['subform_layer_id'][$i] = $json['ref_layer_id'];
 								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
 								$attributes['no_new_window'][$i] = ($json['window_type'] === 'no_new_window');
+								$attributes['options_json'][$i] = $json;
 							}
 							else {
 								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options
