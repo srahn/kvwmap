@@ -1342,14 +1342,9 @@ echo '			</table>
 				}
 			}
 			if ($layercount > 0) {		# Layer vorhanden
-				if (value_of($this->layerset['layer_group_has_legendorder'], $group_id) != ''){			# Gruppe hat Legendenreihenfolge -> sortieren
-					usort($this->layerset['layers_of_group'][$group_id], function($a, $b) use ($layerlist) {
-						return $layerlist[$a]['legendorder'] - $layerlist[$b]['legendorder'];
-					});
-				}
-				else {
-					$this->layerset['layers_of_group'][$group_id] = array_reverse($this->layerset['layers_of_group'][$group_id]);		# umgedrehte Zeichenreihenfolge verwenden
-				}
+				usort($this->layerset['layers_of_group'][$group_id], function($a, $b) use ($layerlist) {
+					return $layerlist[$a]['legendorder'] - $layerlist[$b]['legendorder'];
+				});
 				if (!value_of($this->formvars, 'nurFremdeLayer')) {
 					if (!is_array($this->layer_ids_of_group[$group_id])) {
 						$this->layer_ids_of_group[$group_id] = [];
@@ -2999,6 +2994,9 @@ echo '			</table>
 					$label->size = $dbLabel['size'];
 					$label->minsize = $dbLabel['minsize'];
 					$label->maxsize = $dbLabel['maxsize'];
+					if($this->map_factor != ''){
+						$label->size = $dbLabel['size']*$this->map_factor/1.414;
+					}
 				}
 				else {
 					$label->updateFromString("LABEL SIZE [" . $dbLabel['size']."] END");
@@ -3016,8 +3014,7 @@ echo '			</table>
 				# Skalierung der Labelschriftgröße, wenn map_factor gesetzt
 				if($this->map_factor != ''){
 					$label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
-					$label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
-					$label->size = $dbLabel['size']*$this->map_factor/1.414;
+					$label->maxsize = $dbLabel['maxsize']*$this->map_factor/1.414;
 				}
 				if ($dbLabel['position']!='') {
 					switch ($dbLabel['position']){
@@ -5862,6 +5859,7 @@ echo '			</table>
 			}
 
 			$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			$this->layer_epsg_code = $layerset[0]['epsg_code'];
 			$ret = $pointeditor->eintragenPunkt(
 				$this->formvars['loc_x'],
 				$this->formvars['loc_y'],
@@ -6049,6 +6047,7 @@ echo '			</table>
 	 * @return array key value pairs as strings for update statements
 	 */
 	function get_auto_attribute_kvps() {
+		include_once(CLASSPATH . 'Layer.php');
 		$kvps = array();
 		for ($i = 0; $i < count($this->attributes['type']); $i++) {
 			if ($this->attributes['name'][$i] != 'oid') {
@@ -6090,12 +6089,29 @@ echo '			</table>
 						$this->attributes['form_element_type'][$i] == 'Fläche'
 					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['area'] ?: 'NULL');
 					break;
+					case ($this->attributes['form_element_type'][$i] == 'SubFormFK') : {
+						$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+						if (
+							$layer->get('Datentyp') == 0 AND
+							$layer->has_fk_constraint('within') AND
+							$parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])
+						) {
+							$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
+						}
+						else {
+							$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+							$kvps = array(
+								'success' => false,
+								'msg' => $msg
+							);
+						}
+					}
+					break;
 				}
 			}
 		}
 		return $kvps;
 	}
-
 	
 	function create_auto_classes_for_rollenlayer(){
 		$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -6294,6 +6310,7 @@ echo '			</table>
 		$this->formvars['data'] = $datastring;
 		$this->formvars['query'] = $select;
 		$this->formvars['datentyp'] = $layerset[0]['datentyp'];
+		$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$this->formvars['connectiontype'] = 6;
 		if ($layerset[0]['labelitem'] != 'Cluster_FeatureCount') {
 			$this->formvars['labelitem'] = $layerset[0]['labelitem'];
@@ -8456,11 +8473,12 @@ echo '			</table>
 		$this->titel = 'Themenbaum bearbeiten';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->groups = $mapDB->read_Groups(true);
-		$this->layers = $mapDB->getall_Layer();
+		$this->layers = $mapDB->getall_Layer('legendorder');
 		$this->output();
 	}
 
 	function Layer_Legendenreihenfolge_Speichern() {
+		### Gruppen ###
 		include_once(CLASSPATH . 'LayerGroup.php');
 		for ($i = 0; $i < count($this->formvars['group_ids']); $i++) {
 			$this->layergruppe = new LayerGroup($this);
@@ -8471,6 +8489,17 @@ echo '			</table>
 			];
 			$result = $this->layergruppe->update();
 		}
+		### Layer ###
+		include_once(CLASSPATH . 'Layer.php');
+		for ($i = 0; $i < count($this->formvars['layer_ids']); $i++) {
+			$this->layer = new Layer($this);
+			$this->layer->data = [
+				'layer_id' => $this->formvars['layer_ids'][$i],
+				'legendorder' => $this->formvars['layer_orders'][$i],
+				'gruppe' => $this->formvars['layer_groups'][$i]
+			];
+			$result = $this->layer->update();
+		}
 		rolle::setGroupsForAll($this->pgdatabase);
 		rolle::clear_groups2rolle($this->pgdatabase);
 	}
@@ -8479,25 +8508,14 @@ echo '			</table>
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
 		$this->main = 'layer2stelle_order.php';
 		if ($this->formvars['order'] == '') {
-			$this->formvars['order'] = 'ul.legendorder, l.drawingorder desc';
+			$this->formvars['order'] = 'l.legendorder';
 		}
-		if ($this->formvars['order'] == 'ul.legendorder, l.drawingorder desc') {
+		if ($this->formvars['order'] == 'l.legendorder') {
 			$this->groups = $this->selected_stelle->getGroups();
 		}
 		$this->layers = $this->selected_stelle->getLayers(NULL, $this->formvars['order']);
 		$this->output();
 	}
-
-  function Layer2Stelle_ReihenfolgeSpeichern(){
-    $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
-    $this->layers = $Stelle->getLayers(NULL);
-    for($i = 0; $i < count($this->layers['ID']); $i++){
-      $this->formvars['selected_layer_id'] = $this->layers['ID'][$i];
-			$this->formvars['legendorder'] = $this->formvars['legendorder_layer'.$this->layers['ID'][$i]];
-      $Stelle->updateLayerOrder($this->formvars);
-    }
-    $this->Layer2Stelle_Reihenfolge();
-  }
 
   function layer_export(){
   	# Abfragen aller Layer
@@ -11048,6 +11066,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	function neuer_Layer_Datensatz_speichern() {
+		include_once(CLASSPATH . 'PgObject.php');
+		include_once(CLASSPATH . 'Layer.php');
+
 		foreach ($this->formvars as $key => $value) {
 			if (is_string($value)) {
 				$this->formvars[$key] = replace_tags($value, 'script|embed');
@@ -11267,32 +11288,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							} break;
 
-							// Funktioniert nicht
-							// case ($table['type'][$i] == 'SubFormFK') : {
-							// 	$attribute_options = $attribute->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
-							// 	include_once(CLASSPATH . 'Layer.php');
-							// 	$fk_field_is_empty = $this->formvars[$table['formfield'][$i]] == '';
-							// 	$parent_layer = Layer::find_by_id($this, $attribute_options['parent_layer_id']);
-							// 	$parent_layer_has_geom = $parent_layer->get('geom_column') != '';
-							// 	$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
-							// 	if ($result['success']) {
-							// 		$new_feature_has_geometry = true;
-							// 		$new_feature_geometry = $result['wkb_geometry'];
-							// 		include_once(CLASSPATH . 'PgObject.php');
-							// 		$pg_object = new PgObject($this, $parent_layer->get('schema'), $parent_layer->get('maintable'));
-							// 		$pg_object->debug->user_funktion = 'admin'; $pg_object->show = true;
-							// 		$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
-							// 		$intersecting_parent_gefunden = false;
-							// 		if (count($intersected_objects) > 0) {
-							// 			$parent_feature = $intersected_objects[0];
-							// 			$intersecting_parent_gefunden = true;
-							// 		}
-							// 		if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
-							// 			$insert[$table['attributname'][$i]] = "'" . $parent_feature->get($parent_layer->get('oid')) . "'";
-							// 		}
-							// 	}
-							// } break;
-
 							case ($table['type'][$i] == 'Geometrie') : {
 								if ($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != '' OR $this->formvars['newpathwkt'] != '') {
 									$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
@@ -11366,6 +11361,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						} # end of switch
 					}
 				}
+
+				$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+				if (
+					$layer->get('Datentyp') == 0 AND
+					$layer->has_fk_constraint('within')
+				) {
+					if ($parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])) {
+						$insert[$layer->fk_options['fk_name']] = "'" . $parent_feature->get_id() . "'";
+					}
+					else {
+						$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+						$insert = array();
+						$this->success = false;
+						$this->add_message('error', 'Eintrag fehlgeschlagen. ' . $msg);
+					}
+				}
+
 				if (!empty($insert)) {
 					if (!$layerset[0]['maintable_is_view']) {
 						$sql = "LOCK TABLE " . pg_quote($table['tablename']) . " IN SHARE ROW EXCLUSIVE MODE;";
@@ -11388,7 +11400,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 					$this->debug->show('<p>SQL zum Anlegen des Datensatzes: ' . $sql);
-					// echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
+					// if ($this->user->id = 1) {
+					// 	echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
+					// }
 					$ret = $layerdb->execSQL($sql, 4, 1, true);
 
 					if ($ret['success']) {
@@ -11460,6 +11474,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 			}
 		}
+
 		if ($this->formvars['embedded'] != '') {
 			# wenn es ein neuer Datensatz aus einem embedded-Formular ist,
 			# muss das entsprechende Attribut des Hauptformulars aktualisiert werden
@@ -13889,6 +13904,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['reset_password_text'] = $this->stellendaten['reset_password_text'];
 			$this->formvars['invitation_text'] = $this->stellendaten['invitation_text'];
 			$this->formvars['comment'] = $this->stellendaten['comment'];
+			$this->formvars['start_page_params'] = $this->stellendaten['start_page_params'];
 			$where = 'id != '.$this->formvars['selected_stelle_id'];
 
 			$children_ids = array_map(function($child) {return $child['id'];}, $this->formvars['selchildren']);
@@ -18720,7 +18736,7 @@ class db_mapObj{
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale, ul.maxscale,
 				ul.offsite,
 				ul.postlabelcache,
@@ -19422,6 +19438,7 @@ class db_mapObj{
 					$sql = str_replace('$' . $attributenames[$a], $attributevalues[$a], $sql);
 				}
 			}
+			$sql = str_replace('$originalname', $originalname, $sql);
 			# echo '<p>SQL zur Abfrage des Dokumentenpfades: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 1);
 			$dynamic_path = pg_fetch_row($ret[1]);
@@ -19886,6 +19903,7 @@ class db_mapObj{
 								$attributes['subform_layer_id'][$i] = $json['ref_layer_id'];
 								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
 								$attributes['no_new_window'][$i] = ($json['window_type'] === 'no_new_window');
+								$attributes['options_json'][$i] = $json;
 							}
 							else {
 								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options
@@ -20296,8 +20314,7 @@ DO $$
 							SELECT
 								'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id,
 								'vars_stelle_id_" . $stellen[$s]['extra'][0] . "' AS stelle_id,
-								queryable,
-								legendorder, minscale, maxscale, offsite, transparency, postlabelcache, filter,
+								queryable, minscale, maxscale, offsite, transparency, postlabelcache, filter,
 								template, header, footer, symbolscale, requires, privileg, export_privileg,
 								start_aktiv,
 								use_geom
@@ -21407,7 +21424,7 @@ DO $$
 				'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
 				'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
 				'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
-				'visibility_rules_' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]])
+				'visibility_rules' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]])
 			] + $alias_rows;
 				
 			if ($formvars['for_all_layers'] != 1) {
@@ -22052,6 +22069,7 @@ DO $$
 				l.uptodateness,
 				l.updatecycle,
 				l.drawingorder,
+				l.legendorder,
 				l.alias,
 				l.shared_from
 				" . ($this->GUI->plugin_loaded('mobile') ? ', l.sync' : '') . "
@@ -23695,64 +23713,64 @@ class Document {
       $sql ="UPDATE kvwmap.druckrahmen";
       $sql .= " SET Name = '" . $formvars['name']."'";
 			$sql .= ", dhk_call = '" . $formvars['dhk_call']."'";
-      $sql .= ", headposx = '" . $formvars['headposx']."'";
-      $sql .= ", headposy = '" . $formvars['headposy']."'";
-      $sql .= ", headwidth = '" . $formvars['headwidth']."'";
-      $sql .= ", headheight = '" . $formvars['headheight']."'";
-      $sql .= ", mapposx = '" . $formvars['mapposx']."'";
-      $sql .= ", mapposy = '" . $formvars['mapposy']."'";
-      $sql .= ", mapwidth = '" . $formvars['mapwidth']."'";
-      $sql .= ", mapheight = '" . $formvars['mapheight']."'";
-      $sql .= ", refmapposx = '" . $formvars['refmapposx']."'";
-      $sql .= ", refmapposy = '" . $formvars['refmapposy']."'";
-      $sql .= ", refmapwidth = '" . $formvars['refmapwidth']."'";
-      $sql .= ", refmapheight = '" . $formvars['refmapheight']."'";
-      $sql .= ", refposx = '" . $formvars['refposx']."'";
-      $sql .= ", refposy = '" . $formvars['refposy']."'";
-      $sql .= ", refwidth = '" . $formvars['refwidth']."'";
-      $sql .= ", refheight = '" . $formvars['refheight']."'";
-      $sql .= ", refzoom = '" . $formvars['refzoom']."'";
-      $sql .= ", dateposx = '" . $formvars['dateposx']."'";
-      $sql .= ", dateposy = '" . $formvars['dateposy']."'";
-      $sql .= ", datesize = '" . $formvars['datesize']."'";
-      $sql .= ", scaleposx = '" . $formvars['scaleposx']."'";
-      $sql .= ", scaleposy = '" . $formvars['scaleposy']."'";
-      $sql .= ", scalesize = '" . $formvars['scalesize']."'";
-			$sql .= ", scalebarposx = '" . $formvars['scalebarposx']."'";
-      $sql .= ", scalebarposy = '" . $formvars['scalebarposy']."'";
-      $sql .= ", oscaleposx = " . ($formvars['oscaleposx'] ?: 'NULL');
-      $sql .= ", oscaleposy = " . ($formvars['oscaleposy'] ?: 'NULL');
-      $sql .= ", oscalesize = " . ($formvars['oscalesize'] ?: 'NULL');
-			$sql .= ", lageposx = '" . $formvars['lageposx']."'";
-      $sql .= ", lageposy = '" . $formvars['lageposy']."'";
-      $sql .= ", lagesize = '" . $formvars['lagesize']."'";
-			$sql .= ", gemeindeposx = '" . $formvars['gemeindeposx']."'";
-      $sql .= ", gemeindeposy = '" . $formvars['gemeindeposy']."'";
-      $sql .= ", gemeindesize = '" . $formvars['gemeindesize']."'";
-      $sql .= ", gemarkungposx = '" . $formvars['gemarkungposx']."'";
-      $sql .= ", gemarkungposy = '" . $formvars['gemarkungposy']."'";
-      $sql .= ", gemarkungsize = '" . $formvars['gemarkungsize']."'";
-      $sql .= ", flurposx = '" . $formvars['flurposx']."'";
-      $sql .= ", flurposy = '" . $formvars['flurposy']."'";
-      $sql .= ", flursize = '" . $formvars['flursize']."'";
-			$sql .= ", flurstposx = '" . $formvars['flurstposx']."'";
-      $sql .= ", flurstposy = '" . $formvars['flurstposy']."'";
-      $sql .= ", flurstsize = '" . $formvars['flurstsize']."'";
-      $sql .= ", legendposx = '" . $formvars['legendposx']."'";
-      $sql .= ", legendposy = '" . $formvars['legendposy']."'";
-      $sql .= ", legendsize = '" . $formvars['legendsize']."'";
-      $sql .= ", arrowposx = '" . $formvars['arrowposx']."'";
-      $sql .= ", arrowposy = '" . $formvars['arrowposy']."'";
-      $sql .= ", arrowlength = '" . $formvars['arrowlength']."'";
-      $sql .= ", userposx = '" . $formvars['userposx']."'";
-      $sql .= ", userposy = '" . $formvars['userposy']."'";
-      $sql .= ", usersize = '" . $formvars['usersize']."'";
+      $sql .= ", headposx = " . value_or_null($formvars['headposx']);
+      $sql .= ", headposy = " . value_or_null($formvars['headposy']);
+      $sql .= ", headwidth = " . value_or_null($formvars['headwidth']);
+      $sql .= ", headheight = " . value_or_null($formvars['headheight']);
+      $sql .= ", mapposx = " . value_or_null($formvars['mapposx']);
+      $sql .= ", mapposy = " . value_or_null($formvars['mapposy']);
+      $sql .= ", mapwidth = " . value_or_null($formvars['mapwidth']);
+      $sql .= ", mapheight = " . value_or_null($formvars['mapheight']);
+      $sql .= ", refmapposx = " . value_or_null($formvars['refmapposx']);
+      $sql .= ", refmapposy = " . value_or_null($formvars['refmapposy']);
+      $sql .= ", refmapwidth = " . value_or_null($formvars['refmapwidth']);
+      $sql .= ", refmapheight = " . value_or_null($formvars['refmapheight']);
+      $sql .= ", refposx = " . value_or_null($formvars['refposx']);
+      $sql .= ", refposy = " . value_or_null($formvars['refposy']);
+      $sql .= ", refwidth = " . value_or_null($formvars['refwidth']);
+      $sql .= ", refheight = " . value_or_null($formvars['refheight']);
+      $sql .= ", refzoom = " . value_or_null($formvars['refzoom']);
+      $sql .= ", dateposx = " . value_or_null($formvars['dateposx']);
+      $sql .= ", dateposy = " . value_or_null($formvars['dateposy']);
+      $sql .= ", datesize = " . value_or_null($formvars['datesize']);
+      $sql .= ", scaleposx = " . value_or_null($formvars['scaleposx']);
+      $sql .= ", scaleposy = " . value_or_null($formvars['scaleposy']);
+      $sql .= ", scalesize = " . value_or_null($formvars['scalesize']);
+			$sql .= ", scalebarposx = " . value_or_null($formvars['scalebarposx']);
+      $sql .= ", scalebarposy = " . value_or_null($formvars['scalebarposy']);
+      $sql .= ", oscaleposx = " . value_or_null($formvars['oscaleposx']);
+      $sql .= ", oscaleposy = " . value_or_null($formvars['oscaleposy']);
+      $sql .= ", oscalesize = " . value_or_null($formvars['oscalesize']);
+			$sql .= ", lageposx = " . value_or_null($formvars['lageposx']);
+      $sql .= ", lageposy = " . value_or_null($formvars['lageposy']);
+      $sql .= ", lagesize = " . value_or_null($formvars['lagesize']);
+			$sql .= ", gemeindeposx = " . value_or_null($formvars['gemeindeposx']);
+      $sql .= ", gemeindeposy = " . value_or_null($formvars['gemeindeposy']);
+      $sql .= ", gemeindesize = " . value_or_null($formvars['gemeindesize']);
+      $sql .= ", gemarkungposx = " . value_or_null($formvars['gemarkungposx']);
+      $sql .= ", gemarkungposy = " . value_or_null($formvars['gemarkungposy']);
+      $sql .= ", gemarkungsize = " . value_or_null($formvars['gemarkungsize']);
+      $sql .= ", flurposx = " . value_or_null($formvars['flurposx']);
+      $sql .= ", flurposy = " . value_or_null($formvars['flurposy']);
+      $sql .= ", flursize = " . value_or_null($formvars['flursize']);
+			$sql .= ", flurstposx = " . value_or_null($formvars['flurstposx']);
+      $sql .= ", flurstposy = " . value_or_null($formvars['flurstposy']);
+      $sql .= ", flurstsize = " . value_or_null($formvars['flurstsize']);
+      $sql .= ", legendposx = " . value_or_null($formvars['legendposx']);
+      $sql .= ", legendposy = " . value_or_null($formvars['legendposy']);
+      $sql .= ", legendsize = " . value_or_null($formvars['legendsize']);
+      $sql .= ", arrowposx = " . value_or_null($formvars['arrowposx']);
+      $sql .= ", arrowposy = " . value_or_null($formvars['arrowposy']);
+      $sql .= ", arrowlength = " . value_or_null($formvars['arrowlength']);
+      $sql .= ", userposx = " . value_or_null($formvars['userposx']);
+      $sql .= ", userposy = " . value_or_null($formvars['userposy']);
+      $sql .= ", usersize = " . value_or_null($formvars['usersize']);
       $sql .= ", watermark = '" . $formvars['watermark']."'";
-      $sql .= ", watermarkposx = '" . $formvars['watermarkposx']."'";
-      $sql .= ", watermarkposy = '" . $formvars['watermarkposy']."'";
-      $sql .= ", watermarksize = '" . $formvars['watermarksize']."'";
-      $sql .= ", watermarkangle = '" . $formvars['watermarkangle']."'";
-      $sql .= ", watermarktransparency = '" . $formvars['watermarktransparency']."'";
+      $sql .= ", watermarkposx = " . value_or_null($formvars['watermarkposx']);
+      $sql .= ", watermarkposy = " . value_or_null($formvars['watermarkposy']);
+      $sql .= ", watermarksize = " . value_or_null($formvars['watermarksize']);
+      $sql .= ", watermarkangle = " . value_or_null($formvars['watermarkangle']);
+      $sql .= ", watermarktransparency = " . value_or_null($formvars['watermarktransparency']);
       if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
       $sql .= ", variable_freetexts = " . $formvars['variable_freetexts'];
       $sql .= ", format = '" . $formvars['format']."'";

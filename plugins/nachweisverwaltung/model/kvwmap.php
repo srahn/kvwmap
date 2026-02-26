@@ -45,13 +45,13 @@ $GUI->nachweis_columns = [
 		'alias' => 'Fortführung',
 		'width' => 83
 	],
-	'vermst' => [
-		'alias' => 'Vermstelle',
-		'width' => 65
-	],
 	'antragsnummer_alt' => [
 		'alias' => 'GB/C-Nr.',
 		'width' => 60
+	],	
+	'vermst' => [
+		'alias' => 'Vermstelle',
+		'width' => 65
 	],
 	'gueltigkeit' => [
 		'alias' => 'gültig',
@@ -1165,8 +1165,10 @@ $GUI->nachweis_columns = [
 			';
 			
 		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
-			$GUI->nachweis->Dokumente[$i]['bearbeitungshinweis'] = 'mailto:' . $GUI->nachweis->Dokumente[$i]['email'] . '?subject=Bearbeitungshinweis zum Nachweis ' . $GUI->nachweis->Dokumente[$i]['client_nachweis_id'];
-			$json = str_replace('\\"', '\\\"', str_replace('\\\"', '"', str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', str_replace('\\t', '\\\t', json_encode($GUI->nachweis->Dokumente[$i])))))));
+			$nachweis_data = $GUI->nachweis->Dokumente[$i];
+			unset($nachweis_data['the_geom']);	// wird nicht benötigt und kann zu Escape-Fehlern im JSON führen
+			$nachweis_data['bearbeitungshinweis'] = 'mailto:' . $nachweis_data['email'] . '?subject=Bearbeitungshinweis zum Nachweis ' . $nachweis_data['client_nachweis_id'];
+			$json = str_replace('\\"', '\\\"', str_replace('\\\"', '"', str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', str_replace('\\t', '\\\t', json_encode($nachweis_data)))))));
 			$html.= "			nachweise.push(JSON.parse('".$json."'));\n";
 		}	
 		

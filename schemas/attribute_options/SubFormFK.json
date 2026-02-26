@@ -4,6 +4,18 @@
   "title": "SubformFK options",
   "description": "Options for kvwmap formular element type SubformFK. SubformFK define a one to many foreign key relationship to a parent layer.",
   "type": "object",
+  "example": {
+    "vorher": "287,standort_uuid:uuid;no_new_window",
+    "ref_layer_id": 289,
+    "ref_keys": [
+      {
+        "pkey": "uuid",
+        "fkey": "baum_uuid"
+      }
+    ],
+    "window_type": "no_new_window",
+    "ref_constraint": "within"
+  },
   "properties": {
     "ref_layer_id": {
       "description": "The id of the referenced layer SubFormPK referenced to a sub layer, SubFormFK to a parent layer.",
@@ -99,7 +111,16 @@
         }
       ],
       "default": "value"
+    },
+    "ref_constraint": {
+      "description": "An optional constraint that will be applied when querying the parent layer for possible referenced features.",
+      "type": "string",
+      "anyOf":[
+        {
+          "const": "within"
+        }
+      ]
     }
   },
-  "required": [ "ref_layer_id", "keys", "window_type", "display", "display_type", "link_type", "default_value_type" ]
+  "required": [ "ref_layer_id", "keys", "window_type"]
 }

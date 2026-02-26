@@ -1390,7 +1390,6 @@ class stelle {
 			$columns = '
 				layer_id, 
 				queryable, 
-				legendorder,
 				minscale, 
 				maxscale, 
 				offsite, 
@@ -1527,7 +1526,6 @@ class stelle {
 				layer_id,
 				queryable,
 				use_geom,
-				legendorder,
 				minscale,
 				maxscale,
 				symbolscale,
@@ -1552,7 +1550,6 @@ class stelle {
 						" . $layer_ids[$i] . ",
 						queryable,
 						use_geom,
-						legendorder, 
 						minscale, 
 						maxscale, 
 						symbolscale, 
@@ -1579,7 +1576,6 @@ class stelle {
 					ON CONFLICT (stelle_id, layer_id) DO UPDATE SET
 						queryable = EXCLUDED.queryable, 
 						use_geom = EXCLUDED.use_geom, 
-						legendorder = EXCLUDED.legendorder, 
 						minscale = EXCLUDED.minscale, 
 						maxscale = EXCLUDED.maxscale, 
 						symbolscale = EXCLUDED.symbolscale, 
@@ -1611,7 +1607,6 @@ class stelle {
 						'" . $layer_ids[$i] . "',
 						queryable,
 						use_geom,
-						legendorder, 
 						minscale, 
 						maxscale, 
 						symbolscale, 
@@ -1636,7 +1631,6 @@ class stelle {
 						UPDATE SET
 							queryable = EXCLUDED.queryable, 
 							use_geom = EXCLUDED.use_geom, 
-							legendorder = EXCLUDED.legendorder, 
 							minscale = EXCLUDED.minscale, 
 							maxscale = EXCLUDED.maxscale, 
 							symbolscale = EXCLUDED.symbolscale, 
@@ -1866,22 +1860,6 @@ class stelle {
 		}
 	}
 
-	function updateLayerOrder($formvars){
-		# Aktualisieren der LayerzuStelle-Eigenschaften
-		$sql = '
-			UPDATE 
-				kvwmap.used_layer 
-			SET 
-				legendorder = ' . ($formvars['legendorder'] ?: 'NULL') . '
-			WHERE 
-				stelle_id = ' . $formvars['selected_stelle_id'] . ' AND 
-				layer_id = ' . $formvars['selected_layer_id'];
-		#echo $sql.'<br>';
-		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-	}
-
   function getGroups() {
 		global $language;
 		$sql = 'SELECT DISTINCT';
@@ -1903,7 +1881,7 @@ class stelle {
     return $groups;
   }
 
-	function getLayers($group, $order = 'ul.legendorder, l.drawingorder desc', $return = '') {
+	function getLayers($group, $order = 'l.legendorder', $return = '') {
 		$layer = array(
 			'ID' => array(),
 			'Bezeichnung' => array(),
@@ -1915,7 +1893,7 @@ class stelle {
 			ul.stelle_id = " . $this->id .
 			($group != NULL ? " AND COALESCE(ul.group_id, l.gruppe) = " . $group : "") . "
 		";
-		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY ul.legendorder, l.drawingorder desc');
+		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY l.legendorder');
 
 		# Lesen der Layer zur Stelle
 		$sql = "
@@ -1925,7 +1903,7 @@ class stelle {
 				l.name,
 				l.alias,
 				l.drawingorder,
-				ul.legendorder
+				l.legendorder
 			FROM
 				kvwmap.used_layer ul JOIN
 				kvwmap.layer l ON ul.layer_id = l.layer_id 
@@ -2198,7 +2176,7 @@ class stelle {
 				ul.requires,
 				ul.queryable, 
 				l.drawingorder, 
-				ul.legendorder, 
+				l.legendorder, 
 				ul.minscale, 
 				ul.maxscale, 
 				ul.offsite, 
@@ -2229,7 +2207,7 @@ class stelle {
 				l.layer_id, l.name, l.gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
 				ul.queryable, 
 				l.drawingorder, 
-				ul.legendorder, 
+				l.legendorder, 
 				ul.minscale, 
 				ul.maxscale, 
 				ul.offsite, 

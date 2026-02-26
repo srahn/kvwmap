@@ -24,6 +24,7 @@
             $GUI->outputLayer($group_layer_ids[$i]);
           }
     echo '
+          <div id="dummy">&nbsp;</div>
         </div>
       </div>
       <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
@@ -31,8 +32,9 @@
 	
 	$this->outputLayer = function($i) use ($GUI) {
     echo '
-		  <div id="' . $group['id'] . '" class="llr_layer dragObject closed" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
+		  <div id="' . $GUI->layers['ID'][$i] . '" class="llr_layer dragObject closed" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
 			  ' . $GUI->layers['Bezeichnung'][$i] . '
+        <a title="bearbeiten" class="llr_edit_link" href="index.php?go=Layereditor&selected_layer_id=' . $GUI->layers['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '"><i class="fa fa-pencil" style="padding: 3px"></i></a>
 			</div>
       <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>
 			';
@@ -42,7 +44,7 @@
 
 <script language="JavaScript">
 
-  let order = 0;
+  let group_order = 0;
   const form = new FormData(document.GUI);
 
   function save(){
@@ -65,13 +67,21 @@
   }
 
   function traverse_group(group, uppergroup){
-    order += 1;
+    let layer_order = 1;
+    group_order += 1;
     form.append('group_ids[]', group.id);
-    form.append('group_orders[]', order);
+    form.append('group_orders[]', group_order);
     form.append('group_uppergroups[]', uppergroup?.id ?? '');
     const subgroups = group.querySelectorAll(':scope > .group_content > .llr_group');
 	  [].forEach.call(subgroups, function (subgroup){
       traverse_group(subgroup, group);
+    });
+    const layers = group.querySelectorAll(':scope > .group_content > .llr_layer');
+	  [].forEach.call(layers, function (layer){
+      form.append('layer_ids[]', layer.id);
+      form.append('layer_orders[]', layer_order);
+      form.append('layer_groups[]', group.id);
+      layer_order += 1;
     });
   }
 
@@ -113,6 +123,7 @@
 
   .llr_layer {
     padding: 1 0 1 5px;
+    margin-right: 6;
   }
 
   .llr_group>.groupname::before {
@@ -134,9 +145,7 @@
   }
 
   .llr_edit_link {
-    position: absolute;
-    right: 10px;
-    top: 3px;
+    float: right;
   }
 
   .dropZone.ready {
