@@ -3065,4 +3065,35 @@ function set_href($text) {
 	}
 	return $text;
 }
+
+/**
+ * Function return the option value of attribute at index $i for option key $option_key
+ * It searches first in options_json if exists else in attributes array directly
+ * ToDo pk: Zusammenführen mit der Funktion get_options und get_SubFormFK_options in LayerAttributes.php
+ * @param Array $attributes The attributes array.
+ * @param Integer $i The index of the attribute.
+ * @param String $option_key The option key to get the value for.
+ * @return mixed The option value or null if not exists.
+ */
+function get_attribute_option($attributes, $i, $option_key) {
+	$option = null;
+	if (is_array($attributes)) {
+		if (
+			array_key_exists('options_json', $attributes) AND
+			is_array($attributes['options_json']) AND
+			array_key_exists($option_key, $attributes['options_json'][$i])
+		) {
+			$option = $attributes['options_json'][$i][$option_key];
+		}
+		if (
+			$option === null AND
+			array_key_exists($option_key, $attributes) AND
+			is_array($attributes[$option_key])
+		) {
+			$option = $attributes[$option_key][$i];
+		}
+	}
+	return $option;
+}
+
 ?>

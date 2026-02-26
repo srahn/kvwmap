@@ -449,6 +449,18 @@ if ($gast_export === false) {
 			else {
 				if (file_exists(AGREEMENT_MESSAGE)) {
 					$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
+					if (strpos(strtolower($GUI->formvars['format']), 'json') !== false) {
+						$response = array(
+							'error' => 'agreement missing',
+							'error_msg' => 'Der Datenschutzerklärung wurde noch nicht zugestimmt.',
+							'agreement_url' => URL,
+							'agree_param' => 'agreement=1',
+							'agreement_html' => nl2br(file_get_contents(AGREEMENT_MESSAGE))
+						);
+						header('Content-Type: application/json; charset=utf-8');
+						echo json_encode($response);
+						exit;
+					}
 					$show_login_form = true;
 					$go = 'login_agreement';
 				}
