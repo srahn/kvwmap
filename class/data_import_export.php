@@ -1345,10 +1345,15 @@ class data_import_export {
 			}
 
 			# Where-Klausel aus Sachdatenabfrage-SQL
-			$where = substr(
-				$this->formvars['sql_' . $this->formvars['selected_layer_id']],
-				strrpos(strtolower($this->formvars['sql_' . $this->formvars['selected_layer_id']]), 'as query') + 9
-			);
+			if (strpos($this->formvars['sql_' . $this->formvars['selected_layer_id']], 'as query') !== false) {
+				$where = substr(
+					$this->formvars['sql_' . $this->formvars['selected_layer_id']],
+					strrpos(strtolower($this->formvars['sql_' . $this->formvars['selected_layer_id']]), 'as query') + 9
+				);
+			}
+			else {
+				$where = $this->formvars['sql_' . $this->formvars['selected_layer_id']];
+			}
 
 			# Zusammensammeln der Attribute, die abgefragt werden müssen
 			for ($i = 0; $i < count($layerset[0]['attributes']['name']); $i++) {
