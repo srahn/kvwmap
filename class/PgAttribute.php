@@ -27,6 +27,9 @@ class PgAttribute {
 
 	function get_input_type() {
 		switch ($this->type) {
+			case ('b') : {
+				$input_type = 'checkbox';
+			} break;
 			case ('tinyint(1)') : {
 				$input_type = 'checkbox';
 			} break;
@@ -75,9 +78,31 @@ class PgAttribute {
 					$html .= "<span style=\"padding-top: 2px; float: left\">" . $this->value . "</span>";
 				}
 				else {
-					$html .= "<input name=\"" . $this->name . "\" type=\"" . $this->get_input_type() . "\" value=\"" . (($this->get_input_type() == 'checkbox' AND $this->value == '') ? 1 : htmlentities($this->value)) . "\" class=\"" . ($is_valid['success'] ? 'valid' : 'alerts-border') . "\" oninput=\"$(this).removeClass('alerts-border'); $(this).addClass('valid'); if ($(this).next().hasClass('validation-error-msg-div')) { $(this).next().hide(); }\">";
-					if (!$is_valid['success']) {
-						$html .= "<div class=\"validation-error-msg-div\">" . implode('<br>', $is_valid['results']) . "</div>";
+					switch ($this->type) {
+						case 'b' : {
+							$true_array = array('t', 'true', '1');
+							$false_array = array('f', 'false', '0');
+							$class = $is_valid['success'] ? 'valid' : 'alerts-border';
+							$oninput = "$(this).removeClass('alerts-border'); $(this).addClass('valid'); if ($(this).next().hasClass('validation-error-msg-div')) { $(this).next().hide(); }";
+							$null_option = ($this->is_mandatory() ? '' : '<option value=""' . ($this->value == '' ? ' selected' : '') . '></option>');
+							$html .= '
+								<select name="' . $this->name . '" class="' . $class . '" oninput="' . $oninput . '">'
+									. $null_option . '
+									<option value="false"' . (in_array($this->value, $false_array) ? ' selected' : '') . '>Nein</option>
+									<option value="true"' . (in_array($this->value, $true_array) ? ' selected' : '') . '>Ja</option>
+								</select>
+							';
+							// $html .= '<input type="checkbox" value="1" name="' . $this->name . '" class="' . $class . '" oninput="' . $oninput . '"' . $selected . '>';
+							if (!$is_valid['success']) {
+								$html .= "<div class=\"validation-error-msg-div\">" . implode('<br>', $is_valid['results']) . "</div>";
+							}
+						} break;
+						default : {
+							$html .= "<input name=\"" . $this->name . "\" type=\"" . $this->get_input_type() . "\" value=\"" . (($this->get_input_type() == 'checkbox' AND $this->value == '') ? 1 : htmlentities($this->value)) . "\" class=\"" . ($is_valid['success'] ? 'valid' : 'alerts-border') . "\" oninput=\"$(this).removeClass('alerts-border'); $(this).addClass('valid'); if ($(this).next().hasClass('validation-error-msg-div')) { $(this).next().hide(); }\">";
+							if (!$is_valid['success']) {
+								$html .= "<div class=\"validation-error-msg-div\">" . implode('<br>', $is_valid['results']) . "</div>";
+							}
+						}
 					}
 				}
 			}

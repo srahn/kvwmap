@@ -9611,14 +9611,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	function Layergruppe_Editor() {
+	function Layergruppe_Editor($layergruppe = null) {
 		include_once(CLASSPATH . 'LayerGroup.php');
-		$this->layergruppe = new LayerGroup($this);
-		if ($this->formvars['selected_group_id'] != '') {
-			$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
-		}
-		else {
-			$this->layergruppe->setKeysFromTable();
+		if ($layergruppe === null) {
+			if ($this->formvars['selected_group_id'] != '') {
+				$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
+			}
+			else {
+				$this->layergruppe = new LayerGroup($this);
+				$this->layergruppe->setKeysFromTable();
+			}
 		}
 		$this->main = 'layergruppe_formular.php';
 		$this->output();
@@ -9657,18 +9659,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 		$this->layergruppe->setData($this->formvars);
-		$results = $this->layergruppe->validate();
-		if (empty($results)) {
+		$validation_results = $this->layergruppe->validate();
+		if (empty($validation_results)) {
 			$results = $this->layergruppe->update();
+			if ($results['success']) {
+				rolle::setGroupsForAll($this->pgdatabase);
+				$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
+			}
+			else {
+				$this->add_message('error', $results['msg']);
+			}
 		}
-		if ($results['success']) {
-			rolle::setGroupsForAll($this->pgdatabase);
-			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
-		}
-		else {
-			$this->add_message('error', $results['msg']);
-		}
-		$this->Layergruppe_Editor();
+		$this->Layergruppe_Editor($this->layergruppe);
 	}
 
 	function Layergruppe_Loeschen(){
@@ -14260,6 +14262,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			$this->menue->setKeysFromTable();
 		}
+		$this->menue->get_stellen();
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
 		$this->output();
@@ -14279,6 +14282,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		else {
 			$this->add_message('array', array_values($results));
+			$this->menue->get_stellen();
 			$this->main = 'menue_formular.php';
 			$this->output();
 		}
@@ -14293,11 +14297,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$results = $this->menue->update();
 		}
 		if ($results['success']) {
+			$this->menue->update_stellen($this->formvars['selstellen']);
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
+			$this->Fehlermeldung = 'Fehler beim Aktualisieren des Menüs!' . print_r(array_values($results), true);
 			$this->add_message('array', array_values($results));
 		}
+		$this->menue->get_stellen();
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
 		$this->output();

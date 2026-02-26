@@ -343,6 +343,7 @@ class PgObject {
 
 	function getAttributes() {
 		$attributes = [];
+		$this->columns = $this->get_attribute_types();
 		foreach ($this->data AS $key => $value) {
 			$attribute_validations  = array_filter(
 				$this->validations,
@@ -350,7 +351,7 @@ class PgObject {
 					return $validation['attribute'] == $key;
 				}
 			);
-			$attributes[] = new MyAttribute($this->debug, $key, $this->columns[$key]['Type'], $value, $attribute_validations, $this->identifier);
+			$attributes[] = new PgAttribute($this->debug, $key, $this->columns[$key]['Type'], $value, $attribute_validations, $this->identifier);
 		}
 		return $attributes;
 	}
