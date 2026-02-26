@@ -63,8 +63,8 @@ class Layer extends PgObject {
 		if ($layer->get_id() == '') {
 			return false;
 		}
-		$db_mapOjb = new db_mapObj($layer->stelle_id, $layer->user_id);		
-		$layer->database = $db_mapOjb->getlayerdatabase($layer->get_id(), $layer->gui->Stelle->pgdbhost);
+		// $db_mapOjb = new db_mapObj($layer->stelle_id, $layer->user_id);		# Fehler beim Speichern eines Layers
+		// $layer->database = $db_mapOjb->getlayerdatabase($layer->get_id(), $layer->gui->Stelle->pgdbhost);   # Fehler beim Speichern eines Layers
 		$layer->attributes = $layer->get_layer_attributes();
 		$layer->charts = $layer->get_layer_charts();
 		return $layer;
