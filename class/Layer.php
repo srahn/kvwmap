@@ -18,6 +18,7 @@ class Layer extends PgObject {
 	public $maxScale;
 	public $document_attributes;
 	public $layer2stelle;
+	public $layerdb;
 
 	function __construct($gui) {
 		$this->gui = $gui;
@@ -62,6 +63,8 @@ class Layer extends PgObject {
 		if ($layer->get_id() == '') {
 			return false;
 		}
+		$db_mapOjb = new db_mapObj($layer->stelle_id, $layer->user_id);		
+		$layer->database = $db_mapOjb->getlayerdatabase($layer->get_id(), $layer->gui->Stelle->pgdbhost);
 		$layer->attributes = $layer->get_layer_attributes();
 		$layer->charts = $layer->get_layer_charts();
 		return $layer;
@@ -120,6 +123,44 @@ class Layer extends PgObject {
 			}
 		}
 		return $duplicate_layer_ids;
+	}
+
+	function has_fk_constraint($constraint) {
+		$has_fk_constraint = (
+			$this->fk_attribute = $this->get_fk_attribute() AND
+			$this->fk_options = $this->fk_attribute->get_SubFormFK_options($this->fk_attribute->get('options')) AND
+			array_key_exists('ref_constraint', $this->fk_options) AND
+			strpos($this->fk_options['ref_constraint'], $constraint) !== false
+		);
+		return $has_fk_constraint;
+	}
+
+	function get_fk_attribute() {
+		$fk_attribute = false;
+		foreach ($this->attributes AS $index => $attribute) {
+			if (strpos($attribute->get('form_element_type'), 'SubFormFK') !== false) {
+				$fk_attribute = $attribute;
+				break;
+			}
+		}
+		return $fk_attribute;
+	}
+
+	function get_fk_feature($x, $y) {
+		$this->parent_layer = Layer::find_by_id($this->gui, $this->fk_options['parent_layer_id']);
+		$constraint_parts = explode('where', replace_params_rolle($this->fk_options['ref_constraint']));
+		$fk_feature = $this->parent_layer->get_feature_by_point("ST_SetSrid(ST_MakePoint(" . $x . ", " . $y . "), ". $this->gui->user->rolle->epsg_code . ")", trim($constraint_parts[1]));
+		return $fk_feature;
+	}
+
+	function get_feature_by_point($point, $filter) {
+		include_once(CLASSPATH . 'PgObject.php');
+		$obj = new PgObject($this->gui, $this->get('schema'), $this->get('maintable'), $this->get('oid'));
+		$result = $obj->find_where("ST_Within(ST_Transform(" . $point . ", " . $this->get('epsg_code') . "), " . $this->get('geom_column') . ")" . ($filter ? " AND " . $filter : ""), null, '*', 1);
+		if (count($result) !== 1) {
+			return false;
+		}
+		return $result[0];
 	}
 
 	function get_layer_db() {

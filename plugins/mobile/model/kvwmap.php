@@ -81,8 +81,10 @@ $GUI->mobile_set_sync_reset_needed = function($log_name) use ($GUI) {
 	$GUI->log_name = $log_name;
 	$GUI->msg = 'sync_reset_needed';
 	if (!$GUI->mobile_sync_reset_needed($log_name)) {
-		$fp = fopen(LOGPATH . 'kvmobile/' . $log_name . '_debug_log.html', "a");
-		fwrite($fp, "\nsync_reset_needed");
+		$command = 'echo "\nsync_reset_needed" >> ' . LOGPATH . 'kvmobile/' . $log_name . '_debug_log.html';
+		exec($command);
+		// $fp = fopen(LOGPATH . 'kvmobile/' . $log_name . '_debug_log.html', "a");
+		// fwrite($fp, "\nsync_reset_needed");
 		$GUI->msg .= 'in Log-Datei für Nutzer '. $log_name . ' geschrieben';
 	} else {
 		$GUI->msg .= 'ist bereits in der Log-Datei für Nutzer ' . $log_name . ' vorhanden';
@@ -728,6 +730,7 @@ $GUI->mobile_reformat_fk_attributes = function ($attributes) use ($GUI) {
 		if ($attribute['form_element_type'] === 'SubFormFK') {
 			$attribute_obj = new LayerAttribute($GUI);
 			$attribute_options = $attribute_obj->get_options($attribute['options'], 'SubFormFK');
+			$attribute_options_old_version = $attribute_options['parent_layer_id'] . ',' . $attribute_options['fk_name'] . ':' . $attribute_options['pk_name'] . ';' . $attribute_options['window_option'];
 			$fk_attribute = array_filter(
 				$attributes,
 				function ($attr) use ($attribute_options) {
@@ -735,11 +738,11 @@ $GUI->mobile_reformat_fk_attributes = function ($attributes) use ($GUI) {
 				}
 			);
 			foreach (array_keys($fk_attribute) as $fk_attr_key) {
-				$new_attributes[$fk_attr_key]['options'] = $attribute['options'];
+				$new_attributes[$fk_attr_key]['options'] = $attribute_options_old_version;
 				$new_attributes[$fk_attr_key]['form_element_type'] = 'SubFormFK';
 			}
 			$new_attributes[$key]['form_element_type'] = 'Text';
-			$new_attributes[$key]['fk_options'] = $attribute['options'];
+			$new_attributes[$key]['fk_options'] = $attribute_options_old_version;
 		}
 	}
 	return $new_attributes;
