@@ -64,6 +64,8 @@ class Layer extends MyObject {
 		if ($layer->get_id() == '') {
 			return false;
 		}
+		$db_mapOjb = new db_mapObj($layer->stelle_id, $layer->user_id);		
+		$layer->database = $db_mapOjb->getlayerdatabase($layer->get_id(), $layer->gui->Stelle->pgdbhost);
 		$layer->attributes = $layer->get_layer_attributes();
 		$layer->charts = $layer->get_layer_charts();
 		return $layer;

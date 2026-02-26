@@ -11148,32 +11148,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							} break;
 
-							// Funktioniert nicht
-							// case ($table['type'][$i] == 'SubFormFK') : {
-							// 	$attribute_options = $attribute->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
-							// 	include_once(CLASSPATH . 'Layer.php');
-							// 	$fk_field_is_empty = $this->formvars[$table['formfield'][$i]] == '';
-							// 	$parent_layer = Layer::find_by_id($this, $attribute_options['parent_layer_id']);
-							// 	$parent_layer_has_geom = $parent_layer->get('geom_column') != '';
-							// 	$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
-							// 	if ($result['success']) {
-							// 		$new_feature_has_geometry = true;
-							// 		$new_feature_geometry = $result['wkb_geometry'];
-							// 		include_once(CLASSPATH . 'PgObject.php');
-							// 		$pg_object = new PgObject($this, $parent_layer->get('schema'), $parent_layer->get('maintable'));
-							// 		$pg_object->debug->user_funktion = 'admin'; $pg_object->show = true;
-							// 		$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
-							// 		$intersecting_parent_gefunden = false;
-							// 		if (count($intersected_objects) > 0) {
-							// 			$parent_feature = $intersected_objects[0];
-							// 			$intersecting_parent_gefunden = true;
-							// 		}
-							// 		if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
-							// 			$insert[$table['attributname'][$i]] = "'" . $parent_feature->get($parent_layer->get('oid')) . "'";
-							// 		}
-							// 	}
-							// } break;
-
 							case ($table['type'][$i] == 'Geometrie') : {
 								if ($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != '' OR $this->formvars['newpathwkt'] != '') {
 									$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
@@ -11286,7 +11260,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 					$this->debug->show('<p>SQL zum Anlegen des Datensatzes: ' . $sql);
-					// echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
+					// if ($this->user->id = 1) {
+					// 	echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
+					// }
 					$ret = $layerdb->execSQL($sql, 4, 1, true);
 
 					if ($ret['success']) {
@@ -11358,6 +11334,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 			}
 		}
+
 		if ($this->formvars['embedded'] != '') {
 			# wenn es ein neuer Datensatz aus einem embedded-Formular ist,
 			# muss das entsprechende Attribut des Hauptformulars aktualisiert werden
@@ -12941,7 +12918,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'newpathwkt' => 'text',
 			'precision' => 'int'
 		]);
-		$this->formvars['sql_' . $this->formvars['selected_layer_id']] = str_ireplace([';', 'union ', 'select '], '', $this->formvars['sql_' . $this->formvars['selected_layer_id']]);
+		$this->formvars['sql_' . $this->formvars['selected_layer_id']] = str_ireplace([';', 'union '], '', $this->formvars['sql_' . $this->formvars['selected_layer_id']]);
 		if (!(array_key_exists('selected_layer_id', $this->formvars) AND $this->formvars['selected_layer_id'] != '')) {
 			$this->add_message('error', 'Es muss der Parameter selected_layer_id angegeben werden!');
 			$this->loadMap('DataBase');
