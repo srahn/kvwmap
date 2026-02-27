@@ -98,7 +98,7 @@ class ConvertJob extends PgObject {
 
 	function update_dst_file() {
 		$obj = new PgObject($this->gui, $this->get('dst_schema'), $this->get('dst_table'));
-		$foto = $obj->find_by('dst_file', $this->get('src_file'));
+		$foto = $obj->find_by($this->get('dst_column'), $this->get('src_file'));
 		$result = $foto->update_attr(
 			array(
 				$this->get('dst_column') . " = '" . $this->get('dst_file') . "'"
