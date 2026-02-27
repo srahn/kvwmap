@@ -136,20 +136,6 @@ class LayerAttribute extends MyObject {
 			$options['pk_name'] = $colon_parts[1];
 			$options['window_option'] = $semicolon_parts[1] ?? '';
 		}
-
-		// $options = array();
-		// if (strpos($settings, '{') === 0) {
-		// 	$options = json_decode($settings, true);
-		// }
-		// else {
-		// 	$semicolon_parts = explode(';', $settings);
-		// 	$comma_parts = explode(',', $semicolon_parts[0]);
-		// 	$colon_parts = explode(':', $comma_parts[1]);
-		// 	$options['ref_layer_id'] = $comma_parts[0];
-		// 	$options['ref_keys'][0]['fkey'] = $colon_parts[0];
-		// 	$options['ref_keys'][0]['pkey'] = $colon_parts[1];
-		// 	$options['window_type'] = $semicolon_parts[1] ?? '';
-		// }
 		return $options;
 	}
 
