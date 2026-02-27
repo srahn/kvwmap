@@ -1,6 +1,7 @@
 <?php
 include_once(CLASSPATH . 'PgObject.php');
-include_once(CLASSPATH . 'MyAttribute.php');
+include_once(CLASSPATH . 'PgAttribute.php');
+include_once(CLASSPATH . 'Menue2Stelle.php');
 class Menue extends PgObject {
 	var $obermenue;
 	static $write_debug = false;
@@ -182,6 +183,11 @@ class Menue extends PgObject {
 		return $menues;
 	}
 
+	function get_stellen() {
+		$this->stellen = Menue2Stelle::find($this->gui, 'menue_id = ' . $this->get('id'), ' DISTINCT stelle_id');
+		return $this->stellen;
+	}
+
 	function is_selected() {
 		$is_selected = true;
 		$formvars = $_REQUEST;
@@ -307,6 +313,60 @@ class Menue extends PgObject {
 
 		$html .= '</div>';
 		return $html;
+	}
+
+	/**
+	 * Speichert die Zuordnung des Menüs zu den Stellen und Rollen der Nutzer in der Stellen.
+	 * @param array $stelle_ids Array mit den Stellen-IDs, die dem Menü zugeordnet werden sollen
+	 * @return void
+	 */
+	function update_stellen($stelle_ids) {
+		$with_new_values = "
+			WITH nv(menue_id, stelle_id) AS (
+			VALUES
+				" . implode(
+					', ',
+					array_map(
+						function($stelle_id) {
+							return '(' . $this->get('id') . ', ' . $stelle_id . ', 0)';
+						},
+						$stelle_ids
+					)
+				) . "
+			)
+		";
+		$sql ="
+			DELETE FROM kvwmap.u_menue2rolle m2r WHERE m2r.menue_id = " . $this->get('id') . " AND m2r.stelle_id NOT IN (" . implode(', ', $stelle_ids) . ");
+			DELETE FROM kvwmap.u_menue2stelle m2s WHERE m2s.menue_id = " . $this->get('id') . " AND m2s.stelle_id NOT IN (" . implode(', ', $stelle_ids) . ");
+			" . $with_new_values . "
+			INSERT INTO kvwmap.u_menue2stelle (menue_id, stelle_id, menue_order)
+			SELECT
+				nv.menue_id, 
+				nv.stelle_id,
+				0
+			FROM 
+				nv LEFT JOIN
+				kvwmap.u_menue2stelle ms ON nv.menue_id = ms.menue_id AND nv.stelle_id = ms.stelle_id
+			WHERE
+				ms.stelle_id IS NULL;
+			" . $with_new_values . "
+			INSERT INTO kvwmap.u_menue2rolle (menue_id, stelle_id, user_id, status)
+			SELECT
+				nv.menue_id, 
+				nv.stelle_id,
+				r.user_id,
+				0
+			FROM
+				nv JOIN
+				kvwmap.rolle r ON nv.stelle_id = r.stelle_id LEFT JOIN
+				kvwmap.u_menue2stelle ms ON nv.menue_id = ms.menue_id AND nv.stelle_id = ms.stelle_id
+			WHERE
+				ms.stelle_id IS NULL;
+		";
+		// echo "Update relation of menues to stellen and rollen with SQL: " . $sql;
+		$ret = $this->database->execSQL($sql);
+		// $this->execSQL($sql);
+		return $ret;
 	}
 }
 ?>

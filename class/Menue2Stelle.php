@@ -7,9 +7,14 @@ class Menue2Stelle extends PgObject {
 		parent::__construct($gui, 'kvwmap', 'u_menue2stelle', 'stelle_id, menue_id');
 	}
 
-	public static	function find($gui, $where) {
+	public static	function find($gui, $where, $select = '*') {
 		$menue2stelle = new Menue2Stelle($gui);
-		return $menue2stelle->find_where($where);
+		return $menue2stelle->find_by_sql(
+			array(
+				'select' => 'DISTINCT stelle_id',
+				'where' => $where
+			)
+		);
 	}
 }
 ?>
