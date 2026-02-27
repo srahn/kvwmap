@@ -218,6 +218,7 @@ if ($gast_export === false) {
 							$nutzer = Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
 							$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = 0;
 							$GUI->user->login_locked_until 	= '';
+							$GUI->formvars['go'] = '';
 							if ($GUI->user->stelle_id == '') {
 								# Nutzer hat keine stellen_id
 								$GUI->user->Stellen = $GUI->user->getStellen(0);
