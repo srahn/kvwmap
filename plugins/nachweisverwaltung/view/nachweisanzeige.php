@@ -5,8 +5,7 @@ var nachweise = new Array();
 
 <?
 	for($i = 0; $i < count_or_0($this->nachweis->Dokumente); $i++){
-		$json = str_replace('\\"', '\\\"', str_replace('\\\"', '"', str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', str_replace('\\t', '\\\t', json_encode($this->nachweis->Dokumente[$i])))))));
-		echo "nachweise.push(JSON.parse('".$json."'));\n";
+		echo "nachweise.push(" . json_encode($this->nachweis->Dokumente[$i], JSON_UNESCAPED_UNICODE) . ");\n";
 	}
 ?>
 
