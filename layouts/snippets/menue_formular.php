@@ -1,5 +1,6 @@
 <?
 	include(LAYOUTPATH . 'languages/menue_formular_' . rolle::$language . '.php');
+	include_once(CLASSPATH . 'FormObject.php');
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <div class="center-outerdiv">

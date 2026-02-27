@@ -351,7 +351,7 @@ class PgObject {
 					return $validation['attribute'] == $key;
 				}
 			);
-			$attributes[] = new PgAttribute($this->debug, $key, $this->columns[$key]['Type'], $value, $attribute_validations, $this->identifier);
+			$attributes[] = new PgAttribute($this->debug, $key, $this->columns[$key], $value, $attribute_validations, $this->identifier);
 		}
 		return $attributes;
 	}
