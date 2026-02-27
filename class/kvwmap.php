@@ -408,9 +408,15 @@ class GUI {
 	*/
 	function exec_trigger_function($fired, $event, $layer, $oid = '', $old_dataset = array()) {
 		global $GUI;
+		global $kvwmap_plugins;
 		$custom_kvwmap_php = WWWROOT.APPLVERSION.CUSTOM_PATH.'class/kvwmap.php';
-		if(file_exists($custom_kvwmap_php)){
+		if (file_exists($custom_kvwmap_php)){
 			include_once($custom_kvwmap_php);
+		}
+		for ($i = 0; $i < count($kvwmap_plugins); $i++) {
+			if (file_exists(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php')) {
+				include(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php');
+			}
 		}
 		$trigger_result = array('executed' => false);
 		if (array_key_exists($layer['trigger_function'], $this->trigger_functions)) {

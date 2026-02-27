@@ -990,8 +990,7 @@
 			$nachweis_data = $GUI->nachweis->Dokumente[$i];
 			unset($nachweis_data['the_geom']);	// wird nicht benötigt und kann zu Escape-Fehlern im JSON führen
 			$nachweis_data['bearbeitungshinweis'] = 'mailto:' . $nachweis_data['email'] . '?subject=Bearbeitungshinweis zum Nachweis ' . $nachweis_data['client_nachweis_id'];
-			$json = str_replace('\\"', '\\\"', str_replace('\\\"', '"', str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', str_replace('\\t', '\\\t', json_encode($nachweis_data)))))));
-			$html.= "			nachweise.push(JSON.parse('".$json."'));\n";
+			$html .= "nachweise.push(" . json_encode($nachweis_data, JSON_UNESCAPED_UNICODE) . ");\n";
 		}	
 		
 		$html.= "
