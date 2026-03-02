@@ -43,7 +43,7 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 }
 
 function mapserverExp2SQL($exp, $classitem) {
-	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
+	$exp = preg_replace("/'\\[([^\\]]+)\\]'/", "$1", $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
 	$exp = str_replace(' ne ', ' != ', $exp);
 	$exp = str_replace(' ge ', ' >= ', $exp);
@@ -58,34 +58,6 @@ function mapserverExp2SQL($exp, $classitem) {
 		$exp = str_replace($array, $array . ')', $exp);
 	}
 
-	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
-		if (strpos($exp, '/') === 0) { # regex
-			$operator = '~';
-			$exp = str_replace('\/', 'escaped_slash', $exp);
-			$exp = str_replace('/', '', $exp);
-			$exp = str_replace('escaped_slash', '/', $exp);
-		}
-		else {
-			$operator = '=';
-		}
-		if (substr($exp, 0, 1) != "'") {
-			$quote = "'";
-		}
-		$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
-	}
-	return $exp;
-}
-
-function mapserverExp2SQLWhere($exp, $classitem) {
-	$exp = str_replace(' eq ', ' = ', $exp);
-	$exp = str_replace(' ne ', ' != ', $exp);
-	$exp = str_replace(' ge ', ' >= ', $exp);
-	$exp = str_replace(' le ', ' <= ', $exp);
-	$exp = str_replace(' gt ', ' > ', $exp);
-	$exp = str_replace(' lt ', ' < ', $exp);
-	$exp = str_replace(" = ''", ' IS NULL', $exp);
-	$exp = str_replace('\b', '\y', $exp);
-	$exp = preg_replace("/'\\[([^\\]]+)\\]'/", "$1", $exp);
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
