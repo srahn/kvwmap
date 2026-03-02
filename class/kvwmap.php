@@ -18361,7 +18361,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$anzahl = count($classes);
 			for ($i = 0; $i < $anzahl; $i++) {
 				if ($classes[$i]['expression'] != '' AND strpos($classes[$i]['expression'], 'Cluster_FeatureCount') === false) {
-					$expressions[$classes[$i]['classification']][] = mapserverExp2SQL($classes[$i]['expression'], $this->layerdaten['classitem']);
+					// $expressions[$classes[$i]['classification']][] = mapserverExp2SQL($classes[$i]['expression'], $this->layerdaten['classitem']);
+					$expressions[$classes[$i]['classification']][] = mapserverExp2SQLWhere($classes[$i]['expression'], $this->layerdaten['classitem']);
 				}
 			}
 			if (empty($expressions)) {
