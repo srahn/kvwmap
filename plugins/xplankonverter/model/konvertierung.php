@@ -1178,7 +1178,7 @@ class Konvertierung extends PgObject {
 		if (!$this->plan) {
 			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get($this->identifier), Konvertierung::$write_debug);
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
-			$plan = $plan->find_where('konvertierung_id = ' . $this->get($this->identifier));
+			$plan = $plan->find_where('konvertierung_id = ' . $this->get($this->identifier), NULL, '*, to_json(externereferenz) AS externereferenz_json');
 			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
 			if (count($plan) > 0) {
 				$this->plan = $plan[0];
