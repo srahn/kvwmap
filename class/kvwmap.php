@@ -6078,17 +6078,18 @@ echo '			</table>
 						$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
 						if (
 							$layer->get('Datentyp') == 0 AND
-							$layer->has_fk_constraint('within') AND
-							$parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])
+							$layer->has_fk_constraint('within')
 						) {
-							$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
-						}
-						else {
-							$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
-							$kvps = array(
-								'success' => false,
-								'msg' => $msg
-							);
+							if ($parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])) {
+								$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
+							}
+							else {
+								$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+								$kvps = array(
+									'success' => false,
+									'msg' => $msg
+								);
+							}
 						}
 					}
 					break;
@@ -14676,20 +14677,34 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $ret = $this->user->checkUserDaten($this->formvars);
     if ($ret[0]) {
       # Fehler bei der Formulareingabe
-      $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
+			$msg = 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1];
+			$this->add_message('error', $msg);
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
     }
     else {
       $ret = $this->user->NeuAnlegen($this->formvars);
       if ($ret[0]) {
         # Fehler beim Eintragen der Benutzerdaten
-        $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
+				$msg = 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1];
+        $this->add_message('error', $msg);
+				return array(
+					'success' => false,
+					'msg' => $msg
+				);
       }
       else {
         $this->formvars['selected_user_id'] = $ret[1];
         $stellen = array_filter(explode(', ', $this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->pgdatabase);
-					rolle::create($this->pgdatabase, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
+					$result = rolle::create($this->pgdatabase, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
+					if ($result['success'] == false) {
+						$this->add_message('error', $result['msg']);
+						return $result;
+					}
 					// $this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -14698,12 +14713,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$stelle->updateLayerParams();
 					$this->update_layer_parameter_in_rollen($stelle->id);
 				}
-        if ($ret[0]) {
-          $this->Meldung = $ret[1];
-        }
-        else {
-          $this->Meldung = 'Daten des Benutzers erfolgreich eingetragen!';
-        }
+				$this->Meldung = 'Daten des Benutzers erfolgreich eingetragen!';
+				return array(
+					'success' => true,
+					'msg' => $this->Meldung
+				);
       }
     }
   }
@@ -18347,7 +18361,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$anzahl = count($classes);
 			for ($i = 0; $i < $anzahl; $i++) {
 				if ($classes[$i]['expression'] != '' AND strpos($classes[$i]['expression'], 'Cluster_FeatureCount') === false) {
-					$expressions[$classes[$i]['classification']][] = mapserverExp2SQL($classes[$i]['expression'], $this->layerdaten['classitem']);
+					// $expressions[$classes[$i]['classification']][] = mapserverExp2SQL($classes[$i]['expression'], $this->layerdaten['classitem']);
+					$expressions[$classes[$i]['classification']][] = mapserverExp2SQLWhere($classes[$i]['expression'], $this->layerdaten['classitem']);
 				}
 			}
 			if (empty($expressions)) {
