@@ -388,7 +388,7 @@ class XP_Plan extends PgObject {
 					str_replace(
 						$zusatz,
 						'',
-						$this->get(kommentar)
+						$this->get('kommentar')
 					)
 				)
 			);

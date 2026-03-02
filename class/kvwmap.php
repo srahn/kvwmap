@@ -6078,17 +6078,18 @@ echo '			</table>
 						$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
 						if (
 							$layer->get('Datentyp') == 0 AND
-							$layer->has_fk_constraint('within') AND
-							$parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])
+							$layer->has_fk_constraint('within')
 						) {
-							$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
-						}
-						else {
-							$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
-							$kvps = array(
-								'success' => false,
-								'msg' => $msg
-							);
+							if ($parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])) {
+								$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
+							}
+							else {
+								$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+								$kvps = array(
+									'success' => false,
+									'msg' => $msg
+								);
+							}
 						}
 					}
 					break;
