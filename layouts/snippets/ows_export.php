@@ -2,7 +2,7 @@
 	include(LAYOUTPATH . 'languages/ows_export_' . rolle::$language . '.php');
 	include_once(CLASSPATH . 'FormObject.php');
 ?>
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
+<table id="ows_export" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
 	<tr align="center">
 		<td colspan="2" width="100%"><h2><?php echo $strTitle; ?></h2></td>
 	</tr>
@@ -127,7 +127,7 @@
 	</tr>
 </table>
 <b><?php echo $strExportList; ?>:</b>
-<ul><?
+<ul id="ows_export_ul"><?
 	echo implode('', array_map(
 		function($mapfile) {
 			return '<li>' . $mapfile . '

@@ -522,6 +522,13 @@ SCRIPTDEFINITIONS;
 		}
 	}
 
+	function update_fk() {
+		console.log('Man könnte hier rausbekommen ob es einen Fremdschlüssel zu einem Parent-Layer gibt, ob die id leer ist und wenn ja ob man die über die Geometrie holen kann.');
+		console.log('update_fk not implemented yet');
+		console.log('ef: %o', enclosingForm);
+		console.log('layer_id: " . $this->formvars['selected_layer_id'] . "');
+	}
+
 	function sendBWlocation(loc_x,loc_y) {
       enclosingForm.loc_x.value    = loc_x;
       enclosingForm.loc_y.value    = loc_y;
@@ -987,9 +994,9 @@ SCRIPTDEFINITIONS;
 			case 'edit_other_object':
 				startPoint(client_x, client_y);
 			break;
-
 			case 'draw_point':
-	 			choose(world_x, world_y);
+				update_fk();
+				choose(world_x, world_y);
 	 			redrawpoint();
 			break;
 			case 'draw_multipoint':

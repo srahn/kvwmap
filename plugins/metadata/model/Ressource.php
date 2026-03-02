@@ -258,7 +258,7 @@ class Ressource extends PgObject {
 	 *  9 - Transformation fertig
 	 */
 	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $only_missing = false, $force = false) {
-		$gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ' ohne Ressource id'), true);
+		$gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ' ohne Ressource id') . ($only_missing ? ' only missing' : ''), true);
 		$msg = '';
 		$ressource = new Ressource($gui);
 		if ($ressource_id != null) {

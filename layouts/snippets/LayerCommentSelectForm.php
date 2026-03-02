@@ -5,7 +5,7 @@
 <br>
 <h2><?php echo $strTitleLayers; ?></h2>
 <br>
-<table cellpadding="0" cellspacing="0">
+<table id="LayerCommentSelectForm" cellpadding="0" cellspacing="0">
 <?	$anzLayerComments = count_or_0($this->layerComments ?: []);
   for ($i=0;$i<$anzLayerComments;$i++) { ?>
 		<tr>

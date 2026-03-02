@@ -1070,12 +1070,18 @@ select[name="geom_from_layer"] {
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	text-align: center;
 	display: flex; 
-	flex-wrap: wrap;
-	justify-content: flex-start;
+	flex-direction: column;
+  min-height: 0;
 }
 
 #menueTable a {
 	color: firebrick;
+}
+
+#menueButtons {
+	display: flex;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
 }
 
 #menueScrollTable{
@@ -1215,7 +1221,6 @@ a.menuered:hover {
 }
 
 .button-menue{
-	flex: 0 0 auto;
 	margin: 0 0 2 0;
 }
 

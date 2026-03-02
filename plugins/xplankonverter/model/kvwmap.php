@@ -728,6 +728,7 @@
 		$md->set('md_date', date('Y-m-d', $current_time));
 		$md->set('id_cite_title', $admin_stelle->ows_title);
 		$md->set('date_title', 'Datum');
+		$md->set('namespace', $admin_stelle->ows_namespace);
 		$md->set('date_de', date('d.m.Y', $current_time));
 		$md->set('id_cite_date', date('Y-m-d', $current_time));
 		if ($GUI->konvertierung->get('planart') == 'FP-Plan') {

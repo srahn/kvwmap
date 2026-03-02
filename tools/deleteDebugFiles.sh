@@ -10,6 +10,6 @@ echo "LOGPATH: $LOGPATH"
 DEBUGFILE=$(grep "DEBUGFILE'," $CONFIG_FILE | cut -d "'" -f 4)
 echo "DEBUGFILE: $DEBUGFILE"
 
-if [ -d $LOGPATH ] && [[ "$LOGPATH" == "/var/www/logs/"* ]]; then
+if [ -d $LOGPATH ] && [[ "$LOGPATH" =~ /var/www/logs/ ]]; then
   find ${LOGPATH} -mindepth 1 -name "*.${DEBUGFILE##*.}" -type f -delete
 fi

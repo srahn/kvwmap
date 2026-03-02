@@ -218,6 +218,7 @@ if ($gast_export === false) {
 							$nutzer = Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
 							$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = 0;
 							$GUI->user->login_locked_until 	= '';
+							$GUI->formvars['go'] = '';
 							if ($GUI->user->stelle_id == '') {
 								# Nutzer hat keine stellen_id
 								$GUI->user->Stellen = $GUI->user->getStellen(0);
@@ -504,6 +505,18 @@ if ($gast_export === false) {
 			else {
 				if (file_exists(AGREEMENT_MESSAGE)) {
 					$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
+					if (strpos(strtolower($GUI->formvars['format']), 'json') !== false) {
+						$response = array(
+							'error' => 'agreement missing',
+							'error_msg' => 'Der Datenschutzerklärung wurde noch nicht zugestimmt.',
+							'agreement_url' => URL,
+							'agree_param' => 'agreement=1',
+							'agreement_html' => nl2br(file_get_contents(AGREEMENT_MESSAGE))
+						);
+						header('Content-Type: application/json; charset=utf-8');
+						echo json_encode($response);
+						exit;
+					}
 					$show_login_form = true;
 					$GUI->formvars['go'] = 'login_agreement';
 				}
@@ -604,7 +617,9 @@ else {
 			$GUI->setHistTimestamp();
 		}
 		# Zurücksetzen der veränderten Klassen
-		$GUI->user->rolle->resetClasses();
+		if (defined('RESET_CLASSES') AND RESET_CLASSES) {
+			$GUI->user->rolle->resetClasses();
+		}
 		if (defined('LOGIN_ROUTINE') AND LOGIN_ROUTINE != '' AND file_exists(LOGIN_ROUTINE) AND is_file(LOGIN_ROUTINE)) {
 			include(LOGIN_ROUTINE);
 		}

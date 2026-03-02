@@ -31,7 +31,7 @@
 	
 </script>
 
-<table border="0" style="margin: 5px" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table id="wms_import" border="0" style="margin: 5px" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr>
     <td colspan="2" align="center"><h2><?php echo $this->titel; ?></h2></td> 
   </tr>

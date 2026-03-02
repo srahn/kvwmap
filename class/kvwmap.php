@@ -410,9 +410,15 @@ class GUI {
 	*/
 	function exec_trigger_function($fired, $event, $layer, $oid = '', $old_dataset = array()) {
 		global $GUI;
+		global $kvwmap_plugins;
 		$custom_kvwmap_php = WWWROOT.APPLVERSION.CUSTOM_PATH.'class/kvwmap.php';
-		if(file_exists($custom_kvwmap_php)){
+		if (file_exists($custom_kvwmap_php)){
 			include_once($custom_kvwmap_php);
+		}
+		for ($i = 0; $i < count($kvwmap_plugins); $i++) {
+			if (file_exists(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php')) {
+				include(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php');
+			}
 		}
 		$trigger_result = array('executed' => false);
 		if (array_key_exists($layer['trigger_function'], $this->trigger_functions)) {
@@ -5859,6 +5865,7 @@ echo '			</table>
 			}
 
 			$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			$this->layer_epsg_code = $layerset[0]['epsg_code'];
 			$ret = $pointeditor->eintragenPunkt(
 				$this->formvars['loc_x'],
 				$this->formvars['loc_y'],
@@ -6046,6 +6053,7 @@ echo '			</table>
 	 * @return array key value pairs as strings for update statements
 	 */
 	function get_auto_attribute_kvps() {
+		include_once(CLASSPATH . 'Layer.php');
 		$kvps = array();
 		for ($i = 0; $i < count($this->attributes['type']); $i++) {
 			if ($this->attributes['name'][$i] != 'oid') {
@@ -6087,12 +6095,29 @@ echo '			</table>
 						$this->attributes['form_element_type'][$i] == 'Fläche'
 					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['area'] ?: 'NULL');
 					break;
+					// case ($this->attributes['form_element_type'][$i] == 'SubFormFK') : {
+					// 	$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+					// 	if (
+					// 		$layer->get('Datentyp') == 0 AND
+					// 		$layer->has_fk_constraint('within') AND
+					// 		$parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])
+					// 	) {
+					// 		$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
+					// 	}
+					// 	else {
+					// 		$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+					// 		$kvps = array(
+					// 			'success' => false,
+					// 			'msg' => $msg
+					// 		);
+					// 	}
+					// }
+					// break;
 				}
 			}
 		}
 		return $kvps;
 	}
-
 	
 	function create_auto_classes_for_rollenlayer(){
 		$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -9610,14 +9635,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	function Layergruppe_Editor() {
+	function Layergruppe_Editor($layergruppe = null) {
 		include_once(CLASSPATH . 'LayerGroup.php');
-		$this->layergruppe = new LayerGroup($this);
-		if ($this->formvars['selected_group_id'] != '') {
-			$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
-		}
-		else {
-			$this->layergruppe->setKeysFromTable();
+		if ($layergruppe === null) {
+			if ($this->formvars['selected_group_id'] != '') {
+				$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
+			}
+			else {
+				$this->layergruppe = new LayerGroup($this);
+				$this->layergruppe->setKeysFromTable();
+			}
 		}
 		$this->main = 'layergruppe_formular.php';
 		$this->output();
@@ -9656,18 +9683,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 		$this->layergruppe->setData($this->formvars);
-		$results = $this->layergruppe->validate();
-		if (empty($results)) {
+		$validation_results = $this->layergruppe->validate();
+		if (empty($validation_results)) {
 			$results = $this->layergruppe->update();
+			if ($results['success']) {
+				rolle::setGroupsForAll($this->pgdatabase);
+				$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
+			}
+			else {
+				$this->add_message('error', $results['msg']);
+			}
 		}
-		if ($results['success']) {
-			rolle::setGroupsForAll($this->pgdatabase);
-			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
-		}
-		else {
-			$this->add_message('error', $results['msg']);
-		}
-		$this->Layergruppe_Editor();
+		$this->Layergruppe_Editor($this->layergruppe);
 	}
 
 	function Layergruppe_Loeschen(){
@@ -11045,6 +11072,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	function neuer_Layer_Datensatz_speichern() {
+		include_once(CLASSPATH . 'PgObject.php');
+		include_once(CLASSPATH . 'Layer.php');
+
 		foreach ($this->formvars as $key => $value) {
 			if (is_string($value)) {
 				$this->formvars[$key] = replace_tags($value, 'script|embed');
@@ -11264,32 +11294,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							} break;
 
-							// Funktioniert nicht
-							// case ($table['type'][$i] == 'SubFormFK') : {
-							// 	$attribute_options = $attribute->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
-							// 	include_once(CLASSPATH . 'Layer.php');
-							// 	$fk_field_is_empty = $this->formvars[$table['formfield'][$i]] == '';
-							// 	$parent_layer = Layer::find_by_id($this, $attribute_options['parent_layer_id']);
-							// 	$parent_layer_has_geom = $parent_layer->get('geom_column') != '';
-							// 	$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
-							// 	if ($result['success']) {
-							// 		$new_feature_has_geometry = true;
-							// 		$new_feature_geometry = $result['wkb_geometry'];
-							// 		include_once(CLASSPATH . 'PgObject.php');
-							// 		$pg_object = new PgObject($this, $parent_layer->get('schema'), $parent_layer->get('maintable'));
-							// 		$pg_object->debug->user_funktion = 'admin'; $pg_object->show = true;
-							// 		$intersected_objects = $pg_object->find_where("ST_Intersects(" . $parent_layer->get('geom_column') . ", '" . $new_feature_geometry . "')");
-							// 		$intersecting_parent_gefunden = false;
-							// 		if (count($intersected_objects) > 0) {
-							// 			$parent_feature = $intersected_objects[0];
-							// 			$intersecting_parent_gefunden = true;
-							// 		}
-							// 		if ($fk_field_is_empty AND $intersecting_parent_gefunden) {
-							// 			$insert[$table['attributname'][$i]] = "'" . $parent_feature->get($parent_layer->get('oid')) . "'";
-							// 		}
-							// 	}
-							// } break;
-
 							case ($table['type'][$i] == 'Geometrie') : {
 								if ($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != '' OR $this->formvars['newpathwkt'] != '') {
 									$result = $attribute->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
@@ -11363,6 +11367,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						} # end of switch
 					}
 				}
+
+				$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+				if (
+					$layer->get('Datentyp') == 0 AND
+					$layer->has_fk_constraint('within')
+				) {
+					if ($parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])) {
+						$insert[$layer->fk_options['fk_name']] = "'" . $parent_feature->get_id() . "'";
+					}
+					else {
+						$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+						$insert = array();
+						$this->success = false;
+						$this->add_message('error', 'Eintrag fehlgeschlagen. ' . $msg);
+					}
+				}
+
 				if (!empty($insert)) {
 					if (!$layerset[0]['maintable_is_view']) {
 						$sql = "LOCK TABLE " . pg_quote($table['tablename']) . " IN SHARE ROW EXCLUSIVE MODE;";
@@ -11385,7 +11406,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 					$this->debug->show('<p>SQL zum Anlegen des Datensatzes: ' . $sql);
-					// echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
+					// if ($this->user->id = 1) {
+					// 	echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
+					// }
 					$ret = $layerdb->execSQL($sql, 4, 1, true);
 
 					if ($ret['success']) {
@@ -11457,6 +11480,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 			}
 		}
+
 		if ($this->formvars['embedded'] != '') {
 			# wenn es ein neuer Datensatz aus einem embedded-Formular ist,
 			# muss das entsprechende Attribut des Hauptformulars aktualisiert werden
@@ -13886,6 +13910,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['reset_password_text'] = $this->stellendaten['reset_password_text'];
 			$this->formvars['invitation_text'] = $this->stellendaten['invitation_text'];
 			$this->formvars['comment'] = $this->stellendaten['comment'];
+			$this->formvars['start_page_params'] = $this->stellendaten['start_page_params'];
 			$where = 'id != '.$this->formvars['selected_stelle_id'];
 
 			$children_ids = array_map(function($child) {return $child['id'];}, $this->formvars['selchildren']);
@@ -14259,6 +14284,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			$this->menue->setKeysFromTable();
 		}
+		$this->menue->get_stellen();
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
 		$this->output();
@@ -14278,6 +14304,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		else {
 			$this->add_message('array', array_values($results));
+			$this->menue->get_stellen();
 			$this->main = 'menue_formular.php';
 			$this->output();
 		}
@@ -14292,11 +14319,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$results = $this->menue->update();
 		}
 		if ($results['success']) {
+			$this->menue->update_stellen($this->formvars['selstellen']);
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
+			$this->Fehlermeldung = 'Fehler beim Aktualisieren des Menüs!' . print_r(array_values($results), true);
 			$this->add_message('array', array_values($results));
 		}
+		$this->menue->get_stellen();
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
 		$this->output();
@@ -14753,20 +14783,34 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $ret = $this->user->checkUserDaten($this->formvars);
     if ($ret[0]) {
       # Fehler bei der Formulareingabe
-      $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
+			$msg = 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1];
+			$this->add_message('error', $msg);
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
     }
     else {
       $ret = $this->user->NeuAnlegen($this->formvars);
       if ($ret[0]) {
         # Fehler beim Eintragen der Benutzerdaten
-        $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
+				$msg = 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1];
+        $this->add_message('error', $msg);
+				return array(
+					'success' => false,
+					'msg' => $msg
+				);
       }
       else {
         $this->formvars['selected_user_id'] = $ret[1];
         $stellen = array_filter(explode(', ', $this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->pgdatabase);
-					rolle::create($this->pgdatabase, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
+					$result = rolle::create($this->pgdatabase, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
+					if ($result['success'] == false) {
+						$this->add_message('error', $result['msg']);
+						return $result;
+					}
 					// $this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -14775,12 +14819,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$stelle->updateLayerParams();
 					$this->update_layer_parameter_in_rollen($stelle->id);
 				}
-        if ($ret[0]) {
-          $this->Meldung = $ret[1];
-        }
-        else {
-          $this->Meldung = 'Daten des Benutzers erfolgreich eingetragen!';
-        }
+				$this->Meldung = 'Daten des Benutzers erfolgreich eingetragen!';
+				return array(
+					'success' => true,
+					'msg' => $this->Meldung
+				);
       }
     }
   }
@@ -19879,6 +19922,7 @@ class db_mapObj{
 								$attributes['subform_layer_id'][$i] = $json['ref_layer_id'];
 								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
 								$attributes['no_new_window'][$i] = ($json['window_type'] === 'no_new_window');
+								$attributes['options_json'][$i] = $json;
 							}
 							else {
 								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options

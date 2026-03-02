@@ -53,7 +53,7 @@ window.addEventListener("unload", function () {
 * @param target array ['divname', ...]
 * @param action array ['sethtml'. ...]
 */
-function ahah(url, data, target, action, progress, loading_img = true) {
+function ahah(url, data, target, action, progress, loading_img = true, successCallback = null) {
 	if (csrf_token && csrf_token !== '') {
 		if (typeof data == 'string') {
 			data = data + '&csrf_token=' + csrf_token;
@@ -74,7 +74,7 @@ function ahah(url, data, target, action, progress, loading_img = true) {
 	var req = new XMLHttpRequest();
 	if (req != undefined) {
 		req.onreadystatechange = function() {
-			ahahDone(url, target, req, action);
+			ahahDone(url, target, req, action, successCallback);
 		};
 		if (typeof progress !== 'undefined') {
 			req.upload.addEventListener("progress", progress);
@@ -88,7 +88,7 @@ function ahah(url, data, target, action, progress, loading_img = true) {
 	return req;
 }
 
-function ahahDone(url, targets, req, actions) {
+function ahahDone(url, targets, req, actions, successCallback) {
 	if (req.readyState == 4) { // only if req is "loaded"
 		if (req.getResponseHeader('error') == 'true'){
 			message(req.responseText);
@@ -203,6 +203,9 @@ function ahahDone(url, targets, req, actions) {
 						}
 					}
 				}
+			}
+			if (successCallback) {
+				successCallback();
 			}
 		} 
 		else{
@@ -1372,11 +1375,10 @@ function closeGroupOptions(group_id) {
 	document.getElementById('group_options_' + group_id).innerHTML = ' ';
 }
 
-function saveLayerOptions(layer_id){	
+function saveLayerOptions(){	
 	var formdata = new FormData(document.GUI);
 	formdata.set('go', 'saveLayerOptions');
-	ahah("index.php",	formdata, [], []);
-	neuLaden();
+	ahah("index.php",	formdata, [], [], null, true, neuLaden);
 }
 
 function setLayerParam(name) {
