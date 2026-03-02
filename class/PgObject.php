@@ -351,7 +351,7 @@ class PgObject {
 					return $validation['attribute'] == $key;
 				}
 			);
-			$attributes[] = new PgAttribute($this->debug, $key, $this->columns[$key]['Type'], $value, $attribute_validations, $this->identifier);
+			$attributes[] = new PgAttribute($this->debug, $key, $this->columns[$key], $value, $attribute_validations, $this->identifier);
 		}
 		return $attributes;
 	}
@@ -1159,7 +1159,7 @@ VALUES (" . implode(
 
 		if (!empty($this->has_many) AND is_array($this->has_many)) {
 			foreach ($this->has_many AS $key => $relation) {
-				$many_attribut = new MyAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
+				$many_attribut = new PgAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
 				array_push($attributes_html, $many_attribut->as_form_html());
 			}
 		}

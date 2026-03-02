@@ -240,7 +240,7 @@ function set_all(column){
 let visibilityRules = [];
 <?	for ($i = 0; $i < count_or_0($this->attributes['type']); $i++) { 
 			if ($this->attributes['visibility_rules'][$i]) { ?>
-				visibilityRules[<? echo $i; ?>] = JSON.parse('<? echo $this->attributes['visibility_rules'][$i]; ?>');
+				visibilityRules[<? echo $i; ?>] = <? echo $this->attributes['visibility_rules'][$i]; ?>;
 <?		}
 		} ?>
 
@@ -252,7 +252,7 @@ function syncHiddenField(i) {
 }
 
 function addEmptyRule(i){
-	visibilityRules[i] = JSON.parse('{"logic":"AND","rules":[{"attribute":"","operator":"=","value":""}]}');
+	visibilityRules[i] = {"logic":"AND","rules":[{"attribute":"","operator":"=","value":""}]};
 	render(i);
 }
 

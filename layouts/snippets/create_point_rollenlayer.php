@@ -30,7 +30,7 @@ function show(){
 //-->
 </script>
 
-<table border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
+<table id="create_point_rollenlayer" border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td colspan="3"><h2><?php echo $strTitle; ?></h2></td>
   </tr>

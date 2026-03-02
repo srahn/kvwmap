@@ -410,9 +410,15 @@ class GUI {
 	*/
 	function exec_trigger_function($fired, $event, $layer, $oid = '', $old_dataset = array()) {
 		global $GUI;
+		global $kvwmap_plugins;
 		$custom_kvwmap_php = WWWROOT.APPLVERSION.CUSTOM_PATH.'class/kvwmap.php';
-		if(file_exists($custom_kvwmap_php)){
+		if (file_exists($custom_kvwmap_php)){
 			include_once($custom_kvwmap_php);
+		}
+		for ($i = 0; $i < count($kvwmap_plugins); $i++) {
+			if (file_exists(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php')) {
+				include(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php');
+			}
 		}
 		$trigger_result = array('executed' => false);
 		if (array_key_exists($layer['trigger_function'], $this->trigger_functions)) {
@@ -6089,24 +6095,24 @@ echo '			</table>
 						$this->attributes['form_element_type'][$i] == 'Fläche'
 					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['area'] ?: 'NULL');
 					break;
-					case ($this->attributes['form_element_type'][$i] == 'SubFormFK') : {
-						$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
-						if (
-							$layer->get('Datentyp') == 0 AND
-							$layer->has_fk_constraint('within') AND
-							$parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])
-						) {
-							$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
-						}
-						else {
-							$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
-							$kvps = array(
-								'success' => false,
-								'msg' => $msg
-							);
-						}
-					}
-					break;
+					// case ($this->attributes['form_element_type'][$i] == 'SubFormFK') : {
+					// 	$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+					// 	if (
+					// 		$layer->get('Datentyp') == 0 AND
+					// 		$layer->has_fk_constraint('within') AND
+					// 		$parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])
+					// 	) {
+					// 		$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
+					// 	}
+					// 	else {
+					// 		$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+					// 		$kvps = array(
+					// 			'success' => false,
+					// 			'msg' => $msg
+					// 		);
+					// 	}
+					// }
+					// break;
 				}
 			}
 		}

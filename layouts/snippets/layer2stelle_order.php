@@ -41,7 +41,7 @@
   # 2007-12-30 pk
   include(LAYOUTPATH.'languages/layer2stelle_order_'.rolle::$language.'.php');
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table id="layer2stelle_order" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><h2><?php echo $strTitle.' '.$this->selected_stelle->Bezeichnung; ?></h2></td>
   </tr>
