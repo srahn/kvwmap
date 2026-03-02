@@ -14783,20 +14783,34 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $ret = $this->user->checkUserDaten($this->formvars);
     if ($ret[0]) {
       # Fehler bei der Formulareingabe
-      $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
+			$msg = 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1];
+			$this->add_message('error', $msg);
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
     }
     else {
       $ret = $this->user->NeuAnlegen($this->formvars);
       if ($ret[0]) {
         # Fehler beim Eintragen der Benutzerdaten
-        $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
+				$msg = 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1];
+        $this->add_message('error', $msg);
+				return array(
+					'success' => false,
+					'msg' => $msg
+				);
       }
       else {
         $this->formvars['selected_user_id'] = $ret[1];
         $stellen = array_filter(explode(', ', $this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->pgdatabase);
-					rolle::create($this->pgdatabase, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
+					$result = rolle::create($this->pgdatabase, $stelle->id, $this->formvars['selected_user_id'], $stelle->default_user_id, $stelle->getLayers(NULL)['ID']);
+					if ($result['success'] == false) {
+						$this->add_message('error', $result['msg']);
+						return $result;
+					}
 					// $this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					// $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -14805,12 +14819,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$stelle->updateLayerParams();
 					$this->update_layer_parameter_in_rollen($stelle->id);
 				}
-        if ($ret[0]) {
-          $this->Meldung = $ret[1];
-        }
-        else {
-          $this->Meldung = 'Daten des Benutzers erfolgreich eingetragen!';
-        }
+				$this->Meldung = 'Daten des Benutzers erfolgreich eingetragen!';
+				return array(
+					'success' => true,
+					'msg' => $this->Meldung
+				);
       }
     }
   }

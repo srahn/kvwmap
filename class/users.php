@@ -1378,15 +1378,25 @@ class user {
 		do {
 			$login_name = strtolower(substr($vorname, 0, 1)) . strtolower($nachname) . $postfix;
 			$ret = $this->loginname_exists($login_name);
-			if ($ret[1] == 1) {
+			if (!$ret['success']) {
+				return array(
+					'login_name' => $login_name,
+					'success' => false,
+					'message' => 'Fehler bei der Überprüfung ob der Login-Name ' . $login_name . ' bereits existiert: ' . $ret['message'],
+				);
+			}
+			if ($ret['login_name_exists']) {
 				$postfix = ($postfix == '' ? 2 : $postfix + 1);
 			}
 			if ($postfix > 10) {
-				$ret[1] = 0; // Abbruch
+				$ret['login_name_exists'] = false; // Abbruch
 				$login_name = strtolower(substr($vorname, 0, 1)) . strtolower($nachname) . rand(11, 9999);
 			}
-		} while ($ret[1] == 1);
-		return $login_name;
+		} while ($ret['login_name_exists']);
+		return array(
+			'login_name' => $login_name,
+			'success' => true
+		);
 	}
 
 	function loginname_exists($login, $id = NULL) {
@@ -1406,17 +1416,15 @@ class user {
 		}
 		$ret = $this->database->execSQL($sql,4, 0);
 		if (!$this->database->success) {
-			$ret[1].='<br>Die Abfrage konnte nicht ausgeführt werden.'.$ret[1];
+			return array(
+				'success' => false,
+				'message' => 'Fehler bei der Überprüfung ob der Login-Name ' . $login . ' bereits existiert: ' . $ret[1]
+			);
 		}
-		else {
-			if (pg_num_rows($ret[1]) > 0) {
-				$ret['user'] = pg_fetch_array($ret[1]);
-			}
-			else {
-				$ret[1] = 0;
-			}
-		}
-		return $ret;
+		return array(
+			'success' => true,
+			'login_name_exists' => pg_num_rows($ret[1]) > 0
+		);
 	}
 
 	/**
@@ -1443,8 +1451,13 @@ class user {
 		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
 		else {
 			$ret = $this->loginname_exists($userdaten['loginname'], $userdaten['id']);
-			if ($ret['user']) {
-				$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
+			if (!$ret['success']) {
+				$Meldung .= $ret['message'];
+			}
+			else {
+				if ($ret['login_name_exists']) {
+					$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
+				}
 			}
 		}
 		if ($userdaten['changepasswd'] == 1){
