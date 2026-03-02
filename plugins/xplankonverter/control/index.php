@@ -50,7 +50,14 @@
 // xplankonverter_zusammenzeichnung
 
 // neuer_Layer_Datensatz must be included for after-triggers in model/kvwmap (which itself includes other classes)
-if (strpos($go, '_') !== false AND (strpos($go, 'xplankonverter') !== false || strpos($go, 'neuer_Layer_Datensatz') !== false)) {
+if (
+	strpos($go, '_') !== false AND
+	(
+		strpos($go, 'xplankonverter') !== false ||
+		strpos($go, 'neuer_Layer_Datensatz') !== false ||
+		strpos($go, 'Layer_Datensaetze_Loeschen') !== false
+	)
+) {
 	include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 	include_once(CLASSPATH . 'PgObject.php');
 	include_once(CLASSPATH . 'MyObject.php');
