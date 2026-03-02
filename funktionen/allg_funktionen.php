@@ -70,6 +70,34 @@ function mapserverExp2SQL($exp, $classitem) {
 	return $exp;
 }
 
+function mapserverExp2SQLWhere($exp, $classitem) {
+	$exp = str_replace(' eq ', ' = ', $exp);
+	$exp = str_replace(' ne ', ' != ', $exp);
+	$exp = str_replace(' ge ', ' >= ', $exp);
+	$exp = str_replace(' le ', ' <= ', $exp);
+	$exp = str_replace(' gt ', ' > ', $exp);
+	$exp = str_replace(' lt ', ' < ', $exp);
+	$exp = str_replace(" = ''", ' IS NULL', $exp);
+	$exp = str_replace('\b', '\y', $exp);
+	$exp = preg_replace("/'\\[([^\\]]+)\\]'/", "$1", $exp);
+	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
+		if (strpos($exp, '/') === 0) { # regex
+			$operator = '~';
+			$exp = str_replace('\/', 'escaped_slash', $exp);
+			$exp = str_replace('/', '', $exp);
+			$exp = str_replace('escaped_slash', '/', $exp);
+		}
+		else {
+			$operator = '=';
+		}
+		if (substr($exp, 0, 1) != "'") {
+			$quote = "'";
+		}
+		$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
+	}
+	return $exp;
+}
+
 function add_csrf($url){
 	if (strpos($url, 'javascript:') === false AND strpos($url, 'go=') !== false) {
 		$url = (strpos($url, '#') === false ? $url . '&csrf_token=' . $_SESSION['csrf_token'] : str_replace('#', '&csrf_token=' . $_SESSION['csrf_token'] . '#', $url));
