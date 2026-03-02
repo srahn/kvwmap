@@ -187,7 +187,7 @@ else {
 }
  ?>
 
-<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table id="dokumentenabfrageformular" style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td colspan="3" style="height: 30px">
 			<? if ($this->formvars['lea_layer_id'] != '') { ?>
@@ -207,7 +207,7 @@ else {
 			<input type="checkbox" style="display:none" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>
     </td>
 		<td valign="top">
-			<table>
+			<table id="dokumentenabfrageformular_right">
 				<tr> 
 					<td colspan="2">Recherche nach folgenden Dokumenten:</td>
 				</tr>

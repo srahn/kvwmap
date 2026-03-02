@@ -22,7 +22,7 @@
 		}
 	}
 </script>
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table id="invitations" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
 	<tr align="center">
 		<td><h2><?php echo $strTitel; ?></h2></td>
 	</tr>

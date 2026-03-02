@@ -510,7 +510,7 @@
 								</tr>
 							</table>
 							<br>
-							<table border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table id="ddl_attributes" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td align="center" style="border-top:2px solid #C3C7C3" colspan=8><span class="fett">&nbsp;Attribute</span></td>
 								</tr><?
