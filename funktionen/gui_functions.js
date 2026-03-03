@@ -887,11 +887,13 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	var browserwidth = '';
 	var browserheight = '';
 	var legendtouched = '';
+	var zoom_layer_id = '';
 	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
 	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
 	if(document.GUI.browserwidth)browserwidth = document.GUI.browserwidth.value;
 	if(document.GUI.browserheight)browserheight = document.GUI.browserheight.value;
 	if(document.GUI.legendtouched)legendtouched = document.GUI.legendtouched.value;
+	if(document.GUI.zoom_layer_id)zoom_layer_id = document.GUI.zoom_layer_id.value;
 	
 	if(browser == 'ie'){
 		code2execute_after += 'moveback();';
@@ -899,7 +901,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
-	postdata = postdata+"&mime_type=map_ajax&legendtouched="+legendtouched+"&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
+	postdata = postdata+"&mime_type=map_ajax&legendtouched="+legendtouched+"&zoom_layer_id="+zoom_layer_id+"&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
 	postdata.split("&")
 		.forEach(function (item) {
