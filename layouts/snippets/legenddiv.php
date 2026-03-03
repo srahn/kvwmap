@@ -31,7 +31,7 @@
 		if (!$this->simple_legend AND defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != '') {
 			include(SNIPPETS.'schnellsprung.php');
 		}
-		if ($this->user->rolle->layer_selection) {
+		if ($this->user->rolle->layer_selection_mode == 1) {
 			include_once(CLASSPATH.'FormObject.php');
 			$ret = $this->user->rolle->getLayerComments(NULL, $this->user->id);
       $layer_selections = $ret[1];
