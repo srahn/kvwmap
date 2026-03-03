@@ -103,8 +103,12 @@
 	$strSharedFrom  =  "Geteilt von Nutzer";
 	$strSharedFromHelp  =  "Lösche die ID wenn der Layer in der Layerlegende nicht länger als geteilt markiert werden soll.";
 	$strSizeUnits = "Sizeunits";
+	$strErrorStatus = "Fehlerstatus";
+	$strErrorStatusHelp = "Dieses Feld kann mit einem Fehlerstatus befüllt werden. Der Layer ist dadurch deaktiviert und in der Legende mit einem Hinweissymbol versehen.&#xa;Das Tool 'wms_checker.php' befüllt diese Feld automatisch.";
 	$strStatus = "Status";
-	$strStatusHelp = "Dieses Feld kann mit einem Fehlerstatus befüllt werden. Der Layer ist dadurch deaktiviert und in der Legende mit einem Hinweissymbol versehen.&#xa;Das Tool 'wms_checker.php' befüllt diese Feld automatisch.";
+	$strStatusHelp = "Optionaler Status. Mögliche Werte: 
+  sensibel - der Layer bekommt ein Hinweis-Symbol im Themenbaum und im Header
+  im Aufbau - der Layer bekommt ein Hinweis-Symbol im Themenbaum";
 	$strStellenAsignment = "Stellen-Zuweisung";
 	$strStyleItem = "Styleitem";
 	$strStylesLabels = "Styles und Labels";

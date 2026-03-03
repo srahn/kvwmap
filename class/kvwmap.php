@@ -1540,8 +1540,8 @@ echo '			</table>
 			}
 			$legend .= ' >'.html_umlaute($layer['Name_or_alias']).'</span></a>';
 			$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"> </div>';
-			if($layer['status'] != ''){
-				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
+			if($layer['errorstatus'] != ''){
+				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['errorstatus'].'" src="'.GRAPHICSPATH.'warning.png">';
 			}
 			if($layer['queryable'] == 1){
 				$legend .=  '<input type="hidden" name="qLayer[' . $layer['layer_id'] . ']"';
@@ -1575,6 +1575,16 @@ echo '			</table>
 		}
 		$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
 		$legend .= '</a>';
+		if ($layer['status'] != '') {
+			switch ($layer['status']) {
+				case 'under_construction' : {
+					$legend .= '&nbsp;<img title="Thema befindet sich noch im Aufbau" src="'.GRAPHICSPATH.'warning.png">';
+				}break;
+				case 'sensible' : {
+					$legend .= '&nbsp;<img title="Achtung! Thema mit sensiblen Daten!" src="'.GRAPHICSPATH.'warning.png">';
+				}break;
+			}
+		}
 		# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
 		if ($layer['aktivstatus'] == 1 and $this->user->rolle->showlayeroptions) {
 			$legend .= '&nbsp';
@@ -3434,7 +3444,7 @@ echo '			</table>
   }
 
 	function check_layer_visibility(&$layer){
-		if(value_of($layer, 'status') != '' OR ($this->map_scaledenom < value_of($layer, 'minscale') OR (value_of($layer, 'maxscale') > 0 AND $this->map_scaledenom > value_of($layer, 'maxscale')))) {
+		if(value_of($layer, 'errorstatus') != '' OR ($this->map_scaledenom < value_of($layer, 'minscale') OR (value_of($layer, 'maxscale') > 0 AND $this->map_scaledenom > value_of($layer, 'maxscale')))) {
 			return false;
 		}
 		return true;
@@ -18783,7 +18793,7 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.errorstatus, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
@@ -21082,6 +21092,7 @@ DO $$
 			'querymap',
 			'processing',
 			'status',
+			'errorstatus',
 			'trigger_function'
 		);
 		if ($this->GUI->plugin_loaded('mobile')) {

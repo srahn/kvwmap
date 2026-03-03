@@ -8,7 +8,7 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 # Es sind 2 Einstellungen zu machen: - die Variable $config muss auf den Pfad zur config.php gesetzt werden.																													 #
 #                                    - das Array $bbox muss gültige BBox-Werte im EPSG-Code 4326 enthalten; damit werden die Test-Requests gemacht										 #
 # Wenn man das Skript aufruft, werden alle WMS-Layer aus der in der config.php definierten DB ausgelesen und mit einem getMap-Request getestet.									 #
-# Das Ergebnis des Tests wird in die Spalte status der Tabelle layer geschrieben. Diese Spalte wird von kvwmap ausgewertet und der Status in der Legende visualisiert. #
+# Das Ergebnis des Tests wird in die Spalte errorstatus der Tabelle layer geschrieben. Diese Spalte wird von kvwmap ausgewertet und der Status in der Legende visualisiert. #
 # Ruft man das Skript im Browser auf, erhält man außerdem eine Übersicht über die getesteten Layer.																																		 #
 # Um den Status regelmäßig zu überprüfen, muss man sich einen entsprechenden cron-job einrichten, der das Skript aufruft. 																																		 #
 #																																																																																			 #
@@ -191,7 +191,7 @@ while ($line = pg_fetch_assoc($ret[1])){
 			UPDATE
 				kvwmap.layer
 			SET
-				status = '" . addslashes($status[1]) . "'
+				errorstatus = '" . addslashes($status[1]) . "'
 			WHERE
 				layer_id = " . $line["layer_id"] . "
 		";
@@ -203,7 +203,7 @@ while ($line = pg_fetch_assoc($ret[1])){
 			UPDATE
 				kvwmap.layer
 			SET
-				status = ''
+				errorstatus = ''
 			WHERE
 				layer_id = " . $line["layer_id"] . "
 		";

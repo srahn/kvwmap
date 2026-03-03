@@ -1274,8 +1274,31 @@ from
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="status" type="text" value="<?php echo $this->formvars['status']; ?>" size="50" maxlength="255">&nbsp;
-							<span data-tooltip="<? echo $strStatusHelp; ?>"></span>
+							<?
+								echo FormObject::createSelectField(
+									'status',
+									[
+										['value' => 'sensible',						'output' => 'sensibel'],
+										['value' => 'under_construction',	'output' => 'im Aufbau']
+									],
+									$this->formvars['status'],
+									1,
+									'',
+									'',
+									'',
+									'',
+									'',
+									' '
+								);
+							?>
+							&nbsp;<span data-tooltip="<? echo $strStatusHelp; ?>"></span>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strErrorStatus; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="errorstatus" type="text" value="<?php echo $this->formvars['errorstatus']; ?>" size="50" maxlength="255">&nbsp;
+							<span data-tooltip="<? echo $strErrorStatusHelp; ?>"></span>
 						</td>
 					</tr>
 					<tr>
