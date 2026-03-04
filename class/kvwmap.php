@@ -1563,28 +1563,13 @@ echo '			</table>
 		if ($this->user->rolle->showlayeroptions) {
 			$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
 		}
-		if(value_of($layer, 'metalink') != ''){
-			$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
-		}
-		else {
-			$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
-		}
+		$legend .= ' class="visiblelayerlink ' . ($layer['metalink']? 'metalink' : '') . ' ' . ($layer['status']) . ' boldhover" href="javascript:void(0)">';
 		$legend .= '<span ';
 		if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 			$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 		}
 		$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
 		$legend .= '</a>';
-		if ($layer['status'] != '') {
-			switch ($layer['status']) {
-				case 'under_construction' : {
-					$legend .= '&nbsp;<img title="Thema befindet sich noch im Aufbau" src="'.GRAPHICSPATH.'warning.png">';
-				}break;
-				case 'sensible' : {
-					$legend .= '&nbsp;<img title="Achtung! Thema mit sensiblen Daten!" src="'.GRAPHICSPATH.'warning.png">';
-				}break;
-			}
-		}
 		# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
 		if ($layer['aktivstatus'] == 1 and $this->user->rolle->showlayeroptions) {
 			$legend .= '&nbsp';

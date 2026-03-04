@@ -1770,12 +1770,7 @@ class GUI {
 		if ($this->user->rolle->showlayeroptions) {
 			$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
 		}
-		if(value_of($layer, 'metalink') != ''){
-			$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
-		}
-		else {
-			$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
-		}
+		$legend .= ' class="visiblelayerlink ' . ($layer['metalink']? 'metalink' : '') . ' ' . ($layer['status']) . ' boldhover" href="javascript:void(0)">';
 		$legend .= '<span ';
 		if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 			$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';

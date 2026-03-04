@@ -834,6 +834,12 @@ a.invisiblelayerlink {
 	cursor: context-menu;
 }
 
+a.under_construction span::after{
+  content: url('graphics/under_construction.png');
+  padding: 3px;
+	vertical-align: -4px;
+}
+
 .sachdatenanzeige_paging{
 	margin-top: 10px;
 }
