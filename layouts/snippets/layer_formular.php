@@ -1,5 +1,6 @@
 <?php
 	global $supportedLanguages;
+	global $layer_status;
 	$language_file_name = 'layer_formular_' . rolle::$language . '.php';
 
 	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
@@ -1277,10 +1278,14 @@ from
 							<?
 								echo FormObject::createSelectField(
 									'status',
-									[
-										['value' => 'sensible',						'output' => 'sensibel'],
-										['value' => 'under_construction',	'output' => 'im Aufbau']
-									],
+									array_map(
+										fn($key, $value) => [
+												'value'  => $key,
+												'output' => $value
+										],
+										array_keys($layer_status),
+										$layer_status
+									),
 									$this->formvars['status'],
 									1,
 									'',

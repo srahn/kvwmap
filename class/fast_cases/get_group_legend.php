@@ -1764,6 +1764,7 @@ class GUI {
 	}
 
 	function create_layername_legend($layer){
+		global $layer_status;
 		$legend = '';
 		$legend .= '<a';
 		# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.
@@ -1772,9 +1773,12 @@ class GUI {
 		}
 		$legend .= ' class="visiblelayerlink ' . ($layer['metalink']? 'metalink' : '') . ' ' . ($layer['status']) . ' boldhover" href="javascript:void(0)">';
 		$legend .= '<span ';
-		if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
-			$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
+		$title = '';
+		$title .= $layer_status[$layer['status']];
+		if (value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
+			$title .= ' ' . round($layer['minscale']) . ' - ' . round($layer['maxscale']);
 		}
+		$legend .= ($title? ' title="' . $title . '"' : '');
 		$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
 		$legend .= '</a>';
 		# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
