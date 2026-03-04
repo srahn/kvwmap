@@ -1519,7 +1519,7 @@ class stelle {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
-			$insert = "(
+			$insert = "
 				stelle_id,
 				layer_id,
 				queryable,
@@ -1530,7 +1530,6 @@ class stelle {
 				symbolscale,
 				offsite,
 				transparency,
-				filter,
 				template,
 				header,
 				footer,
@@ -1538,12 +1537,12 @@ class stelle {
 				export_privileg,
 				postlabelcache,
 				requires,
-				start_aktiv
-			)";
+				start_aktiv";
 			if (!$assign_default_values) {
 				# Einstellungen von der ersten Elternstelle übernehmen (LIMTI 1)
 				$sql = "
-					INSERT INTO kvwmap.used_layer " . $insert . "
+					INSERT INTO kvwmap.used_layer 
+						(" . $insert . ")
 					SELECT
 						" . $this->id . ",
 						" . $layer_ids[$i] . ",
@@ -1555,7 +1554,6 @@ class stelle {
 						symbolscale, 
 						offsite, 
 						transparency, 
-						filter,
 						template, 
 						header,
 						footer,
@@ -1582,7 +1580,6 @@ class stelle {
 						symbolscale = EXCLUDED.symbolscale, 
 						offsite = EXCLUDED.offsite, 
 						transparency = EXCLUDED.transparency, 
-						filter = EXCLUDED.filter,
 						template = EXCLUDED.template, 
 						header = EXCLUDED.header,
 						footer = EXCLUDED.footer,
@@ -1602,7 +1599,10 @@ class stelle {
 			}
 			if ($assign_default_values OR pg_affected_rows($ret[1]) == 0) {
 				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
-				$sql = "INSERT INTO kvwmap.used_layer " . $insert . "
+				$sql = "
+					INSERT INTO kvwmap.used_layer 
+						(" . $insert . ",
+						filter)
 					SELECT
 						'" . $this->id . "',
 						'" . $layer_ids[$i] . "',
@@ -1614,7 +1614,6 @@ class stelle {
 						symbolscale, 
 						offsite, 
 						transparency, 
-						'" . $filter . "',
 						template, 
 						NULL,
 						NULL,
@@ -1622,7 +1621,8 @@ class stelle {
 						export_privileg,
 						postlabelcache,
 						requires,
-						'0'
+						'0',
+						'" . $filter . "'
 					FROM
 						kvwmap.layer as l
 					WHERE
