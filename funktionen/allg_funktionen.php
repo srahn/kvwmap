@@ -91,7 +91,7 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
  * @return String Die aus der MapServer-Expression erzeugte SQL-Expression
  */
 function mapserverExp2SQL($exp, $classitem) {
-	$exp = preg_replace("/'\\[([^\\]]+)\\]'/", "$1", $exp);
+	$exp = preg_replace("/'\\[([^\]]*[^0-9][^\]]*)\\]'|\\[([^\]]*[^0-9][^\]]*)\\]/", "$1$2", $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
 	$exp = str_replace(' ne ', ' != ', $exp);
 	$exp = str_replace(' ge ', ' >= ', $exp);
