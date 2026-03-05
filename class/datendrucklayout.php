@@ -722,11 +722,13 @@ class ddl {
 						}
 						$this->gui->formvars['layer_id'] = $selected_layer_id;
 						$this->gui->formvars['oid'] = $oid;
-						$this->gui->formvars['selektieren'] = 'false';
+						$this->gui->formvars['selektieren'] = 'false';		// true
 						if ($this->layout['elements'][$attributes['name'][$j]]['border'] > 0) {
 							$rollenlayer_id = $this->gui->createZoomRollenlayer($this->gui->mapDB, $layerdb, array($this->layerset), array($oid));
 							$rollenlayer = $this->gui->mapDB->read_RollenLayer($rollenlayer_id);
 							$this->gui->loadlayer($this->gui->map, $rollenlayer[0]);
+							#$this->gui->loadMap('DataBase');
+							#$this->gui->user->rolle->setOneLayer($selected_layer_id, 1);	# richtigen Layer wieder einschalten
 						}
 						$this->gui->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
 					}
