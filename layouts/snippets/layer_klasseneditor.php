@@ -103,7 +103,7 @@
 	</tr>
 	<tr>
 		<td align="center" style="padding-top: 10px;">
-		<table border="0" cellspacing="0" cellpadding="3" style="background-color: #f8f8f9; width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
+		<table id="layer_klasseneditor" border="0" cellspacing="0" cellpadding="3" style="background-color: #f8f8f9; width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr>
 			<td style="border-bottom:1px solid #C3C7C3"></td>		
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strID; ?></td>

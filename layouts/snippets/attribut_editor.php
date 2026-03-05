@@ -540,7 +540,7 @@ function render(i){
 <? }
 	if($this->formvars['selected_layer_id'] != '' OR $this->formvars['selected_datatype_id']){ ?>
 
-<table style="position: relative; display: block; max-width: 1670px; overflow-x: auto;" cellpadding="5" cellspacing="2" bgcolor="#f8f8f9">
+<table id="attribut_editor" style="position: relative; display: block; max-width: 1670px; overflow-x: auto;" cellpadding="5" cellspacing="2" bgcolor="#f8f8f9">
   <tr>
     <td colspan="2">&nbsp;</td>
   </tr>
