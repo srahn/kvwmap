@@ -849,9 +849,8 @@ a.sensible span::after{
 #sensible_layer_warning {
 	pointer-events: none;
   position: absolute;        /* relativ zu #map_frame */
-  top: 43;                 /* unter der Toolbar */
-  left: 50%;                 /* horizontales Zentrieren */
-  transform: translateX(-50%); /* genau mittig */
+  top: 6px;
+	right: 30px;
   max-width: 400px;          /* Breite begrenzen */
   background-color: rgba(211, 47, 47, 0.8); /* kräftig Rot, 80% Deckkraft */
   color: white;
