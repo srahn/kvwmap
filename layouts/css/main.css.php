@@ -840,6 +840,30 @@ a.under_construction span::after{
 	vertical-align: -4px;
 }
 
+a.sensible span::after{
+  content: url('graphics/critical.png');
+  padding: 3px;
+	vertical-align: -4px;
+}
+
+#sensible_layer_warning {
+	pointer-events: none;
+  position: absolute;        /* relativ zu #map_frame */
+  top: 43;                 /* unter der Toolbar */
+  left: 50%;                 /* horizontales Zentrieren */
+  transform: translateX(-50%); /* genau mittig */
+  max-width: 400px;          /* Breite begrenzen */
+  background-color: rgba(211, 47, 47, 0.8); /* kräftig Rot, 80% Deckkraft */
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px 20px;
+  font-family: sans-serif;
+  font-size: 16px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
 .sachdatenanzeige_paging{
 	margin-top: 10px;
 }
