@@ -826,7 +826,7 @@ class GUI {
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'status') != ''){
+		if(value_of($layerset, 'errorstatus') != ''){
 			$layerset['aktivstatus'] = 0;
 		}
 

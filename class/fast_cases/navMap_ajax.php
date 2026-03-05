@@ -615,7 +615,7 @@ class GUI {
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'status') != ''){
+		if(value_of($layerset, 'errorstatus') != ''){
 			$layerset['aktivstatus'] = 0;
 		}
 
@@ -2142,7 +2142,7 @@ class GUI {
   }
 
 	function check_layer_visibility(&$layer){
-		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
+		if($layer['errorstatus'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
 			return false;
 		}
 		return true;

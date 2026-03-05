@@ -2404,7 +2404,7 @@ echo '			</table>
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'status') != ''){
+		if(value_of($layerset, 'errorstatus') != ''){
 			$layerset['aktivstatus'] = 0;
 		}
 
@@ -16590,7 +16590,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$sql_order = '';
 			if (
 				$layerset[$i]['queryable'] AND
-				$layerset[$i]['status']  == '' AND 
+				$layerset[$i]['errorstatus']  == '' AND 
 				(
 					$this->formvars[$queryfield][$layerset[$i]['layer_id']] == '1' OR
 					$this->formvars[$queryfield][$layerset[$i]['requires']] == '1'
