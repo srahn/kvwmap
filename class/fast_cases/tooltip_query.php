@@ -43,7 +43,7 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 }
 
 function mapserverExp2SQL($exp, $classitem) {
-	$exp = preg_replace("/'\\[([^\\]]+)\\]'/", "$1", $exp);
+	$exp = preg_replace("/'\\[([^\]]*[^0-9][^\]]*)\\]'|\\[([^\]]*[^0-9][^\]]*)\\]/", "$1$2", $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
 	$exp = str_replace(' ne ', ' != ', $exp);
 	$exp = str_replace(' ge ', ' >= ', $exp);
