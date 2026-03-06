@@ -14300,6 +14300,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$results = $this->menue->create();
 		}
 		if ($results['success']) {
+			$this->menue->update_stellen($this->formvars['selstellen']);
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
 			header('location: index.php?go=Menues_Anzeigen&csrf_token=' . $_REQUEST['csrf_token']);
 		}
