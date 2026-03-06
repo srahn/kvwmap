@@ -13893,6 +13893,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
 			$this->formvars['wappen_link'] = $this->stellendaten['wappen_link'];
 			$this->formvars['checkClientIP'] = $this->stellendaten['check_client_ip'];
+			$this->formvars['totp_authentication'] = $this->stellendaten['totp_authentication'];
       $this->formvars['checkPasswordAge'] = $this->stellendaten['check_password_age'];
       $this->formvars['allowedPasswordAge'] = $this->stellendaten['allowed_password_age'];
       $this->formvars['use_layer_aliases'] = $this->stellendaten['use_layer_aliases'];

@@ -1219,6 +1219,13 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 
 				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">
+						<input name="totp_authentication" type="checkbox" value="1" <?php if ($this->formvars['totp_authentication']) { ?> checked<?php } ?>>
+					</th>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strtotp_authentication; ?></td>
+				</tr>				
+
+				<tr class="group-sonstiges">
+					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="checkPasswordAge" type="checkbox" value="1" <?php if ($this->formvars['checkPasswordAge']) { ?> checked<?php } ?>>
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strCheckPasswordAge; ?></td>

@@ -69,4 +69,5 @@
   $strResetPasswordText = "Reset password text";
   $strInvitationText = 'You have been invited to participate in the application "' . TITLE . '"';
   $strStartPageParams = 'Startpage Parameter';
+  $strtotp_authentication = 'TOTP-Authentification';
 ?>
