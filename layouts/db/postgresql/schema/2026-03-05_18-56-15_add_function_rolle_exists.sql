@@ -1,5 +1,5 @@
 BEGIN;
-  DROP FUNCTION kvwmap.rolle_exists(int, int);
+  DROP FUNCTION IF EXISTS kvwmap.rolle_exists(int, int);
 
   CREATE OR REPLACE FUNCTION kvwmap.rolle_exists(sid integer, uid integer)
   RETURNS boolean
