@@ -43,7 +43,7 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 }
 
 function mapserverExp2SQL($exp, $classitem) {
-	$exp = preg_replace("/'\\[([^\\]]+)\\]'/", "$1", $exp);
+	$exp = preg_replace("/'\\[([^\]]*[^0-9][^\]]*)\\]'|\\[([^\]]*[^0-9][^\]]*)\\]/", "$1$2", $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
 	$exp = str_replace(' ne ', ' != ', $exp);
 	$exp = str_replace(' ge ', ' >= ', $exp);
@@ -1445,7 +1445,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, errorstatus, trigger_function, version,
 				ul.queryable,
 				l.drawingorder,
 				l.legendorder,

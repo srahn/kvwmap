@@ -249,7 +249,7 @@ class stelle {
 				ows_contentvoicephone,
 				ows_contentfacsimile,
 
-				protected, check_client_ip::int, check_password_age, allowed_password_age, use_layer_aliases, selectable_layer_params, hist_timestamp, default_user_id,
+				protected, check_client_ip, totp_authentication, check_password_age, allowed_password_age, use_layer_aliases, selectable_layer_params, hist_timestamp, default_user_id,
 				style,
 				show_shared_layers,
 				reset_password_text,
@@ -319,6 +319,7 @@ class stelle {
 
 		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
 		$this->check_client_ip = ($rs['check_client_ip'] == 't');
+		$this->totp_authentication = ($rs['totp_authentication'] == 't');
 		$this->checkPasswordAge = ($rs['check_password_age'] == 't');
 		$this->allowedPasswordAge = $rs['allowed_password_age'];
 		$this->useLayerAliases = ($rs['use_layer_aliases'] == 't');
@@ -477,6 +478,7 @@ class stelle {
 		$rs = pg_fetch_array($ret[1]);
 		$rs['ows_inspireidentifiziert'] = ($rs['ows_inspireidentifiziert'] == 't');
 		$rs['check_client_ip'] = ($rs['check_client_ip'] == 't');
+		$rs['totp_authentication'] = ($rs['totp_authentication'] == 't');
 		$rs['check_password_age'] = ($rs['check_password_age'] == 't');
 		$rs['show_shared_layers'] = ($rs['show_shared_layers'] == 't');
 		$this->data = $rs;
@@ -576,6 +578,7 @@ class stelle {
 				'wappen',
 				'default_user_id',
 				'check_client_ip',
+				'totp_authentication',
 				'check_password_age',
 				'allowed_password_age',
 				'use_layer_aliases',
@@ -590,6 +593,7 @@ class stelle {
 		);
 		$rows['ows_srs'] = preg_replace(array('/: +/', '/ +:/'), ':', $rows['ows_srs']);
 		$rows['check_client_ip'] = ($rows['checkClientIP'] == '1'	? "true" : "false");
+		$rows['totp_authentication'] = ($rows['totp_authentication'] == '1'	? "true" : "false");
 		$rows['check_password_age'] = ($rows['checkPasswordAge'] == '1' ? "true" : "false");
 		$rows['allowed_password_age'] = ($rows['allowedPasswordAge'] ?: "6");
 		$rows['use_layer_aliases'] = ($rows['use_layer_aliases'] == '1'	? "true" : "false");
@@ -703,6 +707,7 @@ class stelle {
 				ows_srs = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				wappen_link = '" . $stellendaten['wappen_link'] . "',
 				check_client_ip =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
+				totp_authentication =				'" . ($stellendaten['totp_authentication'] 			== '1'	? "1" : "0") . "',
 				check_password_age =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
 				use_layer_aliases = 		'" . (value_of($stellendaten, 'use_layer_aliases') 	== '1'	? "1" : "0") . "',
 				hist_timestamp = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
@@ -1521,7 +1526,7 @@ class stelle {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
-			$insert = "(
+			$insert = "
 				stelle_id,
 				layer_id,
 				queryable,
@@ -1531,7 +1536,6 @@ class stelle {
 				symbolscale,
 				offsite,
 				transparency,
-				filter,
 				template,
 				header,
 				footer,
@@ -1539,12 +1543,12 @@ class stelle {
 				export_privileg,
 				postlabelcache,
 				requires,
-				start_aktiv
-			)";
+				start_aktiv";
 			if (!$assign_default_values) {
 				# Einstellungen von der ersten Elternstelle übernehmen (LIMTI 1)
 				$sql = "
-					INSERT INTO kvwmap.used_layer " . $insert . "
+					INSERT INTO kvwmap.used_layer 
+						(" . $insert . ")
 					SELECT
 						" . $this->id . ",
 						" . $layer_ids[$i] . ",
@@ -1555,7 +1559,6 @@ class stelle {
 						symbolscale, 
 						offsite, 
 						transparency, 
-						filter,
 						template, 
 						header,
 						footer,
@@ -1581,7 +1584,6 @@ class stelle {
 						symbolscale = EXCLUDED.symbolscale, 
 						offsite = EXCLUDED.offsite, 
 						transparency = EXCLUDED.transparency, 
-						filter = EXCLUDED.filter,
 						template = EXCLUDED.template, 
 						header = EXCLUDED.header,
 						footer = EXCLUDED.footer,
@@ -1601,7 +1603,10 @@ class stelle {
 			}
 			if ($assign_default_values OR pg_affected_rows($ret[1]) == 0) {
 				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
-				$sql = "INSERT INTO kvwmap.used_layer " . $insert . "
+				$sql = "
+					INSERT INTO kvwmap.used_layer 
+						(" . $insert . ",
+						filter)
 					SELECT
 						'" . $this->id . "',
 						'" . $layer_ids[$i] . "',
@@ -1612,7 +1617,6 @@ class stelle {
 						symbolscale, 
 						offsite, 
 						transparency, 
-						'" . $filter . "',
 						template, 
 						NULL,
 						NULL,
@@ -1620,7 +1624,8 @@ class stelle {
 						export_privileg,
 						postlabelcache,
 						requires,
-						'0'
+						'0',
+						'" . $filter . "'
 					FROM
 						kvwmap.layer as l
 					WHERE

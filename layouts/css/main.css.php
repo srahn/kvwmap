@@ -834,6 +834,35 @@ a.invisiblelayerlink {
 	cursor: context-menu;
 }
 
+a.under_construction span::after{
+  content: url('graphics/under_construction.png');
+  padding: 3px;
+	vertical-align: -4px;
+}
+
+a.sensible span::after{
+  content: url('graphics/critical.png');
+  padding: 3px;
+	vertical-align: -4px;
+}
+
+#sensible_layer_warning {
+	pointer-events: none;
+  position: absolute;        /* relativ zu #map_frame */
+  top: 6px;
+	right: 30px;
+  max-width: 400px;          /* Breite begrenzen */
+  background-color: rgba(211, 47, 47, 0.8); /* kräftig Rot, 80% Deckkraft */
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px 20px;
+  font-family: sans-serif;
+  font-size: 16px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
 .sachdatenanzeige_paging{
 	margin-top: 10px;
 }

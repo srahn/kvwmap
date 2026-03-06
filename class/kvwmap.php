@@ -417,7 +417,7 @@ class GUI {
 		}
 		for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 			if (file_exists(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php')) {
-				include(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php');
+				include_once(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php');
 			}
 		}
 		$trigger_result = array('executed' => false);
@@ -1540,8 +1540,8 @@ echo '			</table>
 			}
 			$legend .= ' >'.html_umlaute($layer['Name_or_alias']).'</span></a>';
 			$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"> </div>';
-			if($layer['status'] != ''){
-				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
+			if($layer['errorstatus'] != ''){
+				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['errorstatus'].'" src="'.GRAPHICSPATH.'warning.png">';
 			}
 			if($layer['queryable'] == 1){
 				$legend .=  '<input type="hidden" name="qLayer[' . $layer['layer_id'] . ']"';
@@ -1557,22 +1557,21 @@ echo '			</table>
 	}
 
 	function create_layername_legend($layer){
+		global $layer_status;
 		$legend = '';
 		$legend .= '<a';
 		# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.
 		if ($this->user->rolle->showlayeroptions) {
 			$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
 		}
-		if(value_of($layer, 'metalink') != ''){
-			$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
-		}
-		else {
-			$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
-		}
+		$legend .= ' class="visiblelayerlink ' . ($layer['metalink']? 'metalink' : '') . ' ' . $layer['status'] . ' boldhover" href="javascript:void(0)">';
 		$legend .= '<span ';
-		if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
-			$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
+		$title = '';
+		$title .= $layer_status[$layer['status']];
+		if (value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
+			$title .= ' ' . round($layer['minscale']) . ' - ' . round($layer['maxscale']);
 		}
+		$legend .= ($title? ' title="' . $title . '"' : '');
 		$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
 		$legend .= '</a>';
 		# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
@@ -2296,7 +2295,9 @@ echo '			</table>
 					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivstatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
-
+						if ($layerset['list'][$i]['status'] == 'sensible') {
+							$this->sensible_layers_active = true;
+						}
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
 						$error = msGetErrorObj();
 						$test = 0;
@@ -2403,7 +2404,7 @@ echo '			</table>
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'status') != ''){
+		if(value_of($layerset, 'errorstatus') != ''){
 			$layerset['aktivstatus'] = 0;
 		}
 
@@ -3434,7 +3435,7 @@ echo '			</table>
   }
 
 	function check_layer_visibility(&$layer){
-		if(value_of($layer, 'status') != '' OR ($this->map_scaledenom < value_of($layer, 'minscale') OR (value_of($layer, 'maxscale') > 0 AND $this->map_scaledenom > value_of($layer, 'maxscale')))) {
+		if(value_of($layer, 'errorstatus') != '' OR ($this->map_scaledenom < value_of($layer, 'minscale') OR (value_of($layer, 'maxscale') > 0 AND $this->map_scaledenom > value_of($layer, 'maxscale')))) {
 			return false;
 		}
 		return true;
@@ -13892,6 +13893,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
 			$this->formvars['wappen_link'] = $this->stellendaten['wappen_link'];
 			$this->formvars['checkClientIP'] = $this->stellendaten['check_client_ip'];
+			$this->formvars['totp_authentication'] = $this->stellendaten['totp_authentication'];
       $this->formvars['checkPasswordAge'] = $this->stellendaten['check_password_age'];
       $this->formvars['allowedPasswordAge'] = $this->stellendaten['allowed_password_age'];
       $this->formvars['use_layer_aliases'] = $this->stellendaten['use_layer_aliases'];
@@ -16590,7 +16592,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$sql_order = '';
 			if (
 				$layerset[$i]['queryable'] AND
-				$layerset[$i]['status']  == '' AND 
+				$layerset[$i]['errorstatus']  == '' AND 
 				(
 					$this->formvars[$queryfield][$layerset[$i]['layer_id']] == '1' OR
 					$this->formvars[$queryfield][$layerset[$i]['requires']] == '1'
@@ -18784,7 +18786,7 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.errorstatus, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
@@ -21083,6 +21085,7 @@ DO $$
 			'querymap',
 			'processing',
 			'status',
+			'errorstatus',
 			'trigger_function'
 		);
 		if ($this->GUI->plugin_loaded('mobile')) {

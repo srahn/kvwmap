@@ -561,7 +561,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 											<select name="selectedlayer" size="12" multiple style="position: relative; width: 340px">
 											<?
 											for($i=0; $i < count_or_0($this->formvars['sellayer']["Bezeichnung"]); $i++){
-													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace([' ', '<br>'], '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
+													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace([' ', '<br>'], '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
 												 }
 											?>
 											</select>
@@ -1216,6 +1216,13 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strcheckClientIP; ?></td>
 				</tr>
+
+				<tr class="group-sonstiges">
+					<th align="right" style="border-bottom:1px solid #C3C7C3">
+						<input name="totp_authentication" type="checkbox" value="1" <?php if ($this->formvars['totp_authentication']) { ?> checked<?php } ?>>
+					</th>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strtotp_authentication; ?></td>
+				</tr>				
 
 				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">

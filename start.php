@@ -197,21 +197,6 @@ if ($gast_export === false) {
 							$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
 							set_session_vars($GUI->formvars);
 
-							if (defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $_SESSION['login_new_password'] != true) {
-								if ($GUI->user->totp_secret != '') {
-									if ($GUI->is_trusted_device($GUI->user) == false) {
-										$_SESSION['2fa_verification'] = true;
-										include(SNIPPETS . '2fa_verify.php');
-										exit;
-									}
-								} 
-								else {
-									$_SESSION['2fa_registration'] = true;
-									include(SNIPPETS . '2fa_enable.php');
-									exit;
-								}
-							}
-
 							$GUI->user->update_tokens($_SESSION['csrf_token']);
 							$GUI->user->has_logged_in = true;
 							$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
@@ -370,6 +355,21 @@ if ($gast_export === false) {
 		if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars, $GUI->user)) {
 			$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
 	
+			if (is_login($GUI->formvars) AND defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $GUI->Stelle->totp_authentication AND $_SESSION['login_new_password'] != true) {
+				if ($GUI->user->totp_secret != '') {
+					if ($GUI->is_trusted_device($GUI->user) == false) {
+						$_SESSION['2fa_verification'] = true;
+						include(SNIPPETS . '2fa_verify.php');
+						exit;
+					}
+				} 
+				else {
+					$_SESSION['2fa_registration'] = true;
+					include(SNIPPETS . '2fa_enable.php');
+					exit;
+				}
+			}
+
 			$GUI->user->Stellen = $GUI->user->getStellen(0);
 			$permission = get_permission_in_stelle($GUI);
 	

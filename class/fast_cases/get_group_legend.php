@@ -826,7 +826,7 @@ class GUI {
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'status') != ''){
+		if(value_of($layerset, 'errorstatus') != ''){
 			$layerset['aktivstatus'] = 0;
 		}
 
@@ -1747,8 +1747,8 @@ class GUI {
 			}
 			$legend .= ' >'.html_umlaute($layer['Name_or_alias']).'</span></a>';
 			$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"> </div>';
-			if($layer['status'] != ''){
-				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
+			if($layer['errorstatus'] != ''){
+				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['errorstatus'].'" src="'.GRAPHICSPATH.'warning.png">';
 			}
 			if($layer['queryable'] == 1){
 				$legend .=  '<input type="hidden" name="qLayer[' . $layer['layer_id'] . ']"';
@@ -1764,22 +1764,21 @@ class GUI {
 	}
 
 	function create_layername_legend($layer){
+		global $layer_status;
 		$legend = '';
 		$legend .= '<a';
 		# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.
 		if ($this->user->rolle->showlayeroptions) {
 			$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
 		}
-		if(value_of($layer, 'metalink') != ''){
-			$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
-		}
-		else {
-			$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
-		}
+		$legend .= ' class="visiblelayerlink ' . ($layer['metalink']? 'metalink' : '') . ' ' . $layer['status'] . ' boldhover" href="javascript:void(0)">';
 		$legend .= '<span ';
-		if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
-			$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
+		$title = '';
+		$title .= $layer_status[$layer['status']];
+		if (value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
+			$title .= ' ' . round($layer['minscale']) . ' - ' . round($layer['maxscale']);
 		}
+		$legend .= ($title? ' title="' . $title . '"' : '');
 		$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
 		$legend .= '</a>';
 		# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
@@ -1980,7 +1979,7 @@ class GUI {
 	}
 
 	function check_layer_visibility(&$layer){
-		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
+		if($layer['errorstatus'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
 			return false;
 		}
 		return true;
@@ -3001,7 +3000,7 @@ class db_mapObj {
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.errorstatus, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,

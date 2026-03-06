@@ -130,7 +130,11 @@ include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php'); ?>
 <? if (defined('LAGEBEZEICHNUNGSART')) { ?>
 <div id="lagebezeichnung_bar">
 	<div id="lagebezeichnung">
-	<? if (is_array($this->Lagebezeichung) AND $this->Lagebezeichung['gemeindename'] != '') { ?>
+	<?
+		if ($this->sensible_layers_active) {
+			echo '<div id="sensible_layer_warning"> Achtung! Es sind sensible Layer aktiv!</div>';
+		} 
+		if (is_array($this->Lagebezeichung) AND $this->Lagebezeichung['gemeindename'] != '') { ?>
 		<span class="fett">Gemeinde:</span>&nbsp;<?php echo $this->Lagebezeichung['gemeindename']; ?>
 		<span class="fett">Gemarkung:</span>&nbsp;<?php echo $this->Lagebezeichung['gemkgname']; ?>&nbsp;(<?php echo $this->Lagebezeichung['gemkgschl']; ?>)
 		<span class="fett">Flur:</span>&nbsp;<?php echo $this->Lagebezeichung['flur'];

@@ -209,7 +209,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, errorstatus, trigger_function, version,
 				ul.queryable,
 				l.drawingorder,
 				l.legendorder,
@@ -1510,6 +1510,18 @@ class rolle {
 
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
+		if ($this->singlequery == 1) {
+			$sql ='
+				UPDATE 
+					kvwmap.u_rolle2used_layer 
+				SET 
+					querystatus = 0
+				WHERE 
+					user_id = ' . $this->user_id . ' AND 
+					stelle_id = ' . $this->stelle_id;
+			$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
 		foreach ($formvars['qLayer'] as $layer_id => $query_status) {
 			if ($layer_id != '' AND $query_status !== '') {	
 				$table = ($layer_id > 0 ? 'u_rolle2used_layer' : 'rollenlayer');
