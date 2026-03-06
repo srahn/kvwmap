@@ -30,6 +30,7 @@ BEGIN;
     END IF;
   END$$;
 
+
   CREATE OR REPLACE FUNCTION xplankonverter.to_xp_generattribut_erweitert(
     xp_generattribut xplan_gml.xp_generattribut[]
   )
@@ -37,10 +38,10 @@ BEGIN;
   LANGUAGE plpgsql
   AS $$
   DECLARE
-    result xp_generattribut_erweitert[] := '{}';
+    result xplan_gml.xp_generattribut_erweitert[] := '{}';
     elem xplan_gml.xp_generattribut;
-    varchar attribut_wert := '';
-    xplan_gml.xp_generattributtyp attribut_type := 'XP_StringAttribut'::xplan_gml.xp_generattributtyp
+    attribut_wert varchar := '';
+    attribut_type xplan_gml.xp_generattributtyp := 'XP_StringAttribut'::xplan_gml.xp_generattributtyp;
   BEGIN
     IF xp_generattribut IS NULL THEN
       RETURN NULL;
@@ -56,13 +57,13 @@ BEGIN;
   $$;
 
   --SELECT hatgenerattribut, xplankonverter.to_xp_generattribut_erweitert(hatgenerattribut) FROM xplan_gml.bp_plan WHERE hatgenerattribut IS NOT NULL;
-
+  
   DO $$
   BEGIN
     IF NOT EXISTS (
       SELECT 1
       FROM information_schema.columns
-      WHERE table_schema = current_schema()
+      WHERE table_schema = 'xplan_gml'
         AND table_name = 'xp_plan'
         AND column_name = 'hatgenerattribut'
         AND udt_name = '_xp_generattribut_erweitert'
@@ -135,10 +136,7 @@ BEGIN;
         bp_plan.zusammenzeichnung,
         xplan_gml.alle_verbundenen_plaene(bp_plan.gml_id) AS alle_verbundenen_plaene
       FROM xplan_gml.bp_plan;
-
     END IF;
   END
   $$;
-
-
 COMMIT;

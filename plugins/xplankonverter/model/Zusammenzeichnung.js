@@ -641,13 +641,18 @@ class Zusammenzeichnung {
     }
     // let nextFunction = (nextStep != '' ? nextStep : this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]);
     // confirm step
-    console.log('confirm_step: %o', this.process[step]);
+    console.log('confirm_step: %o', step);
     $('#upload_zusammenzeichnung_step_' + this.process[step].nr).addClass(this.confirm_class[success]);
     $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success] + '" aria-hidden="true" ></i>');
-    if (success == 'ok' && nextFunction !== '') {
-      console.log(`call next step function: ${this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]}()`);
-      console.log(`call next step function nextFunction: ${nextFunction}()`);
-      this[nextFunction]();
+    if (success == 'ok') {
+      if (nextFunction !== '') {
+        console.log(`call next step function: ${this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]}()`);
+        console.log(`call next step function nextFunction: ${nextFunction}()`);
+        this[nextFunction]();
+      }
+      else {
+        $('#upload_zusammenzeichnung_finish_button').show();
+      }
     }
     else {
       console.log(`Step ${step} has not successfully finished.`);

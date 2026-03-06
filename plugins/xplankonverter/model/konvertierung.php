@@ -81,8 +81,8 @@ class Konvertierung extends PgObject {
 						'import_zusammenzeichnung',
 						'create_plaene',
 						'convert_zusammenzeichnung',
-						'gml_generieren',
-						'check_class_completeness'
+						'gml_generieren'
+						#,'check_class_completeness'
 					)
 				);
 				// ToDo 'replace_zusammenzeichnung' noch nicht bei B-Plänen. Erst das optionale Überschreiben oder nicht in Dialog beim Upload einbauen, siehe Konzept bplan-Server.
