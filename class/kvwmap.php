@@ -14263,7 +14263,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($this->formvars['view_sort'] == '') {
 			$this->formvars['view_sort'] = 'name';
 		}
-		$this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort'], $this->formvars['sort_direction']);
+		if ($this->formvars['view_sort'] == 'obermenue,"order"') {
+			$this->formvars['view_sort'] = '
+				COALESCE(parent."order", u_menues."order"),
+				CASE WHEN u_menues.menueebene = 1 THEN u_menues.id ELSE u_menues.obermenue END,
+				CASE WHEN u_menues.menueebene = 1 THEN 0 ELSE 1 END,
+				u_menues."order"';
+		}
+		$this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort'], $this->formvars['sort_direction'], 'kvwmap.u_menues LEFT JOIN kvwmap.u_menues parent ON parent.id = u_menues.obermenue');
 		if ($this->formvars['sort_direction'] == 'DESC') {
 			$this->formvars['sort_direction'] = 'ASC';
 		}

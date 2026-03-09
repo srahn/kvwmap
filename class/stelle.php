@@ -125,7 +125,7 @@ class stelle {
 		$sql .=' AND obermenue = '.$id;
 		$sql .=' AND menueebene = 2';
 		$sql .=' AND u_menue2stelle.menue_id = u_menues.id';
-		$sql .= ' ORDER BY menue_order';
+		$sql .= ' ORDER BY coalesce(menue_order, order)';
 		$this->debug->write("<p>file:stelle.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines Menüpunktes:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -1291,41 +1291,20 @@ class stelle {
 	* Hinzufügen von Menuepunkten zur Stelle
 	*/
 	function addMenue($menue_ids) {
-		$sql = "
-			SELECT
-				MAX(menue_order)
-			FROM
-				kvwmap.u_menue2stelle
-			WHERE
-				stelle_id = " . $this->id . "
-		";
-		#echo '<br>stelle.php addMenue Sql: ' . $sql;
-		$this->debug->write("<p>file:stelle.php class:stelle->addMenue - Lesen der maximalen menue_order der Menuepunkte der Stelle:<br>".$sql,4);
-		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
-		}
-		else {
-			$rs = pg_fetch_array($ret[1]);
-		}
-		$count = ($rs[0] == '' ? 0 : $rs[0]);
 		for ($i = 0; $i <@ count($menue_ids); $i++) {
 			$sql ="
 				INSERT INTO kvwmap.u_menue2stelle 
 					(
 						stelle_id,
-						menue_id,
-						menue_order
+						menue_id
 					)
 				VALUES (
 					'" . $this->id ."',
-					'" . $menue_ids[$i] . "',
-					'" . $count . "'
+					'" . $menue_ids[$i] . "'
 				)
 				ON CONFLICT (stelle_id, menue_id) DO NOTHING
 			";
 			#echo '<br>stelle.php addMenue Sql: ' . $sql;
-			$count++;
 			$this->debug->write("<p>file:stelle.php class:stelle->addMenue - Hinzufügen von Menuepunkten zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -1349,18 +1328,23 @@ class stelle {
 
 		$sql = "
 			SELECT
-				menue_id," .
+				m.id AS menue_id," .
 				$name_column . ",
-				menueebene,
-				\"order\"
-			FROM
-				kvwmap.u_menues m JOIN
-				kvwmap.u_menue2stelle m2s ON m.id = m2s.menue_id
+				m.menueebene,
+				COALESCE(m2s.menue_order, m.\"order\") as \"order\"
+			FROM 
+				kvwmap.u_menues m
+				JOIN kvwmap.u_menue2stelle m2s ON m.id = m2s.menue_id
+				LEFT JOIN kvwmap.u_menues parent ON parent.id = m.obermenue
+				LEFT JOIN kvwmap.u_menue2stelle parent_m2s ON parent.id = parent_m2s.menue_id AND parent_m2s.stelle_id = m2s.stelle_id
 			WHERE
 				m2s.stelle_id = " . $this->id .
-				($ebene != 0 ? " AND menueebene = " . $ebene : "") . "
+				($ebene != 0 ? " AND m.menueebene = " . $ebene : "") . "
 			ORDER BY
-				menue_order
+				COALESCE(parent_m2s.menue_order, parent.\"order\", m2s.menue_order, m.\"order\"),	-- Order des Obermenüs
+				CASE WHEN m.menueebene = 1 THEN m.id ELSE m.obermenue	END,												-- stabile Gruppierung (Obermenü-ID)
+				CASE WHEN m.menueebene = 1 THEN 0 ELSE 1 END,																			-- Obermenü zuerst				
+				COALESCE(m2s.menue_order, m.\"order\")																						-- Order innerhalb der Gruppe
 		";
 		#echo '<br>stelle.php getMenue(' . $ebene . ') Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getMenue - Lesen der Menuepunkte zur Stelle:<br>".$sql,4);

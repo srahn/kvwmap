@@ -50,9 +50,9 @@ class Menue extends PgObject {
 		);
 	}
 
-	public static	function find($gui, $where, $order = '', $sort_direction = '') {
+	public static	function find($gui, $where, $order = '', $sort_direction = '', $from = '') {
 		$menue = new Menue($gui);
-		return $menue->find_where($where, $order);
+		return $menue->find_where($where, $order, 'u_menues.*', NULL, $from);
 	}
 
 	public static function loadMenue($gui, $type) {
@@ -77,8 +77,8 @@ class Menue extends PgObject {
 					m.id,
 					m.links,
 					m.onclick,
-					name as name_german," .
-					(rolle::$language != 'german' ? "name_" . rolle::$language . " AS" : "") . " name,
+					m.name as name_german," .
+					(rolle::$language != 'german' ? "m.name_" . rolle::$language . " AS name" : "m.name") . ",
 					m.menueebene,
 					m.obermenue,
 					m.target,
@@ -86,9 +86,11 @@ class Menue extends PgObject {
 					".($type == 'button'? "m.button_class" : "'' as button_class")."
 				",
 				'from' => "
-					kvwmap.u_menue2rolle m2r JOIN
-					kvwmap.u_menue2stelle AS m2s ON (m2r.stelle_id = m2s.stelle_id AND m2r.menue_id = m2s.menue_id) JOIN
-					kvwmap.u_menues AS m ON (m2s.menue_id = m.id)
+					kvwmap.u_menue2rolle m2r 
+					JOIN kvwmap.u_menue2stelle AS m2s ON (m2r.stelle_id = m2s.stelle_id AND m2r.menue_id = m2s.menue_id) 
+					JOIN kvwmap.u_menues AS m ON (m2s.menue_id = m.id)
+					LEFT JOIN kvwmap.u_menues parent ON parent.id = m.obermenue
+					LEFT JOIN kvwmap.u_menue2stelle parent_m2s ON parent.id = parent_m2s.menue_id AND parent_m2s.stelle_id = m2s.stelle_id
 				",
 				'where' => "
 					m2s.stelle_id = " . $gui->Stelle->id . " AND
@@ -96,7 +98,10 @@ class Menue extends PgObject {
 					".$button_where."
 				",
 				'order' => "
-					m2s.menue_order
+					COALESCE(parent_m2s.menue_order, parent.\"order\", m2s.menue_order, m.\"order\"),	-- Order des Obermenüs
+					CASE WHEN m.menueebene = 1 THEN m.id ELSE m.obermenue	END,												-- stabile Gruppierung (Obermenü-ID)
+					CASE WHEN m.menueebene = 1 THEN 0 ELSE 1 END,																			-- Obermenü zuerst				
+					COALESCE(m2s.menue_order, m.\"order\")																						-- Order innerhalb der Gruppe
 				"
 			), 'obermenue'
 		);
@@ -325,13 +330,13 @@ class Menue extends PgObject {
 	function update_stellen($stelle_ids) {
 		if ($stelle_ids[0]) {
 			$with_new_values = "
-				WITH nv(menue_id, stelle_id, menue_order) AS (
+				WITH nv(menue_id, stelle_id) AS (
 				VALUES
 					" . implode(
 						', ',
 						array_map(
 							function($stelle_id) {
-								return '(' . $this->get('id') . ', ' . $stelle_id . ', ' . $this->get('order') . ')';
+								return '(' . $this->get('id') . ', ' . $stelle_id . ')';
 							},
 							$stelle_ids
 						)
@@ -342,11 +347,10 @@ class Menue extends PgObject {
 				DELETE FROM kvwmap.u_menue2rolle m2r WHERE m2r.menue_id = " . $this->get('id') . " AND m2r.stelle_id NOT IN (" . implode(', ', $stelle_ids) . ");
 				DELETE FROM kvwmap.u_menue2stelle m2s WHERE m2s.menue_id = " . $this->get('id') . " AND m2s.stelle_id NOT IN (" . implode(', ', $stelle_ids) . ");
 				" . $with_new_values . "
-				INSERT INTO kvwmap.u_menue2stelle (menue_id, stelle_id, menue_order)
+				INSERT INTO kvwmap.u_menue2stelle (menue_id, stelle_id)
 				SELECT
 					nv.menue_id, 
-					nv.stelle_id,
-					nv.menue_order
+					nv.stelle_id
 				FROM 
 					nv LEFT JOIN
 					kvwmap.u_menue2stelle ms ON nv.menue_id = ms.menue_id AND nv.stelle_id = ms.stelle_id
