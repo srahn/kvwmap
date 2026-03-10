@@ -1755,6 +1755,7 @@ CREATE TABLE kvwmap.stelle (
     ows_distributionorganization character varying(150) DEFAULT NULL::character varying,
     ows_distributionemailaddress character varying(100) DEFAULT NULL::character varying,
     ows_fees character varying(255) DEFAULT NULL::character varying,
+    ows_inspireidentifiziert boolean default false,      
     ows_srs character varying(255) DEFAULT NULL::character varying,
     protected boolean DEFAULT false NOT NULL,
     check_client_ip boolean DEFAULT false NOT NULL,
