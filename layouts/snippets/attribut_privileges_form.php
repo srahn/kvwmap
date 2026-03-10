@@ -259,7 +259,7 @@ function update_stellen_visibility(){
 
 <? } ?>
 
-<table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
+<table id="attribut_privileges_form" border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <? if($this->layer[0]['name'] != ''){ ?>
 	<tr>
   	<td>

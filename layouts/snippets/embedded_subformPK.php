@@ -106,6 +106,12 @@
 						<tr id="<? echo $element_id; ?>">
 							<td style="display: none">
 								<input type="hidden" value="" onchange="root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['layer_id'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
+								<input
+									id="<? echo $layer['layer_id'] . '_' . $k; ?>"
+									type="checkbox"
+									class="check_<? echo $layer['layer_id']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
+									name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['layer_id']; ?>"
+								>
 							</td><?
 							$editable = false;
 							for ($j = 0; $j < count($attributes['name']); $j++) {
@@ -116,7 +122,7 @@
 									if ($layer['attributes']['visible'][$j]) {
 										$explosion = explode(';', $layer['attributes']['group'][$j]);
 										if ($explosion[1] != 'collapsed') { ?>
-											<td id="value_<? echo $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '_' . $k; ?>" <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
+											<td id="value_<? echo $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '_' . $k; ?>" <? echo get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style_attribute'][$j]])); ?>><?
 												if (in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 													echo calendar($layer['attributes']['type'][$j], $layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 												}
@@ -157,6 +163,7 @@
 			<? }
 			if($editable OR $layer['template'] == 'generic_layer_editor_doc_raster.php'){ ?>
 				<a id="subform_save_button_<? echo $layer['layer_id']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subsave_data(<? echo $layer['layer_id']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>Speichern</span></a>
+				<a id="subdelete_all_button_<? echo $layer['layer_id']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subdelete_all(<? echo $layer['layer_id']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>alle Löschen</span></a>
 	<?	}
 		}
 		
@@ -248,7 +255,7 @@
 					}
 				}
 				echo '<tr style="border: none">
-								<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '>'.($preview_link != ''? $preview_link.'</td><td valign="top">' : '');
+								<td'. get_td_class_or_style(array($dataset[$attributes['style'][0]], 'subFormListItem')) . '>'.($preview_link != ''? $preview_link.'</td><td valign="top">' : '');
 								
 				if ($this->formvars['embedded'] == 'true') {
 					echo '<a href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['layer_id'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].'\');">'.implode(' ', $output).'</a><div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'"></div></td>';
@@ -304,5 +311,6 @@
 	echo '
 		<script type="text/javascript">
 			root.open_subform_requests--;
+			auto_resize_overlay();
 		</script>';
 ?>

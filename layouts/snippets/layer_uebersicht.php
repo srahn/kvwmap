@@ -83,6 +83,7 @@
 					<td class="dataowner_name-column">
 						<div style="width: 200px" valign="top">
 							' . $GUI->layers['dataowner_name'][$i] . '
+							' . ((defined('SHOW_DATAOWNER_CONTACT') AND SHOW_DATAOWNER_CONTACT) ? '<br>' . $GUI->layers['dataowner_email'][$i] . '<br>' . $GUI->layers['dataowner_tel'][$i] : '') . '
 						</div>
 					</td>
 				</tr>';

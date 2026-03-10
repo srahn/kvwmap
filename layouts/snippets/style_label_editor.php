@@ -277,7 +277,7 @@ function navigate(params) {
 	</tr>	
 </table>
 
-<table border="0" cellpadding="2" cellspacing="2" bgcolor="#f8f8f9">
+<table id="style_label_editor" border="0" cellpadding="2" cellspacing="2" bgcolor="#f8f8f9">
   <tr>
   	<td valign="top">
 		  <table cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3;">

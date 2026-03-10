@@ -55,6 +55,7 @@
 	$strLegendGraphic = "legendgraphic";
 	$strLegendOrder = "legend order";	
 	$strListed = "show in Layer-List";
+	$strLogged = 'Logging enabled';
 	$strMaintable = "Main Table";
 	$strMap = "Map";
 	$strMapParameters = "Map Display";
@@ -87,7 +88,11 @@
 	$strSignOrder = "Drawingorder";
 	$strSizeUnits = "Sizeunits";
 	$strStatus = "Status";
-	$strStatusHelp = "This field can be filled with an error status. This deactivates the layer and has a hint symbol in the legend.&#xa;The 'wms_checker.php' tool fills this field automatically.";
+	$strStatusHelp = "Optional Status. Possible Values are: 
+	sensible - the layer has a hint symbol in the legend and in the header
+	under_construction - the layer has a hint symbol in the legend";
+	$strErrorStatus = "Error Status";
+	$strErrorStatusHelp = "This field can be filled with an error status. This deactivates the layer and has a hint symbol in the legend.&#xa;The 'wms_checker.php' tool fills this field automatically.";
 	$strStellenAsignment = "Usergroup-Assignment";
 	$strStyleItem = "Styleitem";
 	$strStylesLabels = "Styles and Labels";

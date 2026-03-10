@@ -10,7 +10,7 @@
 				rename(XPLANKONVERTER_FILE_PATH, $new_file_path);
 			}
 			else {
-				mkdir($new_file_path, 0775);
+				mkdir($new_file_path, 0770, true);
 			}
 			$sql = "
 				UPDATE

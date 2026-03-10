@@ -367,6 +367,10 @@ hr {
 	display: none !important;
 }
 
+.changed{
+	border: 3px solid tomato !important;
+}
+
 ul{
 	color: lightsteelblue;
 	margin: 5px;
@@ -830,6 +834,35 @@ a.invisiblelayerlink {
 	cursor: context-menu;
 }
 
+a.under_construction span::after{
+  content: url('graphics/under_construction.png');
+  padding: 3px;
+	vertical-align: -4px;
+}
+
+a.sensible span::after{
+  content: url('graphics/critical.png');
+  padding: 3px;
+	vertical-align: -4px;
+}
+
+#sensible_layer_warning {
+	pointer-events: none;
+  position: absolute;        /* relativ zu #map_frame */
+  top: 6px;
+	right: 30px;
+  max-width: 400px;          /* Breite begrenzen */
+  background-color: rgba(211, 47, 47, 0.8); /* kräftig Rot, 80% Deckkraft */
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px 20px;
+  font-family: sans-serif;
+  font-size: 16px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
 .sachdatenanzeige_paging{
 	margin-top: 10px;
 }
@@ -1066,12 +1099,18 @@ select[name="geom_from_layer"] {
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	text-align: center;
 	display: flex; 
-	flex-wrap: wrap;
-	justify-content: flex-start;
+	flex-direction: column;
+  min-height: 0;
 }
 
 #menueTable a {
 	color: firebrick;
+}
+
+#menueButtons {
+	display: flex;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
 }
 
 #menueScrollTable{
@@ -1211,7 +1250,6 @@ a.menuered:hover {
 }
 
 .button-menue{
-	flex: 0 0 auto;
 	margin: 0 0 2 0;
 }
 
@@ -2145,6 +2183,12 @@ thead.gle th {
 	vertical-align: bottom;
 }
 
+.gle_attribute_tooltip {
+	width: 16px;
+	height: 16px;
+	background-image: url(<? echo GRAPHICSPATH; ?>emblem-important.png);
+}
+
 table.tgle .glehead tr {
 	height: 26px;
 }
@@ -2435,7 +2479,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fstanzeigecontainer{
-	width: 580px;
+	width: 620px;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
@@ -2472,6 +2516,14 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	border-right: 1px solid #CCCCCC;
 }
 
+#layer_selection_div, #schnellsprung_div{
+	display: flex;
+  flex-flow: column;
+  border: 1px solid #bbb;
+  margin: 4px;
+  padding: 3px;
+}
+
 #rollenwahl_main_div {
 	width: 830px; 
 	min-height: 430px
@@ -2497,7 +2549,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .rollenwahl-option-header {
-	<!-- width: 270px; -->
+	width: 285px;
 	padding : 4px;
 }
 
@@ -2912,6 +2964,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .red {
 	color: red;
+}
+
+.inactive_class {
+	color: red;
+	font-style: italic;
 }
 
 .edit_button {

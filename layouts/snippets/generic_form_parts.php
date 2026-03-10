@@ -52,7 +52,11 @@
 			else {
 				$title_link = 'href="javascript:void(0);"';
 			}
-			return '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"></a></td>';
+			return '<td align="right">
+								<a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '">
+									<div class="gle_attribute_tooltip" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"></div>
+								</a>
+							</td>';
 		}
 	}
 
@@ -137,15 +141,13 @@
 		$old_field_class = $field_class;
 		if ($attributes['dependents'][$j] != NULL) {
 			$field_class .= ' visibility_changer';
-			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
+			$onchange .= 'this.oninput();" oninput="check_visibility_dependents('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
 		}
 
 		$field_class = ($field_class != '' ? $field_class . ' ' : '') . 'attr_' . $layer_id . '_' . $name; 
 
-		if($attributes['vcheck_attribute'][$j] != ''){
-			$after_attribute .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
-			$after_attribute .= '<input type="hidden" id="vcheck_operator_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_operator'][$j].'">';
-			$after_attribute .= '<input type="hidden" id="vcheck_value_'.$attributes['name'][$j].'" value="'.htmlentities($attributes['vcheck_value'][$j]).'">';
+		if($attributes['visibility_rules'][$j] != ''){
+			$after_attribute .= '<input type="hidden" id="visibility_rules_'.$attributes['name'][$j].'" value="'.htmlentities($attributes['visibility_rules'][$j]).'">';
 		}
 
 		###### Array-Typ #####

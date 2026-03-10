@@ -11,6 +11,7 @@
 	$strGUI="Graphical User Interface";
 	$strButtons="Interface";
 	$strMenueButtons="Menus as Buttons";
+	$strLayerSelectionMode='hide inactive layers in layer selection';
 	$strMapExtent="Map Extent";
 	$strMapProjection="1.Map Projection (EPSG-Code)";
 	$strSecondMapProjection="2.Map Projection (EPSG-Code)";

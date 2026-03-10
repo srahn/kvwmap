@@ -272,7 +272,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
   	}
   	else{
 			for ($i = 0; $i < $anzLayer; $i++) {
-				if ($this->formvars[$queryfield . $this->qlayerset[$i]['layer_id']] == 1) {
+				if ($this->formvars[$queryfield][$this->qlayerset[$i]['layer_id']] == 1) {
 					#echo '<input name="qLayer'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="1">';
 					echo '<input id="offset_'.$this->qlayerset[$i]['layer_id'].'" name="offset_'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="'.value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['layer_id']).'">';
 					echo '<input name="sql_'.$this->qlayerset[$i]['layer_id'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[$i]['sql']).'">';

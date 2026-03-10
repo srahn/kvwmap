@@ -92,7 +92,7 @@
 								if($nl AND $layer['attributes']['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
 							}
 							if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-							$td = '	<td width="" id="value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" ' . get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j]));; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
+							$td = '	<td width="" id="value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" ' . get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style_attribute'][$j]], 'gle_attribute_value value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j]));; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
 							$td.= 			attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname);
 							$td.= '	</td>';
 							if($nl)$next_line .= $td; else $datapart .= $td;
@@ -117,7 +117,7 @@
 					$onchange = '';
 					if ($layer['attributes']['dependents'][$j] != NULL) {
 						$vc_class = ' visibility_changer';
-						$onchange = 'this.oninput();" oninput="check_visibility('.$layer['layer_id'].', this, [\''.implode('\',\'', $layer['attributes']['dependents'][$j]).'\'], '.$k.');';
+						$onchange = 'this.oninput();" oninput="check_visibility_dependents('.$layer['layer_id'].', this, [\''.implode('\',\'', $layer['attributes']['dependents'][$j]).'\'], '.$k.');';
 					}
 					$invisible_attributes[$layer['layer_id']][] = '<input type="hidden" class="'.$this->subform_classname.$vc_class.'" onchange="'.$onchange.'" name="'.$layer['layer_id'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 				}				

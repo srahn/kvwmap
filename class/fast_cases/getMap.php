@@ -705,7 +705,7 @@ class GUI {
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'status') != ''){
+		if(value_of($layerset, 'errorstatus') != ''){
 			$layerset['aktivstatus'] = 0;
 		}
 
@@ -1213,6 +1213,7 @@ class GUI {
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
+				$label->align = $dbLabel['align'];
 				$RGB = explode(" ",$dbLabel['color']);
 				if ($RGB[0] == '') { 
 					$RGB[0]=0; $RGB[1]=0; $RGB[2]=0; 
@@ -1303,7 +1304,14 @@ class GUI {
 				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
-				$label->size = $dbLabel['size'];
+				if (is_numeric($dbLabel['size'])) {
+					$label->size = $dbLabel['size'];
+					$label->minsize = $dbLabel['minsize'];
+					$label->maxsize = $dbLabel['maxsize'];
+				}
+				else {
+					$label->updateFromString("LABEL SIZE [" . $dbLabel['size']."] END");
+				}
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
 				$label->minfeaturesize = $dbLabel['minfeaturesize'];
@@ -1676,7 +1684,7 @@ class stelle {
 				id," .
 				$name_column . ",
 				start,
-				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, Authentifizierung, ALB_status, wappen, wappen_link, logconsume,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, Authentifizierung, ALB_status, wappen, wappen_link, 
 				ows_namespace,
 				ows_title,
 				wms_accessconstraints,
@@ -1880,6 +1888,8 @@ class rolle {
 			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
+			$this->layer_selection_mode=$rs['layer_selection_mode'];
+			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
@@ -2312,7 +2322,8 @@ class db_mapObj {
 				g.id,
 				" . $gruppenname_column . " AS gruppenname,
 				g.obergruppe,
-				g.selectable_for_shared_layers " .
+				g.selectable_for_shared_layers,
+				g.checkbox" .
 				(!$all ? ", g2r.status" : "") . "
 			FROM
 				kvwmap.u_groups AS g" . ($all ? "" : "
@@ -2332,6 +2343,7 @@ class db_mapObj {
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
 			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];
+			$groups[$rs['id']]['checkbox'] = ($rs['checkbox'] == 't');
 			if ($rs['obergruppe']) {
 				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
 			}
@@ -2368,11 +2380,10 @@ class db_mapObj {
 				rl.querystatus,
 				rl.gle_view,
 				rl.showclasses,
-				rl.logconsume,
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale, ul.maxscale,
 				ul.offsite,
 				ul.postlabelcache,
@@ -2381,7 +2392,6 @@ class db_mapObj {
 				ul.header,
 				ul.footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,

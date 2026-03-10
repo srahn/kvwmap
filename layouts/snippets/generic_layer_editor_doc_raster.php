@@ -248,7 +248,7 @@
 							';
 						}
 						echo '</td></tr></table>';
-						echo '</td><td '.get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value')).'><div id="formelement">';
+						echo '</td><td '.get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style_attribute'][$j]], 'gle_attribute_value')).'><div id="formelement">';
 						echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname);
 						if($layer['attributes']['privileg'][$j] >= '0' AND !($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld')){
 							$this->form_field_names .= $layer['layer_id'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';

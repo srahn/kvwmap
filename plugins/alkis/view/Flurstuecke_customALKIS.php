@@ -120,7 +120,10 @@ hide_versions = function(flst){
 
 		# abhängige Sichtbarkeit Eigentümer
 		$j = $this->qlayerset[$i]['attributes']['indizes']['eigentuemer'];
-    if ($vcheck_attribute = $this->qlayerset[$i]['attributes']['vcheck_attribute'][$j]) {
+    if ($this->qlayerset[$i]['attributes']['visibility_rules'][$j]) {
+			$rules = json_decode($this->qlayerset[$i]['attributes']['visibility_rules'][$j], true);
+			$vcheck_attribute = $rules['rules'][0]['attribute'];
+			$vcheck_value = $rules['rules'][0]['value'];
 			$j = $this->qlayerset[$i]['attributes']['indizes'][$vcheck_attribute];
       $parts = get_select_parts(extract_select_clause($this->qlayerset[$i]['pfad']));
 			foreach ($parts as $part) {
@@ -148,9 +151,8 @@ hide_versions = function(flst){
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
 
 			$flst->eigentuemer_visible = true;
-			$j = $this->qlayerset[$i]['attributes']['indizes']['eigentuemer'];
-			if ($vcheck_attribute = $this->qlayerset[$i]['attributes']['vcheck_attribute'][$j]) {
-				$flst->eigentuemer_visible = $flst->eigentuemer_vcheck_value == $this->qlayerset[$i]['attributes']['vcheck_value'][$j];
+			if ($vcheck_attribute) {
+				$flst->eigentuemer_visible = $flst->eigentuemer_vcheck_value == $vcheck_value;
 			}
 
 			if ($privileg_['bestandsnr'] and $privileg_['eigentuemer'] and $flst->eigentuemer_visible) {
@@ -931,6 +933,18 @@ hide_versions = function(flst){
 													<div class="fstanzeigehover">&nbsp;&nbsp;Öffnen in Kolibri&nbsp;&nbsp;</div>
 												</a><?php
 											} ?>
+
+											<div style="position: relative">
+												<a 
+													title="QR-Code" 
+													href="javascript:void(0);" 
+													onmouseenter="get_position_qrcode(<? echo $this->qlayerset[$i]['layer_id']; ?>, '<? echo $flst->oid; ?>');"
+													onmouseleave="remove_position_qrcode(<? echo $this->qlayerset[$i]['layer_id']; ?>, '<? echo $flst->oid; ?>');"
+												>
+													<div class="button qr_code"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div>
+												</a>
+												<img id="qr_<? echo $this->qlayerset[$i]['layer_id']; ?>_<? echo $flst->oid; ?>" src="<? echo GRAPHICSPATH.'leer.gif'; ?>" style="position: absolute; bottom: 0px; left: -20px; bottom: 40px; box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.4);">
+											</div>
 
 											<div id="auszugselector_div" class="fstanzeigehover">
 												&nbsp;&nbsp;

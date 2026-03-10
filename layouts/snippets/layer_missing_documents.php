@@ -60,32 +60,19 @@
 					$datatype = $attribute->get_datatype();
 					// echo '<br>Attribut: ' . $attribute->get('name') . ' Datentyp: ' . $datatype->get('name') . ' Datentypattribut: ' . $datatype_attribute->get('name');
 					// Das extrahieren der Dokumentnamen der Feature Datentyp und Array berücksichtigen.
-					$features = $pg_obj->find_where(
+					$features = $pg_obj->find_where_ohne_clone(
 						$datatype_attribute->get_document_where($this->layer, $attribute), // where
 						'document', // order
 					  $this->layer->get('oid') . " AS oid," .
 						$datatype_attribute->get_document_select($this->layer, $attribute) . " AS document" // select
 					);
-					$features = array_filter(
-						$features,
-						function($feature) {
-							return !is_null($feature->get('document'));
-						}
-					);
-					// echo '<p>Dokument-Einträge in Datenbank:<br>';
-					// foreach ($features AS $feature) {
-					// 	echo '<br>' . $feature->get('document');
-					// }
-
 					if (count($features) > 0) {
-						$files = glob($this->layer->get('document_path') . '*[!thumb].*');
-						// foreach ($files AS $file) {
-						// 	echo '<br>' . $file;
-						// }
-						$missing_documents = array_diff(
-							array_map(function($feature) { return $feature->get('document'); }, $features), // documents of features in database
-							$files // files in document_path
-						);
+						echo '<p>Dokument-Einträge in Datenbank:<br>';
+						foreach ($features AS $key => $feature) {
+							if (!file_exists($feature['document'])) {
+								$missing_documents[$key] =  $feature['document'];
+							}
+						}			
 						if (count($missing_documents) > 0) {
 							$attributes_with_missing_docs[] = array(
 								'attribute' => $attribute,
@@ -93,7 +80,7 @@
 								'missing_documents' => $missing_documents
 							);
 						}
-					}	
+					}
 				}
 			}
 		}

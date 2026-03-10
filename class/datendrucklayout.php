@@ -722,10 +722,14 @@ class ddl {
 						}
 						$this->gui->formvars['layer_id'] = $selected_layer_id;
 						$this->gui->formvars['oid'] = $oid;
-						$this->gui->formvars['selektieren'] = 'false';
-						$rollenlayer_id = $this->gui->createZoomRollenlayer($this->gui->mapDB, $layerdb, array($this->layerset), array($oid));
-						$rollenlayer = $this->gui->mapDB->read_RollenLayer($rollenlayer_id);
-						$this->gui->loadlayer($this->gui->map, $rollenlayer[0]);
+						$this->gui->formvars['selektieren'] = 'false';		// true
+						if ($this->layout['elements'][$attributes['name'][$j]]['border'] > 0) {
+							$rollenlayer_id = $this->gui->createZoomRollenlayer($this->gui->mapDB, $layerdb, array($this->layerset), array($oid));
+							$rollenlayer = $this->gui->mapDB->read_RollenLayer($rollenlayer_id);
+							$this->gui->loadlayer($this->gui->map, $rollenlayer[0]);
+							#$this->gui->loadMap('DataBase');
+							#$this->gui->user->rolle->setOneLayer($selected_layer_id, 1);	# richtigen Layer wieder einschalten
+						}
 						$this->gui->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
 					}
 					if ($this->gui->map->selectOutputFormat('jpeg_print') == 1) {
@@ -743,7 +747,7 @@ class ddl {
 					}
 					$image_map = $this->gui->map->draw();
 					# Rollenlayer wieder entfernen
-					if ($oid != '') {
+					if ($rollenlayer_id) {
 						$this->gui->mapDB->deleteRollenLayer($rollenlayer_id);
 						$this->gui->map->removeLayer($this->gui->map->numlayers - 1);		# der letzte Layer ist die Scalebar
 						$this->gui->map->removeLayer($this->gui->map->numlayers - 1);
@@ -773,7 +777,7 @@ class ddl {
 						$this->layout['elements'][$attributes['name'][$j]]['width']
 					);
 					if (!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y) {
-						#$this->miny[$this->pdf->currentContents] = $y;		# Fehler bei Druck der VSG mit Maßnahmen im Schutzgebietsportal
+						$this->miny[$this->pdf->currentContents] = $y;		# Fehler bei Druck der VSG mit Maßnahmen im Schutzgebietsportal
 					}
 					if ($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages']) + 1) {
 						# falls in eine alte Seite geschrieben wurde, zurückkehren
@@ -1039,7 +1043,7 @@ class ddl {
 	* @param ...
 	* @return array $return_values Full path to created pdf document if $output is true and else only the last y-value of cursor in page
 	*/
-	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true, $append = false ) {
+	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true, $append = false, $use_variable_layouts = false) {
 		$result = (!$result ? array() : $result);
 		$this->layerset = $layerset[0];
 		$this->layout = $layout;
@@ -1097,7 +1101,7 @@ class ddl {
 			$rowcount = ceil(count($result) / 3);
 		}
 		for ($i = 0; $i < count_or_0($result); $i++) {
-			if (true AND is_numeric($result[$i][$this->layerset['ddl_attribute']])) {
+			if ($use_variable_layouts AND is_numeric($result[$i][$this->layerset['ddl_attribute']])) {
 				$this->layout = $this->load_layouts(NULL, $result[$i][$this->layerset['ddl_attribute']], NULL, array(0,1))[0];
 			}
 			$lastpage = end($this->pdf->objects['3']['info']['pages']) + 1;

@@ -1219,6 +1219,13 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 
 				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">
+						<input name="totp_authentication" type="checkbox" value="1" <?php if ($this->formvars['totp_authentication']) { ?> checked<?php } ?>>
+					</th>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strtotp_authentication; ?></td>
+				</tr>				
+
+				<tr class="group-sonstiges">
+					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="checkPasswordAge" type="checkbox" value="1" <?php if ($this->formvars['checkPasswordAge']) { ?> checked<?php } ?>>
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strCheckPasswordAge; ?></td>
@@ -1251,6 +1258,16 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3;">
 						<input name="version" type="text" value="<?php echo $this->formvars['version']; ?>" size="10" maxlength="10" style="width: 50px">
+					</td>
+				</tr>
+
+				<tr class="group-sonstiges">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strStartPageParams; ?>
+					</th>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3;">
+						<input name="start_page_params" type="text" value="<?php echo $this->formvars['start_page_params']; ?>" style="width: 690px">
+						<span style="vertical-align: top; margin-left: 3px" data-tooltip="<?php echo $strStartPageParamsDescription; ?>"></span>
 					</td>
 				</tr>
 

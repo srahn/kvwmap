@@ -861,6 +861,9 @@ class user {
 		$this->tokens = $rs['tokens'];
 		$this->num_login_failed = $rs['num_login_failed'];
 		$this->login_locked_until = $rs['login_locked_until'];
+		$this->totp_secret = $rs['totp_secret'];
+		$this->device_token = $rs['device_token'];
+		$this->device_expires = DateTime::createFromFormat('d.m.Y H:i:s', $rs['device_expires']);
 	}
 
 	/*
@@ -1159,6 +1162,39 @@ class user {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 	}
 
+	function update_totp_secret($secret) {
+		$sql = "
+			UPDATE
+				kvwmap.user
+			SET
+				totp_secret = '" . $secret . "'
+			WHERE
+				id = " . $this->id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->update_totp_secret - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
+	}
+
+	function generate_device_token() {
+		$token = bin2hex(random_bytes(32)); // Zufälliges Token
+    $token_hash = hash('sha256', $token);
+    $expires = new DateTime('+' . TOTP_DEVICE_EXPIRATION . ' days');
+		setcookie('trusted_device',	$token,	['expires' => $expires->getTimestamp(), 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
+		$sql = "
+			UPDATE
+				kvwmap.user
+			SET
+				device_token = '" . $token_hash . "',
+				device_expires = '" . $expires->format('d.m.Y H:i:s') . "'
+			WHERE
+				id = " . $this->id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->generate_device_token - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
+	}
+
 	function setOptions($stelle_id, $formvars) {
 		$nImageWidth = '';
 		$nImageHeight = '';
@@ -1215,6 +1251,7 @@ class user {
 					, showlayeroptions = '" . ($formvars['showlayeroptions'] == '' ? '0' : '1') . "'
 					, showrollenfilter = '" . (value_of($formvars, 'showrollenfilter') == '' ? '0' : '1') . "'
 					, menue_buttons = '" . (value_of($formvars, 'menue_buttons') == '' ? '0' : '1') . "'
+					, layer_selection_mode = '" . (value_of($formvars, 'layer_selection_mode') == '' ? '0' : '1') . "'
 					" . (value_of($formvars, 'redline_text_color')  != '' ? ", redline_text_color  = '" . $formvars['redline_text_color']  . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_family') != '' ? ", redline_font_family = '" . $formvars['redline_font_family'] . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_size')   != '' ? ", redline_font_size   = '" . $formvars['redline_font_size']   . "'" : '') . "
@@ -1476,6 +1513,9 @@ class user {
 		if ($userdaten['ips']!='') {
 			$columns['ips'] = "'" . $userdaten['ips'] . "'";
 		}
+		if ($userdaten['totp_secret']!='') {
+			$columns['totp_secret'] = "'" . $userdaten['totp_secret'] . "'";
+		}
 		if($stellen[0] != ''){
 			$columns['stelle_id'] = $stellen[0];
 		}
@@ -1530,6 +1570,7 @@ class user {
 				position = '" . $userdaten['position']."',
 				comment = '" . $userdaten['comment']."',
 				ips = '" . $userdaten['ips'] . "',
+				totp_secret = '" . $userdaten['totp_secret'] . "',
 				agreement_accepted = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
 				share_rollenlayer_allowed = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
 				layer_data_import_allowed = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .

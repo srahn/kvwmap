@@ -163,22 +163,44 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		scrollto_saved_position();
 		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
+
+	check_visibility_rule = function(layer_id, rule, scope, k) {
+		// Leaf-Regel (kein logic → einfache Bedingung)
+		if (!rule.logic && rule.attribute) {
+			const field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+			return field_has_value(field, rule.operator, rule.value);
+		}
+		// Logische Gruppe (AND / OR)
+		if (rule.logic && Array.isArray(rule.rules)) {
+			const results = rule.rules.map(r => check_visibility_rule(layer_id, r, scope, k));
+
+			if (rule.logic === 'AND') {
+				return results.every(Boolean);
+			}
+
+			if (rule.logic === 'OR') {
+				return results.some(Boolean);
+			}
+		}
+		// Fallback (ungültige Regel)
+		return false;
+	}
 	
-	check_visibility = function(layer_id, object, dependents, k){
+	check_visibility_dependents = function(layer_id, object, dependents, k) {
 		if(object == null)return;
 		var group_display;
 		dependents.forEach(function(dependent){
 			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen
-			if(scope.querySelector('#vcheck_operator_'+dependent) == undefined){
+			if (scope.querySelector('#visibility_rules_'+dependent) == undefined){
 				scope = document;			// ansonsten global
 			}
-			var operator = scope.querySelector('#vcheck_operator_'+dependent).value;
-			var value = scope.querySelector('#vcheck_value_'+dependent).value;
-			if(operator == '=')operator = '==';
+			var rule = JSON.parse(scope.querySelector('#visibility_rules_'+dependent).value);
+			
 			// visibility of attribute
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
-			if(field_has_value(object, operator, value)){
+
+			if (check_visibility_rule(layer_id, rule, scope, k)){
 				if (name_dependent != null) {
 					name_dependent.classList.remove('collapsedfull');
 				}
@@ -233,6 +255,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	}
 
 	field_has_value = function(field, operator, value) {
+		if (operator == '=')operator = '==';
 		var field_value = field.value;
 		if (field.type == 'radio') {
 			field_value = '';
@@ -256,13 +279,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 		else {
 			if (operator == 'IN') {
-				value_array = value.split('|');
-				if (value_array.indexOf(field_value) > -1) {
-					return true;
-				}
-				else {
-					return false;
-				}
+				return Array.isArray(value) && value.includes(field_value);
 			}
 			else {
 				return eval("'" + field_value + "' " + operator + " '" + value + "'");
@@ -685,6 +702,30 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 
+	subdelete_all = function(layer_id, fromobject, targetobject, reload) {
+		// layer_id ist die von dem Layer, in dem die Datensätze gespeichert werden soll
+		// fromobject ist die id von dem div, welches das Formular der Datensätze enthält
+		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
+		if (confirm('Wollen Sie die Datensätze wirklich löschen?')) {
+			checkboxes = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.check_' + layer_id));
+			checkbox_names = '';
+			var formData = new FormData();
+			for (i = 0; i < checkboxes.length; i++) {
+				checkbox_names += checkboxes[i].name + '|';
+				formData.append(checkboxes[i].name, 'on');
+			}
+			formData.append('go', 'Layer_Datensaetze_Loeschen');
+			if (reload) {
+				formData.append('reload', reload);
+			}
+			formData.append('chosen_layer_id', layer_id);
+			formData.append('targetobject', targetobject);
+			formData.append('checkbox_names_' + layer_id, checkbox_names);
+			formData.append('embedded', 'true');
+			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
+		}
+	}
+
 	subsave_data = function(layer_id, fromobject, targetobject, reload) {
 		// layer_id ist die von dem Layer, in dem die Datensätze gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular der Datensätze enthält
@@ -854,12 +895,17 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		var attributenames = '';
 		var attributevalues = '';
 		var geom = '';
+		var value = '';
 		for(i = 0; i < attributenamesarray.length; i++){
 			if(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k) != undefined){
+				value = document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value;
+				if (attributenamesarray[i] == geom_attribute) {
+					value = "'" + value + "'";
+				}
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += encodeURIComponent(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value) + '|';
+				attributevalues += encodeURIComponent(value) + '|';
 			}
-			else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
+			else if(attributenamesarray[i] == geom_attribute){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
 				if(enclosingForm.loc_x != undefined && enclosingForm.loc_x.value != ''){		// Punktgeometrie
 					geom = 'POINT('+enclosingForm.loc_x.value+' '+enclosingForm.loc_y.value+')';
 				}
@@ -869,8 +915,13 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 					}
 				}
 				attributenames += attributenamesarray[i] + '|';
-				if(geom != '')attributevalues += 'SRID=<? echo $this->user->rolle->epsg_code; ?>;' + geom + '|';		// EWKT mit dem user-epsg draus machen
-				else attributevalues += 'POINT EMPTY|';		// leere Geometrie zurückliefern
+				if (geom != '') {
+					geom = 'SRID=<? echo $this->user->rolle->epsg_code; ?>;' + geom;		// EWKT mit dem user-epsg draus machen
+				}
+				else {
+					geom = 'POINT EMPTY';		// leere Geometrie zurückliefern
+				}
+				attributevalues += 'st_geometryfromtext(\'' + geom + '\')|';
 			}
 		}
 		return new Array(attributenames, attributevalues);
@@ -1265,6 +1316,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				same_field.value = field.value;	// alle gleichen Felder auf den selben Wert setzen, falls der gleiche Datensatz im GLE nochmal vorkommt (durch Subforms)
 			});
 		}*/
+		root.changed_form_fields.push(field);
 		var flags = document.querySelectorAll('[name="' + flag_name + '"]');
 		[].forEach.call(flags, function (flag){
 			if(flag != undefined){

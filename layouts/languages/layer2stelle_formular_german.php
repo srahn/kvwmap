@@ -5,7 +5,6 @@ $strFooter = "Footer";
 $strGeomUsable = "Geometrie übernehmbar";
 $strHeader = "Header";
 $strLayerGroup = "Layergruppe in Stelle";
-$strLogconsume = "wird geloggt";
 $strMaxScale = "Max scale";
 $strMinScale = "Min scale";
 $strOffSite = "Offsite";
