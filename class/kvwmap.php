@@ -12947,6 +12947,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		if ($this->formvars['selected_layer_id'] != '') {
 			$this->layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$this->formvars['selected_group_id'] = $this->layerset[0]['gruppe'];
+			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
 			$layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 			$this->attributes = $this->mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
