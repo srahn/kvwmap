@@ -6253,6 +6253,33 @@ echo '			</table>
 		$this->output();
 	}
 
+	function schnellsprung() {
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
+		$attributes = $mapdb->read_layer_attributes($this->formvars['layer_id'], $layerdb, $privileges['attributenames']);
+		if (array_key_exists('layer_selection_id', $attributes['indizes']) OR array_key_exists('layer_params', $attributes['indizes'])) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+			$this->formvars['selected_layer_id'] = $this->formvars['layer_id'];
+			$this->formvars['value_' . $layerset[0]['maintable'] . '_oid'] = $this->formvars['oid'];
+			$this->formvars['operator_' . $layerset[0]['maintable'] . '_oid'] = '=';
+			$this->formvars['no_output'] = true;
+			$this->formvars['no_last_query'] = true;
+			$this->formvars['no_last_search'] = true;
+			$this->GenerischeSuche_Suchen();
+			if ($layer_selection_id = $this->qlayerset[0]['shape'][0]['layer_selection_id']) {
+				$this->formvars['id'] = $layer_selection_id;
+				$this->layerCommentLoad();
+			}
+			if ($new_layer_params_json = $this->qlayerset[0]['shape'][0]['layer_params']) {
+				$new_layer_params = (array)json_decode($new_layer_params_json);
+				rolle::$layer_params = array_replace(rolle::$layer_params, $new_layer_params);
+				$this->user->rolle->set_layer_params(trim(json_encode(rolle::$layer_params), '{}'));
+			}
+		}
+		$this->zoomto_dataset();
+	}
+
 	function createZoomRollenlayer($dbmap, $layerdb, $layerset, $oids, $auto_class_attribute = NULL, $result = NULL){
 		# Layer erzeugen
 		$data = $dbmap->getData($layerset[0]['layer_id']);
@@ -15590,10 +15617,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->user->rolle->setLayerSelection($this->formvars['id']);
 			$this->user->rolle->readSettings();
 		}
-		$this->loadMap('DataBase');
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->output();
 	}
 
   function composePolygonWKTString($pathx,$pathy,$minx,$miny,$scale) {
