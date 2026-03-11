@@ -23524,7 +23524,7 @@ class Document {
     		0,
     		0,
     		0,
-    		'Helvetica.afm', // Ein Wert muss gesetzt werden, weil beim Layer-Export Null rauskommen würde und das darf für font nicht sein.
+    		'Helvetica.afm', -- Ein Wert muss gesetzt werden, weil beim Layer-Export Null rauskommen würde und das darf für font nicht sein.
     		0
 			) RETURNING id";
     $this->debug->write("<p>file:kvwmap class:Document->addfreetext :",4);
