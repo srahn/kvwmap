@@ -70,6 +70,7 @@ class ddl {
 		$this->remaining_rectangles = array();
 		$this->remaining_lines = array();
 		$this->colors = $this->read_colors();
+		$this->debug_output = false;
   }
 	
 	function read_colors(){
@@ -483,7 +484,10 @@ class ddl {
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if ($this->i_on_page == 0) {
 									# beim ersten Datensatz das maxy ermitteln
-									if($this->maxy < $this->layout['height']-$offy)$this->maxy = $this->layout['height']-$offy;
+									if ($this->maxy < $this->layout['height'] - $offy) {
+										if ($this->debug_output) echo '$this->maxy = '. $this->layout['height'].' - '.$offy.' ($this->layout[\'height\'] - $offy ='.($this->layout['height'] - $offy).')<br>';
+										$this->maxy = $this->layout['height'] - $offy;
+									}
 								}
 								if ($sublayout == '') {
 									$y = $ypos - 20;
@@ -601,6 +605,7 @@ class ddl {
 								if ($this->i_on_page == 0) {
 									if ($this->maxy < $y) {
 										# beim ersten Datensatz das maxy ermitteln
+										if ($this->debug_output) echo '$this->maxy = '. $y.' ($y ='.$y.')<br>';
 										$this->maxy = $y;
 									}
 								}
@@ -780,7 +785,8 @@ class ddl {
 					if ($this->i_on_page == 0) {
 						if ($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width']) {
 							# beim ersten Datensatz das maxy ermitteln
-							$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];
+							if ($this->debug_output) echo '$this->maxy = '. $y.' + '.$this->layout['elements'][$attributes['name'][$j]]['width'].' ($y + $this->layout[\'elements\'][$attributes[\'name\'][$j]][\'width\'] ='.($y + $this->layout['elements'][$attributes['name'][$j]]['width']).')<br>';
+							$this->maxy = $y + $this->layout['elements'][$attributes['name'][$j]]['width'];
 						}
 					}
 					if (
@@ -792,6 +798,7 @@ class ddl {
 						$y = $y - $this->yoffset_onpage;
 						$x = $x - $this->xoffset_onpage;
 					}
+					if ($this->debug_output) echo '&nbsp;&nbsp;&nbsp;&nbsp;Kartenbild auf '.$this->pdf->currentContents.' an y='.$y.'<br>';
 					$this->pdf->addJpegFromFile(IMAGEPATH . $newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
 					# Rechteck um die Karte
 					$this->pdf->setLineStyle(1, 'square');
@@ -804,6 +811,7 @@ class ddl {
 						$this->miny[$this->pdf->currentContents] = $y;		# Fehler bei Druck der VSG mit Maßnahmen im Schutzgebietsportal
 					}
 					if ($y < $this->layout['margin_bottom']) {
+						if ($this->debug_output) echo 'pageoverflow Kartenbild<br>';
 						$nextpage = $this->getNextPage($this->pdf->currentContents);
 						if ($nextpage != NULL) {
 							$this->pdf->reopenObject($nextpage);
@@ -831,12 +839,14 @@ class ddl {
 			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer anderen Seite beendet -> zu dieser Seite zurückkehren
 		}
 		if($offset_value - $ypos < 40){	# Seitenüberlauf
-			$offset_value = $this->layout['height'] + $offset_value - 40 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
+			#$offset_value = $this->layout['height'] + $offset_value - 40 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
+			$offset_value = $this->layout['height'] + ($offset_value - $ypos - 40) - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
 			$next_page = $this->getNextPage($this->layout['page_id'][$offset_attribute]);
 			if($next_page != NULL){
 				$this->pdf->reopenObject($next_page);		# die nächste Seite der Seite des Offset-Attributes nehmen
 			}
 			else{																			# wenns noch keine gibt, neue Seite erstellen
+				if ($this->debug_output) echo 'ezNewPage durch handlePageOverflow<br>';
 				$this->pdf->ezNewPage();			# eine neue Seite beginnen
 				$this->miny[$this->pdf->currentContents] = $this->layout['height'];
 				$this->maxy = 800;
@@ -847,6 +857,7 @@ class ddl {
 		elseif($backto_oldpage){
 			$this->pdf->reopenObject($this->layout['page_id'][$offset_attribute]);		# die Seite des Offset-Attributes nehmen
 		}
+		if ($this->debug_output) echo '$y = ' . $offset_value.' - '.$ypos.' ($offset_value - $ypos = '.($offset_value - $ypos).') in handlePageOverflow<br>';
 		$ypos = $offset_value - $ypos;
 		return $ypos;
 	}
@@ -977,7 +988,7 @@ class ddl {
 			}
 		}
 		$page_id_after_puttext = $this->pdf->currentContents;
-		#if($this->user->id == 2)echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
+		if ($this->debug_output) echo '&nbsp;&nbsp;&nbsp;&nbsp;Text auf '.$page_id_before_puttext.' '.$page_id_after_puttext.' an y='.$y.' : "'.$text.'"<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow = true; 
 			if($this->getNextPage($page_id_before_puttext) != $page_id_after_puttext)$this->pdf->overflow_error = true;		# eine oder mehr Seiten übersprungen -> Fehler
@@ -1169,6 +1180,7 @@ class ddl {
 				}
 			}
 			if (!$new_column AND $this->i_on_page > 0) {
+				if ($this->debug_output) echo '$this->yoffset_onpage = '.$this->maxy.' - '.$this->miny[$lastpage].' + '.$this->layout['gap'].' ($this->maxy - $this->miny[$lastpage] + $this->layout[\'gap\']='.($this->maxy - $this->miny[$lastpage] + $this->layout['gap']).')<br>';
 				$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage] + $this->layout['gap']; # der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			}
 			if (
@@ -1286,6 +1298,7 @@ class ddl {
 					}
 					else {
 						$this->page_overflow = false;
+						if ($this->debug_output) echo 'abort<br>';
 						$this->pdf->transaction('abort');
 						$i--;
 						$this->i_on_page = -1;
