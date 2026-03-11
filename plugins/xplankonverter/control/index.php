@@ -559,7 +559,7 @@ function go_switch_xplankonverter($go) {
 				* As the date will also end up in the metadata, it needs to be set before the metadata is created/updated
 				*/
 				if ($GUI->formvars['suppress_gvbtable_letzteaktualisierung_update'] == false ||
-				$GUI->formvars['suppress_gvbtable_letzteaktualisierung_update'] == 'false') {
+				strtolower($GUI->formvars['suppress_gvbtable_letzteaktualisierung_update']) == 'false') {
 					$GUI->write_xlog('Update des Aktualisierungsdatums in gebietseinheiten-Tabelle.');
 					$GUI->debug->write('Setze Datum Letze Aktualisierung in Gemeindeverbände-Tabelle.');
 					$ret_akt = $GUI->konvertierung->update_letztes_aktualisierungsdatum_gebietstabelle();

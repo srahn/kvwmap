@@ -208,6 +208,7 @@
 	$GUI->trigger_functions['handle_regel'] = function($fired, $event, $layer, $oid = 0, $old_dataset = array()) use ($GUI) {
 		$executed = true;
 		$success = true;
+		require_once(PLUGINS . 'xplankonverter/model/regel.php');
 
 		switch(true) {
 

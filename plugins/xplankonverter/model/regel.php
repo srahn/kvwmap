@@ -414,6 +414,7 @@ class Regel extends PgObject {
 
 	function gml_layer_exists() {
 		$this->debug->show("Prüfe ob Layer: " . $this->get_layername() . " mit Typ: " . $this->get_layertyp() . " in Gruppe: " . $this->konvertierung->get('gml_layer_group_id') . " existiert", Regel::$write_debug);
+		require_once(CLASSPATH . 'Layer.php');
 		$layers = Layer::find($this->gui, "
 			`Name` = '{$this->get_layername()}' AND
 			`Datentyp`= {$this->get_layertyp()}
@@ -460,6 +461,7 @@ class Regel extends PgObject {
 	* Funktion fragt die zur Regel gehöhrende Konvertierung ab
 	*/
 	function get_konvertierung() {
+		require_once(PLUGINS . 'xplankonverter/model/konvertierung.php');
 		$konvertierung_id = $this->get('konvertierung_id');
 		if (!empty($this->get('konvertierung_id'))) {
 			$this->debug->show('Regel gehört direkt zur Konvertierung: ' . $this->get('konvertierung_id'), false);
@@ -522,7 +524,7 @@ class Regel extends PgObject {
 
 			if (empty($template_layer)) {
 				# ToDo: Kein Template Layer vorhanden, erzeuge einen Dummy
-				echo 'Layer ' . $this->get_layername() . ' für gewählte GML-Klasse nicht vorhanden. Bitte anlegen.';
+				$this->debug->show('Layer ' . $this->get_layername() . ' für gewählte GML-Klasse nicht vorhanden. Bitte anlegen.', Regel::$write_debug);
 			}
 			else {
 				$this->debug->show('<p>Kopiere Templatelayer in gml layer gruppe id: ' . $this->konvertierung->get('gml_layer_group_id'), Regel::$write_debug);
