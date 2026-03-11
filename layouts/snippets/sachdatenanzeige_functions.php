@@ -972,13 +972,13 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	} 
 
-	selectall = function(layer_id) {
+	selectall = function(layer_id, also_invisible) {
 		var k = 0,
 				obj = document.getElementById(layer_id + '_' + k),
 				status = obj.checked;
 
 		while (obj != undefined) {
-			if (obj.offsetParent !== null) {	// nur wenn Datensatz sichtbar
+			if (also_invisible || obj.offsetParent !== null) {	// nur wenn also_invisible oder Datensatz sichtbar
 				obj.checked = !status;
 			}
 			k++;
