@@ -415,7 +415,7 @@ class GUI {
 		}
 		for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 			if (file_exists(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php')) {
-				include(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php');
+				include_once(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php');
 			}
 		}
 		$trigger_result = array('executed' => false);
