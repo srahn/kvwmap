@@ -779,6 +779,16 @@ class ddl {
 					if (!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y) {
 						$this->miny[$this->pdf->currentContents] = $y;		# Fehler bei Druck der VSG mit Maßnahmen im Schutzgebietsportal
 					}
+					if ($y < $this->layout['margin_bottom']) {
+						$nextpage = $this->getNextPage($this->pdf->currentContents);
+						if ($nextpage != NULL) {
+							$this->pdf->reopenObject($nextpage);
+						}
+						else {
+							$this->page_overflow = true;
+						}
+						$y = $this->layout['height'] - $this->layout['margin_top'] - 20 - $height;
+					}
 					if ($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages']) + 1) {
 						# falls in eine alte Seite geschrieben wurde, zurückkehren
 						$this->pdf->closeObject();
@@ -857,14 +867,8 @@ class ddl {
 				$new_filename = IMAGEPATH . $dateinamensteil['filename'] . '.jpg';
 				if (!file_exists($new_filename)) {
 					$command = IMAGEMAGICKPATH . 'convert "' . $dateiname . '" -background white -flatten "' . $new_filename . '"';
-					#echo 'Kommando zum konvertieren der Bilddatei: ' . $command;
 					exec($command, $result, $status);
-					#echo '<br>Result of command: ' . print_r($command, true) . ' status: ' . $status;
 				}
-				// echo '<br>dateiname: ' . $dateiname;
-				// echo '<br>newfile: ' . $new_filename;
-				// echo '<br>file_exists: ' . file_exists($new_filename);
-				// exit;
 				if (file_exists($new_filename)) {
 					$size = getimagesize($new_filename);
 					$ratio = $size[1] / $size[0];
@@ -1245,6 +1249,7 @@ class ddl {
 					$lastpage = end($this->pdf->objects['3']['info']['pages']) + 1;
 					if (
 						$this->pdf->overflow_error != true AND
+						$this->getNextPage($this->transaction_start_pageid) != '' AND 
 						(
 							# wenn die Transaktion aber mehr als 2 Seiten umfasst
 							$this->getNextPage($this->transaction_start_pageid) != $lastpage OR
@@ -1274,7 +1279,7 @@ class ddl {
 						}
 						$this->pdf->newPage();
 						$lastpage = end($this->pdf->objects['3']['info']['pages']) + 1;
-						$this->miny[$lastpage] = 0;
+						$this->miny[$lastpage] = $this->layout['height'];
 					}
 				}
 				else {
