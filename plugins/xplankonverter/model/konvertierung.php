@@ -270,7 +270,6 @@ class Konvertierung extends PgObject {
 		$layernames_with_content[] = strtoupper($this->plan->planartAbk) . '-Bereiche';
 		$layernames_with_content[] = 'Geltungsbereiche';
 		#echo '<br>pk layernames_with_content: ' . print_r($layernames_with_content, true);
-		$layers_to_remove = array();
 		for ($i = 0; $i < $gui->map->numlayers; $i++) {
 			$layer = $gui->map->getLayer($i);
 			if (in_array($layer->name, $layernames_with_content)) {

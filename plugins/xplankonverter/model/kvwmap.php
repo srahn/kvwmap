@@ -301,6 +301,7 @@
 						)
 						AND LOWER(`Name`) != 'rp_bereich'
 						AND LOWER(`Name`) != 'rp_plan'
+						AND LOWER(`Name`) != 'xp_ppo_rp_plan'
 						" : '') . "
 					) OR
 					(
@@ -644,7 +645,6 @@
 		$GUI->service_layers = $result['layers_with_content'];
 		$GUI->service_layernames = array_keys($GUI->service_layers);
 		$GUI->xlog->write('service_layernames: ' . implode(', ' . $GUI->service_layer_names));
-		$layers_to_remove = array();
 
 		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
 			$layer = $GUI->map->getLayer($i);
