@@ -510,7 +510,7 @@
 								</tr>
 							</table>
 							<br>
-							<table id="ddl_attributes" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table id="ddl_attributes" border="0" cellpadding="3" cellspacing="0" style="width: 710px; border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td align="center" style="border-top:2px solid #C3C7C3" colspan=8><span class="fett">&nbsp;Attribute</span></td>
 								</tr><?
@@ -615,7 +615,7 @@
 																title="<? echo $strTitleWidth; ?>"
 															>Breite:</label>
 														</td>
-														<td style="border-top:1px solid #C3C7C3;">
+														<td style="border-top:1px solid #C3C7C3; width: 100%">
 															<input
 																id="width_<? echo $this->ddl->attributes['name'][$i]; ?>"
 																type="number"
@@ -799,6 +799,25 @@
 										<tr id="tr2_<? echo $this->ddl->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
 											<td>&nbsp;&nbsp;&nbsp;y:</td>
 											<td><input type="text" name="posy_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['ypos']; ?>" size="5"></td>
+											<td style="width: 60px; text-align: right;">
+												<label
+													for="offset_attribute_<? echo $this->ddl->attributes['the_geom']; ?>"
+													title="<? echo $strTitleOffset_attribute; ?>"
+												>
+													unterhalb&nbsp;von:
+												</label>
+											</td>
+											<td align="left" align="center">
+												<input
+													id="offset_attribute_<? echo $this->ddl->attributes['the_geom']; ?>"
+													type="text"
+													title="<? echo $strTitleOffset_attribute; ?>"
+													onmouseenter="show_select(this, 'attributes')"
+													name="offset_attribute_<? echo $this->ddl->attributes['the_geom']; ?>"
+													value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['offset_attribute']; ?>"
+													style="width: 150px"
+												>
+											</td>
 											<td width="60px">&nbsp;Rand:</td>
 											<td><input	type="text" name="fontsize_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['fontsize']; ?>" size="5">m</td>
 											<td colspan="3"></td>

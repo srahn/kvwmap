@@ -421,6 +421,9 @@ class ddl {
 				$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed', NULL, NULL, $preview);			#  feste Freitexte hinzufügen
 				$this->remaining_lines = $this->add_lines($offsetx, 'fixed');			# feste Linien hinzufügen
 				$this->remaining_rectangles = $this->add_rectangles($offsetx, 'fixed');			# feste Rechtecke hinzufügen
+
+				$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
+
 				if ($attributes['type'][$j] != 'geometry') {
 					switch ($attributes['form_element_type'][$j]) {
 						case 'SubFormPK' :
@@ -440,7 +443,6 @@ class ddl {
 								$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
 								
 								#### relative Positionierung über Offset-Attribut ####
-								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 								if ($offset_attribute != '') {
 									# es ist ein offset_attribute gesetzt
 									$offset_value = $this->layout['offset_attributes'][$offset_attribute];
@@ -531,7 +533,6 @@ class ddl {
 						} break;
 
 						default : {
-							$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 							$value = $this->result[$i][$attributes['name'][$j]];
 							$value_offset_attribute = $this->result[$i][$offset_attribute];
 							$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
@@ -680,6 +681,23 @@ class ddl {
 					$this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0
 				) {
 					# Geometrie
+					$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
+					#### relative Positionierung über Offset-Attribut #
+					if ($offset_attribute != '') {		# es ist ein offset_attribute gesetzt
+						$offset_value = $this->layout['offset_attributes'][$offset_attribute];
+						if ($offset_value != ''){		# Offset wurde auch schon bestimmt, relative y-Position berechnen
+							if ($this->layout['dont_print_empty'] AND $value_offset_attribute == '') {
+								$y = 0;
+							}
+							$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
+						}
+						else {
+							#$remaining_attributes[] = $attributes['name'][$j];	# Offset wurde noch nicht bestimmt, Attribut merken und überspringen
+							continue 1;
+						}
+					}
+					#### relative Positionierung über Offset-Attribut #
+
 					if ($this->layout['type'] == 0 AND $this->record_startpage != end($this->pdf->objects['3']['info']['pages']) + 1) {
 						# zurück zur Startseite des Datensatzes
 						$this->pdf->reopenObject($this->record_startpage);
@@ -756,14 +774,20 @@ class ddl {
 					$newname = $this->user->id.basename($filename);
 					rename(IMAGEPATH . basename($filename), IMAGEPATH . $newname);
 					$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'] + $offsetx;
-					$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'] - $this->offsety;
+					if ($offset_attribute == '') {
+						$y = $y - $this->offsety;
+					}
 					if ($this->i_on_page == 0) {
 						if ($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width']) {
 							# beim ersten Datensatz das maxy ermitteln
 							$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];
 						}
 					}
-					if ($this->layout['type'] != 0 AND $this->i_on_page > 0) {
+					if (
+						$this->layout['type'] != 0 AND 
+						$offset_attribute == '' AND
+						$this->i_on_page > 0) 
+					{
 						# beim Untereinander-Typ y-Wert um Offset verschieben
 						$y = $y - $this->yoffset_onpage;
 						$x = $x - $this->xoffset_onpage;
