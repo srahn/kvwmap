@@ -1049,7 +1049,7 @@ from
 													'output' => $this->formvars['selstellen']['Bezeichnung'][$key]
 												);
 											},
-											array_keys($this->formvars['selstellen']['ID'])
+											array_keys($this->formvars['selstellen']['ID'] ?: [])
 										),
 										$this->formvars['ows_stelle_id'],
 										1,
