@@ -1252,6 +1252,7 @@ class user {
 					, showrollenfilter = '" . (value_of($formvars, 'showrollenfilter') == '' ? '0' : '1') . "'
 					, menue_buttons = '" . (value_of($formvars, 'menue_buttons') == '' ? '0' : '1') . "'
 					, layer_selection_mode = '" . (value_of($formvars, 'layer_selection_mode') == '' ? '0' : '1') . "'
+					" . (value_of($formvars, 'layer_selection_mode')  == '' ? ", layer_selection  = NULL" : '') . "
 					" . (value_of($formvars, 'redline_text_color')  != '' ? ", redline_text_color  = '" . $formvars['redline_text_color']  . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_family') != '' ? ", redline_font_family = '" . $formvars['redline_font_family'] . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_size')   != '' ? ", redline_font_size   = '" . $formvars['redline_font_size']   . "'" : '') . "
