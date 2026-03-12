@@ -1017,6 +1017,10 @@ function go_switch($go, $exit = false) {
 			case 'Layerauswahl_Laden' : {
 				$GUI->sanitize(['id' => 'int']);
 				$GUI->layerCommentLoad();
+				$GUI->loadMap('DataBase');
+				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$GUI->drawMap();
+				$GUI->output();
 			}break;
 
 			case 'Layerauswahl_loeschen' : {
@@ -1366,6 +1370,10 @@ function go_switch($go, $exit = false) {
 				$GUI->formvars['keinzurueck'] = true;
 				$GUI->formvars['quicksearch'] = true;
 				$GUI->GenerischeSuche_Suchen();
+			} break;
+
+			case 'schnellsprung' : {
+				$GUI->schnellsprung();
 			} break;
 
 			case 'Layer-Suche' : {

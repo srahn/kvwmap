@@ -34,8 +34,8 @@
 
 <script type="text/javascript">
 
-function zoomto(layer_id, oid, columnname){
-  location.href="index.php?go=zoomto_dataset&oid="+oid+"&layer_columnname="+columnname+"&layer_id="+layer_id+"&selektieren=zoomonly";
+function schnellsprung(layer_id, oid, columnname){
+  location.href="index.php?go=schnellsprung&oid="+oid+"&layer_columnname="+columnname+"&layer_id="+layer_id+"&selektieren=zoomonly";
 }
 
 function toggle_vertices(){	

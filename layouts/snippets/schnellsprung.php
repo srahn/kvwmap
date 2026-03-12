@@ -6,7 +6,6 @@
 	<?
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
-		$path = $mapdb->getPath(LAYER_ID_SCHNELLSPRUNG);
 		$privileges = $this->Stelle->get_attributes_privileges(LAYER_ID_SCHNELLSPRUNG);
 		$attributes = $mapdb->read_layer_attributes(LAYER_ID_SCHNELLSPRUNG, $layerdb, $privileges['attributenames']);
 		# wenn Attributname/Wert-Paare �bergeben wurden, diese im Formular einsetzen
@@ -22,11 +21,11 @@
 				if($attributes['form_element_type'][$i] == 'Auswahlfeld'){
 					?><select class="schnellsprung-select-field" 
 					<?
-						if($attributes['req_by'][$i] != ''){
-							echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';
-						}
+						// if($attributes['req_by'][$i] != ''){
+						// 	echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';
+						// }
 						if($attributes['name'][$i] == 'oid'){
-							echo 'onchange="zoomto('.LAYER_ID_SCHNELLSPRUNG.', this.value, \''.$attributes['the_geom'].'\');"';
+							echo 'onchange="schnellsprung('.LAYER_ID_SCHNELLSPRUNG.', this.value, \''.$attributes['the_geom'].'\');"';
 						}
 					?> 
 						id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>"><?echo "\n"; ?>
