@@ -125,7 +125,7 @@ class PgObject {
 	/**
 	 * @return PgObject $this->data is false if nothing found.
 	 */
-	function find_by($attribute, $value) {
+	function find_by($attribute, $value, $comp_operator = '=') {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, $this->show);
 		$sql = '
 			SELECT
@@ -133,13 +133,8 @@ class PgObject {
 			FROM
 				"' . $this->schema . '"."' . $this->tableName . '"
 			WHERE
-				"' . $attribute . '"';
-		if ($value == '') {
-			$sql .= ' IS NULL';
-		}
-		else {
-			$sql .= ' = \'' . $value . '\'';
-		}
+				' . pg_escape_identifier($attribute) . ($value == '' ? ' IS NULL' : ' ' . $comp_operator . ' ' . pg_escape_literal(pg_escape_string($value)));
+		// echo '<br>sql: ' . $sql;
 		$this->debug->show('find_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		if (!$query) {
@@ -627,7 +622,9 @@ class PgObject {
 	}
 
 	function update_attr($attributes, $set = false, $where = NULL) {
-		$quote = ($this->identifier_type == 'text' ? "'" : "");
+		if (!is_array($attributes)) {
+			$attributes = array($attributes);
+		}
 		$sql = "
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"

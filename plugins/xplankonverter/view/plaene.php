@@ -921,7 +921,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-search_selector="input"
 					data-filter-control="input"
 					>Kon.<br> Id</th>
-				<th
+					<th
 					data-field="plan_gml_id"
 					data-visible="<? echo ((!array_key_exists('plan_gml_id', $rolle_attribute_settings) OR $rolle_attribute_settings['plan_gml_id']['switched_on'] == 1) ? 'true' : 'false'); ?>"
 					data-sort-name="plan_gml_id"
@@ -984,27 +984,6 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-switchable="false"
 					class="col-md-2 text-center"
 				>Edit</th>
-				<th
-					data-field="konvertierung_id"
-					data-sortable="true"
-					data-visible="false"
-					data-switchable="true"
-					data-searchable="true"
-				>Konvertierung Id</th>
-				<th
-					data-field="plan_gml_id"
-					data-sortable="true"
-					data-visible="false"
-					data-switchable="true"
-					data-searchable="true"
-					data-search_selector="input"
-				>Plan-Id</th>
-				<th
-					data-field="stelle_id"
-					data-sortable="true"
-					data-visible="false"
-					data-switchable="true"
-				>Stelle Id</th>
 			</tr>
 		</thead>
 	</table>

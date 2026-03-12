@@ -2513,7 +2513,7 @@ class rolle {
 			RETURNING
 				(id)
 		";
-		// echo '<br>'.$sql;
+		// echo '<br>' . $sql;
 		$ret = $this->database->execSQL($sql,4, 1);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
