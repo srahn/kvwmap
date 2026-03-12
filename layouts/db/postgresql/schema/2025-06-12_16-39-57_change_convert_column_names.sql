@@ -1,6 +1,6 @@
 BEGIN;
 
-CREATE OR REPLACE FUNCTION convert_column_names(
+CREATE OR REPLACE FUNCTION public.convert_column_names(
     schemaname character varying,
     tablename character varying)
   RETURNS void AS
