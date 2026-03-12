@@ -790,6 +790,29 @@ class Konvertierung extends PgObject {
 		}
 	}
 
+	function create_themenauswahl($xplan_layers) {
+		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
+		if (! $result['success']) {
+			return $result;
+		}
+		$layers_with_content = $result['layers_with_content'];
+		$layers_with_content[] = array('id' => $this->plan->get_plan_layer_id());
+		$layers_with_content[] = array('id' => $this->plan->get_bereich_layer_id());
+		$layerset = array('list' => array());
+		foreach ($layers_with_content AS $layer) {
+			$layerset['list'][] = array(
+				'layer_id' => $layer['id'],
+				'aktivstatus' => 1,
+				'querystatus' => 0
+			);
+		}
+		$result = $this->gui->user->rolle->insertLayerComment($layerset, $this->plan->get_anzeige_name() . ' (' . $this->plan->get('gml_id') . ')', $this->gui->Stelle->id, NULL);
+		if ($result['success']) {
+			$this->update_attr('layer_selection_id = ' . $result['id'], true);
+		}
+		return $result;
+	}
+
 	/**
 	 * Removes the directory determined which get_file_path() in which the uploaded and created documents are
 	 * located.

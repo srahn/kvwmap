@@ -3777,6 +3777,8 @@ echo '			</table>
 	# Ausgabe der Seite
 	function output() {
 		global $sizes;
+		global $admin_stellen;
+
 		# bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
 		if (array_key_exists('mime_type', $this->formvars) AND $this->formvars['mime_type'] != '') {
 			$this->mime_type = $this->formvars['mime_type'];
@@ -15503,7 +15505,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function layerCommentStore(){
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->loadMap('DataBase');
-    $ret=$this->user->rolle->insertLayerComment($this->layerset, $this->formvars['comment']);
+    $ret=$this->user->rolle->insertLayerComment($this->layerset, $this->formvars['comment'], $this->user->stelle_id, $this->user->id);
     $this->add_message('notice', 'Themenauswahl gespeichert.');
     $this->drawMap();
     $this->output();
@@ -15514,8 +15516,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->mapCommentSelectForm();
   }
 
-	function DeleteStoredLayers(){
-    $this->user->rolle->deleteLayerComment($this->formvars['id']);
+	/**
+	 * Löscht Themenauswahl mit übergebener id wenn
+	 * a) die 
+	 */
+	function DeleteStoredLayers() {
+		if (!$this->Stelle->is_admin_stelle()) {
+			$stelle_id = $this->Stelle->id;
+			$user_id = $this->user->id;
+		}
+    $this->user->rolle->deleteLayerComment($this->formvars['id'], $stelle_id, $user_id);
     $this->layerCommentSelectForm();
   }
 
@@ -15533,23 +15543,30 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
 	function layerCommentSelectForm() {
-    $this->main='LayerCommentSelectForm.php';
-    $ret=$this->user->rolle->getLayerComments(NULL, $this->user->id);
+		if (!$this->Stelle->is_admin_stelle()) {
+			$stelle_id = $this->Stelle->id;
+		}
+    $ret=$this->user->rolle->getLayerComments(NULL, $stelle_id, $this->user->id);
     if ($ret[0]) {
       $this->Fehlermeldung='Es konnten keine gespeicherten Themen abgefragt werden.<br>'.$ret[1];
     }
     else {
       $this->layerComments=$ret[1];
     }
-    $this->output();
+    $this->main = 'LayerCommentSelectForm.php';
+		$this->output();
   }
 
 	function layerCommentLoad() {
 		if ($this->formvars['id']) {
+			if (!$this->Stelle->is_admin_stelle()) {
+				$stelle_id = $this->Stelle->id;
+			}
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$groups = $mapDB->read_Groups();
 			$ret = $this->user->rolle->getLayerComments(
 				$this->formvars['id'],
+				$stelle_id,
 				($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id)
 			);
 			if ($ret[1] == NULL) {

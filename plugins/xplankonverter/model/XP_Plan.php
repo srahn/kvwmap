@@ -144,6 +144,19 @@ class XP_Plan extends PgObject {
 		return $plan_layer_id;
 	}
 
+	function get_bereich_layer_id($planart = NULL) {
+		if (empty($planart)) {
+			$planart = $this->planart;
+		}
+		switch ($planart) {
+			case 'BP-Plan' : $bereich_layer_id = XPLANKONVERTER_BP_BEREICHE_LAYER_ID; break;
+			case 'FP-Plan' : $bereich_layer_id = XPLANKONVERTER_FP_BEREICHE_LAYER_ID; break;
+			case 'SO-Plan' : $bereich_layer_id = XPLANKONVERTER_SO_BEREICHE_LAYER_ID; break;
+			case 'RP-Plan' : $bereich_layer_id = XPLANKONVERTER_RP_BEREICHE_LAYER_ID; break;
+		}
+		return $bereich_layer_id;
+	}
+
 	/**
 	 * Return names of layer that have content from the plan
 	 * @param array $xplan_layers Array mit GUI->xplankonverter_get_xplan_layers() abgefragt wurden

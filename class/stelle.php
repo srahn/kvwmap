@@ -852,6 +852,12 @@ class stelle {
 		}
 		return $stellen;
 	}
+
+	function is_admin_stelle($stelle_id = null) {
+		global $admin_stellen;
+		$stelle_id = $stelle_id ?? $this->id;
+		return in_array($stelle_id, $admin_stellen);
+	}
 	
 	function getStellenhierarchie() {
 		$this->links = Array();

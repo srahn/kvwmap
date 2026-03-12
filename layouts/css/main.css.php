@@ -3227,3 +3227,15 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .delete-button:hover {
 	background-color: #ffa2a2;
 }
+
+.layer_comment_select_func {
+	padding-left: 7px;
+}
+.layer_comment_select_name_field {
+}
+.layer_comment_select_name_div {
+	background-color:<? echo BG_GLEATTRIBUTE; ?>;
+	border:1px solid #C3C7C3;
+	padding: 4px;
+	margin-left: 7px;
+}
