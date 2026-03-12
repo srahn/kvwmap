@@ -1,3 +1,6 @@
+create table public.current_schema as 
+SELECT current_schema();
+
 BEGIN;
 
 CREATE OR REPLACE FUNCTION public.gdi_subtract_geometries_from_schematables(base_geom geometry, schema_table_with_buffer_list text[], min_area double precision)
