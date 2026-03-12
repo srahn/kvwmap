@@ -33,7 +33,10 @@
 		}
 		if ($this->user->rolle->layer_selection_mode == 1) {
 			include_once(CLASSPATH.'FormObject.php');
-			$ret = $this->user->rolle->getLayerComments(NULL, $this->user->id);
+			if (!$this->Stelle->is_admin_stelle()) {
+				$stelle_id = $this->Stelle->id;
+			}
+			$ret = $this->user->rolle->getLayerComments(NULL, $stelle_id, $this->user->id);
       $layer_selections = $ret[1];
 			echo '<div id="layer_selection_div">' . $this->strLayerSelection . ':';
 			echo FormObject::createSelectField(

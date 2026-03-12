@@ -1125,6 +1125,8 @@ function go_switch_xplankonverter($go) {
 						$GUI->konvertierung->set_status(
 							($GUI->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
 						);
+						$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);
+						$GUI->konvertierung->create_themenauswahl($GUI->xplan_layers);
 						# Validierungsergebnisse anzeigen.
 						$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
 					}
