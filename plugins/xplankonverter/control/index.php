@@ -48,6 +48,7 @@
 // xplankonverter_validierungsergebnisse
 // xplankonverter_xplanvalidator
 // xplankonverter_zusammenzeichnung
+// xplankonverter_augment_xp_ppo_stylesheetids
 
 // neuer_Layer_Datensatz must be included for after-triggers in model/kvwmap (which itself includes other classes)
 if (
@@ -2678,6 +2679,23 @@ function go_switch_xplankonverter($go) {
 					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $GUI->konvertierung->get_id());
 					$GUI->konvertierung->insert_textabschnitte($gml_extractor);
 				}
+			}
+			$GUI->output();
+		} break;
+
+		/*
+		* Augments stylesheet-ids within XP_PPO according to the mappingtable xplankonverter.xp_ppo_art_to_stylesheet, if the stylesheet-ids are empty
+		* Example: https://testportal-plandigital.de/kvwmap/index.php?go=xplankonverter_augment_xp_ppo_stylesheetids&konvertierung_id=23156
+		*/
+		case 'xplankonverter_augment_xp_ppo_stylesheetids' : {
+			$GUI->main = 'Hinweis.php';
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			} else {
+				$GUI->Hinweis = 'Dieser Case fügt XP_PPOs einer spezifischen Konvertierung Stylesheet-Ids hinzu, wenn diese leer sind.<br><br>';
+				$GUI->Hinweis .= 'Es werden anhand der Tabelle xplankonverter.xp_ppo_art_to_stylesheet SQL-Statements erstellt und ausgeführt.<br>';
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				$GUI->konvertierung->augment_xp_ppo_stylesheetids();
 			}
 			$GUI->output();
 		} break;

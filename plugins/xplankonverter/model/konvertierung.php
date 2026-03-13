@@ -3167,7 +3167,6 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		}
 		return $rs['is_95_equal'];
 		
-		
 		/*
 		$plan_or_regel_assigned = $result['plan_or_regel_assigned'];
 		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
@@ -3179,5 +3178,132 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		}
 		*/
 	}
+
+	/*
+	* Augments xp_ppo's with stylesheet-ids if stylesheet id is null
+	* and rules are listed within xplankonverter.xp_ppo_art_to_stylesheet
+	*/
+	function augment_xp_ppo_stylesheetids() {
+		// sql to get rules related to the xppo for all target classes
+		// relates to target class without possible namespaces, -> also remove namespaces in update sql
+		// function get_xplan_object_class_from_gml_id returns lower string table_name from pg_class through tableoid
+		// art_attrs = comma separated attribute list from art without spaces, curly brackets or namespaces, but with array indicator, e.g. [2]
+		// data_types currently limited to 5, consider simplifying this somehow?
+		// TODO consider pre-sorting array together with index to gain a more universal rule
+		// (sorting output is randomized or changing across software-versionsin many gmls)
+		$sql = "
+			SELECT
+				DISTINCT
+				CONCAT_WS(',',c1.data_type,c2.data_type,c3.data_type,c4.data_type,c5.data_type) AS data_types,
+					REPLACE(
+						TRANSLATE(
+							REPLACE(LOWER(origin_art::text), 'xplan:', '')
+							, '{}', '')
+						, ' ', '') AS art_attrs,
+					ats.*
+			FROM
+				xplankonverter.xp_ppo_art_to_stylesheet ats
+			INNER JOIN
+				xplan_gml.xp_ppo ppo
+			ON
+				REPLACE(ppo.art::text, 'xplan:','') = REPLACE(origin_art::text, 'xplan:', '')
+			LEFT JOIN LATERAL (
+				SELECT *
+				FROM information_schema.columns col1
+				WHERE table_schema = 'xplan_gml'
+				AND lower(ats.target_class) = col1.table_name
+				AND split_part(lower(ats.target_column_1),',',1) = col1.column_name
+			) c1 ON TRUE
+			LEFT JOIN LATERAL (
+				SELECT *
+				FROM information_schema.columns col2
+				WHERE table_schema = 'xplan_gml'
+				AND lower(ats.target_class) = col2.table_name
+				AND split_part(lower(ats.target_column_1),',',2) = col2.column_name
+			) c2 ON TRUE
+			LEFT JOIN LATERAL (
+				SELECT *
+				FROM information_schema.columns col3
+				WHERE table_schema = 'xplan_gml'
+				AND lower(ats.target_class) = col3.table_name
+				AND split_part(lower(ats.target_column_1),',',3) = col3.column_name
+			) c3 ON TRUE
+			LEFT JOIN LATERAL (
+				SELECT *
+				FROM information_schema.columns col4
+				WHERE table_schema = 'xplan_gml'
+				AND lower(ats.target_class) = col4.table_name
+				AND split_part(lower(ats.target_column_1),',',4) = col4.column_name
+			) c4 ON TRUE
+			LEFT JOIN LATERAL (
+				SELECT *
+				FROM information_schema.columns col5
+				WHERE table_schema = 'xplan_gml'
+				AND lower(ats.target_class) = col5.table_name
+				AND split_part(lower(ats.target_column_1),',',5) = col5.column_name
+			) c5 ON TRUE
+			WHERE
+				ppo.konvertierung_id = " . $this->get($this->identifier) . "
+			AND
+				ppo.stylesheetid IS NULL
+			AND
+				ppo.dientzurdarstellungvon IS NOT NULL
+			AND
+				xplankonverter.get_xplan_object_class_from_gml_id(ppo.dientzurdarstellungvon[1]::uuid) = LOWER(ats.target_class)
+			ORDER BY
+				ats.target_class
+		";
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
+		$this->gui->Hinweis .= '<br>Durchgeführte SQL-Statements:<br>';
+
+		while($row = pg_fetch_assoc($ret[1])) {
+			//$this->gui->Hinweis .= '<pre>' . var_dump($row) . ' </pre>';
+			$target_columns = explode(',', $row['art_attrs']);
+			$target_values = explode(',', $row['target_value']); // TODO consider what happens for text/aufschrift-fields with comma inside the string
+			$data_types = explode(',', $row['data_types']); // currently limit to 5, see what happens if more are needed
+			$attr_str = '';
+			for($i = 0; $i < count($target_columns); $i++) {
+				//TODO check if empty
+				switch($data_types[$i]) {
+					case 'ARRAY':
+						// on occasion there are -1 index-values that should likely be considered 0
+						$index = 0;
+						($row['origin_index'] < 0) ? $index = 1 : $index = $row['origin_index'] + 1;
+						$target_column_with_cast = explode('[',$target_columns[$i])[0] . "[" . $index . "]::text";
+						break;
+					default: //includes e.g. USER-DEFINED, integer, character varying
+						// removes everything within potential array [] brackets and casts to text
+						$target_column_with_cast = explode('[',$target_columns[$i])[0] .  "::text";
+						break;
+				}
+				$attr_str .= " AND " . $target_column_with_cast . " =  '" . $target_values[$i] . "' ";
+			}
+
+			$sql = "
+				UPDATE
+					xplan_gml.xp_ppo
+				SET
+					stylesheetid = (NULL,'" . $row['target_stylesheet_id'] . "', NULL)::xplan_gml.xp_stylesheetliste
+				WHERE
+					gml_id IN
+					(
+						SELECT p.gml_id
+						FROM xplan_gml.xp_ppo p
+						INNER JOIN xplan_gml." . strtolower($row['target_class']) . " o
+						ON p.dientzurdarstellungvon[1]::text = o.gml_id::text
+						AND p.konvertierung_id = o.konvertierung_id
+						WHERE p.konvertierung_id = " . $this->get($this->identifier) . "
+						AND stylesheetid IS NULL " .
+						$attr_str . "
+					)
+				AND
+					konvertierung_id = " . $this->get($this->identifier) .";
+			";
+			$return = $this->gui->pgdatabase->execSQL($sql, 4, 0);
+
+			$this->gui->Hinweis .= '<br>' . $sql . '<br>';
+		}
+	}
+
 }
 ?>
