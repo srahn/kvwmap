@@ -319,6 +319,20 @@ function install() {
 				echo $pgsqlKvwmapDb->errormessage;
 			}
 
+			?>ALTER USER kvwmap WITH NOSUPERUSER...<?php
+			$sql = "
+				ALTER USER kvwmap WITH NOSUPERUSER;
+			";
+			$ret = $pgsqlKvwmapDb->execSQL($sql, 0, 1);
+			if ($ret['success']) { ?>
+				... fertig<?
+			}
+			else { ?>
+				Fehler bei ALTER USER kvwmap WITH NOSUPERUSER; in der Datenbank <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
+				$error = true;
+				echo $pgsqlKvwmapDb->errormessage;
+			}
+
 			if (file_exists('config.php')) { ?>
 				config.php existiert schon.<?php
 			}
