@@ -791,6 +791,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function create_themenauswahl($xplan_layers) {
+		include_once(CLASSPATH . 'RolleSavedLayers.php');
 		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
 		if (! $result['success']) {
 			return $result;
@@ -806,9 +807,12 @@ class Konvertierung extends PgObject {
 				'querystatus' => 0
 			);
 		}
+		if ($rolle_saved_layer = RolleSavedLayers::find_by_name($this->gui, $this->plan->get_anzeige_name())) {
+			$rolle_saved_layer->delete(); // Drop LayerComment if already exists and overwrite in next step.
+		}
 		$result = $this->gui->user->rolle->insertLayerComment($layerset, $this->plan->get_anzeige_name() . ' (' . $this->plan->get('gml_id') . ')', $this->gui->Stelle->id, NULL);
 		if ($result['success']) {
-			$this->update_attr('layer_selection_id = ' . $result['id'], true);
+			$this->update_attr(array('layer_selection_id = ' . $result['id']), true);
 		}
 		return $result;
 	}

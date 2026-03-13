@@ -885,7 +885,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 						data-order="<? echo ((!array_key_exists('inkrafttretensdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['inkrafttretensdatum']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
 						class="col-md-2"
 						data-filter-control="input"
-					>Inkrafttretensdatum</th><?
+					>Datum<br>Inkraft-<br>treten</th><?
 				} ?>
 				<th
 					data-field="genehmigungsdatum"
@@ -908,7 +908,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-formatter="konvertierungAuslegungsstartdatumFormatter"
 					class="col-md-2"
 					data-filter-control="input"
-				>Bekanntmachung</th>
+				>Bekannt-<br>machung</th>
 				<? } ?>
 				<th
 					data-field="konvertierung_id"
@@ -920,8 +920,8 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-searchable="true"
 					data-search_selector="input"
 					data-filter-control="input"
-					>Konvertierung Id</th>
-				<th
+					>Kon.<br> Id</th>
+					<th
 					data-field="plan_gml_id"
 					data-visible="<? echo ((!array_key_exists('plan_gml_id', $rolle_attribute_settings) OR $rolle_attribute_settings['plan_gml_id']['switched_on'] == 1) ? 'true' : 'false'); ?>"
 					data-sort-name="plan_gml_id"
@@ -976,7 +976,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-visible="true"
 					data-formatter="konvertierungDownloadsFormatter"
 					data-switchable="false"
-					class="col-md-2 align-top text-center"
+					class="col-md-2 text-center"
 				>Downloads</th>
 				<th
 					data-visible="true"
@@ -984,27 +984,6 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-switchable="false"
 					class="col-md-2 text-center"
 				>Edit</th>
-				<th
-					data-field="konvertierung_id"
-					data-sortable="true"
-					data-visible="false"
-					data-switchable="true"
-					data-searchable="true"
-				>Konvertierung Id</th>
-				<th
-					data-field="plan_gml_id"
-					data-sortable="true"
-					data-visible="false"
-					data-switchable="true"
-					data-searchable="true"
-					data-search_selector="input"
-				>Plan-Id</th>
-				<th
-					data-field="stelle_id"
-					data-sortable="true"
-					data-visible="false"
-					data-switchable="true"
-				>Stelle Id</th>
 			</tr>
 		</thead>
 	</table>

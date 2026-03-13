@@ -113,7 +113,7 @@ class XP_Plan extends PgObject {
 	}
 
 	function get_anzeige_name() {
-		return $this->get_first_planart_name() . ' ' . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
+		return ($this->get_first_planart_name() ? $this->get_first_planart_name() . ' ' : '') . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
 	}
 
 	/**
