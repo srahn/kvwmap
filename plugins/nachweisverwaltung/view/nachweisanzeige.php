@@ -265,7 +265,7 @@ function update_columns() {
 <? 
 	function output_columns($gui, $i, $columns) {
 		foreach ($columns as $column) {
-			if (in_array($column, $gui->formvars['columns'])) {
+			if (in_array($column, $gui->formvars['columns'] ?: [])) {
 				$c = $gui->nachweis_columns[$column];
 				switch ($column) {
 					case 'blattnummer' : {
@@ -465,7 +465,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<i id="column_options_button" class="fa fa-columns" aria-hidden="true" title="Spaltenauswahl" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
 					<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">
 		<? 			foreach ($this->nachweis_columns as $column => $c) {
-							echo '<input type="checkbox" name="column_' . $column . '" ' . (in_array($column, $this->formvars['columns']) ? 'checked' : '') . '>' . $c['alias'] . '<br>'; 
+							echo '<input type="checkbox" name="column_' . $column . '" ' . (in_array($column, $this->formvars['columns'] ?: []) ? 'checked' : '') . '>' . $c['alias'] . '<br>'; 
 						}	?>
 						<input type="button" style="margin: 8 0 5 40;" onclick="update_columns();" value="ok">
 					</div>
