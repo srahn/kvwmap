@@ -40,22 +40,15 @@
 <? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
-		<!--td valign="top" style="padding: 0 0 0 0">
-			<? if($layer['template'] != 'generic_layer_editor.php'){ ?>
-			<a href="javascript:switch_gle_view1(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
-			<? }else{ ?>
-			<a href="javascript:switch_gle_view1(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
-			<? } ?>
-		</td-->
 		<td height="30" width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['name']; ?></h2></td>
-		<!--td valign="top" style="padding: 0 10 0 0">
-			<? if($layer['template'] != 'generic_layer_editor.php'){ ?>
-			<a href="javascript:switch_gle_view1(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
-			<? }else{ ?>
-			<a href="javascript:switch_gle_view1(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
-			<? } ?>
-		</td-->
 		<td align="right" valign="top">
+			<? if ($layer['records_status'] !== '0') { ?>
+				<div class="gle-view" style="margin-right: 16px;">	<?
+					for ($g = 0; $g < 3; $g = $g + 2) {
+						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+					}	?>
+				</div>
+			<? } ?>
 		</td>
 	</tr>
 	<tr><td><img height="7" src="<? echo GRAPHICSPATH ?>leer.gif"></td></tr>
