@@ -93,6 +93,7 @@
 	});
 
 	select.addEventListener("change", () => {
+		select.style.position = "";
 		filter.value = "";
 		select.size = 1;
 	});
