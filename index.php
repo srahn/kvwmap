@@ -149,6 +149,11 @@ ob_start ();    // Ausgabepufferung starten
 
 $formvars = $_REQUEST;
 
+$go = (array_key_exists('go', $formvars) ? $formvars['go'] : '');
+if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
+	$go = $go.'_'.$formvars['go_plus'];
+}
+
 ###########################################################################################################
 define('CASE_COMPRESS', false);
 #																																																					#
@@ -226,11 +231,7 @@ if ($GUI->formvars['go'] == '' AND $GUI->Stelle->start_page_params != '') {
 	parse_str($GUI->Stelle->start_page_params, $params);
 	$GUI->formvars = array_merge($GUI->formvars, $params);
 	$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
-}
-
-$go = (array_key_exists('go', $GUI->formvars) ? $GUI->formvars['go'] : '');
-if (array_key_exists('go_plus', $GUI->formvars) and $GUI->formvars['go_plus'] != '') {
-	$go = $go.'_'.$GUI->formvars['go_plus'];
+	$go = $GUI->formvars['go'];
 }
 
 $GUI->go = $go;
