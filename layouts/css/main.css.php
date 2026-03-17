@@ -492,7 +492,6 @@ span[data-tooltip]:hover::after {
 	box-shadow: 1px 1px 6px 1px #ddd;
   position: absolute;
 	width: max-content;
-	min-width: 200px;
 	max-width: 400px;
   top: 1px;
   right: 0;
@@ -534,7 +533,8 @@ span[data-tooltip]:hover::after {
 }
 
 .custom-select .dropdown li.selected {
-  background-color: #e0e0e6;
+  background-color: #cdcdd4;
+	filter: brightness(1.1);
 }
 
 .custom-select img {
@@ -2560,6 +2560,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .rollenwahl-option-data {
 	width: 560px;
 	padding : 4px;
+	display: flex;
 }
 
 .button_selection{

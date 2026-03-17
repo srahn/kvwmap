@@ -403,21 +403,26 @@
 					# Auswahl vordefinierter Farben
 					if ($gui->result_colors == '') {
 						$gui->result_colors = $gui->pgdatabase->read_colors();
-					}
-					$datapart .= '
-						<select class="'.$field_class.'" tabindex="1" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="width: 80px; background-color: rgb(' . $value . ')" onchange="' . $onchange . ';this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
 						for($i = 0; $i < count($gui->result_colors); $i++){
-							$rgb = $gui->result_colors[$i]['red'] . ' ' . $gui->result_colors[$i]['green'] . ' ' . $gui->result_colors[$i]['blue'];
-							$datapart .= '<option ';
-							if ($value == $rgb){
-								$datapart .= ' selected';
-							}
-							$datapart .= '	style="width: 80px; background-color: rgb(' . $rgb . ')"
-															value="' . $rgb . '">
-															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-														</option>' . "\n";
+							$option['style'] = 'background-color: rgb('.$gui->result_colors[$i]['red'].', '.$gui->result_colors[$i]['green'].', '.$gui->result_colors[$i]['blue'].')';
+							$option['value'] = $gui->result_colors[$i]['red'].' '.$gui->result_colors[$i]['green'].' '.$gui->result_colors[$i]['blue'];
+							$option['output'] = '';
+							$gui->result_color_options[] = $option;
 						}
-					$datapart .= '</select>';
+					}
+					$datapart .= FormObject::createCustomSelectField(
+						$fieldname,																					# name
+						$gui->result_color_options,													# options
+						$value,																							# value
+						1,																									# size
+						'width: 80px',																			# style
+						$onchange,																					# onchange
+						$layer_id.'_'.$name.'_'.$e.'_'.$k,									# id
+						'',																									# multiple
+						$field_class,																				# class
+						' ',																								# firstoption
+						'min-width: 80px'																		# optionstyle
+					);
 				}
 			} break;
 
