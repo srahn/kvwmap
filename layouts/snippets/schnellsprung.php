@@ -19,7 +19,7 @@
 			if($attributes['name'][$i] == 'oid'){
 				echo $attributes['alias'][$i] . ':';
 				if ($attributes['form_element_type'][$i] == 'Auswahlfeld') {	?>
-					<input type="text" id="filter" placeholder="Suchen...">
+					<input type="text" id="schnellsprung_filter" placeholder="Suchen...">
 					<select class="schnellsprung-select-field" 
 					<?
 						// if($attributes['req_by'][$i] != ''){
@@ -58,7 +58,7 @@
 	 ?>
 </div>
 <script>
-	const filter = document.getElementById("filter");
+	const filter = document.getElementById("schnellsprung_filter");
 	const select = document.getElementById("value_oid");
 	const allOptions = Array.from(select.options);
 

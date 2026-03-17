@@ -871,6 +871,10 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+#schnellsprung_filter {
+	display: none;
+}
+
 select[name="geom_from_layer"] {
 	width: 250px;
 }
