@@ -534,9 +534,6 @@ function go_switch($go, $exit = false) {
 			case 'reset_layers' : {
 				$GUI->reset_layers(value_of($GUI->formvars, 'layer_id'));
 				$GUI->loadMap('DataBase');
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
@@ -544,9 +541,6 @@ function go_switch($go, $exit = false) {
 			case 'show_all_layers' : {
 				$GUI->user->rolle->update_layer_status(NULL, '1');
 				$GUI->loadMap('DataBase');
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
@@ -555,10 +549,12 @@ function go_switch($go, $exit = false) {
 				$GUI->reset_querys();
 				$GUI->loadMap('DataBase');
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
+			} break;
+
+			case 'hide_deactivated_layers' : {
+				$GUI->user->rolle->hide_deactivated_layers();
 			} break;
 
 			case 'zoom2coord' : {

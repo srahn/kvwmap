@@ -37,6 +37,7 @@
 	$strLayerControl="Layer control";
 	$strDeactivateAllLayer="Click to deactivate all layers.";
 	$strClearAllQuerys="Click to clear all query checkboxes.";
+  $strHideDeactivatedLayers="Hide/Show deactivated layers";
 	$strInfoQuery="Information query";
 	$strGPS="GPS-Follow-Mode";
 	$strExtentURL="Show Extent URL";

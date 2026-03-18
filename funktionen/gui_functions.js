@@ -1069,6 +1069,10 @@ function add_to_formdata(element){
 	formdata.set(element.name, value);
 }
 
+function hide_deactivated_layers(){
+	ahah("index.php",	"go=hide_deactivated_layers", '', '', function () {update_legend('reload ');});	
+}
+
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){

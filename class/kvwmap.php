@@ -2245,7 +2245,7 @@ echo '			</table>
 				}
 
 				# Filter für read_Layer
-				$mapDB->nurAktiveLayer = value_of($this->formvars, 'nurAktiveLayer');
+				$mapDB->nurAktiveLayer = $this->user->rolle->hide_deactivated_layers ?? value_of($this->formvars, 'nurAktiveLayer');
 				$mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
 				$mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
 				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');

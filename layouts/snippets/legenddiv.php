@@ -76,6 +76,11 @@
 				<div class="button layer" title="<? echo $strDeactivateAllLayer; ?>"></div>
 			</div>
 		</a>
+		<a href="javascript: void(0)" onclick="hide_deactivated_layers();">
+			<div>
+				<div class="button" title="<? echo $strHideDeactivatedLayers; ?>"><i style="font-size: 24px; margin: 6px" class="fa fa-eye" aria-hidden="true"></i></div>
+			</div>
+		</a>
 		<? } ?>
 
 		<div title="<?php echo $strLoadNew; ?>" style="flex-grow: 3; text-align: -webkit-center;">
