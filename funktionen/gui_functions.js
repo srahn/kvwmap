@@ -1070,6 +1070,9 @@ function add_to_formdata(element){
 }
 
 function hide_deactivated_layers(){
+	var icon = document.getElementById('hide_deactivated_layers_icon');
+	icon.classList.toggle("fa-eye");
+  icon.classList.toggle("fa-eye-slash");
 	ahah("index.php",	"go=hide_deactivated_layers", '', '', function () {update_legend('reload ');});	
 }
 
