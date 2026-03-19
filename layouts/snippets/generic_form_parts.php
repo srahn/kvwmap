@@ -966,115 +966,126 @@
 	}
 
 	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $change_all, $size, $onchange, $field_class, $req = NULL, $req_by = NULL){
-		if (!is_array($req)) {
-			$req = array($req);
-		}
 		$element_id = $layer_id . '_' . $name . '_' . $k;
 		if (strpos($fieldname, $element_id) !== false) {		# bei Array-Typen der Fall
 			$element_id = $fieldname;
 		}
-		$dataparts = array();
+		if ($privileg == '0') {
+			$auswahlfeld_output = $enums[$value]['output'];
+			$datapart  = '<div class="readonly_text">' . htmlspecialchars($output) . '</div>';
+			$datapart .= '<input
+				type="hidden"
+				id="' . $lelement_id . '"
+				name="' . $fieldname . '"
+				class="' . $field_class . '"
+				onchange="' . $onchange . '"
+				value="' . htmlspecialchars($value) . '"
+			>'; // falls das Attribut ein visibility-changer ist
+		}
+		else {
+			if (!is_array($req)) {
+				$req = array($req);
+			}
+			$dataparts = array();
 
-		if ($change_all) {
-			$onchange = 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
-			$onchange_output = 'change_all('.$layer_id.', '.$k.', \'output_'.$layer_id.'_'.$name.'\');';
-		}
-		# datapart besteht aus
-		# - autofeld_zweispaltig_auswahl_und_suggest_div
-		# - bei Subformverknüpfung und Anlegerechten entweder
-		# 	- bei embedded der Neu Button und ein div für subform
-		#		- oder ein Link zum Anlegen eines neuen Datensatzes
-		# - dargestellt in 1, 2 oder 3 Spalten		
-		if ($subform_layer_id != '' AND $subform_layer_privileg > 0) {
-			if ($embedded == true) {
-				$href = 'javascript:void(0);" onclick="ahah(
-					\'index.php\',
-					\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&embedded=true&fromobject=subform' . $layer_id . '_' . $k . '_' . $j . '&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id . '&targetattribute=' . $name . '\',
-					new Array(document.getElementById(\'subform' . $layer_id . '_' . $k . '_' . $j . '\')),
-					new Array(\'sethtml\')
-				)';
-				$subform_div = '</tr><tr><td><div style="display:inline" id="subform' . $layer_id . '_' . $k . '_' . $j . '"></div></td>';
+			if ($change_all) {
+				$onchange = 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
+				$onchange_output = 'change_all('.$layer_id.', '.$k.', \'output_'.$layer_id.'_'.$name.'\');';
 			}
-			else {
-				$href = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&csrf_token=' . $_SESSION['csrf_token'];
+			# datapart besteht aus
+			# - autofeld_zweispaltig_auswahl_und_suggest_div
+			# - bei Subformverknüpfung und Anlegerechten entweder
+			# 	- bei embedded der Neu Button und ein div für subform
+			#		- oder ein Link zum Anlegen eines neuen Datensatzes
+			# - dargestellt in 1, 2 oder 3 Spalten		
+			if ($subform_layer_id != '' AND $subform_layer_privileg > 0) {
+				if ($embedded == true) {
+					$href = 'javascript:void(0);" onclick="ahah(
+						\'index.php\',
+						\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&embedded=true&fromobject=subform' . $layer_id . '_' . $k . '_' . $j . '&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id . '&targetattribute=' . $name . '\',
+						new Array(document.getElementById(\'subform' . $layer_id . '_' . $k . '_' . $j . '\')),
+						new Array(\'sethtml\')
+					)';
+					$subform_div = '</tr><tr><td><div style="display:inline" id="subform' . $layer_id . '_' . $k . '_' . $j . '"></div></td>';
+				}
+				else {
+					$href = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&csrf_token=' . $_SESSION['csrf_token'];
+				}
+				$new_button = '<td>&nbsp;&nbsp;<a class="buttonlink" href="' . $href . '">&nbsp;neu&nbsp;</a></td>';
 			}
-			$new_button = '<td>&nbsp;&nbsp;<a class="buttonlink" href="' . $href . '">&nbsp;neu&nbsp;</a></td>';
-		}
-		$datapart = '
-			<table cellpadding="0" cellspacing="0">
-				<tr>
-					<td>
-						<div id="autofeld_zweispaltig_auswahl_und_suggest_div">
-							<input
-								autocomplete="off"
-								title="' . $alias . '"
-								onkeydown="
-									if(event.keyCode == 13){
-										document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked = true;
-										document.querySelector(\'#suggests_' . $element_id . ' select\').onchange();
-									}
-									if (this.backup_value == undefined) {
-										this.backup_value = this.value;
-										document.getElementById(\'' . $element_id . '\').backup_value = document.getElementById(\'' . $element_id . '\').value;
-									}
-								"
-								onkeyup="
-									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'ok\', \'' . $k . '\', [\'' . implode(',', $req) . '\'], \'' . $req_by . '\');
-								"
-								onchange="
-									if (!document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked && document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
-										// Abbrechen und Reset bei Danebenklicken
-										this.value = this.backup_value;
-										document.getElementById(\'' . $element_id . '\').value = document.getElementById(\'' . $element_id . '\').backup_value;
-										setTimeout(function(){
-											document.getElementById(\'suggests_' . $element_id . '\').style.display = \'none\';
-											},
-											500
-										);
-									}' . $onchange_output . '
-									if (\'' . $oid . '\' != \'\') {
-										set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
-									}
-								"' .
-								(($privileg == '0')
-									? ' readonly style="border:0px;background-color:transparent;"'
-									: ' tabindex="1" '
-								) . '
-								size="' . $size . '"
-								type="text"
-								id="output_' . $element_id . '"
-								value="' . htmlspecialchars($output) . '"
-							>
-							<input
-								class="' . $field_class . '"
-								type="hidden"
-								onchange="' . $onchange . ';"
-								name="' . $fieldname . '"
-								id="' . $element_id . '"
-								value="' . htmlspecialchars($value) . '"
-							>
-							<div valign="top" style="height:0px; position:relative;">
-								<div
-									id="suggests_' . $element_id . '"
-									style="
-										z-index: 3000;
-										display:none;
-										position:absolute;
-										left:0px; top:0px;
-										width: 400px;
-										vertical-align:top;
-										overflow:hidden;
-										border:solid grey 1px;
+			$datapart = '
+				<table cellpadding="0" cellspacing="0">
+					<tr>
+						<td>
+							<div id="autofeld_zweispaltig_auswahl_und_suggest_div">
+								<input
+									autocomplete="off"
+									title="' . $alias . '"
+									onkeydown="
+										if(event.keyCode == 13){
+											document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked = true;
+											document.querySelector(\'#suggests_' . $element_id . ' select\').onchange();
+										}
+										if (this.backup_value == undefined) {
+											this.backup_value = this.value;
+											document.getElementById(\'' . $element_id . '\').backup_value = document.getElementById(\'' . $element_id . '\').value;
+										}
 									"
-								></div>
+									onkeyup="
+										autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'ok\', \'' . $k . '\', [\'' . implode(',', $req) . '\'], \'' . $req_by . '\');
+									"
+									onchange="
+										if (!document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked && document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
+											// Abbrechen und Reset bei Danebenklicken
+											this.value = this.backup_value;
+											document.getElementById(\'' . $element_id . '\').value = document.getElementById(\'' . $element_id . '\').backup_value;
+											setTimeout(function(){
+												document.getElementById(\'suggests_' . $element_id . '\').style.display = \'none\';
+												},
+												500
+											);
+										}' . $onchange_output . '
+										if (\'' . $oid . '\' != \'\') {
+											set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
+										}
+									" 
+									tabindex="1" 
+									size="' . $size . '"
+									type="text"
+									id="output_' . $element_id . '"
+									value="' . htmlspecialchars($output) . '"
+								>
+								<input
+									class="' . $field_class . '"
+									type="hidden"
+									onchange="' . $onchange . ';"
+									name="' . $fieldname . '"
+									id="' . $element_id . '"
+									value="' . htmlspecialchars($value) . '"
+								>
+								<div valign="top" style="height:0px; position:relative;">
+									<div
+										id="suggests_' . $element_id . '"
+										style="
+											z-index: 3000;
+											display:none;
+											position:absolute;
+											left:0px; top:0px;
+											width: 400px;
+											vertical-align:top;
+											overflow:hidden;
+											border:solid grey 1px;
+										"
+									></div>
+								</div>
 							</div>
-						</div>
-					</td>
-					' . $new_button . '
-					' . $subform_div . '
-				</tr>
-			</table>
-		';
+						</td>
+						' . $new_button . '
+						' . $subform_div . '
+					</tr>
+				</table>
+			';
+		}
 		return $datapart;
 	}
 
