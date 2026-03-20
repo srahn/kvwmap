@@ -803,3 +803,15 @@ nav > ul > li > ul > li:hover > ul {
 	margin: 5 31 13 0;
 	border-radius: 8px;
 }
+
+.table-wrapper .table td, .table-wrapper .table th {
+  padding: 0px;
+}
+
+.table-wrapper .btn {
+  padding: 2px;
+}
+
+#message_box {
+  top: 29% !important;
+}

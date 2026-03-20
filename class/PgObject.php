@@ -40,6 +40,7 @@ class PgObject {
 	static $schema;
 	static $tableName;
 	static $identifier;
+	public $columns;
 	public $debug;
 	public $gui;
 	public $database;
@@ -308,6 +309,10 @@ class PgObject {
 		return $this->extent;
 	}
 
+	/**
+	 * function return true if a dataset with the value of $key exists and is
+	 * other than this dataset.
+	 */
 	function exists($key) {
 		$sql = "
 			SELECT
@@ -444,6 +449,10 @@ class PgObject {
 		return $ids;
 	}
 
+	function get_id_keys() {
+		return array_keys($this->get_ids());
+	}
+
 	function set($attribute, $value) {
 		$this->data[$attribute] = $value;
 		return $value;
@@ -458,6 +467,9 @@ class PgObject {
 		return $this->data[$attribute];
 	}
 
+	/**
+	 * Function create a dataset of this object type with $data if given, else with current values from $this->data.
+	 */
 	function create($data = '') {
 		if (!empty($data)) {
 			$this->data = $data;
@@ -594,6 +606,66 @@ class PgObject {
 		return $this->get('id');
 	} */
 
+
+	/*
+	* Function insert new dataset if not exists else update it with data values
+	* corresonding to identifier attributes
+	* INSERT INTO users (id, name, email)
+	* VALUES (1, 'John', 'j@url.de')
+	* ON CONFLICT (id)
+	* DO UPDATE SET name = EXCLUDED.name;
+	*/
+	function insert_or_update($data = '') {
+		if (!empty($data)) {
+			$this->data = $data;
+		}
+		if ($this->data[$this->identifier] == '' OR $this->data[$this->identifier] == 0) {
+			unset($this->data[$this->identifier]);
+		}
+		$values = array_map(
+			function($value) {
+				return (is_array($value) ? "{" . implode(", ", $value) . "}" : $value);
+			},
+			$this->getValues()
+		);
+		$sql = "
+			INSERT INTO " . $this->qualifiedTableName . " (
+				" . implode(', ', array_map(function($key) { return '"' . $key . '"'; }, $this->getKeys())) . "
+			)
+			VALUES (" .
+				implode(
+					", ",
+					array_map(
+						function($value) {
+							return (($value === '' OR $value === null) ? "NULL" : "'" . pg_escape_string($value) . "'");
+						},
+						$values
+					)
+				) . "
+			)
+			ON CONFLICT (" . implode(', ' , $this->get_id_keys()) . ")
+			DO UPDATE SET
+				" . implode(', ', array_map(function($key) { return $key . ' = EXCLUDED.' . $key; }, $this->getKeys())) . "
+			RETURNING *;
+		";
+		$this->debug->show('SQL zum Insert on Conflict: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		if ($query === false) {
+			return array(
+				'success' => false,
+				'msg' => 	pg_last_error($this->database->dbConn) . ' Aufgetreten bei SQL: ' . $sql . 'keys: -' . implode(', ', $this->getKeys()) . '-' . ' data: ' . print_r($this->data, true)
+			);
+		}
+		$results = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$results[] = $rs;
+		}
+		return array(
+			'success' => true,
+			'msg' => $results
+		);
+	}
+
 	function update($data = array(), $update_all_attributes = true) {
 		$results = array();
 		if (!empty($data)) {
@@ -718,6 +790,36 @@ class PgObject {
 		return $results;
 	}
 
+	function getColumnsFromTable() {
+		$this->debug->show('getColumnsFromTable', PgObject::$write_debug);
+		$this->columns = array();
+		$sql = "
+			SELECT
+				*
+			FROM
+				information_schema.columns
+			WHERE
+			  table_schema = 'kvwmap' AND
+				table_name = '" . $this->tableName . "'
+		";
+		$this->debug->show('SQL zum Abfragen der Spalten der Tabelle SQL: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		if (!$query) {
+			return array(
+				'success' => false,
+				'msg' => pg_last_error($this->database->dbConn)
+			);
+		}
+		$this->columns = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$this->columns[] = $rs;
+		}
+		return array(
+			'success' => true,
+			'columns' => $this->columns
+		);
+	}
+
 	function setKeysFromTable() {
 		#$this->debug->show('setKeysFromTable', PgObject::$write_debug);
 		$columns = $this->get_attribute_types();
@@ -729,9 +831,30 @@ class PgObject {
 
 	function setKeysFromFormvars($formvars) {
 		$this->debug->show('setKeysFromFormvars', PgObject::$write_debug);
-		$this->data = array_map(function($attribute) { return null; }, array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable()))));
+		$result = $this->getColumnsFromTable();
+		if (!$result['success']) {
+			echo '<br>hier';
+			return $result;
+		}
+		$this->data = array_map(
+			function($attribute) { return null; },
+			array_flip(
+				array_intersect(
+					array_keys($formvars),
+					array_map(
+						function($attribute) {
+							return $attribute['column_name'];
+						},
+						$this->columns
+					)
+				)
+			)
+		);
+		return array(
+			'success' => true,
+			'data' => $this->data
+		);
 	}
-
 
 	/*
 	* Fragt die foreign constraints der Tabelle ab und

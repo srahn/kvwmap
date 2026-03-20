@@ -45,16 +45,27 @@
 	}
 
 	function attribute_tooltip($attributes, $j) {
-		if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
+		if ($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time') {
+			$title = 'externer Link';
+			$target = '';
+			$onclick = '';
 			if (substr($attributes['tooltip'][$j], 0, 4) == 'http') {
-				$title_link = 'href="'.$attributes['tooltip'][$j].'" target="_blank"';
+				$href = $attributes['tooltip'][$j];
+				$target = '_blank';
+			}
+			else if ($tooltip_json = getTooltipJSON($attributes['tooltip'][$j])) {
+				$href = $tooltip_json['href'];
+				if ($tooltip_json['title'] != '') { $title = $tooltip_json['title']; }
+				if ($tooltip_json['target'] != '') { $target = $tooltip_json['target']; }
 			}
 			else {
-				$title_link = 'href="javascript:void(0);"';
+				$href = 'javascript:void(0)';
+				$title = htmlentities($attributes['tooltip'][$j]);
+				$onclick = ' onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"';
 			}
 			return '<td align="right">
-								<a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '">
-									<div class="gle_attribute_tooltip" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"></div>
+								<a href="' . $href . '" title="' . $title . '" target="' . $target .'">
+									<div class="gle_attribute_tooltip"' . $onclick .'"></div>
 								</a>
 							</td>';
 		}

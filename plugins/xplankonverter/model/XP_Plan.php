@@ -63,6 +63,18 @@ class XP_Plan extends PgObject {
 		}
 		return $plan_attribs;
 	}
+	
+	public static function convert_xp_generattribut_erweitert($plan_attribs) {
+		// Entfernt die Enumeration typ in Planattribut type und type_name für typ xp_generattribut_erweitert
+		foreach ($plan_attribs AS $i => $plan_attribut) {
+			if ($plan_attribut['type'] == 'xp_generattribut_erweitert' AND $plan_attribut['type_type'] == 'c') {
+				$plan_attribs[$i]['type'] = str_replace('_erweitert', '', $plan_attribs[$i]['type']);
+				$plan_attribs[$i]['type_name'] = str_replace('_erweitert', '', $plan_attribs[$i]['type_name']);
+				$plan_attribs[$i]['type_schema'] = 'xplan_gml';
+			}
+		}
+		return $plan_attribs;
+	}
 
 	/**
 	 * Die Funktion filtert dokumente aus dem Attribut externereferenz die laut Angaben zur Auslegung
