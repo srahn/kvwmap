@@ -38,6 +38,7 @@
 	$strPointSnap="Punktfang";
 	$strDeactivateAllLayer="alle Themen deaktivieren";
 	$strClearAllQuerys="alle Abfragehaken entfernen";
+  $strHideDeactivatedLayers="Inaktive Themen aus/einblenden";
 	$strRotationAngle="Richtungswinkel";
 	$strNoLayer="Es wurde kein Thema zur Sachdatenabfrage ausgewählt!";
 	$strLayerSearch="Themensuche";

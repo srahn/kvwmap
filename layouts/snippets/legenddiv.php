@@ -76,6 +76,11 @@
 				<div class="button layer" title="<? echo $strDeactivateAllLayer; ?>"></div>
 			</div>
 		</a>
+		<a href="javascript: void(0)" onclick="hide_deactivated_layers();">
+			<div>
+				<div class="button" title="<? echo $strHideDeactivatedLayers; ?>"><i id="hide_deactivated_layers_icon" style="font-size: 24px; margin: 6px; color: #5c88a8" class="fa fa-eye<? if ($this->user->rolle->hide_deactivated_layers)echo '-slash'; ?>" aria-hidden="true"></i></div>
+			</div>
+		</a>
 		<? } ?>
 
 		<div title="<?php echo $strLoadNew; ?>" style="flex-grow: 3; text-align: -webkit-center;">

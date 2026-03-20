@@ -2245,7 +2245,7 @@ echo '			</table>
 				}
 
 				# Filter für read_Layer
-				$mapDB->nurAktiveLayer = value_of($this->formvars, 'nurAktiveLayer');
+				$mapDB->nurAktiveLayer = $this->user->rolle->hide_deactivated_layers ?? value_of($this->formvars, 'nurAktiveLayer');
 				$mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
 				$mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
 				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
@@ -13324,12 +13324,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over layer attributes privileges
 		$sql = "
 			UPDATE
-				kvwmap.layer_attributes2stelle AS t2 INNER JOIN
-				kvwmap.layer_attributes2stelle AS t1 ON t1.attributename = t2.attributename AND t1.stelle_id = t2.stelle_id
+				kvwmap.layer_attributes2stelle AS t2 
 			SET
-				t2.privileg = t1.privileg,
-				t2.tooltip = t1.tooltip
+				privileg = t1.privileg,
+				tooltip = t1.tooltip
+			FROM
+				kvwmap.layer_attributes2stelle AS t1
 			WHERE
+				t1.attributename = t2.attributename AND 
+				t1.stelle_id = t2.stelle_id and 
 				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
 				t2.layer_id = " . $this->formvars['to_layer_id'] . "
 		";
@@ -13368,12 +13371,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over layer privileges
 		$sql = "
 			UPDATE
-				kvwmap.used_layer AS t2 INNER JOIN
-				kvwmap.used_layer AS t1 ON t1.stelle_id = t2.stelle_id
+				kvwmap.used_layer AS t2 
 			SET
-				t2.privileg = t1.privileg,
-				t2.export_privileg = t1.export_privileg
+				privileg = t1.privileg,
+				export_privileg = t1.export_privileg
+			FROM
+				kvwmap.used_layer AS t1 
 			WHERE
+				t1.stelle_id = t2.stelle_id and 
 				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
 				t2.layer_id = " . $this->formvars['to_layer_id'] . "
 		";
@@ -13390,12 +13395,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over default layer attributes
 		$sql = "
 			UPDATE
-				kvwmap.layer_attributes AS t2 INNER JOIN
-				kvwmap.layer_attributes AS t1 ON t1.name = t2.name
+				kvwmap.layer_attributes AS t2 
 			SET
-				t2.privileg = t1.privileg,
-				t2.query_tooltip = t1.query_tooltip
+				privileg = t1.privileg,
+				query_tooltip = t1.query_tooltip
+			FROM
+				kvwmap.layer_attributes AS t1 
 			WHERE
+				t1.name = t2.name and 
 				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
 				t2.layer_id = " . $this->formvars['to_layer_id'] . "
 		";
@@ -13412,11 +13419,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over default layer privileges
 		$sql = "
 			UPDATE
-				kvwmap.layer AS t2,
-				kvwmap.layer AS t1
+				kvwmap.layer AS t2
 			SET
-				t2.privileg = t1.privileg,
-				t2.export_privileg = t1.export_privileg
+				privileg = t1.privileg,
+				export_privileg = t1.export_privileg
+			FROM
+				kvwmap.layer AS t1
 			WHERE
 				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
 				t2.layer_id = " . $this->formvars['to_layer_id'] . "
@@ -16161,7 +16169,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						} break;
 						default : {
 							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
-								if ($this->formvars[$form_fields[$i]] == '') {
+								if ($this->formvars[$form_fields[$i]] === '') {
 									$eintrag = 'NULL';
 								}
 								else {

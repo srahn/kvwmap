@@ -680,7 +680,7 @@ class GUI {
 				}
 
 				# Filter für read_Layer
-				$mapDB->nurAktiveLayer = value_of($this->formvars, 'nurAktiveLayer');
+				$mapDB->nurAktiveLayer = $this->user->rolle->hide_deactivated_layers ?? value_of($this->formvars, 'nurAktiveLayer');
 				$mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
 				$mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
 				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
@@ -2411,6 +2411,7 @@ class rolle {
 			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
+			$this->hide_deactivated_layers = ($rs['hide_deactivated_layers'] == 't');
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];

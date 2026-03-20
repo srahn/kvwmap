@@ -999,6 +999,14 @@ function handleCustomSelectKeyDown(event, dropdown) {
 	}
 }
 
+document.addEventListener("click", (e) => {
+  document.querySelectorAll(".custom-select").forEach(select => {
+    if (!select.contains(e.target)) {
+      select.classList.remove("active");
+    }
+  });
+});
+
 function toggle_custom_select(id) {
 	var custom_select_div = document.getElementById('custom_select_' + id);
 	var dropdown = custom_select_div.querySelector('.dropdown');
@@ -1035,6 +1043,8 @@ function custom_select_click(option) {
 		custom_select_div.querySelector('.placeholder img').src = option.querySelector('img').src;
 	}
 	custom_select_div.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
+	custom_select_div.style.backgroundColor = option.style.backgroundColor;
+	custom_select_div.style.color = option.style.color;
 	if (field.onchange) {
 		field.onchange();
 	}
@@ -1057,6 +1067,13 @@ function add_to_formdata(element){
 		value = 0;
 	}
 	formdata.set(element.name, value);
+}
+
+function hide_deactivated_layers(){
+	var icon = document.getElementById('hide_deactivated_layers_icon');
+	icon.classList.toggle("fa-eye");
+  icon.classList.toggle("fa-eye-slash");
+	ahah("index.php",	"go=hide_deactivated_layers", '', '', function () {update_legend('reload ');});	
 }
 
 function update_legend(layerhiddenstring){

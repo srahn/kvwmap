@@ -149,6 +149,11 @@ ob_start ();    // Ausgabepufferung starten
 
 $formvars = $_REQUEST;
 
+$go = (array_key_exists('go', $formvars) ? $formvars['go'] : '');
+if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
+	$go = $go.'_'.$formvars['go_plus'];
+}
+
 ###########################################################################################################
 define('CASE_COMPRESS', false);
 #																																																					#
@@ -226,11 +231,7 @@ if ($GUI->formvars['go'] == '' AND $GUI->Stelle->start_page_params != '') {
 	parse_str($GUI->Stelle->start_page_params, $params);
 	$GUI->formvars = array_merge($GUI->formvars, $params);
 	$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
-}
-
-$go = (array_key_exists('go', $GUI->formvars) ? $GUI->formvars['go'] : '');
-if (array_key_exists('go_plus', $GUI->formvars) and $GUI->formvars['go_plus'] != '') {
-	$go = $go.'_'.$GUI->formvars['go_plus'];
+	$go = $GUI->formvars['go'];
 }
 
 $GUI->go = $go;
@@ -533,9 +534,6 @@ function go_switch($go, $exit = false) {
 			case 'reset_layers' : {
 				$GUI->reset_layers(value_of($GUI->formvars, 'layer_id'));
 				$GUI->loadMap('DataBase');
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
@@ -543,9 +541,6 @@ function go_switch($go, $exit = false) {
 			case 'show_all_layers' : {
 				$GUI->user->rolle->update_layer_status(NULL, '1');
 				$GUI->loadMap('DataBase');
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
@@ -554,10 +549,12 @@ function go_switch($go, $exit = false) {
 				$GUI->reset_querys();
 				$GUI->loadMap('DataBase');
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
+			} break;
+
+			case 'hide_deactivated_layers' : {
+				$GUI->user->rolle->hide_deactivated_layers();
 			} break;
 
 			case 'zoom2coord' : {
