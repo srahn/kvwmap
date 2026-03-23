@@ -21,7 +21,7 @@ mkdir -p $mail_archiv_path
 # chown gisadmin.www-data $mail_archiv_path
 # chmod g+w $mail_archiv_path
 
-busyfile="${MAILQUEUEPATH}/busyfile"
+busyfile="${mail_queue_path}/busyfile"
 if [ -f "${busyfile}" ]; then
   # Es gibt schon einen Prozess der die E-Mail-Dateien abarbeitet.
   echo "${busyfile} exists."
