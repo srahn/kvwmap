@@ -167,7 +167,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	check_visibility_rule = function(layer_id, rule, scope, k) {
 		// Leaf-Regel (kein logic → einfache Bedingung)
 		if (!rule.logic && rule.attribute) {
-			const field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+			var field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+			if (field == undefined) {
+				field = scope.querySelector('.attr_' + layer_id + '_' + rule.attribute);		// bei Datentypattributen notwendig
+			}
 			return field_has_value(field, rule.operator, rule.value);
 		}
 		// Logische Gruppe (AND / OR)
