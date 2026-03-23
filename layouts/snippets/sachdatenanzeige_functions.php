@@ -118,20 +118,34 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 		}
 	}
-		
-	toggle_group = function(id){
-		var group = document.getElementById('group'+id);
-		var group_img = document.getElementById('group_img'+id);
-		if(group.style.display == 'none'){
-			group.style.display = '';
-			group_img.src = 'graphics/minus.gif';
+
+	toggle_group = function(id, gle_view = '1') {
+		var groups = [];
+		var group_imgs = [];
+		if (gle_view == '1') {
+			groups[0] = document.getElementById('group'+id);
+			group_imgs[0] = document.getElementById('group_img'+id);
 		}
-		else{
-			group.style.display = 'none';
-			group_img.src = 'graphics/plus.gif';
+		else {
+			console.log('gle_view not 1');
+			const parts = id.split('_');
+			groups = document.querySelectorAll(`[id^="group${parts[0]}_${parts[1]}_"]`);
+			group_imgs = document.querySelectorAll(`[id^="group_img${parts[0]}_${parts[1]}_"]`);
 		}
+		console.log('groups: %o', groups);
+		groups.forEach((group, i) => {
+			console.log('Handle group: %o', group.id);
+			if (group.style.display == 'none') {
+				group.style.display = '';
+				group_imgs[i].src = 'graphics/minus.gif';
+			}
+			else {
+				group.style.display = 'none';
+				group_imgs[i].src = 'graphics/plus.gif';
+			}
+		});
 	}
-	
+
 	toggle_tab = function(tab, layer_id, k, t, tabname){
 		var dataset = document.getElementById('datensatz_' + layer_id + '_' + k);
 		var opentab_field = document.getElementById('opentab_' + layer_id + '_' + k);

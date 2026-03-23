@@ -18,9 +18,10 @@ class TypeInfo {
       // fetch list of attributes and their properties from UML-structure
       $uml_attributes = $this->fetchUmlAttributesForType($typename, $include_inherited);
 
-      // fetch attribute information for all attributes of the type from persitence layer
+      // fetch attribute information for all attributes of the type from persistence layer
       $attribInfo = $this->_database->get_attribute_information(TypeInfo::$schema, strtolower($typename));
       $attribInfo = XP_Plan::convert_xp_spezexternereferenzauslegung($attribInfo);
+			$attribInfo = XP_Plan::convert_xp_generattribut_erweitert($attribInfo);
 
       // build look-up table
       $attribInfo = array_combine(array_column($attribInfo,'name'), $attribInfo);

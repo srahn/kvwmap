@@ -4,7 +4,6 @@ class LayerAttributeRolleSetting extends PgObject {
 	static $write_debug = true;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'kvwmap', 'layer_attributes2rolle');
 		$this->identifier_type = 'array';
 		$this->identifier = array(
 			array('type' => 'integer', 'column' => 'layer_id'),
@@ -12,10 +11,12 @@ class LayerAttributeRolleSetting extends PgObject {
 			array('type' => 'integer', 'column' => 'stelle_id'),
 			array('type' => 'integer', 'column' => 'user_id')
 		);
+		parent::__construct($gui, 'kvwmap', 'layer_attributes2rolle', $this->identifier, $this->identifier_type);
 	}
 
-	public static	function find_by_layer_rolle($layer_id, $stelle_id, $user_id) {
-		return $user->find_where('layer_id = ' . $layer_id . ' AND stelle_id = ' . $stelle_id . ' user_id = ' . $user_id);
+	public static	function find_by_layer_rolle($gui, $layer_id, $stelle_id, $user_id) {
+		$pg_obj = new LayerAttributeRolleSetting($gui);
+		return $pg_obj->find_where('layer_id = ' . $layer_id . ' AND stelle_id = ' . $stelle_id . ' user_id = ' . $user_id);
 	}
 
 	function resetSortOrder($layer_id, $stelle_id, $user_id) {
@@ -34,8 +35,8 @@ class LayerAttributeRolleSetting extends PgObject {
 		$this->database->execSQL($sql);
 	}
 
-	function delete_by_layer_rolle($layer_id, $stelle_id, $user_id) {
-		$this->find_by_layer_rolle($layer_id);
+	public static function delete_by_layer_rolle($gui, $layer_id, $stelle_id, $user_id) {
+		return LayerAttributeRolleSetting::find_by_layer_rolle($gui, $layer_id, $stelle_id, $user_id);
 	}
 
 	function read_layer_attributes2rolle($layer_id, $stelle_id, $user_id) {

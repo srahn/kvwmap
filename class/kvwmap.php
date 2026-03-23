@@ -13239,6 +13239,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	function write_layer_attributes2rolle() {
+		header('Content-Type: application/json; charset=utf-8');
 		$result = array();
 		include_once(CLASSPATH . 'LayerAttributeRolleSetting.php');
 		$larsObj = new LayerAttributeRolleSetting($this);
@@ -13251,10 +13252,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		) {
 			$larsObj->resetSortOrder($this->formvars['layer_id'], $this->formvars['stelle_id'], $this->formvars['user_id']);
 		}
-		$larsObj->setKeysFromFormvars($this->formvars);
+		$result = $larsObj->setKeysFromFormvars($this->formvars);
+		if (!$result['success']) {
+			echo utf8_decode(json_encode($result));
+			exit;
+		}
 		$larsObj->setData($this->formvars);
 		$result = $larsObj->insert_or_update();
-		header('Content-Type: application/json; charset=utf-8');
 		echo utf8_decode(json_encode($result));
 	}
 

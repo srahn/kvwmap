@@ -373,6 +373,10 @@ class MyObject {
 		$this->data = array_map(function($attribute) { return null; }, array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable()))));
 	}
 
+	/**
+	 * Liefert ein Assoziatives Array mit dem Spaltennamen als key mit
+	 * Array die folgende Keys haben: Field,Type,Null,Key,Default,Extra
+	 */
 	function getColumnsFromTable() {
 		$this->debug->show('getColumnsFromTable', MyObject::$write_debug);
 		$this->columns = array();
@@ -389,6 +393,9 @@ class MyObject {
 		return $this->columns;
 	}
 
+	/**
+	 * Liefert ein assoziatives Array mit dem Feldnamen als Schlüssel und dem Type als Wert.
+	 */
 	function getTypesFromColumns() {
 		#$this->debug->show('getTypesFromColumns', MyObject::$write_debug);
 		$types = array();

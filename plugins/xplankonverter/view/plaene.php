@@ -371,8 +371,8 @@
 
 					message([{
 						"type": "notice",
-						"msg" : 'Neues Veröffentlichungsdatum erfolgreich eingetragen!'
-					}]);
+						"msg" : (result.veroeffentlichungsdatum != '' ? 'Neues Veröffentlichungsdatum erfolgreich eingetragen!' : 'Veröffentlichungsdatum gelöscht!')
+					}], 5000);
 				}
 				else {
 					message([{
@@ -481,9 +481,13 @@
 				funcIsInProgress,
 				disableFrag = ' disabled" onclick="return false',
 				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
-		output += `<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="javascript:void(0)" onClick="showPlanDetails('${row.plan_gml_id}');"><i class="btn-link fa fa-lg fa-pencil"></i></a>`;
 		output += '<a id="delButton' + row.plan_gml_id + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
+		return output;
+	}
+
+	function konvertierungEditLinkFormatter(value, row) {
+		output = `<a title="Plan bearbeiten" href="javascript:void(0)" onClick="showPlanDetails('${row.plan_gml_id}');">${htmlspecialchars(row.anzeigename)}</a>`;
 		return output;
 	}
 
@@ -800,7 +804,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-field="anzeigename"
 					data-sortable="true"
 					data-visible="true"
-					data-formatter="konvertierungHtmlSpecialchars"
+					data-formatter="konvertierungEditLinkFormatter"
 					class="col-md-7"
 					data-filter-control="input"
 					data-filter-control-placeholder="Filtern"
@@ -811,7 +815,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-visible="<? echo ((!array_key_exists('nummer', $rolle_attribute_settings) OR $rolle_attribute_settings['nummer']['switched_on'] == 1) ? 'true' : 'false'); ?>"
 					data-sort-name="nummer"
 					data-order="<? echo ((!array_key_exists('nummer', $rolle_attribute_settings) OR $rolle_attribute_settings['nummer']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
-					class="col-md-2"
+					class="col-md-1"
 					data-filter-control="input"
 				>Nr</th><?php
 				if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>

@@ -450,6 +450,14 @@ class Gml_builder {
 							break;
 						case "DataType" :
 							$gml_attrib_str = '';
+							if($uml_attribute['col_name'] == 'hatgenerattribut')  {
+								$uml_attribute['type'] = 'XP_StringAttribut';
+								$gml_object['hatgenerattribut'] = str_replace(
+											array(',)"', ',XP_StringAttribut)"', ',XP_IntegerAttribut)"', ',XP_DoubleAttribut)"', ',XP_URLAttribut)"', ',XP_DatumAttribut)"'),
+											')"', $gml_object['hatgenerattribut']
+								);
+							}
+
 							// fetch information about attributes and their properties
 							$datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
 							
@@ -500,6 +508,21 @@ class Gml_builder {
 								if (strlen($gml_attrib_str) == 0) break;
 								$typeElementName = end($datatype_attribs)['origin'];
 								// wrap all data-types with their data-type-element-tag
+								if($uml_attribute['type'] == "XP_StringAttribut") {
+									$gmlStr .= $this->wrapWithElement(
+										"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+										$this->wrapWithElement(
+											"{$xplan_ns_prefix}XP_GenerAttribut",
+											$this->wrapWithElement(
+												"{$xplan_ns_prefix}{$typeElementName}",
+												$gml_attrib_str
+											)
+										)
+									);
+									$gml_attrib_str = '';
+									continue;
+								}
+
 								$gmlStr .= $this->wrapWithElement(
 									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
 									$this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str)

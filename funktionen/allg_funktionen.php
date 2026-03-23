@@ -3104,6 +3104,19 @@ function set_href($text) {
 }
 
 /**
+ * Function check if $str is a valid json and has key href. If yes it returns a decoded data object with trimed values. If not it returns false.
+ */
+function getTooltipJSON($str) {
+  $data = json_decode($str, true);
+  if (json_last_error() !== JSON_ERROR_NONE) return false;
+	foreach ($data as $key => $value) {
+    $data[$key] = trim($value);
+  }
+	if (isset($data['href']) && is_string($data['href']) && $data['href'] !== '') return $data;
+  return false;
+}
+
+/**
  * Function return the option value of attribute at index $i for option key $option_key
  * It searches first in options_json if exists else in attributes array directly
  * ToDo pk: Zusammenführen mit der Funktion get_options und get_SubFormFK_options in LayerAttributes.php
