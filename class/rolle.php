@@ -260,6 +260,7 @@ class rolle {
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['queryable'] = ($rs['queryable'] === 't');
+			$rs['querymap'] = ($rs['querymap'] === 't');
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
 					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
