@@ -6545,7 +6545,8 @@ echo '			</table>
   }
 
   function druckrahmen_init() {
-    $Document=new Document($this->pgdatabase);
+		include_once(CLASSPATH.'kartendrucklayout.php');
+    $Document = new kdl($this->pgdatabase);
     $this->Document=$Document;
   }
 
@@ -6554,6 +6555,7 @@ echo '			</table>
   }
 
   function druckrahmen_load_pdf(){
+		include_once(CLASSPATH.'FormObject.php');
     $this->Document->frames = $this->Document->load_frames(NULL, NULL);
     $frameid = $this->Document->get_active_frameid($this->user->id, $this->Stelle->id);
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
@@ -6572,10 +6574,8 @@ echo '			</table>
 			}
 
 			# Fonts auslesen
-			include_(CLASSPATH . 'datendrucklayout.php');
-			$ddl = new ddl($this->pgdatabase);
-			$this->Document->fonts = $ddl->get_fonts();
-			$this->Document->din_formats = get_din_formats();
+			$this->Document->fonts = $this->Document->get_fonts();
+			$this->Document->din_formats = $this->Document->get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -6797,10 +6797,11 @@ echo '			</table>
 
 	function druckausschnittswahl($loadmapsource) {
 		global $selectable_scales;
+		include_once(CLASSPATH.'kartendrucklayout.php');
 		$this->selectable_scales = array_reverse($selectable_scales);
 		$saved_scale = $this->reduce_mapwidth(10);
 		$this->main = "druckausschnittswahl.php";
-		$this->Document = new Document($this->pgdatabase);
+		$this->Document = new kdl($this->pgdatabase);
 		# aktuellen Kartenausschnitt laden + zeichnen!
 		$this->noMinMaxScaling = $this->formvars['no_minmax_scaling'];
 		if ($this->formvars['neuladen']) {
@@ -6913,20 +6914,23 @@ echo '			</table>
   }
 
   function druckausschnitt_löschen($loadmapsource){
-    $this->Document = new Document($this->pgdatabase);
+		include_once(CLASSPATH.'kartendrucklayout.php');
+    $this->Document = new kdl($this->pgdatabase);
     $this->Document->delete_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['druckausschnitt']);
     $this->formvars['druckausschnitt'] = '';
     $this->druckausschnittswahl($loadmapsource);
   }
 
 	function druckausschnitt_speichern($loadmapsource) {
+		include_once(CLASSPATH.'kartendrucklayout.php');
 		$this->loadMap($loadmapsource);
-		$this->Document = new Document($this->pgdatabase);
+		$this->Document = new kdl($this->pgdatabase);
 		$this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->user->rolle->epsg_code, $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
 		$this->druckausschnittswahl($loadmapsource);
 	}
 
   function druckvorschau(){
+		include_once(CLASSPATH.'kartendrucklayout.php');
     $this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true);
     $this->main = 'druckvorschau.php';
     $this->titel = 'Druckvorschau';
@@ -7620,8 +7624,9 @@ echo '			</table>
     $this->drawMap(true);
     # Einbinden der PDF Klassenbibliotheken
     include (CLASSPATH.'class.ezpdf.php');
+		include_once(CLASSPATH.'kartendrucklayout.php');
     # Erzeugen neue Dokument-Klasse
-    $Document=new Document($this->pgdatabase);
+    $Document = new kdl($this->pgdatabase);
     $this->Docu=$Document;
 
     # Erzeugen neue pdf-Klasse
@@ -7666,7 +7671,7 @@ echo '			</table>
 			'legend_extra' => 'int',
 			'selected_layer_ids' => 'int_csv',
 		]);
-		$Document = new Document($this->pgdatabase);
+		$Document = new kdl($this->pgdatabase);
 		$this->Docu = $Document;
 		$this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
 		if ($this->Docu->activeframe[0]['dhk_call'] != ''){
@@ -7956,6 +7961,8 @@ echo '			</table>
 				} break;
 			}
 
+			$this->Docu->pdf = $pdf;
+
 			# Wasserzeichen hinzufügen
 			if($this->Docu->activeframe[0]['watermark'] != ''){
 				$this->addwatermark($this->Docu->activeframe[0]);
@@ -7971,10 +7978,10 @@ echo '			</table>
 			}
 
 			# Hinzufügen des Hintergrundbildes als Druckrahmen
-			$pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['headsrc']),$this->Docu->activeframe[0]['headposx'],$this->Docu->activeframe[0]['headposy'],$this->Docu->activeframe[0]['headwidth']);
+			$this->Docu->pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['headsrc']),$this->Docu->activeframe[0]['headposx'],$this->Docu->activeframe[0]['headposy'],$this->Docu->activeframe[0]['headwidth']);
 
 			# Hinzufügen der vom MapServer produzierten Karte
-			$pdf->addJpegFromFile(
+			$this->Docu->pdf->addJpegFromFile(
 				IMAGEPATH . basename($this->img['hauptkarte']),
 				$this->Docu->activeframe[0]['mapposx'],
 				$this->Docu->activeframe[0]['mapposy'],
@@ -7985,12 +7992,12 @@ echo '			</table>
 			# Rechteck um die Karte
 			$posx1 = $this->Docu->activeframe[0]['mapposx'];
 			$posy1 = $this->Docu->activeframe[0]['mapposy'];
-			$pdf->rectangle($posx1, $posy1, $this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
+			$this->Docu->pdf->rectangle($posx1, $posy1, $this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
 
 			# Hinzufügen der Referenzkarte, wenn eine angegeben ist.
 			if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
-				$pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['refmapsrc']),$this->Docu->activeframe[0]['refmapposx'],$this->Docu->activeframe[0]['refmapposy'],$this->Docu->activeframe[0]['refmapwidth']);
-				$pdf->addJpegFromFile(IMAGEPATH.basename($this->Docu->referencemap),$this->Docu->activeframe[0]['refposx'],$this->Docu->activeframe[0]['refposy'],$this->Docu->activeframe[0]['refwidth'], $this->Docu->activeframe[0]['refheight']);
+				$this->Docu->pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['refmapsrc']),$this->Docu->activeframe[0]['refmapposx'],$this->Docu->activeframe[0]['refmapposy'],$this->Docu->activeframe[0]['refmapwidth']);
+				$this->Docu->pdf->addJpegFromFile(IMAGEPATH.basename($this->Docu->referencemap),$this->Docu->activeframe[0]['refposx'],$this->Docu->activeframe[0]['refposy'],$this->Docu->activeframe[0]['refwidth'], $this->Docu->activeframe[0]['refheight']);
 			}
 
 			# Attribute
@@ -8002,39 +8009,55 @@ echo '			</table>
 			$this->date = date("d.m.Y");
 			$this->scale = $this->formvars['printscale'];
 
-			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_date']);
-			if($this->Docu->activeframe[0]['datesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
-			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_scale']);
-			if($this->Docu->activeframe[0]['scalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
-			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_oscale']);
-			if($this->Docu->activeframe[0]['oscalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');
-			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_lage']);
-			if($this->Docu->activeframe[0]['lagesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
-			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemeinde']);
-			if($this->Docu->activeframe[0]['gemeindesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);
-			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemarkung']);
-			if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
-			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flur']);
-			if($this->Docu->activeframe[0]['flursize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
-			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flurst']);
-			if($this->Docu->activeframe[0]['flurstsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
+			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['datecolor']);
+			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_date']);
+			if($this->Docu->activeframe[0]['datesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
+
+			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['scalecolor']);
+			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_scale']);
+			if($this->Docu->activeframe[0]['scalesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
+
+			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_oscale']);
+			if($this->Docu->activeframe[0]['oscalesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');
+
+			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['lagecolor']);
+			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_lage']);
+			if($this->Docu->activeframe[0]['lagesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
+
+			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemeindecolor']);
+			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemeinde']);
+			if($this->Docu->activeframe[0]['gemeindesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);
+
+			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemarkungcolor']);
+			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemarkung']);
+			if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
+
+			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurcolor']);
+			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flur']);
+			if($this->Docu->activeframe[0]['flursize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
+
+			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurstcolor']);
+			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flurst']);
+			if($this->Docu->activeframe[0]['flurstsize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
 
 			# Freie Graphiken
 			for($j = 0; $j < count($this->Docu->activeframe[0]['bilder']); $j++){
 				$bild=$this->Docu->activeframe[0]['bilder'][$j];
 				#var_dump($bild);
 				if ($bild['height']>0) {
-					$pdf->addJpegFromFile(WWWROOT . CUSTOM_PATH . 'graphics/' . $bild['src'], $bild['posx'],$bild['posy'],$bild['width'],$bild['height']);
+					$this->Docu->pdf->addJpegFromFile(WWWROOT . CUSTOM_PATH . 'graphics/' . $bild['src'], $bild['posx'],$bild['posy'],$bild['width'],$bild['height']);
 				}
 				else {
-					$pdf->addJpegFromFile(WWWROOT . CUSTOM_PATH . 'graphics/' . $bild['src'],
+					$this->Docu->pdf->addJpegFromFile(WWWROOT . CUSTOM_PATH . 'graphics/' . $bild['src'],
 					$bild['posx'],$bild['posy'],$bild['width']);
 				}
 			}
 
 			# Freitexte
 			for($j = 0; $j < count($this->Docu->activeframe[0]['texts']); $j++){
-				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['texts'][$j]['font']);
+				$color_id = $this->Docu->activeframe[0]['texts'][$j]['color'];
+				$this->Docu->pdf->setColor($this->Docu->colors[$color_id]['red']/255, $this->Docu->colors[$color_id]['green']/255, $this->Docu->colors[$color_id]['blue']/255);
+				$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['texts'][$j]['font']);
 				if($this->Docu->activeframe[0]['texts'][$j]['text'] == '' AND $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] != ''){    // ein Freitext hat keinen Text aber in der Druckausschnittswahl wurde ein Text vom Nutzer eingefügt
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(10), ';', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
@@ -8051,12 +8074,12 @@ echo '			</table>
 					$posy = $this->Docu->activeframe[0]['texts'][$j]['posy'] - $b;
 
 					if($posx < 0){		# rechtsbündig
-						$posx = $pdf->ez['pageWidth'] + $posx;
+						$posx = $this->Docu->pdf->ez['pageWidth'] + $posx;
 						$justification = 'right';
 						$orientation = 'left';
 						$data = array(array(1 => $freitext[$i]));
-						$pdf->ezSetY($posy+$this->Docu->activeframe[0]['texts'][$j]['size']);
-						$pdf->ezTable($data, NULL, NULL,
+						$this->Docu->pdf->ezSetY($posy+$this->Docu->activeframe[0]['texts'][$j]['size']);
+						$this->Docu->pdf->ezTable($data, NULL, NULL,
 						array('xOrientation'=>$orientation,
 									'xPos'=>$posx,
 									#'width'=>$this->layout['elements'][$attributes['name'][$j]]['width'],
@@ -8070,15 +8093,16 @@ echo '			</table>
 						);
 					}
 					else{
-						$pdf->addText($posx, $posy, $this->Docu->activeframe[0]['texts'][$j]['size'], $freitext[$i], -1 * $alpha);
+						$this->Docu->pdf->addText($posx, $posy, $this->Docu->activeframe[0]['texts'][$j]['size'], $freitext[$i], -1 * $alpha);
 					}
 				}
 			}
 
 			# Nutzer
 			if($this->Docu->activeframe[0]['usersize'] > 0){
-				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_user']);
-				$pdf->addText($this->Docu->activeframe[0]['userposx'],$this->Docu->activeframe[0]['userposy'],$this->Docu->activeframe[0]['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['usercolor']);
+				$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_user']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['userposx'],$this->Docu->activeframe[0]['userposy'],$this->Docu->activeframe[0]['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
 			}
 
 			# Nordpfeil
@@ -8088,15 +8112,15 @@ echo '			</table>
 				$arrow_base_length = $this->Docu->activeframe[0]['arrowlength'] * 0.375;
 				$arrow_head_length = $this->Docu->activeframe[0]['arrowlength'] * 0.4625;
 				$arrow_head_width = $this->Docu->activeframe[0]['arrowlength'] * 0.1125;
-				$pdf->setLineStyle(0.6,'round');
-				$pdf->line($this->Docu->activeframe[0]['arrowposx'] + $arrow_start[0], $this->Docu->activeframe[0]['arrowposy'] + $arrow_start[1], $this->Docu->activeframe[0]['arrowposx'] + $arrow_end[0], $this->Docu->activeframe[0]['arrowposy'] + $arrow_end[1]);
+				$this->Docu->pdf->setLineStyle(0.6,'round');
+				$this->Docu->pdf->line($this->Docu->activeframe[0]['arrowposx'] + $arrow_start[0], $this->Docu->activeframe[0]['arrowposy'] + $arrow_start[1], $this->Docu->activeframe[0]['arrowposx'] + $arrow_end[0], $this->Docu->activeframe[0]['arrowposy'] + $arrow_end[1]);
 				$pdata = translate(rotate(array(0,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_base_length, -1*$arrow_head_width/2,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_head_length,0,$this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']),$this->Docu->activeframe[0]['arrowposx'],$this->Docu->activeframe[0]['arrowposy']);
-				$pdf->polygon($pdata,3);
-				$pdf->polygon($pdata,3,1);
+				$this->Docu->pdf->polygon($pdata,3);
+				$this->Docu->pdf->polygon($pdata,3,1);
 				$pdata = translate(rotate(array(0,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_base_length, $arrow_head_width/2,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_head_length,0,$this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']),$this->Docu->activeframe[0]['arrowposx'],$this->Docu->activeframe[0]['arrowposy']);
-				$pdf->polygon($pdata,3);
-				$pdf->setColor(1,1,1);
-				$pdf->polygon($pdata,3,1);
+				$this->Docu->pdf->polygon($pdata,3);
+				$this->Docu->pdf->setColor(1,1,1);
+				$this->Docu->pdf->polygon($pdata,3,1);
 			}
 
 			# Maßstabsleiste
@@ -8112,8 +8136,8 @@ echo '			</table>
 				$label3 = 3*$label4/4;
 				$label2 = $label4/2;
 				$label1 = $label4/4;
-				$pdf->setColor(0,0,0);
-				$pdf->addText($posx-1.5, $posy+6, 8, '0');
+				$this->Docu->pdf->setColor(0,0,0);
+				$this->Docu->pdf->addText($posx-1.5, $posy+6, 8, '0');
 				if($label1/1000 >= 1){
 					$div = 1000;
 					$unit = 'Km';
@@ -8122,25 +8146,25 @@ echo '			</table>
 					$div = 1;
 					$unit = 'm';
 				}
-				$pdf->addText($posx+$width1-5, $posy+6, 8, round($label1/$div, 2));
-				$pdf->addText($posx+$width2-5, $posy+6, 8, round($label2/$div, 2));
-				$pdf->addText($posx+$width3-5, $posy+6, 8, round($label3/$div, 2));
-				$pdf->addText($posx+$width4-5, $posy+6, 8, round($label4/$div, 2).' '.$unit);
-				$pdf->setLineStyle(0.5);
-				$pdf->rectangle($posx, $posy, $width1, 4);
-				$pdf->rectangle($posx, $posy, $width2, 4);
-				$pdf->rectangle($posx, $posy, $width3, 4);
-				$pdf->rectangle($posx, $posy, $width4, 4);
+				$this->Docu->pdf->addText($posx+$width1-5, $posy+6, 8, round($label1/$div, 2));
+				$this->Docu->pdf->addText($posx+$width2-5, $posy+6, 8, round($label2/$div, 2));
+				$this->Docu->pdf->addText($posx+$width3-5, $posy+6, 8, round($label3/$div, 2));
+				$this->Docu->pdf->addText($posx+$width4-5, $posy+6, 8, round($label4/$div, 2).' '.$unit);
+				$this->Docu->pdf->setLineStyle(0.5);
+				$this->Docu->pdf->rectangle($posx, $posy, $width1, 4);
+				$this->Docu->pdf->rectangle($posx, $posy, $width2, 4);
+				$this->Docu->pdf->rectangle($posx, $posy, $width3, 4);
+				$this->Docu->pdf->rectangle($posx, $posy, $width4, 4);
 				$smallrects = 10;
 				$smallrectwidth = $width1 / $smallrects;
 				for($s = 0; $s < $smallrects; $s++){
-					$pdf->rectangle($posx, $posy, $smallrectwidth*($s+1), 4);
+					$this->Docu->pdf->rectangle($posx, $posy, $smallrectwidth*($s+1), 4);
 				}
 			}
 
 			# variable Freitexte
 			for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
-				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/Helvetica.afm');
+				$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/Helvetica.afm');
 				if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
 				else $height = 842;																																		# das ist die Höhe des Vorschaubildes
 				$ratio = $height/$this->Docu->height;
@@ -8150,10 +8174,10 @@ echo '			</table>
 					$boxwidth = ($this->formvars['freetext_width'.$j]+6)/$ratio;
 					$boxheight = ($this->formvars['freetext_height'.$j]+8)/$ratio;
 					$fontsize = $this->formvars['freetext_fontsize'.$j]/$ratio;
-					$pdf->setColor(1,1,1);
-					$pdf->filledRectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
-					$pdf->setColor(0,0,0);
-					$pdf->Rectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
+					$this->Docu->pdf->setColor(1,1,1);
+					$this->Docu->pdf->filledRectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
+					$this->Docu->pdf->setColor(0,0,0);
+					$this->Docu->pdf->Rectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
 
 					$this->formvars['freetext'.$j] = str_replace(chr(10), ';', $this->formvars['freetext'.$j]);
 					$this->formvars['freetext'.$j] = str_replace(chr(13), '', $this->formvars['freetext'.$j]);
@@ -8161,7 +8185,7 @@ echo '			</table>
 					$anzahlzeilen = count($freitext);
 					for($i = 0; $i < $anzahlzeilen; $i++){
 						$h = $i * $fontsize * 1.25;
-						$pdf->addText($posx+$fontsize*0.3333, $posy-$h-$fontsize*1.18, $fontsize, iconv("UTF-8", "CP1252//TRANSLIT", $freitext[$i]), 0);
+						$this->Docu->pdf->addText($posx+$fontsize*0.3333, $posy-$h-$fontsize*1.18, $fontsize, iconv("UTF-8", "CP1252//TRANSLIT", $freitext[$i]), 0);
 					}
 				}
 			}
@@ -8170,14 +8194,13 @@ echo '			</table>
 			if($this->Docu->activeframe[0]['legendsize'] > 0){
 				$legend = $this->createlegend($this->Docu->activeframe[0]['legendsize'], $fast);
 				if($this->formvars['legend_extra']){
-					$pdf->newPage();
+					$this->Docu->pdf->newPage();
 					$this->Docu->activeframe[0]['legendposx'] = 50;
 					$this->Docu->activeframe[0]['legendposy'] = $this->Docu->height - $legend['height']/$this->map_factor - 50;
 				}
-				$pdf->addJpegFromFile(IMAGEPATH.basename($legend['name']),$this->Docu->activeframe[0]['legendposx'],$this->Docu->activeframe[0]['legendposy'],$legend['width']/$this->map_factor);
+				$this->Docu->pdf->addJpegFromFile(IMAGEPATH.basename($legend['name']),$this->Docu->activeframe[0]['legendposx'],$this->Docu->activeframe[0]['legendposy'],$legend['width']/$this->map_factor);
 			}
-			$this->pdf=$pdf;
-			$output = $this->pdf->ezOutput();
+			$output = $this->Docu->pdf->ezOutput();
 		}
 		$dateipfad=IMAGEPATH;
 		$currenttime = date('Y-m-d_H_i_s',time());
@@ -13560,8 +13583,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   function stelle_aendern() {
   	$_files = $_FILES;
 		include_(CLASSPATH . 'datendrucklayout.php');
+		include_once(CLASSPATH.'kartendrucklayout.php');
 		$this->ddl = new ddl($this->pgdatabase, $this);
-		$this->document = new Document($this->pgdatabase);
+		$this->kdl = new kdl($this->pgdatabase);
 		$results = array();
 		$deleteuser = array();
 
@@ -13591,7 +13615,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$old_menues = $Stelle->getMenue(0, 'only_ids');
 			$old_functions = $Stelle->getFunktionen('only_ids');
 			$old_layouts = $this->ddl->load_layouts($Stelle->id, '', '', '', 'only_ids');
-			$old_frames = $this->document->load_frames($Stelle->id, false, 'only_ids');
+			$old_frames = $this->kdl->load_frames($Stelle->id, false, 'only_ids');
 			$old_layer = $Stelle->getLayer('', 'only_ids');
 
 			# die neuen Zuweisungen aus dem Formular
@@ -13644,7 +13668,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$menues = array_diff($child_stelle->getMenue(0, 'only_ids'), $old_menues);
 				$functions = array_diff($child_stelle->getFunktionen('only_ids'), $old_functions);
 				$layouts = array_diff($this->ddl->load_layouts($child_id, '', '', '', 'only_ids'), $old_layouts);
-				$frames = array_diff($this->document->load_frames($child_id, false, 'only_ids'), $old_frames);
+				$frames = array_diff($this->kdl->load_frames($child_id, false, 'only_ids'), $old_frames);
 				$layer = array_diff($child_stelle->getLayer('', 'only_ids'), $old_layer);
 				$selectedusers = $child_stelle->getUser('only_ids');
 				$parents = $child_stelle->getParents('ORDER BY ID', 'only_ids');
@@ -13698,6 +13722,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function StelleAnlegen() {
 		include_once(CLASSPATH . 'Referenzkarte.php');
+		include_once(CLASSPATH.'kartendrucklayout.php');
 		$_files = $_FILES;
 		if (!$this->formvars['bezeichnung'] or !$this->formvars['referenzkarte_id']) {
 			# Fehler bei der Formulareingabe
@@ -13795,7 +13820,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($layer[0] != NULL) {
 					$Stelle->addLayer($layer);
 				}
-				$document = new Document($this->pgdatabase);
+				$document = new kdl($this->pgdatabase);
 				if ($frames[0] != NULL) {
 					for ($i = 0; $i < count($frames); $i++) {
 						$document->add_frame2stelle($frames[$i], $neue_stelle_id); # Hinzufügen der Druckrahmen zur Stelle
@@ -13851,9 +13876,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		global $language;
 		#echo '<p><b>Stelleneditor</b>';
 		include_(CLASSPATH . 'datendrucklayout.php');
+		include_(CLASSPATH . 'kartendrucklayout.php');
 		include_(CLASSPATH . 'Funktion.php');
 		include_(CLASSPATH . 'FormObject.php');
-		$document = new Document($this->pgdatabase);
+		$document = new kdl($this->pgdatabase);
 		$ddl = new ddl($this->pgdatabase, $this);
 		$stelle = new PgObject($this, 'kvwmap', 'stelle');
 		$where = '';
@@ -14515,6 +14541,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }# END of function StatistikAuswahlErgebnis
 
   function export_georg($formvars){
+		include_(CLASSPATH . 'kartendrucklayout.php');
     $georg = new georg_export();
     $georg->Amt = $georg->get_gemeindedata_from_file($this->formvars['bezeichnung']);
     if($georg->Amt == NULL){
@@ -14525,7 +14552,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       $georg->ALKA3 = $this->formvars['anzahlA3'];
       $georg->ALKA4 = $this->formvars['anzahlA4'];
       $georg->ALB = $this->formvars['anzahlALB'];
-      $document = new Document($this->pgdatabase);
+      $document = new kdl($this->pgdatabase);
       $georg->preisALKA4 = $document->get_price('A4hoch');
       $georg->preisALKA3 = $document->get_price('A3hoch');
       $georg->betragALK = ($georg->preisALKA4 * $georg->ALKA4 + $georg->preisALKA3 * $georg->ALKA3)/100;
@@ -23409,553 +23436,7 @@ DO $$
   }
 }
 
-class Document {
-  var $html;
-  var $debug;
-  var $head;
-  var $headquery;
 
-  ###################### Liste der Funktionen ####################################
-  #
-  # function Document() - Construktor
-  # function load_heads()
-  # function load_head($headid)
-  # function save_head($formvars)
-  # function update_head($formvars)
-  # function save_active_head($id,$userid, $stelleid)
-  # function get_active_headid($userid, $stelleid)
-  # function get_head($userid, $stelleid)
-  #
-  ################################################################################
-
-  function __construct($database){
-    global $debug;
-    $this->debug=$debug;
-    $this->database = $database;
-  }
-
-	function delete_ausschnitt($stelle_id, $user_id, $id) {
-		$sql = "
-			DELETE FROM
-				kvwmap.druckausschnitte
-			WHERE
-				stelle_id = " . $stelle_id . " AND
-				user_id = " . $user_id . "
-				" . ($id != '' ? " AND id = " . $id : '') . "
-		";
-		$this->debug->write("<p>file:kvwmap class:Document->delete_ausschnitt :",4);
-		$this->database->execSQL($sql,4, 1);
-	}
-
-	function save_ausschnitt($stelle_id, $user_id, $name, $epsg_code, $center_x, $center_y, $print_scale, $angle, $frame_id){
-		$sql = "
-			INSERT INTO
-				kvwmap.druckausschnitte
-			VALUES (
-				" . $stelle_id . ",
-				" . $user_id . ",
-				COALESCE(
-					(
-						SELECT
-							new_id
-						FROM
-						(
-							SELECT
-								max(id) + 1 AS new_id
-							FROM
-								kvwmap.druckausschnitte
-							WHERE
-								stelle_id = " . $stelle_id . " AND
-								user_id = " . $user_id . "
-						) as foo
-					),
-					1
-				),
-				'" . $name . "',
-				'" . $epsg_code . "',
-				" . $center_x . ",
-				" . $center_y . ",
-				" . $print_scale . ",
-				" . $angle . ",
-				" . $frame_id . "
-			)
-		";
-		$this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
-		$this->database->execSQL($sql,4, 1);
-	}
-
-  function load_ausschnitte($stelle_id, $user_id, $id){
-    $sql = 'SELECT * FROM kvwmap.druckausschnitte WHERE ';
-    $sql.= 'stelle_id = '.$stelle_id.' AND ';
-    $sql.= 'user_id = '.$user_id;
-    if($id != ''){
-      $sql.= ' AND id = '.$id;
-    }
-    $this->debug->write("<p>file:kvwmap class:Document->load_ausschnitte :<br>" . $sql,4);
-		$ret1 = $this->database->execSQL($sql, 4, 1);
-		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs = pg_fetch_assoc($ret1[1])){
-      $ausschnitte[] = $rs;
-    }
-    return $ausschnitte;
-  }
-
-  function load_frames($stelle_id, $frameid, $return = '') {
-		$frames = array();
-    $sql = 'SELECT DISTINCT druckrahmen.* FROM kvwmap.druckrahmen';
-    if($frameid AND !$stelle_id){$sql .= ' WHERE druckrahmen.id ='.$frameid;}
-    if($stelle_id AND !$frameid){
-    	$sql.= ', kvwmap.druckrahmen2stelle WHERE druckrahmen2stelle.druckrahmen_id = druckrahmen.id';
-    	$sql .= ' AND druckrahmen2stelle.stelle_id = '.$stelle_id;
-    }
-    if($frameid AND $stelle_id){
-    	$sql.= ', kvwmap.druckrahmen2stelle WHERE druckrahmen2stelle.druckrahmen_id = druckrahmen.id';
-    	$sql .= ' AND druckrahmen2stelle.stelle_id = '.$stelle_id;
-    	$sql .= ' AND druckrahmen.id ='.$frameid;
-    }
-    $sql .= ' ORDER BY name';
-    #echo $sql.'<br>';
-		$ret1 = $this->database->execSQL($sql, 4, 1);
-  	if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = pg_fetch_assoc($ret1[1])){
-			if ($return == 'only_ids') {
-				$frames[] = $rs['id'];
-			}
-			else {
-	      $frames[] = $rs;
-	      $frames[0]['bilder'] = $this->load_bilder($rs['id']);
-	      $frames[0]['texts'] = $this->load_texts($rs['id']);
-			}
-    }
-    return $frames;
-  }
-
-  function load_texts($frame_id){
-		$texts = array();
-    $sql = 'SELECT druckfreitexte.* FROM kvwmap.druckrahmen, kvwmap.druckfreitexte, kvwmap.druckrahmen2freitexte';
-    $sql.= ' WHERE druckrahmen2freitexte.druckrahmen_id = '.$frame_id;
-    $sql.= ' AND druckrahmen2freitexte.druckrahmen_id = druckrahmen.id';
-    $sql.= ' AND druckrahmen2freitexte.freitext_id = druckfreitexte.id';
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:Document->load_texts :<br>" . $sql,4);
-    $ret1 = $this->database->execSQL($sql, 4, 1);
-    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs = pg_fetch_assoc($ret1[1])){
-      $texts[] = $rs;
-    }
-    return $texts;
-  }
-
-  function load_bilder($frame_id){
-		$bilder = array();
-    $sql = 'SELECT b.src,r2b.posx,r2b.posy,r2b.width,r2b.height,r2b.angle';
-    $sql.= ' FROM kvwmap.druckrahmen AS r, kvwmap.druckfreibilder AS b, kvwmap.druckrahmen2freibilder AS r2b';
-    $sql.= ' WHERE r.id = r2b.druckrahmen_id';
-    $sql.= ' AND b.id = r2b.freibild_id';
-    $sql.= ' AND r.id = '.$frame_id;
-    $this->debug->write("<p>file:kvwmap class:Document->load_bilder :<br>" . $sql,4);
-		$ret1 = $this->database->execSQL($sql, 4, 1);
-    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = pg_fetch_assoc($ret1[1])){
-      $bilder[] = $rs;
-    }
-    return $bilder;
-  }
-
-  function addfreetext($formvars){
-    $sql = "
-			INSERT INTO kvwmap.druckfreitexte	(
-				text,
-				posx,
-				posy,
-				size,
-				font,
-				angle)
-			VALUES (
-    		'',
-    		0,
-    		0,
-    		0,
-    		'Helvetica.afm', -- Ein Wert muss gesetzt werden, weil beim Layer-Export Null rauskommen würde und das darf für font nicht sein.
-    		0
-			) RETURNING id";
-    $this->debug->write("<p>file:kvwmap class:Document->addfreetext :",4);
-    $ret = $this->database->execSQL($sql,4, 1);
-		$rs = pg_fetch_assoc($ret[1]);
-    $lastinsert_id = $rs['id'];
-    $sql = 'INSERT INTO kvwmap.druckrahmen2freitexte (druckrahmen_id, freitext_id) VALUES('.$formvars['aktiverRahmen'].', '.$lastinsert_id.')';
-    $this->debug->write("<p>file:kvwmap class:Document->addfreetext :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
-
-  function removefreetext($formvars){
-    $sql = 'DELETE FROM kvwmap.druckfreitexte WHERE id = '.$formvars['freitext_id'];
-    $this->debug->write("<p>file:kvwmap class:Document->removefreetext :",4);
-    $this->database->execSQL($sql,4, 1);
-    $sql = 'DELETE FROM kvwmap.druckrahmen2freitexte WHERE freitext_id = '.$formvars['freitext_id'];
-    $this->debug->write("<p>file:kvwmap class:Document->removefreetext :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
-
-  function get_price($format){
-    $sql ='SELECT preis FROM kvwmap.druckrahmen WHERE format = \''.$format.'\'';
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:Document->get_price :<br>" . $sql,4);
-    $ret = $this->database->execSQL($sql,4, 1);
-    $rs = pg_fetch_row($ret[1]);
-    return $rs[0];
-  }
-
-  function delete_frame($selected_frame_id){
-    $sql ="DELETE FROM kvwmap.druckrahmen WHERE id = " . $selected_frame_id;
-    $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
-    $this->database->execSQL($sql,4, 1);
-    $sql ="DELETE FROM kvwmap.druckrahmen2stelle WHERE druckrahmen_id = " . $selected_frame_id;
-    $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
-
-  function save_frame($formvars, $_files, $stelle_id){
-    if($formvars['name']){
-      $frames = $this->load_frames($this->Stelle->id, NULL);
-      for($i = 0; $i < count($frames); $i++){
-        if($frames[$i]['name'] == $formvars['name']){
-          $this->Document->fehlermeldung = 'Name schon vergeben';
-        return;
-        }
-      }
-      $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);
-      $preis = $formvars['euro'] * 100 + $formvars['cent'];
-			$columns = [
-      	'name' => "'" . $formvars['name'] . "'",
-				'dhk_call' => "'" . $formvars['dhk_call'] . "'",
-      	'headposx' => $formvars['headposx'],
-      	'headposy' => $formvars['headposy'],
-      	'headwidth' => $formvars['headwidth'],
-      	'headheight' => $formvars['headheight'],
-      	'mapposx' => $formvars['mapposx'],
-      	'mapposy' => $formvars['mapposy'],
-      	'mapwidth' => $formvars['mapwidth'],
-      	'mapheight' => $formvars['mapheight']
-			];
-      if($formvars['refmapposx'] != ''){$columns['refmapposx'] = $formvars['refmapposx'];}
-      if($formvars['refmapposy'] != ''){$columns['refmapposy'] = $formvars['refmapposy'];}
-      if($formvars['refmapwidth'] != ''){$columns['refmapwidth'] = $formvars['refmapwidth'];}
-      if($formvars['refmapheight'] != ''){$columns['refmapheight'] = $formvars['refmapheight'];}
-      if($formvars['refposx'] != ''){$columns['refposx'] = $formvars['refposx'];}
-      if($formvars['refposy'] != ''){$columns['refposy'] = $formvars['refposy'];}
-      if($formvars['refwidth'] != ''){$columns['refwidth'] = $formvars['refwidth'];}
-      if($formvars['refheight'] != ''){$columns['refheight'] = $formvars['refheight'];}
-      if($formvars['refzoom'] != ''){$columns['refzoom'] = $formvars['refzoom'];}
-      if($formvars['dateposx'] != ''){$columns['dateposx'] = $formvars['dateposx'];}
-      if($formvars['dateposy'] != ''){$columns['dateposy'] = $formvars['dateposy'];}
-      if($formvars['datesize'] != ''){$columns['datesize'] = $formvars['datesize'];}
-      if($formvars['scaleposx'] != ''){$columns['scaleposx'] = $formvars['scaleposx'];}
-      if($formvars['scaleposy'] != ''){$columns['scaleposy'] = $formvars['scaleposy'];}
-      if($formvars['scalesize'] != ''){$columns['scalesize'] = $formvars['scalesize'];}
-			if($formvars['scalebarposx'] != ''){$columns['scalebarposx'] = $formvars['scalebarposx'];}
-      if($formvars['scalebarposy'] != ''){$columns['scalebarposy'] = $formvars['scalebarposy'];}
-      if($formvars['oscaleposx'] != ''){$columns['oscaleposx'] = $formvars['oscaleposx'];}
-      if($formvars['oscaleposy'] != ''){$columns['oscaleposy'] = $formvars['oscaleposy'];}
-      if($formvars['oscalesize'] != ''){$columns['oscalesize'] = $formvars['oscalesize'];}
-			if($formvars['lageposx'] != ''){$columns['lageposx'] = $formvars['lageposx'];}
-      if($formvars['lageposy'] != ''){$columns['lageposy'] = $formvars['lageposy'];}
-      if($formvars['lagesize'] != ''){$columns['lagesize'] = $formvars['lagesize'];}
-			if($formvars['gemeindeposx'] != ''){$columns['gemeindeposx'] = $formvars['gemeindeposx'];}
-      if($formvars['gemeindeposy'] != ''){$columns['gemeindeposy'] = $formvars['gemeindeposy'];}
-      if($formvars['gemeindesize'] != ''){$columns['gemeindesize'] = $formvars['gemeindesize'];}
-      if($formvars['gemarkungposx'] != ''){$columns['gemarkungposx'] = $formvars['gemarkungposx'];}
-      if($formvars['gemarkungposy'] != ''){$columns['gemarkungposy'] = $formvars['gemarkungposy'];}
-      if($formvars['gemarkungsize'] != ''){$columns['gemarkungsize'] = $formvars['gemarkungsize'];}
-      if($formvars['flurposx'] != ''){$columns['flurposx'] = $formvars['flurposx'];}
-      if($formvars['flurposy'] != ''){$columns['flurposy'] = $formvars['flurposy'];}
-      if($formvars['flursize'] != ''){$columns['flursize'] = $formvars['flursize'];}
-			if($formvars['flurstposx'] != ''){$columns['flurstposx'] = $formvars['flurstposx'];}
-      if($formvars['flurstposy'] != ''){$columns['flurstposy'] = $formvars['flurstposy'];}
-      if($formvars['flurstsize'] != ''){$columns['flurstsize'] = $formvars['flurstsize'];}
-      if($formvars['legendposx'] != ''){$columns['legendposx'] = $formvars['legendposx'];}
-      if($formvars['legendposy'] != ''){$columns['legendposy'] = $formvars['legendposy'];}
-      if($formvars['legendsize'] != ''){$columns['legendsize'] = $formvars['legendsize'];}
-      if($formvars['arrowposx'] != ''){$columns['arrowposx'] = $formvars['arrowposx'];}
-      if($formvars['arrowposy'] != ''){$columns['arrowposy'] = $formvars['arrowposy'];}
-      if($formvars['arrowlength'] != ''){$columns['arrowlength'] = $formvars['arrowlength'];}
-      if($formvars['userposx'] != ''){$columns['userposx'] = $formvars['userposx'];}
-      if($formvars['userposy'] != ''){$columns['userposy'] = $formvars['userposy'];}
-      if($formvars['usersize'] != ''){$columns['usersize'] = $formvars['usersize'];}
-      if($formvars['watermark'] != ''){$columns['watermark'] = "'" . $formvars['watermark'] ."'";}
-      if($formvars['watermarkposx'] != ''){$columns['watermarkposx'] = $formvars['watermarkposx'];}
-      if($formvars['watermarkposy'] != ''){$columns['watermarkposy'] = $formvars['watermarkposy'];}
-      if($formvars['watermarksize'] != ''){$columns['watermarksize'] = $formvars['watermarksize'];}
-      if($formvars['watermarkangle'] != ''){$columns['watermarkangle'] = $formvars['watermarkangle'];}
-      if($formvars['watermarktransparency'] != ''){$columns['watermarktransparency'] = $formvars['watermarktransparency'];}
-      if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
-      $columns['variable_freetexts'] = $formvars['variable_freetexts'];
-      if($formvars['format']){$columns['format'] = "'" . $formvars['format'] ."'";}
-      if($preis){$columns['preis'] = $preis;}
-      if($formvars['font_date']){$columns['font_date'] = "'" . $formvars['font_date'] . "'";}
-      if($formvars['font_scale']){$columns['font_scale'] = "'" . $formvars['font_scale'] . "'";}
-			if($formvars['font_lage']){$columns['font_lage'] = "'" . $formvars['font_lage'] . "'";}
-			if($formvars['font_gemeinde']){$columns['font_gemeinde'] = "'" . $formvars['font_gemeinde'] . "'";}
-      if($formvars['font_gemarkung']){$columns['font_gemarkung'] = "'" . $formvars['font_gemarkung'] . "'";}
-      if($formvars['font_flur']){$columns['font_flur'] = "'" . $formvars['font_flur'] . "'";}
-			if($formvars['font_flurst']){$columns['font_flurst'] = "'" . $formvars['font_flurst'] . "'";}
-      if($formvars['font_legend']){$columns['font_legend'] = "'" . $formvars['font_legend'] . "'";}
-      if($formvars['font_user']){$columns['font_user'] = "'" . $formvars['font_user'] . "'";}
-      if($formvars['font_watermark']){$columns['font_watermark'] = "'" . $formvars['font_watermark'] . "'";}
-
-      if($_files['headsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
-        if (move_uploaded_file($_files['headsrc']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $columns['headsrc'] = "'" . $_files['headsrc']['name'] . "'";
-        }
-        else {
-            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-        }
-      }
-      else{
-        $columns['headsrc'] = "'" . $formvars['headsrc_save'] . "'";
-      }
-      if($_files['refmapsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapsrc']['name'];
-        if (move_uploaded_file($_files['refmapsrc']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $columns['refmapsrc'] = "'" . $_files['refmapsrc']['name'] . "'";
-        }
-        else {
-            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-        }
-      }
-      else{
-        $columns['refmapsrc'] = "'" . $formvars['refmapsrc_save']."'";
-      }
-      if($_files['refmapfile']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapfile']['name'];
-        if (move_uploaded_file($_files['refmapfile']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $columns['refmapfile'] = "'" . $_files['refmapfile']['name'] . "'";
-        }
-        else {
-            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-        }
-      }
-      else{
-        $columns['refmapfile'] = "'" . $formvars['refmapfile_save'] . "'";
-      }
-			$sql = "
-				INSERT INTO kvwmap.druckrahmen
-					(" . implode(', ', array_keys($columns)) . ")
-				VALUES 
-					(" . implode(', ', $columns) . ")
-				RETURNING id";
-      $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
-      $ret = $this->database->execSQL($sql,4, 1);
-			$rs = pg_fetch_assoc($ret[1]);
-      $lastdruckrahmen_id = $rs['id'];
-
-      $sql = 'INSERT INTO kvwmap.druckrahmen2stelle (stelle_id, druckrahmen_id) VALUES('.$stelle_id.', '.$lastdruckrahmen_id.')';
-      $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
-      $this->database->execSQL($sql,4, 1);
-
-      for($i = 0; $i < $formvars['textcount']; $i++){
-        $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
-        $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
-        $sql = "
-					INSERT INTO kvwmap.druckfreitexte	(
-						text,
-						posx,
-						posy,
-						size,
-						angle,
-						font)
-				VALUES (
-					'" . $formvars['text'.$i] . "',
-        	" . $formvars['textposx' . $i] . ",
-        	" . $formvars['textposy' . $i] . ",
-        	" . $formvars['textsize' . $i] . ",
-        	" . $formvars['textangle' . $i] .",
-        	'" . $formvars['textfont' . $i] . "'
-				) RETURNING id";
-        #echo $sql;
-        $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
-        $ret = $this->database->execSQL($sql,4, 1);
-				$rs = pg_fetch_assoc($ret[1]);
-    		$lastfreitext_id = $rs['id'];
-
-        $sql = 'INSERT INTO kvwmap.druckrahmen2freitexte (druckrahmen_id, freitext_id) VALUES('.$lastdruckrahmen_id.', '.$lastfreitext_id.')';
-        $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
-        $this->database->execSQL($sql,4, 1);
-      }
-    }
-    return $lastdruckrahmen_id;
-  }
-
-  function update_frame($formvars, $_files){
-    if($formvars['name']){
-      $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);
-      $preis = $formvars['euro'] * 100 + $formvars['cent'];
-
-      $sql ="UPDATE kvwmap.druckrahmen";
-      $sql .= " SET Name = '" . $formvars['name']."'";
-			$sql .= ", dhk_call = '" . $formvars['dhk_call']."'";
-      $sql .= ", headposx = " . value_or_null($formvars['headposx']);
-      $sql .= ", headposy = " . value_or_null($formvars['headposy']);
-      $sql .= ", headwidth = " . value_or_null($formvars['headwidth']);
-      $sql .= ", headheight = " . value_or_null($formvars['headheight']);
-      $sql .= ", mapposx = " . value_or_null($formvars['mapposx']);
-      $sql .= ", mapposy = " . value_or_null($formvars['mapposy']);
-      $sql .= ", mapwidth = " . value_or_null($formvars['mapwidth']);
-      $sql .= ", mapheight = " . value_or_null($formvars['mapheight']);
-      $sql .= ", refmapposx = " . value_or_null($formvars['refmapposx']);
-      $sql .= ", refmapposy = " . value_or_null($formvars['refmapposy']);
-      $sql .= ", refmapwidth = " . value_or_null($formvars['refmapwidth']);
-      $sql .= ", refmapheight = " . value_or_null($formvars['refmapheight']);
-      $sql .= ", refposx = " . value_or_null($formvars['refposx']);
-      $sql .= ", refposy = " . value_or_null($formvars['refposy']);
-      $sql .= ", refwidth = " . value_or_null($formvars['refwidth']);
-      $sql .= ", refheight = " . value_or_null($formvars['refheight']);
-      $sql .= ", refzoom = " . value_or_null($formvars['refzoom']);
-      $sql .= ", dateposx = " . value_or_null($formvars['dateposx']);
-      $sql .= ", dateposy = " . value_or_null($formvars['dateposy']);
-      $sql .= ", datesize = " . value_or_null($formvars['datesize']);
-      $sql .= ", scaleposx = " . value_or_null($formvars['scaleposx']);
-      $sql .= ", scaleposy = " . value_or_null($formvars['scaleposy']);
-      $sql .= ", scalesize = " . value_or_null($formvars['scalesize']);
-			$sql .= ", scalebarposx = " . value_or_null($formvars['scalebarposx']);
-      $sql .= ", scalebarposy = " . value_or_null($formvars['scalebarposy']);
-      $sql .= ", oscaleposx = " . value_or_null($formvars['oscaleposx']);
-      $sql .= ", oscaleposy = " . value_or_null($formvars['oscaleposy']);
-      $sql .= ", oscalesize = " . value_or_null($formvars['oscalesize']);
-			$sql .= ", lageposx = " . value_or_null($formvars['lageposx']);
-      $sql .= ", lageposy = " . value_or_null($formvars['lageposy']);
-      $sql .= ", lagesize = " . value_or_null($formvars['lagesize']);
-			$sql .= ", gemeindeposx = " . value_or_null($formvars['gemeindeposx']);
-      $sql .= ", gemeindeposy = " . value_or_null($formvars['gemeindeposy']);
-      $sql .= ", gemeindesize = " . value_or_null($formvars['gemeindesize']);
-      $sql .= ", gemarkungposx = " . value_or_null($formvars['gemarkungposx']);
-      $sql .= ", gemarkungposy = " . value_or_null($formvars['gemarkungposy']);
-      $sql .= ", gemarkungsize = " . value_or_null($formvars['gemarkungsize']);
-      $sql .= ", flurposx = " . value_or_null($formvars['flurposx']);
-      $sql .= ", flurposy = " . value_or_null($formvars['flurposy']);
-      $sql .= ", flursize = " . value_or_null($formvars['flursize']);
-			$sql .= ", flurstposx = " . value_or_null($formvars['flurstposx']);
-      $sql .= ", flurstposy = " . value_or_null($formvars['flurstposy']);
-      $sql .= ", flurstsize = " . value_or_null($formvars['flurstsize']);
-      $sql .= ", legendposx = " . value_or_null($formvars['legendposx']);
-      $sql .= ", legendposy = " . value_or_null($formvars['legendposy']);
-      $sql .= ", legendsize = " . value_or_null($formvars['legendsize']);
-      $sql .= ", arrowposx = " . value_or_null($formvars['arrowposx']);
-      $sql .= ", arrowposy = " . value_or_null($formvars['arrowposy']);
-      $sql .= ", arrowlength = " . value_or_null($formvars['arrowlength']);
-      $sql .= ", userposx = " . value_or_null($formvars['userposx']);
-      $sql .= ", userposy = " . value_or_null($formvars['userposy']);
-      $sql .= ", usersize = " . value_or_null($formvars['usersize']);
-      $sql .= ", watermark = '" . $formvars['watermark']."'";
-      $sql .= ", watermarkposx = " . value_or_null($formvars['watermarkposx']);
-      $sql .= ", watermarkposy = " . value_or_null($formvars['watermarkposy']);
-      $sql .= ", watermarksize = " . value_or_null($formvars['watermarksize']);
-      $sql .= ", watermarkangle = " . value_or_null($formvars['watermarkangle']);
-      $sql .= ", watermarktransparency = " . value_or_null($formvars['watermarktransparency']);
-      if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
-      $sql .= ", variable_freetexts = " . $formvars['variable_freetexts'];
-      $sql .= ", format = '" . $formvars['format']."'";
-      $sql .= ", preis = '" . $preis."'";
-      $sql .= ", font_date = '" . $formvars['font_date']."'";
-      $sql .= ", font_scale = '" . $formvars['font_scale']."'";
-			$sql .= ", font_lage = '" . $formvars['font_lage']."'";
-			$sql .= ", font_gemeinde = '" . $formvars['font_gemeinde']."'";
-      $sql .= ", font_gemarkung = '" . $formvars['font_gemarkung']."'";
-      $sql .= ", font_flur = '" . $formvars['font_flur']."'";
-			$sql .= ", font_flurst = '" . $formvars['font_flurst']."'";
-      $sql .= ", font_legend = '" . $formvars['font_legend']."'";
-      $sql .= ", font_user = '" . $formvars['font_user']."'";
-      $sql .= ", font_watermark = '" . $formvars['font_watermark']."'";
-
-      if($_files['headsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
-        if (move_uploaded_file($_files['headsrc']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", headsrc = '" . $_files['headsrc']['name']."'";
-          #echo $sql;
-        }
-        else {
-            //echo '<br>Datei: '.$_files['Wappen']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-          }
-      }
-      if($_files['refmapsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapsrc']['name'];
-        if (move_uploaded_file($_files['refmapsrc']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", refmapsrc = '" . $_files['refmapsrc']['name']."'";
-          #echo $sql;
-        }
-        else {
-            //echo '<br>Datei: '.$_files['Wappen']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-          }
-      }
-      if($_files['refmapfile']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapfile']['name'];
-        if (move_uploaded_file($_files['refmapfile']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", refmapfile = '" . $_files['refmapfile']['name']."'";
-        }
-        else {
-            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-        }
-      }
-      $sql .= " WHERE id =".(int)$formvars['aktiverRahmen'];
-      $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
-      $this->database->execSQL($sql,4, 1);
-
-      for($i = 0; $i < $formvars['textcount']; $i++){
-        $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
-        $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
-        $sql = "UPDATE kvwmap.druckfreitexte SET text = '" . $formvars['text'.$i]."'";
-        $sql .= ", posx = " . $formvars['textposx'.$i];
-        $sql .= ", posy = " . $formvars['textposy'.$i];
-        $sql .= ", size = " . $formvars['textsize'.$i];
-        $sql .= ", angle = " . $formvars['textangle'.$i];
-        $sql .= ", font = '" . $formvars['textfont'.$i]."'";
-        $sql .= " WHERE id = " . $formvars['text_id'.$i];
-        #echo $sql;
-        $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
-        $this->database->execSQL($sql,4, 1);
-      }
-    }
-  }
-
-  function add_frame2stelle($id, $stelleid){
-    $sql = "
-			INSERT INTO 
-				kvwmap.druckrahmen2stelle 
-			VALUES (
-				" . $stelleid . ", 
-				" . $id . ")
-			ON CONFLICT (stelle_id, druckrahmen_id) DO NOTHING";
-    $this->debug->write("<p>file:kvwmap class:Document->add_frame2stelle :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
-
-  function removeFrames($stelleid){
-    $sql ="DELETE FROM kvwmap.druckrahmen2stelle WHERE stelle_id = " . $stelleid;
-    $this->debug->write("<p>file:kvwmap class:Document->removeFrames :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
-
-  function save_active_frame($id, $userid, $stelleid){
-    $sql ="UPDATE kvwmap.rolle SET active_frame = '" . $id."' WHERE user_id =" . $userid." AND stelle_id =" . $stelleid;
-    $this->debug->write("<p>file:kvwmap class:Document->save_active_frame :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
-
-  function get_active_frameid($userid, $stelleid){
-    $sql ='SELECT active_frame from kvwmap.rolle WHERE user_id ='.$userid.' AND stelle_id ='.$stelleid;
-    $this->debug->write("<p>file:kvwmap class:GUI->get_active_frameid :<br>" . $sql,4);
-    $ret = $this->database->execSQL($sql,4, 1);
-		$rs = pg_fetch_row($ret[1]);
-    return $rs[0];
-  }
-}
 
 class point {
   var $x;

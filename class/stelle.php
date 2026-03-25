@@ -1136,9 +1136,10 @@ class stelle {
 		&$layer
 	) {
 		include_once(CLASSPATH . 'datendrucklayout.php');
+		include_once(CLASSPATH . 'kartendrucklayout.php');
 		$results = array();
 		$old_parents = $this->getParents('ORDER BY ID', 'only_ids');
-		$document = new Document($this->database);
+		$kdl = new kdl($this->database);
 		$ddl = new ddl($this->database);
 				
 		# immer alle Elternstellen und deren Zuordnungen entfernen und wieder neu hinzufügen
@@ -1147,7 +1148,7 @@ class stelle {
 			$menues = array_values(array_diff($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_diff($functions, $parent_stelle->getFunktionen('only_ids')));
 			$layouts = array_values(array_diff($layouts, $ddl->load_layouts($drop_parent_id, '', '', '', 'only_ids')));
-			$frames = array_values(array_diff($frames, $document->load_frames($drop_parent_id, false, 'only_ids')));
+			$frames = array_values(array_diff($frames, $kdl->load_frames($drop_parent_id, false, 'only_ids')));
 			$parent_layer = $parent_stelle->getLayer('', 'only_ids');
 			$layer = array_values(array_diff($layer, $parent_layer));
 			$this->dropParent($drop_parent_id);
@@ -1159,7 +1160,7 @@ class stelle {
 			$menues = $this->sort_menues(array_merge($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
 			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
-			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
+			$frames = array_values(array_unique(array_merge($frames, $kdl->load_frames($new_parent_id, false, 'only_ids'))));
 			$layer = array_values(array_unique(array_merge($layer, $parent_stelle->getLayer('', 'only_ids'))));
 			$results[] = $this->addParent($new_parent_id);
 		}

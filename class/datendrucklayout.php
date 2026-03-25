@@ -29,19 +29,16 @@
 # Klasse ddl #
 #############################
 
-class ddl {
-	public $debug;
-	public $database;
+include_once(CLASSPATH.'drucklayout.php');
+
+class ddl extends drucklayout{
 	public $gui;
-	public $din_formats;
 	public $remaining_freetexts;
 	public $remaining_rectangles;
 	public $remaining_lines;
-	public $colors;
 	public $layout;
 	public $transaction_start_y;
 	public $transaction_start_pageid;
-	public $pdf;
 	public $i_on_page;
 	public $miny;
 	public $maxy;
@@ -56,9 +53,7 @@ class ddl {
 	public $Stelle;
 
 	function __construct($database, $gui = NULL) {
-    global $debug;
-    $this->debug = $debug;
-    $this->database = $database;
+		parent::__construct($database);
     $this->gui = $gui;
 		$this->din_formats = array(
 			'A4 hoch' => array('width' => 595, 'height' => 842, 'size' => 'A4', 'orientation' => 'portrait'),
@@ -69,22 +64,8 @@ class ddl {
 		$this->remaining_freetexts = array();
 		$this->remaining_rectangles = array();
 		$this->remaining_lines = array();
-		$this->colors = $this->read_colors();
 		$this->debug_output = false;
   }
-	
-	function read_colors(){
-		$sql = "SELECT * FROM kvwmap.ddl_colors";
-  	#echo $sql;
-  	$ret = $this->database->execSQL($sql, 4, 0);
-    if($ret[0]==0){
-			while ($row = pg_fetch_assoc($ret[1])){
-        $colors[$row['id']] = $row;
-      }
-    }
-    return $colors;
-  }
-	
   
   function add_static_elements($offsetx){
 		$offsety = $this->offsety;
@@ -2294,22 +2275,6 @@ class ddl {
 		$sql ="DELETE FROM kvwmap.ddl2stelle WHERE stelle_id = ".$stelleid;
     $this->debug->write("<p>file:kvwmap class:ddl->removelayouts :",4);
     $this->database->execSQL($sql,4, 1);
-	}
- 
-	function get_fonts() {
-		$font_files = searchdir(WWWROOT . APPLVERSION . 'fonts/PDFClass/', true);
-		$fonts = array();
-		foreach($font_files AS $font_file) {
-			if (strpos($font_file, 'php_') === false) {
-				$pathinfo = pathinfo($font_file);
-				$fonts[] = array(
-					'value' => $pathinfo['basename'],
-					'output' => $pathinfo['filename']
-				);
-			}
-		}
-		#print_r($fonts);
-		return $fonts;
 	}
 
 }
