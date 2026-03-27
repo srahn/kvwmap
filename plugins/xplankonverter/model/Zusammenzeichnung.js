@@ -135,7 +135,7 @@ class Zusammenzeichnung {
       form_data.append('format', 'json_result');
       form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
-      form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
+      form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').is(':checked'));
 			form_data.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'));
       var xhttp = new XMLHttpRequest();
       xhttp.open("POST", "index.php", true);
@@ -207,7 +207,7 @@ class Zusammenzeichnung {
         xplan_gml_path: 'uploaded_xplan_gml',
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -247,7 +247,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'),
         simplify_fachdaten_geom: $('#simplify_fachdaten_geom').val()
       },
@@ -284,7 +284,7 @@ class Zusammenzeichnung {
     formData.append('konvertierung_id', this.id);
     formData.append('planart', this.planart);
     formData.append('mime_type', 'json');
-    formData.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
+    formData.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').is(':checked'));
 		formData.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'));
     let response = fetch('index.php', {
       method: 'POST',
@@ -321,7 +321,7 @@ class Zusammenzeichnung {
         xplan_gml_path: 'reindexed_xplan_gml',
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -353,7 +353,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -384,7 +384,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -415,7 +415,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -446,7 +446,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -483,7 +483,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -513,7 +513,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -544,7 +544,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -576,7 +576,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').is(':checked'),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       beforeSend : (request) => {

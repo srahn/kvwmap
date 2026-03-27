@@ -3063,11 +3063,19 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		return $rs['email_arl'];
 	}
 
-	function send_notification($msg) {
+	function send_notification($msg, $send_to_cc_from_config = false) {
 		$from_name = 'XPlan-Server PlanDigital';
 		$from_email = 'info@testportal-plandigital.de';
 		$to_email = $this->get_arl_email();
-		$cc_email = 'peter.korduan@gdi-service.de';
+		// add additional ccs in some contexts for plandigital as defined in config
+		if($send_to_cc_from_config == false || empty(XPLANKONVERTER_CC_EMAILS)) {
+			$cc_email = 'peter.korduan@gdi-service.de';
+		}
+		else {
+			$cc_emails_multiple = explode(',', XPLANKONVERTER_CC_EMAILS);
+			$cc_emails_multiple[] = 'peter.korduan@gdi-service.de';
+			$cc_email = implode(',',$cc_emails_multiple);
+		}
 		$reply_email = null;
 		$subject = 'Update in Plandigital';
 		$message 	= "Sehr geehrte Damen und Herren,\r\n\r\n";
