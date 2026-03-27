@@ -208,6 +208,7 @@
 	$GUI->trigger_functions['handle_regel'] = function($fired, $event, $layer, $oid = 0, $old_dataset = array()) use ($GUI) {
 		$executed = true;
 		$success = true;
+		require_once(PLUGINS . 'xplankonverter/model/regel.php');
 
 		switch(true) {
 
@@ -300,6 +301,7 @@
 						)
 						AND LOWER(`Name`) != 'rp_bereich'
 						AND LOWER(`Name`) != 'rp_plan'
+						AND LOWER(`Name`) != 'xp_ppo_rp_plan'
 						" : '') . "
 					) OR
 					(
@@ -643,7 +645,6 @@
 		$GUI->service_layers = $result['layers_with_content'];
 		$GUI->service_layernames = array_keys($GUI->service_layers);
 		$GUI->xlog->write('service_layernames: ' . implode(', ' . $GUI->service_layer_names));
-		$layers_to_remove = array();
 
 		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
 			$layer = $GUI->map->getLayer($i);

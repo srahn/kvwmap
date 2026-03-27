@@ -131,6 +131,19 @@ class XP_Plan extends PgObject {
 		return null;
 	}
 
+	function get_plan_layer_id($planart = NULL) {
+		if (empty($planart)) {
+			$planart = $this->planart;
+		}
+		switch ($planart) {
+			case 'BP-Plan' : $plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
+			case 'FP-Plan' : $plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID; break;
+			case 'SO-Plan' : $plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID; break;
+			case 'RP-Plan' : $plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID; break;
+		}
+		return $plan_layer_id;
+	}
+
 	/**
 	 * Return names of layer that have content from the plan
 	 * @param array $xplan_layers Array mit GUI->xplankonverter_get_xplan_layers() abgefragt wurden
@@ -422,6 +435,8 @@ class XP_Plan extends PgObject {
 			$bereich->destroy();
 		}
 		$this->destroy_associated_textabschnitte();
+		$this->destroy_externereferenz_dokumente();
+
 		$sql = "
 			DELETE FROM
 				xplan_gml." . $this->planartAbk . "_plan
@@ -430,6 +445,16 @@ class XP_Plan extends PgObject {
 		";
 		$result = $this->database->execSQL($sql, 0, 3);
 		//$this->delete();
+	}
+
+	function destroy_externereferenz_dokumente() {
+		$layer = Layer::find_by_id($this->gui, $this->get_plan_layer_id());
+		$this->gui->processJSON(
+			$this->get('externereferenz_json'),
+			$layer->get('document_path'),
+			$layer->get('document_url'),
+			NULL, NULL, NULL, NULL, '', true
+		);
 	}
 }
 ?>

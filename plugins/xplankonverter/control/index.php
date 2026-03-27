@@ -48,9 +48,17 @@
 // xplankonverter_validierungsergebnisse
 // xplankonverter_xplanvalidator
 // xplankonverter_zusammenzeichnung
+// xplankonverter_augment_xp_ppo_stylesheetids
 
 // neuer_Layer_Datensatz must be included for after-triggers in model/kvwmap (which itself includes other classes)
-if (strpos($go, '_') !== false AND (strpos($go, 'xplankonverter') !== false || strpos($go, 'neuer_Layer_Datensatz') !== false)) {
+if (
+	strpos($go, '_') !== false AND
+	(
+		strpos($go, 'xplankonverter') !== false ||
+		strpos($go, 'neuer_Layer_Datensatz') !== false ||
+		strpos($go, 'Layer_Datensaetze_Loeschen') !== false
+	)
+) {
 	include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 	include_once(CLASSPATH . 'PgObject.php');
 	include_once(CLASSPATH . 'MyObject.php');
@@ -255,14 +263,16 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 
 		if (
 			// empty as ticketbox can be false or ticket box might not exist(variable is not set) for most users
-			empty($GUI->formvars['suppress_ticket_and_notification']) AND
+			($GUI->formvars['suppress_ticket_and_notification'] == false ||
+				strtolower($GUI->formvars['suppress_ticket_and_notification']) == 'false') AND
 			$create_ticket
 		) {
 			$ticket = create_ticket($msg);
 			$msg_zusatz .= "\n\nEs wurde ein Ticket angelegt (" . URL . APPLVERSION . "index.php?go=Layer-Suche_Suchen&selected_layer_id=258&value_id=" . $ticket->get_id() . "&operator_id==) Falls der Fehler durch das Testportal PlanDigital verursacht wurde und nicht in der XPlanGML begründet liegt, werden Sie über den Stand der Behebung informiert.";
 		}
 		if (
-			empty($GUI->formvars['suppress_ticket_and_notification']) AND
+			($GUI->formvars['suppress_ticket_and_notification'] == false ||
+				strtolower($GUI->formvars['suppress_ticket_and_notification']) == 'false') AND
 			$send_notification
 		) {
 			# if konvertierung vorhanden
@@ -414,7 +424,8 @@ function go_switch_xplankonverter($go) {
 						$msg = 'Es wurden ' . $num_unclassified . ' Objekte gefunden, die keinem Planzeichen zugeordnet werden konnten.<br>Rufen Sie den Plan auf, klappen den Abschnitt "Planzeichen (Objektklassen)" auf und klicken auf "Lade Objektklassen". Dort werden die Klassen angezeigt, die Objekte ohne Zuordnung enthalten und ein Link zu den Objekten. Nehmen Sie Kontakt auf mit Ihrem Dienstleister um die fehlenden Klassen zu ergänzen oder bestehende so anzupassen, dass die Objekte fachlich korrekt zugeordnet werden können.';
 					}
 
-					if (empty($GUI->formvars['suppress_ticket_and_notification'])) {
+					if ($GUI->formvars['suppress_ticket_and_notification'] == false ||
+						strtolower($GUI->formvars['suppress_ticket_and_notification']) == 'false') {
 						$GUI->create_ticket($msg);
 						$result = $GUI->konvertierung->send_notification('Hinweis zur Zusammenzeichnung ' . $GUI->konvertierung->get('bezeichnung') . ' id: ' . $GUI->konvertierung->get_id() . $msg);
 						if (! $result['success']) {
@@ -552,7 +563,7 @@ function go_switch_xplankonverter($go) {
 				* As the date will also end up in the metadata, it needs to be set before the metadata is created/updated
 				*/
 				if ($GUI->formvars['suppress_gvbtable_letzteaktualisierung_update'] == false ||
-				$GUI->formvars['suppress_gvbtable_letzteaktualisierung_update'] == 'false') {
+				strtolower($GUI->formvars['suppress_gvbtable_letzteaktualisierung_update']) == 'false') {
 					$GUI->write_xlog('Update des Aktualisierungsdatums in gebietseinheiten-Tabelle.');
 					$GUI->debug->write('Setze Datum Letze Aktualisierung in Gemeindeverbände-Tabelle.');
 					$ret_akt = $GUI->konvertierung->update_letztes_aktualisierungsdatum_gebietstabelle();
@@ -1780,6 +1791,7 @@ function go_switch_xplankonverter($go) {
 			}
 
 			$GUI->debug->write('Setze Veröffentlichungsdatum: ' . $new_konvertierung->get_aktualitaetsdatum() . ' für neuen Plan.');
+			$GUI->xlog->write('Setze Veröffentlichungsdatum: ' . $new_konvertierung->get_aktualitaetsdatum() . ' für neuen Plan.');
 			$result = $new_konvertierung->update_attr(array('error_id = NULL', 'veroeffentlicht = true', "veroeffentlichungsdatum = '" . $new_konvertierung->get_aktualitaetsdatum() . "'"));
 			if (!$result['success']) {
 				send_error($result['msg']);
@@ -1810,9 +1822,11 @@ function go_switch_xplankonverter($go) {
 				}
 			}
 
-			if (empty($GUI->formvars['suppress_ticket_and_notification'])) {
+			if ($GUI->formvars['suppress_ticket_and_notification'] == false ||
+				strtolower($GUI->formvars['suppress_ticket_and_notification']) == 'false') {
 				$GUI->debug->write('Sende Benachrichtigung.');
-				$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . ' ist von dem Nutzer ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . ' (login: ' . $GUI->user->login_name . ") aktualisiert worden.\n\nDiese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_konvertierung_anzeigen&planart=" . $GUI->formvars['planart'] . "}\n\nIhr Team von " . TITLE);
+				// also sends potential ccs as defined in the config
+				$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . ' ist von dem Nutzer ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . ' (login: ' . $GUI->user->login_name . ") aktualisiert worden.\n\nDiese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_konvertierung_anzeigen&planart=" . $GUI->formvars['planart'] . "}\n\nIhr Team von " . TITLE, true);
 				if (!$result['success']) {
 					send_error($result['msg']);
 					break;
@@ -2671,6 +2685,23 @@ function go_switch_xplankonverter($go) {
 					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $GUI->konvertierung->get_id());
 					$GUI->konvertierung->insert_textabschnitte($gml_extractor);
 				}
+			}
+			$GUI->output();
+		} break;
+
+		/*
+		* Augments stylesheet-ids within XP_PPO according to the mappingtable xplankonverter.xp_ppo_art_to_stylesheet, if the stylesheet-ids are empty
+		* Example: https://testportal-plandigital.de/kvwmap/index.php?go=xplankonverter_augment_xp_ppo_stylesheetids&konvertierung_id=23156
+		*/
+		case 'xplankonverter_augment_xp_ppo_stylesheetids' : {
+			$GUI->main = 'Hinweis.php';
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			} else {
+				$GUI->Hinweis = 'Dieser Case fügt XP_PPOs einer spezifischen Konvertierung Stylesheet-Ids hinzu, wenn diese leer sind.<br><br>';
+				$GUI->Hinweis .= 'Es werden anhand der Tabelle xplankonverter.xp_ppo_art_to_stylesheet SQL-Statements erstellt und ausgeführt.<br>';
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				$GUI->konvertierung->augment_xp_ppo_stylesheetids();
 			}
 			$GUI->output();
 		} break;

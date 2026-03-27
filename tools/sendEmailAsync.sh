@@ -36,7 +36,8 @@ else
     from_email=`cat $file | jq -r '.from_email'`
     subject=`cat $file | jq -r '.subject'`
     message=`cat $file | jq -r '.message'`
-    attachment=`cat $file | jq -r '.attachment'`
+    # return empty if null value in json
+    attachment=`cat $file | jq -r '.attachment // empty'`
 
     #tls=auto will only use tls if available
     if [[ -z $attachment ]]; then
