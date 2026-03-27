@@ -271,7 +271,7 @@ class GUI {
 	}
 
 	function login() {
-		if ($this->formvars['format'] == 'json') {
+		if (in_array($this->formvars['format'], array('json', 'json_result', 'geojson'))) {
 			$this->mime_type = 'application/json';
 			$this->formvars['content_type'] = 'application/json';
 			$this->qlayerset[0]['shape'] = array(
@@ -296,36 +296,43 @@ class GUI {
 	function is_login_granted($user, $login_name, $password) {
 		# check if login_name is locked
 		if ($user->login_is_locked()) {
+			# nur wenn login_name und passwort passen
 			$this->login_failed_reason = 'login_is_locked';
 			return false;
 		}
 
 		# check if login_name exists
+		# Nicht an Nutzer weitergeben!
 		if ($user->login_name != $login_name) {
+			# unabhängig vom password
 			$this->login_failed_reason = 'wrong_login_name';
 			return false;
 		}
 
 		# check if user is archived
 		if ($user->archived) {
+			# nur wenn login_name und passwort passen
 			$this->login_failed_reason = 'archived';
 			return false;
 		}
 
 		# check if the password ist correct
 		if ($user->wrong_password($password)) {
+			# wenn passwort nicht zu nutzer mit user->id passt
 			$this->login_failed_reason = 'authentication';
 			return false;
 		}
 
 		# check if the login is granted not yet
 		if ($user->start != '0000-00-00' AND date('Y-m-d') < $user->start) {
+			# dazu muss auch der richtige user abgefragt worden sein.
 			$this->login_failed_reason = 'not_yet_started';
 			return false;
 		}
 
 		# check if the login is not granted any more
 		if ($user->stop != '0000-00-00' AND date('Y-m-d') > $user->stop) {
+			# dazu muss auch der richtige user abgefragt worden sein.
 			$this->login_failed_reason = 'expired';
 			return false;
 		}
@@ -349,21 +356,31 @@ class GUI {
 		);
 		$this->gui = (file_exists(LOGIN) ? LOGIN : SNIPPETS . 'login.php');
 		if (strpos(file_get_contents($this->gui), 'include(LAYOUTPATH . \'languages/login_\'') === false) {
+			$err_msg = '';
 			switch ($this->login_failed_reason) {
 				case 'authentication' : {
-					$this->add_message('error', 'Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!');
+					$err_msg = 'Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!';
+					// $this->add_message('error', $err_msg);
 				} break;
 				case 'login_is_locked' : {
-					$this->add_message('error', 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>' . (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s') . ' gesperrt!');
+					$err_msg = 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>' . (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s') . ' gesperrt!';
+					// $this->add_message('error', $err_msg);
 				} break;
 				case 'expired' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
+					$err_msg = 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.';
+					// $this->add_message('error', $err_msg);
 				} break;
 				case 'not_yet_started' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
+					$err_msg = 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.';
+					// $this->add_message('error', $err_msg);
 				} break;
 			}
 		}
+		$this->data = array(
+			'success' => false,
+			'error' => 'authentification', // $this->login_failed_reason,
+			'error_msg' => $err_msg
+		);
 		$this->output();
 	}
 
@@ -16103,9 +16120,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 			else {
 				if ($this->formvars['close_window'] == "") {
-					$this->add_message('notice', 'Änderung erfolgreich');
+					$this->add_message('notice', 'Änderung erfolgreich!');
 					if ($result[0] != '')$this->add_message('warning', $result[0]);
-					if ($ret['msg'] != '')$this->add_message('warning', $ret['msg']);
+					if ($ret['msg'] != '')$this->add_message($ret['type'] ?: 'warning', $ret['msg']);
 				}
 			}
 		}

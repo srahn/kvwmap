@@ -89,8 +89,10 @@ class formatter {
 
 	function output_json_result() {
 		header('Content-Type: application/json; charset=utf-8');
-		empty($this->data) ? $json = '{}' : $json = json_encode($this->data);
-		return utf8_decode($json);
+		if (empty($this->data)) {
+			$this->data = new ArrayObject(array('success' => true));
+		}
+		return utf8_decode(json_encode($this->data));
 	}
 
 	function output_jsonp() {
