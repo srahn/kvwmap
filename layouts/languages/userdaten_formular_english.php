@@ -2,6 +2,7 @@
 	$strActiveLayers = 'Active layers';
 	$strActiveSite = 'Active site';
 	$strAllowedIps = 'allowed IP / Domain';
+	$strTOTPKey = '2FA-Key';
 	$strAuthorizeTask = 'Authorize task';
 	$strButtonSaveAs = 'Save as new user';
 	$strChangePassword = 'Change password';

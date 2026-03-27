@@ -37,6 +37,13 @@ class PgObject {
 	*
 	*/
 	static $write_debug = false;
+	static $schema;
+	static $tableName;
+	static $identifier;
+	public $debug;
+	public $gui;
+	public $database;
+	public $qualifiedTableName;
 	public $children_ids;
 	public $select;
 	public $from;
@@ -46,6 +53,12 @@ class PgObject {
 	public $fkeys;
 	public $pkey;
 	public $data;
+	public $identifier_type;
+	public $identifiers;
+	public $attribute_types;
+	public $geom_column;
+	public $extent;
+	public $extents;
 
 	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
@@ -130,7 +143,8 @@ class PgObject {
 		$this->debug->show('find_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		if (!$query) {
-			echo $sql;exit;
+			echo 'Fehler beim Ausführen von SQL: ' . $sql . pg_last_error($this->database->dbConn);
+			exit;
 		}
 		$this->data = pg_fetch_assoc($query);
 		return $this;
@@ -142,12 +156,20 @@ class PgObject {
 			$ids = $this->get_ids();
 		}
 		foreach ($this->identifiers AS $identifier) {
-			$quote = ($identifier['type'] == 'text' ? "'" : "");
+			$quote = (array_filter(
+				array('text', 'varchar', 'character', 'date', 'time', 'uuid'),
+				function ($teil) use ($identifier) {
+						return strpos($identifier['type'], $teil) !== false;
+				}
+			) ? "'" : "");
 			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
 		}
 		return implode(' AND ', $parts);
 	}
 
+	/**
+	 * @return PgObject $this->data is false if nothing found.
+	 */
 	function find_by_ids($ids) {
 		$where_condition = $this->get_id_condition($ids);
 		$sql = "
@@ -321,6 +343,7 @@ class PgObject {
 
 	function getAttributes() {
 		$attributes = [];
+		$this->columns = $this->get_attribute_types();
 		foreach ($this->data AS $key => $value) {
 			$attribute_validations  = array_filter(
 				$this->validations,
@@ -328,7 +351,7 @@ class PgObject {
 					return $validation['attribute'] == $key;
 				}
 			);
-			$attributes[] = new MyAttribute($this->debug, $key, $this->columns[$key]['Type'], $value, $attribute_validations, $this->identifier);
+			$attributes[] = new PgAttribute($this->debug, $key, $this->columns[$key], $value, $attribute_validations, $this->identifier);
 		}
 		return $attributes;
 	}
@@ -592,8 +615,9 @@ class PgObject {
 		";
 		$this->debug->show('update sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
-		if(!$query){echo $sql; exit;}
-		$err_msg = $this->database->errormessage;
+		if (!$query) {
+			$err_msg = pg_last_error($this->database->dbConn);
+		}
 		$results = array(
 			'success' => ($err_msg == ''),
 			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
@@ -602,7 +626,7 @@ class PgObject {
 		return $results;
 	}
 
-	function update_attr($attributes, $set = false) {
+	function update_attr($attributes, $set = false, $where = NULL) {
 		$quote = ($this->identifier_type == 'text' ? "'" : "");
 		$sql = "
 			UPDATE
@@ -610,7 +634,7 @@ class PgObject {
 			SET
 				" . implode(', ', $attributes) . "
 			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+				" . ($where !== NULL ? $where : $this->get_id_condition()) . "
 		";
 		#echo $sql;
 		$this->debug->show('update sql: ' . $sql, $this->show);
@@ -1135,7 +1159,7 @@ VALUES (" . implode(
 
 		if (!empty($this->has_many) AND is_array($this->has_many)) {
 			foreach ($this->has_many AS $key => $relation) {
-				$many_attribut = new MyAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
+				$many_attribut = new PgAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
 				array_push($attributes_html, $many_attribut->as_form_html());
 			}
 		}

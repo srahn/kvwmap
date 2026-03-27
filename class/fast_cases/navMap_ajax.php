@@ -615,7 +615,7 @@ class GUI {
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'status') != ''){
+		if(value_of($layerset, 'errorstatus') != ''){
 			$layerset['aktivstatus'] = 0;
 		}
 
@@ -1313,7 +1313,9 @@ class GUI {
 					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivstatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
-
+						if ($layerset['list'][$i]['status'] == 'sensible') {
+							$this->sensible_layers_active = true;
+						}
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
 						$error = msGetErrorObj();
 						$test = 0;
@@ -1640,6 +1642,7 @@ class GUI {
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
+				$label->align = $dbLabel['align'];
 				$RGB = explode(" ",$dbLabel['color']);
 				if ($RGB[0] == '') { 
 					$RGB[0]=0; $RGB[1]=0; $RGB[2]=0; 
@@ -1730,9 +1733,14 @@ class GUI {
 				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
-				$label->size = $dbLabel['size'];
-				$label->minsize = $dbLabel['minsize'];
-				$label->maxsize = $dbLabel['maxsize'];
+				if (is_numeric($dbLabel['size'])) {
+					$label->size = $dbLabel['size'];
+					$label->minsize = $dbLabel['minsize'];
+					$label->maxsize = $dbLabel['maxsize'];
+				}
+				else {
+					$label->updateFromString("LABEL SIZE [" . $dbLabel['size']."] END");
+				}
 				$label->minfeaturesize = $dbLabel['minfeaturesize'];
 				if ($dbLabel['maxscale'] != '') {
 					$label->maxscaledenom = $dbLabel['maxscale'];
@@ -2134,7 +2142,7 @@ class GUI {
   }
 
 	function check_layer_visibility(&$layer){
-		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
+		if($layer['errorstatus'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
 			return false;
 		}
 		return true;
@@ -2581,7 +2589,7 @@ class stelle {
 				id," .
 				$name_column . ",
 				start,
-				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, authentifizierung, alb_status, wappen, wappen_link, logconsume,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, authentifizierung, alb_status, wappen, wappen_link
 				ows_namespace,
 				ows_title,
 				wms_accessconstraints,
@@ -2896,29 +2904,50 @@ class rolle {
     return $groups;
   }
 
+	function setQueryStatus($formvars) {
+		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
+		foreach ($formvars['qLayer'] as $layer_id => $query_status) {
+			if ($layer_id != '' AND $query_status !== '') {	
+				$table = ($layer_id > 0 ? 'u_rolle2used_layer' : 'rollenlayer');
+				$id = ($layer_id > 0 ? 'layer_id' : 'id');
+				$sql ='
+					UPDATE 
+						kvwmap.' . $table . ' 
+					SET 
+						querystatus=' . $query_status . '
+					WHERE 
+						user_id = ' . $this->user_id . ' AND 
+						stelle_id = ' . $this->stelle_id . ' AND 
+						' . $id . ' = ' . abs($layer_id);
+				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
+			}
+		}
+		return 1;
+	}
+
 	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
 		$this->layerset = $this->getLayer('');
-		if (!$ignore_rollenlayer) {
-			$rollenlayer = $this->getRollenLayer('', NULL);
-			$this->layerset = array_merge($this->layerset, $rollenlayer);
+		if (!$ignore_rollenlayer AND $rollenlayer = $this->getRollenLayer('', NULL)) {
+			$this->layerset['layer_ids'] = $this->layerset['layer_ids'] + $rollenlayer['layer_ids'];
+			$this->layerset = $this->layerset + $rollenlayer;
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
-		for ($i = 0; $i < count($this->layerset) - 1; $i++) {
-			#echo $i.' '.$this->layerset[$i]['layer_id'].' '.$formvars['thema'.$this->layerset[$i]['layer_id']].'<br>'; exit;
-			$aktiv_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'layer_id'));
-			$requires_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'requires'));
+		foreach ($formvars['thema'] as $layer_id => $aktiv_status) {
+			$layer = $this->layerset['layer_ids'][$layer_id];
+			$requires_status = value_of($formvars, 'thema[' . value_of($layer, 'requires') . '');
 			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
-				if ($this->layerset[$i]['layer_id'] > 0) {
+				if ($layer['layer_id'] > 0) {
 					$sql ="
 						UPDATE
 							kvwmap.u_rolle2used_layer
 						SET
-							aktivstatus = '" . $aktiv_status . "'
+							aktivstatus = " . $aktiv_status . "
 						WHERE
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . " AND
-							layer_id = " . $this->layerset[$i]['layer_id'] . "
+							layer_id = " . $layer['layer_id'] . "
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
@@ -2932,54 +2961,78 @@ class rolle {
 						WHERE
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . " AND
-							id = " . abs($this->layerset[$i]['layer_id']) . "
+							id = " . abs($layer['layer_id']) . "
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
-				#neu eintragen der deaktiven Klassen
-				if ($aktiv_status != 0){
-					$sql = "
-						SELECT
-							class_id
-						FROM
-							kvwmap.classes
+			}
+		}
+		foreach ($formvars['group_checkbox'] as $group_id => $aktiv_status) {
+			$sql = "
+				UPDATE
+					kvwmap.u_rolle2used_layer
+				SET
+					aktivstatus = " . $aktiv_status . "
+					" . ($aktiv_status == 0 ? ',querystatus = 0' : '') . "
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					layer_id IN (
+						WITH RECURSIVE cte (group_id) AS (
+							SELECT 
+								" .  $group_id . "
+							UNION ALL
+							SELECT 
+								u_groups.id
+							FROM 
+								cte,
+								kvwmap.u_groups
+							WHERE 
+								cte.group_id = u_groups.obergruppe AND 
+								obergruppe IS NOT NULL
+						)
+						SELECT DISTINCT 
+							layer.layer_id
+						FROM 
+							cte,
+							kvwmap.layer
 						WHERE
-						layer_id = " . $this->layerset[$i]['layer_id'] . "
-					";
-					$ret = $this->database->execSQL($sql);
-					while ($rs = pg_fetch_assoc($ret[1])) {
-						if (value_of($formvars, 'class'.$rs['class_id']) == '0' OR value_of($formvars, 'class'.$rs['class_id']) == '2'){
-							$sql2 = '
-								INSERT INTO kvwmap.u_rolle2used_class 
-									(user_id, stelle_id, class_id, status) 
-								VALUES 
-									('.$this->user_id.', '.$this->stelle_id.', '.$rs['class_id'].', '.$formvars['class'.$rs['class_id']].')
-								ON CONFLICT (user_id, stelle_id, class_id) DO 
-									UPDATE SET
-										status = excluded.status
-								;';
-							$this->database->execSQL($sql2,4, $this->loglevel);
-						}
-						elseif (value_of($formvars, 'class'.$rs['class_id']) == '1'){
-							$sql1 = "
-								DELETE FROM
-									kvwmap.u_rolle2used_class
-								WHERE
-									user_id = " . $this->user_id . " AND
-									stelle_id = " . $this->stelle_id . " AND
-									class_id = " . $rs['class_id'] . "
-							";
-							$this->database->execSQL($sql1,4, $this->loglevel);
-						}
-					}
-				}
+							gruppe = cte.group_id
+					)
+			";
+			$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+		foreach ($formvars['class'] as $class_id => $class_status) {
+			if ($class_status == '0' OR $class_status == '2'){
+				$sql2 = '
+					INSERT INTO kvwmap.u_rolle2used_class 
+						(user_id, stelle_id, class_id, status) 
+					VALUES 
+						('.$this->user_id.', '.$this->stelle_id.', ' . $class_id . ', ' . $class_status . ')
+					ON CONFLICT (user_id, stelle_id, class_id) DO 
+						UPDATE SET
+							status = excluded.status
+					;';
+				$this->database->execSQL($sql2,4, $this->loglevel);
+			}
+			elseif ($class_status == '1') {
+				$sql1 = "
+					DELETE FROM
+						kvwmap.u_rolle2used_class
+					WHERE
+						user_id = " . $this->user_id . " AND
+						stelle_id = " . $this->stelle_id . " AND
+						class_id = " . $class_id . "
+				";
+				$this->database->execSQL($sql1,4, $this->loglevel);
 			}
 		}
 		return 1;
 	}
 
-	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
+	function getLayer($LayerName, $only_active = false, $replace_params = true) {
 		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -3017,8 +3070,8 @@ class rolle {
 				) as privilegfk";
 		}
 
-		if ($only_active_or_requires) {
-			$active_filter = " AND (r2ul.aktivstatus = '1' OR ul.requires = 1)";
+		if ($only_active) {
+			$active_filter = " AND (r2ul.aktivstatus = 1)";
 		}
 		else {
 			$active_filter = '';
@@ -3036,10 +3089,10 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, errorstatus, trigger_function, version,
 				ul.queryable,
 				l.drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale,
 				ul.maxscale,
 				ul.offsite,
@@ -3057,7 +3110,6 @@ class rolle {
 				header,
 				footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,
@@ -3158,33 +3210,14 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		$layer = array();
+		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Name_or_alias'] = $rs['name'];
-			$layer[] = $rs;
+			$layer[$i] = $rs;
+			$layer['layer_ids'][$rs['layer_id']] = &$layer[$i];
+			$i++;
 		}
 		return $layer;
-	}
-
-	function setQueryStatus($formvars) {
-		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
-		for ($i=0; $i<count($this->layerset)-1; $i++){
-			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'layer_id'));
-			if($query_status !== ''){	
-				if($this->layerset[$i]['layer_id'] > 0){
-					$sql ='UPDATE kvwmap.u_rolle2used_layer set queryStatus='.$query_status;
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND layer_id='.$this->layerset[$i]['layer_id'];
-				}
-				else{		# Rollenlayer
-					$sql ='UPDATE kvwmap.rollenlayer set queryStatus='.$query_status;
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND id='.-$this->layerset[$i]['layer_id'];
-				}
-				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
-			}
-		}
-		return 1;
 	}
 
 	function readSettings() {
@@ -3230,6 +3263,8 @@ class rolle {
 			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
+			$this->layer_selection_mode=$rs['layer_selection_mode'];
+			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
@@ -3448,17 +3483,14 @@ class rolle {
 				r2ul.layer_id 
 			FROM 
 				kvwmap.u_rolle2used_layer AS r2ul' . 
-    		($logconsume? ', kvwmap.used_layer AS ul, kvwmap.layer AS l, kvwmap.stelle AS s' : '') . '
+    		($logconsume? ', kvwmap.layer AS l' : '') . '
     	WHERE 
 				r2ul.user_id = ' . $this->user_id . ' AND 
 				r2ul.stelle_id = ' . $this->stelle_id;
     if ($logconsume) {
       $sql .= ' 
-				AND r2ul.layer_id = ul.layer_id 
-				AND r2ul.stelle_id = ul.stelle_id
-				AND ul.layer_id = l.layer_id 
-				AND ul.stelle_id = s.id
-				AND (s.logconsume OR l.logconsume OR ul.logconsume OR r2ul.logconsume)';
+				AND r2ul.layer_id = l.layer_id 
+				AND l.logconsume';
     }
     $anzaktivStatus=count($aktivStatus);
     if ($anzaktivStatus > 0) {
@@ -3868,7 +3900,7 @@ class db_mapObj{
     return $filter;
   }	
 	
-	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value'), $attribute_values = []) {
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -3924,12 +3956,12 @@ class db_mapObj{
 				mandatory,
 				quicksearch,
 				visible,
-				vcheck_attribute,
-				vcheck_operator,
-				vcheck_value,
+				visibility_rules,
 				\"order\",
 				privileg,
-				query_tooltip
+				query_tooltip,
+				style_attribute,
+				visibility_rules
 			FROM
 				kvwmap.layer_attributes as a LEFT JOIN
 				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
@@ -3980,26 +4012,50 @@ class db_mapObj{
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];			
+			$attributes['style_attribute'][$i] = $rs['style_attribute'];
+			
+			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
+			// Referenz auf dependents
+    	$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			// JSON parsen
+			$rulesJson = $rs['visibility_rules'] ?? '';
+			$rules = $rulesJson ? json_decode($rulesJson, true) : null;
+
+			// Abhängige Attribute sammeln
+			$dependentAttributes = [];
+			if ($rules) {
+				$collectAttributes = function($node) use (&$dependentAttributes, &$collectAttributes) {
+						if (isset($node['rules'])) {
+								foreach ($node['rules'] as $child) $collectAttributes($child);
+						} elseif (isset($node['attribute'])) {
+								$dependentAttributes[] = $node['attribute'];
+						}
+				};
+				$collectAttributes($rules);
+				$dependentAttributes = array_unique($dependentAttributes);
+			}
+
+			// Abhängigkeiten eintragen
+			foreach ($dependentAttributes as $depAttr) {
+					$dependents[$depAttr][] = $rs['name'];
+			}
+
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
 						$attributes[$column][$i] = 	replace_params_rolle(
-																					$attributes[$column][$i],
-																					((count($attribute_values) > 0 AND $replace_only == 'default') ? $attribute_values : NULL)
-																				);
+							$attributes[$column][$i],
+							((count($attribute_values) > 0 AND in_array('default', $replace_only)) ? $attribute_values : NULL)
+						);
 					}
 				}
 			}
 
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
+				$default = (substr($attributes['type'][$i], 0, 1) == '_' ? 'to_json(' . $attributes['default'][$i] . ')' : $attributes['default'][$i]); # to_json für Array-Datentyp
+				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
@@ -4025,7 +4081,7 @@ class db_mapObj{
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
-				$attributes['style'] = $rs['name'];
+				$attributes['style'][] = $rs['name'];
 				$attributes['visible'][$i] = 0;
 			}
 			if ($rs['form_element_type'] == 'Editiersperre') {
@@ -4131,18 +4187,17 @@ class db_mapObj{
 		}
 
 		$sql = "
-			SELECT DISTINCT
+			SELECT 
 				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency,
 				rl.aktivstatus,
 				rl.querystatus,
 				rl.gle_view,
 				rl.showclasses,
-				rl.logconsume,
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale, ul.maxscale,
 				ul.offsite,
 				ul.postlabelcache,
@@ -4151,7 +4206,6 @@ class db_mapObj{
 				ul.header,
 				ul.footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,
@@ -4170,7 +4224,7 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.errorstatus, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,

@@ -1,5 +1,6 @@
 <?php
 	global $supportedLanguages;
+	global $layer_status;
 	$language_file_name = 'layer_formular_' . rolle::$language . '.php';
 
 	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
@@ -335,7 +336,8 @@ from
 
 	#labelitems_table tr:first-child:nth-last-child(2){
 		display: none;
-	}	
+	}
+
 </style>
 
 <table>
@@ -704,7 +706,13 @@ from
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="drawingorder" type="text" value="<?php echo $this->formvars['drawingorder']; ?>" size="50" maxlength="20">&nbsp;
 						</td>
-					</tr>					
+					</tr>	
+					<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLegendOrder; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="legendorder" type="text" value="<?php echo $this->formvars['legendorder']; ?>" size="50" maxlength="15">
+					</td>
+				</tr>					
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -1017,6 +1025,83 @@ from
 							<span data-tooltip="<?php echo $strWriteMapserverTemplatesHelp; ?>"></span>
 						</td>
 					</tr>
+					<tr>
+						<th class="fetter" align="right"><?php echo $strOWSPublication; ?></th>
+						<td colspan=2>
+							<input type="checkbox" name="ows_publication" value="1"
+								<?php echo ($this->formvars['ows_publication'] ? 'checked ' : ''); ?>onchange="document.getElementById('ows_publication_fields').style.display = this.checked ? 'table-row' : 'none';">
+							&nbsp;<span data-tooltip="<?php echo $strOWSPublicationHint; ?>"></span>
+						</td>
+					</tr>
+					<tr id="ows_publication_fields" style="display: <?php echo $this->formvars['ows_publication'] ? 'table-row' : 'none'; ?>">
+						<td colspan=3 style="border-top:1px solid #C3C7C3">
+							<div class="form-field">
+								<div class="form-label fetter">
+									<label><?php echo $this->strTask; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%"><?php
+									echo FormObject::createSelectField(
+										'ows_stelle_id',
+										array_map(
+											function($key) {
+												return array(
+													'value' => $this->formvars['selstellen']['ID'][$key],
+													'output' => $this->formvars['selstellen']['Bezeichnung'][$key]
+												);
+											},
+											array_keys($this->formvars['selstellen']['ID'] ?: [])
+										),
+										$this->formvars['ows_stelle_id'],
+										1,
+										'width: 50%',
+										'',
+										'ows_stelle_id', // id
+										'',
+										''
+									); ?>&nbsp;<span data-tooltip="<? echo $strOWSStelleHint; ?>"></span>
+								</div>
+								<div style="clear: both; height: 5px;"></div>
+
+								<div class="form-label fetter">
+									<label><? echo $strMapFilePath; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%">
+									<? echo WMS_MAPFILE_PATH; ?>
+									&nbsp;<span data-tooltip="<? echo $strMapFilePathHint; ?>" ></span>
+									&nbsp;<? ($this->formvars['ows_mapfile_name'] != '' AND file_exists(WMS_MAPFILE_PATH . $this->formvars['ows_mapfile_name']) ? '<a href="show_map_file">erzeugte Map-Datei</a>' : ''); ?>
+								</div>
+								<div style="clear: both; height: 5px;"></div>
+
+								<div class="form-label fetter">
+									<label><? echo $strMapFileName; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%">
+									<input type="text" name="ows_mapfile_name" value="<?php echo $this->formvars['ows_mapfile_name']; ?>" size="50" placeholder="<? echo $this->formvars['name']; ?>" style="width: 50% !important">
+									&nbsp;<span data-tooltip="<? echo $strMapFileNameHint; ?>" ></span>
+									&nbsp;<? ($this->formvars['ows_mapfile_name'] != '' AND file_exists(WMS_MAPFILE_PATH . $this->formvars['ows_mapfile_name']) ? '<a href="show_map_file">erzeugte Map-Datei</a>' : ''); ?>
+								</div>
+								<div style="clear: both; height: 5px;"></div>
+
+								<div class="form-label fetter">
+									<label><? echo $strOWSWrapperPath; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%">
+									<? echo str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE); ?>
+									&nbsp;<span data-tooltip="<? echo $strOWSWrapperPathHint; ?>" ></span>
+									&nbsp;<? ($this->formvars['ows_wrapper_name'] != '' AND file_exists(WMS_MAPFILE_PATH . $this->formvars['ows_wrapper_name']) ? '<a href="show_wrapper_file">erzeugte Wrapper-Datei</a>' : ''); ?>
+								</div>
+								<div style="clear: both; height: 5px;"></div>
+
+								<div class="form-label fetter">
+									<label><? echo $strOWSWrapperName; ?></label>
+								</div>
+								<div class="form-value" style="width: 66%">
+									<input type="text" name="ows_wrapper_name" value="<?php echo $this->formvars['ows_wrapper_name']; ?>" size="50"  style="width: 50% !important">
+									&nbsp;<span data-tooltip="<? echo $strOWSWrapperNameHint; ?>"></span>
+								</div>
+							</div>
+						</td>
+					</tr>
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
@@ -1190,8 +1275,35 @@ from
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="status" type="text" value="<?php echo $this->formvars['status']; ?>" size="50" maxlength="255">&nbsp;
-							<span data-tooltip="<? echo $strStatusHelp; ?>"></span>
+							<?
+								echo FormObject::createSelectField(
+									'status',
+									array_map(
+										fn($key, $value) => [
+												'value'  => $key,
+												'output' => $value
+										],
+										array_keys($layer_status),
+										$layer_status
+									),
+									$this->formvars['status'],
+									1,
+									'',
+									'',
+									'',
+									'',
+									'',
+									' '
+								);
+							?>
+							&nbsp;<span data-tooltip="<? echo $strStatusHelp; ?>"></span>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strErrorStatus; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="errorstatus" type="text" value="<?php echo $this->formvars['errorstatus']; ?>" size="50" maxlength="255">&nbsp;
+							<span data-tooltip="<? echo $strErrorStatusHelp; ?>"></span>
 						</td>
 					</tr>
 					<tr>
@@ -1212,6 +1324,12 @@ from
 						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strListed; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="listed" type="checkbox" value="1"<?php if ($this->formvars['listed']) echo ' checked'; ?>>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogged; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="logconsume" type="checkbox" value="1"<?php if ($this->formvars['logconsume']) echo ' checked'; ?>>
 						</td>
 					</tr><?
 					if ($this->formvars['shared_from'] OR $this->is_admin_user($this->user->id)) { ?>
@@ -1271,13 +1389,7 @@ from
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" value="<?php echo $this->formvars['transparency']; ?>" style="width: 95%">
 					</td>
-				</tr>
-				<tr>
-					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLegendOrder; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="legendorder" type="text" value="<?php echo $this->formvars['legendorder']; ?>" size="50" maxlength="15">
-					</td>
-				</tr>				
+				</tr>			
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strminscale; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">

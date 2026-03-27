@@ -59,7 +59,9 @@ if (is_logout($GUI->formvars)) {
 }
 
 /**
- * Dies ist der Beipass für die Datenabfrage von kvportal one login
+ * Dies ist der Beipass für die Datenabfrage von kvportal ohne login
+ * Für den Zugriff von kvportal auf kvwmap wird ein Nutzer in kvwmap benötigt, der login_name = gast haben muss 
+ * und der Gaststelle zugeordnet ist, die die Layer für kvportal zur Verfügung stellt.
  */
 $gast_export = false;
 if (
@@ -91,6 +93,40 @@ if ($gast_export === false) {
 	# login
 	$show_login_form = false;
 	$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
+
+	if ($_SESSION['2fa_registration']) {
+    $code = trim($GUI->formvars['code']);
+    if (verify_totp($_SESSION['secret'], $code)) {
+			$GUI->user = new user($_SESSION['login_name'], 0, $GUI->pgdatabase);
+			$GUI->user->update_totp_secret($_SESSION['secret']);
+			$_SESSION['angemeldet'] = true;
+			unset($_SESSION['2fa_registration']);
+			unset($_SESSION['secret']);
+    } 
+		else {
+			echo "❌ Ungültiger Code, bitte erneut versuchen.";
+			include(SNIPPETS . '2fa_enable.php');
+			exit;
+    }
+	}
+
+	if ($_SESSION['2fa_verification']) {
+		$code = trim($GUI->formvars['code']);
+		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->pgdatabase);
+		if (verify_totp($GUI->user->totp_secret, $code)) {
+			if (defined('TOTP_DEVICE_EXPIRATION') AND TOTP_DEVICE_EXPIRATION > 0) {
+				$GUI->user->generate_device_token();
+			}
+			$_SESSION['angemeldet'] = true;
+			unset($_SESSION['2fa_verification']);
+		}
+		else {
+			echo "❌ Ungültiger Code.";
+			include(SNIPPETS . '2fa_verify.php');
+			exit;
+		}
+	}
+
 	if (is_logged_in()) {
 		$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
 		if ($_SESSION['login_name'] == '') {
@@ -160,6 +196,7 @@ if ($gast_export === false) {
 						if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'], $GUI->formvars['passwort'])) {
 							$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
 							set_session_vars($GUI->formvars);
+
 							$GUI->user->update_tokens($_SESSION['csrf_token']);
 							$GUI->user->has_logged_in = true;
 							$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
@@ -317,6 +354,21 @@ if ($gast_export === false) {
 		if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars, $GUI->user)) {
 			$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
 	
+			if (is_login($GUI->formvars) AND defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $GUI->Stelle->totp_authentication AND $_SESSION['login_new_password'] != true) {
+				if ($GUI->user->totp_secret != '') {
+					if ($GUI->is_trusted_device($GUI->user) == false) {
+						$_SESSION['2fa_verification'] = true;
+						include(SNIPPETS . '2fa_verify.php');
+						exit;
+					}
+				} 
+				else {
+					$_SESSION['2fa_registration'] = true;
+					include(SNIPPETS . '2fa_enable.php');
+					exit;
+				}
+			}
+
 			$GUI->user->Stellen = $GUI->user->getStellen(0);
 			$permission = get_permission_in_stelle($GUI);
 	
@@ -346,7 +398,7 @@ if ($gast_export === false) {
 					$GUI->debug->write('Kein OWS Request.', 4, $GUI->echo);
 	
 					if (in_array($permission['reason'], ['password_expired', 'password_age_expired'])) {
-						logout();
+						#logout();
 						if (is_new_password($GUI->formvars)) {
 							$GUI->debug->write('Passwort ist abgelaufen. Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
 							$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
@@ -357,6 +409,8 @@ if ($gast_export === false) {
 								$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 								session_start();
 								set_session_vars($GUI->formvars);
+								unset($_SESSION['login_new_password']);
+								$go = '';
 								$_SESSION['stelle_angemeldet'] = true;
 								$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
 								$GUI->user->stelle_id = $GUI->Stelle->id;
@@ -397,6 +451,7 @@ if ($gast_export === false) {
 								$GUI->formvars['Stelle_id'] = $GUI->Stelle->id;
 								$show_login_form = true;
 								$go = 'login_new_password';
+								$_SESSION['login_new_password'] = true;
 								# login case 19
 								$GUI->debug->write('login case 19', 4, $GUI->echo);
 							}
@@ -513,7 +568,7 @@ else {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
-	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
+	if (!in_array($GUI->formvars['go'], $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
 		$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 		# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 		# wenn die EPSG-Codes voneinander abweichen
@@ -640,6 +695,7 @@ function is_logged_in_stelle() {
 function is_logged_out() {
 	return !is_logged_in();
 }
+
 
 /**
  * Function check if param gast has been send, is not empty,

@@ -4,6 +4,60 @@
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
+
+ function base32_decode_custom($b32) {
+	$alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+	$b32 = strtoupper($b32);
+	$bits = '';
+	foreach (str_split($b32) as $char) {
+			$pos = strpos($alphabet, $char);
+			if ($pos === false) continue;
+			$bits .= str_pad(decbin($pos), 5, '0', STR_PAD_LEFT);
+	}
+	$binary = '';
+	foreach (str_split($bits, 8) as $byte) {
+			if (strlen($byte) < 8) continue;
+			$binary .= chr(bindec($byte));
+	}
+	return $binary;
+}
+
+function generate_totp($secret, $period = 30, $digits = 6) {
+	$counter = floor(time() / $period);
+	$key = base32_decode_custom($secret);
+	$bin_counter = pack('N*', 0) . pack('N*', $counter);
+	$hash = hash_hmac('sha1', $bin_counter, $key, true);
+	$offset = ord(substr($hash, -1)) & 0x0F;
+	$truncated = unpack('N', substr($hash, $offset, 4))[1] & 0x7FFFFFFF;
+	$code = $truncated % pow(10, $digits);
+	return str_pad($code, $digits, '0', STR_PAD_LEFT);
+}
+
+function verify_totp($secret, $code, $window = 1, $period = 30) {
+	// Prüfe aktuellen Zeitschritt ± window
+	for ($i = -$window; $i <= $window; $i++) {
+			$counter = floor(time() / $period) + $i;
+			$key = base32_decode_custom($secret);
+			$bin_counter = pack('N*', 0) . pack('N*', $counter);
+			$hash = hash_hmac('sha1', $bin_counter, $key, true);
+			$offset = ord(substr($hash, -1)) & 0x0F;
+			$truncated = unpack('N', substr($hash, $offset, 4))[1] & 0x7FFFFFFF;
+			$test_code = str_pad($truncated % 1000000, 6, '0', STR_PAD_LEFT);
+			if (hash_equals($test_code, $code)) return true;
+	}
+	return false;
+}
+
+function generate_random_base32($length = 16) {
+	$alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+	$secret = '';
+	for ($i = 0; $i < $length; $i++) {
+			$secret .= $alphabet[random_int(0, 31)];
+	}
+	return $secret;
+}
+
+
 if (MAPSERVERVERSION < 800) {
 	if (!function_exists('msGetErrorObj')) {
 		function msGetErrorObj() {
@@ -37,7 +91,7 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
  * @return String Die aus der MapServer-Expression erzeugte SQL-Expression
  */
 function mapserverExp2SQL($exp, $classitem) {
-	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
+	$exp = preg_replace("/'\\[(\\D[^\\]]*|[^\\]]*\\D[^\\]]*)\\]'|\\[(\\D[^\\]]*|[^\\]]*\\D[^\\]]*)\\]/", "$1$2", $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
 	$exp = str_replace(' ne ', ' != ', $exp);
 	$exp = str_replace(' ge ', ' >= ', $exp);
@@ -48,10 +102,9 @@ function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace('\b', '\y', $exp);
 	if (strpos($exp, ' IN ') != false) {
 		$array = get_first_word_after($exp, ' IN');
-		$exp = str_replace(' IN ', ' = ANY(', $exp);
-		$exp = str_replace($array, $array . ')', $exp);
+		$exp = str_replace(' IN ', '::text = ANY(ARRAY[', $exp);
+		$exp = str_replace($array, $array . '])', $exp);
 	}
-
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
@@ -2181,24 +2234,8 @@ function replace_params_link($str, $params, $layer_id) {
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe [http://www.php-einfach.de/codeschnipsel_1114.php](http://www.php-einfach.de/codeschnipsel_1114.php)
 *
-* @param $anhang Array mit den Elementen "name", "size" und "data" oder Array mit Elementen solcher Arrays
-* $pfad = array();
-* $pfad[] = "ordner/datei1.exe";
-* $pfad[] = "ordner/datei2.zip";
-* $pfad[] = "ordner/datei3.gif";
-*
-* $anhang = array();
-* foreach($pfad AS $name) {
-*   $name = basename($name);
-*   $size = filesize($name);
-*   $data = implode("",file($name));
-*   if (function_exists("mime_content_type"))
-*     $type = mime_content_type($name);
-*   else
-*     $type = "application/octet-stream";
-*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data);
-* }
-* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang);
+* @param $attachement String Pfad zur Datei, die als Anhang an die E-Mail angehängt werden soll.
+* mail_att("from name", "from@domain", "empf@domain", "ccempf@dmain", "reply@domain", "Email mit Anhang", "Im Anhang sind mehrere Datei", '/var/www/logs/kvwmap/mail_queue/anhang.txt', 'to name');
 **/
 function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
 	$success = false;
@@ -2281,11 +2318,11 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 				$botschaft.="\n\n";
 				$botschaft.="--$grenze";
 			}
-			#  echo 'to_email: '.$to_email.'<br>';
-			#  echo 'subject: '.$subject.'<br>';
-			#  echo 'botschaft: '.$botschaft.'<br>';
-			#  echo 'headers: '.$headers.'<br>';
-			$success = @mail($to_email, $subject, $botschaft, $headers);
+			// echo "\nto_email: ".$to_email."<br>";
+			// echo "\nsubject: ".$subject."<br>";
+			// echo "\nbotschaft: ".$botschaft."<br>";
+			// echo "\nheaders: ".$headers."<br>";
+			$success = mail($to_email, $subject, $botschaft, $headers);
 		}
 	}
 	if ($success)

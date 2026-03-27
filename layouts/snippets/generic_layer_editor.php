@@ -187,8 +187,9 @@ if ($doit == true) {
 			</div>
 			<div style="position: sticky; display: flex; right: 5px;  z-index: 1000;">
 				<div class="gle-view">	<?
-					if ($layer['template'] == '') {
-						for ($g = 0; $g < 3; $g++) {
+					if ($layer['template'] == '' or $layer['template'] == 'generic_layer_editor_doc_raster.php') {
+						$d = ($layer['template'] == 'generic_layer_editor_doc_raster.php'? 2 : 1);	# ohne nebeneinander
+						for ($g = 0; $g < 3; $g = $g + $d) {
 							echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
 						}
 					}	?>
@@ -343,7 +344,7 @@ if ($doit == true) {
 					if($layer['attributes']['visible'][$j]){
 						if($layer['attributes']['type'][$j] != 'geometry') {
 							if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-								echo '<td id="value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('gle_attribute_value group_'.$groupname.' value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j], $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: left'.($collapsed ? ';display: none' : ''))) . '>';
+								echo '<td id="value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('gle_attribute_value group_'.$groupname.' value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j], $layer['shape'][$k][$layer['attributes']['style_attribute'][$j]], 'position: relative; text-align: left'.($collapsed ? ';display: none' : ''))) . '>';
 								if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 									echo calendar($layer['attributes']['type'][$j], $layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 								}

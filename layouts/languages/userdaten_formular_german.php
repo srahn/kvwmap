@@ -2,6 +2,7 @@
 	$strActiveLayers = 'aktive Themen';
 	$strActiveSite = 'aktive Stelle';
 	$strAllowedIps = 'erlaubte IP / Domain';
+	$strTOTPKey = '2FA-Schlüssel';
 	$strAuthorizeTask = 'Berechtigte Stellen';
 	$strButtonSaveAs = 'Als neuen Nutzer eintragen';
 	$strChangePassword = 'Passwort ändern';

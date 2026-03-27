@@ -81,8 +81,8 @@ class Konvertierung extends PgObject {
 						'import_zusammenzeichnung',
 						'create_plaene',
 						'convert_zusammenzeichnung',
-						'gml_generieren',
-						'check_class_completeness'
+						'gml_generieren'
+						#,'check_class_completeness'
 					)
 				);
 				// ToDo 'replace_zusammenzeichnung' noch nicht bei B-Plänen. Erst das optionale Überschreiben oder nicht in Dialog beim Upload einbauen, siehe Konzept bplan-Server.
@@ -507,7 +507,7 @@ class Konvertierung extends PgObject {
 	// 	$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 	// 	$this->gui->debug->write('Archiviere Plan in zip_file: ' . $zip_file);
 	// 	if (!file_exists($zip_path)) {
-	// 		mkdir($zip_path, 0775, true);
+	// 		mkdir($zip_path, 0770, true);
 	// 	}
 
 	// 	$archive = new ZipArchive();
@@ -586,7 +586,7 @@ class Konvertierung extends PgObject {
 		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
 		if (!file_exists($zip_path)) {
-			mkdir($zip_path, 0775, true);
+			mkdir($zip_path, 0770, true);
 		}
 
 		$archive = new ZipArchive();
@@ -672,7 +672,7 @@ class Konvertierung extends PgObject {
 		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
 		if (!file_exists($zip_path)) {
-			mkdir($zip_path, 0775, true);
+			mkdir($zip_path, 0770, true);
 		}
 
 		$archive = new ZipArchive();
@@ -784,7 +784,7 @@ class Konvertierung extends PgObject {
 			if (!is_dir($path)) {
 				$this->debug->show('Create directory', Konvertierung::$write_debug);
 				$old = umask(0);
-				mkdir($path, 0775, true);
+				mkdir($path, 0770, true);
 				umask($old);
 			}
 		}
@@ -953,7 +953,7 @@ class Konvertierung extends PgObject {
 	function create_xplan_shapes() {
 		$path = $this->get_file_path('xplan_shapes');
 		if (!file_exists($path)) {
-			mkdir($path, 0775);
+			mkdir($path, 0770);
 		}
 
 		// Delete existing shapes
@@ -1178,7 +1178,7 @@ class Konvertierung extends PgObject {
 		if (!$this->plan) {
 			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get($this->identifier), Konvertierung::$write_debug);
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
-			$plan = $plan->find_where('konvertierung_id = ' . $this->get($this->identifier));
+			$plan = $plan->find_where('konvertierung_id = ' . $this->get($this->identifier), NULL, '*, to_json(externereferenz) AS externereferenz_json');
 			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
 			if (count($plan) > 0) {
 				$this->plan = $plan[0];

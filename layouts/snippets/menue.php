@@ -121,19 +121,21 @@ function showMenue() {
 			echo $refmap_html;
 		} ?>
 
-		<div id="menueTable"><?
-			if ($this->user->rolle->menue_buttons) {
+		<div id="menueTable" style="height: <? echo $menue_height; ?>"><?
+			if ($this->user->rolle->menue_buttons) {?>
+				<div id="menueButtons"><?
 				$button_menues = Menue::loadMenue($this, 'button');		# erst nur die Button-Menüpunkte
 				foreach($button_menues as $menue){
 					echo $menue->html();
 				}
 				$this->menues = Menue::loadMenue($this, 'all-buttons');		# dann alle Menüpunkte, wobei Obermenüpunkte, die Buttons sind, weggelassen werden
-				$menue_height = $menue_height - 38;
+				?>
+				</div><?
 			}
 			else {
 				$this->menues = Menue::loadMenue($this, 'all-no_buttons');		# ansonsten alle Menüpunkte, keine Buttons
 			}
-			?><div id="menueScrollTable" style="max-height: <? echo $menue_height; ?>"><?
+			?><div id="menueScrollTable"><?
 			foreach($this->menues as $menue){
 				if($menue->get('menueebene') == 1) echo $menue->html();
 			} ?>

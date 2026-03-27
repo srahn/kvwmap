@@ -29,6 +29,9 @@ $response = $this->formvars['code2execute_before'].
 '.$this->img['scalebar'].'█
 '.$this->img['referenzkarte'].'█
 '.round($this->map_scaledenom).'█';
+if ($this->sensible_layers_active) {
+	$response.= '<div id="sensible_layer_warning"> Achtung! Es sind sensible Layer aktiv!</div>';
+}
 if($this->Lagebezeichung != ''){
 	$response.= '<span class="fett">Gemeinde:&nbsp;</span>'.$this->Lagebezeichung['gemeindename'].' <span class="fett">Gemarkung:</span>&nbsp;'.$this->Lagebezeichung['gemkgname'].' ('.$this->Lagebezeichung['gemkgschl'].') <span class="fett">Flur:</span>&nbsp;'.$this->Lagebezeichung['flur'];
 }

@@ -101,4 +101,5 @@
 	$this->strYes = 'Yes';
 	$this->TaskChangeWarning = 'You are not allowed to use this function in the currrent task.';
 	$this->transparency = 'Transparency';
+	$this->strLayerSelection = 'Layer Selection';
 ?>

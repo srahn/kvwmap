@@ -187,6 +187,12 @@
 		}
 	}
 
+	function for_other_layer(){
+		other_layer_select = document.getElementById('other_layer_select');
+		other_layer_select.classList.toggle('hidden');
+		other_layer_select.disabled = !other_layer_select.disabled;
+	}
+
 	function save_layout(){
 		if(document.GUI.name.value == ''){
 			alert('Bitte geben Sie einen Namen für das Layout ein.');
@@ -504,7 +510,7 @@
 								</tr>
 							</table>
 							<br>
-							<table border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table id="ddl_attributes" border="0" cellpadding="3" cellspacing="0" style="width: 710px; border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td align="center" style="border-top:2px solid #C3C7C3" colspan=8><span class="fett">&nbsp;Attribute</span></td>
 								</tr><?
@@ -609,7 +615,7 @@
 																title="<? echo $strTitleWidth; ?>"
 															>Breite:</label>
 														</td>
-														<td style="border-top:1px solid #C3C7C3;">
+														<td style="border-top:1px solid #C3C7C3; width: 100%">
 															<input
 																id="width_<? echo $this->ddl->attributes['name'][$i]; ?>"
 																type="number"
@@ -773,11 +779,45 @@
 											<td><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos']; ?>" size="5"></td>
 											<td width="60px">&nbsp;Breite:</td>
 											<td><input	type="text" name="width_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['width']; ?>" size="5"></td>
-											<td colspan="3"></td>
+											<td>
+												<label for="border_<? echo $this->ddl->attributes['the_geom']; ?>">
+														hervorheben:
+												</label>
+											</td>
+											<td>
+												<input
+													id="border_<? echo $this->ddl->attributes['the_geom']; ?>"
+													type="checkbox"
+													name="border_<? echo $this->ddl->attributes['the_geom']; ?>"
+													value="1"
+													style="margin-left: 0px;"<?
+													echo ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['border'] == '1' ? ' checked="true"' : ''); ?>
+												>
+											</td>
+											<td></td>
 										</tr>
 										<tr id="tr2_<? echo $this->ddl->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
 											<td>&nbsp;&nbsp;&nbsp;y:</td>
 											<td><input type="text" name="posy_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['ypos']; ?>" size="5"></td>
+											<td style="width: 60px; text-align: right;">
+												<label
+													for="offset_attribute_<? echo $this->ddl->attributes['the_geom']; ?>"
+													title="<? echo $strTitleOffset_attribute; ?>"
+												>
+													unterhalb&nbsp;von:
+												</label>
+											</td>
+											<td align="left" align="center">
+												<input
+													id="offset_attribute_<? echo $this->ddl->attributes['the_geom']; ?>"
+													type="text"
+													title="<? echo $strTitleOffset_attribute; ?>"
+													onmouseenter="show_select(this, 'attributes')"
+													name="offset_attribute_<? echo $this->ddl->attributes['the_geom']; ?>"
+													value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['offset_attribute']; ?>"
+													style="width: 150px"
+												>
+											</td>
 											<td width="60px">&nbsp;Rand:</td>
 											<td><input	type="text" name="fontsize_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['fontsize']; ?>" size="5">m</td>
 											<td colspan="3"></td>
@@ -996,7 +1036,26 @@
 			<input type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;
 			<input id="save_submit_button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;
 <? } ?>
+
 			<input type="button" name="go_plus" onclick="save_layout();" value="als neues Layout speichern">
+			<select style="width:240px" size="1" id="other_layer_select" name="selected_layer_id" title="Auswahl des anderen Layers" class="hidden" disabled>
+				<option value="">--- bitte wählen ---</option><?
+				for($i = 0; $i < count($this->layerdaten['ID']); $i++){
+					echo '<option';
+					if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+						echo ' selected';
+					}
+					echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+				} ?>
+			</select>
+			<i
+				id="show_attributes_for_other_layer_button"
+				title="Als neues Layout für anderen Layer speichern"
+				class="fa fa-magic"
+				aria-hidden="true"
+				onclick="for_other_layer();"
+			></i>
+
 		</div>
 <? } ?>
 	</div>

@@ -138,7 +138,21 @@ class rolle {
     return 1;
   }
 
-	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
+	function setLayerSelection($id) {
+    $sql = "
+			UPDATE 
+				kvwmap.rolle 
+			SET 
+				layer_selection = " . ($id ?: 'NULL') . "
+    	WHERE 
+				user_id = " . $this->user_id . ' 
+				AND stelle_id = ' . $this->stelle_id;
+    $this->debug->write("<p>file:rolle.php class:rolle->setLayerSelection:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
+
+	function getLayer($LayerName, $only_active = false, $replace_params = true) {
 		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -176,8 +190,8 @@ class rolle {
 				) as privilegfk";
 		}
 
-		if ($only_active_or_requires) {
-			$active_filter = " AND (r2ul.aktivstatus = '1' OR ul.requires = 1)";
+		if ($only_active) {
+			$active_filter = " AND (r2ul.aktivstatus = 1)";
 		}
 		else {
 			$active_filter = '';
@@ -195,10 +209,10 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, errorstatus, trigger_function, version,
 				ul.queryable,
 				l.drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale,
 				ul.maxscale,
 				ul.offsite,
@@ -216,7 +230,6 @@ class rolle {
 				header,
 				footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,
@@ -247,6 +260,7 @@ class rolle {
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['queryable'] = ($rs['queryable'] === 't');
+			$rs['querymap'] = ($rs['querymap'] === 't');
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
 					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
@@ -279,17 +293,14 @@ class rolle {
 				r2ul.layer_id 
 			FROM 
 				kvwmap.u_rolle2used_layer AS r2ul' . 
-    		($logconsume? ', kvwmap.used_layer AS ul, kvwmap.layer AS l, kvwmap.stelle AS s' : '') . '
+    		($logconsume? ', kvwmap.layer AS l' : '') . '
     	WHERE 
 				r2ul.user_id = ' . $this->user_id . ' AND 
 				r2ul.stelle_id = ' . $this->stelle_id;
     if ($logconsume) {
       $sql .= ' 
-				AND r2ul.layer_id = ul.layer_id 
-				AND r2ul.stelle_id = ul.stelle_id
-				AND ul.layer_id = l.layer_id 
-				AND ul.stelle_id = s.id
-				AND (s.logconsume OR l.logconsume OR ul.logconsume OR r2ul.logconsume)';
+				AND r2ul.layer_id = l.layer_id 
+				AND l.logconsume';
     }
     $anzaktivStatus=count($aktivStatus);
     if ($anzaktivStatus > 0) {
@@ -532,6 +543,8 @@ class rolle {
 			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
+			$this->layer_selection_mode=$rs['layer_selection_mode'];
+			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
@@ -1309,9 +1322,12 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		$layer = array();
+		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Name_or_alias'] = $rs['name'];
-			$layer[] = $rs;
+			$layer[$i] = $rs;
+			$layer['layer_ids'][$rs['layer_id']] = &$layer[$i];
+			$i++;
 		}
 		return $layer;
 	}
@@ -1389,27 +1405,26 @@ class rolle {
 
 	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
 		$this->layerset = $this->getLayer('');
-		if (!$ignore_rollenlayer) {
-			$rollenlayer = $this->getRollenLayer('', NULL);
-			$this->layerset = array_merge($this->layerset, $rollenlayer);
+		if (!$ignore_rollenlayer AND $rollenlayer = $this->getRollenLayer('', NULL)) {
+			$this->layerset['layer_ids'] = $this->layerset['layer_ids'] + $rollenlayer['layer_ids'];
+			$this->layerset = $this->layerset + $rollenlayer;
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
-		for ($i = 0; $i < count($this->layerset) - 1; $i++) {
-			#echo $i.' '.$this->layerset[$i]['layer_id'].' '.$formvars['thema'.$this->layerset[$i]['layer_id']].'<br>'; exit;
-			$aktiv_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'layer_id'));
-			$requires_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'requires'));
+		foreach ($formvars['thema'] as $layer_id => $aktiv_status) {
+			$layer = $this->layerset['layer_ids'][$layer_id];
+			$requires_status = value_of($formvars, 'thema[' . value_of($layer, 'requires') . '');
 			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
-				if ($this->layerset[$i]['layer_id'] > 0) {
+				if ($layer['layer_id'] > 0) {
 					$sql ="
 						UPDATE
 							kvwmap.u_rolle2used_layer
 						SET
-							aktivstatus = '" . $aktiv_status . "'
+							aktivstatus = " . $aktiv_status . "
 						WHERE
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . " AND
-							layer_id = " . $this->layerset[$i]['layer_id'] . "
+							layer_id = " . $layer['layer_id'] . "
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
@@ -1423,48 +1438,72 @@ class rolle {
 						WHERE
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . " AND
-							id = " . abs($this->layerset[$i]['layer_id']) . "
+							id = " . abs($layer['layer_id']) . "
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
-				#neu eintragen der deaktiven Klassen
-				if ($aktiv_status != 0){
-					$sql = "
-						SELECT
-							class_id
-						FROM
-							kvwmap.classes
+			}
+		}
+		foreach ($formvars['group_checkbox'] as $group_id => $aktiv_status) {
+			$sql = "
+				UPDATE
+					kvwmap.u_rolle2used_layer
+				SET
+					aktivstatus = " . $aktiv_status . "
+					" . ($aktiv_status == 0 ? ',querystatus = 0' : '') . "
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					layer_id IN (
+						WITH RECURSIVE cte (group_id) AS (
+							SELECT 
+								" .  $group_id . "
+							UNION ALL
+							SELECT 
+								u_groups.id
+							FROM 
+								cte,
+								kvwmap.u_groups
+							WHERE 
+								cte.group_id = u_groups.obergruppe AND 
+								obergruppe IS NOT NULL
+						)
+						SELECT DISTINCT 
+							layer.layer_id
+						FROM 
+							cte,
+							kvwmap.layer
 						WHERE
-						layer_id = " . $this->layerset[$i]['layer_id'] . "
-					";
-					$ret = $this->database->execSQL($sql);
-					while ($rs = pg_fetch_assoc($ret[1])) {
-						if (value_of($formvars, 'class'.$rs['class_id']) == '0' OR value_of($formvars, 'class'.$rs['class_id']) == '2'){
-							$sql2 = '
-								INSERT INTO kvwmap.u_rolle2used_class 
-									(user_id, stelle_id, class_id, status) 
-								VALUES 
-									('.$this->user_id.', '.$this->stelle_id.', '.$rs['class_id'].', '.$formvars['class'.$rs['class_id']].')
-								ON CONFLICT (user_id, stelle_id, class_id) DO 
-									UPDATE SET
-										status = excluded.status
-								;';
-							$this->database->execSQL($sql2,4, $this->loglevel);
-						}
-						elseif (value_of($formvars, 'class'.$rs['class_id']) == '1'){
-							$sql1 = "
-								DELETE FROM
-									kvwmap.u_rolle2used_class
-								WHERE
-									user_id = " . $this->user_id . " AND
-									stelle_id = " . $this->stelle_id . " AND
-									class_id = " . $rs['class_id'] . "
-							";
-							$this->database->execSQL($sql1,4, $this->loglevel);
-						}
-					}
-				}
+							gruppe = cte.group_id
+					)
+			";
+			$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+		foreach ($formvars['class'] as $class_id => $class_status) {
+			if ($class_status == '0' OR $class_status == '2'){
+				$sql2 = '
+					INSERT INTO kvwmap.u_rolle2used_class 
+						(user_id, stelle_id, class_id, status) 
+					VALUES 
+						('.$this->user_id.', '.$this->stelle_id.', ' . $class_id . ', ' . $class_status . ')
+					ON CONFLICT (user_id, stelle_id, class_id) DO 
+						UPDATE SET
+							status = excluded.status
+					;';
+				$this->database->execSQL($sql2,4, $this->loglevel);
+			}
+			elseif ($class_status == '1') {
+				$sql1 = "
+					DELETE FROM
+						kvwmap.u_rolle2used_class
+					WHERE
+						user_id = " . $this->user_id . " AND
+						stelle_id = " . $this->stelle_id . " AND
+						class_id = " . $class_id . "
+				";
+				$this->database->execSQL($sql1,4, $this->loglevel);
 			}
 		}
 		return 1;
@@ -1472,19 +1511,31 @@ class rolle {
 
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
-		for ($i=0; $i<count($this->layerset)-1; $i++){
-			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'layer_id'));
-			if($query_status !== ''){	
-				if($this->layerset[$i]['layer_id'] > 0){
-					$sql ='UPDATE kvwmap.u_rolle2used_layer set querystatus='.$query_status;
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND layer_id='.$this->layerset[$i]['layer_id'];
-				}
-				else{		# Rollenlayer
-					$sql ='UPDATE kvwmap.rollenlayer set querystatus='.$query_status;
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND id='.-$this->layerset[$i]['layer_id'];
-				}
+		if ($this->singlequery == 1) {
+			$sql ='
+				UPDATE 
+					kvwmap.u_rolle2used_layer 
+				SET 
+					querystatus = 0
+				WHERE 
+					user_id = ' . $this->user_id . ' AND 
+					stelle_id = ' . $this->stelle_id;
+			$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+		foreach ($formvars['qLayer'] as $layer_id => $query_status) {
+			if ($layer_id != '' AND $query_status !== '') {	
+				$table = ($layer_id > 0 ? 'u_rolle2used_layer' : 'rollenlayer');
+				$id = ($layer_id > 0 ? 'layer_id' : 'id');
+				$sql ='
+					UPDATE 
+						kvwmap.' . $table . ' 
+					SET 
+						querystatus=' . $query_status . '
+					WHERE 
+						user_id = ' . $this->user_id . ' AND 
+						stelle_id = ' . $this->stelle_id . ' AND 
+						' . $id . ' = ' . $layer_id;
 				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
 				$this->database->execSQL($sql,4, $this->loglevel);
 			}
@@ -2211,7 +2262,6 @@ class rolle {
 					querystatus,
 					gle_view,
 					showclasses,
-					logconsume,
 					geom_from_layer
 				FROM
 					kvwmap.u_rolle2used_layer
@@ -2231,7 +2281,6 @@ class rolle {
 					start_aktiv::integer,
 					1,
 					1,
-					false,
 					layer_id
 				FROM
 					kvwmap.used_layer
@@ -2249,7 +2298,6 @@ class rolle {
 				querystatus,
 				gle_view,
 				showclasses,
-				logconsume,
 				geom_from_layer
 			) " .
 			$rolle2used_layer_select_sql . "

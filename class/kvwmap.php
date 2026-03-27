@@ -275,7 +275,7 @@ class GUI {
 		}
 		else {
 			$this->expect = array('login_name', 'passwort', 'mobile');
-			if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
+			if (array_key_exists('go', $this->formvars) AND in_array($this->formvars['go'], ['login', 'logout'])) {
 				$this->expect[] = 'go';
 			}
 			$this->gui = LOGIN;
@@ -325,6 +325,14 @@ class GUI {
 		}
 
 		return true;
+	}
+
+	function is_trusted_device($user) {
+    if (empty($_COOKIE['trusted_device'])) return false;
+		$now = new DateTime('now');
+    $token = $_COOKIE['trusted_device'];
+    $token_hash = hash('sha256', $token);
+		return ($user->device_token == $token_hash AND $user->device_expires > $now);
 	}
 
 	function login_failed() {
@@ -409,7 +417,7 @@ class GUI {
 		}
 		for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 			if (file_exists(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php')) {
-				include(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php');
+				include_once(PLUGINS . $kvwmap_plugins[$i] . '/model/kvwmap.php');
 			}
 		}
 		$trigger_result = array('executed' => false);
@@ -698,6 +706,13 @@ class GUI {
 							}
 						}
 						echo '<li><a href="javascript:void(0);" onclick="compare_view_for_layer(' . $this->formvars['layer_id'] . ');closeLayerOptions(' . $this->formvars['layer_id'] . ');">' . $this->strCompareView . '</a></li>';
+						if (
+							$layer[0]['datentyp'] == MS_LAYER_RASTER AND
+							preg_match('/\.(tif|tiff)$/i', $layer[0]['data']) AND
+							$layer[0]['export_privileg']
+						) {
+							echo '<li><a href="index.php?go=Daten_Export_Exportieren&selected_layer_id=' . $layer[0]['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">Download</a></li>';
+						}
 						if ($layer[0]['Class'][0]['name'] != '') {
 							if ($layer[0]['showclasses'] != '') {
 								echo '<li><a href="javascript:void(0);" onclick="get_layer_legend(\'' . $this->formvars['layer_id'] . '\', \'\', true);closeLayerOptions(' . $this->formvars['layer_id'] . ')">';
@@ -1234,7 +1249,7 @@ echo '			</table>
 		for($i = 0; $i < count_or_0($this->layers_replace_scale ?: []); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
-    echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
+    echo $this->create_group_legend($this->formvars['group']);
   }
 
   function close_group_legend() {
@@ -1279,18 +1294,16 @@ echo '			</table>
 		return $legend;
   }
 
-	function create_group_legend($group_id, $status = NULL){
+	function create_group_legend($group_id) {
+		if (!$this->group_has_layers[$group_id] ) {		# wenns keine Layer in der Gruppe oder in Untergruppen gibt, Gruppe weglassen
+			return;
+		}
 		$import_types = [
 			'eigene Abfragen' => 'search',
 			'Eigene Importe' => 'import',
 			'WMS-Importe' => 'wms_import'
 		];
-		include_once(CLASSPATH . 'LayerGroup.php');
 		$layerlist = $this->layerset['list'];
-		// $group = new LayerGroup($this);
-		// $group_aktiv_status = $group->get_aktiv_status($this->Stelle->id, $this->user->id, $group_id);
-
-		if (@$this->groupset[$group_id]['untergruppen'] == NULL AND @$this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
     $legend =  '
@@ -1302,9 +1315,9 @@ echo '			</table>
 						<a href="javascript:getlegend(\'' . $group_id . '\')">
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>';
-				if (false) {
+				if ($this->groupset[$group_id]['checkbox']) {
 					$legend .= '
-						<input id="group_checkbox_' . $group_id . '" name="group_checkbox_' . $group_id . '" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="javascript:selectgroupthema(document.GUI.layers_of_group_' . $group_id . ', ' . $this->user->rolle->instant_reload.')"' . ($group_aktiv_status == 2 ? ' checked' : '') . '/>
+						<input id="group_checkbox[' . $group_id . ']" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="' . $groupstatus . '" onclick="selectgroupthemaAll(this, ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
 					';
 				}
 				$legend .= '
@@ -1330,19 +1343,14 @@ echo '			</table>
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
 					$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="6" height="1" border="0"></td><td style="width: 100%">';
-					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u], $status);
+					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
 					$legend .= '</td></tr></table></td></tr>';
 				}
 			}
 			if ($layercount > 0) {		# Layer vorhanden
-				if (value_of($this->layerset['layer_group_has_legendorder'], $group_id) != ''){			# Gruppe hat Legendenreihenfolge -> sortieren
-					usort($this->layerset['layers_of_group'][$group_id], function($a, $b) use ($layerlist) {
-						return $layerlist[$a]['legendorder'] - $layerlist[$b]['legendorder'];
-					});
-				}
-				else {
-					$this->layerset['layers_of_group'][$group_id] = array_reverse($this->layerset['layers_of_group'][$group_id]);		# umgedrehte Zeichenreihenfolge verwenden
-				}
+				usort($this->layerset['layers_of_group'][$group_id], function($a, $b) use ($layerlist) {
+					return $layerlist[$a]['legendorder'] - $layerlist[$b]['legendorder'];
+				});
 				if (!value_of($this->formvars, 'nurFremdeLayer')) {
 					if (!is_array($this->layer_ids_of_group[$group_id])) {
 						$this->layer_ids_of_group[$group_id] = [];
@@ -1398,7 +1406,7 @@ echo '			</table>
 
 			if ($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 				$input_attr['id'] = 'qLayer' . $layer['layer_id'];
-				$input_attr['name'] = 'qLayer' . $layer['layer_id'];
+				$input_attr['name'] = 'qLayer[' . $layer['layer_id'] . ']';
 				$input_attr['title'] = ($layer['querystatus'] == 1 ? $this->deactivatequery : $this->activatequery);
 				$input_attr['value'] = 1;
 				$input_attr['class'] = 'info-select-field';
@@ -1439,7 +1447,7 @@ echo '			</table>
 
 				# die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat,
 				# damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-				$legend .= '<input type="hidden" name="qLayer'.$layer['layer_id'].'" value="0">';
+				// $legend .= '<input type="hidden" name="qLayer'.$layer['layer_id'].'" value="0">';
 				$legend .= '<input';
 				foreach ($input_attr AS $key => $value) {
 					$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
@@ -1452,7 +1460,7 @@ echo '			</table>
 			}
 			$legend .=  '</td><td valign="top">';
 			// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-			$legend .=  '<input type="hidden" name="thema'.$layer['layer_id'].'" value="0">';
+			// $legend .=  '<input type="hidden" name="thema'.$layer['layer_id'].'" value="0">';
 
 			$legend .=  '<input id="thema'.$layer['layer_id'].'" ';
 			if(value_of($layer, 'selectiontype') == 'radio'){
@@ -1464,7 +1472,7 @@ echo '			</table>
 				$legend .=  'type="checkbox" ';
 				$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema'.$layer['layer_id'].'\'), document.getElementById(\'qLayer'.$layer['layer_id'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
 			}
-			$legend .=  ' name="thema'.$layer['layer_id'].'" value="1" ';
+			$legend .=  ' name="thema['.$layer['layer_id'].']" value="1" ';
 			if($layer['aktivstatus'] == 1){
 				$legend .=  'checked title="'.$this->deactivatelayer.'"';
 			}
@@ -1532,11 +1540,11 @@ echo '			</table>
 			}
 			$legend .= ' >'.html_umlaute($layer['Name_or_alias']).'</span></a>';
 			$legend.='<div style="position:static; float:right" id="options_'.$layer['layer_id'].'"> </div>';
-			if($layer['status'] != ''){
-				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
+			if($layer['errorstatus'] != ''){
+				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['errorstatus'].'" src="'.GRAPHICSPATH.'warning.png">';
 			}
 			if($layer['queryable'] == 1){
-				$legend .=  '<input type="hidden" name="qLayer'.$layer['layer_id'].'"';
+				$legend .=  '<input type="hidden" name="qLayer[' . $layer['layer_id'] . ']"';
 				if($layer['queryStatus'] != 0){
 					$legend .=  ' value="1"';
 				}
@@ -1549,22 +1557,21 @@ echo '			</table>
 	}
 
 	function create_layername_legend($layer){
+		global $layer_status;
 		$legend = '';
 		$legend .= '<a';
 		# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.
 		if ($this->user->rolle->showlayeroptions) {
 			$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
 		}
-		if(value_of($layer, 'metalink') != ''){
-			$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
-		}
-		else {
-			$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
-		}
+		$legend .= ' class="visiblelayerlink ' . ($layer['metalink']? 'metalink' : '') . ' ' . $layer['status'] . ' boldhover" href="javascript:void(0)">';
 		$legend .= '<span ';
-		if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
-			$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
+		$title = '';
+		$title .= $layer_status[$layer['status']];
+		if (value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
+			$title .= ' ' . round($layer['minscale']) . ' - ' . round($layer['maxscale']);
 		}
+		$legend .= ($title? ' title="' . $title . '"' : '');
 		$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
 		$legend .= '</a>';
 		# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
@@ -1704,7 +1711,7 @@ echo '			</table>
 								# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
 								if ($maplayer->type < 3) {
 									$legend .= '
-									<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'">
+									<input type="hidden" size="2" name="class[' . $classid . ']" value="'.$status.'">
 									<a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.', ' . $maplayer->type . ')">';
 								}
 								$legend .= '
@@ -1713,7 +1720,7 @@ echo '			</table>
 									$legend .= '</a>';
 								}
 							}
-							$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
+							$legend .= '&nbsp;<span class="px13 ' . ($this->mapDB->disabled_classes['status'][$classid] == '0'? 'inactive_class' : '') . '">'.html_umlaute($class->name).'</span></td></tr>';
 						}
 					}
 					$legend .= '</table>';
@@ -2083,7 +2090,7 @@ echo '			</table>
 					$map = new mapObj(DEFAULTMAPFILE);
 				}
 
-        $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+				$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 				$num_default_layers = $map->numlayers;
 
 				# Allgemeine Parameter
@@ -2130,8 +2137,6 @@ echo '			</table>
 						$map->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 					}
 				}
-
-
 
 				# OWS Metadaten
 				$map->web->metadata->set("ows_title", $this->Stelle->ows_title ?: OWS_TITLE);
@@ -2255,7 +2260,7 @@ echo '			</table>
         }
 
 				if (count($layerset) == 0) {
-					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
+					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')), $this->user->rolle->layer_selection);
 					$rollenlayer = $mapDB->read_RollenLayer();
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
@@ -2273,15 +2278,26 @@ echo '			</table>
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['layer_id'].'|';							# alle Layer-IDs hintereinander in einem String
 
+					if ($group = value_of($this->groupset, $layerset['list'][$i]['gruppe'])){			# die Gruppe des Layers
+						if ($this->group_has_layers[$layerset['list'][$i]['gruppe']] != 1) {				# wenn group_has_layers noch nicht gesetzt
+							$this->group_has_layers[$layerset['list'][$i]['gruppe']] = 1;  						# die Gruppe hat Layer
+							while ($group['obergruppe'] != '' AND $this->group_has_layers[$group['obergruppe']] != 1){
+								$group = $this->groupset[$group['obergruppe']];
+								$this->group_has_layers[$group['id']] = 1;  														# auch die Obergruppen durchlaufen
+							}
+						}
+					}
+
 					if (value_of($layerset['list'][$i], 'requires') != '') {
 						$layerset['list'][$i]['aktivstatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivstatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
-
 					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivstatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
-
+						if ($layerset['list'][$i]['status'] == 'sensible') {
+							$this->sensible_layers_active = true;
+						}
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
 						$error = msGetErrorObj();
 						$test = 0;
@@ -2340,7 +2356,6 @@ echo '			</table>
 		return $drawing_order;
 	}
 
-	
 	function loadlayer($map, $layerset, $strict_layer_name = false) {
 		$this->debug->write('<br>Lade Layer: ' . $layerset['name'], 4);
 		if ($strict_layer_name) {
@@ -2389,7 +2404,7 @@ echo '			</table>
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'status') != ''){
+		if(value_of($layerset, 'errorstatus') != ''){
 			$layerset['aktivstatus'] = 0;
 		}
 
@@ -2416,19 +2431,14 @@ echo '			</table>
 		// 		}
 		// 	}
 		// }
-		
-		if($layerset['aktivstatus'] != 0){
-			$collapsed = false;
-			if($group = value_of($this->groupset, $layerset['gruppe'])){				# die Gruppe des Layers
-				if($group['status'] == 0){
-					$this->group_has_active_layers[$layerset['gruppe']] = 1;  	# die zugeklappte Gruppe hat aktive Layer
-					$collapsed = true;
-				}
-				while($group['obergruppe'] != ''){
-					$group = $this->groupset[$group['obergruppe']];
-					if($collapsed OR $group['status'] == 0){
-						$this->group_has_active_layers[$group['id']] = 1;  	# auch alle Obergruppen durchlaufen
-						$collapsed = true;
+
+		if ($group = value_of($this->groupset, $layerset['gruppe'])){						# die Gruppe des Layers
+			if ($layerset['aktivstatus'] != 0) {																	# wenn Layer aktiv
+				if ($this->group_has_active_layers[$layerset['gruppe']] != 1) {			# wenn group_has_active_layers noch nicht gesetzt
+					$this->group_has_active_layers[$layerset['gruppe']] = 1;  				# die Gruppe hat aktive Layer
+					while ($group['obergruppe'] != '' AND $this->group_has_active_layers[$group['obergruppe']] != 1){
+						$group = $this->groupset[$group['obergruppe']];
+						$this->group_has_active_layers[$group['id']] = 1;  							# auch alle Obergruppen durchlaufen
 					}
 				}
 			}
@@ -2895,6 +2905,7 @@ echo '			</table>
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
+				$label->align = $dbLabel['align'];
 				$RGB = explode(" ",$dbLabel['color']);
 				if ($RGB[0] == '') { 
 					$RGB[0]=0; $RGB[1]=0; $RGB[2]=0; 
@@ -2985,7 +2996,19 @@ echo '			</table>
 				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
-				$label->size = $dbLabel['size'];
+
+				if (is_numeric($dbLabel['size'])) {
+					$label->size = $dbLabel['size'];
+					$label->minsize = $dbLabel['minsize'];
+					$label->maxsize = $dbLabel['maxsize'];
+					if($this->map_factor != ''){
+						$label->size = $dbLabel['size']*$this->map_factor/1.414;
+					}
+				}
+				else {
+					$label->updateFromString("LABEL SIZE [" . $dbLabel['size']."] END");
+				}
+
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
 				$label->minfeaturesize = $dbLabel['minfeaturesize'];
@@ -2998,8 +3021,7 @@ echo '			</table>
 				# Skalierung der Labelschriftgröße, wenn map_factor gesetzt
 				if($this->map_factor != ''){
 					$label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
-					$label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
-					$label->size = $dbLabel['size']*$this->map_factor/1.414;
+					$label->maxsize = $dbLabel['maxsize']*$this->map_factor/1.414;
 				}
 				if ($dbLabel['position']!='') {
 					switch ($dbLabel['position']){
@@ -3413,7 +3435,7 @@ echo '			</table>
   }
 
 	function check_layer_visibility(&$layer){
-		if(value_of($layer, 'status') != '' OR ($this->map_scaledenom < value_of($layer, 'minscale') OR (value_of($layer, 'maxscale') > 0 AND $this->map_scaledenom > value_of($layer, 'maxscale')))) {
+		if(value_of($layer, 'errorstatus') != '' OR ($this->map_scaledenom < value_of($layer, 'minscale') OR (value_of($layer, 'maxscale') > 0 AND $this->map_scaledenom > value_of($layer, 'maxscale')))) {
 			return false;
 		}
 		return true;
@@ -5503,7 +5525,7 @@ echo '			</table>
 			$this->formvars['printversion'] = 1;
 			foreach($query_layers as $query_layer){
 				$layer=$this->user->rolle->getLayer($query_layer);
-				$this->formvars['qLayer'.$layer[0]['layer_id']] = 1;
+				$this->formvars['qLayer'][$layer[0]['layer_id']] = 1;
 			}
 			$this->queryMap();
 		}
@@ -6078,17 +6100,18 @@ echo '			</table>
 						$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
 						if (
 							$layer->get('Datentyp') == 0 AND
-							$layer->has_fk_constraint('within') AND
-							$parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])
+							$layer->has_fk_constraint('within')
 						) {
-							$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
-						}
-						else {
-							$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
-							$kvps = array(
-								'success' => false,
-								'msg' => $msg
-							);
+							if ($parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])) {
+								$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
+							}
+							else {
+								$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
+								$kvps = array(
+									'success' => false,
+									'msg' => $msg
+								);
+							}
 						}
 					}
 					break;
@@ -6295,6 +6318,7 @@ echo '			</table>
 		$this->formvars['data'] = $datastring;
 		$this->formvars['query'] = $select;
 		$this->formvars['datentyp'] = $layerset[0]['datentyp'];
+		$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$this->formvars['connectiontype'] = 6;
 		if ($layerset[0]['labelitem'] != 'Cluster_FeatureCount') {
 			$this->formvars['labelitem'] = $layerset[0]['labelitem'];
@@ -8402,7 +8426,6 @@ echo '			</table>
 			'template' => 'text',
 			'header' => 'text',
 			'footer' => 'text',
-			'logconsume' => 'int',
 			'queryable' => 'int',
 			'start_aktiv' => 'int',
 			'group_id' => 'int',
@@ -8441,7 +8464,7 @@ echo '			</table>
 
 	function Layer_Zeichenreihenfolge() {
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$this->layerdaten = $mapDB->getall_Layer('drawingorder', false, $this->user->id, $this->Stelle->id);
+		$this->layerdaten = $mapDB->getall_Layer(($this->formvars['auto_order'] ? 'datentyp DESC' : 'drawingorder'), false, $this->user->id, $this->Stelle->id);
 		$this->titel = 'Zeichenreihenfolge';
 		$this->main = 'layer_zeichenreihenfolge.php';
 		$this->output();
@@ -8458,11 +8481,12 @@ echo '			</table>
 		$this->titel = 'Themenbaum bearbeiten';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->groups = $mapDB->read_Groups(true);
-		$this->layers = $mapDB->getall_Layer();
+		$this->layers = $mapDB->getall_Layer('legendorder');
 		$this->output();
 	}
 
 	function Layer_Legendenreihenfolge_Speichern() {
+		### Gruppen ###
 		include_once(CLASSPATH . 'LayerGroup.php');
 		for ($i = 0; $i < count($this->formvars['group_ids']); $i++) {
 			$this->layergruppe = new LayerGroup($this);
@@ -8473,6 +8497,17 @@ echo '			</table>
 			];
 			$result = $this->layergruppe->update();
 		}
+		### Layer ###
+		include_once(CLASSPATH . 'Layer.php');
+		for ($i = 0; $i < count($this->formvars['layer_ids']); $i++) {
+			$this->layer = new Layer($this);
+			$this->layer->data = [
+				'layer_id' => $this->formvars['layer_ids'][$i],
+				'legendorder' => $this->formvars['layer_orders'][$i],
+				'gruppe' => $this->formvars['layer_groups'][$i]
+			];
+			$result = $this->layer->update();
+		}
 		rolle::setGroupsForAll($this->pgdatabase);
 		rolle::clear_groups2rolle($this->pgdatabase);
 	}
@@ -8481,25 +8516,14 @@ echo '			</table>
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
 		$this->main = 'layer2stelle_order.php';
 		if ($this->formvars['order'] == '') {
-			$this->formvars['order'] = 'ul.legendorder, l.drawingorder desc';
+			$this->formvars['order'] = 'l.legendorder';
 		}
-		if ($this->formvars['order'] == 'ul.legendorder, l.drawingorder desc') {
+		if ($this->formvars['order'] == 'l.legendorder') {
 			$this->groups = $this->selected_stelle->getGroups();
 		}
 		$this->layers = $this->selected_stelle->getLayers(NULL, $this->formvars['order']);
 		$this->output();
 	}
-
-  function Layer2Stelle_ReihenfolgeSpeichern(){
-    $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
-    $this->layers = $Stelle->getLayers(NULL);
-    for($i = 0; $i < count($this->layers['ID']); $i++){
-      $this->formvars['selected_layer_id'] = $this->layers['ID'][$i];
-			$this->formvars['legendorder'] = $this->formvars['legendorder_layer'.$this->layers['ID'][$i]];
-      $Stelle->updateLayerOrder($this->formvars);
-    }
-    $this->Layer2Stelle_Reihenfolge();
-  }
 
   function layer_export(){
   	# Abfragen aller Layer
@@ -9220,7 +9244,7 @@ END $$;
 
 			# Schreibe MapFile
 			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0775, true);
+				mkdir($path_parts['dirname'], 0770, true);
 			}
 			$this->saveMap(WMS_MAPFILE_PATH . $mapfile);
 			// Replacing 'OUTLINEWIDTH 1.00001' is a workaround to the bug that mapserver did not write 'GEOMTRANSFORM "centroid"' to Mapfile.
@@ -9236,7 +9260,7 @@ END $$;
 			$wrapperpath = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE);
 			$path_parts = pathinfo($wrapperpath . $wrapperfile);
 			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0775, true);
+				mkdir($path_parts['dirname'], 0770, true);
 				$this->write_xlog('MapFile-Pfad ' . $path_parts['dirname'] . ' angelegt.');
 			}
 			else {
@@ -9247,7 +9271,7 @@ END $$;
 MAPSERV="/usr/lib/cgi-bin/mapserv"
 MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->write_xlog('MapFile-Wrapper ' . $wrapperpath . $wrapperfile . ' geschrieben.');
-				chmod($wrapperpath . $wrapperfile, 0775);
+				chmod($wrapperpath . $wrapperfile, 0660);
 			}
 		} catch (Exception $ex) {
 			return array(
@@ -9258,6 +9282,24 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		return array(
 			'success' => true,
 			'msg' => 'MapDatei, Templates und Wrapper erfolgreich geschrieben.'
+		);
+	}
+
+	/**
+	 * This function removes the given mapfile, header und footer templates and a wrapper file if they exist
+	 */
+	function remove_mapfile($mapfile, $wrapperfile) {
+		$msg = '';
+		if (file_exists(WMS_MAPFILE_PATH . $mapfile)) {
+			unlink(WMS_MAPFILE_PATH . $mapfile);
+		}
+		$wrapperpath = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE);
+		if (file_exists($wrapperpath . $wrapperfile)) {
+			unlink($wrapperpath . $wrapperfile);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ' und Wrapper-Datei ' . $wrapperfile . ' gelöscht.'
 		);
 	}
 
@@ -9416,6 +9458,46 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->update_layer_parameter_in_rollen($stellen_ids[$i]);
 		}
 
+		$ows_mapfile_name = sonderzeichen_umwandeln($formvars['ows_mapfile_name'] ?: $formvars['name']) . '.map';
+		$ows_publication_changed = false;
+		if ($formvars['ows_publication']) {
+			# Lade das MapObjekt (nur mit selected_layer_id)
+			global $admin_stellen;
+			$this->class_load_level = 2;
+			$this->formvars['only_layer_ids'] = $formvars['selected_layer_id'];
+			$start_stelle = $this->Stelle;
+			$start_extent = $this->user->rolle->oGeorefExt;
+			$ows_stelle_id = $formvars['ows_stelle_id'] ?? $admin_stellen[0];
+			$this->Stelle_ID = $ows_stelle_id;
+			$ows_stelle = new Stelle($ows_stelle_id, $this->pgdatabase);
+			$this->Stelle = $ows_stelle;
+			$this->loadMap('DataBase', array(), true); // Layer name immer aus Attribute Name
+			$this->map->web->metadata->set("ows_onlineresource", OWS_SERVICE_ONLINERESOURCE . $this->formvars['ows_wrapper_name']);
+			$this->map->web->metadata->set("ows_service_onlineresource", OWS_SERVICE_ONLINERESOURCE . $this->formvars['ows_wrapper_name']);
+			$this->map->web->metadata->set("wms_extent", $ows_stelle->MaxGeorefExt->minx . ' ' . $ows_stelle->MaxGeorefExt->miny . ' ' . $ows_stelle->MaxGeorefExt->maxx . ' ' . $ows_stelle->MaxGeorefExt->maxy);
+			$result = $this->write_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
+			$this->Stelle_ID = $start_stelle_id; // setze Stelle_ID zurück
+			$this->Stelle = $start_stelle;
+			$this->user->rolle->oGeorefExt = $start_extent;
+			$ows_publication_changed = true;
+		}
+		else {
+			if ($formvars['ows_mapfile_name'] != '') {
+				$result = $this->remove_mapfile($ows_mapfile_name, $this->formvars['ows_wrapper_name']);
+				$ows_publication_changed = true;
+			}
+		}
+
+		if ($ows_publication_changed) {
+			$this->t_visible = 5000;
+			if (!$result['success']) {
+				$this->add_message('error', $result['msg']);
+			}
+			else {
+				$this->add_message('notice', $result['msg']);
+			}
+		}
+
 		$this->update_duplicate_layers($formvars);
 	}
 
@@ -9555,14 +9637,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	function Layergruppe_Editor() {
+	function Layergruppe_Editor($layergruppe = null) {
 		include_once(CLASSPATH . 'LayerGroup.php');
-		$this->layergruppe = new LayerGroup($this);
-		if ($this->formvars['selected_group_id'] != '') {
-			$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
-		}
-		else {
-			$this->layergruppe->setKeysFromTable();
+		if ($layergruppe === null) {
+			if ($this->formvars['selected_group_id'] != '') {
+				$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
+			}
+			else {
+				$this->layergruppe = new LayerGroup($this);
+				$this->layergruppe->setKeysFromTable();
+			}
 		}
 		$this->main = 'layergruppe_formular.php';
 		$this->output();
@@ -9578,6 +9662,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		if (!$this->layergruppe->get('selectable_for_shared_layers')) {
 			$this->layergruppe->set('selectable_for_shared_layers', 0);
+		}
+		if (!$this->layergruppe->get('checkbox')) {
+			$this->layergruppe->set('checkbox', 0);
 		}
 		$results = $this->layergruppe->validate();
 		if (empty($results)) {
@@ -9598,18 +9685,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 		$this->layergruppe->setData($this->formvars);
-		$results = $this->layergruppe->validate();
-		if (empty($results)) {
+		$validation_results = $this->layergruppe->validate();
+		if (empty($validation_results)) {
 			$results = $this->layergruppe->update();
+			if ($results['success']) {
+				rolle::setGroupsForAll($this->pgdatabase);
+				$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
+			}
+			else {
+				$this->add_message('error', $results['msg']);
+			}
 		}
-		if ($results['success']) {
-			rolle::setGroupsForAll($this->pgdatabase);
-			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
-		}
-		else {
-			$this->add_message('error', $results['msg']);
-		}
-		$this->Layergruppe_Editor();
+		$this->Layergruppe_Editor($this->layergruppe);
 	}
 
 	function Layergruppe_Loeschen(){
@@ -10277,7 +10364,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		elseif (value_of($this->formvars, 'embedded_subformPK') != '') {
 			header('Content-type: text/html; charset=UTF-8');
-			include(LAYOUTPATH . 'snippets/embedded_subformPK.php'); # listenförmige Ausgabe mit Links untereinander
+			include(LAYOUTPATH . 'snippets/embedded_subformPK.php'); # listenförmige Ausgabe mit Links untereinander oder list_edit Anzeige
 			if (!$ret['success']) {
 				// Diese Variante funktioniert nicht wenn in $ret['msg'] Zeilenumbrüche drin sind, wie das hier z.B.
 				// 				WHERE
@@ -10289,10 +10376,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				// ', '', $ret['msg'])) . "'}]);</script>";
 				echo "<script>message([{ \"type\" : 'error', \"msg\" : " . json_encode($ret['msg']) . "}]);</script>";
 			}
-		}
-		elseif (value_of($this->formvars, 'embedded_subformPK_liste') != '') {
-			header('Content-type: text/html; charset=UTF-8');
-			include(LAYOUTPATH . 'snippets/embedded_subformPK_list.php'); # listenförmige Ausgabe zum schnellen editieren
 		}
 		elseif(value_of($this->formvars, 'embedded') != '') {
 			ob_end_clean();
@@ -11980,6 +12063,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# Layouts abfragen
 		$this->ddl->layouts = $this->ddl->load_layouts($this->Stelle->id, NULL, $this->formvars['chosen_layer_id'], array(0,1));
 
+		if ($this->formvars['aktivesLayout'] == '') {
+			$use_variable_layouts = true; // basierend auf dem was das ddl_attribute für jeden Datensatz liefert
+		}
+
 		if (count($this->ddl->layouts) == 1) {
 			$this->formvars['aktivesLayout'] = $this->ddl->layouts[0]['id'];
 		}
@@ -11998,7 +12085,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 			}
 			# PDF erzeugen
-			$result = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user, $this->formvars['record_paging']);
+			$result = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user, false, $this->formvars['record_paging'], true, false, $use_variable_layouts);
 			# in jpg umwandeln
 			$file_name = basename($result['pdf_file'], ".pdf") . '-' . date('Y-m-d_H_i_s', time()) . '.jpg';
 			$command = IMAGEMAGICKPATH . 'convert "' . $result['pdf_file'] . '[0]" -resize 595x1000 "' . dirname($result['pdf_file']) . '/' . $file_name . '"';
@@ -12125,12 +12212,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
 		$this->attributes = $attributes;
-		# aktives Layout abfragen
-		if ($this->formvars['aktivesLayout'] != '') {
-			$ddl->selectedlayout = $ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);
-			# PDF erzeugen
-			$return_values = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging'], $output, $append);
+
+		if ($this->formvars['aktivesLayout'] == '') {
+			$use_variable_layouts = true; // basierend auf dem was das ddl_attribute für jeden Datensatz liefert
 		}
+		else {			# aktives Layout abfragen
+			$ddl->selectedlayout = $ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);
+		}
+		# PDF erzeugen
+		$return_values = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging'], $output, $append, $use_variable_layouts);
 		return $return_values;
 	}
 
@@ -12946,6 +13036,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		if ($this->formvars['selected_layer_id'] != '') {
 			$this->layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$this->formvars['selected_group_id'] = $this->layerset[0]['gruppe'];
+			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
 			$layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 			$this->attributes = $this->mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
@@ -13009,14 +13101,26 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->output();
 		}
 		else {
-			include_(CLASSPATH . 'data_import_export.php');
-			$this->data_import_export = new data_import_export();
-			// $this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
-			$result = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
-			if (!$result['success']) {
-				$this->add_message('error', $result['msg']);
-				$this->daten_export();
-				return $result;
+			include_(CLASSPATH . 'Layer.php');
+			$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+			if (
+				$layer->get('datentyp') == MS_LAYER_RASTER AND
+				preg_match('/\.(tif|tiff)$/i', $layer->get('data')) AND
+				$layer->get('export_privileg')
+			) {
+				$result['contenttype'] = 'image/tiff';
+				$result['exportfile'] = replace_params_rolle(SHAPEPATH . $layer->get('data'));
+			}
+			else {
+				include_(CLASSPATH . 'data_import_export.php');
+				$this->data_import_export = new data_import_export();
+				// $this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+				$result = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+				if (!$result['success']) {
+					$this->add_message('error', $result['msg']);
+					$this->daten_export();
+					return $result;
+				}
 			}
 			ob_end_clean();
 			header('Content-type: ' . $result['contenttype']);
@@ -13187,12 +13291,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over layer attributes privileges
 		$sql = "
 			UPDATE
-				kvwmap.layer_attributes2stelle AS t2 INNER JOIN
-				kvwmap.layer_attributes2stelle AS t1 ON t1.attributename = t2.attributename AND t1.stelle_id = t2.stelle_id
+				kvwmap.layer_attributes2stelle AS t2 
 			SET
-				t2.privileg = t1.privileg,
-				t2.tooltip = t1.tooltip
+				privileg = t1.privileg,
+				tooltip = t1.tooltip
+			FROM
+				kvwmap.layer_attributes2stelle AS t1
 			WHERE
+				t1.attributename = t2.attributename AND 
+				t1.stelle_id = t2.stelle_id and 
 				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
 				t2.layer_id = " . $this->formvars['to_layer_id'] . "
 		";
@@ -13231,12 +13338,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over layer privileges
 		$sql = "
 			UPDATE
-				kvwmap.used_layer AS t2 INNER JOIN
-				kvwmap.used_layer AS t1 ON t1.stelle_id = t2.stelle_id
+				kvwmap.used_layer AS t2 
 			SET
-				t2.privileg = t1.privileg,
-				t2.export_privileg = t1.export_privileg
+				privileg = t1.privileg,
+				export_privileg = t1.export_privileg
+			FROM
+				kvwmap.used_layer AS t1 
 			WHERE
+				t1.stelle_id = t2.stelle_id and 
 				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
 				t2.layer_id = " . $this->formvars['to_layer_id'] . "
 		";
@@ -13253,12 +13362,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over default layer attributes
 		$sql = "
 			UPDATE
-				kvwmap.layer_attributes AS t2 INNER JOIN
-				kvwmap.layer_attributes AS t1 ON t1.name = t2.name
+				kvwmap.layer_attributes AS t2 
 			SET
-				t2.privileg = t1.privileg,
-				t2.query_tooltip = t1.query_tooltip
+				privileg = t1.privileg,
+				query_tooltip = t1.query_tooltip
+			FROM
+				kvwmap.layer_attributes AS t1 
 			WHERE
+				t1.name = t2.name and 
 				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
 				t2.layer_id = " . $this->formvars['to_layer_id'] . "
 		";
@@ -13275,11 +13386,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# take over default layer privileges
 		$sql = "
 			UPDATE
-				kvwmap.layer AS t2,
-				kvwmap.layer AS t1
+				kvwmap.layer AS t2
 			SET
-				t2.privileg = t1.privileg,
-				t2.export_privileg = t1.export_privileg
+				privileg = t1.privileg,
+				export_privileg = t1.export_privileg
+			FROM
+				kvwmap.layer AS t1
 			WHERE
 				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
 				t2.layer_id = " . $this->formvars['to_layer_id'] . "
@@ -13791,6 +13903,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
 			$this->formvars['wappen_link'] = $this->stellendaten['wappen_link'];
 			$this->formvars['checkClientIP'] = $this->stellendaten['check_client_ip'];
+			$this->formvars['totp_authentication'] = $this->stellendaten['totp_authentication'];
       $this->formvars['checkPasswordAge'] = $this->stellendaten['check_password_age'];
       $this->formvars['allowedPasswordAge'] = $this->stellendaten['allowed_password_age'];
       $this->formvars['use_layer_aliases'] = $this->stellendaten['use_layer_aliases'];
@@ -13810,6 +13923,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['reset_password_text'] = $this->stellendaten['reset_password_text'];
 			$this->formvars['invitation_text'] = $this->stellendaten['invitation_text'];
 			$this->formvars['comment'] = $this->stellendaten['comment'];
+			$this->formvars['start_page_params'] = $this->stellendaten['start_page_params'];
 			$where = 'id != '.$this->formvars['selected_stelle_id'];
 
 			$children_ids = array_map(function($child) {return $child['id'];}, $this->formvars['selchildren']);
@@ -14159,7 +14273,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($this->formvars['view_sort'] == '') {
 			$this->formvars['view_sort'] = 'name';
 		}
-		$this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort'], $this->formvars['sort_direction']);
+		if ($this->formvars['view_sort'] == 'obermenue,"order"') {
+			$this->formvars['view_sort'] = '
+				COALESCE(parent."order", u_menues."order"),
+				CASE WHEN u_menues.menueebene = 1 THEN u_menues.id ELSE u_menues.obermenue END,
+				CASE WHEN u_menues.menueebene = 1 THEN 0 ELSE 1 END,
+				u_menues."order"';
+		}
+		$this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort'], $this->formvars['sort_direction'], 'kvwmap.u_menues LEFT JOIN kvwmap.u_menues parent ON parent.id = u_menues.obermenue');
 		if ($this->formvars['sort_direction'] == 'DESC') {
 			$this->formvars['sort_direction'] = 'ASC';
 		}
@@ -14183,6 +14304,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			$this->menue->setKeysFromTable();
 		}
+		$this->menue->get_stellen();
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
 		$this->output();
@@ -14197,11 +14319,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$results = $this->menue->create();
 		}
 		if ($results['success']) {
+			$this->menue->update_stellen($this->formvars['selstellen']);
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
 			header('location: index.php?go=Menues_Anzeigen&csrf_token=' . $_REQUEST['csrf_token']);
 		}
 		else {
 			$this->add_message('array', array_values($results));
+			$this->menue->get_stellen();
 			$this->main = 'menue_formular.php';
 			$this->output();
 		}
@@ -14216,11 +14340,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$results = $this->menue->update();
 		}
 		if ($results['success']) {
+			$this->menue->update_stellen($this->formvars['selstellen']);
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
+			$this->Fehlermeldung = 'Fehler beim Aktualisieren des Menüs!' . print_r(array_values($results), true);
 			$this->add_message('array', array_values($results));
 		}
+		$this->menue->get_stellen();
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
 		$this->output();
@@ -14611,6 +14738,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['Namenszusatz'] 							= $this->userdaten[0]['namenszusatz'];
 			$this->formvars['password_setting_time'] 			= $this->userdaten[0]['password_setting_time'];
 			$this->formvars['password_expired'] 					= $this->userdaten[0]['password_expired'] === 't';
+			$this->formvars['totp_secret'] 								= $this->userdaten[0]['totp_secret'];
 			$this->formvars['start'] 											= $this->userdaten[0]['start'];
 			$this->formvars['stop'] 											= $this->userdaten[0]['stop'];
 			$this->formvars['ips']												= $this->userdaten[0]['ips'];
@@ -15052,7 +15180,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->main = 'cronjobs.php';
 		}
 		else {
-			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);
+			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $results['err_msg']);
 			$this->main = 'cronjob_formular.php';
 		}
 		$this->output();
@@ -15089,7 +15217,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		foreach ($this->crontab_lines AS $user => $lines) {
 			$crontab_file = $this->crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
 			// $crontab_file = $this->crontab_dir . 'crontab_' . $user;
-			// echo '<br>' . $user . ': ' . $crontab_file;
+			// echo '<br>' . $user . ': ' . $crontab_file . ' num lines: ' . count($lines);
 			$fp = fopen($crontab_file, 'w');
 			if (count($lines) > 0) {
 				foreach($lines AS $line) {
@@ -15425,42 +15553,50 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
 	function layerCommentLoad() {
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$groups = $mapDB->read_Groups();
-		$ret = $this->user->rolle->getLayerComments(
-			$this->formvars['id'],
-			($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id)
-		);
-		if ($ret[1] == NULL) {
-			$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
-		}
-		else {
-			$layerset = $this->user->rolle->getLayer('');
-			for ($i = 0; $i < count($layerset); $i++){
-				$formvars['thema'.$layerset[$i]['layer_id']] = 0;		# erstmal alle ausschalten
-				$formvars['qLayer'.$layerset[$i]['layer_id']] = 0;		# erstmal alle ausschalten
+		if ($this->formvars['id']) {
+			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+			$groups = $mapDB->read_Groups();
+			$ret = $this->user->rolle->getLayerComments(
+				$this->formvars['id'],
+				($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id)
+			);
+			if ($ret[1] == NULL) {
+				$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
 			}
-			foreach($groups as $group){
-				if($group['obergruppe'] == ''){
-					$formvars['group_'.$group['id']] = 0;		# und alle Obergruppen zuklappen
+			else {
+				$layerset = $this->user->rolle->getLayer('');
+
+				$this->reset_layers(NULL);
+				for ($i = 0; $i < count($layerset); $i++){
+					unset($formvars['thema'][$layerset[$i]['layer_id']]);
+					unset($formvars['qLayer'][$layerset[$i]['layer_id']]);
 				}
+				foreach($groups as $group){
+					if($group['obergruppe'] == ''){
+						$formvars['group_'.$group['id']] = 0;		# und alle Obergruppen zuklappen
+					}
+				}
+				$layer_ids = explode(',', $ret[1][0]['layers']);
+				foreach($layer_ids as $layer_id){
+					$formvars['thema'][$layer_id] = 1;
+					$groupid = $layerset['layer_ids'][$layer_id]['gruppe'];
+					do{
+						$formvars['group_'.$groupid] = 1;
+						$groupid = $groups[$groupid]['obergruppe'];
+					} while ($groupid != '');
+				}
+				$query_ids = explode(',', $ret[1][0]['query']);
+				foreach($query_ids as $layer_id){
+					$formvars['qLayer'][$layer_id] = 1;
+				}
+				$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
+				$this->user->rolle->setQueryStatus($formvars);
+				$this->user->rolle->setGroupStatus($formvars);
 			}
-      $layer_ids = explode(',', $ret[1][0]['layers']);
-			foreach($layer_ids as $layer_id){
-				$formvars['thema' . $layer_id] = 1;
-				$groupid = $layerset['layer_ids'][$layer_id]['gruppe'];
-				do{
-					$formvars['group_'.$groupid] = 1;
-					$groupid = $groups[$groupid]['obergruppe'];
-				} while ($groupid != '');
-			}
-			$query_ids = explode(',', $ret[1][0]['query']);
-			foreach($query_ids as $layer_id){
-				$formvars['qLayer' . $layer_id] = 1;
-			}
-			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
-			$this->user->rolle->setQueryStatus($formvars);
-			$this->user->rolle->setGroupStatus($formvars);
+		}
+		if ($this->user->rolle->layer_selection_mode == 1) {
+			$this->user->rolle->setLayerSelection($this->formvars['id']);
+			$this->user->rolle->readSettings();
 		}
 		$this->loadMap('DataBase');
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
@@ -15749,12 +15885,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select =  "nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
-    $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, hist_timestamp";
+    $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, hist_timestamp, layer_selection_mode";
     $from = "kvwmap.rolle";
     $where = "stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
-			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp,layer_selection_mode));" : "")
 			. ((value_of($this->formvars, 'show_layer_parameter')) ? "ahah('index.php','go=getLayerParamsForm&stelle_id='+document.GUI.stelle_id.value, new Array(document.getElementById('layer_parameters_div')), new Array('sethtml'))" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
@@ -15989,7 +16125,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						} break;
 						default : {
 							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
-								if ($this->formvars[$form_fields[$i]] == '') {
+								if ($this->formvars[$form_fields[$i]] === '') {
 									$eintrag = 'NULL';
 								}
 								else {
@@ -16258,7 +16394,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	/**
 	 * Diese rekursive Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
 	 * Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
-	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
+	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die entprechende Stelle im String eingefügt
 	 * Die Funktion wird auch beim Löschen eines Datensatzes mit komplexen Datentypen aufgerufen (dann ist der Parameter $delete = true). 
 	 * Dann übernimmt sie das Löschen der Dateien der Dokument-Attribute.
 	 */
@@ -16454,7 +16590,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$last_query_deleted = false;
 		if ($this->last_query != '') {
 			foreach($this->last_query['layer_ids'] as $layer_id) {
-				$this->formvars[$queryfield . $layer_id] = 1;
+				$this->formvars[$queryfield][$layer_id] = 1;
 			}
 		}
 		if (is_string($rect)){
@@ -16473,10 +16609,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$sql_order = '';
 			if (
 				$layerset[$i]['queryable'] AND
-				$layerset[$i]['status']  == '' AND 
+				$layerset[$i]['errorstatus']  == '' AND 
 				(
-					value_of($this->formvars, $queryfield . $layerset[$i]['layer_id']) == '1' OR
-					value_of($this->formvars, $queryfield . $layerset[$i]['requires']) == '1'
+					$this->formvars[$queryfield][$layerset[$i]['layer_id']] == '1' OR
+					$this->formvars[$queryfield][$layerset[$i]['requires']] == '1'
 				) AND
 				(
 					($this->last_query == '' AND ($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)) OR 
@@ -17382,8 +17518,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					(
 						(	# Karte
 							(
-								$this->formvars[$queryfield . $layerset[$i]['layer_id']] == '1' OR 
-								$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
+								$this->formvars[$queryfield][$layerset[$i]['layer_id']] == '1' OR
+								$this->formvars[$queryfield][$layerset[$i]['requires']] == '1'
 							) AND
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
 							($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)
@@ -18186,7 +18322,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$layer['privileg'] 				= 0;
 		$layer['export_privileg'] = 1;
 		$layer['editable'] 				= 1;
-		$layer['listed'] 					= 1;
+		$layer['listed'] 					= 0;
 		$layer['drawingorder'] 		= 100000;
 		$layer['shared_from'] 		= $this->user->id;
 
@@ -18580,7 +18716,7 @@ class db_mapObj{
 				'' as oid
 			FROM
 				kvwmap.rollenlayer AS l JOIN
-				kvwmap.u_groups AS g ON l.Gruppe = g.id LEFT JOIN
+				kvwmap.u_groups AS g ON l.gruppe = g.id LEFT JOIN
 				kvwmap.connections AS c ON l.connection_id = c.id
 			WHERE
 				l.stelle_id=" . $this->Stelle_ID . " AND
@@ -18608,7 +18744,7 @@ class db_mapObj{
 		return $Layer;
 	}
 
-	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL) {
+	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL, $layer_selection = NULL) {
 		global $language;
 
 		if ($language != 'german') {
@@ -18630,18 +18766,17 @@ class db_mapObj{
 		}
 
 		$sql = "
-			SELECT DISTINCT
+			SELECT 
 				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency,
 				rl.aktivstatus,
 				rl.querystatus,
 				rl.gle_view,
 				rl.showclasses,
-				rl.logconsume,
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale, ul.maxscale,
 				ul.offsite,
 				ul.postlabelcache,
@@ -18650,7 +18785,6 @@ class db_mapObj{
 				ul.header,
 				ul.footer,
 				ul.symbolscale,
-				ul.logconsume,
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,
@@ -18669,7 +18803,7 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.errorstatus, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
@@ -18690,9 +18824,10 @@ class db_mapObj{
 				kvwmap.u_rolle2used_layer AS rl,
 				kvwmap.used_layer AS ul JOIN
 				kvwmap.layer AS l ON l.layer_id = ul.layer_id LEFT JOIN
-				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
+				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.gruppe) = g.id LEFT JOIN
 				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				kvwmap.connections as c ON l.connection_id = c.id
+				" . ($layer_selection? "join kvwmap.rolle_saved_layers rsl on l.layer_id = any(rsl.layers) and rsl.id = " . $layer_selection : "") . "
 			WHERE
 				rl.stelle_id = ul.stelle_id AND
 				rl.layer_id = ul.layer_id AND
@@ -18795,7 +18930,8 @@ class db_mapObj{
 				g.id,
 				" . $gruppenname_column . " AS gruppenname,
 				g.obergruppe,
-				g.selectable_for_shared_layers " .
+				g.selectable_for_shared_layers,
+				g.checkbox" .
 				(!$all ? ", g2r.status" : "") . "
 			FROM
 				kvwmap.u_groups AS g" . ($all ? "" : "
@@ -18815,6 +18951,7 @@ class db_mapObj{
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
 			$groups[$rs['id']]['selectable_for_shared_layers'] = ($rs['selectable_for_shared_layers'] == 't');
+			$groups[$rs['id']]['checkbox'] = ($rs['checkbox'] == 't');
 			if ($rs['obergruppe']) {
 				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
 			}
@@ -20217,9 +20354,8 @@ DO $$
 							SELECT
 								'vars_last_layer_id" . $layer_ids[$i] . "' AS layer_id,
 								'vars_stelle_id_" . $stellen[$s]['extra'][0] . "' AS stelle_id,
-								queryable,
-								legendorder, minscale, maxscale, offsite, transparency, postlabelcache, filter,
-								template, header, footer, symbolscale, requires, logconsume, privileg, export_privileg,
+								queryable, minscale, maxscale, offsite, transparency, postlabelcache, filter,
+								template, header, footer, symbolscale, requires, privileg, export_privileg,
 								start_aktiv,
 								use_geom
 							FROM
@@ -20291,10 +20427,8 @@ DO $$
 					dont_use_for_new, 
 					mandatory, 
 					quicksearch, 
-					visible, 
-					vcheck_attribute, 
-					vcheck_operator, 
-					vcheck_value, 
+					visible,
+					visibility_rules, 
 					"order", 
 					privileg, 
 					query_tooltip 
@@ -20380,7 +20514,7 @@ DO $$
 							'vars_datatype_id_' || datatype_id AS datatype_id,
 							name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, \"default\", form_element_type,
 							options, alias, alias_low_german, alias_english, alias_polish, alias_vietnamese, tooltip, \"group\", raster_visibility, mandatory, quicksearch,
-							\"order\", privileg, query_tooltip, visible, vcheck_attribute, vcheck_operator, vcheck_value, arrangement, labeling
+							\"order\", privileg, query_tooltip, visible, visibility_rules, arrangement, labeling
 						FROM
 							kvwmap.datatype_attributes
 						WHERE
@@ -20826,7 +20960,9 @@ DO $$
 					'updatecycle',
 					'metalink',
 					'terms_of_use_link',
-					'comment'
+					'comment',
+					'ows_stelle_id',
+					'ows_publication'
 				) AS $key
 			) {
 				$attribute_sets[] = "" . $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
@@ -20873,7 +21009,8 @@ DO $$
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
 		$zero_if_empty_attributes = array(
 			'drawingorder',
-			'listed'
+			'listed',
+			'logconsume'
 		);
 
 		if ($this->GUI->plugin_loaded('mobile')) {
@@ -20897,7 +21034,9 @@ DO $$
 		# Schreibt alle Attribute, die getrimmt werden sollen
 		foreach(
 			array(
-				'connection'
+				'connection',
+				'ows_mapfile_name',
+				'ows_wrapper_name'
 			) AS $key
 		) {
 			if ($formvars[$key]	!= '') {
@@ -20963,6 +21102,7 @@ DO $$
 			'querymap',
 			'processing',
 			'status',
+			'errorstatus',
 			'trigger_function'
 		);
 		if ($this->GUI->plugin_loaded('mobile')) {
@@ -20984,7 +21124,7 @@ DO $$
 			WHERE
 				layer_id = " . $formvars['selected_layer_id'] . "
 		";
-		#echo '<br>SQL zum update eines Layers: ' . $sql;
+		// echo '<br>SQL zum update eines Layers: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>" . $sql, 4);
 		$ret = $this->db->execSQL($sql, 4, 1, true);
 		if (!$ret['success']) {
@@ -21306,10 +21446,8 @@ DO $$
 					$alias_rows["alias_" . $language] = "'" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
 				}
 			}
-			if($formvars['visible_' . $attributes['name'][$i]] != 2 OR $formvars['vcheck_value_'.$attributes['name'][$i]] == ''){
-				$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
-				$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
-				$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
+			if($formvars['visible_' . $attributes['name'][$i]] != 2){
+				$formvars['visibility_rules_'.$attributes['name'][$i]] = '';
 			}
 
 			$rows = [
@@ -21327,9 +21465,7 @@ DO $$
 				'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
 				'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
 				'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
-				'vcheck_attribute' => "'" . $formvars['vcheck_attribute_'.$attributes['name'][$i]] . "'",
-				'vcheck_operator' => "'" . $formvars['vcheck_operator_'.$attributes['name'][$i]] . "'",
-				'vcheck_value' => "'" . $formvars['vcheck_value_'.$attributes['name'][$i]] . "'"
+				'visibility_rules' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]])
 			] + $alias_rows;
 				
 			if ($formvars['for_all_layers'] != 1) {
@@ -21384,9 +21520,7 @@ DO $$
 					}
 				}
 				if ($formvars['visible_' . $attributes['name'][$i]] != 2){
-					$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
-					$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
-					$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
+					$formvars['visibility_rules_'.$attributes['name'][$i]] = '';
 				}
 				if ($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
 					$formvars['group_' . $attributes['name'][$i]] = $last_group;
@@ -21413,9 +21547,8 @@ DO $$
 					'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
 					'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
 					'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
-					'vcheck_attribute' => "'" . $formvars['vcheck_attribute_'.$attributes['name'][$i]] . "'",
-					'vcheck_operator' => "'" . $formvars['vcheck_operator_'.$attributes['name'][$i]] . "'",
-					'vcheck_value' => "'" . $formvars['vcheck_value_'.$attributes['name'][$i]] . "'"
+					'visibility_rules' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]]),
+					'style_attribute' => "'" . $formvars['style_attribute_'.$attributes['name'][$i]] . "'"
 				] + $alias_rows;
 				$sql = "
 					INSERT INTO
@@ -21508,9 +21641,7 @@ DO $$
 				privileg,
 				query_tooltip,
 				visible,
-				vcheck_attribute,
-				vcheck_operator,
-				vcheck_value,
+				visibility_rules,
 				arrangement,
 				labeling
 			FROM
@@ -21605,11 +21736,33 @@ DO $$
 			$attributes['privileg'][$i]= $rs['privileg'];
 			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
 			$attributes['visible'][$i]= $rs['visible'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
+
+			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
+			// Referenz auf dependents
+    	$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			// JSON parsen
+			$rulesJson = $rs['visibility_rules'] ?? '';
+			$rules = $rulesJson ? json_decode($rulesJson, true) : null;
+
+			// Abhängige Attribute sammeln
+			$dependentAttributes = [];
+			if ($rules) {
+				$collectAttributes = function($node) use (&$dependentAttributes, &$collectAttributes) {
+						if (isset($node['rules'])) {
+								foreach ($node['rules'] as $child) $collectAttributes($child);
+						} elseif (isset($node['attribute'])) {
+								$dependentAttributes[] = $node['attribute'];
+						}
+				};
+				$collectAttributes($rules);
+				$dependentAttributes = array_unique($dependentAttributes);
+			}
+
+			// Abhängigkeiten eintragen
+			foreach ($dependentAttributes as $depAttr) {
+					$dependents[$depAttr][] = $rs['name'];
+			}
+
 			$attributes['arrangement'][$i]= $rs['arrangement'];
 			$attributes['labeling'][$i]= $rs['labeling'];
 			$i++;
@@ -21627,7 +21780,7 @@ DO $$
 	 * @param array[string] $replace_only Function replace_params_rolle will only applied on attribute settings defined in this param if $replace is true.
 	 * @param array[string] $attribute_values Attributenames and there values that shall be used when replace_params_rolle function will be applied. 
 	 */
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value'), $attribute_values = []) {
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -21683,12 +21836,12 @@ DO $$
 				mandatory,
 				quicksearch,
 				visible,
-				vcheck_attribute,
-				vcheck_operator,
-				vcheck_value,
+				visibility_rules,
 				\"order\",
 				privileg,
-				query_tooltip
+				query_tooltip,
+				style_attribute,
+				visibility_rules
 			FROM
 				kvwmap.layer_attributes as a LEFT JOIN
 				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
@@ -21739,11 +21892,34 @@ DO $$
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
+			$attributes['style_attribute'][$i] = $rs['style_attribute'];
+			
+			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
+			// Referenz auf dependents
+    	$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			// JSON parsen
+			$rulesJson = $rs['visibility_rules'] ?? '';
+			$rules = $rulesJson ? json_decode($rulesJson, true) : null;
+
+			// Abhängige Attribute sammeln
+			$dependentAttributes = [];
+			if ($rules) {
+				$collectAttributes = function($node) use (&$dependentAttributes, &$collectAttributes) {
+						if (isset($node['rules'])) {
+								foreach ($node['rules'] as $child) $collectAttributes($child);
+						} elseif (isset($node['attribute'])) {
+								$dependentAttributes[] = $node['attribute'];
+						}
+				};
+				$collectAttributes($rules);
+				$dependentAttributes = array_unique($dependentAttributes);
+			}
+
+			// Abhängigkeiten eintragen
+			foreach ($dependentAttributes as $depAttr) {
+					$dependents[$depAttr][] = $rs['name'];
+			}
+
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
@@ -21785,7 +21961,7 @@ DO $$
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
-				$attributes['style'] = $rs['name'];
+				$attributes['style'][] = $rs['name'];
 				$attributes['visible'][$i] = 0;
 			}
 			if ($rs['form_element_type'] == 'Editiersperre') {
@@ -21934,6 +22110,7 @@ DO $$
 				l.uptodateness,
 				l.updatecycle,
 				l.drawingorder,
+				l.legendorder,
 				l.alias,
 				l.shared_from
 				" . ($this->GUI->plugin_loaded('mobile') ? ', l.sync' : '') . "
@@ -22220,6 +22397,7 @@ DO $$
 			$layer['sync'] = ($layer['sync'] == 't');
 			$layer['queryable'] = ($layer['queryable'] == 't');
 			$layer['querymap'] = ($layer['querymap'] == 't');
+			$layer['logconsume'] = ($layer['logconsume'] == 't');
 			if ($replace_params) {
 				foreach (array('classitem', 'classification', 'data', 'pfad') AS $key) {
 					$layer[$key] = replace_params_rolle(
@@ -23079,6 +23257,7 @@ DO $$
     if($formvars["label_wrap"] != ''){$sql.="wrap = '" . $formvars["label_wrap"]."',";}else{$sql .= "wrap = NULL,";}
 		if($formvars["label_text"] != ''){$sql.="text = '" . $formvars["label_text"]."',";}else{$sql .= "text = NULL,";}
     if($formvars["label_the_force"] != ''){$sql.="the_force = '" . $formvars["label_the_force"]."',";}else{$sql.="the_force = NULL,";}
+		if($formvars["label_align"] != ''){$sql.="align = '" . $formvars["label_align"]."',";}else{$sql.="align = NULL,";}
     $sql.="label_id = " . $formvars["label_label_id"];
     $sql.=" WHERE label_id = " . $formvars["label_id"];
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Label - Speichern der Labeldaten:<br>" . $sql,4);
@@ -23353,7 +23532,7 @@ class Document {
     		0,
     		0,
     		0,
-    		'Helvetica.afm', // Ein Wert muss gesetzt werden, weil beim Layer-Export Null rauskommen würde und das darf für font nicht sein.
+    		'Helvetica.afm', -- Ein Wert muss gesetzt werden, weil beim Layer-Export Null rauskommen würde und das darf für font nicht sein.
     		0
 			) RETURNING id";
     $this->debug->write("<p>file:kvwmap class:Document->addfreetext :",4);

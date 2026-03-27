@@ -153,6 +153,7 @@ $go = (array_key_exists('go', $formvars) ? $formvars['go'] : '');
 if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
 	$go = $go.'_'.$formvars['go_plus'];
 }
+
 ###########################################################################################################
 define('CASE_COMPRESS', false);
 #																																																					#
@@ -193,7 +194,7 @@ $spatial_cases = array('navMap_ajax', 'getMap', 'tooltip_query', 'get_group_lege
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 $fast_loading_case = array();
 
-define('FAST_CASE', in_array($go, $fast_loading_cases));
+define('FAST_CASE', in_array($formvars['go'], $fast_loading_cases));
 
 if (CASE_COMPRESS) {
 	include(CLASSPATH . 'case_compressor.php');
@@ -211,7 +212,7 @@ function include_($filename){
 
 # laden der Klassenbibliotheken
 if (!CASE_COMPRESS AND FAST_CASE) {
-	include (CLASSPATH.'fast_cases/'.$go.'.php');
+	include (CLASSPATH.'fast_cases/' . $formvars['go'] . '.php');
 }
 else {
 	include_(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
@@ -225,6 +226,14 @@ else {
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 include(WWWROOT . APPLVERSION . 'start.php');
+
+if ($GUI->formvars['go'] == '' AND $GUI->Stelle->start_page_params != '') {
+	parse_str($GUI->Stelle->start_page_params, $params);
+	$GUI->formvars = array_merge($GUI->formvars, $params);
+	$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
+	$go = $GUI->formvars['go'];
+}
+
 $GUI->go = $go;
 
 # Laden der Plugins index.phps
@@ -1684,6 +1693,7 @@ function go_switch($go, $exit = false) {
 				if ($GUI->plugin_loaded('mobile')) {
 					include_once(PLUGINS . 'mobile/model/kvwmap.php');
 				}
+
 				$GUI->LayerAendern($GUI->formvars);
 				$GUI->Layereditor();
 			} break;

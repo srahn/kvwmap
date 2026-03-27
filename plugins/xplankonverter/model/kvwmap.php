@@ -337,10 +337,10 @@
 	*/
 	$GUI->xplankonverter_validate_uploaded_zusammenzeichnungen = function($upload_file, $tmp_dir) use ($GUI) {
 		$success = false;
-		if (!file_exists($tmp_dir)) {
-			$deb_msg = '<br>Dir ' . $tmp_dir . ' angelegt.';
+		if (!is_dir($tmp_dir)) {
 			try {
-				mkdir($tmp_dir, 0775);
+				mkdir($tmp_dir, 0770, true);
+				$deb_msg .= '<br>Verzeichnis ' . $tmp_dir . ' angelegt.';
 			} catch (Exception $ex) {
 				return array(
 					'success' => false,
@@ -382,7 +382,7 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => 'Die Datei ' . $upload_file['name'] . ' ist keine Zip-Datei. Laden Sie die Zusammenzeichnung und ggf. Geltungsbereiche in einer Zip-Datei hoch.'
+				'msg' => $deb_msg . 'Die Datei ' . $tmp_dir . $upload_file['name'] . ' ist keine Zip-Datei. Laden Sie die Zusammenzeichnung und ggf. Geltungsbereiche in einer Zip-Datei hoch.'
 			);
 		}
 

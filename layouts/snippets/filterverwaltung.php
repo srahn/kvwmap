@@ -58,7 +58,7 @@ function showmap(){
 //-->
 </script>
 
-<table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
+<table id="filterverwaltung" border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td colspan="5"><h2><?php echo $strTitle; ?></h2></td>
   </tr>

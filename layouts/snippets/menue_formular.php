@@ -1,5 +1,6 @@
 <?
 	include(LAYOUTPATH . 'languages/menue_formular_' . rolle::$language . '.php');
+	include_once(CLASSPATH . 'FormObject.php');
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <div class="center-outerdiv">
@@ -7,6 +8,40 @@
 		<h2><?php echo $this->titel; ?></h2>
 		<em><span class="px13"><? echo $this->strAsteriskRequired; ?></span></em><br><?php
 		echo $this->menue->as_form_html(); ?>
+		<div class="clear"></div>
+		<label class="fetter" for="title">Zuordnung zu Stellen</label>
+		<div name="stellenzuweisung" style="margin-top: 5px; text-align: left">
+			<?php
+			$this->stellen = $this->Stelle->getstellen('bezeichnung');
+			// Wenn es eine Fehlermeldung gibt, wurden die Stellen wahrscheinlich nicht korrekt übergeben. In diesem Fall soll die Auswahl der Stellen anhand der übergebenen Formulardaten erfolgen, damit der Benutzer seine Auswahl nicht erneut treffen muss.
+			$selstellen = $this->Fehlermeldung != '' ? $this->formvars['selstellen'] : implode(',', array_map(function($stelle) { return $stelle->get('stelle_id'); }, $this->menue->stellen));
+			if ($size == 0) $size++;
+			echo FormObject::createSelectField(
+				'selstellen', // name
+				array_map(
+					function($stelle) {
+						return array(
+							'value' => $stelle['ID'],
+							'output' => $stelle['Bezeichnung']
+						);
+					},
+					vectors_to_assoc_array($this->stellen)
+				), // options
+				$selstellen, // values
+				max(1, min(20, count($this->stellen))), // size
+				'width: 370px', // style
+				'', // onchange
+				'stellen_ids', // id
+				true, // multiple
+				'', // class
+				'---Stellen auswählen---', // first_option
+				'', // option_style
+				'', // option_class
+				'', // $onclick
+				'', // onmouseenter
+				'Stellen in denen der Menüpunkt zugeordnet sein soll.', // title
+			); ?>
+		</div>
 		<div class="clear"></div>
 		<div style="text-align: -webkit-center">
 			<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">

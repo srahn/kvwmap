@@ -56,7 +56,7 @@ function buildwktmultipointfromsvgpath(svgpath){
 		showAlert('Fehler bei der Eingabe:\n'.$this->Meldung);
 	}
 ?>
-<table style="border-bottom: 1px solid grey; border-collapse: separate; width: 100%" border="0" cellpadding="0" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
+<table id="MultipointEditor" style="border-bottom: 1px solid grey; border-collapse: separate; width: 100%" border="0" cellpadding="0" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td>
 			<table cellspacing="0" cellpadding="0">

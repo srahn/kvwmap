@@ -1,4 +1,5 @@
 <?
+global $layer_status;
 if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == '') {
 	if (!$this->user->rolle->visually_impaired) { ?>
 		<thead class="gle"><?
@@ -16,6 +17,9 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 								name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['layer_id']; ?>"
 								onchange="count_selected(<? echo $layer['layer_id']; ?>);"
 							>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
+							if (($layer['status']) != '') {
+								echo '<a class="' . $layer['status'] . '" title="' . $layer_status[$layer['status']] . '"><span></span></a>';
+							}
 							if (value_of($layer['shape'][$k], value_of($layer['attributes'], 'Editiersperre')) == 't') { ?>
 								<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">
 									<i class="fa fa-pencil fa-stack-1x" style="font-size:15px"></i>

@@ -1,5 +1,6 @@
 <?php
 include_once(CLASSPATH . 'PgObject.php');
+include_once(CLASSPATH . 'PgAttribute.php');
 include_once(CLASSPATH . 'Layer.php');
 class LayerGroup extends PgObject {
 
@@ -24,6 +25,18 @@ class LayerGroup extends PgObject {
 				'attribute' => 'gruppenname',
 				'condition' => 'not_null',
 				'description' => 'Es muss ein Gruppenname angegeben werden.',
+				'options' => null
+			),
+			array(
+				'attribute' => 'selectable_for_shared_layers',
+				'condition' => 'not_null',
+				'description' => 'Es muss angegeben werden ob die Layergruppe für das Teilen von importierten Layern ausgewählt werden darf.',
+				'options' => null
+			),
+			array(
+				'attribute' => 'checkbox',
+				'condition' => 'not_null',
+				'description' => 'Es muss angegeben werden ob die Layergruppe in der Legende eine Checkbox zum Ein- und Ausschalten von Untergruppen haben soll.',
 				'options' => null
 			)
 		);
@@ -62,15 +75,6 @@ class LayerGroup extends PgObject {
 			'from' => "kvwmap.u_groups",
 			'where' => "obergruppe = " . $obergruppe
 		))[0])->get('max_order') + 100;
-	}
-
-	function get_aktiv_status($stelle_id, $user_id, $group_id) {
-		$result = $this->find_by_sql(array(
-			'select' => "CASE WHEN sum(CASE WHEN r2l.aktivStatus = '1' THEN 1 ELSE 0 END) = 0 THEN 0 WHEN count(l.layer_id) > sum(CASE WHEN r2l.aktivStatus = '1' THEN 1 ELSE 0 END) THEN 1 ELSE 2 END AS aktiv_status",
-			'from' => "kvwmap.u_rolle2used_layer r2l JOIN kvwmap.layer l ON r2l.layer_id = l.layer_id",
-			'where' => "r2l.stelle_id = $stelle_id AND r2l.user_id = $user_id AND l.gruppe = $group_id"
-		));
-		return $result[0]->get('aktiv_status');
 	}
 
 	public static function find_top_parents($gui, $stelle_id) {

@@ -1755,6 +1755,7 @@ CREATE TABLE kvwmap.stelle (
     ows_distributionorganization character varying(150) DEFAULT NULL::character varying,
     ows_distributionemailaddress character varying(100) DEFAULT NULL::character varying,
     ows_fees character varying(255) DEFAULT NULL::character varying,
+    ows_inspireidentifiziert boolean default false,      
     ows_srs character varying(255) DEFAULT NULL::character varying,
     protected boolean DEFAULT false NOT NULL,
     check_client_ip boolean DEFAULT false NOT NULL,
@@ -3847,7 +3848,7 @@ INSERT INTO kvwmap.rolle VALUES (1, 1, 1402, 820, 1, 27837.492, 5.8321865e+06, 4
 -- Data for Name: stelle; Type: TABLE DATA; Schema: kvwmap; Owner: -
 --
 
-INSERT INTO kvwmap.stelle VALUES (1, 'Administration', NULL, NULL, NULL, NULL, NULL, NULL, -174807, 5.230803e+06, 537558, 6.170173e+06, 8, 25833, 10, true, 30, 'Logo_GDI-Service_200x47.png', '', NULL, 'gdi', 'kvwmap-Demo Server', 'keine', 'Demoversion eines Web Service zur Bereitstellung von Geodaten aus den Bereichen des Katasters, der Landkreise', 'Peter Korduan', 'GDI-Service Rostock', NULL, NULL, NULL, 'peter.korduan@gdi-service.de', 'Geschäftsführer', '+49 381 403 44444', '+49 381 3378 9527', 'Friedrichstraße 16', '18057', 'Rostock', 'Mecklenburg-Vorpommern', '21', '22', '33', NULL, '34', '35', '36', '37', '38', '39', '3.10', '24', '25', '26', '27', '28', '29', '2.10', '2.11', '23', '31', '32', 'für Testzwecke frei', 'EPSG:25832 EPSG:25833 EPSG:4326 EPSG:2398', false, false, true, 6, true, false, '', NULL, NULL, false, '1.0.0', '', '', 'Test 2');
+INSERT INTO kvwmap.stelle VALUES (1, 'Administration', NULL, NULL, NULL, NULL, NULL, NULL, -174807, 5.230803e+06, 537558, 6.170173e+06, 8, 25833, 10, true, 30, 'Logo_GDI-Service_200x47.png', '', NULL, 'gdi', 'kvwmap-Demo Server', 'keine', 'Demoversion eines Web Service zur Bereitstellung von Geodaten aus den Bereichen des Katasters, der Landkreise', 'Peter Korduan', 'GDI-Service Rostock', NULL, NULL, NULL, 'peter.korduan@gdi-service.de', 'Geschäftsführer', '+49 381 403 44444', '+49 381 3378 9527', 'Friedrichstraße 16', '18057', 'Rostock', 'Mecklenburg-Vorpommern', '21', '22', '33', NULL, '34', '35', '36', '37', '38', '39', '3.10', '24', '25', '26', '27', '28', '29', '2.10', '2.11', '23', '31', '32', 'für Testzwecke frei', false, 'EPSG:25832 EPSG:25833 EPSG:4326 EPSG:2398', false, false, true, 6, true, false, '', NULL, NULL, false, '1.0.0', '', '', 'Test 2');
 
 
 --
