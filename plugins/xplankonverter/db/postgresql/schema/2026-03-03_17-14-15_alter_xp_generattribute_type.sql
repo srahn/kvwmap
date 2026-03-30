@@ -56,86 +56,87 @@ BEGIN;
   END;
   $$;
 
-  --SELECT hatgenerattribut, xplankonverter.to_xp_generattribut_erweitert(hatgenerattribut) FROM xplan_gml.bp_plan WHERE hatgenerattribut IS NOT NULL;
-  
   DO $$
   BEGIN
     IF NOT EXISTS (
-      SELECT 1
-      FROM information_schema.columns
-      WHERE table_schema = 'xplan_gml'
-        AND table_name = 'xp_plan'
-        AND column_name = 'hatgenerattribut'
-        AND udt_name = '_xp_generattribut_erweitert'
+      SELECT 1 WHERE false
     ) THEN
-      DROP VIEW xplan_gml.bp_plan_v;
+      DROP VIEW IF EXISTS xplan_gml.bp_plan_v;
 
       ALTER TABLE xplan_gml.xp_plan ALTER COLUMN hatgenerattribut TYPE xplan_gml.xp_generattribut_erweitert[] USING xplankonverter.to_xp_generattribut_erweitert(hatgenerattribut);
 
-      CREATE OR REPLACE VIEW xplan_gml.bp_plan_v
-      AS SELECT bp_plan.gml_id,
-        bp_plan.name,
-        bp_plan.nummer,
-        bp_plan.internalid,
-        bp_plan.beschreibung,
-        bp_plan.kommentar,
-        bp_plan.technherstelldatum,
-        bp_plan.genehmigungsdatum,
-        bp_plan.untergangsdatum,
-        bp_plan.aendert,
-        bp_plan.wurdegeaendertvon,
-        bp_plan.erstellungsmassstab,
-        bp_plan.bezugshoehe,
-        bp_plan.raeumlichergeltungsbereich,
-        bp_plan.verfahrensmerkmale,
-        bp_plan.hatgenerattribut,
-        bp_plan.user_id,
-        bp_plan.created_at,
-        bp_plan.updated_at,
-        bp_plan.konvertierung_id,
-        bp_plan.texte,
-        bp_plan.begruendungstexte,
-        bp_plan.externereferenz,
-        bp_plan.inverszu_verbundenerplan_xp_verbundenerplan,
-        bp_plan.technischerplanersteller,
-        bp_plan.veraenderungssperredatum,
-        bp_plan.gemeinde,
-        bp_plan.verfahren,
-        bp_plan.inkrafttretensdatum,
-        bp_plan.durchfuehrungsvertrag,
-        bp_plan.staedtebaulichervertrag,
-        bp_plan.rechtsverordnungsdatum,
-        bp_plan.rechtsstand,
-        bp_plan.hoehenbezug,
-        bp_plan.aufstellungsbeschlussdatum,
-        bp_plan.ausfertigungsdatum,
-        bp_plan.satzungsbeschlussdatum,
-        bp_plan.veraenderungssperre,
-        bp_plan.auslegungsenddatum,
-        bp_plan.sonstplanart,
-        bp_plan.gruenordnungsplan,
-        bp_plan.plangeber,
-        bp_plan.auslegungsstartdatum,
-        bp_plan.traegerbeteiligungsstartdatum,
-        bp_plan.aenderungenbisdatum,
-        bp_plan.status,
-        bp_plan.traegerbeteiligungsenddatum,
-        bp_plan.planart,
-        bp_plan.erschliessungsvertrag,
-        bp_plan.bereich,
-        bp_plan.versionbaunvodatum,
-        bp_plan.versionbaunvotext,
-        bp_plan.versionbaugbdatum,
-        bp_plan.versionbaugbtext,
-        bp_plan.versionsonstrechtsgrundlagedatum,
-        bp_plan.versionsonstrechtsgrundlagetext,
-        bp_plan.planaufstellendegemeinde,
-        bp_plan.veraenderungssperrebeschlussdatum,
-        bp_plan.veraenderungssperreenddatum,
-        bp_plan.verlaengerungveraenderungssperre,
-        bp_plan.zusammenzeichnung,
-        xplan_gml.alle_verbundenen_plaene(bp_plan.gml_id) AS alle_verbundenen_plaene
-      FROM xplan_gml.bp_plan;
+      IF EXISTS (
+        SELECT 1
+        FROM information_schema.tables
+        WHERE 
+          table_schema = 'xplan_gml' AND
+          table_name = 'alle_verbundenen_plaene'
+      ) THEN
+        CREATE OR REPLACE VIEW xplan_gml.bp_plan_v
+        AS SELECT bp_plan.gml_id,
+          bp_plan.name,
+          bp_plan.nummer,
+          bp_plan.internalid,
+          bp_plan.beschreibung,
+          bp_plan.kommentar,
+          bp_plan.technherstelldatum,
+          bp_plan.genehmigungsdatum,
+          bp_plan.untergangsdatum,
+          bp_plan.aendert,
+          bp_plan.wurdegeaendertvon,
+          bp_plan.erstellungsmassstab,
+          bp_plan.bezugshoehe,
+          bp_plan.raeumlichergeltungsbereich,
+          bp_plan.verfahrensmerkmale,
+          bp_plan.hatgenerattribut,
+          bp_plan.user_id,
+          bp_plan.created_at,
+          bp_plan.updated_at,
+          bp_plan.konvertierung_id,
+          bp_plan.texte,
+          bp_plan.begruendungstexte,
+          bp_plan.externereferenz,
+          bp_plan.inverszu_verbundenerplan_xp_verbundenerplan,
+          bp_plan.technischerplanersteller,
+          bp_plan.veraenderungssperredatum,
+          bp_plan.gemeinde,
+          bp_plan.verfahren,
+          bp_plan.inkrafttretensdatum,
+          bp_plan.durchfuehrungsvertrag,
+          bp_plan.staedtebaulichervertrag,
+          bp_plan.rechtsverordnungsdatum,
+          bp_plan.rechtsstand,
+          bp_plan.hoehenbezug,
+          bp_plan.aufstellungsbeschlussdatum,
+          bp_plan.ausfertigungsdatum,
+          bp_plan.satzungsbeschlussdatum,
+          bp_plan.veraenderungssperre,
+          bp_plan.auslegungsenddatum,
+          bp_plan.sonstplanart,
+          bp_plan.gruenordnungsplan,
+          bp_plan.plangeber,
+          bp_plan.auslegungsstartdatum,
+          bp_plan.traegerbeteiligungsstartdatum,
+          bp_plan.aenderungenbisdatum,
+          bp_plan.status,
+          bp_plan.traegerbeteiligungsenddatum,
+          bp_plan.planart,
+          bp_plan.erschliessungsvertrag,
+          bp_plan.bereich,
+          bp_plan.versionbaunvodatum,
+          bp_plan.versionbaunvotext,
+          bp_plan.versionbaugbdatum,
+          bp_plan.versionbaugbtext,
+          bp_plan.versionsonstrechtsgrundlagedatum,
+          bp_plan.versionsonstrechtsgrundlagetext,
+          bp_plan.planaufstellendegemeinde,
+          bp_plan.veraenderungssperrebeschlussdatum,
+          bp_plan.veraenderungssperreenddatum,
+          bp_plan.verlaengerungveraenderungssperre,
+          bp_plan.zusammenzeichnung,
+          xplan_gml.alle_verbundenen_plaene(bp_plan.gml_id) AS alle_verbundenen_plaene
+        FROM xplan_gml.bp_plan;
+      END IF;
     END IF;
   END
   $$;
