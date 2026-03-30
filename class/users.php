@@ -1522,10 +1522,10 @@ class user {
 		}
 		$sql = "
 			SELECT setval(
-				'user_id_seq',
+				'kvwmap.user_id_seq',
 				GREATEST(
 					(SELECT MAX(id) FROM kvwmap.user),
-					(SELECT last_value FROM user_id_seq)
+					(SELECT last_value FROM kvwmap.user_id_seq)
 				)
 			);
 			INSERT INTO kvwmap.user (" . implode(', ', array_keys($columns)) . ")
