@@ -2159,6 +2159,7 @@ class stelle {
 				l.name,
 				l.gruppe,
 				l.document_path,
+				l.maintable,
 				ul.use_parent_privileges,
 				ul.privileg,
 				ul.export_privileg,
