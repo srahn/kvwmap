@@ -2715,10 +2715,11 @@ function before_last($txt, $delimiter) {
  * @return Array (geom, inner select, using)
  */
 function getDataParts($data){
+	$data = str_ireplace(chr(10).'using', ' using', $data);
 	$first_space_pos = strpos($data, ' ');
 	$geom = substr($data, 0, $first_space_pos);					# geom am Anfang
 	$rest = substr($data, $first_space_pos);
-	$usingposition = stripos($rest, 'using');
+	$usingposition = stripos($rest, ' using');
 	$from = substr($rest, 0, $usingposition);						# from (alles zwischen geom und using)
 	$using = substr($rest, $usingposition);							# using ...
 	if(strpos($from, '(') === false){		# from table
