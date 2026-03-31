@@ -20921,7 +20921,7 @@ DO $$
 		# due to spaces in string concatenations with these attributes
 		$formvars['maintable'] = trim($formvars['maintable']);
 		$formvars['schema'] = trim($formvars['schema']);
-		foreach (array('pfad', 'data', 'metalink', 'terms_of_use_link', 'duplicate_criterion', 'comment') AS $var_name) {
+		foreach (array('pfad', 'data', 'metalink', 'terms_of_use_link', 'duplicate_criterion', 'comment', 'kurzbeschreibung') AS $var_name) {
 			$formvars[$var_name] = pg_escape_string($formvars[$var_name]);
 		}
 		if ($formvars['id'] == '') {
