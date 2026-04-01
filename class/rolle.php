@@ -1300,7 +1300,7 @@ class rolle {
 				l.query as pfad,
 				1 as queryable,
 				gle_view,
-				'(' || rollenfilter || ')' as filter
+				'(' || nullif(rollenfilter, '') || ')' as filter
 			FROM
 				kvwmap.rollenlayer AS l
 			WHERE
