@@ -3073,7 +3073,7 @@ class db_mapObj {
 					$rs['layer_id']
 				)
 			);
-			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data') AS $key) {
+			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data', 'wms_name') AS $key) {
 				$rs[$key] = replace_params_rolle(
 					$rs[$key],
 					['duplicate_criterion' => $rs['duplicate_criterion']]
