@@ -11292,7 +11292,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 					if ($ret['success']) {
 						if ($ret['msg'] != '') {
-							$this->add_message('info', $ret['msg']);
+							$this->add_message($ret['type'] ?: 'info', $ret['msg']);
 						}
 						$result = pg_fetch_row($ret['query']);
 						if (pg_affected_rows($ret['query']) > 0) {
@@ -16977,7 +16977,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           } break;
 
           default : { # alle anderen Layertypen
-            $this->add_message('waring', 'Die Sachdatenabfrage für den connectiontype: ' . $layerset[$i]['connectiontype'] . ' wird nicht unterstützt.');
+            $this->add_message('warning', 'Die Sachdatenabfrage für den connectiontype: ' . $layerset[$i]['connectiontype'] . ' wird nicht unterstützt.');
 						$this->loadMap('DataBase');
 						$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 						$this->saveMap('');
