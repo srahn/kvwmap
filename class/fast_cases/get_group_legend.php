@@ -2319,7 +2319,7 @@ class stelle {
 		$this->check_client_ip = $rs['check_client_ip'];
 		$this->checkPasswordAge = $rs['check_password_age'];
 		$this->allowedPasswordAge = $rs['allowed_password_age'];
-		$this->useLayerAliases = $rs['use_layer_aliases'];
+		$this->useLayerAliases = ($rs['use_layer_aliases'] == 't');
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];

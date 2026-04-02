@@ -481,6 +481,7 @@ class stelle {
 		$rs['totp_authentication'] = ($rs['totp_authentication'] == 't');
 		$rs['check_password_age'] = ($rs['check_password_age'] == 't');
 		$rs['show_shared_layers'] = ($rs['show_shared_layers'] == 't');
+		$rs['use_layer_aliases'] = ($rs['use_layer_aliases'] == 't');
 		$this->data = $rs;
 		return $rs;
 	}
