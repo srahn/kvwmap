@@ -1403,7 +1403,7 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
-	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false, $ignore_group_checkboxes = false) {
+	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
 		$this->layerset = $this->getLayer('');
 		if (!$ignore_rollenlayer AND $rollenlayer = $this->getRollenLayer('', NULL)) {
 			$this->layerset['layer_ids'] = $this->layerset['layer_ids'] + $rollenlayer['layer_ids'];
@@ -1445,43 +1445,41 @@ class rolle {
 				}
 			}
 		}
-		if (!$ignore_group_checkboxes) {
-			foreach ($formvars['group_checkbox'] as $group_id => $aktiv_status) {
-				$sql = "
-					UPDATE
-						kvwmap.u_rolle2used_layer
-					SET
-						aktivstatus = " . $aktiv_status . "
-						" . ($aktiv_status == 0 ? ',querystatus = 0' : '') . "
-					WHERE
-						user_id = " . $this->user_id . " AND
-						stelle_id = " . $this->stelle_id . " AND
-						layer_id IN (
-							WITH RECURSIVE cte (group_id) AS (
-								SELECT 
-									" .  $group_id . "
-								UNION ALL
-								SELECT 
-									u_groups.id
-								FROM 
-									cte,
-									kvwmap.u_groups
-								WHERE 
-									cte.group_id = u_groups.obergruppe AND 
-									obergruppe IS NOT NULL
-							)
-							SELECT DISTINCT 
-								layer.layer_id
+		foreach ($formvars['group_checkbox'] as $group_id => $aktiv_status) {
+			$sql = "
+				UPDATE
+					kvwmap.u_rolle2used_layer
+				SET
+					aktivstatus = " . $aktiv_status . "
+					" . ($aktiv_status == 0 ? ',querystatus = 0' : '') . "
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					layer_id IN (
+						WITH RECURSIVE cte (group_id) AS (
+							SELECT 
+								" .  $group_id . "
+							UNION ALL
+							SELECT 
+								u_groups.id
 							FROM 
 								cte,
-								kvwmap.layer
-							WHERE
-								gruppe = cte.group_id
+								kvwmap.u_groups
+							WHERE 
+								cte.group_id = u_groups.obergruppe AND 
+								obergruppe IS NOT NULL
 						)
-				";
-				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
-			}
+						SELECT DISTINCT 
+							layer.layer_id
+						FROM 
+							cte,
+							kvwmap.layer
+						WHERE
+							gruppe = cte.group_id
+					)
+			";
+			$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 		foreach ($formvars['class'] as $class_id => $class_status) {
 			if ($class_status == '0' OR $class_status == '2'){
