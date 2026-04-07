@@ -15357,7 +15357,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Wenn ein Button im Kartenfenster gewählt wurde,
     # werden auch die Einstellungen aus der Legende übernommen
-    $this->user->rolle->setAktivLayer($this->formvars, $this->Stelle->id, $this->user->id, false, true);
+    $this->user->rolle->setAktivLayer($this->formvars, $this->Stelle->id, $this->user->id, false);
     $this->user->rolle->setQueryStatus($this->formvars);
 	}
 

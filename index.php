@@ -300,6 +300,10 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
+			case 'save_legend_role_parameters' : {
+				$GUI->save_legend_role_parameters($GUI->formvars);
+			} break;
+
 			case 'get_route' : {
 				$GUI->getRoute($GUI->formvars);
 			} break;
@@ -862,9 +866,6 @@ function go_switch($go, $exit = false) {
 			case 'Sachdaten' : {
 				if ($GUI->formvars['CMD'] != '') {
 					$GUI->user->rolle->set_selected_button($GUI->formvars['CMD']);
-				}
-				if ($GUI->formvars['legendtouched']) {
-					$GUI->save_legend_role_parameters();
 				}
 				$GUI->queryMap();
 			}break;
