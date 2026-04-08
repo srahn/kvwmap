@@ -2177,16 +2177,6 @@ function go_switch($go, $exit = false) {
 				$GUI->queryMap();
 			} break;
 
-			case "neu Laden" : {
-				$GUI->neuLaden();
-				// $GUI->saveMap('');
-				// $currenttime=date('Y-m-d H:i:s',time());
-				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				// $GUI->drawMap();
-				$GUI->legende = $GUI->create_dynamic_legend();
-				$GUI->output();
-			} break;
-
 			case "zoom_to_max_layer_extent" : {
 				$GUI->loadMap('DataBase');
 				$GUI->zoom_to_max_layer_extent($GUI->formvars['layer_id']);
