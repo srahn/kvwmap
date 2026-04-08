@@ -37,19 +37,20 @@ else
     subject=`cat $file | jq -r '.subject'`
     message=`cat $file | jq -r '.message'`
     # return empty if null value in json
+		cc_email=`cat $file | jq -r '.cc_email // empty'`
     attachment=`cat $file | jq -r '.attachment // empty'`
 
     #tls=auto will only use tls if available
     if [[ -z $attachment ]]; then
       #echo Ohne Attachement sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -u ${subject} -m ${message}
-      sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -u "${subject}" -m "${message}" > $logfile 2>&1
-      echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=utf8 -u \"${subject}\" -m \"${message}\"" >> $job_log_file
+      sendEmail -v -t $to_email -f $from_email -cc $cc_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -u "${subject}" -m "${message}" > $logfile 2>&1
+      echo "sendEmail -v -t $to_email -f $from_email -cc $cc_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=utf8 -u \"${subject}\" -m \"${message}\"" >> $job_log_file
       #sendEmail -v -t 'peter.korduan@gdi-service.de' -f 'info@gdi-service.de' -s smtp.ionos.de:587 -o tls=yes -xu 'peter.korduan@gdi-backup.de' -xp '*****' -o message-charset=utf8 -u "Testkvwmap" -m "TestMessage"
     else
       #echo Mit attachement sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -u ${subject} -m ${message} -a $attachment
       #sendEmail -v -t $to_email -f $from_email -s ${smtp} -o tls=yes  -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -u "TestPlandigital" -m "Testcontent" -a $attachment > /dev/null 2>&1
-      sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -u "${subject}" -m "${message}" -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -a $attachment > $logfile 2>&1
-      echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=utf8 -u \"${subject}\" -m \"${message}\" -a $attachment" >> $job_log_file
+      sendEmail -v -t $to_email -f $from_email -cc $cc_email -s ${smtp_server}:${smtp_port} -o tls=auto -u "${subject}" -m "${message}" -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -a $attachment > $logfile 2>&1
+      echo "sendEmail -v -t $to_email -f $from_email -cc $cc_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=utf8 -u \"${subject}\" -m \"${message}\" -a $attachment" >> $job_log_file
 
       if [[ -z $mail_copy_attachment ]]; then
           mv $attachment $mail_archiv_path

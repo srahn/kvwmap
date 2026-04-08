@@ -3074,7 +3074,8 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		else {
 			$cc_emails_multiple = explode(',', XPLANKONVERTER_CC_EMAILS);
 			$cc_emails_multiple[] = 'peter.korduan@gdi-service.de';
-			$cc_email = implode(',',$cc_emails_multiple);
+			// implode with space for sendMail sh
+			$cc_email = implode(' ',$cc_emails_multiple);
 		}
 		$reply_email = null;
 		$subject = 'Update in Plandigital';
