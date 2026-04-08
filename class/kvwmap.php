@@ -15302,20 +15302,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	function neuLaden() {
-		$this->sanitize([
-			'selected_rollenlayer_id' => 'int',
-			'delete_rollenlayer_type' => 'text'
-		]);
 		$this->save_legend_role_parameters();
 		if (
 			in_array(value_of($this->formvars, 'last_button'), array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery'))
 		) {
 			// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
 			$this->user->rolle->set_selected_button($this->formvars['last_button']);
-		}
-		if (value_of($this->formvars, 'delete_rollenlayer') != '') {
-			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
 		}
 		# Karteninformationen lesen
 		$this->loadMap('DataBase', array(), ($this->formvars['strict_layer_name'] ? true : false));
@@ -18258,10 +18250,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$mapDB->deleteRollenlayer($this->formvars['id'], $this->formvars['delete_rollenlayer_type']);
 		$this->loadMap('DataBase');
-		// $currenttime=date('Y-m-d H:i:s',time());
-		// $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-		// $this->saveMap('');
-		// $this->drawMap();
 		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
