@@ -869,10 +869,6 @@ class GUI {
   function neuLaden() {
 		$this->save_legend_role_parameters();
 		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->set_selected_button($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
-		if($this->formvars['delete_rollenlayer'] != ''){
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
-		}
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs

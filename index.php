@@ -2336,6 +2336,12 @@ function go_switch($go, $exit = false) {
 				readfile(LOGPATH . 'background_jobs_log.htm');
 			} break;
 
+			case "neu Laden" : {
+				$GUI->neuLaden();
+				$GUI->legende = $GUI->create_dynamic_legend();
+				$GUI->output();
+			} break;
+
 			default : {
 				# Karteninformationen lesen
 				$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
