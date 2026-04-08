@@ -17598,7 +17598,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){
 					$rand = $this->map_scaledenom/1000;
 					$tolerance = $this->map_scaledenom/10000;
-					if($client_epsg == 4326){
+					if(in_array($layer_epsg, [4326, 4258])){
 						$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
 						$rand = $rand / 60000;		# wegen der Einheit Grad
 					}
