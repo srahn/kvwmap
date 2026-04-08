@@ -58,7 +58,7 @@ function go_switch_mobile($go) {
 			$GUI->formvars['export_format'] = 'GeoJSONPlus';
 			$GUI->formvars['all'] = 1;
 			$GUI->formvars['epsg'] = 4326;
-			$GUI->formvars['sql_' . $GUI->formvars['selected_layer_id']] = 'WHERE (version IS NULL OR version <= ' . $GUI->formvars['last_delta_version'] . ')';
+			$GUI->formvars['sql_' . $GUI->formvars['selected_layer_id']] = 'WHERE (version IS NULL OR version <= ' . $GUI->formvars['last_delta_version'] . ') as query';
 			$GUI->daten_export_exportieren();
 		}
 		break;

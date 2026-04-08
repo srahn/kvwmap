@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/srahn/kvwmap/refs/heads/dev/schemas/responses/login.json",
+  "title": "login response",
+  "description": "Schema of json object returned as response when login in kvwmap.",
+  "type": "object",
+  "example": {
+    "success": false,
+    "error": "authentification"
+  },
+  "properties": {
+    "success": {
+      "description": "Indicate if the login has been completed successfull.",
+      "type": "boolean"
+    },
+    "error": {
+      "description": "The type of error that occured when login.",
+      "anyOf": [
+        {
+          "const": "authentification",
+          "desctiption" : "Es trat ein Fehler bei der Authentifizierung auf."
+        },
+        {
+          "const": "not_yet_started",
+          "desctiption" : "Der Zeitraum in dem der Login gültig ist hat noch nicht begonnen."
+        },
+        {
+          "const": "expired",
+          "desctiption" : "Der Zeitraum in dem der Login gültig ist ist beendet."
+        }
+      ]
+    },
+    "display": {
+      "description": "An expression that define what to display in the formular. It is a string expression in sql that will be executed on the parent layer table and it can contain attribute variables from the layer that have that SubformFK attribute.",
+      "type": "String"
+    }
+  },
+  "required": [ "success" ]
+}
