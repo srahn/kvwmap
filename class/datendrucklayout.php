@@ -960,7 +960,7 @@ class ddl extends drucklayout{
 		if($border){
 			$text = '<box>'.$text.'</box>';
 		}
-		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
+		$ret = $this->pdf->ezText($text, $fontsize, $options);
 		$lines = explode(chr(10), $text);
 		foreach($lines as $line){
 			$maxx = $this->pdf->getTextWidth($fontsize, $line);
