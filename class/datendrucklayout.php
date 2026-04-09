@@ -64,7 +64,7 @@ class ddl extends drucklayout{
 		$this->remaining_freetexts = array();
 		$this->remaining_rectangles = array();
 		$this->remaining_lines = array();
-		$this->debug_output = false;
+		$this->debug_output = true;
   }
   
   function add_static_elements($offsetx){
@@ -74,15 +74,15 @@ class ddl extends drucklayout{
     	$this->pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->layout['bgsrc']),$this->layout['bgposx']+$offsetx,$this->layout['bgposy']-$offsety,$this->layout['bgwidth']);
 		}
     # Datum
-    if($this->layout['datesize']){
+    if($this->layout['datesize'] AND $this->layout['font_date']){
     	$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['font_date']);
 			$x = $this->layout['dateposx'];
 			$y = $this->layout['dateposy'] - $offsety;
 			$this->putText(date("d.m.Y"), $this->layout['datesize'], NULL, $x, $y, $offsetx);
     }
     # Nutzer
-    if($this->layout['usersize']){
-    	$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['font_user']);			
+    if($this->layout['usersize'] AND $this->layout['font_user']){
+			echo WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['font_user'];
 			$x = $this->layout['userposx'];
 			$y = $this->layout['userposy'] - $offsety;
 			$this->putText('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name, $this->layout['usersize'], NULL, $x, $y, $offsetx);
