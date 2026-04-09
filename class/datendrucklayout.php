@@ -64,7 +64,7 @@ class ddl extends drucklayout{
 		$this->remaining_freetexts = array();
 		$this->remaining_rectangles = array();
 		$this->remaining_lines = array();
-		$this->debug_output = true;
+		$this->debug_output = false;
   }
   
   function add_static_elements($offsetx){
