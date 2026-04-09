@@ -75,14 +75,14 @@ class ddl extends drucklayout{
 		}
     # Datum
     if($this->layout['datesize'] AND $this->layout['font_date']){
-    	$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['font_date']);
+    	$this->pdf->selectFont($this->layout['font_date']);
 			$x = $this->layout['dateposx'];
 			$y = $this->layout['dateposy'] - $offsety;
 			$this->putText(date("d.m.Y"), $this->layout['datesize'], NULL, $x, $y, $offsetx);
     }
     # Nutzer
     if($this->layout['usersize'] AND $this->layout['font_user']){
-			echo WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['font_user'];
+			echo $this->layout['font_user'];
 			$x = $this->layout['userposx'];
 			$y = $this->layout['userposy'] - $offsety;
 			$this->putText('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name, $this->layout['usersize'], NULL, $x, $y, $offsetx);
@@ -114,7 +114,7 @@ class ddl extends drucklayout{
 						#$this->i_on_page = 0;		# evtl. nicht 0 setzen, sondern ein eigenes i_on_page für jede Seite machen
 						#$this->page_overflow = false;		# muss auskommentiert bleiben, da sonst Fehler in EN-Liste1
 					}
-					$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['texts'][$j]['font']);								
+					$this->pdf->selectFont($this->layout['texts'][$j]['font']);								
 					$x = $this->layout['texts'][$j]['posx'];
 					$y = $this->layout['texts'][$j]['posy'];
 					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
@@ -538,7 +538,7 @@ class ddl extends drucklayout{
 								# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 								$this->pdf->reopenObject($this->record_startpage);
 							}
-							$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['elements'][$attributes['name'][$j]]['font']);
+							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
 							if (
 								$this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR
 								$attributes['form_element_type'][$j] == 'Dokument'
@@ -1454,7 +1454,7 @@ class ddl extends drucklayout{
 					$text['offset_attribute'] = $attributes['name'][$last_attribute_index];
 					$text['font'] = 'Helvetica-Bold.afm';
 					$text['size'] = $fontsize;
-					$this->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$text['font']);
+					$this->pdf->selectFont($text['font']);
 					$group_text_width = $this->pdf->getTextWidth($fontsize, $text['text']);
 					if($group_text_width > ($maxx - $formvars['margin_left'] - $formvars['margin_right'] - 7)){
 						$gap = $gap + 15;
@@ -1480,7 +1480,7 @@ class ddl extends drucklayout{
 				$text['offset_attribute'] = $attributes['name'][$last_attribute_index];
 				$text['font'] = 'Helvetica-Bold.afm';
 				$text['size'] = $fontsize;
-				$this->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$text['font']);
+				$this->pdf->selectFont($text['font']);
 				$attributename_text_width = $this->pdf->getTextWidth($fontsize, $text['text']);
 				if($attributename_text_width > 130){
 					$attribute_offset_x = $attributename_text_width - 120;		# Attributname zu lang -> Offset für das Attribut

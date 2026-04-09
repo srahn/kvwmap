@@ -8,6 +8,9 @@
 	else {
 		$explosion = explode(' ', $ausgabe[0]);
 		$branch = array_pop($explosion);
+		if (!in_array($branch, $branches)) {
+			$branches[] = $branch;
+		}
 		$branch_select = FormObject::createSelectField(
 			'branch',
 			$branches,

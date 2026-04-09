@@ -245,16 +245,15 @@ class antrag {
 			$pdf->addText(395,10,6, $footer);
 			$pdf->addText(765,$row+10,8, date('d.m.Y',time()));
 			$pdf->addText(30,$row-=12,10,'<b>Anlage der Vermessungsvorbereitung zu Auftragsnummer ' . $this->antragsliste[0]['antr_nr'] . '</b>');
-			$pdf->addText(30,$row-=25,10,utf8_decode('Liste der ausgegebenen Unterlagen'));
+			$pdf->addText(30,$row-=25,10,'Liste der ausgegebenen Unterlagen');
 			if (defined('ZUSATZ_UEBERGABEPROTOKOLL') AND ZUSATZ_UEBERGABEPROTOKOLL != '') {
-				$pdf->addText(30,$row-=16,9,utf8_decode(ZUSATZ_UEBERGABEPROTOKOLL));
+				$pdf->addText(30,$row-=16,9,ZUSATZ_UEBERGABEPROTOKOLL);
 			}
 		}
 	}
 
   function erzeugenUbergabeprotokoll_PDF(){
     $pdf=new Cezpdf('A4', 'landscape');
-    $tmp = array('b'=>'Helvetica-Bold.afm','i'=>'Helvetica-Oblique.afm','bi'=>'Helvetica-BoldOblique.afm');
 		$pageheight = 595;
 		$margin = 57;
     $row = $pageheight - $margin;
@@ -263,7 +262,7 @@ class antrag {
     $rowGap=3;
     $colGap=3;
 		$pdf->ezSetMargins($table_margin,30,30,40);
-    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Helvetica.afm',$tmp);		
+    $pdf->selectFont('Helvetica.afm');
             
     $cols='';
     $title='';
@@ -276,7 +275,7 @@ class antrag {
 		}		
 		#$options['cols']['FFR']=$options['cols']['KVZ']=$options['cols']['GN']=$options['cols']['FPN']=$options['cols']['KRT']=$options['cols']['PL']=$options['cols']['ERG']=array('justification'=>'center');
 		$options['cols']['Datei']=array('width'=>210);
-		$options['cols'][utf8_decode('Gültigkeit')]=array('width'=>62);
+		$options['cols']['Gültigkeit']=array('width'=>62);
 		$pdf->ezSetY($table_row);
 		$pdf->ezTable($this->FFR,$cols,$title,$options);
 		
@@ -370,8 +369,8 @@ class antrag {
 		#echo $sql;
 		$ret=$this->database->execSQL($sql,4, 0); 
     while($rs=pg_fetch_assoc($ret[1])){
-			$rs['stammnr'] = utf8_decode($rs['stammnr']);
-			$rs['rissnummer'] = utf8_decode($rs['rissnummer']);		
+			$rs['stammnr'] = $rs['stammnr'];
+			$rs['rissnummer'] = $rs['rissnummer'];		
 			$rs['anteil_abs'] = str_replace('.', ',', $rs['anteil_abs']);
 			$rs['anteil_pro'] = str_replace('.', ',', $rs['anteil_pro']);
 			$intersections[] = $rs;
@@ -460,14 +459,14 @@ class antrag {
       if($formvars['gemessendurch']){
 	      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['gemessen durch']=utf8_decode($ret[1]);
+	      $FFR[$i]['gemessen durch']=$ret[1];
       }
             
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
 	  if($formvars['Gueltigkeit']){
 		$ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $formvars['lea_id']);
 		if ($ret[0]) { return $ret; }
-		$FFR[$i][utf8_decode('Gültigkeit')]=utf8_decode($ret[1]); 
+		$FFR[$i]['Gültigkeit']=$ret[1]; 
 	  }
       $i++;
     }
@@ -508,7 +507,7 @@ class antrag {
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       while($rs=pg_fetch_array($ret[1])) {
-        $notPrimary[] = utf8_decode($rs[$not_primary]);
+        $notPrimary[] = $rs[$not_primary];
       }
 			if(count(array_unique($notPrimary)) == 1)$ret[1] = $notPrimary[0];
       else $ret[1] = implode(chr(10), $notPrimary);
