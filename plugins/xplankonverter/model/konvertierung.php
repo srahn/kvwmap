@@ -2856,10 +2856,8 @@ class Konvertierung extends PgObject {
 		# Inserts all existing Textabschnitte if they exist (no regel as potential link to plan)
 		$textabschnitte = array("bp_textabschnitt", "fp_textabschnitt", "so_textabschnitt", "rp_textabschnitt", "lp_textabschnitt");
 		foreach ($textabschnitte as $textabschnitt) {
-			if (strpos($textabschnitt, $this->plan->planartAbk) !== false) {
-				if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
-					$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
-				}
+			if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
+				$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
 			}
 		}
 		return array(
