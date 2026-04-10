@@ -287,6 +287,13 @@ class kdl extends drucklayout{
       if($formvars['watermarksize'] != ''){$columns['watermarksize'] = $formvars['watermarksize'];}
       if($formvars['watermarkangle'] != ''){$columns['watermarkangle'] = $formvars['watermarkangle'];}
       if($formvars['watermarktransparency'] != ''){$columns['watermarktransparency'] = $formvars['watermarktransparency'];}
+      if($formvars['watermarkcolor'] != ''){$columns['watermarkcolor'] = $formvars['watermarkcolor'];}
+      if($formvars['copyrightposx'] != ''){$columns['copyrightposx'] = $formvars['copyrightposx'];}
+      if($formvars['copyrightposy'] != ''){$columns['copyrightposy'] = $formvars['copyrightposy'];}
+      if($formvars['copyrightsize'] != ''){$columns['copyrightsize'] = $formvars['copyrightsize'];}
+      if($formvars['copyrightwidth'] != ''){$columns['copyrightwidth'] = $formvars['copyrightwidth'];}
+      if($formvars['copyrighttransparency'] != ''){$columns['copyrighttransparency'] = $formvars['copyrighttransparency'];}
+      if($formvars['copyrightcolor'] != ''){$columns['copyrightcolor'] = $formvars['copyrightcolor'];}
       if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
       $columns['variable_freetexts'] = $formvars['variable_freetexts'];
       if($formvars['format']){$columns['format'] = "'" . $formvars['format'] ."'";}
@@ -301,6 +308,7 @@ class kdl extends drucklayout{
       if($formvars['font_legend']){$columns['font_legend'] = "'" . $formvars['font_legend'] . "'";}
       if($formvars['font_user']){$columns['font_user'] = "'" . $formvars['font_user'] . "'";}
       if($formvars['font_watermark']){$columns['font_watermark'] = "'" . $formvars['font_watermark'] . "'";}
+      if($formvars['font_copyright']){$columns['font_copyright'] = "'" . $formvars['font_copyright'] . "'";}
 
       if($_files['headsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
@@ -465,6 +473,13 @@ class kdl extends drucklayout{
       $sql .= ", watermarksize = " . value_or_null($formvars['watermarksize']);
       $sql .= ", watermarkangle = " . value_or_null($formvars['watermarkangle']);
       $sql .= ", watermarktransparency = " . value_or_null($formvars['watermarktransparency']);
+      $sql .= ", watermarkcolor = " . value_or_null($formvars['watermarkcolor']);
+      $sql .= ", copyrightposx = " . value_or_null($formvars['copyrightposx']);
+      $sql .= ", copyrightposy = " . value_or_null($formvars['copyrightposy']);
+      $sql .= ", copyrightsize = " . value_or_null($formvars['copyrightsize']);
+      $sql .= ", copyrightwidth = " . value_or_null($formvars['copyrightwidth']);
+      $sql .= ", copyrighttransparency = " . value_or_null($formvars['copyrighttransparency']);
+      $sql .= ", copyrightcolor = " . value_or_null($formvars['copyrightcolor']);
       if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
       $sql .= ", variable_freetexts = " . $formvars['variable_freetexts'];
       $sql .= ", format = '" . $formvars['format']."'";
@@ -479,6 +494,7 @@ class kdl extends drucklayout{
       $sql .= ", font_legend = '" . $formvars['font_legend']."'";
       $sql .= ", font_user = '" . $formvars['font_user']."'";
       $sql .= ", font_watermark = '" . $formvars['font_watermark']."'";
+      $sql .= ", font_copyright = '" . $formvars['font_copyright']."'";
 
       if($_files['headsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];

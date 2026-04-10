@@ -6943,8 +6943,26 @@ echo '			</table>
     $angle = $frame['watermarkangle'];
     $textposy = $frame['mapheight'] - $frame['watermarkposy'];
     $mapimage = imagecreatefromjpeg(IMAGEPATH.basename($this->img['hauptkarte']));
-    $red = ImageColorAllocatealpha ($mapimage, 255, 0, 0, $frame['watermarktransparency']);
-    imagettftext($mapimage, $textsize*$this->map_factor, $angle, $textposx*$this->map_factor, $textposy*$this->map_factor, $red, dirname(FONTSET).'/arial.ttf', $text);
+		$r = $this->Docu->colors[$frame['watermarkcolor']]['red'];
+		$g = $this->Docu->colors[$frame['watermarkcolor']]['green'];
+		$b = $this->Docu->colors[$frame['watermarkcolor']]['blue'];
+    $color = ImageColorAllocatealpha ($mapimage, $r, $g, $b, $frame['watermarktransparency']);
+    imagettftext($mapimage, $textsize*$this->map_factor, $angle, $textposx*$this->map_factor, $textposy*$this->map_factor, $color, PDF_FONT_PATH . '/' . $frame['font_watermark'], $text);
+    imagejpeg($mapimage,IMAGEPATH.basename($this->img['hauptkarte']), 100);
+  }
+
+	function addcopyright($frame) {
+    $text = $this->get_copyrights('list');
+    $textsize = $frame['copyrightsize'];
+    $textposx = $frame['copyrightposx'];
+    $width = $frame['copyrightwidth'];
+    $textposy = $frame['mapheight'] - $frame['copyrightposy'];
+    $mapimage = imagecreatefromjpeg(IMAGEPATH.basename($this->img['hauptkarte']));
+		$r = $this->Docu->colors[$frame['copyrightcolor']]['red'];
+		$g = $this->Docu->colors[$frame['copyrightcolor']]['green'];
+		$b = $this->Docu->colors[$frame['copyrightcolor']]['blue'];
+    $color = ImageColorAllocatealpha ($mapimage, $r, $g, $b, $frame['copyrighttransparency']);
+    imagettftext_wrap($mapimage, $textsize*$this->map_factor, 0, $textposx*$this->map_factor, $textposy*$this->map_factor, $color, PDF_FONT_PATH . '/' . $frame['font_copyright'], $text, $width*$this->map_factor);
     imagejpeg($mapimage,IMAGEPATH.basename($this->img['hauptkarte']), 100);
   }
 
@@ -7968,6 +7986,11 @@ echo '			</table>
 				$this->addwatermark($this->Docu->activeframe[0]);
 			}
 
+			# Urheberrechte hinzufügen
+			if($this->Docu->activeframe[0]['copyrightposx'] != 0){
+				$this->addcopyright($this->Docu->activeframe[0]);
+			}			
+
 			# Lagebezeichnung
 			if(defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART == 'Flurbezeichnung') {
 				include_once(PLUGINS.'alkis/model/kataster.php');
@@ -8001,11 +8024,11 @@ echo '			</table>
 			}
 
 			# Attribute
-			$this->gemeinde = utf8_decode($this->lagebezeichnung[1]['gemeindename'].' ('.$this->lagebezeichnung[1]['gemeinde'].')');
-			$this->gemarkung = utf8_decode($this->lagebezeichnung[1]['gemkgname'].' ('.$this->lagebezeichnung[1]['gemkgschl'].')');
-			$this->flur = utf8_decode($this->lagebezeichnung[1]['flur']);
-			$this->flurstueck = utf8_decode($this->lagebezeichnung[1]['flurst']);
-			$this->lage = utf8_decode($this->lagebezeichnung[1]['strasse']).' '.$this->lagebezeichnung[1]['hausnummer'];
+			$this->gemeinde = $this->lagebezeichnung[1]['gemeindename'].' ('.$this->lagebezeichnung[1]['gemeinde'].')';
+			$this->gemarkung = $this->lagebezeichnung[1]['gemkgname'].' ('.$this->lagebezeichnung[1]['gemkgschl'].')';
+			$this->flur = $this->lagebezeichnung[1]['flur'];
+			$this->flurstueck = $this->lagebezeichnung[1]['flurst'];
+			$this->lage = $this->lagebezeichnung[1]['strasse'].' '.$this->lagebezeichnung[1]['hausnummer'];
 			$this->date = date("d.m.Y");
 			$this->scale = $this->formvars['printscale'];
 
@@ -15301,13 +15324,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	function zweifaktor_authentifizierung() {
-		include_once(CLASSPATH . 'ZweiFaktor.php');
-		$this->main = 'zweifaktors.php';
-		$this->output();
-	}	
 	
-	function get_copyrights(){
+	function get_copyrights($format = 'html'){
+		$copyrights = [];
 		$sql = "
 			SELECT 
 				string_agg(" . ($this->Stelle->useLayerAliases ? 'COALESCE(l.alias, l.name)' : 'l.name') . ", ', ') as layer, 
@@ -15324,15 +15343,27 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 1);
 		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$output = '<table>';
 		while ($rs = pg_fetch_assoc($ret[1])){
 			$rs['layer'] = replace_params_rolle($rs['layer']);
-      $output .= '<tr>
-							<td>' . $rs['layer'] . '</td>
-							<td>' . set_href($rs['beschreibung']) . '</td>
-						</tr>';
+			$copyrights[] = $rs;
     }
-		$output .= '</table>';
+		switch ($format) {
+			case 'html' : {
+				$output = '<table>';
+				foreach ($copyrights as $copyright) {
+					$output .= '
+							<tr>
+								<td>' . $copyright['layer'] . '</td>
+								<td>' . set_href($copyright['beschreibung']) . '</td>
+							</tr>';
+				}
+				$output .= '</table>';
+			} break;
+
+			case 'list' : {
+				$output = implode(', ', array_column($copyrights, 'beschreibung'));
+			}
+		}
 		return $output;
 	}
 
