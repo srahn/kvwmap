@@ -3129,7 +3129,7 @@ function get_attribute_option($attributes, $i, $option_key) {
 	return $option;
 }
 
-function imagettftext_wrap($image, $fontsize, $angle, $x, $y, $color, $font, $text, $maxwidth) {
+function imagettftext_wrap($image, $fontsize, $angle, $x, $y, $color, $font, $text, $maxwidth, $direction = 'down') {
 	$words = explode(' ', $text);
 	$lines = [];
 	$currentline = '';
@@ -3147,6 +3147,9 @@ function imagettftext_wrap($image, $fontsize, $angle, $x, $y, $color, $font, $te
 	}
 	if ($currentline) {
 		$lines[] = $currentline;
+	}
+	if ($direction == 'up') {
+		$y =  $y - ($fontsize * 1.4 * (count($lines) - 1));
 	}
 	foreach ($lines as $line) {
 		imagettftext($image, $fontsize, $angle, $x, $y, $color, $font, $line);

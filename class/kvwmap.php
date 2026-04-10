@@ -6962,7 +6962,7 @@ echo '			</table>
 		$g = $this->Docu->colors[$frame['copyrightcolor']]['green'];
 		$b = $this->Docu->colors[$frame['copyrightcolor']]['blue'];
     $color = ImageColorAllocatealpha ($mapimage, $r, $g, $b, $frame['copyrighttransparency']);
-    imagettftext_wrap($mapimage, $textsize*$this->map_factor, 0, $textposx*$this->map_factor, $textposy*$this->map_factor, $color, PDF_FONT_PATH . '/' . $frame['font_copyright'], $text, $width*$this->map_factor);
+    imagettftext_wrap($mapimage, $textsize*$this->map_factor, 0, $textposx*$this->map_factor, $textposy*$this->map_factor, $color, PDF_FONT_PATH . '/' . $frame['font_copyright'], $text, $width*$this->map_factor, 'up');
     imagejpeg($mapimage,IMAGEPATH.basename($this->img['hauptkarte']), 100);
   }
 
@@ -7679,6 +7679,7 @@ echo '			</table>
   }
 
 	function createMapPDF($frame_id, $preview, $fast = false) {
+		include_once(CLASSPATH.'kartendrucklayout.php');
 		$this->sanitize([
 			'name' => 'text',
 			'center_x' => 'float', 'center_y' => 'float',
