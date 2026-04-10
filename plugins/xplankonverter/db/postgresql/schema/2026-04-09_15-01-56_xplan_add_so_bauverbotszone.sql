@@ -13,7 +13,7 @@ INSERT INTO xplan_uml.uml_classes(
 	('EAID_41242DCD_3D5D_3202_D66D_3CC7DC42352D', 'SO_Bauverbotszone', 'public', FALSE, FALSE, FALSE, NULL, 37, NULL, now()::timestamp, NULL, FALSE, 423, 'EAID_6FDC92A7_2818_42bf_9B7D_10397E273699' , '-1'),
 	('EAID_6323ADBE_6D5D_3333_D53D_3CD6CC31253B', 'SO_KlassifizBauverbot','public', FALSE, FALSE, FALSE, NULL, 37, NULL, now()::timestamp, NULL, FALSE, 424,'EAID_8D09BC59_987A_481a_9FDE_6816AD7DCEF1', '-1'),
 	('EAID_62242ABC_3B3A_4521_C33D_3CD3CD51251D', 'SO_DetailKlassifizBauverbot', 'public', FALSE, FALSE, FALSE, NULL, 37, NULL, now()::timestamp, NULL, FALSE, 425,'EAID_E95F3575_1A65_42f2_B5F2_2EA449652444', '-1'),
-	('EAID_6423ADBE_6D5D_3542_C53D_3DD6DD31253C', 'SO_KlassifizRechtlicheGrundlageBauverbot','public', FALSE, FALSE, FALSE, NULL, 37, NULL, now()::timestamp, NULL, FALSE, 426,'EAID_8D09BC59_987A_481a_9FDE_6816AD7DCEF1', '-1'),
+	('EAID_6423ADBE_6D5D_3542_C53D_3DD6DD31253C', 'SO_KlassifizRechtlicheGrundlageBauverbot','public', FALSE, FALSE, FALSE, NULL, 37, NULL, now()::timestamp, NULL, FALSE, 426,'EAID_8D09BC59_987A_481a_9FDE_6816AD7DCEF1', '-1');
 
 INSERT INTO xplan_uml.class_generalizations (xmi_id,name,"isSpecification",package_id,parent_id,child_id,inheritance_order)
 VALUES
@@ -148,6 +148,12 @@ VALUES
 (3000,'Waldabstadt','Bereich um Wälder, Moore und Heiden, in dem aus Brandschutzgründen keinen baulichen Anlagen errichtet werden dürfen.'),
 (9999,'SonstigeBeschraenkung','Bereich mit sonstigen Baubeschränkungen.');
 
+CREATE TYPE xplan_gml.so_rechtlichegrundlagebauverbot AS ENUM
+    ('1000', '2000', '9999');
+ALTER TYPE xplan_gml.so_rechtlichegrundlagebauverbot
+    OWNER TO kvwmap;
+
+
 CREATE TABLE IF NOT EXISTS xplan_gml.enum_so_rechtlichegrundlagebauverbot
 (
     wert integer NOT NULL,
@@ -261,27 +267,27 @@ CREATE INDEX IF NOT EXISTS so_bauverbotszone_gml_id
 -- Mapping gmlas to gml
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(feature_class,o_table,o_column,o_data_type,t_table,t_column,t_data_type,codespace,complex_type,regel)
 VALUES
-(true,'so_bauverbotszone','xplan_name','character varying','so_bauverbotszone','name','character varying','gmlas.xplan_name AS name'),
-(true,'so_bauverbotszone','artderfestlegung','character varying','so_bauverbotszone','artderfestlegung','so_klassifizbauverbot','gmlas.artderfestlegung::xplan_gml.so_klassifizbauverbot AS artderfestlegung'),
-(true,'so_bauverbotszone','detailartderfestlegung','character varying','so_bauverbotszone','detailartderfestlegung','so_detailklassifizbauverbot','detailartderfestlegung_codespace','(gmlas.detailartderfestlegung_codespace,gmlas.detailartderfestlegung,NULL)::xplan_gml.so_detailklassifizbauverbot AS detailartderfestlegung'),
-(true,'so_bauverbotszone','rechtlichegrundlage','character varying','so_bauverbotszone','rechtlichegrundlage','so_rechtlichegrundlagebauverbot','gmlas.rechtlichegrundlage::xplan_gml.so_rechtlichegrundlagebauverbot AS rechtlichegrundlage'),
-(true,'so_bauverbotszone','ebene','integer','so_bauverbotszone','ebene','integer','gmlas.ebene AS ebene'),
-(true,'so_bauverbotszone','flaechenschluss','boolean','so_bauverbotszone','flaechenschluss','boolean','gmlas.flaechenschluss AS flaechenschluss'),
-(true,'so_bauverbotszone','flussrichtung','boolean','so_bauverbotszone','flussrichtung','boolean','gmlas.flussrichtung AS flussrichtung'),
-(true,'so_bauverbotszone','gehoertzubereich_href','character varying','so_bauverbotszone','gehoertzubereich','text','CASE WHEN gmlas.gehoertzubereich_href LIKE ''#GML_%'' OR gmlas.gehoertzubereich_href LIKE ''#gml_%'' OR gmlas.gehoertzubereich_href LIKE ''#Gml_%'' THEN substring(gmlas.gehoertzubereich_href, 6) ELSE gmlas.gehoertzubereich_href END AS gehoertzubereich'),
-(true,'so_bauverbotszone','gesetzlichegrundlage','character varying','so_bauverbotszone','gesetzlichegrundlage','xp_gesetzlichegrundlage','gesetzlichegrundlage_codespace','(gmlas.gesetzlichegrundlage_codespace,gmlas.gesetzlichegrundlage,NULL)::xplan_gml.xp_gesetzlichegrundlage AS gesetzlichegrundlage'),
-(true,'so_bauverbotszone','gliederung1','character varying','so_bauverbotszone','gliederung1','character varying','gmlas.gliederung1 AS gliederung1'),
-(true,'so_bauverbotszone','gliederung2','character varying','so_bauverbotszone','gliederung2','character varying','gmlas.gliederung2 AS gliederung2'),
-(true,'so_bauverbotszone','id','character varying','so_bauverbotszone','gml_id','uuid','CASE WHEN gmlas.id LIKE ''GML_%'' OR gmlas.id LIKE ''gml_%'' OR gmlas.id LIKE ''Gml_%'' THEN substring(gmlas.id, 5)::uuid ELSE gmlas.id::uuid END AS gml_id'),
-(true,'so_bauverbotszone','nordwinkel','double precision','so_bauverbotszone','nordwinkel','double precision','gmlas.nordwinkel AS nordwinkel'),
-(true,'so_bauverbotszone','nummer','character varying','so_bauverbotszone','nummer','character varying','gmlas.nummer AS nummer'),
-(true,'so_bauverbotszone','position','geometry','so_bauverbotszone','position','geometry','gmlas.position AS position'),
-(true,'so_bauverbotszone','rechtscharakter','character varying','so_bauverbotszone','rechtscharakter','so_rechtscharakter','gmlas.rechtscharakter::xplan_gml.so_rechtscharakter AS rechtscharakter'),
-(true,'so_bauverbotszone','rechtsstand','character varying','so_bauverbotszone','rechtsstand','xp_rechtsstand','gmlas.rechtsstand::xplan_gml.xp_rechtsstand AS rechtsstand'),
-(true,'so_bauverbotszone','sonstrechtscharakter','character varying','so_bauverbotszone','sonstrechtscharakter','so_sonstrechtscharakter','sonstrechtscharakter_codespace','(gmlas.sonstrechtscharakter_codespace,gmlas.sonstrechtscharakter,NULL)::xplan_gml.so_sonstrechtscharakter AS sonstrechtscharakter'),
-(true,'so_bauverbotszone','text','character varying','so_bauverbotszone','text','character varying','gmlas.text AS text'),
-(true,'so_bauverbotszone','uuid','character varying','so_bauverbotszone','uuid','character varying','gmlas.uuid AS uuid'),
-(true,'so_bauverbotszone','aufschrift','character varying','so_bauverbotszone','aufschrift','character varying','gmlas.aufschrift AS aufschrift');
+(true,'so_bauverbotszone','xplan_name','character varying','so_bauverbotszone','name','character varying','','','gmlas.xplan_name AS name'),
+(true,'so_bauverbotszone','artderfestlegung','character varying','so_bauverbotszone','artderfestlegung','so_klassifizbauverbot','','','gmlas.artderfestlegung::xplan_gml.so_klassifizbauverbot AS artderfestlegung'),
+(true,'so_bauverbotszone','detailartderfestlegung','character varying','so_bauverbotszone','detailartderfestlegung','so_detailklassifizbauverbot','detailartderfestlegung_codespace','','(gmlas.detailartderfestlegung_codespace,gmlas.detailartderfestlegung,NULL)::xplan_gml.so_detailklassifizbauverbot AS detailartderfestlegung'),
+(true,'so_bauverbotszone','rechtlichegrundlage','character varying','so_bauverbotszone','rechtlichegrundlage','so_rechtlichegrundlagebauverbot','','','gmlas.rechtlichegrundlage::xplan_gml.so_rechtlichegrundlagebauverbot AS rechtlichegrundlage'),
+(true,'so_bauverbotszone','ebene','integer','so_bauverbotszone','ebene','integer','','','gmlas.ebene AS ebene'),
+(true,'so_bauverbotszone','flaechenschluss','boolean','so_bauverbotszone','flaechenschluss','boolean','','','gmlas.flaechenschluss AS flaechenschluss'),
+(true,'so_bauverbotszone','flussrichtung','boolean','so_bauverbotszone','flussrichtung','boolean','','','gmlas.flussrichtung AS flussrichtung'),
+(true,'so_bauverbotszone','gehoertzubereich_href','character varying','so_bauverbotszone','gehoertzubereich','text','','','CASE WHEN gmlas.gehoertzubereich_href LIKE ''#GML_%'' OR gmlas.gehoertzubereich_href LIKE ''#gml_%'' OR gmlas.gehoertzubereich_href LIKE ''#Gml_%'' THEN substring(gmlas.gehoertzubereich_href, 6) ELSE gmlas.gehoertzubereich_href END AS gehoertzubereich'),
+(true,'so_bauverbotszone','gesetzlichegrundlage','character varying','so_bauverbotszone','gesetzlichegrundlage','xp_gesetzlichegrundlage','gesetzlichegrundlage_codespace','','(gmlas.gesetzlichegrundlage_codespace,gmlas.gesetzlichegrundlage,NULL)::xplan_gml.xp_gesetzlichegrundlage AS gesetzlichegrundlage'),
+(true,'so_bauverbotszone','gliederung1','character varying','so_bauverbotszone','gliederung1','character varying','','','gmlas.gliederung1 AS gliederung1'),
+(true,'so_bauverbotszone','gliederung2','character varying','so_bauverbotszone','gliederung2','character varying','','','gmlas.gliederung2 AS gliederung2'),
+(true,'so_bauverbotszone','id','character varying','so_bauverbotszone','gml_id','uuid','','','CASE WHEN gmlas.id LIKE ''GML_%'' OR gmlas.id LIKE ''gml_%'' OR gmlas.id LIKE ''Gml_%'' THEN substring(gmlas.id, 5)::uuid ELSE gmlas.id::uuid END AS gml_id'),
+(true,'so_bauverbotszone','nordwinkel','double precision','so_bauverbotszone','nordwinkel','double precision','','','gmlas.nordwinkel AS nordwinkel'),
+(true,'so_bauverbotszone','nummer','character varying','so_bauverbotszone','nummer','character varying','','','gmlas.nummer AS nummer'),
+(true,'so_bauverbotszone','position','geometry','so_bauverbotszone','position','geometry','','','gmlas.position AS position'),
+(true,'so_bauverbotszone','rechtscharakter','character varying','so_bauverbotszone','rechtscharakter','','','so_rechtscharakter','gmlas.rechtscharakter::xplan_gml.so_rechtscharakter AS rechtscharakter'),
+(true,'so_bauverbotszone','rechtsstand','character varying','so_bauverbotszone','rechtsstand','xp_rechtsstand','','','gmlas.rechtsstand::xplan_gml.xp_rechtsstand AS rechtsstand'),
+(true,'so_bauverbotszone','sonstrechtscharakter','character varying','so_bauverbotszone','sonstrechtscharakter','so_sonstrechtscharakter','sonstrechtscharakter_codespace','','(gmlas.sonstrechtscharakter_codespace,gmlas.sonstrechtscharakter,NULL)::xplan_gml.so_sonstrechtscharakter AS sonstrechtscharakter'),
+(true,'so_bauverbotszone','text','character varying','so_bauverbotszone','text','character varying','','','gmlas.text AS text'),
+(true,'so_bauverbotszone','uuid','character varying','so_bauverbotszone','uuid','character varying','','','gmlas.uuid AS uuid'),
+(true,'so_bauverbotszone','aufschrift','character varying','so_bauverbotszone','aufschrift','character varying','','','gmlas.aufschrift AS aufschrift');
 
 
 
