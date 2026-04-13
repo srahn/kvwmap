@@ -8033,36 +8033,52 @@ echo '			</table>
 			$this->date = date("d.m.Y");
 			$this->scale = $this->formvars['printscale'];
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['datecolor']);
-			$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_date']);
-			if($this->Docu->activeframe[0]['datesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
+			if ($this->Docu->activeframe[0]['font_date'] AND $this->Docu->activeframe[0]['datesize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['datecolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_date']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['scalecolor']);
-			$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_scale']);
-			if($this->Docu->activeframe[0]['scalesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
+			if ($this->Docu->activeframe[0]['font_scale'] AND $this->Docu->activeframe[0]['scalesize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['scalecolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_scale']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
+			}
 
-			$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_oscale']);
-			if($this->Docu->activeframe[0]['oscalesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');
+			if ($this->Docu->activeframe[0]['font_oscale'] AND $this->Docu->activeframe[0]['oscalesize'] > 0) {
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_oscale']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['lagecolor']);
-			$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_lage']);
-			if($this->Docu->activeframe[0]['lagesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
+			if ($this->Docu->activeframe[0]['font_lage'] AND $this->Docu->activeframe[0]['lagesize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['lagecolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_lage']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemeindecolor']);
-			$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_gemeinde']);
-			if($this->Docu->activeframe[0]['gemeindesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);
+			if ($this->Docu->activeframe[0]['font_gemeinde'] AND $this->Docu->activeframe[0]['gemeindesize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemeindecolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_gemeinde']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemarkungcolor']);
-			$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_gemarkung']);
-			if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
+			if ($this->Docu->activeframe[0]['font_gemarkung'] AND $this->Docu->activeframe[0]['gemarkungsize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemarkungcolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_gemarkung']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurcolor']);
-			$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_flur']);
-			if($this->Docu->activeframe[0]['flursize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
+			if ($this->Docu->activeframe[0]['font_flur'] AND $this->Docu->activeframe[0]['flursize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurcolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_flur']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurstcolor']);
-			$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_flurst']);
-			if($this->Docu->activeframe[0]['flurstsize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
+			if ($this->Docu->activeframe[0]['font_flurst'] AND $this->Docu->activeframe[0]['flurstsize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurstcolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_flurst']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
+			}
 
 			# Freie Graphiken
 			for($j = 0; $j < count($this->Docu->activeframe[0]['bilder']); $j++){
