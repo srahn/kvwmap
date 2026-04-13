@@ -13111,8 +13111,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->user->rolle->deleteExportSettings($this->formvars);
 		}
 		if ($this->formvars['selected_layer_id'] != '') {
-			$this->layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-			$this->formvars['selected_group_id'] = $this->layerset[0]['gruppe'];
+			$this->layer = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$this->formvars['selected_group_id'] = $this->layer[0]['gruppe'];
 			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
 			$layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
@@ -13150,7 +13150,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		if ($this->formvars['epsg'] == '') {
 			# originäres System
-			$this->formvars['epsg'] = $this->layerset[0]['epsg_code'];
+			$this->formvars['epsg'] = $this->layer[0]['epsg_code'];
 		}
 		$this->saveMap('');
 		$currenttime = date('Y-m-d H:i:s',time());
