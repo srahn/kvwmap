@@ -2366,7 +2366,7 @@ class Gml_extractor {
 						$log .= $result['log'];
 						$sql_regel = str_replace("'", "''", $result['sql']); # Replaces all single commas with 2x single commas to escape them in SQL
 						# TODO: pk Hier vorher existierende Regeln der konvertierung des Bereiches löschen damit sie nicht mehrfach drin sind.
-						$log .= '<br>gmlas_to_geml_regel: ' . $sql_regel;
+						$log .= '<br>gmlas_to_gml_regel: ' . $sql_regel;
 						$this->insert_regel_into_db($gmlas_feature_table, $sql_regel, $geometry_type, $konvertierung_id, $stelle_id, $bereich_gml_id, $bereich_index);
 					}
 				}

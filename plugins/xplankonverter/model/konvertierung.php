@@ -2856,8 +2856,8 @@ class Konvertierung extends PgObject {
 		# Inserts all existing Textabschnitte if they exist (no regel as potential link to plan)
 		$textabschnitte = array("bp_textabschnitt", "fp_textabschnitt", "so_textabschnitt", "rp_textabschnitt", "lp_textabschnitt");
 		foreach ($textabschnitte as $textabschnitt) {
-			if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
-				$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
+				if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
+					$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
 			}
 		}
 		return array(
@@ -3197,7 +3197,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		// art_attrs = comma separated attribute list from art without spaces, curly brackets or namespaces, but with array indicator, e.g. [2]
 		// data_types currently limited to 5, consider simplifying this somehow?
 		// TODO consider pre-sorting array together with index to gain a more universal rule
-		// (sorting output is randomized or changing across software-versionsin many gmls)
+		// (sorting output is randomized or changing across software-versions in many gmls)
 		$sql = "
 			SELECT
 				DISTINCT
@@ -3268,6 +3268,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 			$target_columns = explode(',', $row['art_attrs']);
 			$target_values = explode(',', $row['target_value']); // TODO consider what happens for text/aufschrift-fields with comma inside the string
 			$data_types = explode(',', $row['data_types']); // currently limit to 5, see what happens if more are needed
+			$indices = explode(',', trim($row['origin_index'],'{}'));
 			$attr_str = '';
 			for($i = 0; $i < count($target_columns); $i++) {
 				//TODO check if empty
@@ -3275,7 +3276,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 					case 'ARRAY':
 						// on occasion there are -1 index-values that should likely be considered 0
 						$index = 0;
-						($row['origin_index'] < 0) ? $index = 1 : $index = $row['origin_index'] + 1;
+						(((int)$indices[$i]) < 0) ? $index = 1 : $index = ((int)$indices[$i]) + 1;
 						$target_column_with_cast = explode('[',$target_columns[$i])[0] . "[" . $index . "]::text";
 						break;
 					default: //includes e.g. USER-DEFINED, integer, character varying
@@ -3285,6 +3286,9 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 				}
 				$attr_str .= " AND " . $target_column_with_cast . " =  '" . $target_values[$i] . "' ";
 			}
+			// add string-comparison to attribute to only get matching attributes, i.e. "zweckbestimmung[0]" not also styling "zweckbestimmung[0],rechtsstand[0]"
+			// and ignore namespace, spaces, array brackets
+			$attr_str .= " AND '" . $row['art_attrs'] . "' = REPLACE(TRANSLATE(REPLACE(LOWER(p.art::text), 'xplan:', ''), '{}', ''), ' ', '')";
 
 			$sql = "
 				UPDATE
