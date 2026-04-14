@@ -14180,7 +14180,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           if ($poly_id != '' AND $showpolygon == true){
             $PolygonAsSVG = $this->pgdatabase->selectPolyAsSVG($poly_id, $this->user->rolle->epsg_code);
             $PolygonAsSVG = transformCoordsSVG($PolygonAsSVG);
-            $this->zoomToPolygon('u_polygon', $poly_id,20, $this->user->rolle->epsg_code);
+            $this->zoomToPolygon('kvwmap.u_polygon', $poly_id,20, $this->user->rolle->epsg_code);
             $this->user->rolle->saveSettings($this->map->extent);
             $this->user->rolle->readSettings();
             $this->formvars['newpath'] = $PolygonAsSVG;
