@@ -22422,13 +22422,18 @@ DO $$
     $sql = "
 			SELECT
 				id,
-				bezeichnung
+				bezeichnung,
+				string_agg(parent_id::text, ',') as parent_id
 			FROM
-				kvwmap.stelle,
-				kvwmap.used_layer
+				kvwmap.used_layer,
+				kvwmap.stelle
+				LEFT JOIN kvwmap.stellen_hierarchie ON child_id = stelle.id
 			WHERE
 				used_layer.stelle_id = stelle.id AND
 				used_layer.layer_id = " . $layer_id . "
+			GROUP BY
+				id,
+				bezeichnung
 			ORDER BY
 				Bezeichnung
 		";
@@ -22441,6 +22446,7 @@ DO $$
     while ($rs = pg_fetch_assoc($ret[1])) {
       $stellen['ID'][] = $rs['id'];
       $stellen['Bezeichnung'][] = $rs['bezeichnung'];
+			$stellen['parent_id'][] = $rs['parent_id'];
     }
     return $stellen;
   }

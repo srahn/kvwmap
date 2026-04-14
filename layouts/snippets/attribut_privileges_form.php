@@ -83,16 +83,16 @@ function toggle_unterstellen(){
 }
 
 function update_stellen_visibility(){
-	var stellen = document.getElementById('stellen_visibility');
-	if (stellen.value != '') {
+	var stellen_visibility = document.getElementById('stellen_visibility');
+	if (stellen_visibility.value != '') {
 		document.getElementById('stellendiv').classList.add('filtered');
 	}
 	else {
 		document.getElementById('stellendiv').classList.remove('filtered');
 	}
-	for (var i=1; i < stellen.options.length; i++) {
-		var td = document.getElementById('stellen_td_' + stellen.options[i].value);
-    if (stellen.options[i].selected) {
+	for (var i=1; i < stellen_visibility.options.length; i++) {
+		var td = document.getElementById('stellen_td_' + stellen_visibility.options[i].value);
+    if (stellen_visibility.options[i].selected) {
       td.classList.add('visible');
     }
 		else {
@@ -314,6 +314,9 @@ function update_stellen_visibility(){
 								echo '<option value="'.$this->stellen['ID'][$i].'" ';
 								if (in_array($this->stellen['ID'][$i], $this->formvars['stellen_visibility'] ?: [])){
 									echo 'selected';
+								}
+								if ($this->stellen['parent_id'][$i]) {
+									echo ' class="unterstelle"';
 								}
 								echo '>'.$this->stellen['Bezeichnung'][$i].'</option>';
 							}
