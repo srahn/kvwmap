@@ -27,7 +27,7 @@
 	function change_chart_type(chart, chart_type) {
 		chart.config.type = chart_type;
 		if (['bar', 'line'].indexOf(chart_type) != -1) {
-			chart.config.data.datasets[0].backgroundColor = 'lightblue';
+			chart.config.data.datasets[0].backgroundColor = chart.config.data.datasets[0].orig_color;
 			chart.config.options.plugins.legend.display = false;
 		}
 		else {
@@ -173,7 +173,7 @@
 							<select id="chart_type_selector_<? echo $id; ?>" onchange="change_chart_type(chart_<? echo $id; ?>, this.value)">
 								<option value="bar"<? echo ($chart->get('type') == 'bar' ? ' selected' : ''); ?>>Balken</option>
 								<option value="pie"<? echo ($chart->get('type') == 'pie' ? ' selected' : ''); ?>>Torten</option>
-								<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
+								<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Ring</option>
 								<option value="line"<? echo ($chart->get('type') == 'line' ? ' selected' : ''); ?>>Linien</option>
 							</select><?
 							if (
@@ -208,7 +208,8 @@
 								datasets: [{
 									label: '',
 									data: data_<? echo $id; ?>,
-									backgroundColor: (['bar', 'line'].indexOf(chart_type_<? echo $id; ?>) != -1 ? 'lightblue' : COLORS),
+									orig_color: '<? echo $chart->get('color'); ?>',
+									backgroundColor: (['bar', 'line'].indexOf(chart_type_<? echo $id; ?>) != -1 ? '<? echo $chart->get('color'); ?>' : COLORS),
 								//backgroundColor: COLORS,
 									borderWidth: 1
 								}]

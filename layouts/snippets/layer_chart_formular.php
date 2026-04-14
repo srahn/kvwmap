@@ -130,6 +130,10 @@ else { ?>
 				left: 17px;
 			"></span>
 			<div style="clear: both"></div>
+
+			<label class="fetter form-label" for="label_attribute_name">Farbe: * </label>
+			<input type="color" class="form-field" name="color" value="<? echo $this->layer_chart->get('color'); ?>" style="margin-left:5px; float:left"/>
+			<div style="clear: both"></div>
 		</div>
 		<div style="clear: both"></div>
 		<input type="hidden" name="go" value="layer_chart"/>

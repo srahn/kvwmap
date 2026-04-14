@@ -12404,7 +12404,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function layer_chart_Speichern($chart) {
 		include(LAYOUTPATH . 'languages/layer_chart_' . rolle::$language . '.php');
-		$chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite'), 'keep');
+		$chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite', 'color'), 'keep');
 		$results = $chart->validate();
 		if (empty($results)) {
 			if ($chart->get_id() == '') {

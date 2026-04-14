@@ -1486,7 +1486,8 @@ function go_switch($go, $exit = false) {
 					'value_attribute_name' => 'text',
 					'label_attribute_name' => 'text',
 					'beschreibung' => 'text',
-					'breite' => 'text'
+					'breite' => 'text',
+					'color' => 'text'
 				]);
 				include_once(CLASSPATH . 'LayerChart.php');
 				if ($GUI->formvars['id'] != '') {
