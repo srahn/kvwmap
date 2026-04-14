@@ -56,7 +56,7 @@ class Gml_extractor {
 			}
 		}
 		
-		if(XPLANKONVERTER_AUTOCOMPLETE_FP_BEBAUUNGSFLAECHE) {
+		if (XPLANKONVERTER_AUTOCOMPLETE_FP_BEBAUUNGSFLAECHE) {
 			$this->autocomplete_fp_bebauungsflaeche_attributes($this->gmlas_schema);
 		}
 		
@@ -108,7 +108,7 @@ class Gml_extractor {
 		}
 
 		$gml_id = $this->parse_gml_id($classname);
-		if(empty($gml_id)){
+		if (empty($gml_id)){
 			$GUI->add_message('warning', 'Es konnte keine Klasse ' . $classname . ' mit Pflichtattribut gml:id gefunden werden');
 			return;
 		}
@@ -236,7 +236,7 @@ class Gml_extractor {
 		}
 
 		$gml_id = $this->parse_gml_id($classname);
-		if(empty($gml_id)){
+		if (empty($gml_id)){
 			$GUI->add_message('warning', 'Es konnte keine Klasse ' . $classname . ' mit Pflichtattribut gml:id gefunden werden');
 			return;
 		}
@@ -457,7 +457,7 @@ class Gml_extractor {
 		# Parse the GML-ID of the file (to avoid duplicates, to identify the file)
 		$lines = file($this->gml_location);
 		foreach ($lines as $lineNumber => $line) {
-			if(strpos($line, $class) === false) {
+			if (strpos($line, $class) === false) {
 				continue;
 			}
 			# needs to check for both single and double quotes as both are permitted by XML spec
@@ -525,9 +525,9 @@ class Gml_extractor {
 	function trim_gml_prefix_if_exists($gml_id) {
 		#Removes prefix 'GML_', 'gml_' or 'Gml_ if it exists'
 		$mod_gml_id = $gml_id;
-		if(substr($gml_id, 0, strlen('GML_')) == 'GML_') $mod_gml_id = substr($gml_id, strlen('GML_'));
-		if(substr($gml_id, 0, strlen('gml_')) == 'gml_') $mod_gml_id = substr($gml_id, strlen('gml_'));
-		if(substr($gml_id, 0, strlen('Gml_')) == 'Gml_') $mod_gml_id = substr($gml_id, strlen('Gml_'));
+		if (substr($gml_id, 0, strlen('GML_')) == 'GML_') $mod_gml_id = substr($gml_id, strlen('GML_'));
+		if (substr($gml_id, 0, strlen('gml_')) == 'gml_') $mod_gml_id = substr($gml_id, strlen('gml_'));
+		if (substr($gml_id, 0, strlen('Gml_')) == 'Gml_') $mod_gml_id = substr($gml_id, strlen('Gml_'));
 		return $mod_gml_id;
 	}
 
@@ -1261,7 +1261,7 @@ class Gml_extractor {
 			);
 		}
 		$selects_reftextinhalt = array();
-		if(!empty($table_with_reftextinhalt)) {
+		if (!empty($table_with_reftextinhalt)) {
 			foreach ($tables_with_reftextinhalt AS $table_with_reftextinhalt) {
 				$selects_reftextinhalt[] = "
 					SELECT
@@ -2372,6 +2372,15 @@ class Gml_extractor {
 				}
 			}
 		}
+		# check if there are xp_ppos without bereich_gml_id. This can be the case in some externally produced gml-files
+		# if true, add bereich_gml_id with lowest nummer
+		# to xp_ppo to ensure xp_ppo can be associated with plan in some ways
+		$table_without_bereich = 'xp_ppo';
+		if(!empty($bereiche_ids[0]) and $this->check_class_without_bereich_id_exists($table_without_bereich, $this->gmlas_schema)) {
+			$sql_regel_table_without_bereich = $this->get_gmlas_to_gml_regel($table_without_bereich , null, 'ST_Point', $simplify_fachdaten_geom);
+			$regel_without_bereich = str_replace("'", "''", $sql_regel_table_without_bereich['sql']); # Replaces all single commas with 2x single commas to escape them in SQL
+			$this->insert_regel_into_db($table_without_bereich, $regel_without_bereich, 'ST_Point', $konvertierung_id, $stelle_id, $bereiche_ids[0], 'keinbereich');
+		}
 		return $log;
 	}
 
@@ -2388,7 +2397,9 @@ class Gml_extractor {
 			FROM
 				xplan_gml.xp_bereich
 			WHERE
-				konvertierung_id = " . $konvertierung_id . ";
+				konvertierung_id = " . $konvertierung_id . "
+			ORDER BY
+				nummer;
 			";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$bereiche = pg_fetch_all_columns($ret[1]);
@@ -2419,7 +2430,7 @@ class Gml_extractor {
 		$log .= '<br>Loop through gmlas_attributes:';
 		foreach ($gmlas_attributes AS $a) {
 			$log .= '<br>gmlas_attribute: ' . $a;
-			if(!in_array($a, array_column($mappings, 'o_column'))) {
+			if (!in_array($a, array_column($mappings, 'o_column'))) {
 				continue;
 			}
 			$log .= '<br>Loop through mappings:';
@@ -2447,7 +2458,7 @@ class Gml_extractor {
 							$mapping['regel'] = 'ST_CurveToLine(' . $mapping['regel'] . ')';
 						}
 						// Cast to multi-geometries (konverter-convention)
-						else if(($geom_type == 'ST_Point') or
+						else if (($geom_type == 'ST_Point') or
 							($geom_type == 'ST_LineString') or
 							($geom_type == 'ST_Polygon'))
 						{
@@ -2494,13 +2505,19 @@ class Gml_extractor {
 
 		// Add INSERT INTO and FROM
 		// Filters only by relevant bereich (in case 2 rules target the same class with different bereich)
+		// if null is passed (e.g. xp_ppo without bereich), bereich will be added automatically, but filtered on null
+		$bereich_condition = "gmlas.gehoertzubereich_href ILIKE '%" . $bereich_id . "'";
+		if(empty($bereich_id)) {
+			$bereich_condition = "gmlas.gehoertzubereich_href IS NULL";
+		}
+
 		$sql  = "INSERT INTO " . XPLANKONVERTER_CONTENT_SCHEMA . "." . $gml_class . " (" . implode(", ", $gml_attributes) . ")
 			SELECT
 				" . implode(", ", $select_sql) . "
 			FROM
 				" . $this->gmlas_schema . '.' . $gmlas_feature_table . " AS gmlas
 			WHERE
-				gmlas.gehoertzubereich_href ILIKE '%" . $bereich_id . "' AND
+				" . $bereich_condition . " AND
 				ST_GeometryType(position) = '" . $geom_type . "'
 		";
 		$log .= '<br>SQL für Regel zur Konvertierung von gmlas table ' . $gmlas_feature_table . ' to gml class ' . $gml_class . ': '. $sql;
@@ -3002,7 +3019,7 @@ class Gml_extractor {
 	*/
 	function autocomplete_fp_bebauungsflaeche_attributes($schema) {
 		// table might not exist in all loaded source data
-		if($this->check_if_table_exists_in_schema('fp_bebauungsflaeche', $schema)) {
+		if ($this->check_if_table_exists_in_schema('fp_bebauungsflaeche', $schema)) {
 			//besondereartderbaulnutzung should be filled before allgartderbaulnutzung in separate query, as it might require filled attributes
 			$sql = "UPDATE
 								" . $schema . ".fp_bebauungsflaeche
@@ -3049,6 +3066,24 @@ class Gml_extractor {
 							END;";
 			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		}
+	}
+
+	function check_class_without_bereich_id_exists($class, $schema) {
+		$object_without_bereich_id_exists = false;
+		if($this->check_if_table_exists_in_schema($class, $schema)) {
+			$sql =
+			"SELECT
+				EXiSTS(
+					SELECT * FROM " . $schema . "." . strtolower($class) . "
+					WHERE gehoertzubereich_href IS NULL
+				)";
+			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+			$result = pg_fetch_row($ret[1]);
+			if ($result[0] === 't') {
+				$object_without_bereich_id_exists = true;
+			}
+		}
+		return $object_without_bereich_id_exists;
 	}
 }
 ?>
