@@ -2187,7 +2187,6 @@ class stelle {
 				ul.start_aktiv, 
 				ul.use_geom,
 				ul.group_id,
-				parent_id,
 				string_agg(ul2.stelle_id::text, ',') as used_layer_parent_id,
 				string_agg(s.bezeichnung, ',') as used_layer_parent_bezeichnung
 			FROM
@@ -2218,8 +2217,7 @@ class stelle {
 				ul.start_aktiv, 
 				ul.use_geom,
 				ul.requires,
-				ul.group_id,
-				stellen_hierarchie.parent_id
+				ul.group_id
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
