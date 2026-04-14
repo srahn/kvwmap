@@ -15447,16 +15447,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
 	/**
-	 * Function activate only the layer with $layer_id if given
+	 * Function activate the layer with $layer_id if given
 	 * and zoom to it for rolle if $zoom_to_layer_extent is true
-	 * All other layers has been reseted to status 0.
 	 * And it reads rolle settings.
 	 * @param int $layer_id
 	 * @param bool $zoom_to_layer_extent
 	 */
-	function activate_layer_only($layer_id, $zoom_to_layer_extent = false) {
+	function activate_layer($layer_id, $zoom_to_layer_extent = false) {
 		if ($layer_id) {
-			$this->reset_layers(NULL);
 			$this->user->rolle->setOneLayer($layer_id, 1);
 		}
 		$this->user->rolle->readSettings();
