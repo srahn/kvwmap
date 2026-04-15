@@ -136,15 +136,12 @@ function update_stellen_visibility(){
 	}
 	.apf-template-div-default, .apf-template-div {
 		background-color: #f8f8f9; 
-		border-width:1px 0px 1px 1px;
-		border-style: solid;
-		border-color: #bbb;
+		padding-top: 30px;
 	}
 	.apf-template-div {
 		position: relative;
 		display: block; 
 		overflow-x: auto;
-		padding-top: 30px;
 	}
 	.apt-main-td {
 		width:280px;
@@ -155,18 +152,25 @@ function update_stellen_visibility(){
 		margin: 10px 0px 20px 0px;
 	}
 	.apt-bezeichnung {
-		height: 40px;
+		height: 22px;
 		width: 286px;
 		margin-top: 0;
+		padding-top: 8;
+		z-index: 1000;
+	}
+
+	#stellenscrolltable.scrolled .apt-bezeichnung, #defaultscrolltable.scrolled .apt-bezeichnung{
+    box-shadow: 0 4px 4px -1px #bbb;
+	}
+	#stellendiv .apt-bezeichnung {
 		margin-right: -1px;
 		border-right: 1px solid #bbb;
-		padding-top: 8;
 	}
 	.apt-layerzugriffsrechte, .apt-layerexportrechte {
 		margin: 10px 10px 0 14px;
 	}
 	.apt-use_parent_privileges {
-		margin-top: -30px;
+		margin: -2px 0 -2px 5px;
 	}	
 	.apt-attributrechte {
 		margin: 20px 0 10px 10px;
@@ -339,32 +343,22 @@ function update_stellen_visibility(){
   </tr>
   <tr>
   	<td>
-  		<table>
+  		<table cellpadding="0" cellspacing="2">
 				<tr>
 					<td></td>
 					<td></td>
 					<td><?
 						$stellenanzahl = ($this->stellen ? count($this->stellen['ID']) : 0);
-						if($stellenanzahl > 0){
-						$width1 = $width = 297*$stellenanzahl;
-						if($width > 1187)$width = 1187;
-						if($width1 > 1187){ ?>
-						<div id="upperscrollbar" style="overflow:hidden;width:1187px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
-							<div class="fetter px16" style="width:<? echo $width1; ?>px;height:40px; display: flex">
-							<?
-								for($s = 0; $s < count($this->stellen['ID']); $s++){
-									echo '<div style="width: 296px; text-align: center;" ' . ($this->stellen['parent_id'][$s]? 'class="unterstelle"' : '') . '>' . $this->stellen['Bezeichnung'][$s] . '</div>';
-								}
-							?>
-							</div>
-						</div>
-						<? } ?>
+						if ($stellenanzahl > 0) {
+							$width = 297*$stellenanzahl;
+							if ($width > 1187)$width = 1187; ?>
 					</td>
 				</tr>
   			<tr>
-			  	<td valign="top">
+			  	<td valign="top" style="border: 1px solid #bbb;">
 			  		<div class="apf-template-div-default">
-							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="0">
+							<table border="0" class="scrolltable" style="border-collapse:collapse" cellspacing="0" cellpadding="0">
+							<tbody id="defaultscrolltable" style="max-height: 650px" onscroll="document.getElementById('stellenscrolltable').scrollTop=this.scrollTop">
 								<tr>  	
 			  					<? $template_div = 'default'; ?>
 								<? include(LAYOUTPATH.'snippets/attribute_privileges_template.php'); ?>
@@ -372,10 +366,10 @@ function update_stellen_visibility(){
 							</table>
 						</div>
 					<td>	
-					<td valign="top">
+					<td valign="top" style="border: 1px solid #bbb;">
 						<div id="stellendiv" class="apf-template-div <? if ($this->formvars['stellen_visibility'] != '') {echo 'filtered';}?>" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="0" class="scrolltable" style="border-collapse:collapse" cellspacing="0" cellpadding="0">
-							<tbody style="max-height: 650px">
+							<tbody id="stellenscrolltable" style="max-height: 650px" onscroll="document.getElementById('defaultscrolltable').scrollTop=this.scrollTop">
 								<tr>
 							<?
 								for($s = 0; $s < count($this->stellen['ID']); $s++){
@@ -409,7 +403,28 @@ function update_stellen_visibility(){
 <input type="hidden" name="to_layer_id" value="">
 <script type="text/javascript">
 
-	if(document.getElementById("stellendiv"))document.getElementById("stellendiv").scrollLeft="<? echo $this->formvars['scrollposition']; ?>"
+let isSyncing = false;
+
+function syncScroll(source, target) {
+	source.addEventListener('scroll', () => {
+			if (isSyncing) return;
+			isSyncing = true;
+			if (source.scrollTop > 0) {
+				source.classList.add('scrolled');
+			} 
+			else {
+				source.classList.remove('scrolled');
+			}
+			target.scrollTop = source.scrollTop;
+			isSyncing = false;
+	});
+}
+
+const stellenscrolltable = document.getElementById('stellenscrolltable');
+const defaultscrolltable = document.getElementById('defaultscrolltable');
+
+syncScroll(stellenscrolltable, defaultscrolltable);
+syncScroll(defaultscrolltable, stellenscrolltable);
 
 </script>
 
