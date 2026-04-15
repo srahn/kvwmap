@@ -1615,7 +1615,7 @@ class user {
 			UPDATE
 				kvwmap.user
 			SET
-				userdata_checking_time = CURRENT_TIMESTAMP
+				userdata_checking_time = CURRENT_TIMESTAMP(0)
 			WHERE
 				id = " . $this->id . "
 		";
