@@ -343,8 +343,14 @@ function update_stellen_visibility(){
 						$width1 = $width = 297*$stellenanzahl;
 						if($width > 1187)$width = 1187;
 						if($width1 > 1187){ ?>
-						<div id="upperscrollbar" style="overflow:auto; overflow-y:hidden;width:1187px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
-							<div style="width:<? echo $width1; ?>px;height:1px"></div>
+						<div id="upperscrollbar" style="overflow:hidden;width:1187px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
+							<div class="fetter px16" style="width:<? echo $width1; ?>px;height:40px; display: flex">
+							<?
+								for($s = 0; $s < count($this->stellen['ID']); $s++){
+									echo '<div style="width: 296px; text-align: center;" ' . ($this->stellen['parent_id'][$s]? 'class="unterstelle"' : '') . '>' . $this->stellen['Bezeichnung'][$s] . '</div>';
+								}
+							?>
+							</div>
 						</div>
 						<? } ?>
 					</td>
@@ -361,7 +367,7 @@ function update_stellen_visibility(){
 						</div>
 					<td>	
 					<td valign="top">
-						<div id="stellendiv" class="apf-template-div <? if ($this->formvars['stellen_visibility'] != '') {echo 'filtered';}?>" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
+						<div id="stellendiv" class="apf-template-div <? if ($this->formvars['stellen_visibility'] != '') {echo 'filtered';}?>" style="width:<? echo $width; ?>px;max-height: 700px; overflow: auto;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?
