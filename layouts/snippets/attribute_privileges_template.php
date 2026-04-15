@@ -27,7 +27,7 @@
 		?>"
 >
 <div class="apt-main-div">
-	<div class="apt-bezeichnung">
+	<div class="apt-bezeichnung scrolltable_header">
 		<? if($this->stelle->id != '' AND $this->layer[0]['name'] != ''){ ?>
 		<span class="fetter px16"><? echo $this->stelle->Bezeichnung; ?></span>
 		<? }elseif($this->layer[0]['name'] != ''){ ?>

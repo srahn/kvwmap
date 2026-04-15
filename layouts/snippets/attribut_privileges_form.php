@@ -141,9 +141,10 @@ function update_stellen_visibility(){
 		border-color: #bbb;
 	}
 	.apf-template-div {
-		 float:right; 
-		 overflow:auto; 
-		 overflow-y:hidden;
+		position: relative;
+		display: block; 
+		overflow-x: auto;
+		padding-top: 30px;
 	}
 	.apt-main-td {
 		width:280px;
@@ -155,15 +156,20 @@ function update_stellen_visibility(){
 	}
 	.apt-bezeichnung {
 		height: 40px;
+		width: 286px;
+		margin-top: 0;
+		margin-right: -1px;
+		border-right: 1px solid #bbb;
+		padding-top: 8;
 	}
 	.apt-layerzugriffsrechte, .apt-layerexportrechte {
-		margin: 10px 10px 0 4px;
+		margin: 10px 10px 0 14px;
 	}
 	.apt-use_parent_privileges {
 		margin-top: -30px;
 	}	
 	.apt-attributrechte {
-		margin: 20px 0 10px 0;
+		margin: 20px 0 10px 10px;
 	}
 	.apt-attributrechte table{
 		border-spacing: 0;
@@ -358,7 +364,7 @@ function update_stellen_visibility(){
   			<tr>
 			  	<td valign="top">
 			  		<div class="apf-template-div-default">
-							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
+							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="0">
 								<tr>  	
 			  					<? $template_div = 'default'; ?>
 								<? include(LAYOUTPATH.'snippets/attribute_privileges_template.php'); ?>
@@ -367,8 +373,9 @@ function update_stellen_visibility(){
 						</div>
 					<td>	
 					<td valign="top">
-						<div id="stellendiv" class="apf-template-div <? if ($this->formvars['stellen_visibility'] != '') {echo 'filtered';}?>" style="width:<? echo $width; ?>px;max-height: 700px; overflow: auto;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
-							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
+						<div id="stellendiv" class="apf-template-div <? if ($this->formvars['stellen_visibility'] != '') {echo 'filtered';}?>" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
+							<table border="0" class="scrolltable" style="border-collapse:collapse" cellspacing="0" cellpadding="0">
+							<tbody style="max-height: 650px">
 								<tr>
 							<?
 								for($s = 0; $s < count($this->stellen['ID']); $s++){
