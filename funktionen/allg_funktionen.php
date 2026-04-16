@@ -3129,4 +3129,32 @@ function get_attribute_option($attributes, $i, $option_key) {
 	return $option;
 }
 
+function imagettftext_wrap($image, $fontsize, $angle, $x, $y, $color, $font, $text, $maxwidth, $direction = 'down') {
+	$words = explode(' ', $text);
+	$lines = [];
+	$currentline = '';
+	foreach ($words as $word) {
+		$testLine = $currentline . ($currentline ? ' ' : '') . $word;
+		$box = imagettfbbox($fontsize, 0, $font, $testLine);
+		$textwidth = max($box[2], $box[4]) - min($box[0], $box[6]);
+		if ($textwidth > $maxwidth) {
+			$lines[] = $currentline;
+			$currentline = $word;
+		} 
+		else {
+			$currentline = $testLine;
+		}
+	}
+	if ($currentline) {
+		$lines[] = $currentline;
+	}
+	if ($direction == 'up') {
+		$y =  $y - ($fontsize * 1.4 * (count($lines) - 1));
+	}
+	foreach ($lines as $line) {
+		imagettftext($image, $fontsize, $angle, $x, $y, $color, $font, $line);
+		$y +=  $fontsize * 1.4;
+	}
+}
+
 ?>

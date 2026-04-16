@@ -2,7 +2,7 @@
   error_reporting(E_ERROR | E_PARSE);
 	include (CLASSPATH.'class.ezpdf.php');
   $pdf=new Cezpdf();
-	$pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Courier.afm');
+	$pdf->selectFont('Courier.afm');
 	$table_data = array();
 
   $table_data[] = array('key' => '', 'value' => 'Angaben zum Antragsteller');
@@ -61,7 +61,7 @@
 
   $table_data = array_map(
     function($row) {
-      return array('key' => utf8_decode($row['key']), 'value' => utf8_decode($row['value']));
+      return array('key' => $row['key'], 'value' => $row['value']);
     },
     $table_data
   );
@@ -69,7 +69,7 @@
 	$pdf->ezTable(
 		$table_data,
 		array('key' => 'Parameter', 'value' => 'Wert'),
-    utf8_decode('Antrag zur Baumfällgenehmigung Nr: ' . $antrag_id),
+    'Antrag zur Baumfällgenehmigung Nr: ' . $antrag_id,
 		array(
 			'showHeadings' => 0,
 			'shaded' => 1,

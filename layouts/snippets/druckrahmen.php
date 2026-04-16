@@ -527,9 +527,38 @@ function art_hide(){
         <tr>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="watermarkposy" value="<? echo $this->Document->selectedframe[0]['watermarkposy'] ?>" size="5"></td>
-        	<td colspan="1">Drehwinkel:&nbsp;<input type="text" name="watermarkangle" value="<? echo $this->Document->selectedframe[0]['watermarkangle'] ?>" size="3">°</td>
-        	<td colspan="3" style="border-right:1px solid #C3C7C3">Transparenz:&nbsp;<input type="text" name="watermarktransparency" value="<? echo $this->Document->selectedframe[0]['watermarktransparency'] ?>" size="1"></td>
-        	<td colspan="2" align="center"><input type="text" name="watermarksize" value="<? echo $this->Document->selectedframe[0]['watermarksize'] ?>" size="5">&nbsp;pt</td>
+        	<td colspan="1">Transparenz:&nbsp;<input type="text" name="watermarktransparency" value="<? echo $this->Document->selectedframe[0]['watermarktransparency'] ?>" size="2"></td>
+        	<td colspan="3" style="border-right:1px solid #C3C7C3">Drehwinkel:&nbsp;<input type="text" name="watermarkangle" value="<? echo $this->Document->selectedframe[0]['watermarkangle'] ?>" size="3">°</td>
+        	<td colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="watermarksize" value="<? echo $this->Document->selectedframe[0]['watermarksize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('watermarkcolor', $this->Document->selectedframe[0]['watermarkcolor']); ?>
+						</div>
+					</td>
+        </tr>
+
+				<tr>
+          <td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">Urheberrechte</td>
+        </tr>
+        <tr>
+        	<td style="border-top:1px solid #C3C7C3;">&nbsp;x:</td>
+        	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="copyrightposx" value="<? echo $this->Document->selectedframe[0]['copyrightposx'] ?>" size="5"></td>
+        	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=4></td>
+        	<td style="border-top:1px solid #C3C7C3;" colspan=2 align="center">
+						<?php echo output_select('font_copyright', $this->Document->fonts, $this->Document->selectedframe[0]['font_copyright']); ?>
+        	</td>
+        </tr>
+        <tr>
+        	<td>&nbsp;y:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="copyrightposy" value="<? echo $this->Document->selectedframe[0]['copyrightposy'] ?>" size="5"></td>
+        	<td colspan="1">Transparenz:&nbsp;<input type="text" name="copyrighttransparency" value="<? echo $this->Document->selectedframe[0]['copyrighttransparency'] ?>" size="2"></td>
+					<td colspan="3" style="border-right:1px solid #C3C7C3">Breite: <input type="text" name="copyrightwidth" value="<? echo $this->Document->selectedframe[0]['copyrightwidth'] ?>" size="5"></td>
+        	<td colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="copyrightsize" value="<? echo $this->Document->selectedframe[0]['copyrightsize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('copyrightcolor', $this->Document->selectedframe[0]['copyrightcolor']); ?>
+						</div>
+					</td>
         </tr>
 
         <tr>

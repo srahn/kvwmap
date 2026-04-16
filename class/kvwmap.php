@@ -6943,8 +6943,26 @@ echo '			</table>
     $angle = $frame['watermarkangle'];
     $textposy = $frame['mapheight'] - $frame['watermarkposy'];
     $mapimage = imagecreatefromjpeg(IMAGEPATH.basename($this->img['hauptkarte']));
-    $red = ImageColorAllocatealpha ($mapimage, 255, 0, 0, $frame['watermarktransparency']);
-    imagettftext($mapimage, $textsize*$this->map_factor, $angle, $textposx*$this->map_factor, $textposy*$this->map_factor, $red, dirname(FONTSET).'/arial.ttf', $text);
+		$r = $this->Docu->colors[$frame['watermarkcolor']]['red'];
+		$g = $this->Docu->colors[$frame['watermarkcolor']]['green'];
+		$b = $this->Docu->colors[$frame['watermarkcolor']]['blue'];
+    $color = ImageColorAllocatealpha ($mapimage, $r, $g, $b, $frame['watermarktransparency']);
+    imagettftext($mapimage, $textsize*$this->map_factor, $angle, $textposx*$this->map_factor, $textposy*$this->map_factor, $color, PDF_FONT_PATH . '/' . $frame['font_watermark'], $text);
+    imagejpeg($mapimage,IMAGEPATH.basename($this->img['hauptkarte']), 100);
+  }
+
+	function addcopyright($frame) {
+    $text = $this->get_copyrights('list');
+    $textsize = $frame['copyrightsize'];
+    $textposx = $frame['copyrightposx'];
+    $width = $frame['copyrightwidth'];
+    $textposy = $frame['mapheight'] - $frame['copyrightposy'];
+    $mapimage = imagecreatefromjpeg(IMAGEPATH.basename($this->img['hauptkarte']));
+		$r = $this->Docu->colors[$frame['copyrightcolor']]['red'];
+		$g = $this->Docu->colors[$frame['copyrightcolor']]['green'];
+		$b = $this->Docu->colors[$frame['copyrightcolor']]['blue'];
+    $color = ImageColorAllocatealpha ($mapimage, $r, $g, $b, $frame['copyrighttransparency']);
+    imagettftext_wrap($mapimage, $textsize*$this->map_factor, 0, $textposx*$this->map_factor, $textposy*$this->map_factor, $color, PDF_FONT_PATH . '/' . $frame['font_copyright'], $text, $width*$this->map_factor, 'up');
     imagejpeg($mapimage,IMAGEPATH.basename($this->img['hauptkarte']), 100);
   }
 
@@ -7631,7 +7649,7 @@ echo '			</table>
 
     # Erzeugen neue pdf-Klasse
     $pdf=new Cezpdf();
-    $pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/Helvetica-Bold.afm');
+    $pdf->selectFont('Helvetica-Bold.afm');
 
     $massstab = explode('.', $this->map_scaledenom);
     $row = 712;
@@ -7661,6 +7679,7 @@ echo '			</table>
   }
 
 	function createMapPDF($frame_id, $preview, $fast = false) {
+		include_once(CLASSPATH.'kartendrucklayout.php');
 		$this->sanitize([
 			'name' => 'text',
 			'center_x' => 'float', 'center_y' => 'float',
@@ -7968,6 +7987,11 @@ echo '			</table>
 				$this->addwatermark($this->Docu->activeframe[0]);
 			}
 
+			# Urheberrechte hinzufügen
+			if($this->Docu->activeframe[0]['copyrightposx'] != 0){
+				$this->addcopyright($this->Docu->activeframe[0]);
+			}			
+
 			# Lagebezeichnung
 			if(defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART == 'Flurbezeichnung') {
 				include_once(PLUGINS.'alkis/model/kataster.php');
@@ -8001,44 +8025,60 @@ echo '			</table>
 			}
 
 			# Attribute
-			$this->gemeinde = utf8_decode($this->lagebezeichnung[1]['gemeindename'].' ('.$this->lagebezeichnung[1]['gemeinde'].')');
-			$this->gemarkung = utf8_decode($this->lagebezeichnung[1]['gemkgname'].' ('.$this->lagebezeichnung[1]['gemkgschl'].')');
-			$this->flur = utf8_decode($this->lagebezeichnung[1]['flur']);
-			$this->flurstueck = utf8_decode($this->lagebezeichnung[1]['flurst']);
-			$this->lage = utf8_decode($this->lagebezeichnung[1]['strasse']).' '.$this->lagebezeichnung[1]['hausnummer'];
+			$this->gemeinde = $this->lagebezeichnung[1]['gemeindename'].' ('.$this->lagebezeichnung[1]['gemeinde'].')';
+			$this->gemarkung = $this->lagebezeichnung[1]['gemkgname'].' ('.$this->lagebezeichnung[1]['gemkgschl'].')';
+			$this->flur = $this->lagebezeichnung[1]['flur'];
+			$this->flurstueck = $this->lagebezeichnung[1]['flurst'];
+			$this->lage = $this->lagebezeichnung[1]['strasse'].' '.$this->lagebezeichnung[1]['hausnummer'];
 			$this->date = date("d.m.Y");
 			$this->scale = $this->formvars['printscale'];
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['datecolor']);
-			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_date']);
-			if($this->Docu->activeframe[0]['datesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
+			if ($this->Docu->activeframe[0]['font_date'] AND $this->Docu->activeframe[0]['datesize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['datecolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_date']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['scalecolor']);
-			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_scale']);
-			if($this->Docu->activeframe[0]['scalesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
+			if ($this->Docu->activeframe[0]['font_scale'] AND $this->Docu->activeframe[0]['scalesize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['scalecolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_scale']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
+			}
 
-			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_oscale']);
-			if($this->Docu->activeframe[0]['oscalesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');
+			if ($this->Docu->activeframe[0]['font_oscale'] AND $this->Docu->activeframe[0]['oscalesize'] > 0) {
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_oscale']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['lagecolor']);
-			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_lage']);
-			if($this->Docu->activeframe[0]['lagesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
+			if ($this->Docu->activeframe[0]['font_lage'] AND $this->Docu->activeframe[0]['lagesize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['lagecolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_lage']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemeindecolor']);
-			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemeinde']);
-			if($this->Docu->activeframe[0]['gemeindesize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);
+			if ($this->Docu->activeframe[0]['font_gemeinde'] AND $this->Docu->activeframe[0]['gemeindesize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemeindecolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_gemeinde']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemarkungcolor']);
-			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemarkung']);
-			if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
+			if ($this->Docu->activeframe[0]['font_gemarkung'] AND $this->Docu->activeframe[0]['gemarkungsize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['gemarkungcolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_gemarkung']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurcolor']);
-			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flur']);
-			if($this->Docu->activeframe[0]['flursize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
+			if ($this->Docu->activeframe[0]['font_flur'] AND $this->Docu->activeframe[0]['flursize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurcolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_flur']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
+			}
 
-			$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurstcolor']);
-			$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flurst']);
-			if($this->Docu->activeframe[0]['flurstsize'] > 0)$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
+			if ($this->Docu->activeframe[0]['font_flurst'] AND $this->Docu->activeframe[0]['flurstsize'] > 0) {
+				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['flurstcolor']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_flurst']);
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
+			}
 
 			# Freie Graphiken
 			for($j = 0; $j < count($this->Docu->activeframe[0]['bilder']); $j++){
@@ -8057,7 +8097,7 @@ echo '			</table>
 			for($j = 0; $j < count($this->Docu->activeframe[0]['texts']); $j++){
 				$color_id = $this->Docu->activeframe[0]['texts'][$j]['color'];
 				$this->Docu->pdf->setColor($this->Docu->colors[$color_id]['red']/255, $this->Docu->colors[$color_id]['green']/255, $this->Docu->colors[$color_id]['blue']/255);
-				$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['texts'][$j]['font']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['texts'][$j]['font']);
 				if($this->Docu->activeframe[0]['texts'][$j]['text'] == '' AND $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] != ''){    // ein Freitext hat keinen Text aber in der Druckausschnittswahl wurde ein Text vom Nutzer eingefügt
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(10), ';', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
@@ -8101,7 +8141,7 @@ echo '			</table>
 			# Nutzer
 			if($this->Docu->activeframe[0]['usersize'] > 0){
 				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['usercolor']);
-				$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_user']);
+				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_user']);
 				$this->Docu->pdf->addText($this->Docu->activeframe[0]['userposx'],$this->Docu->activeframe[0]['userposy'],$this->Docu->activeframe[0]['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
 			}
 
@@ -8164,7 +8204,7 @@ echo '			</table>
 
 			# variable Freitexte
 			for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
-				$this->Docu->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/Helvetica.afm');
+				$this->Docu->pdf->selectFont('Helvetica.afm');
 				if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
 				else $height = 842;																																		# das ist die Höhe des Vorschaubildes
 				$ratio = $height/$this->Docu->height;
@@ -12364,7 +12404,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function layer_chart_Speichern($chart) {
 		include(LAYOUTPATH . 'languages/layer_chart_' . rolle::$language . '.php');
-		$chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite'), 'keep');
+		$chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite', 'color'), 'keep');
 		$results = $chart->validate();
 		if (empty($results)) {
 			if ($chart->get_id() == '') {
@@ -13087,8 +13127,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->user->rolle->deleteExportSettings($this->formvars);
 		}
 		if ($this->formvars['selected_layer_id'] != '') {
-			$this->layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-			$this->formvars['selected_group_id'] = $this->layerset[0]['gruppe'];
+			$this->layer = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$this->formvars['selected_group_id'] = $this->layer[0]['gruppe'];
 			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
 			$layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
@@ -13126,7 +13166,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		if ($this->formvars['epsg'] == '') {
 			# originäres System
-			$this->formvars['epsg'] = $this->layerset[0]['epsg_code'];
+			$this->formvars['epsg'] = $this->layer[0]['epsg_code'];
 		}
 		$this->saveMap('');
 		$currenttime = date('Y-m-d H:i:s',time());
@@ -13304,7 +13344,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL);
-		if ($formvars['stelle'] != '' AND $formvars['selected_layer_id'] != '') {
+		if ($formvars['selected_layer_id'] != '') {
 			$stellen = explode('|', $formvars['stelle']);
 			foreach ($stellen as $stelleid) {
 				$stelle = new stelle($stelleid, $this->pgdatabase);
@@ -13315,10 +13355,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				$stelle->set_attributes_privileges($formvars, $this->attributes);
 				$stelle->set_layer_privileges($formvars);
+				$mapdb->set_default_layer_privileges($formvars, $this->attributes);
 			}
-		}
-		elseif ($formvars['selected_layer_id'] != '') {
-			$mapdb->set_default_layer_privileges($formvars, $this->attributes);
 		}
 	}
 
@@ -14140,7 +14178,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           if ($poly_id != '' AND $showpolygon == true){
             $PolygonAsSVG = $this->pgdatabase->selectPolyAsSVG($poly_id, $this->user->rolle->epsg_code);
             $PolygonAsSVG = transformCoordsSVG($PolygonAsSVG);
-            $this->zoomToPolygon('u_polygon', $poly_id,20, $this->user->rolle->epsg_code);
+            $this->zoomToPolygon('kvwmap.u_polygon', $poly_id,20, $this->user->rolle->epsg_code);
             $this->user->rolle->saveSettings($this->map->extent);
             $this->user->rolle->readSettings();
             $this->formvars['newpath'] = $PolygonAsSVG;
@@ -15301,13 +15339,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	function zweifaktor_authentifizierung() {
-		include_once(CLASSPATH . 'ZweiFaktor.php');
-		$this->main = 'zweifaktors.php';
-		$this->output();
-	}	
 	
-	function get_copyrights(){
+	function get_copyrights($format = 'html'){
+		$copyrights = [];
 		$sql = "
 			SELECT 
 				string_agg(" . ($this->Stelle->useLayerAliases ? 'COALESCE(l.alias, l.name)' : 'l.name') . ", ', ') as layer, 
@@ -15324,15 +15358,27 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 1);
 		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$output = '<table>';
 		while ($rs = pg_fetch_assoc($ret[1])){
 			$rs['layer'] = replace_params_rolle($rs['layer']);
-      $output .= '<tr>
-							<td>' . $rs['layer'] . '</td>
-							<td>' . set_href($rs['beschreibung']) . '</td>
-						</tr>';
+			$copyrights[] = $rs;
     }
-		$output .= '</table>';
+		switch ($format) {
+			case 'html' : {
+				$output = '<table>';
+				foreach ($copyrights as $copyright) {
+					$output .= '
+							<tr>
+								<td>' . $copyright['layer'] . '</td>
+								<td>' . set_href($copyright['beschreibung']) . '</td>
+							</tr>';
+				}
+				$output .= '</table>';
+			} break;
+
+			case 'list' : {
+				$output = implode(', ', array_column($copyrights, 'beschreibung'));
+			}
+		}
 		return $output;
 	}
 
@@ -15399,16 +15445,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
 	/**
-	 * Function activate only the layer with $layer_id if given
+	 * Function activate the layer with $layer_id if given
 	 * and zoom to it for rolle if $zoom_to_layer_extent is true
-	 * All other layers has been reseted to status 0.
 	 * And it reads rolle settings.
 	 * @param int $layer_id
 	 * @param bool $zoom_to_layer_extent
 	 */
-	function activate_layer_only($layer_id, $zoom_to_layer_extent = false) {
+	function activate_layer($layer_id, $zoom_to_layer_extent = false) {
 		if ($layer_id) {
-			$this->reset_layers(NULL);
 			$this->user->rolle->setOneLayer($layer_id, 1);
 		}
 		$this->user->rolle->readSettings();
@@ -22374,13 +22418,18 @@ DO $$
     $sql = "
 			SELECT
 				id,
-				bezeichnung
+				bezeichnung,
+				string_agg(parent_id::text, ',') as parent_id
 			FROM
-				kvwmap.stelle,
-				kvwmap.used_layer
+				kvwmap.used_layer,
+				kvwmap.stelle
+				LEFT JOIN kvwmap.stellen_hierarchie ON child_id = stelle.id
 			WHERE
 				used_layer.stelle_id = stelle.id AND
 				used_layer.layer_id = " . $layer_id . "
+			GROUP BY
+				id,
+				bezeichnung
 			ORDER BY
 				Bezeichnung
 		";
@@ -22393,6 +22442,7 @@ DO $$
     while ($rs = pg_fetch_assoc($ret[1])) {
       $stellen['ID'][] = $rs['id'];
       $stellen['Bezeichnung'][] = $rs['bezeichnung'];
+			$stellen['parent_id'][] = $rs['parent_id'];
     }
     return $stellen;
   }

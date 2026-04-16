@@ -48,7 +48,7 @@ class drucklayout {
 	}
 
 	function get_fonts() {
-		$font_files = searchdir(WWWROOT . APPLVERSION . 'fonts/PDFClass/', true);
+		$font_files = searchdir(PDF_FONT_PATH, true);
 		$fonts = array();
 		foreach($font_files AS $font_file) {
 			if (strpos($font_file, 'php_') === false) {
