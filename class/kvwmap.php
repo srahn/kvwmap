@@ -13344,7 +13344,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL);
-		if ($formvars['stelle'] != '' AND $formvars['selected_layer_id'] != '') {
+		if ($formvars['selected_layer_id'] != '') {
 			$stellen = explode('|', $formvars['stelle']);
 			foreach ($stellen as $stelleid) {
 				$stelle = new stelle($stelleid, $this->pgdatabase);
@@ -13355,10 +13355,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				$stelle->set_attributes_privileges($formvars, $this->attributes);
 				$stelle->set_layer_privileges($formvars);
+				$mapdb->set_default_layer_privileges($formvars, $this->attributes);
 			}
-		}
-		elseif ($formvars['selected_layer_id'] != '') {
-			$mapdb->set_default_layer_privileges($formvars, $this->attributes);
 		}
 	}
 

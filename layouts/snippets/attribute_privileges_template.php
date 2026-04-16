@@ -188,16 +188,8 @@ if ($this->layer[0]['name'] != '' AND count($this->attributes) != 0) { ?>
 	<div class="apt-defaultrechteanstelle">
 		<a href="javascript:get_from_default('<? echo $attributenames; ?>','<? echo $default_stellen_ids; ?>');"><? echo $default_privileges_link_text; ?></a>
 	</div>
-	<div class="apt-attributrechtespeichern">
-		<input type="button" onclick="save('<? echo $save_stellen_ids; ?>');" name="speichern" value="<? echo $this->strSave; ?>">
-	</div>
-<?		} ?>
-	<div class="apt-bezeichnung">
-		<span class="fetter px16">
-			<? if($this->stelle->id != '' AND $this->layer[0]['name'] != ''){ echo $this->stelle->Bezeichnung; } else { echo '&nbsp;'; } ?>
-		</span>
-	</div>
-<?	} ?>						
+<?		}
+	} ?>						
 <? 
 } else { ?>
 		<div>Keine Attribute zu diesem Layer</div>

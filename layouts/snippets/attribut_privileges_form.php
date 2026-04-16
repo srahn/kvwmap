@@ -138,14 +138,19 @@ function update_stellen_visibility(){
 		background-color: #f8f8f9; 
 		padding-top: 30px;
 	}
+	.apf-template-div-default tbody{
+		scrollbar-width: none;
+	}
 	.apf-template-div {
 		position: relative;
 		display: block; 
 		overflow-x: auto;
 	}
-	.apt-main-td {
-		width:280px;
+	.apt-main-td:not(:last-child) {
 		border-right: 1px solid #bbb;
+	}	
+	.apt-main-div {
+		min-width:286px;
 	}
 	.apt-bezeichnung, .apt-defaultrechteanstelle, .apt-attributrechtespeichern {
 		text-align: center;
@@ -158,11 +163,13 @@ function update_stellen_visibility(){
 		padding-top: 8;
 		z-index: 1000;
 	}
-
+	.apf-template-div-default .apt-bezeichnung {
+		width: 305px;
+	}
 	#stellenscrolltable.scrolled .apt-bezeichnung, #defaultscrolltable.scrolled .apt-bezeichnung{
     box-shadow: 0 4px 4px -1px #bbb;
 	}
-	#stellendiv .apt-bezeichnung {
+	#stellendiv .apt-main-td:not(:last-child) .apt-bezeichnung {
 		margin-right: -1px;
 		border-right: 1px solid #bbb;
 	}
@@ -317,7 +324,7 @@ function update_stellen_visibility(){
 				<div style="flex-grow: 2; text-align: center; position: relative">
 					<div style="display:flex; justify-content: center; position: absolute; width: 100%;">
 						<div style="margin-top: 3px;">Stellen:&nbsp;</div>
-						<select name="stellen_visibility[]" id="stellen_visibility" style="z-index: 1000; height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
+						<select name="stellen_visibility[]" id="stellen_visibility" style="z-index: 10000; height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
 							<option value="">- alle -</option>
 							<?
 							for($i = 0; $i < count($this->stellen['ID']); $i++){
@@ -390,7 +397,11 @@ function update_stellen_visibility(){
 		</td>
   </tr>
   <tr> 
-    <td colspan="4" >&nbsp;</td>
+    <td colspan="4" >
+			<div class="apt-attributrechtespeichern">
+				<input type="button" onclick="save('<? echo $save_stellen_ids; ?>');" name="speichern" value="<? echo $this->strSave; ?>">
+			</div>
+		</td>
   </tr>
   <? } ?>
 </table>
