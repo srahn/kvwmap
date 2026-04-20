@@ -507,7 +507,7 @@ if ($gast_export === false) {
 					$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
 					if (strpos(strtolower($GUI->formvars['format']), 'json') !== false) {
 						$response = array(
-							'error' => 'agreement missing',
+							'error' => 'AGREEMENT_MISSING',
 							'error_msg' => 'Der Datenschutzerklärung wurde noch nicht zugestimmt.',
 							'agreement_url' => URL,
 							'agree_param' => 'agreement=1',
