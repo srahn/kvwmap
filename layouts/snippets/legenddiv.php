@@ -48,7 +48,7 @@
 							'output' => $layer_selection['name']
 						);
 					},
-					$layer_selections
+					$layer_selections ?? []
 				),
 				$this->user->rolle->layer_selection,
 				1,
