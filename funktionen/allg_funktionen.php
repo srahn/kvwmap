@@ -2024,6 +2024,85 @@ function getArrayOfChars() {
 	return $characters;
 }
 
+function create_document_hash($layer_id, $document) {
+	if (document_exists_local($layer_id, $document)) {
+		return hash_file('sha256', get_local_path($layer_id, $document));
+	}
+	if (document_exists_remote($document)) {
+		return hash('sha256', url_get_contents($document));
+	}
+	return false;
+}
+
+function document_exists_local($layer_id, $document) {
+	$local_path = get_local_path($layer_id, $document);
+	return file_exists($local_path);
+}
+
+function document_exists_remote($document) {
+	if (is_valid_url($document)) {
+		$headers = @get_headers(urlEncodeUrl($document));
+		return is_array($headers) && strpos($headers[0], '200') !== false;
+	}
+	return false;
+}
+
+function get_local_path($layer_id, $document) {
+	if (is_local_file($document)) {
+		return explode('&original_name', $document)[0];
+	}
+	global $GUI;
+	include_once(CLASSPATH . 'Layer.php');
+	$layer = Layer::find_by_id($GUI, $layer_id);
+	if (
+		is_valid_url($document) AND
+		strpos($document, $layer->get('document_url')) === 0
+	) {
+    return rtrim($layer->get('document_path'), '/') . '/' . end(explode('/', $document));
+	}
+	return '';
+}
+
+function is_local_file($pfad) {
+	return (strpos($pfad, '&original_name=') !== false);
+}
+
+function is_valid_url($url) {
+	$parts = parse_url($url);
+	return filter_var(urlEncodeUrl($url), FILTER_VALIDATE_URL) !== false AND
+		isset($parts['scheme'], $parts['host']) AND
+		in_array(strtolower($parts['scheme']), ['http', 'https'], true);
+}
+
+function urlEncodeUrl($url) {
+  $url = trim($url);
+  $parts = parse_url($url);
+  if (!$parts || !isset($parts['scheme'], $parts['host'])) {
+    return false;
+  }
+
+	$scheme = $parts['scheme'] . '://';
+	$host   = $parts['host'];
+	$port   = isset($parts['port']) ? ':' . $parts['port'] : '';
+
+	// Path sauber encoden
+	$path = '';
+  if (isset($parts['path'])) {
+    $segments = explode('/', $parts['path']);
+    $segments = array_map('rawurlencode', $segments);
+    $path = implode('/', $segments);
+  }
+  // Query optional encoden
+  $query = '';
+  if (isset($parts['query'])) {
+    parse_str($parts['query'], $q);
+    $query = '?' . http_build_query($q);
+  }
+  // Fragment optional encoden
+  $fragment = isset($parts['fragment']) ? '#' . rawurlencode($parts['fragment']) : '';
+  return $scheme . $host . $port . $path . $query . $fragment;
+}
+
 function url_get_contents($url, $username = NULL, $password = NULL, $useragent = NULL) {
 	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
@@ -3146,4 +3225,20 @@ function get_attribute_option($attributes, $i, $option_key) {
 	return $option;
 }
 
+function is_datatype_value_path($value_path) {
+	$count = count($value_path);
+	return $count >= 4
+    && is_int($value_path[$count - 1])
+    && is_int($value_path[$count - 2]);
+}
+
+function get_value_by_path(array $array, array $path) {
+	foreach ($path as $key) {
+		if (!isset($array[$key])) {
+			return null; // oder Exception
+		}
+		$array = $array[$key];
+	}
+	return $array;
+}
 ?>

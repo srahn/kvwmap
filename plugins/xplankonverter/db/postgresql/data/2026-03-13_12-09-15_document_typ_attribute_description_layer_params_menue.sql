@@ -59,7 +59,7 @@ BEGIN;
     END
   $$;
 
-  INSERT INTO kvwmap.layer_parameter (key, alias, options_sql, multiple)
-  VALUES ('plan_gml_id', 'Plan-ID', 'SELECT gml_id AS value, xplankonverter.plan_anzeigename(name, nummer, planart[1], (gemeinde[1]).gemeindename) AS output FROM xplan_gml.xp_plan', false);
+  INSERT INTO kvwmap.layer_parameter (key, alias, options_sql, multiple, default_value)
+  VALUES ('plan_gml_id', 'Plan-ID', 'SELECT gml_id AS value, xplankonverter.plan_anzeigename(name, nummer, planart[1], (gemeinde[1]).gemeindename) AS output FROM xplan_gml.xp_plan', false, '');
 
 COMMIT;

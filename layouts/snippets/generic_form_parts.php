@@ -5,6 +5,7 @@
 	global $strShowAll;
 	global $strNewEmbeddedPK;
 	global $hover_preview;
+	global $strShowHashButtonTitle;
 	
 	function output_table($table) {
 		$output = '';
@@ -114,10 +115,12 @@
 	}
 
 	/**
+	 * Generiert das Formular-Element für ein Attribut, einen Array-Typ oder einen Nutzer-Datentyp
+	 * @param int $j Counter für Attribute
 	 * @param int $k Counter for objects found in a layer or objects in an array of a specific data type
 	 * @param int $e Counter for array-elements
 	 */
-	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL, $e = NULL){
+	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL, $e = NULL, $value_path = array()) {
 		$datapart = '';
 		$after_attribute = '';
 		global $strShowPK;
@@ -161,11 +164,17 @@
 			$after_attribute .= '<input type="hidden" id="visibility_rules_'.$attributes['name'][$j].'" value="'.htmlentities($attributes['visibility_rules'][$j]).'">';
 		}
 
-		###### Array-Typ #####
-		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
-			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
-			else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
 
+		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
+			###### Array-Typ #####
+			if ($field_id != NULL) {
+				$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			}
+			else {
+				$id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
+				$value_path[] = $oid;
+				$value_path[] = $name;
+			}
 			if ($attributes['form_element_type'][$j] == 'Auswahlfeld' AND $attributes['req_by'][$j] != '') {
 				$onchange .= 'update_require_attribute(this, \''.$attributes['req_by'][$j].'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributes['name']).'\'));';
 			}
@@ -198,7 +207,7 @@
 				if (in_array($attributes2['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 					$datapart .= calendar($attributes2['type'][$j], $field_id, $attributes['privileg'][$j]).'&nbsp;';
 				}
-				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $change_all, $onchange2, $id.'_'.$e, $field_id, $id.' '.$old_field_class, $e);
+				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $change_all, $onchange2, $id.'_'.$e, $field_id, $id.' '.$old_field_class, $e, [...$value_path, $e]);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1'){
 					$datapart .= '
@@ -220,10 +229,16 @@
 			return $datapart.$after_attribute;
 		}
 
-		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
-			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
-			else $id = $k.'_'.$name;	# oberste Ebene
+			###### Nutzer-Datentyp #####
+			if($field_id != NULL) {
+				$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			}
+			else {
+				$id = $k.'_'.$name;	# oberste Ebene
+				$value_path[] = $oid;
+				$value_path[] = $name;
+			}
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j][$k];
 			if ($e !== NULL AND $e >= 0) {
@@ -261,7 +276,7 @@
 								</tr>
 								<tr>
 									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id, null, [...$value_path, $t]) . '
 									</td>
 								</tr>
 							';
@@ -270,7 +285,7 @@
 							$datapart .= '
 								<tr>
 									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id, null, [...$value_path, $t]) . '
 									</td>
 								</tr>
 							';
@@ -282,7 +297,7 @@
 									' . attribute_name($layer_id, $type_attributes, $t, $k, false, $field_id) . '
 									</td>
 									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id, null, [...$value_path, $t]) . '
 									</td>
 								</tr>';
 						}
@@ -299,6 +314,16 @@
 		}
 		else {
 			$id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene ($id kann eigentlich für alle Typen verwendet werden)
+			$value_path[] = $oid;
+			$value_path[] = $name;
+		}
+		// Hier soll das letzte Element durch den Namen des Attributes ersetzt werden
+		// Das soll aber nur passieren, wenn es am Ende der Index eines Elementes eines Datentypen steht.
+		// ToDo: Das muss noch mal angepasst werden, denn wenn ein Datentypattribut vom Typ Array ist und
+		// im Array selbst keine Datentypen, muss der Index am Ende erhalten bleiben obwohl im Pfad am Ende mind. 2 Integer stehen.
+		if (is_datatype_value_path($value_path)) {
+			$last_key = array_key_last($value_path);
+    	$value_path[$last_key] = $name;
 		}
 		if (in_array($attributes['type'][$j], ['numeric', 'float4', 'float8'])) {
 			$value = str_replace('.', ',', $value);
@@ -661,6 +686,9 @@
 
 			case 'Dokument': {
 				if ($value != '') {
+					include_once(CLASSPATH.'LayerAttribute.php');
+					$attr_obj = new LayerAttribute($gui);
+					$attribute_options = $attr_obj->get_options($attributes['options'][$j], 'Dokument');
 					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url'], $attributes['type'][$j], $layer_id, $oid, $name);
 					if ($preview['doc_src'] != '') {
 						$datapart .= '<table border="0"><tr><td class="' . ($preview['doc_type'] == 'local_img'? 'td_preview_image' : '') . '">';
@@ -690,7 +718,19 @@
 							$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
 						}
 						$datapart .= '</td></tr>';
-						$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $preview['original_name'] . ($preview['filesize'] ? ' (' . $preview['filesize'] . ')' : '') . '</span></td></tr>';
+						$datapart .= '
+							<tr>
+								<td colspan="2"><span id="image_original_name">
+									' . $preview['original_name'] . ($preview['filesize'] ? ' (' . $preview['filesize'] . ')' : '') . '</span>'
+									. ($attribute_options['show_hash_button'] ? '<a href="javascript:show_document_hash(' . $layer_id . ', \'' . htmlspecialchars(json_encode($value_path), ENT_QUOTES, 'UTF-8') . '\')" title="' . $strShowHashButtonTitle . '">
+										<span class="fa-stack hashtag-icon">
+  										<i class="fa fa-file-o fa-stack-2x"></i>
+											<i class="fa fa-hashtag fa-stack-1x"></i>
+										</span>
+									</a>' : '') . '
+								</td>
+							</tr>
+						';
 						$datapart .= '</table>';
 					}
 					else {
