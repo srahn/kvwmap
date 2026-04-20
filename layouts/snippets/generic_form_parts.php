@@ -951,7 +951,7 @@
 					$datapart .= ' readonly style="display:none;"';
 				}
 				else{
-					$datapart .= ' tabindex="1" style="width: 95%;"';
+					$datapart .= ' tabindex="1" style="max-width: 95%;"';
 				}
 				if($name == 'lock'){
 					$datapart .= ' type="hidden"';
