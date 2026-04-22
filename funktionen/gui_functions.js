@@ -149,7 +149,11 @@ function ahahDone(url, targets, req, actions, successCallback) {
 						case "setouterhtml":
 							targets[i].outerHTML = responsevalues[i];
 						break;
-						
+
+						case "showMessage":
+							message(JSON.parse(responsevalues[i]), 1000, 2000, top, null, null, 'OK', null, '600px');
+						break;
+
 						case "prependhtml":
 							targets[i].insertAdjacentHTML('beforebegin', responsevalues[i]);
 						break;

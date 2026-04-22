@@ -135,6 +135,7 @@ class Zusammenzeichnung {
       form_data.append('format', 'json_result');
       form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
+      form_data.append('digital_mv', $('#digital_mv').is(':checked'));
       form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
 			form_data.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'));
       var xhttp = new XMLHttpRequest();
