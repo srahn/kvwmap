@@ -35,7 +35,7 @@
 					'>';
 					$output .= $cell['content'];
 					if ($cell['id']) {
-						$output .= '<div onmousedown="resizestart(document.getElementById(\'' . $cell['id'] . '\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
+						$output .= '<div onmousedown="resizestart(event, document.getElementById(\'' . $cell['id'] . '\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
 					}
 					$output .= '</td>';
 				}

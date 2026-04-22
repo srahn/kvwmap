@@ -532,6 +532,7 @@ class rolle {
 			rolle::$language = $rs['language'];
 			$this->hideMenue = ($rs['hidemenue'] == 'f'? false : true);
 			$this->hideLegend = ($rs['hidelegend'] == 'f'? false : true);
+			$this->legendwidth = $rs['legendwidth'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -1780,6 +1781,20 @@ class rolle {
 				layer_id = " . $formvars['layer_options_open'] . "
 		";
 		$this->debug->write("<p>file:rolle.php class:rolle->removeTransparency:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+
+	function setLegendWidth($width) {
+		$sql = "
+			UPDATE
+				kvwmap.rolle
+			SET
+				legendwidth = " . $width . "
+			WHERE
+				user_id= " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " 
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->setLegendWidth:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 

@@ -598,9 +598,6 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['reloadmap']){
 					$GUI->loadMap('DataBase');
 					$GUI->scaleMap($GUI->formvars['nScale']);
-					// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-					// $GUI->drawMap();
-					// $GUI->saveMap('');
 					$GUI->legende = $GUI->create_dynamic_legend();
 					$GUI->output();
 				}

@@ -475,7 +475,7 @@ function getBrowserSize(){
 
 function resizemap2window(){
 	getBrowserSize();
-	params = 'go=ResizeMap2Window&browserwidth='+document.GUI.browserwidth.value+'&browserheight='+document.GUI.browserheight.value;
+	params = 'go=ResizeMap2Window&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value + '&legendwidth=' + document.getElementById('legenddiv').clientWidth;
 	if(document.getElementById('map_frame') != undefined){
 		startwaiting();
 		document.location.href='index.php?'+params+'&nScale='+document.GUI.nScale.value+'&reloadmap=true';			// in der Hauptkarte neuladen
@@ -648,8 +648,11 @@ function dragstart(element){
 	}
 }
 
-function resizestart(element, type){
+function resizestart(event, element, type){
+	preventDefault(event);
 	if(document.fullyLoaded){
+		posx =  event.screenX;
+  	posy = event.screenY;
 		resizeobjekt = element;
 		resizetype = type;
 		dragx = posx - resizeobjekt.parentNode.offsetLeft;
