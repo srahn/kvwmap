@@ -1,3 +1,9 @@
+<div 
+	style="position: absolute; top: 0px; left: -1px; height: 100%; width: 5px; cursor: e-resize;" 
+	onmousedown="resizestart(event, document.getElementById('map'), 'e');" 
+	onmouseup="resizemap2window();">
+</div>
+
 <? if(!$this->simple_legend){ ?>
 	<table width="100%" border="0" cellpadding="0" cellspacing="0" id="legend_switch">
 		<tr>

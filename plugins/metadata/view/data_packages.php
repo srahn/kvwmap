@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="plugins/metadata/styles/metadata_styles.css">
 <script src="plugins/metadata/model/DataPackage.js"></script>
 <div id="metadata_data_packages_div">
-  <!-- style="min-width: <?php echo $this->user->rolle->nImageWidth + $sizes['layouts/gui.php']['legend']['width'] + 22; ?>">//-->
+  <!-- style="min-width: <?php echo $this->user->rolle->nImageWidth + $this->user->rolle->legendwidth + 22; ?>">//-->
   <h2 style="margin-top: 10px">Datenpakete zum Download</h2>
   <a href="index.php?go=metadata_show_data_packages" title="Inhalte auffrischen"><i class="fa fa-refresh" aria-hidden="true" title="Seite neu laden" onMouseOver="this.style.color='black'"
   onMouseOut="this.style.color='firebrick'" style="

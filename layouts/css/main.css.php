@@ -1584,6 +1584,7 @@ a.menuered:hover {
 }
 
 #legenddiv {
+	position: relative;
 	border-left: 1px solid #ccc;
 	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
@@ -1680,7 +1681,6 @@ a.menuered:hover {
 }
 
 #scrolldiv{
-	width: <?php echo ($size['legend']['width'] - 3); ?>px;
 	margin-right: 2px;
 	flex: 1 1 0; 
 	overflow:auto; 
@@ -1694,13 +1694,13 @@ a.menuered:hover {
 
 .normallegend {
 	float: right;
-	width: <?php echo ($size['legend']['width'] - 1); ?>px;
+	width: 100%;
 	vertical-align: top;
 }
 
 .slidinglegend_slideout {
+	width: <?php echo $this->user->rolle->legendwidth; ?>px;
 	cursor: pointer;
-	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
 	transform: translate3d(-<? echo ($size['legend']['hide_width'] + 2); ?>px,0px,0px);
 	transition: all 0.3s ease;
@@ -1713,9 +1713,9 @@ a.menuered:hover {
 }
 
 .slidinglegend_slidein {
-	right: -<?php echo $size['legend']['width']; ?>px;
+	width: <?php echo $this->user->rolle->legendwidth; ?>px;
 	position: absolute;
-	transform: translate3d(-<?php echo $size['legend']['width']; ?>px,0px,0px);
+	transform: translate3d(-<?php echo ($this->user->rolle->legendwidth - $size['legend']['hide_width']); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
 

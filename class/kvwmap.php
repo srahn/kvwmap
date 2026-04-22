@@ -996,7 +996,6 @@ echo '			</table>
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerset = $mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL);     # class_load_level: 0 = keine Klassen laden
 		$this->user->rolle->saveDrawingorder($layerset, $this->formvars);
-		$this->resizeMap2Window();
 		$this->user->rolle->readSettings();
 		$this->neuLaden();
 		$this->legende = $this->create_dynamic_legend();
@@ -4311,7 +4310,7 @@ echo '			</table>
 		$width = $this->formvars['browserwidth'] -
 			$size['margin']['width']
 			- ($this->user->rolle->hideMenue == 1 ? $size['menue']['hide_width'] : $size['menue']['width'])
-			- ($gui_light? 0 : ($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']))
+			- ($gui_light? 0 : ($hideLegend == 1 ? $size['legend']['hide_width'] : ($this->formvars['legendwidth'] ?: $this->user->rolle->legendwidth)))
 			- ($gui_light ? 0 : 18);	# Breite für möglichen Scrollbalken
 
 		$height = $this->formvars['browserheight'] -
@@ -4329,6 +4328,9 @@ echo '			</table>
 
 		// $this->debug->write('<br>resizeMap2Window for gui: ' . $this->user->rolle->gui . ' to: ' . $width . 'x' . $height, 4, false);
 		$this->user->rolle->setSize($width.'x'.$height);
+		if ($this->formvars['legendwidth']) {
+			$this->user->rolle->setLegendWidth($this->formvars['legendwidth']);
+		}
 		$this->user->rolle->readSettings();
 	}
 
