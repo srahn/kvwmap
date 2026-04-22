@@ -300,6 +300,10 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
+			case 'save_legend_role_parameters' : {
+				$GUI->save_legend_role_parameters($GUI->formvars);
+			} break;
+
 			case 'get_route' : {
 				$GUI->getRoute($GUI->formvars);
 			} break;
@@ -862,9 +866,6 @@ function go_switch($go, $exit = false) {
 			case 'Sachdaten' : {
 				if ($GUI->formvars['CMD'] != '') {
 					$GUI->user->rolle->set_selected_button($GUI->formvars['CMD']);
-				}
-				if ($GUI->formvars['legendtouched']) {
-					$GUI->save_legend_role_parameters();
 				}
 				$GUI->queryMap();
 			}break;
@@ -2185,16 +2186,6 @@ function go_switch($go, $exit = false) {
 				$GUI->queryMap();
 			} break;
 
-			case "neu Laden" : {
-				$GUI->neuLaden();
-				// $GUI->saveMap('');
-				// $currenttime=date('Y-m-d H:i:s',time());
-				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				// $GUI->drawMap();
-				$GUI->legende = $GUI->create_dynamic_legend();
-				$GUI->output();
-			} break;
-
 			case "zoom_to_max_layer_extent" : {
 				$GUI->loadMap('DataBase');
 				$GUI->zoom_to_max_layer_extent($GUI->formvars['layer_id']);
@@ -2348,6 +2339,12 @@ function go_switch($go, $exit = false) {
 
 			case 'show_background_jobs_log' : {
 				readfile(LOGPATH . 'background_jobs_log.htm');
+			} break;
+
+			case "neu Laden" : {
+				$GUI->neuLaden();
+				$GUI->legende = $GUI->create_dynamic_legend();
+				$GUI->output();
 			} break;
 
 			default : {

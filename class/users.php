@@ -1521,13 +1521,19 @@ class user {
 			$columns['stelle_id'] = $stellen[0];
 		}
 		$sql = "
-			INSERT INTO 
-				kvwmap.user
-			(" . implode(', ', array_keys($columns)) . ")
-			VALUES	
+			SELECT setval(
+				'kvwmap.user_id_seq',
+				GREATEST(
+					(SELECT MAX(id) FROM kvwmap.user),
+					(SELECT last_value FROM kvwmap.user_id_seq)
+				)
+			);
+			INSERT INTO kvwmap.user (" . implode(', ', array_keys($columns)) . ")
+			VALUES
 				(" . implode(', ', $columns) . ")
-			RETURNING id";
-		
+			RETURNING id
+		";
+
 		// echo '<p>SQL zum Eintragen eines neuen Nutzers: ' . $sql;
 		# Abfrage starten
 		$ret = $this->database->execSQL($sql,4, 0);
@@ -1609,7 +1615,7 @@ class user {
 			UPDATE
 				kvwmap.user
 			SET
-				userdata_checking_time = CURRENT_TIMESTAMP
+				userdata_checking_time = CURRENT_TIMESTAMP(0)
 			WHERE
 				id = " . $this->id . "
 		";

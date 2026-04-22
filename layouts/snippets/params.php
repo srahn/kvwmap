@@ -14,7 +14,8 @@
 							layerParamsBar.fadeIn()
 			}
 
-			function updateLayerParams() { <?
+			function updateLayerParams() {
+				data = ''; <?
 				foreach($params AS $param) {
 					if ($param['multiple'] == '1') {
 						echo "
@@ -28,9 +29,9 @@
 							valuesString = document.getElementById('layer_parameter_" . $param['key'] . "').value;
 						";
 					} ?>
-					data = 'go=setLayerParams&layer_parameter_<? echo $param['key']; ?>=' + valuesString; <?
+					data += '&layer_parameter_<? echo $param['key']; ?>=' + valuesString; <?
 				} ?>;
-				ahah('index.php', data, [''], ['execute_function']);
+				ahah('index.php', 'go=setLayerParams' + data, [''], ['execute_function']);
 				document.GUI.legendtouched.value = 1;
 				neuLaden();
 			}

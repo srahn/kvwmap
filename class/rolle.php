@@ -260,6 +260,7 @@ class rolle {
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['queryable'] = ($rs['queryable'] === 't');
+			$rs['querymap'] = ($rs['querymap'] === 't');
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
 					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
@@ -1299,7 +1300,7 @@ class rolle {
 				l.query as pfad,
 				1 as queryable,
 				gle_view,
-				'(' || rollenfilter || ')' as filter
+				'(' || nullif(rollenfilter, '') || ')' as filter
 			FROM
 				kvwmap.rollenlayer AS l
 			WHERE
@@ -1511,18 +1512,6 @@ class rolle {
 
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
-		if ($this->singlequery == 1) {
-			$sql ='
-				UPDATE 
-					kvwmap.u_rolle2used_layer 
-				SET 
-					querystatus = 0
-				WHERE 
-					user_id = ' . $this->user_id . ' AND 
-					stelle_id = ' . $this->stelle_id;
-			$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
-			$this->database->execSQL($sql,4, $this->loglevel);
-		}
 		foreach ($formvars['qLayer'] as $layer_id => $query_status) {
 			if ($layer_id != '' AND $query_status !== '') {	
 				$table = ($layer_id > 0 ? 'u_rolle2used_layer' : 'rollenlayer');
@@ -1535,7 +1524,7 @@ class rolle {
 					WHERE 
 						user_id = ' . $this->user_id . ' AND 
 						stelle_id = ' . $this->stelle_id . ' AND 
-						' . $id . ' = ' . $layer_id;
+						' . $id . ' = ' . abs($layer_id);
 				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
 				$this->database->execSQL($sql,4, $this->loglevel);
 			}

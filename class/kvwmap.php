@@ -6347,7 +6347,7 @@ echo '			</table>
 		$this->formvars['data'] = $datastring;
 		$this->formvars['query'] = $select;
 		$this->formvars['datentyp'] = $layerset[0]['datentyp'];
-		$this->formvars['classitem'] = $layerset[0]['classitem'];
+		$this->formvars['classitem'] = ($auto_class_attribute != ''? $layerset[0]['classitem'] : NULL);
 		$this->formvars['connectiontype'] = 6;
 		if ($layerset[0]['labelitem'] != 'Cluster_FeatureCount') {
 			$this->formvars['labelitem'] = $layerset[0]['labelitem'];
@@ -13115,8 +13115,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->user->rolle->deleteExportSettings($this->formvars);
 		}
 		if ($this->formvars['selected_layer_id'] != '') {
-			$this->layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-			$this->formvars['selected_group_id'] = $this->layerset[0]['gruppe'];
+			$this->layer = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$this->formvars['selected_group_id'] = $this->layer[0]['gruppe'];
 			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
 			$layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
@@ -13154,7 +13154,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		if ($this->formvars['epsg'] == '') {
 			# originäres System
-			$this->formvars['epsg'] = $this->layerset[0]['epsg_code'];
+			$this->formvars['epsg'] = $this->layer[0]['epsg_code'];
 		}
 		$this->saveMap('');
 		$currenttime = date('Y-m-d H:i:s',time());
@@ -14165,7 +14165,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           if ($poly_id != '' AND $showpolygon == true){
             $PolygonAsSVG = $this->pgdatabase->selectPolyAsSVG($poly_id, $this->user->rolle->epsg_code);
             $PolygonAsSVG = transformCoordsSVG($PolygonAsSVG);
-            $this->zoomToPolygon('u_polygon', $poly_id,20, $this->user->rolle->epsg_code);
+            $this->zoomToPolygon('kvwmap.u_polygon', $poly_id,20, $this->user->rolle->epsg_code);
             $this->user->rolle->saveSettings($this->map->extent);
             $this->user->rolle->readSettings();
             $this->formvars['newpath'] = $PolygonAsSVG;
@@ -15381,25 +15381,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Wenn ein Button im Kartenfenster gewählt wurde,
     # werden auch die Einstellungen aus der Legende übernommen
-    $this->user->rolle->setAktivLayer($this->formvars, $this->Stelle->id, $this->user->id);
+    $this->user->rolle->setAktivLayer($this->formvars, $this->Stelle->id, $this->user->id, false);
     $this->user->rolle->setQueryStatus($this->formvars);
 	}
 
 	function neuLaden() {
-		$this->sanitize([
-			'selected_rollenlayer_id' => 'int',
-			'delete_rollenlayer_type' => 'text'
-		]);
 		$this->save_legend_role_parameters();
 		if (
 			in_array(value_of($this->formvars, 'last_button'), array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery'))
 		) {
 			// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
 			$this->user->rolle->set_selected_button($this->formvars['last_button']);
-		}
-		if (value_of($this->formvars, 'delete_rollenlayer') != '') {
-			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
 		}
 		# Karteninformationen lesen
 		$this->loadMap('DataBase', array(), ($this->formvars['strict_layer_name'] ? true : false));
@@ -17703,7 +17695,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){
 					$rand = $this->map_scaledenom/1000;
 					$tolerance = $this->map_scaledenom/10000;
-					if($client_epsg == 4326){
+					if(in_array($layer_epsg, [4326, 4258])){
 						$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
 						$rand = $rand / 60000;		# wegen der Einheit Grad
 					}
@@ -18355,10 +18347,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$mapDB->deleteRollenlayer($this->formvars['id'], $this->formvars['delete_rollenlayer_type']);
 		$this->loadMap('DataBase');
-		// $currenttime=date('Y-m-d H:i:s',time());
-		// $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-		// $this->saveMap('');
-		// $this->drawMap();
 		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
@@ -18973,7 +18961,7 @@ class db_mapObj{
 					$rs['layer_id']
 				)
 			);
-			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data') AS $key) {
+			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data', 'wms_name') AS $key) {
 				$rs[$key] = replace_params_rolle(
 					$rs[$key],
 					['duplicate_criterion' => $rs['duplicate_criterion']]
@@ -21018,7 +21006,7 @@ DO $$
 		# due to spaces in string concatenations with these attributes
 		$formvars['maintable'] = trim($formvars['maintable']);
 		$formvars['schema'] = trim($formvars['schema']);
-		foreach (array('pfad', 'data', 'metalink', 'terms_of_use_link', 'duplicate_criterion', 'comment') AS $var_name) {
+		foreach (array('pfad', 'data', 'metalink', 'terms_of_use_link', 'duplicate_criterion', 'comment', 'kurzbeschreibung') AS $var_name) {
 			$formvars[$var_name] = pg_escape_string($formvars[$var_name]);
 		}
 		if ($formvars['id'] == '') {

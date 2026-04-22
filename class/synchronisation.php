@@ -894,6 +894,7 @@ class synchro {
 		$sql_obj = new sql($row->sql);
 		$not_allowed_columns = $sql_obj->remove_not_allowed_columns($allowed_columns);
 		$adjusted_sql .= $sql_obj->to_sql();
+		$adjusted_sql = $sql_obj->remove_empty_image_path($adjusted_sql);
 		return $adjusted_sql;
 	}
 

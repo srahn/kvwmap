@@ -2,6 +2,7 @@
 
 error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
 
+include('../../../credentials.php');
 include('../../../config.php');
 include(PLUGINS.'nachweisverwaltung/config/config.php');
 include(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');

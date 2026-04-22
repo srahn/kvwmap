@@ -54,6 +54,7 @@ if (is_logout($GUI->formvars)) {
 	else {
 		#$GUI->add_message('info', $strLoggedOutAlready);
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
+		logout();
 	}
 	$GUI->formvars['go'] = '';
 }

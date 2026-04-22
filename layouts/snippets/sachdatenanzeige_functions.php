@@ -181,7 +181,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	check_visibility_rule = function(layer_id, rule, scope, k) {
 		// Leaf-Regel (kein logic → einfache Bedingung)
 		if (!rule.logic && rule.attribute) {
-			const field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+			var field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+			if (field == undefined) {
+				field = scope.querySelector('.attr_' + layer_id + '_' + rule.attribute);		// bei Datentypattributen notwendig
+			}
 			return field_has_value(field, rule.operator, rule.value);
 		}
 		// Logische Gruppe (AND / OR)
@@ -852,7 +855,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	switch_gle_view1 = function(layer_id, from_mode, to_mode, button){
 		var active_button = enclosingForm.querySelector('.gle-view-button.active');
 		var div = enclosingForm.querySelector('#result_' + layer_id + '>#layer>div.records');
-		var req = 'go=switch_gle_view&chosen_layer_id=' + layer_id + '&mode=' + to_mode;
+		var req = 'go=switch_gle_view&chosen_layer_id=' + layer_id + '&mode=' + to_mode + '&anzahl=' + enclosingForm.anzahl.value;
 		var reload = false;
 
 		if (from_mode == 0 && to_mode > 0 || from_mode > 0 && to_mode == 0){		// Wechsel zwischen 0 und 1/2
