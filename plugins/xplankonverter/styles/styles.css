@@ -815,3 +815,8 @@ nav > ul > li > ul > li:hover > ul {
 #message_box {
   top: 29% !important;
 }
+
+.digital_mv_bedingung {
+  list-style-type: circle;
+  display: none;
+}

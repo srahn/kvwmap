@@ -104,15 +104,19 @@ class LayerAttribute extends PgObject {
 			case 'SubFormFK':
 				$options = $this->get_SubFormFK_options($settings);
 				break;
-			// case 'checkbox':
-			// 	$options = $this->get_checkbox_options($settings);
-			// 	break;
+			case 'Dokument':
+			 	$options = $this->get_Dokument_options($settings);
+				break;
 			// case 'radio':
 			// 	$options = $this->get_radio_options($settings);
 			// 	break;
 			default:
-				$options = array();
-				break;
+				if (strpos($settings, '{') === 0) {
+					$options = array();
+				}
+				else {
+					$options = $settings;
+				}
 		}
 		return $options;
 	}
@@ -150,6 +154,19 @@ class LayerAttribute extends PgObject {
 		// 	$options['ref_keys'][0]['pkey'] = $colon_parts[1];
 		// 	$options['window_type'] = $semicolon_parts[1] ?? '';
 		// }
+		return $options;
+	}
+
+	function get_Dokument_options($settings) {
+		$options = array();
+		if (strpos($settings, '{') === 0) {
+			$json = json_decode($settings, true);
+			$options['dynamic_path'] = $json['dynamic_path'] ?? '';
+			$options['show_hash_button'] = $json['show_hash_button'] ?? false;
+		}
+		else {
+			$options['dynamic_path'] = (strpos(strtolower($settings), 'select') !== false ? $settings : '');
+		}
 		return $options;
 	}
 

@@ -1445,6 +1445,11 @@ function go_switch($go, $exit = false) {
 				$GUI->get_document();
 			} break;
 
+			case 'get_document_hash' : {
+				$GUI->check_csrf_token();
+				$GUI->get_document_hash();
+			} break;
+
 			case 'Dokument_Loeschen' : {
 				$GUI->check_csrf_token();
 				$GUI->sachdaten_speichern();
