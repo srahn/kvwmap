@@ -1758,31 +1758,29 @@ FROM
   }
 
   function deletepolygon($poly_id){
-    $sql = 'DELETE FROM u_polygon WHERE id = '.$poly_id;
+    $sql = 'DELETE FROM kvwmap.u_polygon WHERE id = '.$poly_id;
     #echo $sql;
     $ret = $this->execSQL($sql, 4, 0);
     return $ret;
   }
 
   function updatepolygon($wkt_string, $srid, $poly_id){
-    $sql = 'UPDATE u_polygon SET the_geom = st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), (select srid from geometry_columns where f_table_name = \'u_polygon\' and f_table_schema = \'public\')) WHERE id = '.$poly_id;
+    $sql = 'UPDATE kvwmap.u_polygon SET the_geom = st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), (select srid from geometry_columns where f_table_name = \'u_polygon\' and f_table_schema = \'kvwmap\')) WHERE id = '.$poly_id;
     #echo $sql;
     $ret = $this->execSQL($sql, 4, 0);
     return $ret;
   }
 
   function insertpolygon($wkt_string, $srid){
-    $sql = 'INSERT into u_polygon (the_geom) VALUES (st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), (select srid from geometry_columns where f_table_name = \'u_polygon\' and f_table_schema = \'public\')))';
+    $sql = 'INSERT into kvwmap.u_polygon (the_geom) VALUES (st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), (select srid from geometry_columns where f_table_name = \'u_polygon\' and f_table_schema = \'kvwmap\'))) RETURNING id';
     #echo $sql;
-    $ret = $this->execSQL($sql, 4, 0);
-    $sql = 'SELECT currval(\'u_polygon_id_seq\')';
     $ret = $this->execSQL($sql, 4, 0);
     $poly_id = pg_fetch_row($ret[1]);
     return $poly_id[0];
   }
 
   function selectPolyAsSVG($poly_id, $srid){
-    $sql = "SELECT st_assvg(st_transform(the_geom, ".$srid.")) FROM u_polygon WHERE id='".$poly_id."'";
+    $sql = "SELECT st_assvg(st_transform(the_geom, ".$srid.")) FROM kvwmap.u_polygon WHERE id='".$poly_id."'";
     $ret=$this->execSQL($sql,4, 0);
     $rs= pg_fetch_row($ret[1]);
     $poly=$rs[0];
@@ -1790,7 +1788,7 @@ FROM
   }
 
   function selectPolyAsText($poly_id, $srid){
-    $sql = "SELECT st_astext(st_transform(the_geom, ".$srid.")) FROM u_polygon WHERE id='".$poly_id."'";
+    $sql = "SELECT st_astext(st_transform(the_geom, ".$srid.")) FROM kvwmap.u_polygon WHERE id='".$poly_id."'";
     $ret=$this->execSQL($sql,4, 0);
     $rs= pg_fetch_row($ret[1]);
     $poly=$rs[0];
@@ -1798,7 +1796,7 @@ FROM
   }
 
   function getpolygon($poly_id, $srid){
-    $sql = 'SELECT st_transform(the_geom, '.$srid.') from u_polygon WHERE id = '.$poly_id;
+    $sql = 'SELECT st_transform(the_geom, '.$srid.') from kvwmap.u_polygon WHERE id = '.$poly_id;
     $ret = $this->execSQL($sql, 4, 0);
     if($ret[0]==0){
       $poly = pg_fetch_row($ret[1]);

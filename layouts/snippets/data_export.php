@@ -249,8 +249,8 @@ $j=0;
 											if (
 												$this->layerdaten['export_privileg'][$selectindex] <= $required['export_privileg'] AND
 												$this->attributes[$required['geom_attribute']] != '' OR
-												($this->layerset[0]['connectiontype'] == 9 AND $format == 'GeoJSON') OR
-												($this->layerset[0]['connectiontype'] == 6 AND $format == 'CSV')
+												($this->layer[0]['connectiontype'] == 9 AND $format == 'GeoJSON') OR
+												($this->layer[0]['connectiontype'] == 6 AND $format == 'CSV')
 											) {
 												echo '<option' . ($this->formvars['export_format'] == $format ? ' selected' : '') . ' value="' . $format . '">' . $format . '</option>';
 												if ($this->formvars['export_format'] == '') {
@@ -377,14 +377,14 @@ $j=0;
 								&nbsp;<? echo $strFilename; ?>:&nbsp;&nbsp;<input type="text" name="layer_name" value="<? echo sonderzeichen_umwandeln($this->layerdaten['Bezeichnung'][$selectindex]); ?>">
 							</td>
 						</tr>
-				<? 	if ($this->layerset[0]['metalink'] != '') { ?>
+				<? 	if ($this->layer[0]['metalink'] != '') { ?>
 						<tr>
 							<td>
 								<input type="checkbox" name="with_metadata_document" value="1" <? if ($this->formvars['with_metadata_document'] == 1)echo 'checked'; ?>> <? echo $strExportMetadatadocument; ?>
 							</td>
 						</tr>
 				<? 	}
-						if ($this->layerset[0]['terms_of_use_link'] != '') { ?>
+						if ($this->layer[0]['terms_of_use_link'] != '') { ?>
 						<tr style="display: none">
 							<td>
 								<input type="checkbox" name="with_terms_of_use_document" value="1" checked> <? echo $strExportTermsOfUsedocument; ?>

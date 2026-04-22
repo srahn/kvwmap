@@ -3244,3 +3244,27 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	padding: 4px;
 	margin-left: 7px;
 }
+
+.hashtag-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  background: white;
+  transition: background 0.2s ease;
+	font-size: 60%;
+	margin-bottom: 5px;
+}
+
+.hashtag-icon .fa {
+  color: firebrick;
+}
+
+.hashtag-icon .fa-hashtag {
+	margin-top: 5px
+}
+
+.hashtag-icon:hover .fa {
+  color: black;
+}

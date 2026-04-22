@@ -335,46 +335,46 @@
 	 * moves the data to uploaded_gml diretory, removes the tmp_dir and
 	 * finish with success and a success message.
 	*/
-	$GUI->xplankonverter_validate_uploaded_zusammenzeichnungen = function($upload_file, $tmp_dir) use ($GUI) {
+	$GUI->xplankonverter_validate_uploaded_zusammenzeichnungen = function($upload_file, $upload_path) use ($GUI) {
 		$success = false;
-		if (!is_dir($tmp_dir)) {
+		if (!is_dir($upload_path)) {
 			try {
-				mkdir($tmp_dir, 0770, true);
-				$deb_msg .= '<br>Verzeichnis ' . $tmp_dir . ' angelegt.';
+				mkdir($upload_path, 0770, true);
+				$deb_msg .= '<br>Verzeichnis ' . $upload_path . ' angelegt.';
 			} catch (Exception $ex) {
 				return array(
 					'success' => false,
-					'msg' => 'Das Verzeichnis ' . $tmp_dir . ' kann auf dem Server nicht angelegt werden. ' . $ex
+					'msg' => 'Das Verzeichnis ' . $upload_path . ' kann auf dem Server nicht angelegt werden. ' . $ex
 				);
 			}
 		}
 
 		try {
-			$deb_msg .= '<br>move ' . $upload_file['tmp_name'] . ' nach ' . $tmp_dir . $upload_file['name'];
-			move_uploaded_file($upload_file['tmp_name'], $tmp_dir . $upload_file['name']);
+			$deb_msg .= '<br>move ' . $upload_file['tmp_name'] . ' nach ' . $upload_path . $upload_file['name'];
+			move_uploaded_file($upload_file['tmp_name'], $upload_path . $upload_file['name']);
 		} catch (Exception $ex) {
 			return array(
 				'success' => false,
-				'msg' => 'Die hochgeladene Datei kann nicht als Datei ' . $tmp_dir . $upload_file['name'] . ' auf dem Server gespeichert werden. ' . $ex
+				'msg' => 'Die hochgeladene Datei kann nicht als Datei ' . $upload_path . $upload_file['name'] . ' auf dem Server gespeichert werden. ' . $ex
 			);
 		}
-
-		if (is_zip_file($tmp_dir . $upload_file['name'])) {
+		
+		if (is_zip_file($upload_path . $upload_file['name'])) {
 			$zip = new ZipArchive;
-			if ($zip->open($tmp_dir . $upload_file['name']) === FALSE) {
+			if ($zip->open($upload_path . $upload_file['name']) === FALSE) {
 				return array(
 					'success' => false,
-					'msg' => 'Die Zip-Datei ' . $tmp_dir . $upload_file['name'] . ' kann nicht geöffnet werden. ' . $ex
+					'msg' => 'Die Zip-Datei ' . $upload_path . $upload_file['name'] . ' kann nicht geöffnet werden. ' . $ex
 				);
 			}
-			$msg .= 'Extract ' . $tmp_dir . $upload_file['name'] . ' nach ' . $tmp_dir;
+			$msg .= 'Extract ' . $upload_path . $upload_file['name'] . ' nach ' . $upload_path;
 
 			try {
-				$zip->extractTo($tmp_dir);
+				$zip->extractTo($upload_path);
 			} catch (Exception $ex) {
 				return array(
 					'success' => false,
-					'msg' => 'Die Zip-Datei ' . $tmp_dir . $upload_file['name'] . ' kann nicht nach ' . $tmp_dir . ' ausgepakt werden. ' . $ex
+					'msg' => 'Die Zip-Datei ' . $upload_path . $upload_file['name'] . ' kann nicht nach ' . $upload_path . ' ausgepakt werden. ' . $ex
 				);
 			}
 			$zip->close();
@@ -382,19 +382,19 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => $deb_msg . 'Die Datei ' . $tmp_dir . $upload_file['name'] . ' ist keine Zip-Datei. Laden Sie die Zusammenzeichnung und ggf. Geltungsbereiche in einer Zip-Datei hoch.'
+				'msg' => $deb_msg . 'Die Datei ' . $upload_path . $upload_file['name'] . ' ist keine Zip-Datei. Laden Sie die Zusammenzeichnung und ggf. Geltungsbereiche in einer Zip-Datei hoch.'
 			);
 		}
 
 		try {
-			if (strpos($tmp_dir, XPLANKONVERTER_FILE_PATH . 'tmp/zusammenzeichnung_') !== false AND file_exists($tmp_dir . '__MACOSX')) {
-				exec('rm -R ' . $tmp_dir . '__MACOSX');
+			if (strpos($upload_path, XPLANKONVERTER_FILE_PATH . 'tmp/zusammenzeichnung_') !== false AND file_exists($upload_path . '__MACOSX')) {
+				exec('rm -R ' . $upload_path . '__MACOSX');
 			}
-			unlink($tmp_dir . $upload_file['name']);
+			unlink($upload_path . $upload_file['name']);
 		} catch (Exception $ex) {
 			return array(
 				'success' => false,
-				'msg' => 'Kann die hochgeladene Zip-Datei: ' . $tmp_dir . $upload_file['name'] . ' nicht löschen.' . $ex
+				'msg' => 'Kann die hochgeladene Zip-Datei: ' . $upload_path . $upload_file['name'] . ' nicht löschen.' . $ex
 			);
 		}
 
@@ -404,12 +404,32 @@
 
 		$konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']); # Create empty Konvertierungsobjekt
 
-		$upload_validation_result = $konvertierung->validate_uploaded_files($tmp_dir);
-		if (!$upload_validation_result['success']) {
-			return $upload_validation_result;
+		$upload_files = getAllFiles($upload_path);
+		if ($konvertierung->get('planart') == 'RP-Plan') {
+			$uploaded_xplangml_file = current($upload_files); // get the first file only
+			if ($uploaded_xplangml_file != $upload_path . $konvertierung->config['plan_file_name']) {
+				// Umbenennen der ersten Datei in den konfigurierten Namen.
+				// ToDo: Umstellen, so dass auch der Name von $uploaded_xplangml_file verwendet werden kann
+				// und nicht mehr umbenannt werden muss
+				rename($uploaded_xplangml_file, $upload_path . $konvertierung->config['plan_file_name']);
+			}
 		}
 
-		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . $upload_validation_result['plan_file_name']);
+		try {
+			$upload_validation_result = $konvertierung->validate_uploaded_files($upload_path, $upload_files, ($GUI->formvars['digital_mv'] === 'true' ? 'MV' : null));
+			if (!$upload_validation_result['success']) {
+				return $upload_validation_result;
+			}
+		} catch (Exception $ex) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler bei der Validierung der hochgeladenen Dateien. ' . $ex
+			);
+		}
+
+		$konvertierung->set_plan_file_name($upload_files);
+
+		$result_zusammenzeichnung = $konvertierung->xplanvalidator($upload_path . $konvertierung->get_plan_file_name());
 
 		if (!$result_zusammenzeichnung['success']) {
 			return $result_zusammenzeichnung;
@@ -418,12 +438,12 @@
 		$msg = $konvertierung->config['title'];
 
 		if ($konvertierung->get('planart') == 'FP-Plan') {
-			if (file_exists($tmp_dir . $zip_dir . 'Einzelfassungen.gml')) {
-				rename($tmp_dir . $zip_dir . 'Einzelfassungen.gml', $tmp_dir . 'Geltungsbereiche.gml');
+			if (file_exists($upload_path . $zip_dir . 'Einzelfassungen.gml')) {
+				rename($upload_path . $zip_dir . 'Einzelfassungen.gml', $upload_path . 'Geltungsbereiche.gml');
 			}
 
-			if (file_exists($tmp_dir . 'Geltungsbereiche.gml')) {
-				$result_geltungsbereiche = $konvertierung->xplanvalidator($tmp_dir . 'Geltungsbereiche.gml');
+			if (file_exists($upload_path . 'Geltungsbereiche.gml')) {
+				$result_geltungsbereiche = $konvertierung->xplanvalidator($upload_path . 'Geltungsbereiche.gml');
 				if (!$result_geltungsbereiche['success']) {
 					return $result_geltungsbereiche;
 				}
@@ -442,7 +462,7 @@
 			$GUI->formvars['planart'],
 			$GUI->Stelle->id,
 			$GUI->user->id,
-			$upload_validation_result['plan_file_name']
+			$konvertierung->get_plan_file_name()
 		);
 		if (!$result['success']) {
 			return array(
@@ -453,8 +473,8 @@
 		$konvertierung->create_directories();
 
 		# move files from tmp to upload folder from konvertierung
-		rename($tmp_dir, $konvertierung->get_file_path('uploaded_xplan_gml'));
-		$msg .= '<br>Temporäre Dateien von ' . $tmp_dir . ' nach ' .  $konvertierung->get_file_path('uploaded_xplan_gml') . ' kopiert.';
+		rename($upload_path, $konvertierung->get_file_path('uploaded_xplan_gml'));
+		$msg .= '<br>Temporäre Dateien von ' . $upload_path . ' nach ' .  $konvertierung->get_file_path('uploaded_xplan_gml') . ' kopiert.';
 
 		$result = $konvertierung->save_validation_report('Zusammenzeichnung', $result_zusammenzeichnung['report']);
 		# Der Validierungsreport der Geltungsbereiche wird nicht gespeichert, weil es nur einen Report pro Konvertierung geben kann und für die Geltungsbereiche

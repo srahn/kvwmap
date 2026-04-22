@@ -684,6 +684,8 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 		} else {
 			$attr['enums'][$key] = array();
 		}
+		// Solange es noch kvmobile Versionen <= 1.20.10 genutzt werden, muss der workaround gemacht werden, dass die vcheck attribute aus der ersten visibility_rules extrahiert werden. Wenn das erledigt ist, kann die nächste Zeile und die drei vcheck Attriubte unten im attributes Array aus dem Code raus.
+		$vcheck = ($attr['visibility_rules'][$key] ? json_decode($attr['visibility_rules'][$key], true) : null);
 
 		$attributes[$key] = array(
 			"index" => $attr['indizes'][$value],
@@ -703,7 +705,10 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 			"privilege" => $attr['privileg'][$key],
 			"default" => $attr['default'][$key],
 			'visible' => $attr['visible'][$key],
-			'visibility_rules' => $attr['visibility_rules'][$key]
+			'visibility_rules' => $attr['visibility_rules'][$key],
+			'vcheck_attribute' => ($vcheck ? $vcheck['rules'][0]['attribute'] : ''),
+			'vcheck_operator' => ($vcheck ? $vcheck['rules'][0]['operator'] : ''),
+			'vcheck_value' => ($vcheck ? $vcheck['rules'][0]['value'] : '')
 		);
 		if ($GUI->formvars['kvmobile_version'] >= '1.13.0') {
 			$attributes[$key]['options'] = $attr['options'][$key];

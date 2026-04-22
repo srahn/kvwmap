@@ -1100,6 +1100,15 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 
+	show_document_hash = function(layer_id, value_path) {
+		const params = new URLSearchParams({
+  		go: "get_document_hash",
+  		layer_id: layer_id,
+			value_path: value_path
+		});
+		ahah("index.php", params.toString(), new Array('message_box'), new Array('showMessage'));
+	}
+
 	daten_export = function(layer_id, anzahl, format){
 		enclosingForm.all.value = (document.getElementById('all_' + layer_id + '_2').checked? '1' : '');
 		if(enclosingForm.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten

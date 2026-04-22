@@ -196,7 +196,7 @@ class ALKIS {
 		return $nasfile;
 	}
 
-  function export_klassifizierung_csv($flurstuecke, $formvars){
+  function export_klassifizierung_csv($flurstuecke, $formvars, $eigentuemer_allowed){
 		if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
   	if($formvars['flurstkennz']){ $csv .= 'FlstKZ_kurz;';}
     if($formvars['gemkgname']){ $csv .= 'Gemkg-Name;';}
@@ -243,8 +243,10 @@ class ALKIS {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
-			$flst->Grundbuecher=$flst->getGrundbuecher();
-			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
+			if (isset($eigentuemer_allowed[$flurstkennz])) {
+				$flst->Grundbuecher=$flst->getGrundbuecher();
+				$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
+			}
 			$emzges_a = $flaeche_a = $emzges_agr = $flaeche_agr = $emzges_gr = $flaeche_gr = $emzges_gra = $flaeche_gra = 0;			
 			
 			$limit = count_or_0($flst->Klassifizierung)+2;
@@ -489,7 +491,7 @@ class ALKIS {
     print utf8_decode($csv);
   }
   
-  function export_eigentuemer_csv($flurstuecke, $formvars){
+  function export_eigentuemer_csv($flurstuecke, $formvars, $eigentuemer_allowed){
   	if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
   	if($formvars['flurstkennz']){ $csv .= 'FlstKZ_kurz;';}
     if($formvars['gemkgname']){ $csv .= 'Gemkg-Name;';}
@@ -537,8 +539,10 @@ class ALKIS {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
-      $flst->Grundbuecher=$flst->getGrundbuecher();
-			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
+			if (isset($eigentuemer_allowed[$flurstkennz])) {
+				$flst->Grundbuecher=$flst->getGrundbuecher();
+				$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
+			}
 				for($b = 0; $b < count_or_0($flst->Buchungen); $b++){
 					$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 					reset($Eigentuemerliste);
@@ -760,7 +764,7 @@ class ALKIS {
     print utf8_decode($csv);
   }
   
-  function export_nutzungsarten_csv($flurstuecke, $formvars){
+  function export_nutzungsarten_csv($flurstuecke, $formvars, $eigentuemer_allowed){
   	if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
   	if($formvars['flurstkennz']){ $csv .= 'FlstKZ_kurz;';}
     if($formvars['gemkgname']){ $csv .= 'Gemkg-Name;';}
@@ -809,8 +813,10 @@ class ALKIS {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
-      $flst->Grundbuecher=$flst->getGrundbuecher();
-			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
+			if (isset($eigentuemer_allowed[$flurstkennz])) {
+				$flst->Grundbuecher=$flst->getGrundbuecher();
+				$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
+			}
       $anzNutzung= count_or_0($flst->Nutzung);
 			for ($n = 0; $n < $anzNutzung; $n++){
 	      if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
@@ -1038,7 +1044,7 @@ class ALKIS {
     print utf8_decode($csv);
   }
 
-  function export_flurst_csv($flurstuecke, $formvars){
+  function export_flurst_csv($flurstuecke, $formvars, $eigentuemer_allowed){
     if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
   	if($formvars['flurstkennz']){ $csv .= 'FlstKZ_kurz;';}
     if($formvars['gemkgname']){ $csv .= 'Gemkg-Name;';}
@@ -1085,8 +1091,10 @@ class ALKIS {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
-			$flst->Grundbuecher=$flst->getGrundbuecher();
-			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
+			if (isset($eigentuemer_allowed[$flurstkennz])) {
+				$flst->Grundbuecher=$flst->getGrundbuecher();
+				$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
+			}
       if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
       if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
       if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}

@@ -16,7 +16,12 @@
 	*/
 ?>
 	<link rel="stylesheet" href="plugins/xplankonverter/styles/styles.css">
-	<script src="plugins/xplankonverter/model/Zusammenzeichnung.js"></script><?
+	<script src="plugins/xplankonverter/model/Zusammenzeichnung.js"></script>
+	<script>
+		function toggle_digital_mv_bedingungen(evt) {
+			$('.digital_mv_bedingung').css('display', (evt.checked ? 'list-item' : 'none'));
+		}
+	</script><?
 	if ($this->plan_title === 'Plan') { ?>
 		<br>
 		<h2><? echo $this->konvertierung->config['title']; ?></h2>
@@ -351,6 +356,8 @@
 				); ?> <span data-tooltip="Wenn ein Wert zwischen 2cm und 2m ausgewählt wird, wird die PostGIS-Funktion ST_SimplifyPreserveTopology mit der ausgewählten Toleranz auf alle Polygone und Linien der Fachdatengeometrien angewendet. Wird „-- Bitte Wählen --“ ausgewählt findet keine Vereinfachung statt. Der Default-Wert für Regionale Raumordnungsprogramme ist auf 1 m eingestellt." style="--left: -400px"><?
 			} ?>
 
+			<p style="margin-bottom: 8px;"><input id="digital_mv" type="checkbox" name="digital_mv" value="1" onchange="toggle_digital_mv_bedingungen(this);"/>&nbsp;Es handelt sich um einen Plan aus dem Digitalisierungsprojekt-MV:</p>
+
 			<p style="margin-bottom: 8px;">Die hoch zu ladenden Daten müssen folgende Eigenschaften aufweisen:</p>
 			<div style="
 				text-align: left;
@@ -365,6 +372,35 @@
 				"><?
 					echo $this->konvertierung->config['upload_bedingungen']; ?>
 					<li>Die XPlan-GML Datei muss eine Version 5.x haben.</li>
+					<li class="digital_mv_bedingung">Die XPlan-GML Datei muss der Namenskonvention DE__[8-stelliger AGS]__BP__[Plannummer]__[Dokumentenart] z.B. DE__13072006__BP__033__GP.gml entsprechen.</li>
+					<li class="digital_mv_bedingung">Es muss eine Excel-Datei zur Dokumentation der Erfassungsqualität enthalten sein mit gleichem Namen wie die GML-Datei nur statt GP Dokumentation_Erfassungsqualität und der Dateierweiterung .xlsx.</li>
+					<li class="digital_mv_bedingung">Externe Referenzen müssen einer Namenskonvention entsprechen:
+						<ul>
+							<li>DE</li>
+							<li>8-stelliger Gemeindeschlüssel</li>
+							<li>Planart (hier stets BP für B-Plan)
+							<li>n-stellige Plannummer inklusive jeglicher Plannummernzusätze
+							<li>Dokumentart<br>
+								Beispiel: DE__13072036__BP__01__PZ.pdf<br>
+								Um Konflikte bei der Benennung zu vermeiden, werden folgende differenzierte Kürzel für die verschiedenen Planarten eingeführt. Liste noch nicht endgültig festgelegt und nicht abschließend:<br>
+								<ul>
+									<li>BP – vorhabenbezogener BPlan</li>
+									<li>IS – Innenbereichssatzung</li>
+									<li>KS – Klarstellungssatzung</li>
+									<li>EnS – Entwicklungssatzung</li>
+									<li>ErS – Ergänzungssatzung</li>
+									<li>KES - Klarstellungs- und Ergänzungssatzung</li>
+									<li>AS – Außenbereichssatzung</li>
+								</ul>
+								Beispiele für die Anwendung der Planartenkürzel:
+								<ul>
+									<li>DE__13072036__BP__01__PZ.pdf</li>
+									<li>DE__13072036__vBP__01__PZ.pdf</li>
+									<li>DE__13072036__IS__01__PZ.pdf</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
 				</ul>
 			</div>
 			<p style="

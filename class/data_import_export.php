@@ -74,9 +74,11 @@ class data_import_export {
 				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, $this->ogr_unkown_srid($filename), $adjustments);
 			} break;
 			case 'xml' : case 'gml' : {
-				$layers = $this->ogr_get_layers($filename);
-				$this->unique_column = 'ogc_fid';
-				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, true, $adjustments);
+				if (strpos($filename, 'shp.xml') === false) {
+					$layers = $this->ogr_get_layers($filename);
+					$this->unique_column = 'ogc_fid';
+					$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, true, $adjustments);
+				}
 			} break;
 			case 'kml' : case 'kmz' : {
 				$layers = $this->ogr_get_layers($filename);

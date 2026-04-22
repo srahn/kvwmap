@@ -199,7 +199,7 @@
 		  $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 		  $data = $layerset[0]['data'];
     }
-		if($data == '')$data ="the_geom from (select distinct on (f.gml_id) f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1 order by gml_id, endet IS NULL desc, endet desc) as foo using unique oid using srid=" . $epsg;
+		if($data == '')$data ="the_geom from (select distinct on (f.gml_id) f.gml_id, endet, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1 order by gml_id, endet IS NULL desc, endet desc) as foo using unique gml_id using srid=" . $epsg;
 		$explosion = explode(' ', $data);
 		$datageom = $explosion[0];
 		$explosion = explode('using unique ', strtolower($data));
@@ -207,10 +207,13 @@
     $data = str_replace('$SCALE', '1000', $data);
     $select = getDataParts($data)['select'];
 		$orderbyposition = strpos(strtolower($select), ' order by ');
-		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
+		if($orderbyposition > 0) {
+      $orderby = substr($select, $orderbyposition);
+      $select = substr($select, 0, $orderbyposition);
+    }
 		if(strpos(strtolower($select), 'where') === false)$select .= " WHERE ";
 		else $select .= " AND ";
-		$select .= " flurstueckskennzeichen IN ('" . implode("','", $FlurstListe) . "')";
+		$select .= " flurstueckskennzeichen IN ('" . implode("','", $FlurstListe) . "') " . $orderby;
     $legendentext = "Flurstück" . (count_or_0($FlurstListe) > 1 ? 'e' : '');
     $legendentext .= " (".date('d.m. H:i',time())."): " . implode(" ", $FlurstListe);
     $datastring = $datageom." from (" . $select . ") as foo using unique " . $end;
@@ -1172,21 +1175,23 @@
       $flurstuecke = $ret[1];
       $alkis = new ALKIS($GUI->pgdatabase);
       $currenttime=date('Y-m-d H:i:s',time());
+      $ret = $GUI->Stelle->getFlurstueckeAllowed($flurstuecke, $GUI->pgdatabase, '_eigentuemer');
+		  $eigentuemer_allowed = array_flip($ret[1] ?? []); // zur schnelleren Suche mit isset() anstatt in_array()
       switch ($GUI->formvars['formnummer']){
       	case 'Flurstück' : {
-      		$alkis->export_flurst_csv($flurstuecke, $GUI->formvars);
+      		$alkis->export_flurst_csv($flurstuecke, $GUI->formvars, $eigentuemer_allowed);
       		$GUI->user->rolle->setConsumeCSV($currenttime,'Flurstück',count($flurstuecke));
       	}break;
       	case 'Nutzungsarten' : {
-      		$alkis->export_nutzungsarten_csv($flurstuecke, $GUI->formvars);
+      		$alkis->export_nutzungsarten_csv($flurstuecke, $GUI->formvars, $eigentuemer_allowed);
       		$GUI->user->rolle->setConsumeCSV($currenttime,'Nutzungsarten',count($flurstuecke));
       	}break;
       	case 'Eigentümer' : {
-      		$alkis->export_eigentuemer_csv($flurstuecke, $GUI->formvars);
+      		$alkis->export_eigentuemer_csv($flurstuecke, $GUI->formvars, $eigentuemer_allowed);
       		$GUI->user->rolle->setConsumeCSV($currenttime,'Eigentümer',count($flurstuecke));
       	}break;
       	case 'Klassifizierung' : {
-      		$alkis->export_klassifizierung_csv($flurstuecke, $GUI->formvars);
+      		$alkis->export_klassifizierung_csv($flurstuecke, $GUI->formvars, $eigentuemer_allowed);
       		$GUI->user->rolle->setConsumeCSV($currenttime,'Klassifizierung',count($flurstuecke));
       	}break;
       }
@@ -1198,7 +1203,7 @@
     $GUI->titel='Suche nach Grundbuchblättern';
 		$GUI->main = PLUGINS.'alkis/view/grundbuchblattsuchform.php';
     $grundbuch = new grundbuch('', '', $GUI->pgdatabase);
-    $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
+    $GemeindenStelle=$GUI->Stelle->getGemeindeIDs('_eigentuemer');
     if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])){   // Stelle ist auf Gemeinden eingeschränkt
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 			$ganze_gemarkungen = array_keys($GemeindenStelle['ganze_gemarkung']);
@@ -1351,7 +1356,7 @@
 	$GUI->nameSuchen = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		$layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-		$GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
+		$GemeindenStelle=$GUI->Stelle->getGemeindeIDs('_eigentuemer');
 		if(!empty($GemeindenStelle['ganze_gemeinde'])){
 			$Gemarkung=new gemarkung('',$GUI->pgdatabase);
 			$GemkgListe = $Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_keys($GemeindenStelle['ganze_gemarkung']));

@@ -2259,8 +2259,6 @@ function go_switch_xplankonverter($go) {
 			header('Content-Type: application/json');
 			$upload_file = $_FILES['upload_file'];
 			$tmp_dir = 	XPLANKONVERTER_FILE_PATH . 'tmp/zusammenzeichnung_' . random_int(100000, 999999) . '/';
-			$tmp_file = $upload_file['name'];
-
 			$result = $GUI->xplankonverter_validate_uploaded_zusammenzeichnungen($upload_file, $tmp_dir);
 
 			if (! $result['success']) {

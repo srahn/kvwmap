@@ -1225,6 +1225,29 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
+	 * Function search for $this->config['plan_file_name'] in $upload_files
+	 * If found set as uploaded_xplan
+	 */
+	function set_plan_file_name($upload_files) {
+		$this->set('uploaded_xplan_gml_file_name', $this->get_uploaded_gml_file_name($upload_files));
+	}
+
+	function get_uploaded_gml_file_name($upload_files) {
+		$plan_file_name = null;
+		foreach ($upload_files as $file) {
+			$basename = basename($file);
+			if (strcasecmp($basename, $this->config['plan_file_name']) === 0) {
+				$plan_file_name = $this->config['plan_file_name'];
+				break; // sofort stoppen
+			}
+			if ($plan_file_name === null && strtolower(substr($basename, -4)) === '.gml') {
+				$plan_file_name = $basename;
+			}
+		}
+		return $plan_file_name;
+	}
+
+	/**
 	 * Diese Funktion liefert das Datum der Aktualität des Plans.
 	 */
 	function get_aktualitaetsdatum() {
@@ -2384,56 +2407,189 @@ class Konvertierung extends PgObject {
 	 * Function validiert ob die hochgeladenen Dateien in Ordnung sind,
 	 * sucht die Plandatei, benennt sie ggf. um und liefert den Plandateinamen zurück.
 	 * @param String $upload_path
+	 * @param String $profil // Sonderbehandlung für Pläne aus dem Digitalisierungsprojekt MV
 	 * @return array[
 	 *	'success' => Boolean, Erfolgreich validiert oder nicht
-	 *  'plan_file_name' => String, Bei Erfolg: Datei des hochgeladenen Planes
 	 *	'msg' => String, Meldung im Fehler- oder Erfolgsfall.
 	 * ]
 	 */
-	function validate_uploaded_files($upload_path) {
-		$uploaded_files = getAllFiles($upload_path);
-		$plan_file_name =  $this->config['plan_file_name'];
+	function validate_uploaded_files($upload_path, $upload_files, $profil = null) {
+		$validation_steps = array(
+			fn() => $this->validate_files_exists($upload_path, $upload_files),
+			fn() => $this->validate_gml_file_exists($upload_files)
+		);
 
+		$gml_file_name = $this->get_uploaded_gml_file_name($upload_files);
 
-		if (count($uploaded_files) == 0) {
-			return array(
-				'success' => false,
-				'msg' => 'Die hochgeladene ZIP-Datei enthält keine Dateien. Das Verzeichnis ' . $upload_path . ' ist leer!'
+		if ($profil === 'MV') {
+			$validation_steps = array_merge(
+				$validation_steps,
+				array(
+					fn() => $this->validate_gml_name_konvention($upload_path, $gml_file_name),
+					fn() => $this->validate_qualitaet_datei($upload_path, $gml_file_name),
+					fn() => $this->validate_textzuweisungen($upload_path, $gml_file_name),
+					fn() => $this->validate_externe_referenz_konvention($upload_path, $upload_files)
+				)
 			);
 		}
 
-		if ($this->get('planart') == 'RP-Plan') {
-			$uploaded_xplangml_file = current($uploaded_files); // get the first file only
-			if ($uploaded_xplangml_file != $upload_path . $this->config['plan_file_name']) {
-				// ToDo: Umstellen, so dass auch der Name von $uploaded_xplangml_file verwendet werden kann
-				// und nicht mehr umbenannt werden muss
-				rename($uploaded_xplangml_file, $upload_path . $this->config['plan_file_name']);
-			}
-		}
-
-		if (!file_exists($upload_path . $this->config['plan_file_name'])) {
-			// Suche eine GML-Datei im upload_path.
-			// ToDo: Wenn es möglich ist einen beliebigen plan_file_name zu vergeben,
-			// bräuchte man auch keinen Standardmäßigen plan_file_name in config mehr.
-			$gml_files = glob($upload_path . '*.gml');
-			if (count($gml_files) > 0) {
-				$plan_file_name = basename($gml_files[0]);
-			}
-			else {
-				// Weder $this->get_plan_file_name() noch eine Datei mit .gml gefunden
-				$plan_file_name = $this->get_plan_file_name();
-				return array(
-					'success' => false,
-					'msg' => 'Die hochgeladene ZIP-Datei enthält keine Datei mit dem Namen: '. $plan_file_name
-				);
+		foreach ($validation_steps as $step) {
+			$result = $step();
+			if (!$result['success']) {
+				return $result;
 			}
 		}
 
 		return array(
 			'success' => true,
-			'plan_file_name' => $plan_file_name,
-			'msg' => 'Hochgeladene Datei wurde auf dem Server gefunden.'
+			'msg' => 'Validierung der hochgeladenen Dateien bestanden.'
 		);
+	}
+
+	function validate_files_exists($upload_path, $upload_files) {
+		if (count($upload_files) == 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Die hochgeladene ZIP-Datei enthält keine Dateien. Das ausgepackte Verzeichnis ist leer!'
+			);
+		}
+		return array('success' => true);
+	}
+
+	function validate_gml_file_exists($upload_files) {
+		if (empty(
+			array_filter(
+				$upload_files,
+				function ($file) {
+    			return strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'gml';
+				}
+			)
+		)) {
+			return array(
+				'success' => false,
+				'msg' => 'Die hochgeladene ZIP-Datei enthält keine Datei mit der Dateieindung .gml'
+			);
+		}
+		return array('success' => true);
+	}
+
+	/**
+	 * Validates the naming convention of the GML file.
+	 * DE__[8-stelliger AGS]__BP__[Plannummer]__[Dokumentenart].gml
+	 * @param String $path
+	 * @param String $gml_file_name
+	 * @return array
+	 */
+	function validate_gml_name_konvention($path, $gml_file_name) {
+		if (strpos($gml_file_name, '.gml') === false) {
+			return array(
+				'success' => false,
+				'msg' => 'Die hochgeladene Datei ' . $gml_file_name . ' ist keine GML-Datei. Es wird eine GML-Datei mit der Endung .gml erwartet.'
+			);
+		}
+		
+		if (strpos($gml_file_name, '__') === false) {
+			return array(
+				'success' => false,
+				'msg' => 'Der Name der GML-Datei ' . $gml_file_name . ' enthält keine doppelten Unterstriche "__" als Trenner der Namensbestandteile.'
+			);
+		}
+
+		$parts = explode('__', pathinfo($gml_file_name, PATHINFO_FILENAME));
+		if (count($parts) < 5) {
+			return array(
+				'success' => false,
+				'msg' => 'Der Name der GML-Datei ' . $gml_file_name . ' enthält nicht genügend Bestandteile, die durch doppelte Unterstriche "__" getrennt sind. Es werden mindestens 5 Bestandteile erwartet: DE__Gemeindeschlüssel__Planart__Plannummer__Dokumentenart.gml'
+			);
+		}
+
+		if ($parts[0] !== 'DE') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Name der GML-Datei ' . $gml_file_name . ' fängt nicht mit DE an.'
+			);
+		}
+
+		$pattern = '/^130(03|04|7[1-6])[0-9]{3}$/';
+		if (!preg_match($pattern, $parts[1])) {
+			return array(
+				'success' => false,
+				'msg' => 'Der zweite Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist kein gültiger 8-stelliger Gemeindeschlüssel.'
+			);
+		}
+
+		if ($parts[2] !== 'BP') {
+			return array(
+				'success' => false,
+				'msg' => 'Der dritte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP.'
+			);
+		}
+
+		// $pattern = '/^(0[1-9]|[1-9][0-9])$/';
+		// if (!preg_match($pattern, $parts[3])) {
+		// 	return array(
+		// 		'success' => false,
+		// 		'msg' => 'Der vierte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige zweistellige Plannummer.'
+		// 	);
+		// }
+
+		if (!in_array($parts[4], array('GP', 'SO', 'IS', 'KS', 'EnS', 'ErS', 'KES', 'AS'))) {
+			return array(
+				'success' => false,
+				'msg' => 'Der fünfte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Dokumentenart. Es sind nur folgende Kürzel erlaubt: GP, SO, IS, KS, EnS, ErS, KES, AS.'
+			);
+		}
+
+		return array('success' => true);
+	}
+
+	/**
+	 * Validates the quality of the uploaded file.
+	 * @param String $path
+	 * @return array
+	 */
+	function validate_qualitaet_datei($path, $gml_file_name) {
+		$basename = basename($path . $gml_file_name);
+		$qualitaet_datei = substr($basename, 0, strrpos($basename, '__')) . '__Dokumentation_Erfassungsqualitaet.xlsx';
+		if (!file_exists($path . $qualitaet_datei)) {
+			return array(
+				'success' => false,
+				'msg' => 'In der ZIP-Datei fehlt die Dokumentationsdatei zur Erfassungsqualität ' . $qualitaet_datei . '.'
+			);
+		}
+		return array('success' => true);
+	}
+
+	/**
+	 * Validiert die Existens der Textzuweisungsdatei.
+	 * @param String $path
+	 * @return array
+	 */
+	function validate_textzuweisungen($path, $gml_file_name) {
+		$basename = basename($path . $gml_file_name);
+		$textzuweisung_datei = substr($basename, 0, strrpos($basename, '__')) . '__Textzuweisungen.xlsm';
+		if (!file_exists($path . $textzuweisung_datei)) {
+			return array(
+				'success' => false,
+				'msg' => 'In der ZIP-Datei fehlt die Textzuweisungsdatei ' . $textzuweisung_datei . '.'
+			);
+		}
+		return array('success' => true);
+	}
+
+	/**
+	 * Prüft alle Dateien, die nicht Plan-GML, Qualität oder Textzuweisung sind auf Namenskonvention.
+	 * @param String $path
+	 * @return array
+	 */
+	function validate_externe_referenz_konvention($path, $upload_files) {
+		// ToDo pk: Hier weiter implementieren
+		$file = $upload_files[0];
+		return array(
+			'success' => false,
+			'msg' => 'Die Datei ' . $file . ' entspricht nicht der Namenskonvention der externen Referenzen.'
+		);
+		return array('success' => true);
 	}
 
 	/**
@@ -3037,7 +3193,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 			'metaDataView' =>  $metaDataCreator->createMetadataView()
 		);
 	}
-
+	
 	function get_metadata_uuids() {
 		$uuids = array();
 		foreach (array('dataset', 'viewservice', 'downloadservice') AS $type) {

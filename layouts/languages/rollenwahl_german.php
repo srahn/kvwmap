@@ -19,6 +19,7 @@
 	$strShowLayerOptions="Zeige Themenoptionen";
 	$strMenueButtons="Menüs als Schaltflächen";
 	$strLayerSelectionMode='nur Layer der Themenauswahl anzeigen';
+	$strHintLayerSelection='Wenn diese Option aktiviert ist und eine gespeicherte Themenauswahl geladen wird, werden nur die Layer der Themenauswahl im Themenbaum angezeigt.';
 	$strMapSize="Kartenfenstergr&ouml;&szlig;e";
 	$strAutoResize="automatisch";
 	$strTask="Stelle";

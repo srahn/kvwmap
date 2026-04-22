@@ -143,21 +143,30 @@ hide_versions = function(flst){
         $attribute .= $this->qlayerset[$i]['attributes']['name'][$j];
       }
     }
+		for ($a=0;$a<$anzObj;$a++){
+			$FlurstKennzListe[] = $this->qlayerset[$i]['shape'][$a]['flurstkennz'];
+		}
+		$ret = $this->Stelle->getFlurstueckeAllowed($FlurstKennzListe, $this->pgdatabase, '_eigentuemer');
+		$eigentuemer_allowed = array_flip($ret[1] ?? []); // zur schnelleren Suche mit isset() anstatt in_array()
+
     for ($a=0;$a<$anzObj;$a++){
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter'], $this->qlayerset[$i]['oid'], $eigentuemer_vcheck);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
-			$flst->Grundbuecher=$flst->getGrundbuecher();
-			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
 
-			$flst->eigentuemer_visible = true;
-			if ($vcheck_attribute) {
-				$flst->eigentuemer_visible = $flst->eigentuemer_vcheck_value == $vcheck_value;
-			}
+			if (isset($eigentuemer_allowed[$flurstkennz_a])) {
+				$flst->Grundbuecher=$flst->getGrundbuecher();
+				$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
 
-			if ($privileg_['bestandsnr'] and $privileg_['eigentuemer'] and $flst->eigentuemer_visible) {
-				for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
-					$flst->Buchungen[$b]['eigentuemerliste'] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+				$flst->eigentuemer_visible = true;
+				if ($vcheck_attribute) {
+					$flst->eigentuemer_visible = $flst->eigentuemer_vcheck_value == $vcheck_value;
+				}
+
+				if ($privileg_['bestandsnr'] and $privileg_['eigentuemer'] and $flst->eigentuemer_visible) {
+					for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
+						$flst->Buchungen[$b]['eigentuemerliste'] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+					}
 				}
 			}
 			$flst_array[] = $flst;

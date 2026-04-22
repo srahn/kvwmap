@@ -18,6 +18,42 @@ class SQL {
     $this->query = $query;
     $this->parsed = $parser->parsed;
     $this->action = array_keys($this->parsed)[0];
+    if ($this->action == 'INSERT' AND strpos($this->parsed['VALUES'][0]['base_expr'], ', -') !== false) {
+      $this->adjust_value_operators();
+    }
+    if ($this->action == 'UPDATE') {
+      $this->adjust_where_uuid_function();
+    }
+  }
+
+  function adjust_value_operators() {
+    $data_elements = array();
+    for ($i = 0; $i < count($this->parsed['VALUES'][0]['data']); $i++) {
+      $data_element = $this->parsed['VALUES'][0]['data'][$i];
+      $next_element = $this->parsed['VALUES'][0]['data'][$i+1];
+      if ($data_element['expr_type'] === 'operator' &&
+        $data_element['base_expr'] === '-' &&
+        $next_element['expr_type'] === 'const'
+      ) {
+        $next_element['base_expr'] = '-' . $next_element['base_expr'];
+        $data_elements[] = $next_element;
+        $i++;
+      }
+      else {
+        $data_elements[] = $data_element;
+      }
+    }
+    $this->parsed['VALUES'][0]['data'] = $data_elements;
+  }
+
+  function adjust_where_uuid_function() {
+    foreach ($this->parsed['WHERE'] AS $index => $where_part) {
+      if ($where_part['expr_type'] === 'function' && $where_part['base_expr'] === 'uuid') {
+        $where_part['expr_type'] = 'colref';
+        $where_part['no_quotes'] = 'uuid';
+        $this->parsed['WHERE'][$index] = $where_part;
+      }
+    }
   }
 
   function get_attributes($only_names = true) {
@@ -69,6 +105,19 @@ class SQL {
           }
         }
       } break;
+      CASE 'UPDATE' : {
+        foreach ($this->parsed['SET'] AS $index => $set_part) {
+          if ($only_names) {
+            $this->attributes[$index] = $set_part['sub_tree'][0]['no_quotes'];
+          }
+          else {
+            $this->attributes[$set_part['sub_tree'][0]['no_quotes']] = array(
+              'base_expr' => $set_part['sub_tree'][0]['no_quotes'],
+              'alias' => ''
+            );
+          }
+        }
+      } break;
       default : {}
     }
     return $this->attributes;
@@ -111,8 +160,7 @@ class SQL {
         foreach ($this->get_attributes() AS $index => $attribute) {
           if (!in_array($attribute, $allowed)) {
             $not_allowed_columns[] = $attribute;
-            unset($this->parsed[$this->action][0]['columns'][$index]);
-            unset($this->parsed['VALUES'][0]['data'][$index]);
+            unset($this->parsed['SET'][$index]);
           }
         }
       } break;
@@ -123,6 +171,13 @@ class SQL {
     $this->parsed[$this->action][0]['columns'] = array_values($this->parsed[$this->action][0]['columns']);
     $this->parsed['VALUES'][0]['data'] = array_values($this->parsed['VALUES'][0]['data']);
     return $not_allowed_columns;
+  }
+
+  function remove_empty_image_path($sql) {
+    if (strpos($sql, '{,') !== false) {
+      $sql = str_replace('{,', '{', $sql);
+    }
+    return $sql;
   }
 
   function to_sql() {

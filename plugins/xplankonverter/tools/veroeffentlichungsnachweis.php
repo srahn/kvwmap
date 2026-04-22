@@ -1,5 +1,6 @@
 <?php
 $pruefdatum = date('Y-m-d H:i:s', time());
+$test_mode = true;
 echo_log("\n". $pruefdatum);
 // Running this script with a cron job like this:
 // cd /var/www/apps/kvwmap/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan >> /var/www/logs/cron/veroeffentlichungsnachweis.log 2>&1
@@ -9,7 +10,12 @@ try {
   include('../../../credentials.php');
   include('../../../config.php');
   include(PLUGINS . 'xplankonverter/config/config.php');
-  define('AUSLEGUNG_URL', "https://bplan.geodaten-mv.de/bauportal/Uebersicht/Details");
+  if ($test_mode) {
+    define('AUSLEGUNG_URL', "https://dev.bauleitplaene-mv.de/custom/layouts/snippets/Veroeffnachweis_Portal_Fake.php");
+  }
+  else {
+    define('AUSLEGUNG_URL', "https://bplan.geodaten-mv.de/bauportal/Uebersicht/Details");
+  }
   include(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
   include(CLASSPATH . 'kvwmap.php');
   include(CLASSPATH . 'log.php');
@@ -71,6 +77,10 @@ try {
 				'type' => 'uuid'
 			),
       array(
+        'column' => 'lfdnr',
+        'type' => 'integer' 
+      ),
+      array(
 				'column' => 'auslegungsstartdatum',
 				'type' => 'timestamp without time zone'
 			),
@@ -110,10 +120,10 @@ try {
   foreach ($auslegungen AS $auslegung) {
     if (!pruefprotokoll_exists($protokoll_obj, $auslegung)) {
       open_pruefprotokoll($protokoll_obj, $auslegung, $pruefdatum);
-      echo_log('Prüfprotokoll angelegt für Planart: ' . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr'));
+      echo_log('Prüfprotokoll angelegt für Planart: ' . $auslegung->get('planart') . ' plan_gml_id: ' . $auslegung->get('plan_gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr'));
     }
 
-    $pruef_result = pruefe_auslegung(AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->get('gml_id'), $auslegung->get('gml_id'));
+    $pruef_result = pruefe_auslegung(AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->get('plan_gml_id'), $auslegung->get('plan_gml_id'));
 
     if (!veroeffentlichungsnachweis_exists($nachweis_obj, $auslegung)) {
       $save_result = save_veroeffentlichungsnachweis($nachweis_obj, $auslegung, $pruef_result);
@@ -121,7 +131,7 @@ try {
         $err_msgs[] = 'Fehler beim Speichern des Veröffentlichungsnachweises: ' . $save_result['err_msg'];
         continue;
       }
-      // echo_log('Veröffentlichungsnachweis gespeichert für Planart: ' . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr') . ' Ergebnis: ' . $pruef_result['msg']);
+      // echo_log('Veröffentlichungsnachweis gespeichert für Planart: ' . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('plan_gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr') . ' Ergebnis: ' . $pruef_result['msg']);
     }
 
     $nachweisfehler = suche_nachweisfehler($fehler_obj, $auslegung);
@@ -129,7 +139,7 @@ try {
       continue;
     }
 	  $plan = $plan_obj->find_where(
-      "p.gml_id = '" . $auslegung->get('gml_id') . "'",
+      "p.gml_id = '" . $auslegung->get('plan_gml_id') . "'",
       NULL,
       "
         p.gml_id,
@@ -147,7 +157,7 @@ try {
         kvwmap.stelle s ON k.stelle_id = s.id
       "
     )[0];
-    $alert_result = send_alert('Fehler bei der Auslegung von Plan ' . $auslegung->get('gml_id'), create_alert($plan, $auslegung, $nachweisfehler), $plan->get('ows_contentemailaddress'), $plan->get('ows_contentperson'));
+    $alert_result = send_alert('Fehler bei der Auslegung von Plan ' . $auslegung->get('plan_gml_id'), create_alert($plan, $auslegung, $nachweisfehler), $plan->get('ows_contentemailaddress'), $plan->get('ows_contentperson'));
 
     if (!$alert_result['success']) {
       $err_msgs[] = 'Fehler beim Versenden der Benachrichtigung: ' . $alert_result['msg'];
@@ -160,7 +170,7 @@ try {
       false,
       "
         planart = '" . $auslegung->get('planart') . "' AND
-        plan_gml_id = '" . $auslegung->get('gml_id') . "' AND
+        plan_gml_id = '" . $auslegung->get('plan_gml_id') . "' AND
         lfdnr = " . $auslegung->get('lfdnr') . " AND
         pruefzeit BETWEEN '" . $nachweisfehler->get('startzeit') . "' AND '" . $nachweisfehler->get('endzeit') . "'AND
         gemeldet_am IS NULL
@@ -171,7 +181,7 @@ try {
   // Finde beendete Auslegungen. Erzeuge, versende und schließe die Prüfprotokolle.
   foreach(find_completed_auslegungen($auslegung_obj) AS $auslegung) {
 	  $plan = $plan_obj->find_where(
-      "p.gml_id = '" . $auslegung->get('gml_id') . "'",
+      "p.gml_id = '" . $auslegung->get('plan_gml_id') . "'",
       NULL,
       "
         p.gml_id,
@@ -191,9 +201,8 @@ try {
     )[0];
     $pruefprotokoll_result = send_pruefprotokoll(create_pruefprotokoll($plan, $nachweis_obj, $auslegung), $plan->get('ows_contentemailaddress'), $plan->get('ows_contentperson'));
     $veroeffentlichungsprotokoll = $protokoll_obj->find_by_ids(array(
-      'plan_gml_id' => $auslegung->get('gml_id'),
-      'auslegungsstartdatum' => $auslegung->get('startdatum'),
-      'auslegungsenddatum' => $auslegung->get('enddatum')
+      'plan_gml_id' => $auslegung->get('plan_gml_id'),
+      'lfdnr' => $auslegung->get('lfdnr')
     ));
     $veroeffentlichungsprotokoll->update_attr(array("observationend = now()"));
   }
@@ -216,16 +225,16 @@ function include_($filename) {
 
 function pruefprotokoll_exists($protokoll_obj, $auslegung) {
   $results = $protokoll_obj->find_where("
-    plan_gml_id = '" . $auslegung->get('gml_id') . "' AND
-    auslegungsstartdatum = '" . $auslegung->get('startdatum') . "' AND
-    auslegungsenddatum = '" . $auslegung->get('enddatum') . "'
+    plan_gml_id = '" . $auslegung->get('plan_gml_id') . "' AND
+    lfdnr = " . $auslegung->get('lfdnr') . "
   ");
   return count($results) > 0;
 }
 
 function open_pruefprotokoll($protokoll_obj, $auslegung, $pruefdatum) {
   $ret = $protokoll_obj->create(array(
-    'plan_gml_id' => $auslegung->get('gml_id'),
+    'plan_gml_id' => $auslegung->get('plan_gml_id'),
+    'lfdnr' => $auslegung->get('lfdnr'),
     'auslegungsstartdatum' => $auslegung->get('startdatum'),
     'auslegungsenddatum' => $auslegung->get('enddatum'),
     'observationstart' => $pruefdatum
@@ -241,16 +250,16 @@ function open_pruefprotokoll($protokoll_obj, $auslegung, $pruefdatum) {
  */
 function create_pruefprotokoll($plan, $nachweis_obj, $auslegung) {
   $subject = 'Prüfprotokoll für die Auslegung des Plan ' . $plan->get('name') . ' Nr ' . $plan->get('nummer') . ' vom ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
-  $body = 'Mitteilung für ' . $plan->get('ows_distributionperson') . "\n\n" . 'Anbei erhalten Sie das Prüfprotokoll für die Auslegung des Plan ' . $plan->get('name') . ' Nr ' . $plan->get('nummer') . ' gml_id: ' . $auslegung->get('gml_id') . ' vom ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum') . " auf dem Bau- und Planungsportal unter: " . AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->get('gml_id') . "\n\n" . "Folgende Nachweise für die Auslegung des Planes wurden während des Auslegungszeitraums erstellt:\n\n";
+  $body = 'Mitteilung für ' . $plan->get('ows_distributionperson') . "\n\n" . 'Anbei erhalten Sie das Prüfprotokoll für die Auslegung des Plan ' . $plan->get('name') . ' Nr ' . $plan->get('nummer') . ' gml_id: ' . $auslegung->get('plan_gml_id') . ' vom ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum') . " auf dem Bau- und Planungsportal unter: " . AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->get('plan_gml_id') . "\n\n" . "Folgende Nachweise für die Auslegung des Planes wurden während des Auslegungszeitraums erstellt:\n\n";
   $pruefnachweise = $nachweis_obj->find_where(
     "
-      plan_gml_id = '" . $auslegung->get('gml_id') . "' AND
+      plan_gml_id = '" . $auslegung->get('plan_gml_id') . "' AND
       lfdnr = " . $auslegung->get('lfdnr') . " AND
       pruefzeit::date BETWEEN '" . $auslegung->get('startdatum') . "' AND '" . $auslegung->get('enddatum') . "'
     ",
     "pruefzeit"
   );
-  $protokollfile = MAILQUEUEPATH . 'Prüfprotokoll_' . $auslegung->get('gml_id') . '_' . $auslegung->get('lfdnr') . '.log';
+  $protokollfile = MAILQUEUEPATH . 'Prüfprotokoll_' . $auslegung->get('plan_gml_id') . '_' . $auslegung->get('lfdnr') . '.log';
   $fp = fopen($protokollfile, 'w');
   // ToDo: PDF-Dokument erzeugen mit der Liste der Prüfnachweise
   foreach($pruefnachweise AS $pruefnachweis) {
@@ -326,13 +335,13 @@ function pruefe_auslegung($url, $gml_id) {
 
 function veroeffentlichungsnachweis_exists($nachweis_obj, $auslegung) {
   $nachweis = $nachweis_obj->find_by_ids(array(
-    'plan_gml_id' => $auslegung->get('gml_id'),
+    'plan_gml_id' => $auslegung->get('plan_gml_id'),
     'planart' => $auslegung->get('planart'),
     'lfdnr' => $auslegung->get('lfdnr'),
     'pruefzeit' => date("Y-m-d H:00:00", time())
   ));
   if ($nachweis->data !== false) {
-    // echo_log('Veröffentlichungsnachweis bereits vorhanden für planart: ' . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr'));
+    // echo_log('Veröffentlichungsnachweis bereits vorhanden für planart: ' . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('plan_gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr'));
     return true;
   }
   return false;
@@ -343,18 +352,18 @@ function veroeffentlichungsnachweis_exists($nachweis_obj, $auslegung) {
  */
 function save_veroeffentlichungsnachweis($nachweis_obj, $auslegung, $pruef_result) {
   $ret = $nachweis_obj->create(array(
-    'plan_gml_id' => $auslegung->get('gml_id'),
+    'plan_gml_id' => $auslegung->get('plan_gml_id'),
     'planart' => $auslegung->get('planart'),
     'lfdnr' => $auslegung->get('lfdnr'),
     'pruefzeit' => date("Y-m-d H:00:00", time()),
     'pruefergebnis' => $pruef_result['msg']
   ));
   if ($ret['success']) {
-    $ret['msg'] = 'Nachweis erfolgreich eingetragen für planart: ' . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr') . ' result: ' . $pruef_result['msg'];
+    $ret['msg'] = 'Nachweis erfolgreich eingetragen für planart: ' . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('plan_gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr') . ' result: ' . $pruef_result['msg'];
     $ret['nachweis'] = $nachweis_obj;
   }
   else {
-    $ret['err_msg'] .= date("Y:m:d H:i:s") . ' Failed to write Result: ' . $pruef_result['msg'] . ' for planart: '. $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('gml_id') . ' und lfdnr: ' . $auslegung->get('lfdnr');
+    $ret['err_msg'] .= date("Y:m:d H:i:s") . ' Failed to write Result: ' . $pruef_result['msg'] . ' for planart: '. $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('plan_gml_id') . ' und lfdnr: ' . $auslegung->get('lfdnr');
   }
   return $ret;
 }
@@ -363,7 +372,7 @@ function save_veroeffentlichungsnachweis($nachweis_obj, $auslegung, $pruef_resul
  * Abfrage der Anzahl der Fehler in den letzten 5 Nachweisen
  */
 function suche_nachweisfehler($fehler_obj, $auslegung) {
-  // echo_log('Suche Fehler in den letzten 5 Nachweisen für planart: ' . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr'));
+  // echo_log('Suche Fehler in den letzten 5 Nachweisen für planart: ' . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('plan_gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr'));
   $nachweisfehler = $fehler_obj->find_by_sql(array(
     'select' => "
       min(pruefzeit) AS startzeit,
@@ -376,7 +385,7 @@ function suche_nachweisfehler($fehler_obj, $auslegung) {
         CASE WHEN pruefergebnis = 'Plan veröffentlicht' THEN 0 ELSE 1 END AS fehler
       FROM xplankonverter.veroeffentlichungsnachweise
       WHERE
-        plan_gml_id = '" . $auslegung->get('gml_id') . "' AND
+        plan_gml_id = '" . $auslegung->get('plan_gml_id') . "' AND
         lfdnr = " . $auslegung->get('lfdnr') . " AND
         gemeldet_am IS NULL
       ORDER BY pruefzeit DESC
@@ -387,8 +396,8 @@ function suche_nachweisfehler($fehler_obj, $auslegung) {
 }
 
 function create_alert($plan, $auslegung, $nachweisfehler) {
-  $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->get('gml_id');
-  $msg = "Mitteilung für: " . $plan->get('ows_distributionperson') . "\n\nDer Plan " . $plan->get('name') . " Nr " . $plan->get('nummer') . " gml_id: " . $auslegung->get('gml_id') . " mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " war am " . $nachweisfehler->get('endzeit') . " auf dem Bau- und Planungsportal für 5 Stunden nicht verfügbar!\n\nBitte prüfen Sie die Auslegung im Bau- und Planungsportal unter: " . $url . " und die Angaben zur Veröffentlichung des Plans auf " . URL . " und stellen Sie sicher, dass der Plan veröffentlicht ist.\n\nSind Ihre Angaben korrekt und sollte das Problem, dass der Plan nicht veröffentlicht wird, weiterhin bestehen, wenden Sie sich an GDI-Service unter der Adresse robert.kraetschmer@gdi-service.de oder per Telefon unter 0381 40344446 oder an die Koordinierungsstelle beim Landkreis LUP unter der Adresse jens.wildner@kreis-lup.de.\n\n\nDies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an die oben angegebenen Kontakte.";
+  $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->get('plan_gml_id');
+  $msg = "Mitteilung für: " . $plan->get('ows_distributionperson') . "\n\nDer Plan " . $plan->get('name') . " Nr " . $plan->get('nummer') . " gml_id: " . $auslegung->get('plan_gml_id') . " mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " war am " . $nachweisfehler->get('endzeit') . " auf dem Bau- und Planungsportal für 5 Stunden nicht verfügbar!\n\nBitte prüfen Sie die Auslegung im Bau- und Planungsportal unter: " . $url . " und die Angaben zur Veröffentlichung des Plans auf " . URL . " und stellen Sie sicher, dass der Plan veröffentlicht ist.\n\nSind Ihre Angaben korrekt und sollte das Problem, dass der Plan nicht veröffentlicht wird, weiterhin bestehen, wenden Sie sich an GDI-Service unter der Adresse robert.kraetschmer@gdi-service.de oder per Telefon unter 0381 40344446 oder an die Koordinierungsstelle beim Landkreis LUP unter der Adresse jens.wildner@kreis-lup.de.\n\n\nDies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an die oben angegebenen Kontakte.";
   return $msg;
 }
 
@@ -416,8 +425,7 @@ function find_completed_auslegungen($auslegung_obj) {
       xplankonverter.veroeffentlichungsprotokolle p JOIN
       xplankonverter.auslegungen a ON
         p.plan_gml_id = a.gml_id AND
-        p.auslegungsstartdatum = a.startdatum AND
-        p.auslegungsenddatum = a.enddatum
+        p.lfdnr = a.lfdnr
     "
   );
   return $completed_auslegungen;
