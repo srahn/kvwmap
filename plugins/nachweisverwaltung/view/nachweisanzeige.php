@@ -200,8 +200,9 @@ function set_richtung(richtung){
 }
 
 function set_magnifier(evt, magnifier){
-	mousex = evt.clientX - document.getElementById('vorschau_nwv').offsetLeft;
-	mousey = evt.clientY - document.getElementById('vorschau_nwv').offsetTop;
+	rect = document.getElementById('vorschau_nwv').getClientRects()[0];
+	mousex = evt.clientX - rect.x;
+	mousey = evt.clientY - rect.y;
 	width = magnifier.offsetWidth;
 	height = magnifier.offsetHeight;
 	magnifier.style.left = mousex - (width/2);
@@ -484,6 +485,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	 if ($this->nachweis->erg_dokumente > 0) { ie_check();?>
 		<table id="nachweisanzeige_ergebnis" class="<? if (!ie_check()){ ?>scrolltable <? } ?>nw_treffer_table" style="width: fit-content" border="0" cellspacing="0" cellpadding="0">
 			<tbody style="outline: 1px solid gray; max-height: 590px; min-height: 300px;">
+				<tr> 
+					<td bgcolor="<? echo BG_FORM ?>">
+						<div style="position: absolute; right:0px; top: -190px; z-index: 1000;">
+							<div id="vorschau_nwv"  onmouseleave="clearVorschau();" style="position: absolute; right: 200px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
+	 					</div>
+					</td>
+				</tr>
         <?
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
@@ -724,15 +732,7 @@ Wählen Sie neue Suchparameter.</span><br>
 		</td>
   </tr>
   <tr> 
-    <td bgcolor="<? echo BG_FORM ?>"> 
+    <td bgcolor="<? echo BG_FORM ?>">
     </td>
   </tr>
 </table>
-
-
-<!--[IF !IE]> -->
-<div id="vorschau_nwv"  onmouseleave="clearVorschau();" style="z-index: 1000; position: fixed; left:40px;  top:0px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
-<!-- <![ENDIF]-->
- <!--[IF IE]>
-<div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>
-<![ENDIF]-->
