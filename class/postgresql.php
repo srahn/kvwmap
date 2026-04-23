@@ -2497,7 +2497,7 @@ FROM
 				LEFT JOIN alkis.ax_artderrechtsgemeinschaft_namensnummer adrg ON n.artderrechtsgemeinschaft = adrg.wert 
 				LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart 
 				LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id 
-				LEFT JOIN alkis.ax_person_auskunftssperre aks on aks.gml_id = p.gml_id 
+				LEFT JOIN alkis.ax_person_auskunftssperre aks on aks.gml_id = p.gml_id AND (aks.ablaufdatum IS NULL OR aks.ablaufdatum > now())
 				LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] ";		# da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('anschrift'));
 		$sql.= " WHERE 1=1"; 
@@ -2664,7 +2664,7 @@ FROM
 				b.schluesselgesamt as bezirk
 			FROM 
 				alkis.ax_person p 
-				LEFT JOIN alkis.ax_person_auskunftssperre aks on aks.gml_id = p.gml_id
+				LEFT JOIN alkis.ax_person_auskunftssperre aks on aks.gml_id = p.gml_id AND (aks.ablaufdatum IS NULL OR aks.ablaufdatum > now())
 				LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] -- da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
 				LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id 
 				LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart 
