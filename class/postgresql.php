@@ -2444,15 +2444,61 @@ FROM
 	}
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR, $without_temporal_filter = false) {
-    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, p.sterbedatum::date, array_to_string(p.hat, ',') as hat, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.beschreibung as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.beschreibung) as zusatz_eigentuemer ";
-		$sql.= "FROM alkis.ax_buchungsstelle s ";
-		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_artderrechtsgemeinschaft_namensnummer adrg ON n.artderrechtsgemeinschaft = adrg.wert ";
-		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
-		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] ";		# da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
+    $sql = "
+			SELECT distinct 
+				coalesce(n.laufendenummernachdin1421, '0') as order1, 
+				coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, 
+				bestehtausrechtsverhaeltnissenzu, 
+				CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, 
+				n.gml_id as n_gml_id, 
+				p.gml_id, 
+				p.nachnameoderfirma, 
+				p.vorname, 
+				p.akademischergrad, 
+				p.namensbestandteil, 
+				p.geburtsname, 
+				p.geburtsdatum::date, 
+				p.sterbedatum::date, 
+				array_to_string(p.hat, ',') as hat, 
+				anschrift.gml_id as anschrift_gml_id, 
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN 'Auskunftssperre'
+					ELSE anschrift.strasse
+				END as strasse,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE anschrift.hausnummer
+				END as hausnummer,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE anschrift.postleitzahlpostzustellung
+				END as postleitzahlpostzustellung,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE anschrift.ort_post
+				END as ort_post,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE 'OT ' || anschrift.ortsteil
+				END as ortsteil,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE anschrift.bestimmungsland
+				END as bestimmungsland, 
+				w.beschreibung as Art, 
+				n.zaehler||'/'||n.nenner as anteil, 
+				coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),
+				adrg.beschreibung) as zusatz_eigentuemer 
+			FROM 
+				alkis.ax_buchungsstelle s 
+				LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk 
+				LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_artderrechtsgemeinschaft_namensnummer adrg ON n.artderrechtsgemeinschaft = adrg.wert 
+				LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart 
+				LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id 
+				LEFT JOIN alkis.ax_person_auskunftssperre aks on aks.gml_id = p.gml_id 
+				LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] ";		# da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('anschrift'));
 		$sql.= " WHERE 1=1"; 
     if ($Bezirk!="") {
@@ -2590,15 +2636,35 @@ FROM
 				p.geburtsdatum, 
 				p.sterbedatum,
 				array_to_string(p.hat, ',') as hat, 
-				anschrift.strasse, 
-				anschrift.hausnummer, 
-				anschrift.postleitzahlpostzustellung, 
-				anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, 
-				anschrift.bestimmungsland, 
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN 'Auskunftssperre'
+					ELSE anschrift.strasse
+				END as strasse,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE anschrift.hausnummer
+				END as hausnummer,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE anschrift.postleitzahlpostzustellung
+				END as postleitzahlpostzustellung,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE anschrift.ort_post
+				END as ort_post,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE 'OT ' || anschrift.ortsteil
+				END as ortsteil,
+				CASE 
+					WHEN aks.gml_id IS NOT NULL THEN NULL
+					ELSE anschrift.bestimmungsland
+				END as bestimmungsland,
 				g.buchungsblattnummermitbuchstabenerweiterung as blatt, 
 				b.schluesselgesamt as bezirk
 			FROM 
 				alkis.ax_person p 
+				LEFT JOIN alkis.ax_person_auskunftssperre aks on aks.gml_id = p.gml_id
 				LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] -- da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
 				LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id 
 				LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart 
