@@ -30,7 +30,8 @@
   $strSelectAll="alle auswählen";
   $strSelectAllShown="alle angezeigten auswählen";
   $strSelectedDatasets="ausgewählte Datensätze";
-  $strSelectThisDataset="Datensatz auswählen";
+  $strSelectThisDataset="Datensatz";
+  $strSelectThisDataset2=" auswählen";
   $strShowAll="alle anzeigen";
   $strShowAllSeparat="alle separat anzeigen";
   $strShowFK="anzeigen";
