@@ -292,6 +292,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
   <input name="rectmaxy" type="hidden" value="<?php echo value_of($this->formvars, 'rectmaxy') ? $this->formvars['rectmaxy'] : $this->queryrect->maxy; ?>">
   <input name="form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
   <input type="hidden" name="chosen_layer_id" value="">
+	<input type="hidden" name="selektieren" value="">
 	<input type="hidden" name="active_layer_id" value="<? echo $active_layer_tab; ?>">
   <input type="hidden" name="layer_tablename" value="">
   <input type="hidden" name="layer_columnname" value="">

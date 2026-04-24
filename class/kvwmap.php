@@ -6177,7 +6177,6 @@ echo '			</table>
 			$layerset[0]['oid'] = $layerset[0]['attributes']['pk'][0];
 		}
     $checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
-		$this->formvars['selektieren'] = 'false';
     for($i = 0; $i < count($checkbox_names); $i++){
       if($this->formvars[$checkbox_names[$i]] == 'on'){
         $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
@@ -6406,8 +6405,10 @@ echo '			</table>
 			}
 		}
 		else{         # selektieren (eigenen Style verwenden)
-			$class_id = $dbmap->getClassFromObject($select, $layerset[0]['layer_id'], $layerset[0]['classitem']);
-			$this->formvars['class'] = $dbmap->copyClass($class_id, -$layer_id);
+			$class_ids = $dbmap->getClassIdsFromObjects($select, $layerset[0]['layer_id'], $layerset[0]['classitem']);
+			foreach ($class_ids as $class_id) {
+				$dbmap->copyClass($class_id, -$layer_id);
+			}
 			$this->user->rolle->setOneLayer($layerset[0]['layer_id'], 0);	# richtigen Layer ausschalten
 		}
 		$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
@@ -22737,29 +22738,28 @@ DO $$
 		return $rs;
 	}
 	
-  function getClassFromObject($select, $layer_id, $classitem){
+  function getClassIdsFromObjects($select, $layer_id, $classitem){
     # diese Funktion bestimmt für ein über die oid gegebenes Objekt welche Klasse dieses Objekt hat
     $classes = $this->read_Classes($layer_id);
     $anzahl = count($classes);
     if($anzahl == 1){
-      return $classes[0]['class_id'];
+      return [$classes[0]['class_id']];
     }
     else{
       for($i = 0; $i < $anzahl; $i++){
-				if ($classes[$i]['expression'] == '') {
-          return $classes[$i]['class_id'];
-        }
-				$exp = mapserverExp2SQL($classes[$i]['expression'], $classitem);
-				
-				$sql = 'SELECT * FROM ('.$select.") as foo WHERE (" . $exp.")";
-        $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
-        $query=pg_query($sql);
-    		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-        $count=pg_num_rows($query);
-        if($count > 0){
-          return $classes[$i]['class_id'];
-        }
-      }
+				$exp = mapserverExp2SQL($classes[$i]['expression'], $classitem) ?: 'true';
+				$class_cases[] = 'when ' . $exp . ' then ' . $classes[$i]['class_id'];
+			}	
+			$sql = '
+				SELECT 
+					CASE ' . implode(chr(10), $class_cases) . ' END as class_id
+				FROM 
+					(' . $select . ') as foo';
+			$this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
+			$ret = $this->db->execSQL($sql);
+			if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+			$rs = pg_fetch_all($ret[1]);
+			return array_unique(array_column($rs, 'class_id'));
     }
   }
 

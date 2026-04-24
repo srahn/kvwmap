@@ -1027,6 +1027,17 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			root.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}
+
+	zoomto_datasets = function(layer_id, tablename, columnname, selektieren){
+		if(check_for_selection(layer_id)){
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.layer_tablename.value = tablename;
+			enclosingForm.layer_columnname.value = columnname;
+			enclosingForm.selektieren.value = selektieren;
+			enclosingForm.go.value = 'zoomto_selected_datasets';
+			root.overlay_submit(enclosingForm, false, 'root');
+		}
+	}
 	
 	zoom2wkt = function(wkt, epsg){
 		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
@@ -1055,16 +1066,6 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 		else{
 			return true;
-		}
-	}
-
-	zoomto_datasets = function(layer_id, tablename, columnname){
-		if(check_for_selection(layer_id)){
-			enclosingForm.chosen_layer_id.value = layer_id;
-			enclosingForm.layer_tablename.value = tablename;
-			enclosingForm.layer_columnname.value = columnname;
-			enclosingForm.go.value = 'zoomto_selected_datasets';
-			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
 

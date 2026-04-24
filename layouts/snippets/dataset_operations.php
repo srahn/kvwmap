@@ -49,8 +49,15 @@
 										if ($privileg != '') { ?>
 											<td id="zoom_link_<? echo $layer['layer_id']; ?>" style="padding: 0 0 0 15px">
 												<a
-													title="<? echo $strzoomtodatasets; ?>"
+													title="<? echo $strMapZoom.$strAndHide; ?>"
 													href="javascript:zoomto_datasets(<?php echo $layer['layer_id']; ?>, '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>');"
+												><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div>
+												</a>
+											</td>										
+											<td id="zoom_link_<? echo $layer['layer_id']; ?>" style="padding: 0 0 0 15px">
+												<a
+													title="<? echo $strMapZoom.$strAndHighlight; ?>"
+													href="javascript:zoomto_datasets(<?php echo $layer['layer_id']; ?>, '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', 'false');"
 												><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div>
 												</a>
 											</td>
