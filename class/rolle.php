@@ -1332,11 +1332,11 @@ class rolle {
 		return $layer;
 	}
 
-	function resetLayers($layer_id){
-		$this->update_layer_status($layer_id, '0');
+	function resetLayers($layer_id, $ignore_rollenlayer = false){
+		$this->update_layer_status($layer_id, '0', $ignore_rollenlayer);
 	}
 
-	function update_layer_status($layer_id, $status) {
+	function update_layer_status($layer_id, $status, $ignore_rollenlayer = false) {
 		if($layer_id > 0 OR $layer_id == NULL){
 			$sql = "
 				UPDATE
@@ -1351,7 +1351,7 @@ class rolle {
 			$this->debug->write("<p>file:rolle.php class:rolle->update_layer_status - schalte ein oder alle Layer Stati der Rolle um:", 4);
 			$this->database->execSQL($sql, 4, $this->loglevel);		
 		}
-		if($layer_id < 0 OR $layer_id == NULL){
+		if (!$ignore_rollenlayer AND ($layer_id < 0 OR $layer_id == NULL)){
 			$sql = "
 				UPDATE
 					kvwmap.rollenlayer

@@ -4285,8 +4285,8 @@ echo '			</table>
 		echo $routing->getRoute($formvars);
 	}
 
-	function reset_layers($layer_id){
-		$this->user->rolle->resetLayers($layer_id);
+	function reset_layers($layer_id, $ignore_rollenlayer = false){
+		$this->user->rolle->resetLayers($layer_id, $ignore_rollenlayer);
 		$this->user->rolle->resetQuerys($layer_id);
 	}
 
@@ -15558,7 +15558,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			else {
 				$layerset = $this->user->rolle->getLayer('');
 
-				$this->reset_layers(NULL);
+				$this->reset_layers(NULL, true);
 				for ($i = 0; $i < count($layerset); $i++){
 					unset($formvars['thema'][$layerset[$i]['layer_id']]);
 					unset($formvars['qLayer'][$layerset[$i]['layer_id']]);
