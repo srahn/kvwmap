@@ -8108,9 +8108,9 @@ echo '			</table>
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
 					$this->Docu->activeframe[0]['texts'][$j]['text'] = $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']];
 				}
-				$freitext = explode(';', $this->substituteFreitext(iconv("UTF-8", "CP1252//TRANSLIT", $this->Docu->activeframe[0]['texts'][$j]['text'])));
+				$freitext = explode(';', $this->substituteFreitext($this->Docu->activeframe[0]['texts'][$j]['text']));
 				$anzahlzeilen = count($freitext);
-				$alpha = $this->Docu->activeframe[0]['texts'][$j]['angle'];
+				echo $alpha = $this->Docu->activeframe[0]['texts'][$j]['angle'];
 				for($i = 0; $i < $anzahlzeilen; $i++){
 					$h = $i * $this->Docu->activeframe[0]['texts'][$j]['size'] * 1.25;
 					$a = sin(deg2rad($alpha)) * $h;
@@ -8138,7 +8138,7 @@ echo '			</table>
 						);
 					}
 					else{
-						$this->Docu->pdf->addText($posx, $posy, $this->Docu->activeframe[0]['texts'][$j]['size'], $freitext[$i], -1 * $alpha);
+						$this->Docu->pdf->addText($posx, $posy, $this->Docu->activeframe[0]['texts'][$j]['size'], $freitext[$i], 0, 'left', -1 * $alpha);
 					}
 				}
 			}
@@ -8147,7 +8147,7 @@ echo '			</table>
 			if($this->Docu->activeframe[0]['usersize'] > 0){
 				$this->Docu->set_pdf_color($this->Docu->activeframe[0]['usercolor']);
 				$this->Docu->pdf->selectFont($this->Docu->activeframe[0]['font_user']);
-				$this->Docu->pdf->addText($this->Docu->activeframe[0]['userposx'],$this->Docu->activeframe[0]['userposy'],$this->Docu->activeframe[0]['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
+				$this->Docu->pdf->addText($this->Docu->activeframe[0]['userposx'],$this->Docu->activeframe[0]['userposy'],$this->Docu->activeframe[0]['usersize'], 'Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name);
 			}
 
 			# Nordpfeil
@@ -8230,7 +8230,7 @@ echo '			</table>
 					$anzahlzeilen = count($freitext);
 					for($i = 0; $i < $anzahlzeilen; $i++){
 						$h = $i * $fontsize * 1.25;
-						$this->Docu->pdf->addText($posx+$fontsize*0.3333, $posy-$h-$fontsize*1.18, $fontsize, iconv("UTF-8", "CP1252//TRANSLIT", $freitext[$i]), 0);
+						$this->Docu->pdf->addText($posx+$fontsize*0.3333, $posy-$h-$fontsize*1.18, $fontsize, $freitext[$i], 0);
 					}
 				}
 			}
@@ -8275,8 +8275,8 @@ echo '			</table>
   }
 
   function substituteFreitext($text){
-  	$text = str_replace('$stelle', utf8_decode($this->Stelle->Bezeichnung), $text);
-  	$text = str_replace('$user', utf8_decode($this->user->Name), $text);
+  	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
+  	$text = str_replace('$user', $this->user->Name, $text);
 		$text = str_replace('$scale', $this->scale, $text);
 		$text = str_replace('$gemeinde', $this->gemeinde, $text);
 		$text = str_replace('$gemarkung', $this->gemarkung, $text);
