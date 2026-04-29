@@ -43,7 +43,7 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 }
 
 function mapserverExp2SQL($exp, $classitem) {
-	$exp = preg_replace("/'\\[([^\]]*[^0-9][^\]]*)\\]'|\\[([^\]]*[^0-9][^\]]*)\\]/", "$1$2", $exp);
+	$exp = preg_replace("/'\\[(\\D[^\\]]*|[^\\]]*\\D[^\\]]*)\\]'|\\[(\\D[^\\]]*|[^\\]]*\\D[^\\]]*)\\]/", "$1$2", $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
 	$exp = str_replace(' ne ', ' != ', $exp);
 	$exp = str_replace(' ge ', ' >= ', $exp);
@@ -54,10 +54,9 @@ function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace('\b', '\y', $exp);
 	if (strpos($exp, ' IN ') != false) {
 		$array = get_first_word_after($exp, ' IN');
-		$exp = str_replace(' IN ', ' = ANY(', $exp);
-		$exp = str_replace($array, $array . ')', $exp);
+		$exp = str_replace(' IN ', '::text = ANY(ARRAY[', $exp);
+		$exp = str_replace($array, $array . '])', $exp);
 	}
-
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';

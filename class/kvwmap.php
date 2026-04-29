@@ -4292,8 +4292,8 @@ echo '			</table>
 		echo $routing->getRoute($formvars);
 	}
 
-	function reset_layers($layer_id){
-		$this->user->rolle->resetLayers($layer_id);
+	function reset_layers($layer_id, $ignore_rollenlayer = false){
+		$this->user->rolle->resetLayers($layer_id, $ignore_rollenlayer);
 		$this->user->rolle->resetQuerys($layer_id);
 	}
 
@@ -15450,7 +15450,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->titel='Themenübersicht';
     $this->main='layer_uebersicht.php';
     # Abfragen aller Layer
-    $this->layers = $mapDB->getall_Layer($this->formvars['order'], true);
+    $this->layers = $mapDB->getall_Layer($this->formvars['order'] ?: 'name', true);
 		$this->layers_in_stelle = $mapDB->read_Layer(0);
 		$this->groups = $mapDB->read_Groups(true, 'gruppenname');
     $this->output();
@@ -15737,7 +15737,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			else {
 				$layerset = $this->user->rolle->getLayer('');
 
-				$this->reset_layers(NULL);
+				$this->reset_layers(NULL, true);
 				for ($i = 0; $i < count($layerset); $i++){
 					unset($formvars['thema'][$layerset[$i]['layer_id']]);
 					unset($formvars['qLayer'][$layerset[$i]['layer_id']]);
@@ -16575,7 +16575,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			for ($i = 0; $i < count($json); $i++) {
 				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"', $delete);
 			}
-			$result = '{' . @implode(',', array_filter($elems)) . '}';		# leere Array-Elemente mit array_filter weglassen
+			$result = '{' . @implode(',', array_filter($elems ?: [])) . '}';		# leere Array-Elemente mit array_filter weglassen
 		}
 		elseif (is_object($json)) { // Nutzer-Datentyp
 			if ($quote == '') {
