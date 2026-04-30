@@ -301,7 +301,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		global $GUI;
 		# Erzeuge ein neues Ticket der Kategorie Fehler mit Auftragsart Fehlerkorrektur.
 		$pgObj = new PgObject($GUI, 'feedback', 'tickets');
-		$ticket = $pgObj->create(array(
+		$pgObj->create(array(
 			'titel' => 'Fehler beim Upload ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? ' ' . $GUI->konvertierung->get_id() : '') . ' in Stelle ' . $GUI->Stelle->id,
 			'anfrage' => 'Beim Hochladen ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? $GUI->konvertierung->get('bezeichnung') : '') . ($GUI->konvertierung ? ' id: ' . $GUI->konvertierung->get_id() : '') . " ist ein Fehler aufgetreten.\n" . pg_escape_string($msg),
 			'kategorie_id' => 3, # Planuploadfehler
@@ -315,7 +315,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			'stelle_id' => $GUI->Stelle->id
 		));
 
-		return $ticket;
+		return $pgObj;
 	}
 
 	/*

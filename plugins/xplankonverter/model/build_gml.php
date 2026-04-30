@@ -321,7 +321,7 @@ class Gml_builder {
 			
 			# for XP_AbstraktesPraesentationsobjekt and children
 			$xp_plan_children = array('BP_Plan','FP_Plan','RP_Plan','SO_Plan','LP_Plan');
-			$abstraktes_praesentationsobjekt_children = array('XP_Praesentationsobjekt','XP_PPO','XP_FPO','XP_LPO','XP_TPO');
+			$abstraktes_praesentationsobjekt_children = array('XP_Praesentationsobjekt','XP_PPO','XP_FPO','XP_LPO','XP_TPO','XP_PTO');
 			$prefixes_or_signs_to_remove = array('#','GML_','Gml_','gml_','{','}');
 			
 			if ($sequence_attr == 4 && in_array($uml_attribute['origin'], $abstraktes_praesentationsobjekt_children)) {

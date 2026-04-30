@@ -3266,7 +3266,29 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		while($row = pg_fetch_assoc($ret[1])) {
 			//$this->gui->Hinweis .= '<pre>' . var_dump($row) . ' </pre>';
 			$target_columns = explode(',', $row['art_attrs']);
-			$target_values = explode(',', $row['target_value']); // TODO consider what happens for text/aufschrift-fields with comma inside the string
+			$target_values_escaped = $row['target_value'];
+			$is_quoted = false;
+			// loop from end to front to replace all commas within quotes with $ special replacement string
+			// assumption that $ will never appear in string
+			for($i = strlen($target_values_escaped); $i > 0; $i--) {
+				if($target_values_escaped[$i] == "'" AND !$is_quoted) {
+					$is_quoted = true;
+				} elseif ($target_values_escaped[$i] == "'" AND $is_quoted){
+					$is_quoted = false;
+				}
+				if($target_values_escaped[$i] == ',' AND $is_quoted) {
+					$target_values_escaped = substr_replace($target_values_escaped, '$', $i, 1);
+				}
+			}
+			$target_values = explode(',', $target_values_escaped);
+			// unescape after exploding
+			$array_cnt = count($target_values);
+			for($i = 0; $i < $array_cnt; $i++) {
+				$target_values[$i] =  str_replace('$',',',$target_values[$i]);
+				// remove all single quotes
+				$target_values[$i] =  str_replace("'","",$target_values[$i]);
+			}
+
 			$data_types = explode(',', $row['data_types']); // currently limit to 5, see what happens if more are needed
 			$indices = explode(',', trim($row['origin_index'],'{}'));
 			$attr_str = '';
