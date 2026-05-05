@@ -21281,6 +21281,9 @@ DO $$
 			$attribute_sets[] = "" . $key . " = '" . $formvars[$key] . "'";
 		}
 
+		$attribute_sets[] = "edited_at = now()";
+		$attribute_sets[] = "edited_by = " . $this->User_ID;
+
 		$sql = "
 			UPDATE
 				kvwmap.layer
@@ -21418,7 +21421,9 @@ DO $$
 					duplicate_criterion,
 					shared_from,
 					version,
-					comment
+					comment,
+					created_at,
+					created_by
 					" . ($this->GUI->plugin_loaded('mobile') ? ', sync' : '') . "
 					" . ($this->GUI->plugin_loaded('mobile') ? ', vector_tile_url' : '') . "
 					" . ($this->GUI->plugin_loaded('portal') ? ', cluster_option' : '') . "
@@ -21497,7 +21502,9 @@ DO $$
 					" . quote(pg_escape_string($formvars['duplicate_criterion'])) . ",
 					" . quote_or_null($formvars['shared_from']) . ",
 					'" . ($formvars['version'] == '' ? '1.0.0' : $formvars['version']) . "',
-					" . quote_or_null(pg_escape_string($formvars['comment'])) . "
+					" . quote_or_null(pg_escape_string($formvars['comment'])) . ",
+					now(),
+					" . $this->User_ID . "
 					" . ($this->GUI->plugin_loaded('mobile') ? ", " . quote(($formvars['sync'] == '' ? '0' : $formvars['sync']), 'text') : '') . "
 					" . ($this->GUI->plugin_loaded('mobile') ? ", " . quote($formvars['vector_tile_url']) : '') . "
 					" . ($this->GUI->plugin_loaded('portal') ? ", " . quote(($formvars['cluster_option'] == '' ? '0' : $formvars['cluster_option']), 'text') : '') . "

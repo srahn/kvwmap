@@ -102,6 +102,8 @@
 	$strSelectionTypeHelp = "Hier kann 'radio' eingetragen werden. Alle Layer einer Gruppe mit diesem Eintrag bekommen in der Legende einen Radiobutton. Man kann dann nur immer einen der Layer einschalten. Macht z.B. für Hintergrundkarten Sinn.";
 	$strSharedFrom  =  "Geteilt von Nutzer";
 	$strSharedFromHelp  =  "Lösche die ID wenn der Layer in der Layerlegende nicht länger als geteilt markiert werden soll.";
+	$strCreatedAt = 'Erstellt am';
+	$strEditedAt = 'Bearbeitet am';
 	$strSizeUnits = "Sizeunits";
 	$strErrorStatus = "Fehlerstatus";
 	$strErrorStatusHelp = "Dieses Feld kann mit einem Fehlerstatus befüllt werden. Der Layer ist dadurch deaktiviert und in der Legende mit einem Hinweissymbol versehen.&#xa;Das Tool 'wms_checker.php' befüllt diese Feld automatisch.";

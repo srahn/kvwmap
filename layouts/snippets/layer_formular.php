@@ -1338,7 +1338,7 @@ from
 							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
 								if ($this->formvars['shared_from']) {
 									$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
-									$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
+									$shared_name = $shared_user['vorname'] . ' ' . $shared_user['name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
 								}
 								if ($this->is_admin_user($this->user->id)) { ?>
 									<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px"> <?
@@ -1352,6 +1352,34 @@ from
 							</td>
 						</tr><?
 					} ?>
+					<tr>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strCreatedAt; ?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<input name="created_at" type="text" value="<?php echo $this->formvars['created_at']; ?>" size="3">&nbsp;
+						</td>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<?
+								if ($this->formvars['created_by']) {
+									$created_user = $this->user->getUserDaten($this->formvars['created_by'], '', '')[0];
+									echo $created_user['vorname'] . ' ' . $created_user['name'] . (!empty($created_user['organisation']) ? ' (' . $created_user['organisation'] . ')' : '');
+								}
+							?>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strEditedAt; ?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<input name="edited_at" type="text" value="<?php echo $this->formvars['edited_at']; ?>" size="3">&nbsp;
+						</td>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<?
+								if ($this->formvars['edited_by']) {
+									$edited_user = $this->user->getUserDaten($this->formvars['edited_by'], '', '')[0];
+									echo $edited_user['vorname'] . ' ' . $edited_user['name'] . (!empty($edited_user['organisation']) ? ' (' . $edited_user['organisation'] . ')' : '');
+								}
+							?>							
+						</td>
+					</tr>
 				</table>
 			</div>
 		

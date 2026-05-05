@@ -85,6 +85,8 @@
 	$strSelectionTypeHelp = "'radio' can be entered here. All layers of a group with this entry get a radio button in the legend. You can only switch on one of the layers at a time. Makes sense for background maps for example.";
 	$strSharedFrom = "Shared from user";
 	$strSharedFromHelp = "Remove the ID when the layer should not be marked as shared by another user in the layer legend any longer.";
+	$strCreatedAt = 'Created At';
+	$strEditedAt = 'Edited At';
 	$strSignOrder = "Drawingorder";
 	$strSizeUnits = "Sizeunits";
 	$strStatus = "Status";
