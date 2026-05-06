@@ -688,7 +688,7 @@ span[data-tooltip]:hover::after {
 }
 
 select {
-
+	padding-right: 16px;
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
 }
