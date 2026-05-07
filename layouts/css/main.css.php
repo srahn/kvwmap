@@ -378,6 +378,10 @@ ul{
 	list-style: square outside none;
 }
 
+.ul_table {
+	width: max-content;
+}
+
 .ul_table td:first-of-type{
 	display: inline list-item;
 	color: lightsteelblue;
