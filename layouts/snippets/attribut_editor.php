@@ -459,6 +459,15 @@ function render(i){
 		margin: 0px 2px 2px 10px;
 	}
 
+	.options_div {
+		display: flex;
+    gap: 2px;
+	}
+
+	.options_div a {
+		padding-top: 5px;
+	}
+
 </style>
 
 <table style="width: 700px; margin: 15px 40px 0 40px">
@@ -603,18 +612,24 @@ function render(i){
 									echo '<div class="fett scrolltable_footer">
 														<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 													</div>';
-								}
-								if (in_array($this->attributes['form_element_type'][$i], ['SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'])) {
-									echo '<a href="">#</a>';
-								}
-								if (
-									$this->attributes['options'][$i] == '' AND
-									$this->attributes['constraints'][$i] != '' AND
-									!in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
-								) {
-									$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
 								} ?>
-								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
+								<div class="options_div"> <?
+									if (
+										$this->attributes['options'][$i] == '' AND
+										$this->attributes['constraints'][$i] != '' AND
+										!in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
+									) {
+										$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
+									} ?>
+									<textarea class="select_option_link" name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
+									<?
+									if (in_array($this->attributes['form_element_type'][$i], ['SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'])) {
+										if ($sublayer_id = explode(',', $this->attributes['options'][$i])[0]) {
+											echo '<a href="index.php?go=Layereditor&selected_layer_id=' . $sublayer_id . '&csrf_token=' . $_SESSION['csrf_token'] .'"><img src="graphics/pfeil_rechts.gif"></a>';
+										}
+									}
+									?>
+								</div>
 						  </td>
 							
 						  <td align="left" valign="top">
