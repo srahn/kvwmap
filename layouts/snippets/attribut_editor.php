@@ -604,6 +604,9 @@ function render(i){
 														<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 													</div>';
 								}
+								if (in_array($this->attributes['form_element_type'][$i], ['SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'])) {
+									echo '<a href="">#</a>';
+								}
 								if (
 									$this->attributes['options'][$i] == '' AND
 									$this->attributes['constraints'][$i] != '' AND
