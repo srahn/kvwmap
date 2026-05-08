@@ -181,7 +181,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	check_visibility_rule = function(layer_id, rule, scope, k) {
 		// Leaf-Regel (kein logic → einfache Bedingung)
 		if (!rule.logic && rule.attribute) {
-			var field = scope.querySelector('.attr_' + layer_id + '_' + rule.attribute);
+			var field;
+			if (scope != document) {
+				field = scope.querySelector('.attr_' + layer_id + '_' + rule.attribute);
+			}
 			if (field == undefined) {
 				field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
 			}
@@ -207,7 +210,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		if(object == null)return;
 		var group_display;
 		dependents.forEach(function(dependent){
-			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen
+			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen falls man verschachtelt in einem Datentyp ist
 			if (scope.querySelector('#visibility_rules_'+dependent) == undefined){
 				scope = document;			// ansonsten global
 			}
