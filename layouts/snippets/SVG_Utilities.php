@@ -3032,7 +3032,6 @@ function mouseup(evt){
 	  enclosingForm.newpath.value = path;
 	  if(pathy.length > 2){
 	  	enclosingForm.firstpoly.value = true;
-			if(enclosingForm.firstpoly.onchange)enclosingForm.firstpoly.onchange();
 	  	polygonarea();
 	  }
 	}
@@ -3811,6 +3810,9 @@ function mouseup(evt){
 	  		enclosingForm.area.value = "0.0";
 	  	}
 	  }
+		if (area.onchange) {
+			area.onchange();
+		}
 	}
 	';
 
