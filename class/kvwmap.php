@@ -14735,7 +14735,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['nachname'] 									= $this->userdaten[0]['name'];
 			$this->formvars['vorname'] 										= $this->userdaten[0]['vorname'];
 			$this->formvars['loginname'] 									= $this->userdaten[0]['login_name'];
-			$this->formvars['Namenszusatz'] 							= $this->userdaten[0]['namenszusatz'];
+			$this->formvars['namenszusatz'] 							= $this->userdaten[0]['namenszusatz'];
 			$this->formvars['password_setting_time'] 			= $this->userdaten[0]['password_setting_time'];
 			$this->formvars['password_expired'] 					= $this->userdaten[0]['password_expired'] === 't';
 			$this->formvars['totp_secret'] 								= $this->userdaten[0]['totp_secret'];
