@@ -8110,7 +8110,7 @@ echo '			</table>
 				}
 				$freitext = explode(';', $this->substituteFreitext($this->Docu->activeframe[0]['texts'][$j]['text']));
 				$anzahlzeilen = count($freitext);
-				echo $alpha = $this->Docu->activeframe[0]['texts'][$j]['angle'];
+				$alpha = $this->Docu->activeframe[0]['texts'][$j]['angle'];
 				for($i = 0; $i < $anzahlzeilen; $i++){
 					$h = $i * $this->Docu->activeframe[0]['texts'][$j]['size'] * 1.25;
 					$a = sin(deg2rad($alpha)) * $h;
