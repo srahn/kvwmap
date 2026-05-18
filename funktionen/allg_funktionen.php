@@ -2315,7 +2315,8 @@ function replace_params_link($str, $params, $layer_id) {
 *
 * @param $attachement String Pfad zur Datei, die als Anhang an die E-Mail angehängt werden soll.
 * mail_att("from name", "from@domain", "empf@domain", "ccempf@dmain", "reply@domain", "Email mit Anhang", "Im Anhang sind mehrere Datei", '/var/www/logs/kvwmap/mail_queue/anhang.txt', 'to name');
-**/
+*	Wenn eine E-Mail ohne Attachment gesendet werden soll, muss der Parameter einen leeren String enthalten.
+*/
 function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
 	$success = false;
 	switch ($mode) {
@@ -3241,5 +3242,18 @@ function get_value_by_path(array $array, array $path) {
 		$array = $array[$key];
 	}
 	return $array;
+}
+
+/**
+ * Zählt die vollen Stunden zwischen $end und $start
+ * @param string $start Format (Y-m-d H:i:s),
+ * @param string $end Format (Y-m-d H:i:s)
+ */
+function volle_stunden($start, $end) {
+	$start = new DateTime($start);
+	$end   = new DateTime($end);
+	$diff = $start->diff($end);
+	$hours = ($diff->days * 24) + $diff->h;
+	return $hours;
 }
 ?>

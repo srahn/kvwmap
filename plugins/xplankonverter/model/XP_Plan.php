@@ -6,6 +6,7 @@
 class XP_Plan extends PgObject {
 
 	static $schema = 'xplan_gml';
+	public $veroeffentlichungsprotokoll_dokumente = array();
 
 	function __construct($gui, $planart, $select = '*') {
 		$this->planart = $planart;
@@ -39,10 +40,84 @@ class XP_Plan extends PgObject {
 		return $xp_plan;
 	}
 
+	public static	function find_by_id_with_stelle_id($gui, $id, $planart) {
+		$plan_obj = new XP_Plan($gui, $planart);
+		$results = $plan_obj->find_where(
+      "p.gml_id = '" . $id . "'",
+      NULL,
+      "
+        k.stelle_id,
+        p.*,
+				xplankonverter.plan_anzeigename(p.name, p.planart[1], p.nummer, (p.gemeinde[1]).gemeindename) AS anzeigename
+      ",
+      NULL,
+      "
+        xplan_gml." . $plan_obj->tableName . " p JOIN
+        xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+      "
+    );
+		$fehler = pg_last_error();
+		if ($fehler) {
+			return array(
+				'success' => false,
+				'msg' => 'Class XP_Plan Func find_by_id_with_stelle_id: Fehler bei der Abfrage des Plans mit stelle_id: ' . $fehler
+			);
+		}
+		$plan = $results[0];
+		$plan->planart = $planart;
+		return array(
+			'success' => true,
+			'plan' => $plan
+		);
+	}
+
 	public static	function find_where_by_planart($gui, $planart, $where, $order = '', $select = '*', $limit = '') {
 		$plan = new XP_Plan($gui, $planart);
 		$plaene = $plan->find_where($where, $order, $select, $limit);
 		return $plaene;
+	}
+
+	function find_veroeffentlichungsprotokoll_dokumente ($plan_gml_id = NULL) {
+		$pg_obj = new PgObject($this->gui, 'xplankonverter', 'veroeffentlichungsprotokoll_dokumente');
+		$this->veroeffentlichungsprotokoll_dokumente = $pg_obj->find_by_sql(array(
+			'select' => "
+				d.art,
+				d.referenzurl,
+				d.beschreibung,
+				d.datum,
+				d.typ,
+				e.beschreibung AS typ_beschreibung
+			",
+			'from' => "
+				(
+					SELECT
+						gml_id,
+						UNNEST(externereferenz),
+						(UNNEST(externereferenz)).art,
+						(UNNEST(externereferenz)).referenzurl,
+						(UNNEST(externereferenz)).beschreibung,
+						(UNNEST(externereferenz)).datum,
+						(UNNEST(externereferenz)).typ
+					FROM
+						xplan_gml.xp_plan
+				) d JOIN
+				xplan_gml.enum_xp_externereferenztyp e ON d.typ::text::integer = e.wert
+			",
+			'where' => "
+			  d.gml_id = '" . ($plan_gml_id ?? $this->get('plan_gml_id')) . "'
+			"
+		));
+		$fehler = pg_last_error();
+		if ($fehler) {
+			return array(
+				'success' => false,
+				'msg' => 'Class: XP_Plan, Func: find_veroeffentlichungsprotokoll_dokumente, ' . __LINE__ . ' Fehler bei der Abfrage der Veröffentlichungsdokumente: ' . $fehler
+			);
+		}
+		return array(
+			'success' => true,
+			'veroeffentlichungsprotokoll_dokumente' => $this->veroeffentlichungsprotokoll_dokumente
+		);
 	}
 
 	/**
@@ -147,6 +222,7 @@ class XP_Plan extends PgObject {
 		if (empty($planart)) {
 			$planart = $this->planart;
 		}
+		echo 'search planlayerid by planart: ' . $planart;
 		switch ($planart) {
 			case 'BP-Plan' : $plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
 			case 'FP-Plan' : $plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID; break;
