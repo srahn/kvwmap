@@ -115,6 +115,9 @@ BEGIN;
 
   ALTER TABLE xplankonverter.veroeffentlichungsprotokolle ADD COLUMN IF NOT EXISTS last_pruefcode int4 NULL;
   ALTER TABLE xplankonverter.veroeffentlichungsprotokolle ADD COLUMN IF NOT EXISTS last_pruefung timestamp without time zone NULL;
+  ALTER TABLE xplankonverter.veroeffentlichungsprotokolle ADD COLUMN IF NOT EXISTS datei varchar;
+  ALTER TABLE xplankonverter.veroeffentlichungsprotokolle ADD COLUMN IF NOT EXISTS pruefungen_seit_observation_start integer;
+
   ALTER TABLE xplankonverter.veroeffentlichungsprotokolle ADD CONSTRAINT fk_veroeffentlichungsprotokolle_pruefcode FOREIGN KEY (last_pruefcode) REFERENCES xplankonverter.pruefcodes(code) ON UPDATE CASCADE ON DELETE NO ACTION;
 
   CREATE TABLE IF NOT EXISTS xplankonverter.veroeffentlichungsnachweis_luecken (
