@@ -185,7 +185,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			if (scope != document) {
 				field = scope.querySelector('.attr_' + layer_id + '_' + rule.attribute);
 			}
-			if (field == undefined) {
+			else {
 				field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
 			}
 			return field_has_value(field, rule.operator, rule.value);
