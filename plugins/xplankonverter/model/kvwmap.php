@@ -834,5 +834,27 @@
 				'msg' => 'Fehler beim Versenden der E-Mail zum Update der Zusammenzeichnung!'
 			);
 		}
-	}
+	};
+
+	$GUI->xplankonverter_stelle_kontaktdaten = function() use ($GUI) {
+		$GUI->checkCaseAllowed('xplankonverter_stelle_kontaktdaten');
+		if ($GUI->formvars['stelle_id'] == $GUI->Stelle->id AND $GUI->formvars['action'] == 'Speichern') {
+			$stelle_obj = stelle::find($GUI, 'id=' . $GUI->Stelle->id)[0];
+			$stelle_obj->update_attr(
+				array(
+					"ows_distributionorganization = '" . $GUI->formvars['ows_distributionorganization'] . "'",
+					"ows_distributionaddress = '" . $GUI->formvars['ows_distributionaddress'] . "'",
+					"ows_distributionpostalcode = '" . $GUI->formvars['ows_distributionpostalcode'] . "'",
+					"ows_distributioncity = '" . $GUI->formvars['ows_distributioncity'] . "'",
+				),
+				true,
+				'id = ' . $GUI->Stelle->id
+			);
+			$GUI->Stelle->data = $stelle_obj->data;
+		}
+		$GUI->titel = 'Stellendaten';
+		$GUI->main = '../../plugins/xplankonverter/view/stelle_kontaktdaten.php';
+		$GUI->output();
+	};
+
 ?>

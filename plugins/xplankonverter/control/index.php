@@ -41,6 +41,7 @@
 // xplankonverter_shapefile_loeschen
 // xplankonverter_shapefiles_index
 // xplankonverter_show_geltungsbereich_upload
+// xplankonverter_stelle_kontaktdaten
 // xplankonverter_upload_geltungsbereich
 // xplankonverter_upload_xplan_gml
 // xplankonverter_upload_zusammenzeichnung
@@ -2611,6 +2612,12 @@ function go_switch_xplankonverter($go) {
 				}
 			}
 			$GUI->data = $result;
+			$GUI->output();
+		} break;
+
+		case 'xplankonverter_stelle_kontaktdaten' : {
+			$GUI->xplankonverter_stelle_kontaktdaten();
+			$GUI->main = '../../plugins/xplankonverter/view/stelle_kontaktdaten.php';
 			$GUI->output();
 		} break;
 

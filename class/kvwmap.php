@@ -14050,7 +14050,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->titel='Stellen Editor';
 		$this->main='stelle_formular.php';
-    $this->output();
   }
 
 	function StelleLoeschen() {
