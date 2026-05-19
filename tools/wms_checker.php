@@ -121,7 +121,7 @@ function getExceptionCode($data){
 }
 
 include($config);
-#include($credentials);
+include($credentials);
 include(CLASSPATH.'log.php');
 include(CLASSPATH.'postgresql.php');
 $debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
