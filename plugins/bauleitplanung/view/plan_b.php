@@ -86,7 +86,7 @@ zoom_to = function(roknr, art){
 	currentform.roknr.value = roknr;
 	currentform.art.value = art;
 	currentform.go.value = 'zoomtobplan';
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
 set_changed_flag = function(flag){
