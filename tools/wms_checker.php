@@ -136,7 +136,7 @@ $sql = "
 	FROM
 		kvwmap.layer_parameter
 ";
-$ret = $userDb->execSQL($sql);
+$ret = $userDb->execSQL($sql, 4, 0);
 while ($line = pg_fetch_assoc($ret[1])) {
 	$params[$line['key']] = $line['default_value'];
 }
@@ -155,7 +155,7 @@ if ($without_layer_id != '') {
 	$query .= '	AND layer_id NOT IN (' . $without_layer_id . ')';
 }
 #echo '<br>get layer with sql: ' . $query;
-$ret = $userDb->execSQL($query);
+$ret = $userDb->execSQL($query, 4, 0);
 
 while ($line = pg_fetch_assoc($ret[1])){
 	$extent = rectObj($bbox['left'], $bbox['bottom'], $bbox['right'], $bbox['top']);
@@ -208,7 +208,7 @@ while ($line = pg_fetch_assoc($ret[1])){
 				layer_id = " . $line["layer_id"] . "
 		";
 	}
-	$result2 = $userDb->execSQL($query);
+	$result2 = $userDb->execSQL($query, 4, 0);
 	echo '</div>';
 }
 ?>
