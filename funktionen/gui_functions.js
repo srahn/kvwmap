@@ -475,7 +475,9 @@ function getBrowserSize(){
 
 function resizemap2window(){
 	getBrowserSize();
-	params = 'go=ResizeMap2Window&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value + '&legendwidth=' + document.getElementById('legenddiv').clientWidth;
+	legendwidth = document.getElementById('container_paint').clientWidth - 
+								document.getElementById('map').clientWidth;
+	params = 'go=ResizeMap2Window&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value + '&legendwidth=' + legendwidth;
 	if(document.getElementById('map_frame') != undefined){
 		startwaiting();
 		document.location.href='index.php?'+params+'&nScale='+document.GUI.nScale.value+'&reloadmap=true';			// in der Hauptkarte neuladen

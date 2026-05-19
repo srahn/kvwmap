@@ -151,7 +151,7 @@
 		<input type="text" autocomplete="off" id="layer_search" onkeyup="jumpToLayer(this.value);" value="">
 	</div>
 	</div>
-	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();">
+	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();" style="max-width: <? echo $legend_width; ?>px">
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 		<div onmousedown="document.GUI.legendtouched.value = 1;" id="legend">
 			<? echo $this->legende; ?>
