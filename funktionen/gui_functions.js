@@ -477,6 +477,9 @@ function resizemap2window(){
 	getBrowserSize();
 	legendwidth = document.getElementById('container_paint').clientWidth - 
 								document.getElementById('map').clientWidth;
+	if (legendwidth < 230) {
+		legendwidth = 230;
+	}
 	params = 'go=ResizeMap2Window&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value + '&legendwidth=' + legendwidth;
 	if(document.getElementById('map_frame') != undefined){
 		startwaiting();
