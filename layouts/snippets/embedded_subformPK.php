@@ -149,11 +149,14 @@
 				<script type="text/javascript">
 					var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
 					[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
-				</script>				
+				</script>		
+				<table><tr><td>		<!-- notwendig wegen der closest table bei check_visibility -->					
 	<?
-				for($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++){
-					echo $invisible_attributes[$layer['layer_id']][$l]."\n";
-				}
+					for($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++){
+						echo $invisible_attributes[$layer['layer_id']][$l]."\n";
+					} ?>
+				</td></tr></table>
+	<?
 			}
 		} ?>
 		<div style="width: 100%;text-align: center;margin-top: 4px">
