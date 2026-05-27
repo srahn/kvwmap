@@ -3872,9 +3872,11 @@ echo '			</table>
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
+		$sql = str_replace("='<requires>", "= '<requires>", $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
-			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
-			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
+			$value = ($attributevalues[$i] != '' ? $attributevalues[$i] : 'NULL');
+			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN ('" . $value . "')", $sql);
+			$sql = str_replace("= '<requires>" . $attributenames[$i] . "</requires>'", " IN ('" . $value . "')", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 		}
 
@@ -4720,13 +4722,15 @@ echo '			</table>
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
+		$sql = str_replace("='<requires>", "= '<requires>", $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
-			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
-			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
-			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 			if ($this->formvars['attribute'] == $attributenames[$i]) {
-				$selected_value = $value;
+				$selected_value = $attributevalues[$i];
 			}
+			$value = ($attributevalues[$i] != '' ? $attributevalues[$i] : 'NULL');
+			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN ('" . $value . "')", $sql);
+			$sql = str_replace("= '<requires>" . $attributenames[$i] . "</requires>'", " IN ('" . $value . "')", $sql);
+			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 		}
 		#echo $sql;
 		@$ret = $layerdb->execSQL($sql, 4, 0);
@@ -19685,6 +19689,7 @@ class db_mapObj{
 									else {
 										if ($query_result != NULL) {
 											$attributes['options'][$i] = str_replace('=<requires>', '= <requires>', $attributes['options'][$i]);
+											$attributes['options'][$i] = str_replace("='<requires>", "= '<requires>", $attributes['options'][$i]);
 											foreach ($attributes['name'] as $attributename) {
 												if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
 													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
@@ -19701,8 +19706,9 @@ class db_mapObj{
 														if (is_array($query_result[$k][$attributename])) {
 															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
 														}
-														$options = str_replace('= <requires>' . $attributename.'</requires>',	" IN ('" . $query_result[$k][$attributename] . "')", $options);
-														$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);	# fallback
+														$options = str_replace('= <requires>' . $attributename . '</requires>',	" IN ('" . $query_result[$k][$attributename] . "')", $options);
+														$options = str_replace("= '<requires>" . $attributename . "</requires>'",	" IN ('" . $query_result[$k][$attributename] . "')", $options);
+														$options = str_replace('<requires>'.$attributename.'</requires>', $query_result[$k][$attributename], $options);	# fallback
 													}
 												}
 												if (strpos($options, '<requires>') !== false) {
