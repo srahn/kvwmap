@@ -1333,11 +1333,11 @@ class rolle {
 		return $layer;
 	}
 
-	function resetLayers($layer_id){
-		$this->update_layer_status($layer_id, '0');
+	function resetLayers($layer_id, $ignore_rollenlayer = false){
+		$this->update_layer_status($layer_id, '0', $ignore_rollenlayer);
 	}
 
-	function update_layer_status($layer_id, $status) {
+	function update_layer_status($layer_id, $status, $ignore_rollenlayer = false) {
 		if($layer_id > 0 OR $layer_id == NULL){
 			$sql = "
 				UPDATE
@@ -1352,7 +1352,7 @@ class rolle {
 			$this->debug->write("<p>file:rolle.php class:rolle->update_layer_status - schalte ein oder alle Layer Stati der Rolle um:", 4);
 			$this->database->execSQL($sql, 4, $this->loglevel);		
 		}
-		if($layer_id < 0 OR $layer_id == NULL){
+		if (!$ignore_rollenlayer AND ($layer_id < 0 OR $layer_id == NULL)){
 			$sql = "
 				UPDATE
 					kvwmap.rollenlayer
@@ -1413,19 +1413,25 @@ class rolle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		foreach ($formvars['thema'] as $layer_id => $aktiv_status) {
 			$layer = $this->layerset['layer_ids'][$layer_id];
-			$requires_status = value_of($formvars, 'thema[' . value_of($layer, 'requires') . '');
-			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
+			if ($aktiv_status !== '') {
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
 				if ($layer['layer_id'] > 0) {
 					$sql ="
 						UPDATE
-							kvwmap.u_rolle2used_layer
+							kvwmap.u_rolle2used_layer r
 						SET
 							aktivstatus = " . $aktiv_status . "
+						FROM
+							kvwmap.used_layer ul
 						WHERE
-							user_id = " . $this->user_id . " AND
-							stelle_id = " . $this->stelle_id . " AND
-							layer_id = " . $layer['layer_id'] . "
+							r.user_id = " . $this->user_id . " AND
+							r.stelle_id = " . $this->stelle_id . " AND
+							ul.stelle_id = " . $this->stelle_id . " AND
+							ul.layer_id = r.layer_id and 
+							(
+								r.layer_id = " . $layer['layer_id'] . " OR
+								ul.requires = " . $layer['layer_id'] . "
+							)
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);

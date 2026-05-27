@@ -440,12 +440,14 @@ if ($doit == true) {
 				}
 				?>
 			<div style="display: none">
+				<table><tr><td>		<!-- notwendig wegen der closest table bei check_visibility -->
 				<?
 					if (value_of($invisible_attributes, $layer['layer_id'])){
 						for ($l = 0; $l < count($invisible_attributes[$layer['layer_id']]); $l++){
 							echo $invisible_attributes[$layer['layer_id']][$l]."\n";
 						}
 					} ?>
+				</td></tr></table>
 			</div>
 		</div><?
 		if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {

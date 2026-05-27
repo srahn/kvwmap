@@ -83,10 +83,14 @@ delete_dataset = function(plan_id){
 }
 
 zoom_to = function(roknr, art){
-	currentform.roknr.value = roknr;
-	currentform.art.value = art;
-	currentform.go.value = 'zoomtobplan';
-	currentform.submit();
+		params = 'go=zoomtobplan&art='+art+'&roknr='+roknr;
+	if (root.document.getElementById('mapimage') != null) {					// aus overlay und Hauptkarte im root Fenster heraus --> Kartenzoom per Ajax machen
+		startwaiting();
+		root.get_map_ajax(params, '', '');
+	}
+	else{
+		root.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+	}
 }
 
 set_changed_flag = function(flag){
