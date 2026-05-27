@@ -1000,7 +1000,7 @@
 		$formnummer = $layout['dhk_call'];
 		$nasfile = $alkis->create_nas_request_xml_file(NULL, NULL, NULL, NULL, $print_params, $formnummer);
 		$sessionid = $alkis->dhk_call_login(DHK_CALL_URL, DHK_CALL_USER, DHK_CALL_PASSWORD);
-		$currenttime=date('Y-m-d_H-i-s',time());
+    $currenttime=date('Y-m-d H:i:s',time());
 		$filename = 'Kartenauszug_'.$currenttime;
 		$GUI->user->rolle->setConsumeALK($currenttime, $GUI->Docu->activeframe[0]['id']);
 		return $alkis->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile, $filename);
