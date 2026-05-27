@@ -3,10 +3,11 @@ include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'PgAttribute.php');
 include_once(CLASSPATH . 'Menue2Stelle.php');
 class Menue extends PgObject {
-	var $obermenue;
-	var $stellen;
-	var $validations;
-	static $write_debug = false;
+	public int $obermenue;
+	public array $stellen = [];
+	public array $validations = [];
+	public string $class = '';
+	public string $target = '';
 
 	function __construct($gui) {
 		parent::__construct($gui, 'kvwmap', 'u_menues', 'id');
@@ -258,7 +259,7 @@ class Menue extends PgObject {
 		$link = replace_params_rolle($this->get('links'));
 		$link = add_csrf($link);
 		# define click events
-		if ($this->obermenue){
+		if (! empty($this->obermenue)) {
 			$href .= "javascript:changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";
 		}
 		else {
@@ -291,7 +292,9 @@ class Menue extends PgObject {
 		$target = $this->get_target();
 		$href = $this->get_href();
 		$onclick = $this->get_onclick();
-		if(!$this->obermenue)$onclick = 'checkForUnsavedChanges(event);'.$onclick;
+		if(empty($this->obermenue)) {
+			$onclick = 'checkForUnsavedChanges(event);'.$onclick;
+		}
 		$style = $this->get_style();
 
 		$html .= '<div class="'.$style.'-menue" id="menue_div_'.$this->get('id').'">';
@@ -343,10 +346,35 @@ class Menue extends PgObject {
 					) . "
 				)
 			";
-			$sql ="
+			$sql = "
 				DELETE FROM kvwmap.u_menue2rolle m2r WHERE m2r.menue_id = " . $this->get('id') . " AND m2r.stelle_id NOT IN (" . implode(', ', $stelle_ids) . ");
 				DELETE FROM kvwmap.u_menue2stelle m2s WHERE m2s.menue_id = " . $this->get('id') . " AND m2s.stelle_id NOT IN (" . implode(', ', $stelle_ids) . ");
-				" . $with_new_values . "
+			";
+			if ($this->get('obermenue') != '0') {
+				$sql .= "
+					WITH s AS (
+						SELECT
+							s.id AS stelle_id,
+							" . $this->get('obermenue') . " AS menue_id
+						FROM
+							kvwmap.stelle s LEFT JOIN
+							(SELECT stelle_id FROM kvwmap.u_menue2stelle WHERE menue_id = " . $this->get('obermenue') . ") m2s ON s.id = m2s.stelle_id
+						WHERE
+							s.id IN (" . implode(', ', $stelle_ids) . ") AND
+							m2s.stelle_id IS NULL
+					),
+					insert_m2s AS (
+						INSERT INTO kvwmap.u_menue2stelle (stelle_id, menue_id, menue_order)
+						SELECT s.stelle_id, s.menue_id, m.order AS menue_order FROM s JOIN kvwmap.u_menues m ON s.menue_id = m.id
+					),
+					insert_m2r AS (
+						INSERT INTO kvwmap.u_menue2rolle (user_id, stelle_id, menue_id, status)
+						SELECT r.user_id, r.stelle_id, s.menue_id, 0 FROM kvwmap.rolle r JOIN s ON r.stelle_id = s.stelle_id
+					)
+					SELECT 1;
+				";
+			}
+			$sql .= $with_new_values . "
 				INSERT INTO kvwmap.u_menue2stelle (menue_id, stelle_id)
 				SELECT
 					nv.menue_id, 
