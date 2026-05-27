@@ -1790,8 +1790,8 @@ function go_switch_xplankonverter($go) {
 				}
 			}
 
-			$GUI->debug->write('Setze Veröffentlichungsdatum: ' . $new_konvertierung->get_aktualitaetsdatum() . ' für neuen Plan.');
-			$GUI->xlog->write('Setze Veröffentlichungsdatum: ' . $new_konvertierung->get_aktualitaetsdatum() . ' für neuen Plan.');
+			$GUI->debug->write('Setze Aktualitätsdatum: ' . $new_konvertierung->get_aktualitaetsdatum() . ' für neuen Plan.');
+			$GUI->xlog->write('Setze Aktualitätsdatum: ' . $new_konvertierung->get_aktualitaetsdatum() . ' für neuen Plan.');
 			$result = $new_konvertierung->update_attr(array('error_id = NULL', 'veroeffentlicht = true', "veroeffentlichungsdatum = '" . $new_konvertierung->get_aktualitaetsdatum() . "'"));
 			if (!$result['success']) {
 				send_error($result['msg']);

@@ -2376,12 +2376,14 @@ class Gml_extractor {
 		# if true, add bereich_gml_id with lowest nummer-attribute
 		$tables_without_bereich = array('xp_ppo', 'xp_lpo', 'xp_fpo', 'xp_tpo', 'xp_pto', 'xp_lto');
 		foreach ($tables_without_bereich as $table_without_bereich) {
-			$geometry_types = $this->get_geometry_types($table_without_bereich, $this->gmlas_schema);
-			foreach ($geometry_types as $geometry_type) {
-				if(!empty($bereiche_ids[0]) and $this->check_class_without_bereich_id_exists($table_without_bereich, $this->gmlas_schema)) {
-					$sql_regel_table_without_bereich = $this->get_gmlas_to_gml_regel($table_without_bereich , null, $geometry_type, $simplify_fachdaten_geom);
-					$regel_without_bereich = str_replace("'", "''", $sql_regel_table_without_bereich['sql']); # Replaces all single commas with 2x single commas to escape them in SQL
-					$this->insert_regel_into_db($table_without_bereich, $regel_without_bereich, $geometry_type, $konvertierung_id, $stelle_id, $bereiche_ids[0], 'keinbereich');
+			if ($this->check_if_table_exists_in_schema($table_without_bereich, $this->gmlas_schema)) {
+				$geometry_types = $this->get_geometry_types($table_without_bereich, $this->gmlas_schema);
+				foreach ($geometry_types as $geometry_type) {
+					if(!empty($bereiche_ids[0]) and $this->check_class_without_bereich_id_exists($table_without_bereich, $this->gmlas_schema)) {
+						$sql_regel_table_without_bereich = $this->get_gmlas_to_gml_regel($table_without_bereich , null, $geometry_type, $simplify_fachdaten_geom);
+						$regel_without_bereich = str_replace("'", "''", $sql_regel_table_without_bereich['sql']); # Replaces all single commas with 2x single commas to escape them in SQL
+						$this->insert_regel_into_db($table_without_bereich, $regel_without_bereich, $geometry_type, $konvertierung_id, $stelle_id, $bereiche_ids[0], 'keinbereich');
+					}
 				}
 			}
 		}
