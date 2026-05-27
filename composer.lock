@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
     "content-hash": "f5cbc9dc822274a9a8a8ba4f90ec978b",
@@ -41,20 +41,24 @@
                 "php",
                 "zip"
             ],
+            "support": {
+                "issues": "https://github.com/ivanlanin/pclzip/issues",
+                "source": "https://github.com/ivanlanin/pclzip/tree/master"
+            },
             "time": "2014-06-05T11:42:24+00:00"
         },
         {
             "name": "phpoffice/common",
-            "version": "v0.2.6",
+            "version": "0.2.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/Common.git",
-                "reference": "c9be70c80637c28c728be78e66aad4878a34f8dd"
+                "reference": "edb5d32b1e3400a35a5c91e2539ed6f6ce925e4d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/Common/zipball/c9be70c80637c28c728be78e66aad4878a34f8dd",
-                "reference": "c9be70c80637c28c728be78e66aad4878a34f8dd",
+                "url": "https://api.github.com/repos/PHPOffice/Common/zipball/edb5d32b1e3400a35a5c91e2539ed6f6ce925e4d",
+                "reference": "edb5d32b1e3400a35a5c91e2539ed6f6ce925e4d",
                 "shasum": ""
             },
             "require": {
@@ -65,7 +69,7 @@
                 "phpdocumentor/phpdocumentor": "2.*",
                 "phploc/phploc": "2.*",
                 "phpmd/phpmd": "2.*",
-                "phpunit/phpunit": "3.7.*",
+                "phpunit/phpunit": "^4.8.36 || ^7.0",
                 "sebastian/phpcpd": "2.*",
                 "squizlabs/php_codesniffer": "2.*"
             },
@@ -96,7 +100,11 @@
                 "office",
                 "php"
             ],
-            "time": "2016-07-07T17:26:55+00:00"
+            "support": {
+                "issues": "https://github.com/PHPOffice/Common/issues",
+                "source": "https://github.com/PHPOffice/Common/tree/master"
+            },
+            "time": "2018-07-13T14:12:34+00:00"
         },
         {
             "name": "phpoffice/phpword",
@@ -371,5 +379,6 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
 }
