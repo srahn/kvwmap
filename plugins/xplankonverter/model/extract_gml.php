@@ -2516,6 +2516,8 @@ class Gml_extractor {
 		if(empty($bereich_id)) {
 			$bereich_condition = "gmlas.gehoertzubereich_href IS NULL";
 		}
+		// mapping exception for deprecated featureclass fp_landwirtschaftsflaeche (will not exist in xplan 6 anymore)
+		if($gml_class == 'fp_landwirtschaftsflaeche') $gml_class = 'fp_landwirtschaft';
 
 		$sql  = "INSERT INTO " . XPLANKONVERTER_CONTENT_SCHEMA . "." . $gml_class . " (" . implode(", ", $gml_attributes) . ")
 			SELECT
