@@ -17061,8 +17061,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             $imgxy=explode(';',$this->formvars['INPUT_COORD']);
             $minxy=explode(',',$imgxy[0]);
             $maxxy=explode(',',$imgxy[1]);
-            $x=($maxxy[0]+$minxy[0])/2;
-            $y=($maxxy[1]+$minxy[1])/2;
+            $x = round(($maxxy[0]+$minxy[0])/2);
+            $y = round(($maxxy[1]+$minxy[1])/2);
 						if($layerset[$i]['wms_server_version'] == '1.3.0'){
 							$request .='&I='.$x.'&J='.$y;
 							$request .='&CRS=EPSG:'.$layerset[$i]['epsg_code'];
