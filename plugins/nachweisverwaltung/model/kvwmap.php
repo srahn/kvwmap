@@ -1955,9 +1955,9 @@ $GUI->nachweis_columns = [
 			$GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, $GUI->formvars['selected_group_id'], NULL, NULL, true, true);
 		}
 
-  	if(!$GUI->formvars['geom_from_layer']){
-      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $GUI->formvars['geom_from_layer'] = $layerset[0]['layer_id'];
+		if(!$GUI->formvars['geom_from_layer']){
+      $layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
+	    $GUI->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
     }
     $GUI->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
