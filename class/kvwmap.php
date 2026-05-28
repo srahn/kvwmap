@@ -14344,8 +14344,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$results = $this->menue->update();
 		}
 		if ($results['success']) {
-			$this->menue->update_stellen($this->formvars['selstellen']);
-			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
+			$result = $this->menue->update_stellen($this->formvars['selstellen']);
+			if ($result['success']) {
+				$this->add_message('notice', 'Menü erfolgreich aktualisiert. ');
+			}
 		}
 		else {
 			$this->Fehlermeldung = 'Fehler beim Aktualisieren des Menüs!' . print_r(array_values($results), true);
