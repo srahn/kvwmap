@@ -360,24 +360,45 @@
 		}
 		
 		if (is_zip_file($upload_path . $upload_file['name'])) {
-			$zip = new ZipArchive;
-			if ($zip->open($upload_path . $upload_file['name']) === FALSE) {
+			$cmd =
+					'unzip -o '
+					. escapeshellarg($upload_path . $upload_file['name'])
+					. ' -d '
+					. escapeshellarg($upload_path)
+					. ' 2>&1';
+			exec($cmd, $output, $exitCode);
+			if ($exitCode > 1) {
+    		$msg = '<br>Fehler beim Entpacken exitCode: ' . $exitCode . '<br>';
+				$msg .= implode("<br>", $output);
+				$files = scandir($upload_path);
+				$files = array_diff($files, ['.', '..']);
+				$filesString = implode("<br>", $files);
+				$msg .= '<br>files nach extract:' . $filesString;
+				$msg .= '<br>' . is_writable($upload_path) ? 'dir writable' : 'dir NOT writable';
 				return array(
 					'success' => false,
-					'msg' => 'Die Zip-Datei ' . $upload_path . $upload_file['name'] . ' kann nicht geöffnet werden. ' . $ex
+					'msg' => $msg
 				);
 			}
-			$msg .= 'Extract ' . $upload_path . $upload_file['name'] . ' nach ' . $upload_path;
 
-			try {
-				$zip->extractTo($upload_path);
-			} catch (Exception $ex) {
-				return array(
-					'success' => false,
-					'msg' => 'Die Zip-Datei ' . $upload_path . $upload_file['name'] . ' kann nicht nach ' . $upload_path . ' ausgepakt werden. ' . $ex
-				);
-			}
-			$zip->close();
+			// $zip = new ZipArchive;
+			// if ($zip->open($upload_path . $upload_file['name']) === FALSE) {
+			// 	return array(
+			// 		'success' => false,
+			// 		'msg' => 'Die Zip-Datei ' . $upload_path . $upload_file['name'] . ' kann nicht geöffnet werden. ' . $ex
+			// 	);
+			// }
+			// $msg .= 'Extract ' . $upload_path . $upload_file['name'] . ' nach ' . $upload_path;
+
+			// try {
+
+			// } catch (Exception $ex) {
+			// 	return array(
+			// 		'success' => false,
+			// 		'msg' => 'Die Zip-Datei ' . $upload_path . $upload_file['name'] . ' kann nicht nach ' . $upload_path . ' ausgepakt werden. ' . $ex
+			// 	);
+			// }
+			// $zip->close();
 		}
 		else {
 			return array(
@@ -418,6 +439,7 @@
 		try {
 			$upload_validation_result = $konvertierung->validate_uploaded_files($upload_path, $upload_files, ($GUI->formvars['digital_mv'] === 'true' ? 'MV' : null));
 			if (!$upload_validation_result['success']) {
+				$upload_validation_result['msg'] = $msg . ' ' . $upload_validation_result['msg']; 
 				return $upload_validation_result;
 			}
 		} catch (Exception $ex) {
@@ -834,5 +856,27 @@
 				'msg' => 'Fehler beim Versenden der E-Mail zum Update der Zusammenzeichnung!'
 			);
 		}
-	}
+	};
+
+	$GUI->xplankonverter_stelle_kontaktdaten = function() use ($GUI) {
+		$GUI->checkCaseAllowed('xplankonverter_stelle_kontaktdaten');
+		if ($GUI->formvars['stelle_id'] == $GUI->Stelle->id AND $GUI->formvars['action'] == 'Speichern') {
+			$stelle_obj = stelle::find($GUI, 'id=' . $GUI->Stelle->id)[0];
+			$stelle_obj->update_attr(
+				array(
+					"ows_distributionorganization = '" . $GUI->formvars['ows_distributionorganization'] . "'",
+					"ows_distributionaddress = '" . $GUI->formvars['ows_distributionaddress'] . "'",
+					"ows_distributionpostalcode = '" . $GUI->formvars['ows_distributionpostalcode'] . "'",
+					"ows_distributioncity = '" . $GUI->formvars['ows_distributioncity'] . "'",
+				),
+				true,
+				'id = ' . $GUI->Stelle->id
+			);
+			$GUI->Stelle->data = $stelle_obj->data;
+		}
+		$GUI->titel = 'Stellendaten';
+		$GUI->main = '../../plugins/xplankonverter/view/stelle_kontaktdaten.php';
+		$GUI->output();
+	};
+
 ?>

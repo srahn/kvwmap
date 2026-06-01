@@ -1906,18 +1906,21 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->stelle_bearbeiten_allowed($GUI->formvars['selected_stelle_id'], $GUI->user->id);
 				$GUI->Stelleneditor();
+				$GUI->output();
 			} break;
 
 			case 'Dienstmetadaten' : {
 				$GUI->checkCaseAllowed('Dienstmetadaten');
 				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
 				$GUI->Stelleneditor();
+				$GUI->output();
 			} break;
 
 			case 'Dienstmetadaten_Ändern' : {
 				$GUI->checkCaseAllowed('Dienstmetadaten');
 				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
 				$GUI->dienstmetadaten_aendern();
+				$GUI->output();
 			} break;
 
 			case 'Stelle_Löschen' : {
@@ -1929,11 +1932,13 @@ function go_switch($go, $exit = false) {
 			case 'Stelleneditor_Als neue Stelle eintragen' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->StelleAnlegen();
+				$GUI->output();
 			} break;
 
 			case 'Stelleneditor_Ändern' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->stelle_aendern();
+				$GUI->output();
 			} break;
 
 			case 'Stellen_Anzeigen' : {
