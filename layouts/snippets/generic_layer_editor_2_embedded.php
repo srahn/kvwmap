@@ -182,10 +182,19 @@
 	$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
 
-	for($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++){
-		echo $invisible_attributes[$layer['layer_id']][$l]."\n";
-	}
-?>
+	?>
+
+	<tr>
+		<td>
+			<table><tr><td>		<!-- notwendig wegen der closest table bei check_visibility -->					
+			<?
+				for($l = 0; $l < count_or_0($invisible_attributes[$layer['layer_id']]); $l++){
+					echo $invisible_attributes[$layer['layer_id']][$l]."\n";
+				} ?>
+			</td></tr></table>
+		</td>
+	</tr>
+	
 </table>
 
 <script type="text/javascript">

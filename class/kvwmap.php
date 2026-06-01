@@ -3872,9 +3872,11 @@ echo '			</table>
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
+		$sql = str_replace("='<requires>", "= '<requires>", $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
-			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
-			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
+			$value = ($attributevalues[$i] != '' ? $attributevalues[$i] : 'NULL');
+			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN ('" . $value . "')", $sql);
+			$sql = str_replace("= '<requires>" . $attributenames[$i] . "</requires>'", " IN ('" . $value . "')", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 		}
 
@@ -4285,8 +4287,8 @@ echo '			</table>
 		echo $routing->getRoute($formvars);
 	}
 
-	function reset_layers($layer_id){
-		$this->user->rolle->resetLayers($layer_id);
+	function reset_layers($layer_id, $ignore_rollenlayer = false){
+		$this->user->rolle->resetLayers($layer_id, $ignore_rollenlayer);
 		$this->user->rolle->resetQuerys($layer_id);
 	}
 
@@ -4720,13 +4722,15 @@ echo '			</table>
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
+		$sql = str_replace("='<requires>", "= '<requires>", $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
-			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
-			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
-			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 			if ($this->formvars['attribute'] == $attributenames[$i]) {
-				$selected_value = $value;
+				$selected_value = $attributevalues[$i];
 			}
+			$value = ($attributevalues[$i] != '' ? $attributevalues[$i] : 'NULL');
+			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN ('" . $value . "')", $sql);
+			$sql = str_replace("= '<requires>" . $attributenames[$i] . "</requires>'", " IN ('" . $value . "')", $sql);
+			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 		}
 		#echo $sql;
 		@$ret = $layerdb->execSQL($sql, 4, 0);
@@ -14340,8 +14344,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$results = $this->menue->update();
 		}
 		if ($results['success']) {
-			$this->menue->update_stellen($this->formvars['selstellen']);
-			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
+			$result = $this->menue->update_stellen($this->formvars['selstellen']);
+			if ($result['success']) {
+				$this->add_message('notice', 'Menü erfolgreich aktualisiert. ');
+			}
 		}
 		else {
 			$this->Fehlermeldung = 'Fehler beim Aktualisieren des Menüs!' . print_r(array_values($results), true);
@@ -14735,7 +14741,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['nachname'] 									= $this->userdaten[0]['name'];
 			$this->formvars['vorname'] 										= $this->userdaten[0]['vorname'];
 			$this->formvars['loginname'] 									= $this->userdaten[0]['login_name'];
-			$this->formvars['Namenszusatz'] 							= $this->userdaten[0]['namenszusatz'];
+			$this->formvars['namenszusatz'] 							= $this->userdaten[0]['namenszusatz'];
 			$this->formvars['password_setting_time'] 			= $this->userdaten[0]['password_setting_time'];
 			$this->formvars['password_expired'] 					= $this->userdaten[0]['password_expired'] === 't';
 			$this->formvars['totp_secret'] 								= $this->userdaten[0]['totp_secret'];
@@ -15284,7 +15290,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->titel='Themenübersicht';
     $this->main='layer_uebersicht.php';
     # Abfragen aller Layer
-    $this->layers = $mapDB->getall_Layer($this->formvars['order'], true);
+    $this->layers = $mapDB->getall_Layer($this->formvars['order'] ?: 'name', true);
 		$this->layers_in_stelle = $mapDB->read_Layer(0);
 		$this->groups = $mapDB->read_Groups(true, 'gruppenname');
     $this->output();
@@ -15558,7 +15564,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			else {
 				$layerset = $this->user->rolle->getLayer('');
 
-				$this->reset_layers(NULL);
+				$this->reset_layers(NULL, true);
 				for ($i = 0; $i < count($layerset); $i++){
 					unset($formvars['thema'][$layerset[$i]['layer_id']]);
 					unset($formvars['qLayer'][$layerset[$i]['layer_id']]);
@@ -16398,7 +16404,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			for ($i = 0; $i < count($json); $i++) {
 				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"', $delete);
 			}
-			$result = '{' . @implode(',', array_filter($elems)) . '}';		# leere Array-Elemente mit array_filter weglassen
+			$result = '{' . @implode(',', array_filter($elems ?: [])) . '}';		# leere Array-Elemente mit array_filter weglassen
 		}
 		elseif (is_object($json)) { // Nutzer-Datentyp
 			if ($quote == '') {
@@ -17057,8 +17063,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             $imgxy=explode(';',$this->formvars['INPUT_COORD']);
             $minxy=explode(',',$imgxy[0]);
             $maxxy=explode(',',$imgxy[1]);
-            $x=($maxxy[0]+$minxy[0])/2;
-            $y=($maxxy[1]+$minxy[1])/2;
+            $x = round(($maxxy[0]+$minxy[0])/2);
+            $y = round(($maxxy[1]+$minxy[1])/2);
 						if($layerset[$i]['wms_server_version'] == '1.3.0'){
 							$request .='&I='.$x.'&J='.$y;
 							$request .='&CRS=EPSG:'.$layerset[$i]['epsg_code'];
@@ -19685,6 +19691,7 @@ class db_mapObj{
 									else {
 										if ($query_result != NULL) {
 											$attributes['options'][$i] = str_replace('=<requires>', '= <requires>', $attributes['options'][$i]);
+											$attributes['options'][$i] = str_replace("='<requires>", "= '<requires>", $attributes['options'][$i]);
 											foreach ($attributes['name'] as $attributename) {
 												if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
 													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
@@ -19701,8 +19708,9 @@ class db_mapObj{
 														if (is_array($query_result[$k][$attributename])) {
 															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
 														}
-														$options = str_replace('= <requires>' . $attributename.'</requires>',	" IN ('" . $query_result[$k][$attributename] . "')", $options);
-														$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);	# fallback
+														$options = str_replace('= <requires>' . $attributename . '</requires>',	" IN ('" . $query_result[$k][$attributename] . "')", $options);
+														$options = str_replace("= '<requires>" . $attributename . "</requires>'",	" IN ('" . $query_result[$k][$attributename] . "')", $options);
+														$options = str_replace('<requires>'.$attributename.'</requires>', $query_result[$k][$attributename], $options);	# fallback
 													}
 												}
 												if (strpos($options, '<requires>') !== false) {

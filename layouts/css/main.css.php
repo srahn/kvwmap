@@ -688,9 +688,12 @@ span[data-tooltip]:hover::after {
 }
 
 select {
-
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
+}
+
+select:not([multiple]) {
+	padding-right: 16px;
 }
 
 select option{
