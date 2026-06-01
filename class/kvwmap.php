@@ -22113,7 +22113,15 @@ DO $$
 
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$default = (substr($attributes['type'][$i], 0, 1) == '_' ? 'to_json(' . $attributes['default'][$i] . ')' : $attributes['default'][$i]); # to_json für Array-Datentyp
+				if (substr($attributes['type'][$i], 0, 1) == '_') {
+					# Array-Datentyp
+					$type = substr($attributes['type'][$i], 1) . '[]';
+					$default = 'to_json((' . $attributes['default'][$i] . ')::' . $type . ')';
+				}
+				else {
+					$type = $attributes['type'][$i];
+					$default = '(' . $attributes['default'][$i] . ')::' . $type;
+				}
 				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
