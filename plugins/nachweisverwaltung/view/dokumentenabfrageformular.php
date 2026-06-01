@@ -491,7 +491,7 @@ else {
 							}
 						?>
 						</select>
-						<select name="geom_from_layer">
+						<select name="geom_from_layer" onchange="geom_from_layer_change(<? echo LAYER_ID_NACHWEISE; ?>);">
 							<option value="">--- Auswahl ---</option>
 							<?
 								for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
