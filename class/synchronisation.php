@@ -712,7 +712,7 @@ class synchro {
 
 		// Frage deltas größer last_delta_version an ab.
 		// aber nicht die inserts mit der client_id dieser Sync-Action
-		$log .= '<br><br>Abfrage der Deltas die nach dem Syncen noch reingekommen sind.';
+		// $log .= '<br><br>Abfrage der Deltas die nach dem Syncen noch reingekommen sind.';
 		$sql = "
 			SELECT
 				*
@@ -723,7 +723,7 @@ class synchro {
 				NOT (COALESCE(client_id, '') = '" . $client_id . "')
 			ORDER BY version;
 		";
-		$log .= $sql;
+		// $log .= $sql;
 		#echo 'Deltas aus deltas_all abfragen mit sql: ' . $sql;
 		$res = $this->database->execSQL($sql, 0, 1, true);
 		$deltas = array();
