@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/srahn/kvwmap/refs/heads/dev/schemas/responses/login.json",
+  "title": "login response",
+  "description": "Schema of json object returned as response when login in kvwmap.",
+  "type": "object",
+  "example": {
+    "success": false,
+    "error": "authentification"
+  },
+  "properties": {
+    "success": {
+      "description": "Indicate if the login has been completed successfull.",
+      "type": "boolean"
+    },
+    "error": {
+      "description": "The type of error that occured when login.",
+      "anyOf": [
+        {
+          "const": "LOGIN_REQUIRED",
+          "description" : "Es ist eine Anmdeldung erforderlich."
+        },
+        { "const": "LOGIN_FAILED",
+          "desctiption" : "Es trat ein Fehler bei der Authentifizierung auf."
+        },
+        {
+          "const": "PASSWORD_EXPIRED",
+          "desctiption" : "Die Gültigkeit des Passwortes ist abgelaufen."
+        },
+        {
+          "const": "REGISTRATION_REQUIRED",
+          "desctiption" : "Es ist eine Registrierung des Nutzers erforderlich."
+        },
+        {
+          "const": "AGREEMENT_MISSING",
+          "desctiption" : "Es ist eine Zustimmung zu den Nutzungsbedingungen notwendig."
+        }
+      ]
+    },
+    "msg": {
+      "description" : "Eine zusätzliche Meldung zur Erläuterung der Rückmeldung.",
+      "type" : "string"
+    },
+    "csrf_token": {
+      "description": "CSRF Token generated for the newly created session. Only if success = true",
+      "type": "string"
+    }
+  },
+  "required": [ "success" ]
+}

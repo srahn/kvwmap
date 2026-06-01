@@ -264,25 +264,6 @@ class GUI {
 		$this->output();
 	}
 
-	function login() {
-		if ($this->formvars['format'] == 'json') {
-			$this->mime_type = 'application/json';
-			$this->formvars['content_type'] = 'application/json';
-			$this->qlayerset[0]['shape'] = array(
-				'success' => false,
-				'msg' => 'Login erforderlich'
-			);
-		}
-		else {
-			$this->expect = array('login_name', 'passwort', 'mobile');
-			if (array_key_exists('go', $this->formvars) AND in_array($this->formvars['go'], ['login', 'logout'])) {
-				$this->expect[] = 'go';
-			}
-			$this->gui = LOGIN;
-		}
-		$this->output();
-	}
-
 	/**
 	 * Check if the login is granted. If not set the login failed reason
 	 * @return true if granted, false if not.
@@ -290,37 +271,37 @@ class GUI {
 	function is_login_granted($user, $login_name, $password) {
 		# check if login_name is locked
 		if ($user->login_is_locked()) {
-			$this->login_failed_reason = 'login_is_locked';
+			$this->login_failed_reason = AuthErrCodes::LOGIN_IS_LOCKED;
 			return false;
 		}
 
 		# check if login_name exists
 		if ($user->login_name != $login_name) {
-			$this->login_failed_reason = 'wrong_login_name';
+			$this->login_failed_reason = AuthErrCodes::WRONG_LOGIN_NAME;
 			return false;
 		}
 
 		# check if user is archived
 		if ($user->archived) {
-			$this->login_failed_reason = 'archived';
+			$this->login_failed_reason = AuthErrorCodes::ACCOUNT_ARCHIVED;
 			return false;
 		}
 
 		# check if the password ist correct
 		if ($user->wrong_password($password)) {
-			$this->login_failed_reason = 'authentication';
+			$this->login_failed_reason = AuthErrCodes::WRONG_PASSWORD;
 			return false;
 		}
 
 		# check if the login is granted not yet
 		if ($user->start != '' AND date('Y-m-d') < DateTime::createFromFormat('d.m.Y', $user->start)->format('Y-m-d')) {
-			$this->login_failed_reason = 'not_yet_started';
+			$this->login_failed_reason = AuthErrorCodes::ACCOUNT_NOT_YET_STARTED;
 			return false;
 		}
 
 		# check if the login is not granted any more
 		if ($user->stop != '' AND date('Y-m-d') > DateTime::createFromFormat('d.m.Y', $user->stop)->format('Y-m-d')) {
-			$this->login_failed_reason = 'expired';
+			$this->login_failed_reason = AuthErrCodes::PASSWORD_EXPIRED;
 			return false;
 		}
 
@@ -335,7 +316,27 @@ class GUI {
 		return ($user->device_token == $token_hash AND $user->device_expires > $now);
 	}
 
+	function login() {
+		$this->expect = array('login_name', 'passwort', 'mobile');
+		if (array_key_exists('go', $this->formvars) AND in_array($this->formvars['go'], ['login', 'logout'])) {
+			$this->expect[] = 'go';
+		}
+		$this->gui = LOGIN;
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'LOGIN_REQUIRED',
+				'msg' => 'Login erforderlich'
+			);
+		}
+		$this->output();
+	}
+
 	function login_failed() {
+		global $language;
+		include(LAYOUTPATH . 'languages/login_' . $language . '.php');
 		$this->login_failed = true;
 		$this->expect = array('login_name', 'passwort', 'mobile');
 		if ($this->formvars['go'] == 'logout') {
@@ -352,19 +353,28 @@ class GUI {
 		$this->gui = (file_exists(LOGIN) ? LOGIN : SNIPPETS . 'login.php');
 		if (strpos(file_get_contents($this->gui), 'include(LAYOUTPATH . \'languages/login_\'') === false) {
 			switch ($this->login_failed_reason) {
-				case 'authentication' : {
-					$this->add_message('error', 'Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!');
+				case AuthErrCodes::WRONG_PASSWORD : {
+					$this->add_message('error', sprintf($strLoginFailedMsg[AuthErrCodes::WRONG_PASSWORD], $this->formvars['num_failed']));
 				} break;
-				case 'login_is_locked' : {
-					$this->add_message('error', 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>' . (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s') . ' gesperrt!');
+				case AuthErrCodes::LOGIN_IS_LOCKED : {
+					$this->add_message('error', sprintf($strLoginFailedMsg[AuthErrCodes::LOGIN_IS_LOCKED], (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s')));
 				} break;
-				case 'expired' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
+				case AuthErrCodes::PASSWORD_EXPIRED : {
+					$this->add_message('error', $strLoginFailedMsg[AuthErrCodes::PASSWORD_EXPIRED]);
 				} break;
-				case 'not_yet_started' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
+				case AuthErrorCodes::ACCOUNT_NOT_YET_STARTED : {
+					$this->add_message('error', $strLoginFailedMsg[AuthErrorCodes::ACCOUNT_NOT_YET_STARTED]);
 				} break;
 			}
+		}
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'LOGIN_FAILED',
+				'msg' => 'Login fehlgeschlagen'
+			);
 		}
 		$this->output();
 	}
@@ -381,6 +391,15 @@ class GUI {
 			$this->expect[] = 'go';
 		}
 		$this->gui = LOGIN_NEW_PASSWORD;
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'PASSWORD_EXPIRED',
+				'msg' => 'Password abgelaufen'
+			);
+		}
 		$this->output();
 	}
 
@@ -392,12 +411,30 @@ class GUI {
 		}
 		$this->expect = array('login_name', 'new_password', 'new_password_2');
 		$this->gui = LOGIN_REGISTRATION;
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'REGISTRATION_REQUIRED',
+				'msg' => 'Registrierung erforderlich.'
+			);
+		}
 		$this->output();
 	}
 
 	function login_agreement() {
 		$this->expect = array('agreement_accepted');
 		$this->gui = LOGIN_AGREEMENT;
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'AGREEMENT_MISSING',
+				'msg' => 'Einverständniserklärung fehlt.'
+			);
+		}
 		$this->output();
 	}
 

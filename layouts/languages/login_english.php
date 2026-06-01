@@ -2,11 +2,11 @@
 	$strLogin = 'Login';
 	$strLoginFailed = 'Login unsuccessfull';
 	$strLoginFailedMsg = array(
-		'authentication' => 'Password entered false %s times!',
-		'wrong_login_name' => 'Access data entered incorrectly!',
-		'login_is_locked' => 'Account locked due to multiple false try for login until %s',
-		'expired' => 'The temporary account has been expired.',
-		'not_yet_started' => 'The temporary account did not start yet.'
+		AuthErrCodes::WRONG_PASSWORD => 'Password entered false %s times!',
+		AuthErrCodes::WRONG_LOGIN_NAME => 'Access data entered incorrectly!',
+		AuthErrCodes::LOGIN_IS_LOCKED => 'Account locked due to multiple false try for login until %s',
+		AuthErrCodes::PASSWORD_EXPIRED => 'The temporary account has been expired.',
+		AuthErrCodes::ACCOUNT_NOT_YET_STARTED => 'The temporary account did not start yet.'
 	);
 	$strUserName = 'Login name';
 	$strPassword = 'Password';

@@ -12,6 +12,7 @@ $GUI->user->rolle->querymode = 0;
 $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
 $GUI->formvars = $formvars;
+$GUI->new_session = false;
 $GUI->echo = false;
 
 #################################################################################
@@ -169,7 +170,7 @@ if ($gast_export === false) {
 				$GUI->formvars['passwort'] = $gast['passwort'];
 				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase, $GUI->formvars['passwort']);
 				$GUI->user->stelle_id = $GUI->formvars['gast']; # set new stelle
-				set_session_vars($GUI->formvars);
+				$GUI->new_session = set_session_vars($GUI->formvars);
 				# login case 2
 				$GUI->debug->write('login case 2', 4, $GUI->echo);
 			}
@@ -196,7 +197,7 @@ if ($gast_export === false) {
 					if ($GUI->pgdatabase->success) {
 						if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'], $GUI->formvars['passwort'])) {
 							$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
-							set_session_vars($GUI->formvars);
+							$GUI->new_session = set_session_vars($GUI->formvars);
 
 							$GUI->user->update_tokens($_SESSION['csrf_token']);
 							$GUI->user->has_logged_in = true;
@@ -216,15 +217,15 @@ if ($gast_export === false) {
 						else {
 							# Anmeldung ist fehlgeschlagen
 							$GUI->debug->write('Anmeldung ist fehlgeschlagen. Grund: ' . $GUI->login_failed_reason, 4, $GUI->echo);
-							if ($GUI->login_failed_reason == 'authentication') {
-								$GUI->debug->write('Passwort passt nicht zum login_namen:', 4, $GUI->echo);
+							if ($GUI->login_failed_reason == AuthErrCodes::WRONG_PASSWORD) {
+								$GUI->debug->write('Passwort passt nicht zum login_namen', 4, $GUI->echo);
 								$nutzer = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
 								$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = $nutzer->get('num_login_failed');
 								$GUI->user->login_locked_until 	= $nutzer->get('login_locked_until');
 								$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
 	              #							sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
 							}
-							if ($GUI->login_failed_reason == 'login_is_locked') {
+							if ($GUI->login_failed_reason == AuthErrCodes::LOGIN_IS_LOCKED) {
 								$nutzer = Nutzer::find_by_login_name($GUI, $GUI->formvars['login_name']);
 								$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
 							}
@@ -279,7 +280,7 @@ if ($gast_export === false) {
 								$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase);
 								$GUI->add_message('info', 'Nutzer erfolgreich angelegt.<br>Willkommen im WebGIS kvwmap.');
 								$GUI->debug->write('Set Session', 4, $GUI->echo);
-								set_session_vars($GUI->formvars);
+								$GUI->new_session = set_session_vars($GUI->formvars);
 								unset($GUI->formvars['Stelle_ID']);
 								unset($GUI->formvars['token']);
 								unset($GUI->formvars['passwort']);
@@ -409,7 +410,7 @@ if ($gast_export === false) {
 								update_password($GUI);
 								$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 								session_start();
-								set_session_vars($GUI->formvars);
+								$GUI->new_session = set_session_vars($GUI->formvars);
 								unset($_SESSION['login_new_password']);
 								$go = '';
 								$_SESSION['stelle_angemeldet'] = true;
@@ -976,6 +977,7 @@ function set_session_vars($formvars) {
 	$_SESSION['login_name'] = $formvars['login_name'];
 	$_SESSION['login_routines'] = true;
 	$_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+	return true;
 }
 
 /**

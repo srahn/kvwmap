@@ -1355,7 +1355,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 
 	if ($files['image'] == '') {
 
-		$msg = 'Es wurde keine Datei hochgeladen!';
+		$msg = 'Es wurde keine Datei hochgeladen! ' . print_r($files, true);
 		$GUI->mobile_log->write($msg);
 		return array(
 			"success" => false,
