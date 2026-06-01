@@ -890,7 +890,7 @@ $GUI->mobile_show_log = function($log_name) use ($GUI) {
 				$GUI->mobile_logs[] = array(
 					'timestamp' => $teil_vor_h1,
 					'client_deltas' => $client_deltas->rows,
-					'error' => (count($fehler_parts) > 1 ? 'Fehler bei der Ausführung' . $fehler_parts[1] : '')
+					'error' => (count($fehler_parts) > 1 ? 'Fehler bei der Ausführung' . $fehler_parts[2] : '')
 				);
 			}
 		}
