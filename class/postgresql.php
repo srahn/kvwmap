@@ -1672,7 +1672,7 @@ FROM
 				'real_name' => "'" . $fields[$i]['real_name'] . "'",
 				'type' => "'" . $fields[$i]['type'] . "'",
 				'constraints' => "'" . pg_escape_string($fields[$i]['constraints']) . "'",
-				'form_element_type' => "'" . (pg_escape_string($fields[$i]['constraints']) != '' ? 'Auswahlfeld' : 'Text') . "'",
+				// 'form_element_type' => "'" . (pg_escape_string($fields[$i]['constraints']) != '' ? 'Auswahlfeld' : 'Text') . "'",
 				'nullable' => $fields[$i]['nullable'],
 				'length' => $fields[$i]['length'],
 				'decimal_length' => $fields[$i]['decimal_length'],
