@@ -143,13 +143,18 @@ function updategeoms(){
 
 function bearbeiten(){
 	selected_ids = new Array();
-	ids = document.getElementsByName('id[]');
+	ids = document.getElementsByName('id[]');	
 	for(i = 0; i < ids.length; i++){
 		if(ids[i].checked)selected_ids.push(ids[i].value);
 	}
-	currentform.go.value='Layer-Suche_Suchen';
-	currentform.value_id.value = selected_ids.join('|');
-	overlay_submit(currentform, true);
+	if (selected_ids.length > 0) {
+		currentform.go.value='Layer-Suche_Suchen';
+		currentform.value_id.value = selected_ids.join('|');
+		overlay_submit(currentform, true);
+	}
+	else {
+		message([{ 'type': 'warning', 'msg': 'Es ist kein Nachweis ausgewählt.' }]);
+	}
 }
 
 function loeschen(id){
