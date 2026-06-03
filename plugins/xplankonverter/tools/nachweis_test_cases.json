@@ -2,7 +2,7 @@
   "is_testzeit" : false,
   "testzeitraum" : {
     "start" : "2026-04-24 09:53:15",
-    "end" : "2026-04-24 14:30:15"
+    "ende" : "2026-10-01 14:30:15"
   },
   "auslegung_url" : "https://dev.bauleitplaene-mv.de/custom/layouts/snippets/Veroeffnachweis_Portal_Fake.php",
   "debug_mode" : 2

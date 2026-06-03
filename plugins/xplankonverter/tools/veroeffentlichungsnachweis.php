@@ -28,14 +28,16 @@ try {
   $debug_mode = 1;
   if (
     $test_cases->is_testzeit AND
-    date('Y-m-d H:m:s') > = $test_cases->testzeitraum->start  AND
+    date('Y-m-d H:m:s') >= $test_cases->testzeitraum->start  AND
     date('Y-m-d H:m:s') < $test_cases->testzeitraum->ende
   ) {
+    define('AUSLEGUNG_MODE', 'dev');
     echo_log('Testmodus an, Konfigurationseinstellungen: ' . print_r($test_cases, true), 1);
     $debug_mode = $test_cases->debug_mode;
     define('AUSLEGUNG_URL', $test_cases->auslegung_url);
   }
   else {
+    define('AUSLEGUNG_MODE', 'prod');
     define('AUSLEGUNG_URL', "https://bplan.geodaten-mv.de/bauportal/Uebersicht/Details");
   }
   include(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
@@ -90,7 +92,7 @@ try {
   $GUI->debug->user_funktion = 'admin';
 
   # Aktuelle Auslegungen abfragen
-  echo_log('Frage aktuelle Auslegungen ab: ', 1);
+  echo_log('Frage aktuelle Auslegungen ab: ', 2);
   $result = Auslegung::find_aktuelle($GUI, $GUI->formvars['plan_gml_id'], $pruefzeit);
   if (!$result['success']) {
     echo_log('Fehler in tool veroeffentlichungsnachweis.php ' . __LINE__ . ': ' . $result['msg'], 1);
@@ -107,6 +109,7 @@ try {
         exit;
       }
       $auslegung->veroeffentlichungsprotokoll = $result['protokoll'];
+      $auslegung->veroeffentlichungsprotokoll->create_and_send_ueberwachungsbeginn_alert($auslegung, $pruefzeit);
       echo_log('Veröffentlichungsprotokoll angelegt für Planart: ' . $auslegung->get('planart') . ' plan_gml_id: ' . $auslegung->get('plan_gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr'), 2);
     }
 
@@ -120,7 +123,7 @@ try {
       $auslegung->veroeffentlichungsprotokoll->create_and_send_nachweis_luecke_alert($auslegung, $pruef_result);
     }
 
-    $pruef_result = pruefe_auslegung(AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->get('plan_gml_id'), $auslegung->get('plan_gml_id'));
+    $pruef_result = pruefe_auslegung(AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get_plan_type()) . '&id=' . $auslegung->get('plan_gml_id'), $auslegung->get('plan_gml_id'));
     if ($pruef_result['pruefcode'] > 0) {
       $save_result = Veroeffentlichungsnachweis::save_veroeffentlichungsnachweis($auslegung, $pruefstunde, $pruef_result);
       if (!$save_result['success']) {
@@ -139,7 +142,6 @@ try {
       echo_log('Fehler bei der Aktualisierung des Prüfprotokolls. Fehler: ' . $fehler, 2);
       exit;
     }
-    $auslegung->veroeffentlichungsprotokoll->show = false;
 
     $result = pruefe_5_stunden_zeitraum($nachweis_obj, $auslegung, $pruefstunde);
     if (!$result['success']) {
@@ -168,7 +170,7 @@ try {
   }
 
   // Finde beendete Auslegungen. Erzeuge, versende und schließe die Veröffentlichungsprotokolle.
-  echo_log('veroeffentlichungsnachweis.php ' . __LINE__ . ': Suche beendete Auslegungen', 2);
+  echo_log('Suche beendete Auslegungen:', 2);
   $result = Auslegung::find_completed($GUI, $pruefzeit, $GUI->formvars['plan_gml_id']);
   if (!$result['success']) {
     echo_log('Fehler in veroeffentlichungsnachweis.php 153 => ' . $result['msg'], 1);
@@ -213,7 +215,7 @@ function include_($filename) {
  * Prüft ob ein Plan unter der angegebenen $url gefunden wurde
  */
 function pruefe_auslegung($url, $gml_id) {
-  echo_log('Prüfe Auslegung mit url: ' . $url, 2);
+  echo_log('Prüfe Auslegung mit url: ' . $url, 0);
   $ch = curl_init($url);
   curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
