@@ -152,6 +152,15 @@ class Auslegung extends PgObject {
     return $result;
   }
 
+  function get_plan_type() {
+    switch ($this->get('planart')) {
+      case 'BP-Plan' : return 'bplan';
+      case 'FP-Plan' : return 'fplan';
+      case 'SO-Plan' : return 'soplan';
+      default : return $this->get('planart');
+    }
+  }
+
   /**
    * Prüft ob im Auslegungsobjekt ein Veröffentlichungsprotokoll existiert.
    */

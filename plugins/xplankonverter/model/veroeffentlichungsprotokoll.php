@@ -67,25 +67,25 @@ class Veroeffentlichungsprotokoll extends PgObject {
   function find_zustaendige_user($stelle_id) {
     $this->zustaendige_user = user::find(
       $this->gui,
-      "
+      (AUSLEGUNG_MODE == 'dev' ? "u.login_name = 'pkorduan'" : "
         u.email IS NOT NULL AND
         u.email != '' AND
         u.funktion != 'admin' AND
         u.organisation NOT LIKE '%GDI%Service%' AND
         u.login_name NOT IN ('btfietz') AND
         r.stelle_id = " . $stelle_id . "
-      ",
+      "),
       NULL,
       "
-        r.user_id,
+        u.id AS user_id,
         concat_ws(' ', u.vorname, u.name) AS contact_name, 
         u.email AS contact_email
       ",
       NULL,
-      "
+      (AUSLEGUNG_MODE == 'dev' ? "kvwmap.user AS u" :"
         kvwmap.rolle r JOIN
         kvwmap.user u ON r.user_id = u.id
-      "
+      ")
     );
     $fehler = pg_last_error();
     if ($fehler) {
@@ -203,6 +203,17 @@ class Veroeffentlichungsprotokoll extends PgObject {
     );
   }
 
+  function create_ueberwachungsbeginn_alert_mail($auslegung, $contact_name, $pruefzeit) {
+    $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->plan->get('gml_id');
+    $subject = 'Beginn der Überwachung der Auslegung ' . $auslegung->plan->get('anzeigename') . ' ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
+    $body = "Mitteilung für: " . $contact_name . "\n\nDie Überwachung der Auslegung des Plans " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " hat " . date('d.m.Y H:i', $pruefzeit) . " Uhr begonnen.\n\nSie können die Auslegung im Bau- und Planungsportal unter: " . $url . " prüfen und ggf. Angaben zur Veröffentlichung des Plans auf " . URL . " prüfen und ändern.";
+    return array(
+      'subject' => $subject,
+      'body' => $body,
+      'anhang' => ''
+    );
+  }
+
   function create_nachweis_luecke_alert_mail($auslegung, $contact_name, $pruef_result) {
     echo "\n__Prüf_result: " . print_r($pruef_result, true) . "\n";
     $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->plan->get('gml_id');
@@ -261,6 +272,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
     }
     $this->set('datei', $datei);
     $this->update_attr(array("datei = '" . $datei . "'"));
+    unlink(str_replace('.pdf', '_thumb.jpg', $datei));
     return array(
       'success' => true,
       'msg' => 'PDF-Datei ' . $datei. ' erfolgreich angelegt'
@@ -308,6 +320,17 @@ class Veroeffentlichungsprotokoll extends PgObject {
       'body' => $body,
       'anhang' => $auslegung->veroeffentlichungsprotokoll->get('datei')
     );
+  }
+
+  function create_and_send_ueberwachungsbeginn_alert($auslegung, $pruefzeit) {
+    echo_log('Anzahl zu benachrichtigende Nutzer: ' . count($this->zustaendige_user), 2);
+    foreach ($this->zustaendige_user AS $user) {
+      $this->send_email(
+        $this->create_ueberwachungsbeginn_alert_mail($auslegung, $user->get('contact_name'), $pruefzeit),
+        $user->get('contact_email'),
+        $user->get('contact_name')
+      );
+    }
   }
 
   function create_and_send_nachweis_luecke_alert($auslegung, $pruef_result) {
