@@ -689,6 +689,24 @@ class Layer extends PgObject {
 		}
 
 		switch ($this->get('connectiontype')) {
+			case 1 : { # MS_SHAPEFILE 
+			}
+			case 4 : { # MS_OGR
+				if ($this->get('datentyp') == 3) { # MS_LAYER_RASTER
+					$type = 'WMS';
+					$url = URL . APPLVERSION . 'index.php?go=OWS&gast=' . (int)$stelle_id . '&Stelle_ID=' . (int)$stelle_id;
+					$params = '';
+					$options = (Object) array(
+						'crs' => 'EPSG4326',
+						'version' => ($this->get('wms_server_version') != '' ? $this->get('wms_server_version') : '1.0.0'),
+						'layers' => $this->get('name'),
+						'format' => 'image/png',
+						'transparent' => true,
+						'attribution' => $this->get('dataowner_name'),
+						'opacity' => $this->opacity / 100
+					);
+				}
+			} break;
 			case 6 : { # WFS-Layer werden exportiert wie PostGIS Layer
 				$type = 'GeoJSON';
 				$url = URL . APPLVERSION . 'index.php';
