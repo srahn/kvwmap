@@ -631,7 +631,7 @@ class Layer extends PgObject {
 			$legendgraphic = $this->get('icon');
 		}
 		elseif (count($classes) > 0) {
-			$legendgraphic = $classes[0]->get('legendgraphic');
+			$legendgraphic = CUSTOM_PATH . GRAPHICSPATH . $classes[0]->get('legendgraphic');
 		}
 		else {
 			$legendgraphic = 'graphics/leer.gif';
@@ -712,11 +712,19 @@ class Layer extends PgObject {
 			case 7 : { # WMS-Layer
 				$type = 'WMS';
 				$url = explode('?', $this->get('connection'))[0];
+				$url_params = array();
+				if (strpos($this->get('connection'), 'go=OWS') !== false) {
+					$url_params['go'] = 'OWS';
+				}
+				if (strpos($this->get('connection'), 'gast=') !== false) {
+					$url_params['gast'] = (int)$stelle_id;
+				}
+				$url .= '?' . http_build_query($url_params);
 				$params = '';
 				$options = (Object) array(
 					'crs' => 'EPSG4326',
 					'version' => get_first_word_after($this->get('connection'), 'version=', ' ', '&'),
-					'layers' => get_first_word_after($this->get('connection'), 'layers=', ' ', '&'),
+					'layers' => (strpos($this->get('connection'), 'go=OWS') !== false ? $this->get('name') : get_first_word_after($this->get('connection'), 'layers=', ' ', '&')),
 					'format' => 'image/png',
 					'transparent' => true,
 					'attribution' => $this->get('dataowner_name'),
