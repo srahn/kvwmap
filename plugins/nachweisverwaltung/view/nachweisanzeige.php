@@ -581,7 +581,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 							
 					<? } ?>
 					
-					<td style="width: 30">
+					<td style="width: 30; padding-right: 14;">
 						<?
 							if ($i == 0) {
 								echo '<div style="right: 20px;" class="fett scrolltable_header">' . $this->nachweis->erg_dokumente.' Treffer</div>';
@@ -589,7 +589,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						?>
 						<table cellspacing="0" cellpadding="0">
 							<tr>
-								<td style="width: 30">
+								<td style="width: 30;">
 								<? 
 									$dateiname = $this->nachweis->Dokumente[$i]['link_datei'];
 									$dateinamensteil=explode('.',$dateiname);
