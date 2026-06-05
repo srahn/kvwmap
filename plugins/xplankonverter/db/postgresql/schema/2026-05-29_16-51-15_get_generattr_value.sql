@@ -59,5 +59,5 @@ BEGIN;
         so.konvertierung_id
       FROM
         xplan_gml.so_plan so
-    ) alle
+    ) alle;
 COMMIT;
