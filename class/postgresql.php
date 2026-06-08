@@ -2674,7 +2674,7 @@ FROM
 				LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) 
 			WHERE 1=1 ";
     if($n1 != '%%' AND $n1 != '')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
-		if($n2 != '%%' AND $n2 != '')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
+		if($n2 != '%%' AND $n2 != '')$sql.=" AND lower(p.vorname) LIKE lower('".$n2."') ";
 		if($n3 != '%%')$sql.=" AND lower(geburtsname) LIKE lower('".$n3."') ";
 		if($n4 != '%%')$sql.=" AND geburtsdatum = '".$n4."' ";
 		if($n5 != '%%')$sql.=" AND lower(strasse) LIKE lower('".$n5."') ";
