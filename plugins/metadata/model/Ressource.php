@@ -271,7 +271,7 @@ class Ressource extends PgObject {
 			");
 			$num_updateable = 10 - $results[0]['num_running'];
 			if ($results[0]['num_running'] < 10) {
-				$gui->debug->show('Es laufen nur ' . $results[0]['num_running'] . ' Updates.', true);
+				$gui->debug->show('Es laufen ' . $results[0]['num_running'] . ' Updates.', true);
 				$ressources = Ressource::find_outdated($gui, NULL, '', $force); // liefert nur die ersten 1 - 10 gefundenen zurück
 			}
 			else {
@@ -295,7 +295,12 @@ class Ressource extends PgObject {
 					}
 					else {
 						$result = $ressource->run_update($method_only, $only_missing);
-						$msg .= 'Ressource ' . $ressource->get_id() . ' aktualisiert';
+						if ($result['success'] === false) {
+							$msg .= '<br>Fehler bei der Aktualisierung der Ressource ' . $ressource->get_id() . ': ' . $result['msg'];
+						}
+						else {
+							$msg .= 'Ressource ' . $ressource->get_id() . ' aktualisiert';
+						}
 						$ressource->log($result, false);
 					}
 					$num_updated += 1;

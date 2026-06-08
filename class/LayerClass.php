@@ -75,7 +75,7 @@ class LayerClass extends PgObject {
 			$def = '';
 		}
 		else {
-			$def = "([" . $classitem . "] = '" . $this->get('expression') . "')";
+			$def = "([" . $classitem . "] = '" . str_replace("'", "", $this->get('expression')) . "')";
 		}
 
 		$first_style = $this->get_first_style($datentyp);
