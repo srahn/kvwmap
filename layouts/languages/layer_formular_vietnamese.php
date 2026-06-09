@@ -42,6 +42,7 @@
 	$stroffsite = "offsite";
 	$strOWSParameter = "OWS-Parameters";
 	$strOwsSrs = "OWS SRS";
+	$strParentLayer = "Lớp cha";
 	$strPath = "Đường dẫn";
 	$strPrivileges = "Privileges";
 	$strProcessing = "Processing";

@@ -71,6 +71,7 @@
 	$strOrder = "Order";
 	$strOWSParameter = "OWS-Parameters";
 	$strOwsSrs = "OWS-SRS";
+	$strParentLayer = "Parent Layers";
 	$strPath = "Query";
 	$strPostlabelcache = "Postlabelcache";
 	$strPrintConnection = "Print-Connection";

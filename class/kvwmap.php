@@ -8872,12 +8872,14 @@ END $$;
 	}
 
 	function Layereditor() {
+		include_once(CLASSPATH . 'Layer.php');
 		include_once(CLASSPATH . 'LayerChart.php');
 		include_once(CLASSPATH . 'DataSource.php');
 		include_once(CLASSPATH . 'Connection.php');
 		$this->titel = 'Layer Editor';
 		$this->main = 'layer_formular.php';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layer = new Layer($this);
 		$this->layerdaten = $mapDB->getall_Layer('name', false, $this->user->id, $this->Stelle->id);
 		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
 		if ($this->formvars['selected_layer_id'] > 0) {
@@ -8887,6 +8889,7 @@ END $$;
 			$this->layerdata['charts'] = LayerChart::find($this, 'layer_id = ' . $this->formvars['selected_layer_id']);
 			$this->layerdata['datasources'] = DataSource::find_by_layer_id($this, $this->formvars['selected_layer_id']);
 			$this->layerdata['datasource_ids'] = array_map(function($datasource) { return $datasource->get('id'); }, $this->layerdata['datasources']);
+			$this->layerdata['parent_layers'] = $layer->get_parentform_layers($this->formvars['selected_layer_id']);
 			if (!$this->use_form_data) {
 				$this->formvars = array_merge($this->formvars, $this->layerdata);
 			}
