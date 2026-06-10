@@ -11280,14 +11280,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($this->user->rolle->upload_only_file_metadata == 1) {
 				$belated_files = array();
 			}
+			include_once(CLASSPATH . 'LayerAttribute.php');
+			$attr_obj = new LayerAttribute($this);
 			foreach ($document_attributes as $i => $document_attribute) {
-				include_once(CLASSPATH . 'LayerAttribute.php');
-				$attr_obj = new LayerAttribute($gui);
 				$options = $attr_obj->get_options($attributes['options'][$document_attribute['attributename']], 'Dokument');
 				if (substr($document_attribute['datatype'], 0, 1) == '_') {
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
-					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);
+					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options['dynamic_path'], $attributenames, $attributevalues, $layerdb);
 				}
 				else {
 					$insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options['dynamic_path'], $attributenames, $attributevalues, $layerdb, $document_attributes[$i]['datatype']);	// normales Dokument-Attribut
