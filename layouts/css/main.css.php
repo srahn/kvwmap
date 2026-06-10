@@ -2567,7 +2567,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .rollenwahl-option-data {
 	width: 560px;
 	padding : 4px;
-	display: flex;
 }
 
 .button_selection{
