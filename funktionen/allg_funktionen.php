@@ -43,7 +43,10 @@ function verify_totp($secret, $code, $window = 1, $period = 30) {
 			$offset = ord(substr($hash, -1)) & 0x0F;
 			$truncated = unpack('N', substr($hash, $offset, 4))[1] & 0x7FFFFFFF;
 			$test_code = str_pad($truncated % 1000000, 6, '0', STR_PAD_LEFT);
-			if (hash_equals($test_code, $code)) return true;
+			if (hash_equals($test_code, $code) AND $counter > $_SESSION['last_totp_counter']) {
+				$_SESSION['last_totp_counter'] = $counter;
+				return true;
+			}
 	}
 	return false;
 }

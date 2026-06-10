@@ -972,6 +972,7 @@ function update_password($GUI) {
 }
 
 function set_session_vars($formvars) {
+	session_regenerate_id();
 	$_SESSION['angemeldet'] = true;
 	$_SESSION['login_name'] = $formvars['login_name'];
 	$_SESSION['login_routines'] = true;
