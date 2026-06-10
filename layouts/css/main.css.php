@@ -2120,7 +2120,6 @@ thead.gle th {
 	color: #aaa;
 	white-space: nowrap;
 	border-radius: 0 5px 0 0;
-	height: 21px;
 }
 
 .gle_tabs > div.active_tab{
