@@ -694,7 +694,22 @@ from
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="schema" type="text" value="<?php echo $this->formvars['schema']; ?>" size="50" maxlength="100">
 						</td>
-					</tr>
+					</tr><?php
+						if (count($this->layerdata['parent_layers'])) { ?>
+							<tr>
+								<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 	$strParentLayer; ?></th>
+								<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+									<ul style="float: left"><?php
+										foreach($this->layerdata['parent_layers'] AS $parent_layer) {
+											?><li><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $parent_layer->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo ($parent_layer->get('name') ? $parent_layer->get('name') : $parent_layer->get('alias')); ?> (<?php echo $parent_layer->get_id(); ?>)</a></li><?php
+										}
+									?>
+									</ul>
+									<span style="float: right; margin: 12px" data-tooltip="Verlinkung zu Layern, die diesen Layer über SubFormEmbeddedPK als Sublayer eingebunden haben."></span>
+								</td>
+							</tr><?
+						}
+					?>
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">

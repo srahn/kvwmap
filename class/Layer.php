@@ -563,14 +563,14 @@ class Layer extends PgObject {
 		}
 	}
 
-	function get_parentform_layers() {
+	function get_parentform_layers($layer_id = '') {
 		include_once(CLASSPATH . 'LayerAttribute.php');
 		$parentform_layer_ids = array_unique(
 			array_map(
 				function($attribute) {
 					return $attribute->get('layer_id');
 				},
-				LayerAttribute::find($this->gui, "layer_id != " . $this->get('layer_id') . " AND options LIKE '" . $this->get('layer_id') . ",%' AND form_element_type LIKE 'SubForm%PK'")
+				LayerAttribute::find($this->gui, "layer_id != " . ($layer_id ? $layer_id : $this->get('layer_id')) . " AND options LIKE '" . ($layer_id ? $layer_id : $this->get('layer_id')) . ",%' AND form_element_type LIKE 'SubForm%PK'")
 			)
 		);
 		if (count($parentform_layer_ids) > 0) {

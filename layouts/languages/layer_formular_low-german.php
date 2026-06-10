@@ -44,6 +44,7 @@
 	$strOrder = "Riegfolg";
 	$strOWSParameter = "OWS-Parameter";
 	$strOwsSrs = "OWS-SRS";
+	$strParentLayer = "Übergeordnete Layer";
 	$strPath = "Padd";
 	$strPrintConnection = "Druck-Connection";
 	$strPrivileges = "Rechte";

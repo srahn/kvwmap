@@ -45,6 +45,7 @@
 	$strOrder = "kolejność";
 	$strOWSParameter = "parametry OWS";
 	$strOwsSrs = "OWS-SRS";
+	$strParentLayer = "Warstwy nadrzędne";
 	$strPath = "ścieżka";
 	$strPrintConnection = "podłączenie do drukarki";
 	$strPrivileges = "Privileges";

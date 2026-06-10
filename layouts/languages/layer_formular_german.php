@@ -87,6 +87,7 @@
 	$strOWSWrapperNameHint = "Wenn ein Name angegeben ist, wird zusätzlich zur Map-Datei noch eine MapServer Wrapper-Datei in das Verzeichnis OWS_WRAPPER_PATH geschrieben, die auf die erzeugte Map-Datei verweist. Dadurch wird der Layer in einem Dienst der auf den Wrapper zeigt veröffentlicht.&#xa;Der Wrapper-Name darf nur aus Kleinbuchstaben, Ziffern und Unterstrichen bestehen und muss mit einem Buchstaben beginnen.";
 	$strOWSWrapperPath = "OWS Wrapper Pfad";
 	$strOWSWrapperPathHint = "Pfad in dem die Wrapper-Datei für den Layer gespeichert wird. Dieser wird gebildet aus OWS_SERVICE_ONLINERESOURCE wobei die URL durch INSTALLPATH ersetzt wird.";
+	$strParentLayer = "Übergeordnete Layer";
 	$strPath = "Query";
 	$strPostlabelcache = "Postlabelcache";
 	$strPrintConnection = "Druck-Connection";
