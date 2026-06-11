@@ -259,7 +259,21 @@
           "type": "object",
           "properties": {
             "symbolname": {
-              "type": "string"
+              "type": "string",
+              "anyOf": [
+                {
+                  "const": "circle",
+                  "desctiption" : "Drawing a circle symbol if geomType is point."
+                },
+                {
+                  "const": "rectangle",
+                  "desctiption" : "Drawing a rectangle symbol if geomType is point."
+                },
+                {
+                  "const": "hatch",
+                  "desctiption" : "Filling the geometry with a hatch pattern if geomType is polygon."
+                }
+              ]
             },
             "size": {
               "description": "If symbolname is set to a hatch pattern, the size defines the distance between the lines of the hatch pattern.",
