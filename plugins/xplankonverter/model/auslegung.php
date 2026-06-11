@@ -24,7 +24,7 @@ class Auslegung extends PgObject {
 		$auslegung_obj = new Auslegung($gui);
     $auslegungen = $auslegung_obj->find_where("
       '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= startdatum AND '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone < enddatum + 1 AND
-      '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= veroeffentlichungsdatum"
+      COALESCE('" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= veroeffentlichungsdatum, false)"
       . ($plan_gml_id ? " AND plan_gml_id = '" . $plan_gml_id . "'" : ''),
       "planart",
       "planart, plan_gml_id, lfdnr, startdatum, enddatum"
@@ -57,6 +57,7 @@ class Auslegung extends PgObject {
 		$auslegung_obj = new Auslegung($gui);
     $completed_auslegungen = $auslegung_obj->find_where(
       "
+        COALESCE('" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= a.veroeffentlichungsdatum, false) AND
         a.enddatum + INTERVAL '1 day' <= '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone AND
         v.observationend IS NULL"
         . ($plan_gml_id != '' ? " AND a.plan_gml_id = '" . $plan_gml_id . "'" : '') . "
