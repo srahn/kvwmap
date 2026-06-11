@@ -1,0 +1,300 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/srahn/kvwmap/refs/heads/dev/schemas/responses/layerdef.json",
+  "title": "Schema of layerdef.json",
+  "description": "Schema of json object created to configure the content of kvportal.",
+  "type": "object",
+  "required": [
+    "mapOptions",
+    "themes",
+    "baseLayers",
+    "overlays",
+    "geocoder"
+  ],
+  "properties": {
+    "mapOptions": {
+      "type": "object",
+      "required": ["center", "zoom", "maxBounds", "minZoom"],
+      "properties": {
+        "center": {
+          "type": "object",
+          "required": ["lat", "lng"],
+          "properties": {
+            "lat": {
+              "type": "number"
+            },
+            "lng": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "zoom": {
+          "type": ["string", "integer"]
+        },
+        "minZoom": {
+          "type": ["string", "integer"]
+        },
+        "maxBounds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "default_wms_legend_icon": {
+      "type": "string"
+    },
+
+    "themes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/theme"
+      }
+    },
+
+    "baseLayers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "options", "url"],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "shortLabel": {
+            "type": "string"
+          },
+          "img": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "attribution": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+
+    "overlays": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/overlay"
+      }
+    },
+
+    "geocoder": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+
+  "$defs": {
+    "theme": {
+      "type": "object",
+      "required": ["thema"],
+      "properties": {
+        "thema": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "themes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/theme"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "overlay": {
+      "type": "object",
+      "required": [
+        "thema",
+        "label",
+        "type"
+      ],
+      "properties": {
+        "thema": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "abstract": {
+          "type": ["string", "null"]
+        },
+        "contactOrganisation": {
+          "type": ["string", "null"]
+        },
+        "contactPersonName": {
+          "type": ["string", "null"]
+        },
+        "contactEMail": {
+          "type": ["string", "null"]
+        },
+        "contactPhon": {
+          "type": ["string", "null"]
+        },
+        "actuality": {
+          "type": ["string", "null"]
+        },
+        "actualityCircle": {
+          "type": ["string", "null"]
+        },
+        "type": {
+          "type": "string"
+        },
+        "geomType": {
+          "type": "string"
+        },
+        "backgroundColor": {
+          "type": "string"
+        },
+        "infoAttribute": {
+          "type": "string"
+        },
+        "classItem": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "integer",
+              "boolean",
+              "null"
+            ]
+          }
+        },
+
+        "options": {
+          "type": "object",
+          "properties": {
+            "transparent": {
+              "type": "boolean"
+            },
+            "attribution": {
+              "type": "string"
+            },
+            "opacity": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": true
+        },
+
+        "classes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/classDefinition"
+          }
+        },
+
+        "hideEmptyLayerAttributes": {
+          "type": "boolean"
+        },
+
+        "layerAttributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "classDefinition": {
+      "type": "object",
+      "required": ["name", "style"],
+      "properties": {
+        "def": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "style": {
+          "type": "object",
+          "properties": {
+            "symbolname": {
+              "type": "string"
+            },
+            "size": {
+              "description": "If symbolname is set to a hatch pattern, the size defines the distance between the lines of the hatch pattern.",
+              "type": ["string", "number"]
+            },
+            "stroke": {
+              "type": "boolean"
+            },
+            "weight": {
+              "description": "The width of the stroke. It is only applicable if stroke is true. If symbolname is set to a hatch pattern, the weight defines also the width of the lines of the hatch pattern.",
+              "type": ["string", "number"]
+            },
+            "color": {
+              "type": "string"
+            },
+            "fill": {
+              "type": "boolean"
+            },
+            "fillColor": {
+              "type": "string"
+            },
+            "fillOpacity": {
+              "type": "number"
+            },
+            "angle": {
+              "description": "The angle of the fill pattern. If symbolname is hatch the angle of 0 means horizontal lines, 90 means vertical lines and 45 means diagonal lines.",
+              "type": "number"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+
+  "additionalProperties": true
+}

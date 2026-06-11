@@ -103,7 +103,8 @@ class LayerStyle extends PgObject {
 					'color'				=> 'rgb(' . $this->get('outlinecolor') . ')',
 					'fill'				=> ($color != '' AND $color != '-1 -1 -1'),
 					'fillColor'		=> (($color == '' OR $color == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $color . ')'),
-					'fillOpacity'	=> ($this->get('opacity') == '' ? $layer_opacity / 100 : $this->get('opacity') / 100)
+					'fillOpacity'	=> ($this->get('opacity') == '' ? $layer_opacity / 100 : $this->get('opacity') / 100),
+					'angle'       => ($this->get('angle') == '' ? 0 : $this->get('angle'))
 				);
 			} break;
 			default : {
