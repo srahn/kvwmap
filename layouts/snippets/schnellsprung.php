@@ -1,13 +1,14 @@
 <?
-	$layerset = $this->user->rolle->getLayer(LAYER_ID_SCHNELLSPRUNG);
+	$quick_jump_layer_id = ($this->Stelle->quick_jump_layer_id ?: LAYER_ID_SCHNELLSPRUNG);
+	$layerset = $this->user->rolle->getLayer($quick_jump_layer_id);
 	if($layerset != NULL){ ?>
 
 <div id="schnellsprung_div">
 	<?
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-		$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
-		$privileges = $this->Stelle->get_attributes_privileges(LAYER_ID_SCHNELLSPRUNG);
-		$attributes = $mapdb->read_layer_attributes(LAYER_ID_SCHNELLSPRUNG, $layerdb, $privileges['attributenames']);
+		$layerdb = $mapdb->getlayerdatabase($quick_jump_layer_id, $this->Stelle->pgdbhost);
+		$privileges = $this->Stelle->get_attributes_privileges($quick_jump_layer_id);
+		$attributes = $mapdb->read_layer_attributes($quick_jump_layer_id, $layerdb, $privileges['attributenames']);
 		# wenn Attributname/Wert-Paare �bergeben wurden, diese im Formular einsetzen
 		for($i = 0; $i < count($attributes['name']); $i++){
 			$qlayerset['shape'][0][$attributes['name'][$i]] = $this->formvars['value_'.$attributes['name'][$i]];
@@ -23,10 +24,10 @@
 					<select class="schnellsprung-select-field" 
 					<?
 						// if($attributes['req_by'][$i] != ''){
-						// 	echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';
+						// 	echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.$quick_jump_layer_id.', this.value);" ';
 						// }
 						if($attributes['name'][$i] == 'oid'){
-							echo 'onchange="schnellsprung('.LAYER_ID_SCHNELLSPRUNG.', this.value, \''.$attributes['the_geom'].'\');"';
+							echo 'onchange="schnellsprung('.$quick_jump_layer_id.', this.value, \''.$attributes['the_geom'].'\');"';
 						}
 					?> 
 						id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>"><?echo "\n"; ?>

@@ -254,7 +254,8 @@ class stelle {
 				show_shared_layers,
 				reset_password_text,
 				invitation_text,
-				start_page_params
+				start_page_params,
+				quick_jump_layer_id
 			FROM
 				kvwmap.stelle s
 			WHERE
@@ -326,6 +327,7 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = ($rs['hist_timestamp'] == 't');
 		$this->default_user_id = $rs['default_user_id'];
+		$this->quick_jump_layer_id = $rs['quick_jump_layer_id'];
 		$this->show_shared_layers = ($rs['show_shared_layers'] == 't');
 		$this->style = $rs['style'];
 		$this->reset_password_text = $rs['reset_password_text'];
@@ -714,6 +716,7 @@ class stelle {
 				hist_timestamp = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				allowed_password_age = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
 				default_user_id = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
+				quick_jump_layer_id = " . ($stellendaten['quick_jump_layer_id'] != '' ? $stellendaten['quick_jump_layer_id'] : 'NULL') . ",
 				show_shared_layers = " . ($stellendaten['show_shared_layers'] ? 'true' : 'false') . ",
 				version = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				reset_password_text = '" . $stellendaten['reset_password_text'] . "',

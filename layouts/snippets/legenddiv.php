@@ -34,7 +34,13 @@
 } ?>
 <div id="legend_layer">
 	<div class="button_background" style="box-shadow: none; border-bottom: 1px solid #bbb">		<?	
-		if (!$this->simple_legend AND defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != '') {
+		if (
+				!$this->simple_legend AND 
+				(
+					(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != '') OR 
+					$this->Stelle->quick_jump_layer_id != ''
+				)
+			) {
 			include(SNIPPETS.'schnellsprung.php');
 		}
 		if ($this->user->rolle->layer_selection_mode == 1) {

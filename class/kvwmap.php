@@ -14078,6 +14078,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY bezeichnung"); // formatted resultset, ordered by Bezeichnung
 			$this->formvars['selchildren'] = $Stelle->getChildren($this->formvars['selected_stelle_id'], "ORDER BY bezeichnung"); // formatted resultset, ordered by Bezeichnung
 			$this->formvars['default_user_id'] = $this->stellendaten['default_user_id'];
+			$this->formvars['quick_jump_layer_id'] = $this->stellendaten['quick_jump_layer_id'];
 			$this->formvars['show_shared_layers'] = $this->stellendaten['show_shared_layers'];
 			$this->formvars['version'] = $this->stellendaten['version'];
 			$this->formvars['reset_password_text'] = $this->stellendaten['reset_password_text'];

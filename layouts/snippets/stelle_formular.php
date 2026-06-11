@@ -1196,6 +1196,20 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				</tr>
 
 				<tr class="group-sonstiges">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strQuickJumpLayer; ?>
+					</th>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">
+						<select name="quick_jump_layer_id" style="width: auto">
+							<option value=""> - </option>		<? 
+							for ($i = 0; $i < count($this->formvars['layer']["Bezeichnung"]); $i++) {
+								echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' value="'.$this->formvars['layer']["ID"][$i].'" ' . ($this->formvars['quick_jump_layer_id'] == $this->formvars['layer']["ID"][$i] ? 'selected' : '') . '>' . $this->formvars['layer']["Bezeichnung"][$i] . '</option>';
+							}		?>
+						</select>
+					</td>
+				</tr>
+
+				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input
 							name="show_shared_layers"
