@@ -16287,14 +16287,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							if ($this->formvars[$form_fields[$i]] == '')$this->formvars[$form_fields[$i]] = 'f';
 							$eintrag = $this->formvars[$form_fields[$i]];
 						} break;
-						case 'Link' : {
-							$eintrag = $this->formvars[$form_fields[$i]];
-							if ($eintrag != '' AND substr($eintrag, 0, 9) != 'index.php' AND strpos($eintrag, ':') === false)	{
-								# bei externen Links http davor setzen, wenn kein Protokoll angegeben
-								$eintrag = 'http://' . $eintrag;
-							}
-							if ($eintrag == '')$eintrag = 'NULL';
-						} break;
+						// case 'Link' : {  // erstmal rausgenommen wegen Arrays
+						// 	$eintrag = $this->formvars[$form_fields[$i]];
+						// 	if ($eintrag != '' AND substr($eintrag, 0, 9) != 'index.php' AND strpos($eintrag, ':') === false)	{
+						// 		# bei externen Links http davor setzen, wenn kein Protokoll angegeben
+						// 		$eintrag = 'http://' . $eintrag;
+						// 	}
+						// 	if ($eintrag == '')$eintrag = 'NULL';
+						// } break;
 						default : {
 							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
 								if ($this->formvars[$form_fields[$i]] === '') {

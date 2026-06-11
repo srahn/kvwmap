@@ -1122,13 +1122,9 @@ hide_versions = function(flst){
 
   <?
   } # Ende es liegen Flurstücke im Suchbereich
-
   else {
-    ?><br><span class="fett"><font color="#FF0000">
-    Zu diesem Layer wurden keine Objekte gefunden!</font></span><br>
-    Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
-    <?php
-  }
+		$this->noMatchLayers[$this->qlayerset[$i]['layer_id']] = 'Flurstücke';
+	}
 ?>
 
 </table>
