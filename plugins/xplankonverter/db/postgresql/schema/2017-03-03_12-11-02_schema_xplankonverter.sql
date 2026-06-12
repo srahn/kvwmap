@@ -237,7 +237,7 @@ COMMENT ON COLUMN konvertierungen.stelle_id IS 'Die Id der Stelle in der die Kon
 -- Name: COLUMN konvertierungen.user_id; Type: COMMENT; Schema: xplankonverter; Owner: -
 --
 
-COMMENT ON COLUMN konvertierungen.user_id IS 'Id des Nutzers, der den Datensatz angelegt hat. Dieser Wert solle automatisch vom System kvwmap beim Anlegen des Datensatzes erzeugt werden und ein Wert aus der MySQL-Tabelle users der kvwmap Karten- und Nutzerdatenbank kvwmapsp sein.';
+COMMENT ON COLUMN konvertierungen.user_id IS 'Id des Nutzers, der den Datensatz angelegt hat. Dieser Wert solle automatisch vom System kvwmap beim Anlegen des Datensatzes erzeugt werden und ein Wert aus der Tabelle users der kvwmap Karten- und Nutzerdatenbank kvwmapsp sein.';
 
 
 --

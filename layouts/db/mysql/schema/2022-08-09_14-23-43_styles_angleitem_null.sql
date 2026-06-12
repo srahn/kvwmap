@@ -1,5 +1,0 @@
-BEGIN;
-
-ALTER TABLE `styles` CHANGE `angleitem` `angleitem` VARCHAR(255) NULL DEFAULT NULL;
-
-COMMIT;

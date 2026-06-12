@@ -560,7 +560,7 @@ class GUI {
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
 				if ($this->user->rolle->oGeorefExt->minx==='') {
-				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
+				  echo "Richten Sie in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
 				  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
 				  exit;

@@ -1,5 +1,0 @@
-BEGIN;
-
-  ALTER TABLE `layer` ALTER oid SET DEFAULT 'id';
-
-COMMIT;

@@ -1,5 +1,0 @@
-BEGIN;
-
-ALTER TABLE `user` ADD `archived` DATE NULL;
-
-COMMIT;
