@@ -845,7 +845,8 @@ class synchro {
 
 	function ignorable_by_uuid($row) {
 		$pg_obj = new PgObject($this->database->gui, $row->schema_name, $row->table_name);
-		$uuid_exists = $pg_obj->exists("uuid = '" . $row->uuid . "'::uuid");
+		$pg_obj->set('uuid', $row->uuid);
+		$uuid_exists = $pg_obj->exists(uuid);
 		if ($row->action === 'insert' AND $uuid_exists) {
 			$this->msg = $row->sql . ' SQL ignoriert weil uuid: ' . $row->uuid . ' in Tabelle ' . $row->schema_name. '.' . $row->table_name . ' schon existiert.';
 			return true; // Ignorable because feature allready exists.
