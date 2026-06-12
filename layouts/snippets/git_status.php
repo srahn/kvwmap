@@ -29,7 +29,7 @@
 				<tr>
 					<td>Status:</td>
 					<td>';
-		$diverged = (strpos($ausgabe[1], "Your branch and 'origin/develop' have diverged") !== false);
+		$diverged = (strpos($ausgabe[1], "Your branch and 'origin/" . $branch . "' have diverged") !== false);
 
 		if (strpos($ausgabe[1], 'Your branch is behind') !== false OR $diverged) {
 			$explosion = explode(' ', $ausgabe[1]);
