@@ -1,5 +1,5 @@
 {
-  "is_testzeit" : true,
+  "is_testzeit" : false,
   "testzeitraum" : {
     "start" : "2026-04-24 09:53:15",
     "ende" : "2026-10-01 14:30:15"

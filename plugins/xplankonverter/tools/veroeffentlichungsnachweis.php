@@ -1,8 +1,17 @@
 <?php
-// ToDos:
-// pkorduan aus veroeffentlichungsprotokoll->find_users raus!
-// debug_mode in nachweis_test_cases.json anpassen
-// function send_alert nach veroeffentlichungsnachweis umbauen.
+  // Script zur Erstellung von Nachweisen der Veröffentlichung von Plänen auf dem Bau- und Planungsportal des Landes MV
+  // Running this script with a cron job like this:
+  // cd /var/www/apps/kvwmap/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan
+  // plan_gml_id= für einzelne Pläne
+  // gelogged wird in /var/www/logs/cron/veroeffentlichungsnachweis.log
+  // /var/www/logs/cron/veroeffentlichungsnachweis.log 2>&1
+  // ToDos:
+  // debug_mode in nachweis_test_cases.json anpassen
+  if (env('HOSTNAME') != 'kvwmap_prod_web') {
+    echo "\nAbbruch weil nicht in Produktionsumgebung!";
+    // Wenn das in anderen Umgebungen laufen werden soll, hier exit auskommentieren!
+    exit;
+  }
 
 /**
  * auslegung Auslegung
@@ -16,8 +25,6 @@
 $pruefzeit = time();
 $pruefstunde = (int)($pruefzeit / 3600) * 3600;
 echo_log("\n". date('Y-m-d H:i:s', $pruefzeit) . ' Starte Prüfung');
-// Running this script with a cron job like this:
-// cd /var/www/apps/kvwmap/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan >> /var/www/logs/cron/veroeffentlichungsnachweis.log 2>&1
 error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
 
 try {
@@ -28,7 +35,7 @@ try {
   $debug_mode = 1;
   if (
     $test_cases->is_testzeit AND
-    date('Y-m-d H:m:s') >= $test_cases->testzeitraum->start  AND
+    date('Y-m-d H:m:s') >= $test_cases->testzeitraum->start AND
     date('Y-m-d H:m:s') < $test_cases->testzeitraum->ende
   ) {
     define('AUSLEGUNG_MODE', 'dev');
