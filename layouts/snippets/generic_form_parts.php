@@ -240,6 +240,21 @@
 					$field_id = $id . '_' . $t . '_' . $type_attributes['name'][$t];
 					$type_attributes['privileg'][$t] = $attributes['privileg'][$j];
 					if ($type_attributes['alias'][$t] == '') $type_attributes['alias'][$t] = $type_attributes['name'][$t];
+					$attribute_value = attribute_value(
+																$gui, 
+																$layer, 
+																$type_attributes, 
+																$t, 
+																$k, 
+																$dataset2, 
+																$tsize, 
+																$select_width, 
+																$change_all, 
+																$onchange2, 
+																$id.'_'.$t, 						# field_name
+																$field_id, 							# field_id
+																$id . ' datatype_attr'	# field_class
+															);
 					switch ($type_attributes['labeling'][$t]) {
 						case 1 : {
 							$datapart .= '
@@ -250,7 +265,7 @@
 								</tr>
 								<tr>
 									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id) . '
+										' . $attribute_value . '
 									</td>
 								</tr>
 							';
@@ -259,7 +274,7 @@
 							$datapart .= '
 								<tr>
 									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id) . '
+										' . $attribute_value . '
 									</td>
 								</tr>
 							';
@@ -271,7 +286,7 @@
 									' . attribute_name($layer_id, $type_attributes, $t, $k, false, $field_id) . '
 									</td>
 									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$t].'_'.$k.'" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $t, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$t, $field_id, $id) . '
+										' . $attribute_value . '
 									</td>
 								</tr>';
 						}

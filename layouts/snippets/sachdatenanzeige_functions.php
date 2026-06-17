@@ -196,8 +196,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		if(object == null)return;
 		var group_display;
 		dependents.forEach(function(dependent){
-			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen falls man verschachtelt in einem Datentyp ist
-			if (scope.querySelector('#visibility_rules_'+dependent) == undefined){
+			if (object.classList.contains('datatype_attr')) {
+				var scope = object.closest('table');		// den scope auf die umschliessende Tabelle setzen da man verschachtelt in einem Datentyp ist
+			}
+			else {
 				scope = document;			// ansonsten global
 			}
 			var rule = JSON.parse(scope.querySelector('#visibility_rules_'+dependent).value);
