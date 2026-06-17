@@ -40,7 +40,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
     else {
       $protokoll = $results[0];
       $msg = 'Veröffentlichungsprotokoll zur Auslegung gefunden.';
-      echo_log('class Veroeffentlichungsprotokoll func find_by_auslegung ' . __LINE__ . ': Frage Nachweise der Auslegung ab', 2);
+      echo_log('Frage Nachweise der Auslegung ab', 2);
       $result = $protokoll->find_nachweise($protokoll->get('id'));
       if (!$result['success']) {
         return $result;
@@ -51,7 +51,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
         return $result;
       }
 
-      echo_log('class Veroeffentlichungsprotokoll func find_by_auslegung ' . __LINE__ . ': Frage zuständige Nutzer der Auslegung ab', 2);
+      echo_log('Frage zuständige Nutzer der Auslegung ab', 2);
       $result = $protokoll->find_zustaendige_user($auslegung->plan->get('stelle_id'));
       if (!$result['success']) {
         return $result;
@@ -67,25 +67,23 @@ class Veroeffentlichungsprotokoll extends PgObject {
   function find_zustaendige_user($stelle_id) {
     $this->zustaendige_user = user::find(
       $this->gui,
-      "
-        u.email IS NOT NULL AND
-        u.email != '' AND
-        u.funktion != 'admin' AND
-        u.organisation NOT LIKE '%GDI%Service%' AND
-        u.login_name NOT IN ('btfietz') AND
+      (AUSLEGUNG_MODE == 'dev' ? "u.login_name = 'pkorduan'" : "
+        u.email IS NOT NULL AND u.email != '' AND
+        (u.archived IS NULL OR u.archived > now()) AND
+        u.funktion NOT IN ('admin', 'regionaladmin', 'importer', 'dienstleister') AND
         r.stelle_id = " . $stelle_id . "
-      ",
+      "),
       NULL,
       "
-        r.user_id,
+        u.id AS user_id,
         concat_ws(' ', u.vorname, u.name) AS contact_name, 
         u.email AS contact_email
       ",
       NULL,
-      "
+      (AUSLEGUNG_MODE == 'dev' ? "kvwmap.user AS u" :"
         kvwmap.rolle r JOIN
         kvwmap.user u ON r.user_id = u.id
-      "
+      ")
     );
     $fehler = pg_last_error();
     if ($fehler) {
@@ -173,17 +171,18 @@ class Veroeffentlichungsprotokoll extends PgObject {
 
     $pg_obj = new PgObject($auslegung->gui, 'xplankonverter', 'veroeffentlichungsprotokoll_dokumente');
     foreach ($auslegung->plan->veroeffentlichungsprotokoll_dokumente AS $dokument) {
-      echo_log('Class: Veroeffentlichungsprotokoll, Func: open, Zeile: ' . __LINE__ . ' Erzeuge Dokument Hash mit layer_id: ' . $auslegung->plan->get_plan_layer_id() . ' und dokument: ' . $dokument->get('referenzurl'), 2);
+      // echo_log('Erzeuge Dokument Hash mit layer_id: ' . $auslegung->plan->get_plan_layer_id() . ' und dokument: ' . $dokument->get('referenzurl'), 2);
       $doc_hash = create_document_hash($auslegung->plan->get_plan_layer_id(), $dokument->get('referenzurl'));
       if ($doc_hash === false) {
-        return array(
-          'success' => false,
-          'msg' => 'Fehler beim Erzeugen des Dokument-Hash für Datei: ' . $dokument->get('referenzurl') . ' im Layer id: ' . $auslegung->plan->get_plan_layer_id()
-        );
+        $msg = 'Fehler beim Erzeugen des Dokument-Hash für Datei: ' . $dokument->get('referenzurl') . ' im Layer id: ' . $auslegung->plan->get_plan_layer_id();
+        // return array(
+        //   'success' => false,
+        //   'msg' => $msg
+        // );
       }
       $result = $pg_obj->create(array(
         'protokoll_id' => $veroeffentlichungsprotokoll->get('id'),
-        'doc_art' => $dokument->get('art'),
+        'doc_art' => ($dokument->get('art') ?? 'Dokument'),
         'doc_url' => $dokument->get('referenzurl'),
         'doc_beschreibung' => $dokument->get('beschreibung'),
         'doc_datum' => $dokument->get('datum'),
@@ -194,6 +193,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
         $result['msg'] = 'Fehler bei der Erzeugung des Dokumentes des Veröffentlichungsprotokolls. ' . $result['msg'];
         return $result;
       }
+      echo_log('Dokument des Veröffentlichungsprotokolls angelegt: ' . $dokument->get('referenzurl'), 2);
     }
     // $veroeffentlichungsprotokoll->set('observationstart', date('Y-m-d H:i:s', $pruefstunde));
     return array(
@@ -203,11 +203,23 @@ class Veroeffentlichungsprotokoll extends PgObject {
     );
   }
 
+  function create_ueberwachungsbeginn_alert_mail($auslegung, $contact_name, $pruefzeit) {
+    $stelle = stelle::find($this->gui, "id = " . $auslegung->plan->get('stelle_id'))[0];
+    $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get_plan_type()) . '&id=' . $auslegung->plan->get('gml_id');
+    $subject = 'Beginn der Überwachung der Auslegung ' . $auslegung->plan->get('anzeigename') . ' ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
+    $body = "Mitteilung für: " . $contact_name . "\n\nDie Überwachung der Auslegung des Plans " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") in Stelle " . $stelle->get('bezeichnung') . " mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " hat " . date('d.m.Y H:i', $pruefzeit) . " Uhr begonnen.\n\nSie können die Auslegung im Bau- und Planungsportal unter: " . $url . " prüfen und ggf. Angaben zur Veröffentlichung des Plans auf " . URL . " prüfen und ändern.";
+    return array(
+      'subject' => $subject,
+      'body' => $body,
+      'anhang' => ''
+    );
+  }
+
   function create_nachweis_luecke_alert_mail($auslegung, $contact_name, $pruef_result) {
-    echo "\n__Prüf_result: " . print_r($pruef_result, true) . "\n";
-    $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->plan->get('gml_id');
+    $stelle = stelle::find($this->gui, "id = " . $auslegung->plan->get('stelle_id'))[0];
+    $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get_plan_type()) . '&id=' . $auslegung->plan->get('gml_id');
     $subject = 'Warung zur Auslegung ' . $auslegung->plan->get('anzeigename') . ' ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
-    $body = "Mitteilung für: " . $contact_name . "\n\nFür den " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " gibt es vom " . date('d.m.Y H:i:s', $pruef_result['gap_start']) . " bis " . date('d.m.Y H:i:s', $pruef_result['gap_end']) . " eine Lücke in der Überwachung der Auslegung!\n\nIm genannten Zeitraum konnte nicht automatisch geprüft werden ob der Plan im Bau- und Planungsportal unter: " . $url . " verfügbar war.\n\nDas Problem ist behoben und die Überwachung der Auslegung läuft wieder regulär.\n\nSollte das Problem wiederholt auftreten, wenden Sie sich an die GDI-Service GmbH unter der Adresse robert.kraetschmer@gdi-service.de oder per Telefon unter 0381 40344446 oder an die Koordinierungsstelle beim Landkreis LUP unter der Adresse " . XPLANKONVERTER_COORDINATOR_EMAIL . ".\n\n\nDies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an die oben angegebenen Kontakte.";
+    $body = "Mitteilung für: " . $contact_name . "\n\nFür den " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") in Stelle " . $stelle->get('bezeichnung') . " mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " gibt es vom " . date('d.m.Y H:i:s', $pruef_result['gap_start']) . " bis " . date('d.m.Y H:i:s', $pruef_result['gap_end']) . " eine Lücke in der Überwachung der Auslegung!\n\nIm genannten Zeitraum konnte nicht automatisch geprüft werden ob der Plan im Bau- und Planungsportal unter: " . $url . " verfügbar war.\n\nDas Problem ist behoben und die Überwachung der Auslegung läuft wieder regulär.\n\nSollte das Problem wiederholt auftreten, wenden Sie sich an die GDI-Service GmbH unter der Adresse robert.kraetschmer@gdi-service.de oder per Telefon unter 0381 40344446 oder an die Koordinierungsstelle beim Landkreis LUP.\n\n\nDies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an die oben angegebenen Kontakte.";
     return array(
       'subject' => $subject,
       'body' => $body,
@@ -216,9 +228,10 @@ class Veroeffentlichungsprotokoll extends PgObject {
   }
 
   function create_auslegung_alert_mail($auslegung, $contact_name, $pruefzeit) {
-    $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->plan->get('gml_id');
+    $stelle = stelle::find($this->gui, "id = " . $auslegung->plan->get('stelle_id'))[0];
+    $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get_plan_type()) . '&id=' . $auslegung->plan->get('gml_id');
     $subject = 'Fehler bei Auslegung von ' . $auslegung->plan->get('anzeigename') . ' ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
-    $body = "Mitteilung für: " . $contact_name . "\n\nDer " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " war am " . preg_replace('/:\d+(?:\.\d+)?$/', '', date('d.m.Y H:i:s', $pruefzeit)) . " auf dem Bau- und Planungsportal seit 5 Stunden nicht verfügbar!\n\nBitte prüfen Sie die Auslegung im Bau- und Planungsportal unter: " . $url . " und die Angaben zur Veröffentlichung des Plans auf " . URL . " und stellen Sie sicher, dass der Plan veröffentlicht ist.\n\nSind Ihre Angaben korrekt und sollte das Problem, dass der Plan nicht veröffentlicht wird, weiterhin bestehen, wenden Sie sich an GDI-Service unter der Adresse robert.kraetschmer@gdi-service.de oder per Telefon unter 0381 40344446 oder an die Koordinierungsstelle des Bauleitplanservers unter der Adresse " . XPLANKONVERTER_COORDINATOR_EMAIL . ".\n\n\nDies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an die oben angegebenen Kontakte.";
+    $body = "Mitteilung für: " . $contact_name . "\n\n" . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") in Stelle " . $stelle->get('bezeichnung') . " mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " war am " . preg_replace('/:\d+(?:\.\d+)?$/', '', date('d.m.Y H:i:s', $pruefzeit)) . " auf dem Bau- und Planungsportal seit 5 Stunden nicht verfügbar!\n\nBitte prüfen Sie die Auslegung im Bau- und Planungsportal unter: " . $url . " und die Angaben zur Veröffentlichung des Plans auf " . URL . " und stellen Sie sicher, dass der Plan veröffentlicht ist.\n\nSind Ihre Angaben korrekt und sollte das Problem, dass der Plan nicht veröffentlicht wird, weiterhin bestehen, wenden Sie sich an GDI-Service unter der Adresse robert.kraetschmer@gdi-service.de oder per Telefon unter 0381 40344446 oder an die Koordinierungsstelle des Bauleitplanservers unter der Adresse " . XPLANKONVERTER_COORDINATOR_EMAIL . ".\n\n\nDies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an die oben angegebenen Kontakte.";
     return array(
       'subject' => $subject,
       'body' => $body,
@@ -261,6 +274,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
     }
     $this->set('datei', $datei);
     $this->update_attr(array("datei = '" . $datei . "'"));
+    unlink(str_replace('.pdf', '_thumb.jpg', $datei));
     return array(
       'success' => true,
       'msg' => 'PDF-Datei ' . $datei. ' erfolgreich angelegt'
@@ -274,8 +288,9 @@ class Veroeffentlichungsprotokoll extends PgObject {
    * @return string Pfad zum Veröffentlichungsprotokoll
    */
   function create_veroeffentlichungsprotokoll_mail($auslegung, $contact_name) {
-    $subject = 'Protokoll für Auslegung ' . $auslegung->plan->get('anzeigename'). ' ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
-    $body = 'Mitteilung für ' . $contact_name . "\n\n" . "Anbei erhalten Sie das Veröffentlichungsprotokoll für die Auslegung des Plans: '" . $auslegung->get('name') . "' Nr: " . $auslegung->get('nummer') . ' gml_id: ' . $auslegung->get('plan_gml_id') . ' im Zeitraum vom: ' . $auslegung->get('startdatum') . ' bis: ' . $auslegung->get('enddatum') . " auf dem Bau- und Planungsportal unter: " . AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get('planart')) . '&id=' . $auslegung->plan->get('gml_id') . "\n";
+    $stelle = stelle::find($this->gui, "id = " . $auslegung->plan->get('stelle_id'))[0];
+    $subject = 'Protokoll für Auslegung ' . $auslegung->plan->get('anzeigename') . ' ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
+    $body = 'Mitteilung für ' . $contact_name . "\n\n" . "Anbei erhalten Sie das Veröffentlichungsprotokoll für die Auslegung des Plans: " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->get('plan_gml_id') . ") in Stelle " . $stelle->get('bezeichnung') . ' im Zeitraum vom: ' . $auslegung->get('startdatum') . ' bis: ' . $auslegung->get('enddatum') . " auf dem Bau- und Planungsportal unter: " . AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get_plan_type()) . '&id=' . $auslegung->plan->get('gml_id') . "\n";
     $auslegung_dauer = volle_stunden($auslegung->get('startdatum'), $auslegung->get('enddatum')) + 24;
     // Aktuell keine Ausgabe der Fehlermeldungen in der E-Mail.
     // if (count($this->nachweise) > 0) {
@@ -310,8 +325,19 @@ class Veroeffentlichungsprotokoll extends PgObject {
     );
   }
 
+  function create_and_send_ueberwachungsbeginn_alert($auslegung, $pruefzeit) {
+    echo_log('E-Mail zum Überwachungsbeginn gesendet an Nutzer: ' . implode(', ', array_map(function($user) { return $user->get('contact_name'); }, $this->zustaendige_user)), 2);
+    foreach ($this->zustaendige_user AS $user) {
+      $this->send_email(
+        $this->create_ueberwachungsbeginn_alert_mail($auslegung, $user->get('contact_name'), $pruefzeit),
+        $user->get('contact_email'),
+        $user->get('contact_name')
+      );
+    }
+  }
+
   function create_and_send_nachweis_luecke_alert($auslegung, $pruef_result) {
-    echo_log('Anzahl zu benachrichtigende Nutzer: ' . count($this->zustaendige_user), 2);
+    echo_log('E-Mail zur Nachweislücke gesendet an Nutzer: ' . implode(', ', array_map(function($user) { return $user->get('contact_name'); }, $this->zustaendige_user)), 2);
     foreach ($this->zustaendige_user AS $user) {
       $this->send_email(
         $this->create_nachweis_luecke_alert_mail($auslegung, $user->get('contact_name'), $pruef_result),
@@ -322,7 +348,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
   }
 
   function create_and_send_auslegung_alert($auslegung, $pruefzeit) {
-    echo_log('Anzahl zu benachrichtigende Nutzer: ' . count($this->zustaendige_user), 2);
+    echo_log('E-Mail zum Auslegungsfehler gesendet an Nutzer: ' . implode(', ', array_map(function($user) { return $user->get('contact_name'); }, $this->zustaendige_user)), 2);
     foreach ($this->zustaendige_user AS $user) {
       $this->send_email(
         $this->create_auslegung_alert_mail($auslegung, $user->get('contact_name'), $pruefzeit),
@@ -333,6 +359,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
   }
 
   function create_and_send_protokoll($auslegung) {
+    echo_log('E-Mail mit Veröffentlichungsprotokoll gesendet an Nutzer: ' . implode(', ', array_map(function($user) { return $user->get('contact_name'); }, $this->zustaendige_user)), 2);
     $this->create_pdf_datei($auslegung);
     foreach ($this->zustaendige_user AS $user) {
       $this->send_email(

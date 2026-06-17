@@ -39,6 +39,29 @@ class Nutzer extends PgObject {
 		return $user->find_by('id', pg_escape_string($id));
 	}
 
+	public static function user_funktionen($gui) {
+		$gui->debug->show('Frage die vorkommenden Funktionen von Nutzern ab.', Nutzer::$write_debug);
+		$user = new Nutzer($gui);
+		$result = $user->find_by_sql(array(
+			'select' => 'DISTINCT funktion',
+			'order' => 'funktion'
+		), null, false);
+		if (!$result['success']) {
+			return $result;
+		}
+		else {
+			return array(
+				'success' => true,
+				'user_funktionen' => array_map(
+					function($row) {
+						return $row->get('funktion');
+					},
+					$result['rows']
+				)
+			);
+		}
+	}
+
 	function get_name() {
 		return ($this->get('name') ? $this->get('name') . ', ' : '') . ($this->get('vorname') ? $this->get('vorname') : $this->login_name);
 	}
@@ -88,7 +111,8 @@ class Nutzer extends PgObject {
 				'password' => sha1($gui->formvars['new_password']),
 				'phon' => $gui->formvars['phon'],
 				'email' => $gui->formvars['email'],
-				'stelle_id' => $stellen_ids[0]
+				'stelle_id' => $stellen_ids[0],
+				'funktion' => 'user'
 			)
 		);
 		if (!$results['success']) {

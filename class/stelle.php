@@ -2492,6 +2492,7 @@ class stelle {
 				$user['Bezeichnung'][] = $rs['name'].', '.$rs['vorname'];
 				$user['position'][] = $rs['position'];
 				$user['email'][] = $rs['email'];
+				$user['funktion'][] = $rs['funktion'];
 			}
 		}
 		if ($result == 'only_ids') {
