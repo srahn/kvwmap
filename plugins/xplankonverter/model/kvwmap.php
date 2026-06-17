@@ -794,7 +794,7 @@
 		$from_name = 'XPlan-Server PlanDigital';
 		$from_email = 'plandigital@arl-we.niedersachsen.de';
 		$to_email = 'plandigital@arl-we.niedersachsen.de';
-		$cc_email = 'peter.korduan@gdi-service.de';
+		$cc_email = 'robert.kraetschmer@gdi-service.de';
 		$reply_email = null;
 		$subject = 'Fehler in Plandigital';
 		$message 	= "Sehr geehrte Damen und Herren,\r\n\r\n";

@@ -40,7 +40,8 @@ class Zusammenzeichnung {
         msg: `Konvertierung der Plandaten in die Version ${this.xplan_version}`,
         description: `Die Fachdaten ${this.config.genitiv} werden nun in die entsprechenden Tabellen übernommen.<br>
         Dabei erfolgt das mapping zwischen dem Import-Datenmodell von ogr2ogr in das XPlanung-Datenmodell des xplankonverters.<br>
-        Bei der Konvertierung wird auch auf die Version ${this.xplan_version} gewechselt.`
+        Bei der Konvertierung wird auch auf die Version ${this.xplan_version} gewechselt.<br>
+				Mögliche leere Stylesheet-Ids in Präsentationsobjekten werden, falls möglich, auf Basis des Attributs art ergänzt.`
       },
       gml_generieren: {
         nr: 5,

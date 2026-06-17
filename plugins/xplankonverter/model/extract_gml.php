@@ -734,10 +734,7 @@ class Gml_extractor {
 				to_char(gmlas.technherstelldatum, 'DD.MM.YYYY') AS technherstelldatum,
 				to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY') AS genehmigungsdatum,
 				to_char(gmlas.untergangsdatum, 'DD.MM.YYYY') AS untergangsdatum,
-				CASE WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
-					array_to_json(ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[])
-					ELSE NULL
-				END AS aendert,
+				aendert.aendert As aendert,
 				CASE WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
 					array_to_json(ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[])
 					ELSE NULL
@@ -803,10 +800,23 @@ class Gml_extractor {
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
 					GROUP BY
 						externereferenzlink_sub.parent_id
-				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".fp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
+				) externeref ON gmlas.id = externeref.parent_id JOIN LATERAL
+				(
+					SELECT 
+						ARRAY_AGG(
+							CASE
+								WHEN
+									vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL
+								THEN
+									(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)::xplan_gml.xp_verbundenerplan
+								ELSE NULL
+							END
+							)::xplan_gml.xp_verbundenerplan[] AS aendert
+						FROM 
+							" . $this->gmlas_schema . ".fp_plan_aendert_aendert aendertlink LEFT JOIN
+							" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
+							" . $this->gmlas_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid
+				) aendert ON true LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
@@ -2502,7 +2512,7 @@ class Gml_extractor {
 		$datatype_attributes = $this->get_datatype_attributes($this->gmlas_schema, $gml_class);
 		foreach ($datatype_attributes AS $datatype_attribute) {
 			if ($regel = $this->get_gmlas_to_gml_regel_for_datatype_attribute($this->gmlas_schema, $gml_class, $datatype_attribute)) {
-				$gml_attributes[] = $datatype_attribute;
+				$gml_attributes[] = $datatype_attribute['name'];
 				$select_sql[] = $regel;
 			}
 		}
@@ -2711,6 +2721,7 @@ class Gml_extractor {
 		";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$datatype_attributes = pg_fetch_all($ret[1], PGSQL_ASSOC);
+		return $datatype_attributes;
 	}
 
 	/**
@@ -2772,18 +2783,25 @@ class Gml_extractor {
 			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 			if (pg_num_rows($ret[1]) > 0) {
 				$rs = pg_fetch_assoc($ret[1]);
-				// parent_id
-				/* ToDo: Nur Werte in row aufnehmen die in Typ xplan_gml.bp_dachgestaltung vorkommen und deren Typen setzen. (rekursive, weil da auch wieder zusammengesetzte typen vorkommen können.) 
-				SELECT
-					--  row(data_tab.*)::xplan_gml.bp_dachgestaltung
-  				data_tab.*
-				FROM
-  				xplan_gmlas_5007.bp_baugebietsteilflaeche_dachgestaltung rel_tab JOIN
-  				xplan_gmlas_5007.bp_dachgestaltung data_tab ON rel_tab.bp_dachgestaltung_pkid = data_tab.ogr_pkid
-				*/
+				// get uml info for attributes of subattributes to only access those attributes and to cast them accordingly to the relevant datatypes (ctype) where necessary
+				include_once(PLUGINS . 'xplankonverter/model/TypeInfo.php');
+				$typeInfo = new TypeInfo($this->pgdatabase);
+				$datatype_sub_attrs = $typeInfo->fetchUmlAttributesForType($attribute['datatype'], FALSE);
+				$datatype_sub_attrs_string = '';
+				foreach($datatype_sub_attrs AS $datatype_sub_attr) {
+					if ($datatype_sub_attr['ctype'] != NULL) {
+						$datatype_sub_attrs_string .= strtolower($datatype_sub_attr['name']) . "::xplan_gml." . strtolower($datatype_sub_attr['ctype']) .  ",";
+					} else {
+						$datatype_sub_attrs_string .= strtolower($datatype_sub_attr['name']) . ",";
+					}
+
+				}
+				$datatype_sub_attrs_string = rtrim($datatype_sub_attrs_string, ',');
+
 				$regel = "(
-					SELECT array_agg((SELECT * FROM " . $this->gmlas_schema . "." . $rs['table_name'] . " AS rel_tab JOIN " . $this->gmlas_schema . "." . $attribute['datatype'] . " AS data_tab ON rel_tab." . $attribute['datatype'] . "_pkid = data_tab.ogr_pkid WHERE rel_tab.parent_id::text = gmlas.ogc_fid::text))
-				)";
+					SELECT array_agg((" . $datatype_sub_attrs_string . ")::xplan_gml." . $attribute['datatype'] . ")::xplan_gml." . $attribute['datatype'] .  "[] FROM " . $this->gmlas_schema . "." . $rs['table_name'] . " AS rel_tab JOIN " . $this->gmlas_schema . "." . $attribute['datatype'] . " AS data_tab ON rel_tab." . $attribute['datatype'] . "_pkid = data_tab.ogr_pkid WHERE rel_tab.parent_id::text = gmlas.id::text
+
+				) AS " . $attribute['name'];
 			}
 
 			// Aggregate to an array if type is an array

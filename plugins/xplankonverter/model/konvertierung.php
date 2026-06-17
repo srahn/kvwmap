@@ -1555,11 +1555,7 @@ class Konvertierung extends PgObject {
 						to_char(gmlas.technherstelldatum, 'DD.MM.YYYY')::date AS technherstelldatum,
 						to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY')::date AS genehmigungsdatum,
 						to_char(gmlas.untergangsdatum, 'DD.MM.YYYY')::date AS untergangsdatum,
-						CASE
-							WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
-								ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
-							ELSE NULL
-						END AS aendert,
+						aendert.aendert As aendert,
 						CASE
 							WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
 								ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
@@ -1639,10 +1635,23 @@ class Konvertierung extends PgObject {
 								" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
 							GROUP BY
 								externereferenzlink_sub.parent_id
-						) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
-						" . $table_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
-						" . $table_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
+						) externeref ON gmlas.id = externeref.parent_id JOIN LATERAL
+						(
+							SELECT
+								ARRAY_AGG(
+									CASE
+										WHEN
+											vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL
+										THEN
+											(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)::xplan_gml.xp_verbundenerplan
+										ELSE NULL
+									END
+									)::xplan_gml.xp_verbundenerplan[] AS aendert
+								FROM 
+									" . $table_schema . "." . strtolower($plan_class) . "_aendert_aendert aendertlink LEFT JOIN
+									" . $table_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
+									" . $table_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid
+						) aendert ON true LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
 						" . $table_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
 						" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
@@ -3067,11 +3076,11 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		$to_email = $this->get_arl_email();
 		// add additional ccs in some contexts for plandigital as defined in config
 		if($send_to_cc_from_config == false || empty(XPLANKONVERTER_CC_EMAILS)) {
-			$cc_email = 'peter.korduan@gdi-service.de';
+			$cc_email = 'robert.kraetschmer@gdi-service.de';
 		}
 		else {
 			$cc_emails_multiple = explode(',', XPLANKONVERTER_CC_EMAILS);
-			$cc_emails_multiple[] = 'peter.korduan@gdi-service.de';
+			$cc_emails_multiple[] = 'robert.kraetschmer@gdi-service.de';
 			// implode with space for sendMail sh
 			$cc_email = implode(' ',$cc_emails_multiple);
 		}
@@ -3261,7 +3270,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 				ats.target_class
 		";
 		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
-		$this->gui->Hinweis .= '<br>Durchgeführte SQL-Statements:<br>';
+		#$this->gui->Hinweis .= '<br>Durchgeführte SQL-Statements:<br>';
 
 		while($row = pg_fetch_assoc($ret[1])) {
 			//$this->gui->Hinweis .= '<pre>' . var_dump($row) . ' </pre>';
@@ -3334,7 +3343,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 			";
 			$return = $this->gui->pgdatabase->execSQL($sql, 4, 0);
 
-			$this->gui->Hinweis .= '<br>' . $sql . '<br>';
+			#$this->gui->Hinweis .= '<br>' . $sql . '<br>';
 		}
 	}
 

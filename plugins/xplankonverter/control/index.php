@@ -1126,6 +1126,7 @@ function go_switch_xplankonverter($go) {
 					try {
 						$GUI->konvertierung->reset_mapping();
 						$GUI->konvertierung->mapping();
+						$GUI->konvertierung->augment_xp_ppo_stylesheetids();
 						#$GUI->konvertierung->set_historie();
 						$GUI->konvertierung->set_status(
 							($GUI->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
@@ -1860,7 +1861,7 @@ function go_switch_xplankonverter($go) {
 
 		case 'xplankonverter_download_uploaded_xplan_gml' : {
 			if ($GUI->formvars['konvertierung_id'] == '') {
-				send_error('Sie müssen eine Konvertierung-ID iim Parameter konvertierueng_id angeben!');
+				send_error('Sie müssen eine Konvertierung-ID im Parameter konvertierung_id angeben!');
 				return;
 			}
 			$GUI->sanitize(array('konvertierung_id' => 'int'));
