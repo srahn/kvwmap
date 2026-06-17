@@ -12577,19 +12577,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				(SELECT " . $query_parts['query'] . ") as foo
 			WHERE
 				true";
+		$oids = array();
 		if ($this->formvars['all'] != 'true') {
 			for ($i = 0; $i < count($checkbox_names); $i++) {
 				if ($this->formvars[$checkbox_names[$i]] == 'on') {
 					$element = explode(';', $checkbox_names[$i]); # check;table_alias;table;oid
-					$oids .= $element[3] . ', ';
+					$oids[] = $element[3];
 				}
 			}
-			$sql .= " AND " . pg_quote($layerset[0]['maintable'] . '_oid') . " IN (" . $oids . ')';
+			$sql .= " AND " . pg_quote($layerset[0]['maintable'] . '_oid') . " IN (" . implode(', ', $oids) . ')';
 		}
 		if ($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
 			$sql .= ' ORDER BY ' . replace_semicolon($this->formvars['orderby' . $this->formvars['chosen_layer_id']]);
 		}
-		#echo $sql.'<br><br>';
+		// echo '<br>Frage query_parts für chart ab: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:generisches_sachdaten_diagramm :",4);
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if (!$ret[0]) {
@@ -20721,7 +20722,7 @@ DO $$
 							'vars_last_layer_id" . $layer_ids[$i] . "' as layer_id,
 							'vars_datatype_id_' || datatype_id AS datatype_id,
 							name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, \"default\", form_element_type,
-							options, alias, alias_low_german, alias_english, alias_polish, alias_vietnamese, tooltip, \"group\", raster_visibility, mandatory, quicksearch,
+							options, alias, alias_low_german, alias_english, alias_polish, alias_vietnamese, tooltip, \"group\", raster_visibility, statistic_visibility, mandatory, quicksearch,
 							\"order\", privileg, query_tooltip, visible, visibility_rules, arrangement, labeling
 						FROM
 							kvwmap.datatype_attributes
@@ -21758,6 +21759,7 @@ DO $$
 					'arrangement' => ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]),
 					'labeling' => ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]),
 					'raster_visibility' => ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]),
+					'statistic_visibility' => ($formvars['statistic_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['statistic_visibility_' . $attributes['name'][$i]]),
 					'dont_use_for_new' => ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]),
 					'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
 					'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
@@ -22047,6 +22049,7 @@ DO $$
 				arrangement,
 				labeling,
 				raster_visibility,
+				statistic_visibility,
 				dont_use_for_new,
 				mandatory,
 				quicksearch,
@@ -22177,6 +22180,7 @@ DO $$
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['statistic_visibility'][$i] = $rs['statistic_visibility'];
 			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];

@@ -2012,6 +2012,7 @@ class db_mapObj{
 				arrangement,
 				labeling,
 				raster_visibility,
+				statistic_visibility,
 				dont_use_for_new,
 				mandatory,
 				quicksearch,
@@ -2142,6 +2143,7 @@ class db_mapObj{
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['statistic_visibility'][$i] = $rs['statistic_visibility'];
 			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];

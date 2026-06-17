@@ -446,6 +446,7 @@ INSERT INTO kvwmap.layer_attributes (
 	options,
 	\"group\",
 	raster_visibility,
+	statistic_visibility,
 	mandatory,
 	\"order\",
 	privileg,
@@ -468,6 +469,7 @@ VALUES (
 	'{$options['option']}', -- options
 	'', -- group
 	NULL, -- raster_visibility
+	NULL, -- statistic_visibility
 	NULL, -- mandatory
 	'{$attribute['ordinal_position']}', -- order
 	'1',
