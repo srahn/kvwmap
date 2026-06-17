@@ -14839,7 +14839,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['archived'] 									= $this->userdaten[0]['archived'];
 			$this->formvars['layer_data_import_allowed'] 	= $this->userdaten[0]['layer_data_import_allowed'];
 			$this->formvars['agreement_accepted']					= $this->userdaten[0]['agreement_accepted'];
-			$this->formvars['comment']					= $this->userdaten[0]['comment'];
+			$this->formvars['comment']										= $this->userdaten[0]['comment'];
+			$this->formvars['funktion']										= $this->userdaten[0]['funktion'];
 			# Abfragen der Stellen des Nutzers
 			$this->selected_user = new user('', $this->formvars['selected_user_id'], $this->user->database, '', true);
 			$this->formvars['selstellen'] = $this->selected_user->getStellen(0, true);

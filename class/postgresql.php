@@ -222,7 +222,7 @@ class pgdatabase {
 				namenszusatz,
 				password,
 				ips,
-				Funktion,
+				funktion,
 				stelle_id
 			)
 			VALUES (

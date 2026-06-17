@@ -1505,6 +1505,9 @@ class user {
 		if ($userdaten['comment']!='') {
 			$columns['comment'] = "'" . $userdaten['comment'] . "'";
 		}
+		if ($userdaten['funktion']!='') {
+			$columns['funktion'] = "'" . $userdaten['funktion'] . "'";
+		}
 		if ($userdaten['start'] != '') {
 			$columns['start'] = ($userdaten['start'] ? "'" . $userdaten['start'] . "'" : 'NULL');
 		}
@@ -1576,6 +1579,7 @@ class user {
 				organisation = '" . $userdaten['organisation']."',
 				position = '" . $userdaten['position']."',
 				comment = '" . $userdaten['comment']."',
+				funktion = '" . $userdaten['funktion'] . "',
 				ips = '" . $userdaten['ips'] . "',
 				totp_secret = '" . $userdaten['totp_secret'] . "',
 				agreement_accepted = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",

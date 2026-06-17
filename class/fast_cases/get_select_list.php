@@ -380,7 +380,7 @@ class user {
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
-		$this->funktion = $rs['Funktion'];
+		$this->funktion = $rs['funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'] === 't';

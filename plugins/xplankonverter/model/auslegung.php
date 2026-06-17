@@ -30,6 +30,7 @@ class Auslegung extends PgObject {
       "planart, plan_gml_id, lfdnr, startdatum, enddatum"
     );
     foreach ($auslegungen AS $auslegung) {
+      echo_log('Auslegung: ' . $auslegung->get('planart') . ' ' . $auslegung->get('plan_gml_id') . ' ' . $auslegung->get('lfdnr') . ' ' . $auslegung->get('startdatum') . ' ' . $auslegung->get('enddatum'), 2);
       $result = $auslegung->find_plan();
       if (!$result['success']) {
         return array(
@@ -44,6 +45,9 @@ class Auslegung extends PgObject {
           'success' => false,
           'msg' => 'Fehler in class Auslegung func find_completed ' . __LINE__ . ': ' . $result['msg']
         );
+      }
+      if ($result['protokoll']) {
+        echo_log('Veröffentlichungsprotokoll zur Auslegung gefunden: ' . $result['protokoll']->get('id'), 2);
       }
       $auslegung->veroeffentlichungsprotokoll = $result['protokoll'];
     }
@@ -108,7 +112,7 @@ class Auslegung extends PgObject {
         );
       }
       $auslegung->plan = $result['plan'];
-      echo_log('Class Auslegung Func find_completed ' . __LINE__ . ': Frage Veröffentlichungsprotokoll der Auslegung ab', 2);
+      echo_log('Frage Veröffentlichungsprotokoll der Auslegung ab', 2);
       $result = Veroeffentlichungsprotokoll::find_by_auslegung($auslegung);
       if (!$result['success']) {
         return array(
@@ -134,7 +138,7 @@ class Auslegung extends PgObject {
       );
     }
     $plan = $result['plan'];
-    echo_log('Class: Auslegung, Func: find_plan, Zeile: ' . __LINE__ . ', Frage Dokumente der Auslegung ab', 2);
+    echo_log('Plan zur Auslegung gefunden: ' . $plan->get('name') . ' ' . $plan->get('nummer'), 2);
     $result = $plan->find_veroeffentlichungsprotokoll_dokumente($this->get('plan_gml_id'));
     if (!$result['success']) {
       return array(
@@ -142,6 +146,7 @@ class Auslegung extends PgObject {
         'msg' => 'Class Auslegung Func find_plan ' . __LINE__ . ': ' . $result['msg']
       );
     }
+    echo_log('Dokumente zum Plan gefunden: ' . count($plan->veroeffentlichungsprotokoll_dokumente), 2);
     return array(
       'success' => true,
       'plan' => $plan

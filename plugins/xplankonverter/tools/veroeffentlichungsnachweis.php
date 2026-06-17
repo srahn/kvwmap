@@ -103,6 +103,7 @@ try {
   foreach ($auslegungen AS $auslegung) {
      echo_log('Auslegung ' . $auslegung->get('plan_gml_id') . ' von: ' . $auslegung->get('startdatum') . ' bis: ' . $auslegung->get('enddatum') . ' Anzahl Dokumente: ' . count($auslegung->plan->veroeffentlichungsprotokoll_dokumente), 2);
     if (!$auslegung->veroeffentlichungsprotokoll_exists()) {
+      echo_log('Kein Veröffentlichungsprotokoll zur Auslegung gefunden, lege neues Protokoll an.', 2);
       $result = Veroeffentlichungsprotokoll::open($auslegung, $pruefstunde);
       if (!$result['success']) {
         echo_log('Fehler beim Anlegen des Veröffentlichungsprotokolls. ' . $result['msg'], 1);

@@ -4,5 +4,6 @@
 	$strPosition = "Position";
 	$strIntervall = "Period";
 	$strLastActivity = "Last Activity";
-	$strConfirmDelete = 'Do you realy want user %s to %s'
+	$strConfirmDelete = 'Do you realy want user %s to %s';
+	$strFunktion = "Chức năng";
 ?>
