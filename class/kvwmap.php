@@ -283,7 +283,7 @@ class GUI {
 
 		# check if user is archived
 		if ($user->archived) {
-			$this->login_failed_reason = AuthErrorCodes::ACCOUNT_ARCHIVED;
+			$this->login_failed_reason = AuthErrCodes::ACCOUNT_ARCHIVED;
 			return false;
 		}
 
@@ -295,7 +295,7 @@ class GUI {
 
 		# check if the login is granted not yet
 		if ($user->start != '' AND date('Y-m-d') < DateTime::createFromFormat('d.m.Y', $user->start)->format('Y-m-d')) {
-			$this->login_failed_reason = AuthErrorCodes::ACCOUNT_NOT_YET_STARTED;
+			$this->login_failed_reason = AuthErrCodes::ACCOUNT_NOT_YET_STARTED;
 			return false;
 		}
 
@@ -362,8 +362,8 @@ class GUI {
 				case AuthErrCodes::PASSWORD_EXPIRED : {
 					$this->add_message('error', $strLoginFailedMsg[AuthErrCodes::PASSWORD_EXPIRED]);
 				} break;
-				case AuthErrorCodes::ACCOUNT_NOT_YET_STARTED : {
-					$this->add_message('error', $strLoginFailedMsg[AuthErrorCodes::ACCOUNT_NOT_YET_STARTED]);
+				case AuthErrCodes::ACCOUNT_NOT_YET_STARTED : {
+					$this->add_message('error', $strLoginFailedMsg[AuthErrCodes::ACCOUNT_NOT_YET_STARTED]);
 				} break;
 			}
 		}
