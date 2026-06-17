@@ -17,22 +17,33 @@
       "description": "The type of error that occured when login.",
       "anyOf": [
         {
-          "const": "authentification",
+          "const": "LOGIN_REQUIRED",
+          "description" : "Es ist eine Anmdeldung erforderlich."
+        },
+        { "const": "LOGIN_FAILED",
           "desctiption" : "Es trat ein Fehler bei der Authentifizierung auf."
         },
         {
-          "const": "not_yet_started",
-          "desctiption" : "Der Zeitraum in dem der Login gültig ist hat noch nicht begonnen."
+          "const": "PASSWORD_EXPIRED",
+          "desctiption" : "Die Gültigkeit des Passwortes ist abgelaufen."
         },
         {
-          "const": "expired",
-          "desctiption" : "Der Zeitraum in dem der Login gültig ist ist beendet."
+          "const": "REGISTRATION_REQUIRED",
+          "desctiption" : "Es ist eine Registrierung des Nutzers erforderlich."
+        },
+        {
+          "const": "AGREEMENT_MISSING",
+          "desctiption" : "Es ist eine Zustimmung zu den Nutzungsbedingungen notwendig."
         }
       ]
     },
-    "display": {
-      "description": "An expression that define what to display in the formular. It is a string expression in sql that will be executed on the parent layer table and it can contain attribute variables from the layer that have that SubformFK attribute.",
-      "type": "String"
+    "msg": {
+      "description" : "Eine zusätzliche Meldung zur Erläuterung der Rückmeldung.",
+      "type" : "string"
+    },
+    "csrf_token": {
+      "description": "CSRF Token generated for the newly created session. Only if success = true",
+      "type": "string"
     }
   },
   "required": [ "success" ]
