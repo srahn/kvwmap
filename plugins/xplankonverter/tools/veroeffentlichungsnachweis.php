@@ -7,7 +7,7 @@
   // /var/www/logs/cron/veroeffentlichungsnachweis.log 2>&1
   // ToDos:
   // debug_mode in nachweis_test_cases.json anpassen
-  if (env('HOSTNAME') != 'kvwmap_prod_web') {
+  if (getenv('HOSTNAME') != 'kvwmap_prod_web') {
     echo "\nAbbruch weil nicht in Produktionsumgebung!";
     // Wenn das in anderen Umgebungen laufen werden soll, hier exit auskommentieren!
     exit;
@@ -181,7 +181,7 @@ try {
   echo_log('Suche beendete Auslegungen:', 2);
   $result = Auslegung::find_completed($GUI, $pruefzeit, $GUI->formvars['plan_gml_id']);
   if (!$result['success']) {
-    echo_log('Fehler in veroeffentlichungsnachweis.php 153 => ' . $result['msg'], 1);
+    echo_log('Fehler in find_completed ' . date('Y-m-d H:i:s', $pruefzeit) . ': ' . $result['msg'], 1);
     exit;
   }
   foreach($result['completed_auslegungen'] AS $auslegung) {
