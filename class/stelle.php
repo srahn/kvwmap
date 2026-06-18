@@ -263,10 +263,30 @@ class stelle {
 		";
 		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
-		$ret = $this->database->execSQL($sql, 4, 0, true);
+		$ret = $this->database->execSQL($sql, 4, 0, false);
 		if(!$ret[0]) {
       $rs = pg_fetch_assoc($ret[1]);
     }
+		else {		# fallback
+			$sql = "
+				SELECT
+					id," .
+					$name_column . ",
+					start,
+					stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, Authentifizierung, wappen, wappen_link, 
+					check_client_ip, check_password_age, allowed_password_age, use_layer_aliases, hist_timestamp
+				FROM
+					kvwmap.stelle s
+				WHERE
+					id = " . $this->id . "
+			";
+			#echo 'SQL zum Abfragen der Stelle: ' . $sql;
+			$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
+			$ret = $this->database->execSQL($sql, 4, 0, false);
+			if(!$ret[0]) {
+				$rs = pg_fetch_assoc($ret[1]);
+			}
+		}
 		$this->data = $rs;
 		$this->Bezeichnung = $rs['bezeichnung'];
 		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
