@@ -151,12 +151,13 @@ class Veroeffentlichungsprotokoll extends PgObject {
    */
   public static function open($auslegung, $pruefstunde) {
     $veroeffentlichungsprotokoll = new Veroeffentlichungsprotokoll($auslegung->gui);
+    $auslegungstarttimestamp = strtotime($auslegung->get('startdatum'));
     $result = $veroeffentlichungsprotokoll->create(array(
       'plan_gml_id' => $auslegung->get('plan_gml_id'),
       'lfdnr' => $auslegung->get('lfdnr'),
       'auslegungsstartdatum' => $auslegung->get('startdatum'),
       'auslegungsenddatum' => $auslegung->get('enddatum'),
-      'observationstart' => date('Y-m-d H:i:s', $pruefstunde),
+      'observationstart' => (($pruefstunde - $auslegungstarttimestamp) > 3600 ? $auslegung->get('startdatum') : date('Y-m-d H:i:s', $pruefstunde)),
       'pruefungen_seit_observationstart' => 0
     ));
     if (!$result['success']) {
