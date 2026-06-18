@@ -60,6 +60,7 @@ if (!file_exists('credentials.php') OR !file_exists('config.php')) {
 }
 include('credentials.php');
 include('config.php');
+include(CLASSPATH . 'AuthErrCodes.php');
 
 # Session
 if (!isset($_SESSION)) {
@@ -2351,13 +2352,26 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			default : {
-				# Karteninformationen lesen
-				$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->saveMap('');
-				// $GUI->drawMap();
-				$GUI->legende = $GUI->create_dynamic_legend();
-#				$GUI->add_message('info', 'Die Anwendung wird gerade überarbeitet. Es ist nicht sicher gestellt, dass sie richtig funktioniert und es können Fehlermeldungen auftreten!');
+				if ($GUI->formvars['format'] == 'json') {
+					$GUI->formvars['format'] = 'json_result';
+					$GUI->mime_type = 'application/json';
+					$GUI->data = array(
+						'success' => true,
+						'msg' => 'Login erfolgreich'
+					);
+					if ($GUI->new_session) {
+						$GUI->data['csrf_token'] = $_SESSION['csrf_token'];
+					}
+				}
+				else {
+					# Karteninformationen lesen
+						$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
+						// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+						// $GUI->saveMap('');
+						// $GUI->drawMap();
+						$GUI->legende = $GUI->create_dynamic_legend();
+		#				$GUI->add_message('info', 'Die Anwendung wird gerade überarbeitet. Es ist nicht sicher gestellt, dass sie richtig funktioniert und es können Fehlermeldungen auftreten!');
+				}
 				$GUI->output();
 			}
 		}

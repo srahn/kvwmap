@@ -336,16 +336,76 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 	
-	toggle_statistic_row = function(layer_id) {
-		var x = document.getElementsByClassName('statistic_row_'+layer_id),
-				i;
-		for (i = 0; i < x.length; i++) {
-			if (x[i].style.display == '') {
-				x[i].style.display = 'none';
+	toggle_statistic_row = function(evt, layer_id, mode = 'only_toggle') {
+		var b = document.querySelectorAll(".statistic_box");
+		if (mode == 'only_toggle') {
+			console.log('only toggle statistic row');
+			var x = document.getElementsByClassName('statistic_row_'+layer_id),
+					i;
+
+			for (i = 0; i < x.length; i++) {
+				if (x[i].style.display == '') {
+					x[i].style.display = 'none';
+					b.forEach(el => { el.style.display = "none"; });
+				}
+				else {
+					x[i].style.display = '';
+					b.forEach(el => {
+						el.style.display = "flex";
+					});
+				}
 			}
-			else {
-				x[i].style.display = '';
+		}
+		else {
+			b.forEach(el => { el.style.background = "none"; });
+			var y = document.getElementsByClassName(mode);
+			y[0].style.background = 'linear-gradient(#DAE4EC 0%, #c7d9e6 100%)';
+
+			var c = [];
+			if (mode == 'all_visible') {
+				console.log('use all visible for statistic class .check_' + layer_id);
+				c = document.querySelectorAll(".check_" + layer_id);
 			}
+			else if (mode == 'only_checked') {
+				console.log('use only checked for statistic');
+				c = document.querySelectorAll(".check_" + layer_id + ":checked");
+			}
+			else if (mode == 'all_queried') {
+				console.log('use all queried for statistic');
+				// get values of all queried by query remotely last query result from server and save in hidden input field, then read from there
+			}
+
+			const statistic_attribute_names = Array.from(document.querySelectorAll(".statistic_row_" + layer_id))
+				.filter(el => el.textContent.trim() !== "")
+				.map(el => el.dataset.attribute);
+			console.log('statistic attributes: %o', statistic_attribute_names);
+			const row_ids = Array.from(c).map(cb => cb.id.split('_')[1])
+			console.log('row_ids for statistic: %o', row_ids);
+
+			statistic_attribute_names.forEach(attr => {
+				let values = [];
+				row_ids.forEach(row => {
+					const id = `${layer_id}_${attr}_${row}`;
+					const el = document.getElementById(id);
+					if (el) {
+						values.push(parseFloat(el.value || '0'));
+					}
+				});
+				const sum = values.reduce((a, b) => a + b, 0);
+				const avg = values.length > 0 ? sum / values.length : 0;
+				const min = values.length > 0 ? Math.min(...values) : 0;
+				const max = values.length > 0 ? Math.max(...values) : 0;
+				console.log('values for statistic: %o', values);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Summe`).textContent = sum.toFixed(2);
+				console.log('sum for statistic: %o', sum);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Durchschnitt`).textContent = avg.toFixed(2);
+				console.log('avg for statistic: %o', avg);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Min`).textContent = min.toFixed(2);
+				console.log('min for statistic: %o', min);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Max`).textContent = max.toFixed(2);
+				console.log('max for statistic: %o', max);
+			});
+			evt.stopPropagation();
 		}
 	}
 

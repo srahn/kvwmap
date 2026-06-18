@@ -2471,6 +2471,18 @@ function go_switch_xplankonverter($go) {
 				$msg .= ' und Geltungsbereiche';
 			}
 
+			$upload_path = $GUI->konvertierung->get_file_path('uploaded_xplan_gml');
+			$externereferenz_json = json_decode($GUI->konvertierung->plan->get('externereferenz_json'), JSON_OBJECT_AS_ARRAY);
+			foreach ($externereferenz_json as $item) {
+    		if (!empty($item['referenzurl'])) {
+					$referenzfile = pathinfo($item['referenzurl'], PATHINFO_BASENAME);
+					$srcfile = $GUI->konvertierung->get_file_path('uploaded_xplan_gml') . $referenzfile;
+					$dstfile = XPLANKONVERTER_FILE_PATH . 'plaene/' . $referenzfile;
+					copy($srcfile, $dstfile);
+					$GUI->create_dokument_vorschau('local_img', pathinfo($dstfile));
+				}
+			}
+
 			$response = array(
 				'success' => true,
 				'msg' => 'Einlesen der ' . $msg . ' erfolgreich abgeschlossen.' . $debug_log,

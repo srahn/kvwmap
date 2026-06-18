@@ -1653,8 +1653,8 @@ a.menuered:hover {
 	background-color: #f6f6f6;
 	box-shadow: 1px 1px 4px #aaa;
 	z-index: 100;
-	margin: 3 0 0 15;
-	padding: 2 2 2 3;
+	margin: 3px 0 0 15px;
+	padding: 2px 2px 2px 3px;
 	height: 23px;
 	min-width: 177px;
 	border: 1px solid grey;

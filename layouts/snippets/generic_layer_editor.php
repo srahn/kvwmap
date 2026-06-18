@@ -75,7 +75,25 @@
 	}	
 	
 </script>
-
+<style>
+	.statistic_box {
+		display: none;
+	  cursor: pointer; /* hand stays on div */
+  	flex-direction: column;
+  	gap: 2px;   /* Abstand zwischen den Divs */
+		padding-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+	}
+  .disabled_cb {
+	  opacity: 1;
+	  pointer-events: none; /* checkbox cannot be interacted with */
+  	cursor: pointer;
+	}
+	.all_visible {
+		background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
+	}
+</style>
 <?
 include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 $checkbox_names = '';
@@ -321,8 +339,22 @@ if ($doit == true) {
 						<tr>
 							<td style="line-height: 1px; ">
 								<a name="anchor_<? echo $layer['layer_id']; ?>_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>">
-								<input type="hidden" value="" onchange="changed_<? echo $layer['layer_id']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['layer_id'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>"> 
-								<input id="<? echo $layer['layer_id'].'_'.$k; ?>" type="checkbox" onchange="count_selected(<? echo $layer['layer_id']; ?>);" class="check_<? echo $layer['layer_id']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['layer_id']; ?>">&nbsp;
+								<input
+									type="hidden"
+									value=""
+									onchange="changed_<? echo $layer['layer_id']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value"
+									name="changed_<? echo $layer['layer_id'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>"
+								> 
+								<input
+									id="<? echo $layer['layer_id'] . '_' . $k; ?>"
+									type="checkbox"
+									onchange="count_selected(<? echo $layer['layer_id']; ?>);"
+									class="check_<? echo $layer['layer_id'];
+									if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+										echo ' no_edit';
+									} ?>"
+									name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['layer_id']; ?>"
+								>&nbsp;
 							</td>
 						</tr>
 				  </table>
@@ -410,23 +442,37 @@ if ($doit == true) {
 				<? 	} ?>
 						</tr>
 		<?		$layer['attributes']['privileg'] = $definierte_attribute_privileges;
-				} ?>
-						<tr onclick="toggle_statistic_row(<? echo $layer['layer_id']; ?>);">
+				}
+						$show_statistic = count(array_filter($layer['attributes']['statistic_visibility'],
+							function ($visibility) {
+								return $visibility == 1;
+							}
+						)) > 0;
+						if ($show_statistic) { ?>
+							<tr onclick="toggle_statistic_row(event, <? echo $layer['layer_id']; ?>);" title="Klicken, um die Statistik anzuzeigen/zu verbergen" style="cursor: pointer;">
 							<td style="background-color:<? echo BG_TR; ?>;" valign="top" align="center">
-								&Sigma;
+								&Sigma;<br>
+								<div class="statistic_box all_visible" onclick="toggle_statistic_row(event, <? echo $layer['layer_id']; ?>, 'all_visible');" title="Alle angezeigten Datensätze für die Statistik verwenden."><input type="checkbox" class="disabled_cb" onmouseover="return false;" onclick="return false;"/></div>
+								<div class="statistic_box only_checked" onclick="toggle_statistic_row(event, <? echo $layer['layer_id']; ?>, 'only_checked');" title="Nur ausgewählte Datensätze für die Statistik verwenden."><input type="checkbox" class="disabled_cb" checked onclick="return false;"/></div>
+								<!-- ToDo: Noch nicht implementiert div class="statistic_box all_queried" onclick="toggle_statistic_row(event, <? echo $layer['layer_id']; ?>, 'all_queried');" title="Alle abgefragten Datensätze für die Statistik verwenden."><span style="font-size: 1.8em; margin-left: -2px; margin-top: 4px;">*</span></div//-->
 							</td><?
 							for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
-								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
+								if ($explosion[1] == 'collapsed') {
+									$collapsed = true;
+								}
+								else {
+									$collapsed = false;
+								}
 								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
-								if($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1){ ?>
+								if ($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1) { ?>
 									<td valign="top" class="group_<? echo $groupname; ?>" <? if($collapsed)echo 'style="display: none"'; ?> >
-										<div class="statistic_row_<? echo $layer['layer_id']; ?>" style="display:none"><?php
+										<div class="statistic_row_<? echo $layer['layer_id']; ?>" style="display:none" data-attribute="<? echo $layer['attributes']['name'][$j]; ?>"><?php
 										$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
-										if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
+										if ($layer['attributes']['statistic_visibility'][$j] == 1 AND in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
 											$values = array_map(
 												function ($row) use ($column_name) {
 													return $row[$column_name];
@@ -445,14 +491,14 @@ if ($doit == true) {
 											#$statistic['relative Häufigkeit'] = relative_haeufigkeit($this->qlayerset[$i]['shape'], $column_name, $min, $max);
 											#$statistic['absolute Häufigkeit'] = absolute_haeufigkeit($this->qlayerset[$i]['shape'], $column_name);
 											#if ($summe > 0) {
-												output_statistic($statistic);
+												output_statistic('statistic_value_' . $layer['layer_id'] . '_' . $column_name, $statistic);
 											#}
 										} ?></div>
 									</td><?
 								}
 							} ?>
-						</tr>
-
+							</tr><?
+						} ?>
 						<tr class="result_filter_tr">
 							<td style="border: none; padding: 0" <? if ($layer['attributes']['group'][0] != ''){echo 'colspan="2"';} ?>></td>
 							<?

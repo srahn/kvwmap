@@ -264,25 +264,6 @@ class GUI {
 		$this->output();
 	}
 
-	function login() {
-		if ($this->formvars['format'] == 'json') {
-			$this->mime_type = 'application/json';
-			$this->formvars['content_type'] = 'application/json';
-			$this->qlayerset[0]['shape'] = array(
-				'success' => false,
-				'msg' => 'Login erforderlich'
-			);
-		}
-		else {
-			$this->expect = array('login_name', 'passwort', 'mobile');
-			if (array_key_exists('go', $this->formvars) AND in_array($this->formvars['go'], ['login', 'logout'])) {
-				$this->expect[] = 'go';
-			}
-			$this->gui = LOGIN;
-		}
-		$this->output();
-	}
-
 	/**
 	 * Check if the login is granted. If not set the login failed reason
 	 * @return true if granted, false if not.
@@ -290,37 +271,37 @@ class GUI {
 	function is_login_granted($user, $login_name, $password) {
 		# check if login_name is locked
 		if ($user->login_is_locked()) {
-			$this->login_failed_reason = 'login_is_locked';
+			$this->login_failed_reason = AuthErrCodes::LOGIN_IS_LOCKED;
 			return false;
 		}
 
 		# check if login_name exists
 		if ($user->login_name != $login_name) {
-			$this->login_failed_reason = 'wrong_login_name';
+			$this->login_failed_reason = AuthErrCodes::WRONG_LOGIN_NAME;
 			return false;
 		}
 
 		# check if user is archived
 		if ($user->archived) {
-			$this->login_failed_reason = 'archived';
+			$this->login_failed_reason = AuthErrCodes::ACCOUNT_ARCHIVED;
 			return false;
 		}
 
 		# check if the password ist correct
 		if ($user->wrong_password($password)) {
-			$this->login_failed_reason = 'authentication';
+			$this->login_failed_reason = AuthErrCodes::WRONG_PASSWORD;
 			return false;
 		}
 
 		# check if the login is granted not yet
 		if ($user->start != '' AND date('Y-m-d') < DateTime::createFromFormat('d.m.Y', $user->start)->format('Y-m-d')) {
-			$this->login_failed_reason = 'not_yet_started';
+			$this->login_failed_reason = AuthErrCodes::ACCOUNT_NOT_YET_STARTED;
 			return false;
 		}
 
 		# check if the login is not granted any more
 		if ($user->stop != '' AND date('Y-m-d') > DateTime::createFromFormat('d.m.Y', $user->stop)->format('Y-m-d')) {
-			$this->login_failed_reason = 'expired';
+			$this->login_failed_reason = AuthErrCodes::PASSWORD_EXPIRED;
 			return false;
 		}
 
@@ -335,7 +316,27 @@ class GUI {
 		return ($user->device_token == $token_hash AND $user->device_expires > $now);
 	}
 
+	function login() {
+		$this->expect = array('login_name', 'passwort', 'mobile');
+		if (array_key_exists('go', $this->formvars) AND in_array($this->formvars['go'], ['login', 'logout'])) {
+			$this->expect[] = 'go';
+		}
+		$this->gui = LOGIN;
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'LOGIN_REQUIRED',
+				'msg' => 'Login erforderlich'
+			);
+		}
+		$this->output();
+	}
+
 	function login_failed() {
+		global $language;
+		include(LAYOUTPATH . 'languages/login_' . $language . '.php');
 		$this->login_failed = true;
 		$this->expect = array('login_name', 'passwort', 'mobile');
 		if ($this->formvars['go'] == 'logout') {
@@ -352,19 +353,28 @@ class GUI {
 		$this->gui = (file_exists(LOGIN) ? LOGIN : SNIPPETS . 'login.php');
 		if (strpos(file_get_contents($this->gui), 'include(LAYOUTPATH . \'languages/login_\'') === false) {
 			switch ($this->login_failed_reason) {
-				case 'authentication' : {
-					$this->add_message('error', 'Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!');
+				case AuthErrCodes::WRONG_PASSWORD : {
+					$this->add_message('error', sprintf($strLoginFailedMsg[AuthErrCodes::WRONG_PASSWORD], $this->formvars['num_failed']));
 				} break;
-				case 'login_is_locked' : {
-					$this->add_message('error', 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>' . (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s') . ' gesperrt!');
+				case AuthErrCodes::LOGIN_IS_LOCKED : {
+					$this->add_message('error', sprintf($strLoginFailedMsg[AuthErrCodes::LOGIN_IS_LOCKED], (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s')));
 				} break;
-				case 'expired' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
+				case AuthErrCodes::PASSWORD_EXPIRED : {
+					$this->add_message('error', $strLoginFailedMsg[AuthErrCodes::PASSWORD_EXPIRED]);
 				} break;
-				case 'not_yet_started' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
+				case AuthErrCodes::ACCOUNT_NOT_YET_STARTED : {
+					$this->add_message('error', $strLoginFailedMsg[AuthErrCodes::ACCOUNT_NOT_YET_STARTED]);
 				} break;
 			}
+		}
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'LOGIN_FAILED',
+				'msg' => 'Login fehlgeschlagen'
+			);
 		}
 		$this->output();
 	}
@@ -381,6 +391,15 @@ class GUI {
 			$this->expect[] = 'go';
 		}
 		$this->gui = LOGIN_NEW_PASSWORD;
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'PASSWORD_EXPIRED',
+				'msg' => 'Password abgelaufen'
+			);
+		}
 		$this->output();
 	}
 
@@ -392,12 +411,30 @@ class GUI {
 		}
 		$this->expect = array('login_name', 'new_password', 'new_password_2');
 		$this->gui = LOGIN_REGISTRATION;
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'REGISTRATION_REQUIRED',
+				'msg' => 'Registrierung erforderlich.'
+			);
+		}
 		$this->output();
 	}
 
 	function login_agreement() {
 		$this->expect = array('agreement_accepted');
 		$this->gui = LOGIN_AGREEMENT;
+		if ($this->formvars['format'] == 'json') {
+			$this->formvars['format'] = 'json_result';
+			$this->mime_type = 'application/json';
+			$this->data = array(
+				'success' => false,
+				'error' => 'AGREEMENT_MISSING',
+				'msg' => 'Einverständniserklärung fehlt.'
+			);
+		}
 		$this->output();
 	}
 
@@ -12540,19 +12577,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				(SELECT " . $query_parts['query'] . ") as foo
 			WHERE
 				true";
+		$oids = array();
 		if ($this->formvars['all'] != 'true') {
 			for ($i = 0; $i < count($checkbox_names); $i++) {
 				if ($this->formvars[$checkbox_names[$i]] == 'on') {
 					$element = explode(';', $checkbox_names[$i]); # check;table_alias;table;oid
-					$oids .= $element[3] . ', ';
+					$oids[] = $element[3];
 				}
 			}
-			$sql .= " AND " . pg_quote($layerset[0]['maintable'] . '_oid') . " IN (" . $oids . ')';
+			$sql .= " AND " . pg_quote($layerset[0]['maintable'] . '_oid') . " IN (" . implode(', ', $oids) . ')';
 		}
 		if ($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
 			$sql .= ' ORDER BY ' . replace_semicolon($this->formvars['orderby' . $this->formvars['chosen_layer_id']]);
 		}
-		#echo $sql.'<br><br>';
+		// echo '<br>Frage query_parts für chart ab: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:generisches_sachdaten_diagramm :",4);
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if (!$ret[0]) {
@@ -13296,7 +13334,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if($this->formvars['selected_layer_id']){
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true, false, false, false);
-			$this->datatypes = $mapdb->get_datatypes([$this->formvars['selected_layer_id']]);
+			$this->datatypes = $mapdb->get_datatypes([$this->formvars['selected_layer_id']], true);
 			$this->layer = $mapdb->get_Layer($this->formvars['selected_layer_id'], false);
 		}
 		if(value_of($this->formvars, 'selected_datatype_id')){
@@ -14913,7 +14951,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['archived'] 									= $this->userdaten[0]['archived'];
 			$this->formvars['layer_data_import_allowed'] 	= $this->userdaten[0]['layer_data_import_allowed'];
 			$this->formvars['agreement_accepted']					= $this->userdaten[0]['agreement_accepted'];
-			$this->formvars['comment']					= $this->userdaten[0]['comment'];
+			$this->formvars['comment']										= $this->userdaten[0]['comment'];
+			$this->formvars['funktion']										= $this->userdaten[0]['funktion'];
 			# Abfragen der Stellen des Nutzers
 			$this->selected_user = new user('', $this->formvars['selected_user_id'], $this->user->database, '', true);
 			$this->formvars['selstellen'] = $this->selected_user->getStellen(0, true);
@@ -20683,7 +20722,7 @@ DO $$
 							'vars_last_layer_id" . $layer_ids[$i] . "' as layer_id,
 							'vars_datatype_id_' || datatype_id AS datatype_id,
 							name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, \"default\", form_element_type,
-							options, alias, alias_low_german, alias_english, alias_polish, alias_vietnamese, tooltip, \"group\", raster_visibility, mandatory, quicksearch,
+							options, alias, alias_low_german, alias_english, alias_polish, alias_vietnamese, tooltip, \"group\", raster_visibility, statistic_visibility, mandatory, quicksearch,
 							\"order\", privileg, query_tooltip, visible, visibility_rules, arrangement, labeling
 						FROM
 							kvwmap.datatype_attributes
@@ -21720,6 +21759,7 @@ DO $$
 					'arrangement' => ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]),
 					'labeling' => ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]),
 					'raster_visibility' => ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]),
+					'statistic_visibility' => ($formvars['statistic_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['statistic_visibility_' . $attributes['name'][$i]]),
 					'dont_use_for_new' => ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]),
 					'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
 					'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
@@ -22009,6 +22049,7 @@ DO $$
 				arrangement,
 				labeling,
 				raster_visibility,
+				statistic_visibility,
 				dont_use_for_new,
 				mandatory,
 				quicksearch,
@@ -22139,6 +22180,7 @@ DO $$
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['statistic_visibility'][$i] = $rs['statistic_visibility'];
 			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];

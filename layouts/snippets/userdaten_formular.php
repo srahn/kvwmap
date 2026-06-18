@@ -227,6 +227,47 @@
 		</div>
 
 		<div class="form_formular-input form_formular-aic">
+			<div><? echo 	$strFunktion; ?></div>
+			<div><?
+				include_once(CLASSPATH . 'Nutzer.php');
+				include_once(CLASSPATH . 'FormObject.php');
+				$result = Nutzer::user_funktionen($this);
+				if (!$result['success']) { ?>
+					<script>message('Es konnten keine Funktionen in der Tabelle der Nutzer gefunden werden. <? echo $result['msg']; ?>');</script><?
+					$user_funktionen = array();
+				}
+				else {
+					$user_funktionen = $result['user_funktionen'];
+				}
+				echo FormObject::createSelectField(
+					'funktion', // name
+					array_map(
+						function($user_funktion) {
+							return array(
+								'value'=> $user_funktion,
+								'output' => $user_funktion
+							);
+						},
+						$user_funktionen
+					), // options
+					$this->formvars['funktion'], // values
+					1, // size
+					null, // style
+					'', // onchange
+					'funktion', // id
+					false, // multiple
+					'', // class
+					'---Funktion auswählen---', // first_option
+					'', // option_style
+					'', // option_class
+					'', // $onclick
+					'', // onmouseenter
+					'Funktion des Nutzers.', // title
+				);
+			?></div>
+		</div>
+
+		<div class="form_formular-input form_formular-aic">
 			<div style="align-self: flex-start; margin-top: 3;"><? echo $this->strComment;?></div>
 			<div>
 				<textarea style="width: 300px; height: 60px" name="comment"><? echo $this->formvars['comment']; ?></textarea>

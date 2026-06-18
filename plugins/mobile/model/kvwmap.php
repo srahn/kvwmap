@@ -627,7 +627,7 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"title" => $layerset['name'],
 		"alias" => $layerset['alias'],
 		"id_attribute" => $layerset['oid'],
-		"name_attribute" => $layerset['labelitem'],
+		"name_attribute" => $layerset['original_labelitem'],
 		"classitem" => $layerset['classitem'],
 		"transparency" => $layerset['transparency'],
 		"geometry_attribute" => $attributes['the_geom'],
@@ -1355,7 +1355,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 
 	if ($files['image'] == '') {
 
-		$msg = 'Es wurde keine Datei hochgeladen!';
+		$msg = 'Es wurde keine Datei hochgeladen! ' . print_r($files, true);
 		$GUI->mobile_log->write($msg);
 		return array(
 			"success" => false,

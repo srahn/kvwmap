@@ -1,6 +1,7 @@
 <?php
 	# 2008-01-12 pkvvm
 	include(LAYOUTPATH . 'languages/userdaten_' . rolle::$language . '.php');
+	include(LAYOUTPATH . 'languages/userdaten_formular_' . rolle::$language . '.php');
 	$loeschen = strtolower(NUTZER_ARCHIVIEREN ? $this->strArchive : $this->strDelete);
 ?>
 <script type="text/javascript">
@@ -46,7 +47,7 @@ function Bestaetigung(link,text) {
 		<div class="usd-stellen">
 			<div class="usd-stelle">
 				<span><? echo $this->stellen['Bezeichnung'][$s]; ?></span><br>
-				<span><? echo count($this->stellen['user'][$s]['ID']).' Nutzer'; ?></span>
+				<span><? echo count($this->stellen['user'][$s]['ID']).' Nutzer'; ?> (<? echo $strFunktion; ?>)</span>
 			</div><?
 			for ($i = 0; $i < count($this->stellen['user'][$s]['ID']); $i++) { ?>
 				<div id="stelle<? echo $this->stellen['ID'][$s]; ?>user<? echo $this->stellen['user'][$s]['ID'][$i]; ?>" class="usd-nutzer"><?
@@ -58,6 +59,7 @@ function Bestaetigung(link,text) {
 					else {
 						echo $this->stellen['user'][$s]['Bezeichnung'][$i] . ($this->stellen['user'][$s]['position'][$i]? '&nbsp;&nbsp;-&nbsp;&nbsp;' . $this->stellen['user'][$s]['position'][$i] : '');
 					}
+					echo ($this->stellen['user'][$s]['funktion'][$i] != 'user' ? '&nbsp;(' . $this->stellen['user'][$s]['funktion'][$i] . ')' : '');
 					if ($this->formvars['go'] != 'BenutzerderStelleAnzeigen') { ?>
 						<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->stellen['user'][$s]['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->stellen['user'][$s]['Bezeichnung'][$i], $loeschen); ?>?')" title="<?php echo $this->strDelete; ?>">
 							<i class="fa fa-trash" style="padding: 3px"></i>

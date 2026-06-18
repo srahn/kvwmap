@@ -44,4 +44,5 @@
 	$strTakeOverPassword = 'Cancle new password';
 	$strTitle = 'Brukerdaten Editor';
 	$strUserTitle = 'Tosatz';
+	$strFunktion = "Funkschoon";
 ?>

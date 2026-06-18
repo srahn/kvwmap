@@ -48,7 +48,7 @@ class XP_Plan extends PgObject {
       "
         k.stelle_id,
         p.*,
-				xplankonverter.plan_anzeigename(p.name, p.planart[1], p.nummer, (p.gemeinde[1]).gemeindename) AS anzeigename
+				" . $plan_obj->get_anzeige_name_function() . " AS anzeigename
       ",
       NULL,
       "
@@ -203,6 +203,15 @@ class XP_Plan extends PgObject {
 		return ($this->get_first_planart_name() ? $this->get_first_planart_name() . ' ' : '') . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
 	}
 
+	function get_anzeige_name_function() {
+		switch ($this->planart) {
+			case 'BP-Plan' : return "xplankonverter.bplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename)";
+			case 'FP-Plan' : return "xplankonverter.fplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename)";
+			case 'SO-Plan' : return "xplankonverter.soplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename)";
+			default : return "p.name";
+		}
+	}
+
 	/**
 	 * Function extract regionalschlüssel from first gemeinde if exists.
 	 * @return 12 stelliger Regionalschlüssel or null if not exists
@@ -222,7 +231,6 @@ class XP_Plan extends PgObject {
 		if (empty($planart)) {
 			$planart = $this->planart;
 		}
-		echo 'search planlayerid by planart: ' . $planart;
 		switch ($planart) {
 			case 'BP-Plan' : $plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
 			case 'FP-Plan' : $plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID; break;

@@ -365,19 +365,37 @@ class PgObject {
 	}
 
 	/**
-	 * function return true if a dataset with the value of $key exists and is
-	 * other than this dataset.
+	 * Check if a record with the same value for the given key already exists in the database, excluding the current record by id condition.
 	 */
-	function exists($key) {
+	function unique($key) {
 		$sql = "
 			SELECT
-				" . $key . "
+				count(" . $key . ") AS num_rows
 			FROM
 				\"{$this->schema}\".\"{$this->tableName}\"
 			WHERE
 				" . $key . " = " . quote($this->get($key)) . " AND
 				NOT " . $this->get_id_condition() . "
 		";
+		$this->debug->show('unique sql: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		$result = pg_fetch_assoc($query);
+		return ($result['num_rows'] > 0);
+	}
+
+	/**
+	 * Check if a record with the same value for the given key already exists in the database.
+	 */
+	function exists($key) {
+		$sql = "
+			SELECT
+				count(" . $key . ") AS num_rows
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				" . $key . " = " . quote($this->get($key)) . "
+		";
+		$this->debug->show('exists sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$result = pg_fetch_assoc($query);
 		return ($result['num_rows'] > 0);
@@ -1351,7 +1369,7 @@ class PgObject {
 	function validate_unique($key, $msg = '', $option = '', $on = '') {
 		$msg = $msg . ' Der Wert ' . $this->get($key) . ' im Attribut ' . $key . ' existiert schon.';
 		if ($option == $on) {
-			return ($this->exists($key) ? $msg : '');
+			return ($this->unique($key) ? $msg : '');
 		}
 		else {
 			return ''; # nicht validieren

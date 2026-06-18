@@ -621,19 +621,55 @@ class synchro {
 					// Wenn welche gefunden wurden, werden diese nachdem die Deltas vom Client ausgeführt auch noch einmal ausgeführt, damit die
 					// jüngeren Änderungen nach den Änderungen vom Client ausgeführt werden auch wenn dadurch vielleicht Änderungen vom Client wieder
 					// überschrieben werden.
+					// $sql = "
+					// 	SELECT
+					// 		*
+					// 	FROM
+					// 		deltas_all
+					// 	WHERE
+					// 		version > " . $last_delta_version . " AND
+					// 		action = 'update' AND
+					// 		action_time > '" . $row->action_time . "' AND
+					// 		uuid = '" . $row->uuid . "'
+					// 	ORDER BY version;
+					// ";
 					$sql = "
-						SELECT
-							*
+						SELECT DISTINCT ON (normalized_sql)
+							t.VERSION,
+							t.uuid,
+							t.client_id,
+							t.SQL,
+							t.schema_name,
+							t.table_name,
+							t.ACTION,
+							t.action_time
 						FROM
-							deltas_all
-						WHERE
-							version > " . $last_delta_version . " AND
-							action = 'update' AND
-							action_time > '" . $row->action_time . "' AND
-							uuid = '" . $row->uuid . "'
-						ORDER BY version;
+							(
+								SELECT
+									*,
+									regexp_replace(
+										sql,
+										'version\s*=\s*\d+',
+										'version=?',
+										'gi'
+									) AS normalized_sql,
+									(regexp_match(
+										sql,
+										'version\s*=\s*(\d+)',
+										'i'
+									))[1]::bigint AS highest_version
+								FROM deltas_all
+								WHERE
+									version > " . $last_delta_version . " AND
+									action = 'update' AND
+									action_time > '" . $row->action_time . "' AND
+									uuid = '" . $row->uuid . "'
+							) t
+						ORDER BY
+							normalized_sql,
+							highest_version DESC
 					";
-					$log .= '<br>Abfrage der neuen Detals mit version > ' . $last_delta_version;
+					$log .= '<br>Abfrage der neuen Deltas mit version > ' . $last_delta_version;
 					$res = $this->database->execSQL($sql, 0, 1, true);
 					if ($res[0]) {
 						$failed_deltas[] = $row;
@@ -713,15 +749,49 @@ class synchro {
 		// Frage deltas größer last_delta_version an ab.
 		// aber nicht die inserts mit der client_id dieser Sync-Action
 		// $log .= '<br><br>Abfrage der Deltas die nach dem Syncen noch reingekommen sind.';
+		// $sql = "
+		// 	SELECT
+		// 		*
+		// 	FROM
+		// 		deltas_all
+		// 	WHERE
+		// 		version > " . $last_delta_version . " AND
+		// 		NOT (COALESCE(client_id, '') = '" . $client_id . "')
+		// 	ORDER BY version;
+		// ";
 		$sql = "
-			SELECT
-				*
+			SELECT DISTINCT ON (normalized_sql)
+				t.VERSION,
+				t.uuid,
+				t.client_id,
+				t.SQL,
+				t.schema_name,
+				t.table_name,
+				t.ACTION,
+				t.action_time
 			FROM
-				deltas_all
-			WHERE
-				version > " . $last_delta_version . " AND
-				NOT (COALESCE(client_id, '') = '" . $client_id . "')
-			ORDER BY version;
+				(
+					SELECT
+						*,
+						regexp_replace(
+							sql,
+							'version\s*=\s*\d+',
+							'version=?',
+							'gi'
+						) AS normalized_sql,
+						(regexp_match(
+							sql,
+							'version\s*=\s*(\d+)',
+							'i'
+						))[1]::bigint AS highest_version
+					FROM deltas_all
+					WHERE
+						version > " . $last_delta_version . " AND
+						NOT (COALESCE(client_id, '') = '" . $client_id . "')
+				) t
+			ORDER BY
+				normalized_sql,
+				highest_version DESC
 		";
 		// $log .= $sql;
 		#echo 'Deltas aus deltas_all abfragen mit sql: ' . $sql;
@@ -845,7 +915,8 @@ class synchro {
 
 	function ignorable_by_uuid($row) {
 		$pg_obj = new PgObject($this->database->gui, $row->schema_name, $row->table_name);
-		$uuid_exists = $pg_obj->exists("uuid = '" . $row->uuid . "'::uuid");
+		$pg_obj->set('uuid', $row->uuid);
+		$uuid_exists = $pg_obj->exists(uuid);
 		if ($row->action === 'insert' AND $uuid_exists) {
 			$this->msg = $row->sql . ' SQL ignoriert weil uuid: ' . $row->uuid . ' in Tabelle ' . $row->schema_name. '.' . $row->table_name . ' schon existiert.';
 			return true; // Ignorable because feature allready exists.

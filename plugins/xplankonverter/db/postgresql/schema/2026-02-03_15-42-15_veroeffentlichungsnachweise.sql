@@ -1,6 +1,6 @@
 BEGIN;
   CREATE TABLE IF NOT EXISTS xplankonverter.veroeffentlichungsnachweise (
-    planart varchar NOT NULL DEFAULT 'bplan',
+    planart varchar NOT NULL DEFAULT 'BP-Plan',
     plan_gml_id uuid NOT NULL,
     lfdnr integer NOT NULL,
     pruefzeit timestamp WITHOUT time ZONE NOT NULL,

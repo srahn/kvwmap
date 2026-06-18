@@ -24,12 +24,13 @@ class Auslegung extends PgObject {
 		$auslegung_obj = new Auslegung($gui);
     $auslegungen = $auslegung_obj->find_where("
       '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= startdatum AND '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone < enddatum + 1 AND
-      '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= veroeffentlichungsdatum"
+      COALESCE('" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= veroeffentlichungsdatum, false)"
       . ($plan_gml_id ? " AND plan_gml_id = '" . $plan_gml_id . "'" : ''),
       "planart",
       "planart, plan_gml_id, lfdnr, startdatum, enddatum"
     );
     foreach ($auslegungen AS $auslegung) {
+      echo_log('Auslegung: ' . $auslegung->get('planart') . ' ' . $auslegung->get('plan_gml_id') . ' ' . $auslegung->get('lfdnr') . ' ' . $auslegung->get('startdatum') . ' ' . $auslegung->get('enddatum'), 2);
       $result = $auslegung->find_plan();
       if (!$result['success']) {
         return array(
@@ -45,6 +46,9 @@ class Auslegung extends PgObject {
           'msg' => 'Fehler in class Auslegung func find_completed ' . __LINE__ . ': ' . $result['msg']
         );
       }
+      if ($result['protokoll']) {
+        echo_log('Veröffentlichungsprotokoll zur Auslegung gefunden: ' . $result['protokoll']->get('id'), 2);
+      }
       $auslegung->veroeffentlichungsprotokoll = $result['protokoll'];
     }
     return array(
@@ -57,6 +61,7 @@ class Auslegung extends PgObject {
 		$auslegung_obj = new Auslegung($gui);
     $completed_auslegungen = $auslegung_obj->find_where(
       "
+        COALESCE('" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= a.veroeffentlichungsdatum, false) AND
         a.enddatum + INTERVAL '1 day' <= '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone AND
         v.observationend IS NULL"
         . ($plan_gml_id != '' ? " AND a.plan_gml_id = '" . $plan_gml_id . "'" : '') . "
@@ -107,7 +112,7 @@ class Auslegung extends PgObject {
         );
       }
       $auslegung->plan = $result['plan'];
-      echo_log('Class Auslegung Func find_completed ' . __LINE__ . ': Frage Veröffentlichungsprotokoll der Auslegung ab', 2);
+      echo_log('Frage Veröffentlichungsprotokoll der Auslegung ab', 2);
       $result = Veroeffentlichungsprotokoll::find_by_auslegung($auslegung);
       if (!$result['success']) {
         return array(
@@ -133,7 +138,7 @@ class Auslegung extends PgObject {
       );
     }
     $plan = $result['plan'];
-    echo_log('Class: Auslegung, Func: find_plan, Zeile: ' . __LINE__ . ', Frage Dokumente der Auslegung ab', 2);
+    echo_log('Plan zur Auslegung gefunden: ' . $plan->get('name') . ' ' . $plan->get('nummer'), 2);
     $result = $plan->find_veroeffentlichungsprotokoll_dokumente($this->get('plan_gml_id'));
     if (!$result['success']) {
       return array(
@@ -141,6 +146,7 @@ class Auslegung extends PgObject {
         'msg' => 'Class Auslegung Func find_plan ' . __LINE__ . ': ' . $result['msg']
       );
     }
+    echo_log('Dokumente zum Plan gefunden: ' . count($plan->veroeffentlichungsprotokoll_dokumente), 2);
     return array(
       'success' => true,
       'plan' => $plan
@@ -150,6 +156,15 @@ class Auslegung extends PgObject {
   function find_veroeffentlichungsprotokoll() {
     $result = Veroeffentlichungsprotokoll::find_by_auslegung($this);
     return $result;
+  }
+
+  function get_plan_type() {
+    switch ($this->get('planart')) {
+      case 'BP-Plan' : return 'bplan';
+      case 'FP-Plan' : return 'fplan';
+      case 'SO-Plan' : return 'soplan';
+      default : return $this->get('planart');
+    }
   }
 
   /**

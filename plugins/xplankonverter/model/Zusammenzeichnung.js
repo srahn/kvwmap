@@ -183,8 +183,8 @@ class Zusammenzeichnung {
             id="upload_zusammenzeichnung_finish_button"
             style="display: none"
             type="button"
-            value="Zur Anzeige ${this.config.genitiv}"
-            onclick="window.location='index.php?go=xplankonverter_konvertierung_anzeigen&planart=${this.planart}&csrf_token=${this.csrf_token}'"
+            value="Zur Anzeige der Konvertierung und ${this.config.genitiv}"
+            onclick="window.location='index.php?go=Layer-Suche&selected_layer_id=${this.config.konvertierung_layer_id}&csrf_token=${this.csrf_token}'"
           >
         </div>
       `);

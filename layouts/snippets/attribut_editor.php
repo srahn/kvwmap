@@ -965,6 +965,13 @@ function render(i){
 								} ?>
 								<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
+							<td align="center" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header" style="margin-top: 5px; margin-left:5px"><span style="font-size:25px" title="' . $strUseForStatistics . '">&Sigma;</span></div>';
+								} ?>
+								<input name="statistic_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['statistic_visibility'][$i] ? ' checked="true"' : ''); ?>>
+						  </td>
+
 							<td>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							</td>

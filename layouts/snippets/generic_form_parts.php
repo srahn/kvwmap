@@ -1388,7 +1388,7 @@
 		return $datapart;
 	}	
 	
-	function output_statistic($statistic) {
+	function output_statistic($id, $statistic) {
 		echo '<table>';
 		foreach($statistic AS $key => $row) {
 			if ($key == 'relative Häufigkeit' or $key == 'absolute Häufigkeit') {
@@ -1398,7 +1398,7 @@
 				}
 			}
 			else {
-				echo '<tr><td align="left">' . $row['title'] . '&nbsp;:</td><td align="left">' . $row['value'] . '</td></tr>';
+				echo '<tr><td align="left">' . $row['title'] . '&nbsp;:</td><td id="' . $id . '_' . $key . '" align="left">' . $row['value'] . '</td></tr>';
 			}
 		}
 		echo '</table>';
