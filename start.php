@@ -354,26 +354,26 @@ if ($gast_export === false) {
 		# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
 		if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars, $GUI->user)) {
 			$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
-	
-			if (is_login($GUI->formvars) AND defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $GUI->Stelle->totp_authentication AND $_SESSION['login_new_password'] != true) {
-				if ($GUI->user->totp_secret != '') {
-					if ($GUI->is_trusted_device($GUI->user) == false) {
-						$_SESSION['2fa_verification'] = true;
-						include(SNIPPETS . '2fa_verify.php');
-						exit;
-					}
-				} 
-				else {
-					$_SESSION['2fa_registration'] = true;
-					include(SNIPPETS . '2fa_enable.php');
-					exit;
-				}
-			}
-
 			$GUI->user->Stellen = $GUI->user->getStellen(0);
 			$permission = get_permission_in_stelle($GUI);
 	
 			if ($permission['allowed']) {
+
+				if (is_login($GUI->formvars) AND defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $GUI->Stelle->totp_authentication AND $_SESSION['login_new_password'] != true) {
+					if ($GUI->user->totp_secret != '') {
+						if ($GUI->is_trusted_device($GUI->user) == false) {
+							$_SESSION['2fa_verification'] = true;
+							include(SNIPPETS . '2fa_verify.php');
+							exit;
+						}
+					} 
+					else {
+						$_SESSION['2fa_registration'] = true;
+						include(SNIPPETS . '2fa_enable.php');
+						exit;
+					}
+				}
+
 				$GUI->debug->write('Nutzer ist in Stelle ' . $GUI->Stelle->id . ' erlaubt.', 4, $GUI->echo);
 				$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
 				$GUI->debug->write('Setze neue Stellen-ID: ' . $GUI->Stelle->id . ' für Nutzer: ' . $GUI->user->id, 4, $GUI->echo);
