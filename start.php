@@ -359,20 +359,7 @@ if ($gast_export === false) {
 	
 			if ($permission['allowed']) {
 
-				if (is_login($GUI->formvars) AND defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $GUI->Stelle->totp_authentication AND $_SESSION['login_new_password'] != true) {
-					if ($GUI->user->totp_secret != '') {
-						if ($GUI->is_trusted_device($GUI->user) == false) {
-							$_SESSION['2fa_verification'] = true;
-							include(SNIPPETS . '2fa_verify.php');
-							exit;
-						}
-					} 
-					else {
-						$_SESSION['2fa_registration'] = true;
-						include(SNIPPETS . '2fa_enable.php');
-						exit;
-					}
-				}
+				totp_check($GUI);
 
 				$GUI->debug->write('Nutzer ist in Stelle ' . $GUI->Stelle->id . ' erlaubt.', 4, $GUI->echo);
 				$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
@@ -410,11 +397,13 @@ if ($gast_export === false) {
 								$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 								session_start();
 								set_session_vars($GUI->formvars);
-								unset($_SESSION['login_new_password']);
 								$go = '';
 								$_SESSION['stelle_angemeldet'] = true;
 								$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
 								$GUI->user->stelle_id = $GUI->Stelle->id;
+
+								totp_check($GUI);
+
 								# login case 17
 								$GUI->debug->write('login case 17', 4, $GUI->echo);
 							}
@@ -452,7 +441,6 @@ if ($gast_export === false) {
 								$GUI->formvars['Stelle_id'] = $GUI->Stelle->id;
 								$show_login_form = true;
 								$go = 'login_new_password';
-								$_SESSION['login_new_password'] = true;
 								# login case 19
 								$GUI->debug->write('login case 19', 4, $GUI->echo);
 							}
@@ -1005,4 +993,22 @@ function prepare_sha1($login_name, $password) {
 	if (!$ret['success']) { $GUI->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 	return $ret['success'];
 }
+
+function totp_check($GUI){
+	if (is_login($GUI->formvars) AND defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $GUI->Stelle->totp_authentication) {
+		if ($GUI->user->totp_secret != '') {
+			if ($GUI->is_trusted_device($GUI->user) == false) {
+				$_SESSION['2fa_verification'] = true;
+				include(SNIPPETS . '2fa_verify.php');
+				exit;
+			}
+		} 
+		else {
+			$_SESSION['2fa_registration'] = true;
+			include(SNIPPETS . '2fa_enable.php');
+			exit;
+		}
+	}
+}
+
 ?>
