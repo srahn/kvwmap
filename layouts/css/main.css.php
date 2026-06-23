@@ -2956,8 +2956,20 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	color: green;
 }
 
+.darkgreen {
+	color: darkgreen;
+}
+
+.darkgreen > a {
+	color: darkgreen !important;
+}
+
 .orange {
 	color: orange;
+}
+
+.orange > a {
+	color: orange !important;
 }
 
 .blue {
@@ -2974,6 +2986,30 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .red {
 	color: red;
+}
+
+.red > a {
+	color: red !important;
+}
+
+.darkred {
+	color: darkred;
+}
+
+.darkred > a {
+	color: darkred !important;
+}
+
+.firebrick {
+	color: 	firebrick;
+}
+
+.gray {
+	color: gray;
+}
+
+.gray > a {
+	color: gray !important;
 }
 
 .inactive_class {
@@ -3272,4 +3308,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .hashtag-icon:hover .fa {
   color: black;
+}
+
+.new-gle-dataset-button {
+	display: none;
+  position: sticky;
+	right: 0px;
+	height: 18px;
 }

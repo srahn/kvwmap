@@ -4815,7 +4815,13 @@ echo '			</table>
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
-		$sql = $attributes['options'][0];
+		if (is_json_string($attributes['options'][0])) {
+			$options = json_decode($attributes['options'][0], true);
+			$sql = $options['sql'];
+		}
+		else {
+			$sql = $attributes['options'][0];
+		}
 		for($i = 0; $i < count($attributenames); $i++){
 			if($attributenames[$i] != '')$sql = str_replace('$'.$attributenames[$i], $attributevalues[$i], $sql);
 		}

@@ -99,14 +99,45 @@ class LayerAttribute extends PgObject {
 		return $selects;
 	}
 
-	function get_options($settings, $type) {
+	function get_options($settings, $type, $size = 0) {
+		$options = json_decode($settings, true);
+		$default_rows = $size <= 65 ? 2 : 3;
+		$max_rows = 10;
+		$default_cols = 60;
 		switch ($type) {
-			case 'SubFormFK':
+			case 'SubFormFK' : {
 				$options = $this->get_SubFormFK_options($settings);
-				break;
+			} break;
+			case 'Textfeld' : {
+				if ($options === null || json_last_error() !== JSON_ERROR_NONE) {
+					$options = array(
+						'rows' => $default_rows,
+						'cols' => $default_cols
+					);
+					if (strtolower(substr($settings, 0, 6)) == 'select') {
+						$options['sql'] = $settings;
+					} else {
+						$options['subform_url'] = $settings;
+					}
+				}
+				if (array_key_exists('rows_by_length', $options) AND $options['rows_by_length']) {
+					$options['rows'] = ceil($size / 65);
+				}
+				if (array_key_exists('max_rows', $options) AND $options['max_rows'] != '') {
+					$max_rows = $options['max_rows'];
+				}
+				$options['rows'] = (array_key_exists('rows', $options) AND $options['rows'] != '') ? $options['rows'] : $default_rows;
+				$options['rows'] = ($options['rows'] > $max_rows ? $max_rows : $options['rows']);
+				$options['cols'] = (array_key_exists('cols', $options) AND $options['cols'] != '') ? $options['cols'] : $default_cols;
+				$options['sql'] = (array_key_exists('sql', $options) AND $options['sql'] != '') ? $options['sql'] : '';
+				$options['subform_url'] = (array_key_exists('subform_url', $options) AND $options['subform_url'] != '') ? $options['subform_url'] : '';
+			} break;
 			case 'Dokument':
 			 	$options = $this->get_Dokument_options($settings);
-				break;
+			break;
+			// case 'checkbox':
+			// 	$options = $this->get_checkbox_options($settings);
+			// 	break;
 			// case 'radio':
 			// 	$options = $this->get_radio_options($settings);
 			// 	break;

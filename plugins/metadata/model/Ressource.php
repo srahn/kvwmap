@@ -1873,7 +1873,13 @@ class Ressource extends PgObject {
 
 		// get the files from dest_path
 		$dest_path = $this->get_full_path($this->get('dest_path'));
-		$csv_file = $this->get('import_layer') . '.csv';
+		if ($this->get('import_file') != '') {
+			$csv_file = $this->get('import_file');
+		}
+		else {
+			$csv_file = $this->get('import_layer') . '.csv';
+		}
+		echo '<br>importiere: ' . $dest_path . $csv_file;
 
 		if (!is_file($dest_path . $csv_file)) {
 			return array(
@@ -1887,48 +1893,63 @@ class Ressource extends PgObject {
 		// Lege Tabelle an wenn es sie noch nicht gibt
 		$importer = new data_import_export();
 		$encoding = $importer->getEncoding($dest_path . $csv_file);
+		echo '<br>encoding: ' . $encoding;
 
-		$csv_fp = fopen($dest_path . $csv_file, "r");
-		if (!$csv_fp) {
-			$err_msg[] = 'Konnte Datei ' . $dest_path . $csv_filey . ' nicht zum lesen öffnen.';
-		}
-		$i = 0;
+		$import_filter = json_decode($this->get('import_filter'), true);
+		echo '<br>import_filter: ' . print_r($import_filter, true);
+		$start_line = ((!empty($import_filter['start_line']) && ctype_digit((string)$import_filter['start_line'])) ? (int)$import_filter['start_line'] : 1);
+		echo '<br>start_line: ' . $start_line;
+		$first_line = null;
 
-		while (($line = fgets($csv_fp)) !== false AND trim($line, $delimiter ."\n\r") != '' AND $i < 100) {
-			$first_line = $line;
-			break;
-			$i++; // only to prevent from endless loop
+		$content = file_get_contents($dest_path . $csv_file);
+
+		// Prüfen auf BOM
+		$firstTwoBytes = substr($content, 0, 2);
+		if ($firstTwoBytes === "\xFF\xFE") {
+				$content = mb_convert_encoding($content, 'UTF-8', 'UTF-16LE');
+		} elseif ($firstTwoBytes === "\xFE\xFF") {
+				$content = mb_convert_encoding($content, 'UTF-8', 'UTF-16BE');
+		} else {
+				// Andere Encodings erkennen
+				$encoding = mb_detect_encoding($content, ['UTF-8','ISO-8859-1','Windows-1252'], true);
+				if ($encoding !== 'UTF-8') {
+						$content = mb_convert_encoding($content, 'UTF-8', $encoding);
+				}
 		}
-		fclose($csv_fp);
+		echo '<br><textarea rows="10" cols="100">' . $content . '</textarea>';
+		$lines = preg_split('/\r\n|\r|\n/', $content);
+		if ($start_line == 1) {
+    	foreach ($lines as $line) {
+        if (trim($line) !== '') {
+        	$first_line = $line;
+          break;
+        }
+    	}
+		}
+		else {
+    	$first_line = $lines[$start_line - 1] ?? '';
+		}
 
 		$this->debug->show('Analysiere Kopfzeile: ' . $first_line, true);
 		$delimiter = detect_delimiter($first_line);
 		$this->debug->show('Ermittelter Delimiter: ' . $delimiter, true);
-
 		$columns = array_map(
-			function($column) use ($encoding) { 
-				if ($encoding != 'UTF-8') {
-					$column = utf8_encode($column);
-				}
+			function($column) {
 				return strtolower(sonderzeichen_umwandeln($column));
 			},
 			explode($delimiter, $first_line)
 		);
-
 		$this->debug->show('Ermittelte Spalten: ' . implode(', ', $columns), true);
-
 		$sql = "
 			DROP TABLE IF EXISTS " . $this->get('import_schema') . "." . $this->get('import_table') . ";
 			CREATE TABLE IF NOT EXISTS " . $this->get('import_schema') . "." . $this->get('import_table') . " (
-				" . implode(",
-				", array_map(
-							function($column) {
-								return $column . " character varying";
-							},
-							$columns
-						)
-				) . "
-			)
+				" . implode(",", array_map(
+					function($c) {
+						return $c . ' varchar';
+					},
+					$columns
+				)) . "
+			);
 		";
 		$this->debug->show('SQL zum anlegen der Tabelle: ' . $sql, true);
 		$query = $this->execSQL($sql);
@@ -1945,15 +1966,35 @@ class Ressource extends PgObject {
 		$maxy = $this->Stelle->MaxGeorefExt->maxy;
 
 		// Lese Daten in die Tabelle ein
-		$where = ($this->get('import_filter') ? 'WHERE ' . $this->get('import_filter') : '');
+		$where = '';
+		if (is_array($import_filter) && isset($import_filter['where'])) {
+  	  $where = $import_filter['where'];
+		} elseif (is_string($this->get('import_filter')) && !empty($this->get('input_filter'))) {
+ 		  // Plain text input
+    	$where = $this->get('import_filter');
+		}
+		else {
+			$where = '';
+		}
+		echo "<br>WHERE: " . $where;
+
+		$import_file = $importer->prepare_for_postgres($dest_path, $csv_file);
+
+		if ($start_line > 1) {
+			$from = "PROGRAM 'tail -n +" . $start_line . " \"" . $import_file ."\"'";
+			$from = "PROGRAM 'awk -F\";\" \"NR==" . $start_line . " {header=$0; n=NF; print header; next} NR>" . $start_line . " && NF==n\" \"" . $import_file ."\"'";
+		}
+		else {
+			$from = "'" . $import_file . "'";
+		}
 		$sql = "
 			COPY " . $this->get('import_schema') . "." . $this->get('import_table') . "(" . implode(', ', $columns) . ")
-			FROM '" . $dest_path . $csv_file . "'
+			FROM " . $from . "
 			WITH (
 				FORMAT CSV,
 				DELIMITER '" . $delimiter . "',
 				HEADER true,
-				ENCODING '" . $encoding . "'
+				ENCODING 'UTF8'
 			)
 			" . $where . "
 		";

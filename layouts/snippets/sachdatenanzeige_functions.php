@@ -717,6 +717,48 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		root.overlay_submit(enclosingForm, false);
 	}
 
+	newDataset = function() {
+		var open_subforms = document.querySelectorAll('.subForm:not(:empty)');
+		if (open_subforms.length > 0) {
+			message([{'type': 'info', 'msg': 'Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!'}]);
+			return;
+		}
+		form_fieldstring = enclosingForm.form_field_names.value + '';
+		form_fields = form_fieldstring.split('|');
+		for (i = 0; i < form_fields.length-1; i++) {
+			fieldstring = form_fields[i]+'';
+			field = fieldstring.split(';');
+			var element = document.getElementsByName(fieldstring)[0];
+			
+			if (element != undefined && element.type != 'hidden' && field[4] != 'Dokument' && (element.readOnly != true) && field[5] == '0' && element.value == '') {
+				message('Das Feld ' + element.title + ' erfordert eine Eingabe.');
+				return;
+			}
+
+			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '') {
+				completeDate(element);
+				if (!checkDate(element.value)) {
+					message('Das Datumsfeld ' + element.title + ' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
+			}
+
+			if (element != undefined && field[6] == 'time' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)) {
+				completeTime(element);
+				if(!checkTime(element.value)){
+					message('Das Uhrzeitfeld ' + element.title + ' hat nicht das Format hh:mm:ss.');
+					return;
+				}
+			}
+			if (upload_only_file_metadata == 1) {
+				if (field[4] == 'Dokument') {
+					convert_belated(element);
+				}
+			}
+		}
+		document.location = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>';
+	}
+
 	save_new_dataset = function(){
 		if (
 			(enclosingForm.newpath != undefined && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) 

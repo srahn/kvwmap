@@ -109,7 +109,7 @@ if ($doit == true) {
 		
 		if ($this->new_entry != true) {	?>
 			<div style="display: flex; justify-content: space-between;">
-				<div style="position: sticky; left: calc(50% - 225px); min-width: 450px"> 
+				<div style="flex: 1; position: sticky; left: calc(50% - 225px); min-width: 450px"> 
 					<h2 id="layername"><? echo $layer_name; ?></h2><?
 					echo value_of($layer, 'paging'); ?>
 				</div>
@@ -119,6 +119,18 @@ if ($doit == true) {
 					for ($g = $s; $g < 3; $g++) {
 						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
 					}	?>
+				</div>
+				<div class="new-gle-dataset-button">
+					<a
+					  class="btn btn-new"
+						style="padding: 2px; border-radius: 12px; width: 12px; height: 12px; font-size: 12px;"
+						href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"
+						title="Neuer Datensatz"
+					><i
+						title="Neuer Datensatz"
+						class="fa fa-plus"
+						style="color: white; margin-bottom: 10px;"
+					></i></a>
 				</div>
 				<? } ?>
 			</div> <?
@@ -290,7 +302,10 @@ if ($doit == true) {
 										######### Attributwert #########
 										$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 										$cell['id'] = 'value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k;
-										$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style_attribute'][$j]], 'gle_attribute_value value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j]));
+										$cell['properties'] = get_td_class_or_style(array(
+											$layer['shape'][$k][$layer['attributes']['style_attribute'][$j]],
+											'gle_attribute_value value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j],
+										));
 										if ($nl){
 											$next_row['cells'][] = $cell;
 										}

@@ -6,7 +6,7 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 	global $strShowHashButtonTitle;
-	
+	include_once(CLASSPATH . 'LayerAttribute.php');
 	function output_table($table) {
 		$output = '';
 		if (is_array($table['rows'])) {
@@ -352,23 +352,52 @@
 		}
 		switch ($attributes['form_element_type'][$j]){
 			case 'Textfeld' : {
-				$datapart .= '<textarea class="'.$field_class.'" title="'.$alias.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" id="'.$layer_id.'_'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
-				if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
-					$datapart .= ' maxlength="'.$attributes['length'][$j].'" ';
+				if (is_json_string($attributes['options'][$j])) {
+					$attrObj = new LayerAttribute($gui);
+					$options = $attrObj->get_options($attributes['options'][$j], 'Textfeld', strlen($value));
+					$datapart .= FormObject::createTextarea(
+						$fieldname, // name
+						$value,
+						$options['rows'],
+						$options['cols'],
+						(($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) ? $attributes['length'][$j] : ''), // maxlength
+						$field_class, // class
+						$alias, // title
+						$id = $layer_id . '_' . $name . '_' . $k, // id
+						($attribute_privileg == '0' ? 'display: none' : 'width: 100%'), // style
+						($attribute_privileg == '0' ? '' : '1'), // tabindex
+						'checknumbers(this, \'' . $attributes['type'][$j] . '\', \'' . $attributes['length'][$j] . '\', \'' . $attributes['decimal_length'][$j] . '\')', // onkeyup
+						$onchange, // onchange
+						$attribute_privileg == '0' // readonly
+					);
+					if ($attribute_privileg > '0') {
+						if ($options['sql'] != '') {
+							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+						}
+						if ($options['subform_url'] != '') {
+							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+						}
+					}
 				}
-				if($attribute_privileg == '0'){
-					$datapart .= ' readonly style="display: none"';
-				}
-				else{
-					$datapart .= ' tabindex="1" style="width: 100%;"';
-				}
-				$datapart .= ' rows="' . ($size <= 50 ? '2' : '3') . '" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
-				if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
-					if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
-						$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+				else {
+					$datapart .= '<textarea class="'.$field_class.'" title="'.$alias.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" id="'.$layer_id.'_'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
+					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
+						$datapart .= ' maxlength="'.$attributes['length'][$j].'" ';
+					}
+					if($attribute_privileg == '0'){
+						$datapart .= ' readonly style="display: none"';
 					}
 					else{
-						$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+						$datapart .= ' tabindex="1" style="width: 100%;"';
+					}
+					$datapart .= ' rows="' . ($size <= 50 ? '2' : '3') . '" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
+					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
+						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
+							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+						}
+						else{
+							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+						}
 					}
 				}
 				if($attribute_privileg == '0'){ // nur lesbares Attribut
