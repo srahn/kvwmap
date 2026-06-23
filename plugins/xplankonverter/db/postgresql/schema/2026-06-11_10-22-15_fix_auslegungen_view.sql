@@ -45,4 +45,13 @@ BEGIN;
   END;
   $function$;
 
+  DELETE FROM xplankonverter.veroeffentlichungsprotokoll_dokumente d
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM xplankonverter.veroeffentlichungsprotokolle v
+    WHERE v.id = d.protokoll_id
+  );
+  ALTER TABLE xplankonverter.veroeffentlichungsprotokoll_dokumente DROP CONSTRAINT IF EXISTS protokoll_id_fk;
+  ALTER TABLE xplankonverter.veroeffentlichungsprotokoll_dokumente ADD CONSTRAINT protokoll_id_fk FOREIGN KEY (protokoll_id) REFERENCES xplankonverter.veroeffentlichungsprotokolle(id) ON UPDATE CASCADE ON DELETE CASCADE
+
 COMMIT;
