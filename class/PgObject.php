@@ -1036,8 +1036,8 @@ class PgObject {
 		if ($msg == '') {
 			$msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
 		}
-
-		return ($this->get($key) != '' ? '' : $msg);
+		$value = $this->get($key) === 0 ? '0' : $this->get($key);
+		return ($value != '' ? '' : $msg);
 	}
 
 	function validate_presence_one_of($keys, $msg = '') {
