@@ -1034,15 +1034,21 @@
 			} break;
 
 			default : {
-				if ($field_id != NULL AND in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
-					$value = ($value? de_date($value) : $value);
+				$width = '100%';
+				if (in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
+					if ($field_id != NULL) {
+						$value = ($value? de_date($value) : $value);
+					}
+					if ($size == 16) {
+						$width = '90%';
+					}
 				}
 				$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 				if($attribute_privileg == '0'){
 					$datapart .= ' readonly style="display:none;"';
 				}
 				else{
-					$datapart .= ' tabindex="1" style="max-width: 95%;"';
+					$datapart .= ' tabindex="1" style="width: ' . $width . ';"';
 				}
 				if($name == 'lock'){
 					$datapart .= ' type="hidden"';
