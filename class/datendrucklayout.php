@@ -1038,8 +1038,8 @@ class ddl extends drucklayout{
 				}			
 			}break;			
 			case 'Checkbox' : {
-				$option = (json_decode($this->attributes['options'][$j]));
-				$output = ($value != 'f' ? ($option->print->true != '' ? $option->print->true : 'ja') : ($option->print->false != '' ? $option->print->false : 'nein'));
+				$option = $this->attributes['options_json'][$j];
+				$output = ($value != 'f' ? ($option['print']['true'] != '' ? $option['print']['true'] : 'ja') : ($option['print']['false'] != '' ? $option['print']['false'] : 'nein'));
 			} break;
 			case 'Zahl': {
 				$output = (!$preview? tausenderTrenner($value) : $value);
@@ -1524,8 +1524,8 @@ class ddl extends drucklayout{
 		
 		$rects = array_merge($rects, $groupname_rects);
 		
-		for($t = 0; $t < count($texts); $t++){
-			$this->addfreetext($ddl_id, $texts[$t]['text'], $texts[$t]['posx'], $texts[$t]['posy'], $texts[$t]['size'], $texts[$t]['font'], $texts[$t]['offset_attribute']);
+		for ($t = 0; $t < count($texts); $t++){
+			$this->addfreetext($ddl_id, $texts[$t]['text'], $texts[$t]['posx'], $texts[$t]['posy'], $texts[$t]['size'], $texts[$t]['font'], $texts[$t]['offset_attribute'], $texts[$t]['width'], $texts[$t]['border'], $texts[$t]['angle'], $texts[$t]['type']);
 		}
 		
 		for($r = 0; $r < count($rects); $r++){

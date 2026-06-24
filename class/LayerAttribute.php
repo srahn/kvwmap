@@ -99,41 +99,62 @@ class LayerAttribute extends PgObject {
 		return $selects;
 	}
 
-	function get_options($settings, $type, $size = 0) {
-		$options = json_decode($settings, true);
+	/**
+	 * Function return String 'options_json' if the options of $attributes with $index
+	 * are of type json else return 'options' for options in string format 
+	 */
+	function get_options_type($attributes, $index) {
+		return (
+			isset($attributes['options_json'][$index]) &&
+			is_array($attributes['options_json'][$index]) &&
+			!empty($attributes['options_json'][$index]) ? 'options_json' : 'options'
+		);
+	}
+
+	function get_num_rows(array $options, int $size) {
 		$default_rows = $size <= 65 ? 2 : 3;
 		$max_rows = 10;
+		if ($options === null || json_last_error() !== JSON_ERROR_NONE) {
+			$num_rows = $default_rows;
+		};
+		if (array_key_exists('rows_by_length', $options) AND $options['rows_by_length']) {
+			$num_rows = ceil($size / 65);
+		}
+		if (array_key_exists('max_rows', $options) AND $options['max_rows'] != '') {
+			$max_rows = $options['max_rows'];
+		}
+		$num_rows = (array_key_exists('rows', $options) AND $options['rows'] != '') ? $options['rows'] : $default_rows;
+		$num_rows = ($num_rows > $max_rows ? $max_rows : $num_rows);
+		return $num_rows;
+	}
+
+	function get_options($attributes, $options_type, $index, $form_element_type) {
+		$settings = $attributes[$options_type][$index];
+		$default_rows = 3;
 		$default_cols = 60;
-		switch ($type) {
+		switch ($form_element_type) {
 			case 'SubFormFK' : {
-				$options = $this->get_SubFormFK_options($settings);
+				$options = $this->get_SubFormFK_options($settings, $options_type);
 			} break;
 			case 'Textfeld' : {
-				if ($options === null || json_last_error() !== JSON_ERROR_NONE) {
+				if ($options_type === 'options') {
 					$options = array(
 						'rows' => $default_rows,
 						'cols' => $default_cols
 					);
 					if (strtolower(substr($settings, 0, 6)) == 'select') {
 						$options['sql'] = $settings;
-					} else {
+					}
+					else {
 						$options['subform_url'] = $settings;
 					}
 				}
-				if (array_key_exists('rows_by_length', $options) AND $options['rows_by_length']) {
-					$options['rows'] = ceil($size / 65);
-				}
-				if (array_key_exists('max_rows', $options) AND $options['max_rows'] != '') {
-					$max_rows = $options['max_rows'];
-				}
-				$options['rows'] = (array_key_exists('rows', $options) AND $options['rows'] != '') ? $options['rows'] : $default_rows;
-				$options['rows'] = ($options['rows'] > $max_rows ? $max_rows : $options['rows']);
-				$options['cols'] = (array_key_exists('cols', $options) AND $options['cols'] != '') ? $options['cols'] : $default_cols;
-				$options['sql'] = (array_key_exists('sql', $options) AND $options['sql'] != '') ? $options['sql'] : '';
-				$options['subform_url'] = (array_key_exists('subform_url', $options) AND $options['subform_url'] != '') ? $options['subform_url'] : '';
+				$options['cols'] = (array_key_exists('cols', $settings) AND $settings['cols'] != '') ? $settings['cols'] : $default_cols;
+				$options['sql'] = (array_key_exists('sql', $settings) AND $settings['sql'] != '') ? $settings['sql'] : '';
+				$options['subform_url'] = (array_key_exists('subform_url', $settings) AND $options['subform_url'] != '') ? $settings['subform_url'] : '';
 			} break;
 			case 'Dokument':
-			 	$options = $this->get_Dokument_options($settings);
+			 	$options = $this->get_Dokument_options($settings, $options_type);
 			break;
 			// case 'checkbox':
 			// 	$options = $this->get_checkbox_options($settings);
@@ -152,15 +173,14 @@ class LayerAttribute extends PgObject {
 		return $options;
 	}
 
-	function get_SubFormFK_options($settings) { // get_options
+	function get_SubFormFK_options($settings, $options_type) { // get_options
 		$options = array();
-		if (strpos($settings, '{') === 0) {
-			$json = json_decode($settings, true);
-			$options['parent_layer_id'] = $json['ref_layer_id'];
-			$options['fk_name'] = $json['ref_keys'][0]['fkey'];
-			$options['pk_name'] = $json['ref_keys'][0]['pkey'];
-			$options['window_option'] = $json['window_type'] ?? '';
-			$options['ref_constraint'] = $json['ref_constraint'] ?? '';
+		if ($options_type === 'options_json') {
+			$options['parent_layer_id'] = $settings['ref_layer_id'];
+			$options['fk_name'] = $settings['ref_keys'][0]['fkey'];
+			$options['pk_name'] = $settings['ref_keys'][0]['pkey'];
+			$options['window_option'] = $settings['window_type'] ?? '';
+			$options['ref_constraint'] = $settings['ref_constraint'] ?? '';
 		}
 		else {
 			$semicolon_parts = explode(';', $settings);
@@ -188,12 +208,11 @@ class LayerAttribute extends PgObject {
 		return $options;
 	}
 
-	function get_Dokument_options($settings) {
+	function get_Dokument_options($settings, $options_type = 'options') {
 		$options = array();
-		if (strpos($settings, '{') === 0) {
-			$json = json_decode($settings, true);
-			$options['dynamic_path'] = $json['dynamic_path'] ?? '';
-			$options['show_hash_button'] = $json['show_hash_button'] ?? false;
+		if ($options_type === 'options_json') {
+			$options['dynamic_path'] = $settings['dynamic_path'] ?? '';
+			$options['show_hash_button'] = $settings['show_hash_button'] ?? false;
 		}
 		else {
 			$options['dynamic_path'] = (strpos(strtolower($settings), 'select') !== false ? $settings : '');

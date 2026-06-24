@@ -4816,7 +4816,7 @@ echo '			</table>
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		if (is_json_string($attributes['options'][0])) {
-			$options = json_decode($attributes['options'][0], true);
+			$options = $attributes['options_json'][0];
 			$sql = $options['sql'];
 		}
 		else {
@@ -11329,7 +11329,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			include_once(CLASSPATH . 'LayerAttribute.php');
 			$attr_obj = new LayerAttribute($this);
 			foreach ($document_attributes as $i => $document_attribute) {
-				$options = $attr_obj->get_options($attributes['options'][$document_attribute['attributename']], 'Dokument');
+				$options_type = $attr_obj->get_options_type($attributes, $document_attribute['attributename']);
+				$options = $attr_obj->get_options($attributes, $options_type, $document_attribute['attributename'], 'Dokument');
 				if (substr($document_attribute['datatype'], 0, 1) == '_') {
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
@@ -11385,7 +11386,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$this->sanitize([$table['formfield'][$i] => $table['datatype'][$i]], true);
 						include_once(CLASSPATH . 'LayerAttribute.php');
 						$attr_obj = new LayerAttribute($this);
-						$attribute_options = $attr_obj->get_options($attributes['options'][$table['attributname'][$i]], $table['type'][$i]);
+						$options_type = $attr_obj->get_options_type($attributes, $table['attributname'][$i]);
+						$attribute_options = $attr_obj->get_options($attributes, $options_type, $table['attributname'][$i], $table['type'][$i]);
 						switch (true) {
 							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
 								if (in_array($attribute_options, array('', 'insert'))){
@@ -16402,7 +16404,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			foreach ($document_attributes as $i => $attr_oid) {
 				$doc_path = $layerset[$attr_oid['layer_id']][0]['document_path'];
 				$doc_url = $layerset[$attr_oid['layer_id']][0]['document_url'];
-				$options = $attr_obj->get_options($attributes['options'][$attr_oid['attributename']], 'Dokument');
+				$options_type = $attr_obj->get_options_type($attributes, $attr_oid['attributename']);
+				$options = $attr_obj->get_options($attributes, $options_type, $attr_oid['attributename'], 'Dokument');
 				$attribute_names = $attributenames[$attr_oid['oid']];
 				$attribute_values = $attributevalues[$attr_oid['oid']];
 				$layer_db = $layerdb[$attr_oid['layer_id']];
@@ -22116,6 +22119,9 @@ DO $$
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
+			if ($rs['options'] AND is_json_string($rs['options'])) {
+				$attributes['options_json'][$i] = json_decode($rs['options'], true);
+			}
 			$attributes['style_attribute'][$i] = $rs['style_attribute'];
 			
 			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];

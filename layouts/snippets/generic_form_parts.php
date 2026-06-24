@@ -350,11 +350,16 @@
 		if (in_array($attributes['type'][$j], ['numeric', 'float4', 'float8'])) {
 			$value = str_replace('.', ',', $value);
 		}
+		$attr_obj = new LayerAttribute($gui);
+		$options_type = $attr_obj->get_options_type($attributes, $j);
 		switch ($attributes['form_element_type'][$j]){
 			case 'Textfeld' : {
-				if (is_json_string($attributes['options'][$j])) {
-					$attrObj = new LayerAttribute($gui);
-					$options = $attrObj->get_options($attributes['options'][$j], 'Textfeld', strlen($value));
+				$input_tool = false;
+				$title = '';
+				$funct = '';
+				if ($options_type === 'json') {
+					$options = $attr_obj->get_options($attributes, $options_type, $j, 'Textfeld');
+					$options['rows'] = $attr_obj->get_num_rows($options, strlen($value));
 					$datapart .= FormObject::createTextarea(
 						$fieldname, // name
 						$value,
@@ -372,10 +377,12 @@
 					);
 					if ($attribute_privileg > '0') {
 						if ($options['sql'] != '') {
-							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$input_tool = 'auto';
+							// $datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						if ($options['subform_url'] != '') {
-							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$input_tool = 'manuell';
+							// $datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
 				}
@@ -393,12 +400,26 @@
 					$datapart .= ' rows="' . ($size <= 50 ? '2' : '3') . '" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
-							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$input_tool = 'auto';
+							// $datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
-							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$input_tool = 'manuell';
+							// $datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
+				}
+				if ($input_tool) {
+					$attr_name_array = "new Array(" . implode(', ', array_map(function($name) { return "'" . $name . "'"; }, $attributes['name'])) . ")";
+					if ($input_tool === 'auto') {
+						$title = "automatisch generieren";
+						$funct = "auto_generate(" . $attr_name_array . ", '" . $attributes['the_geom'] . "', '" . $name . "', " . $k . ", " . $layer_id . ");" . $onchange;
+					}
+					if ($input_tool === 'manuell') {
+						$title = "Eingabewerkzeug verwenden";
+						$funct = "openCustomSubform(" . $layer_id . ", '" . $name . "', " . $attr_name_array . ", '" . $name . "_" . $k . "', " . $k . ");";
+					}
+					$datapart .= '&nbsp;<a title="' . $title . '" href="javascript:' . $funct . '"><img src="' . GRAPHICSPATH . 'autogen.png"></a>';
 				}
 				if($attribute_privileg == '0'){ // nur lesbares Attribut
 					if($size == 16){		// spaltenweise
@@ -438,52 +459,48 @@
 			} break;
 			
 			case 'Farbauswahl' : {
-				$form_element_options = json_decode($attributes['options'][$j], JSON_OBJECT_AS_ARRAY);
-				if (
-					$attributes['options'][$j] != '' AND
-					json_last_error() === JSON_ERROR_NONE AND
-					is_array($form_element_options) AND
-					array_key_exists('type', $form_element_options) AND
-					$form_element_options['type'] == 'colorpicker'
-				) {
-					# Auswahl beliebiger Farben mit einem Colorpicker
-					$datapart .= '<input
-						type="' . ($name == 'lock' ? 'hidden' : 'color') . '"
-						class="' . $field_class . ' attr_' . $layer_id . '_' . $name . '"
-						name="' . $fieldname . '"
-						id="' . $layer_id . '_' . $name . '_' . $k . '"
-						onchange="' . $onchange . '"
-						onkeyup="checknumbers(this, \'' . $attributes['type'][$j] . '\', \'' . $attributes['length'][$j] . '\', \'' . $attributes['decimal_length'][$j] . '\');"
-						title="' . $alias . '"
-						value="' . htmlspecialchars($value) . '"
-						style=" 
-							display: ' . ($attribute_privileg == '0' ? 'none' : 'block') . ';
-							width: ' . (array_key_exists('width', $form_element_options) ? $form_element_options['width'] : '100%') . ';
-						"
-						' . ($attribute_privileg == '0' ? ' readonly' : ' tabindex="1"') . '
-					>';
+				if ($options_type === 'options_json') {
+					$options = $attributes['options_json'][$j];
+					if (array_key_exists('type', $options) AND $options['type'] == 'colorpicker') {
+						# Auswahl beliebiger Farben mit einem Colorpicker
+						$datapart .= '<input
+							type="' . ($name == 'lock' ? 'hidden' : 'color') . '"
+							class="' . $field_class . ' attr_' . $layer_id . '_' . $name . '"
+							name="' . $fieldname . '"
+							id="' . $layer_id . '_' . $name . '_' . $k . '"
+							onchange="' . $onchange . '"
+							onkeyup="checknumbers(this, \'' . $attributes['type'][$j] . '\', \'' . $attributes['length'][$j] . '\', \'' . $attributes['decimal_length'][$j] . '\');"
+							title="' . $alias . '"
+							value="' . htmlspecialchars($value) . '"
+							style=" 
+								display: ' . ($attribute_privileg == '0' ? 'none' : 'block') . ';
+								width: ' . (array_key_exists('width', $options) ? $options['width'] : '100%') . ';
+							"
+							' . ($attribute_privileg == '0' ? ' readonly' : ' tabindex="1"') . '
+						>';
 
-					if ($attribute_privileg == '0') { // nur lesbares Attribut
-						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
-						$datapart .= '<div style="
-								border-radius: 2px;
-								border: 1px solid gray;
-								display: inline-block;
-								padding: 4px;
-								background-color: #e9e9ed;
-						">
-							<div
-								class="readonly_text"
-								style="
-									padding: 0px;
-									text-align: center;
-									min-width: 55px;
-									width: ' . (array_key_exists('width', $form_element_options) ? $form_element_options['width'] : '100%') . ';
-									background-color: ' . $angezeigter_value . ';
+						if ($attribute_privileg == '0') { // nur lesbares Attribut
+							$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
+							$datapart .= '<div style="
+									border-radius: 2px;
 									border: 1px solid gray;
-								"
-							>' . ($angezeigter_value != '' ? $angezeigter_value : 'keine') . '</div>
-						</div>';
+									display: inline-block;
+									padding: 4px;
+									background-color: #e9e9ed;
+							">
+								<div
+									class="readonly_text"
+									style="
+										padding: 0px;
+										text-align: center;
+										min-width: 55px;
+										width: ' . (array_key_exists('width', $options) ? $options['width'] : '100%') . ';
+										background-color: ' . $angezeigter_value . ';
+										border: 1px solid gray;
+									"
+								>' . ($angezeigter_value != '' ? $angezeigter_value : 'keine') . '</div>
+							</div>';
+						}
 					}
 				}
 				else {
@@ -738,8 +755,7 @@
 			case 'Dokument': {
 				if ($value != '') {
 					include_once(CLASSPATH.'LayerAttribute.php');
-					$attr_obj = new LayerAttribute($gui);
-					$attribute_options = $attr_obj->get_options($attributes['options'][$j], 'Dokument');
+					$options = $attr_obj->get_options($attributes, $options_type, $j, 'Dokument');
 					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url'], $attributes['type'][$j], $layer_id, $oid, $name);
 					if ($preview['doc_src'] != '') {
 						$datapart .= '<table border="0"><tr><td class="' . ($preview['doc_type'] == 'local_img'? 'td_preview_image' : '') . '">';
@@ -773,7 +789,7 @@
 							<tr>
 								<td colspan="2"><span id="image_original_name">
 									' . $preview['original_name'] . ($preview['filesize'] ? ' (' . $preview['filesize'] . ')' : '') . '</span>'
-									. ($attribute_options['show_hash_button'] ? '<a href="javascript:show_document_hash(' . $layer_id . ', \'' . htmlspecialchars(json_encode($value_path), ENT_QUOTES, 'UTF-8') . '\')" title="' . $strShowHashButtonTitle . '">
+									. ($options['show_hash_button'] ? '<a href="javascript:show_document_hash(' . $layer_id . ', \'' . htmlspecialchars(json_encode($value_path), ENT_QUOTES, 'UTF-8') . '\')" title="' . $strShowHashButtonTitle . '">
 										<span class="fa-stack hashtag-icon">
   										<i class="fa fa-file-o fa-stack-2x"></i>
 											<i class="fa fa-hashtag fa-stack-1x"></i>

@@ -731,10 +731,25 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 $GUI->mobile_reformat_fk_attributes = function ($attributes) use ($GUI) {
 	include_once(CLASSPATH . 'LayerAttribute.php');
 	$new_attributes = $attributes;
+	$attr_obj = new LayerAttribute($GUI);
 	foreach ($attributes AS $key => $attribute) {
 		if ($attribute['form_element_type'] === 'SubFormFK') {
-			$attribute_obj = new LayerAttribute($GUI);
-			$attribute_options = $attribute_obj->get_options($attribute['options'], 'SubFormFK');
+			if (is_json_string($attribute['options'])) {
+				$options_type = 'options_json';
+				$attribute['options_json'] = json_decode($attribute['options'], true);
+			}
+			else {
+				$options_type = 'options';
+			}
+			$attribute_options = $attr_obj->get_options(
+				array(
+					'options' => array($attribute['options']),
+					'options_json' => array($attribute['options_json'])
+				),
+				$options_type,
+				0,
+				'SubFormFK'
+			);
 			$attribute_options_old_version = $attribute_options['parent_layer_id'] . ',' . $attribute_options['fk_name'] . ':' . $attribute_options['pk_name'] . ';' . $attribute_options['window_option'];
 			$fk_attribute = array_filter(
 				$attributes,

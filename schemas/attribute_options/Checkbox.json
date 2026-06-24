@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gdi-service.de/public/schemas/kvwmap/options/Checkbox.json",
+  "title": "Checkbox options",
+  "description": "Options for kvwmap formular element type Checkbox.",
+  "type": ["object", "null"],
+  "example": {
+    "print": {
+      "true":"ja",
+      "false":"nein"
+    }
+  },
+  "properties": {
+    "print": {
+      "description": "Print options",
+      "type": "object",
+      "properties": {
+        "true": {
+          "description": "Text to print if value is true.",
+          "type": "string"
+        },
+        "false": {
+          "description": "Text to print if value is false.",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

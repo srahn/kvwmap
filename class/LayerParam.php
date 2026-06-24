@@ -47,7 +47,7 @@ class LayerParam extends PgObject {
 		if (!$result['success']) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler bei der Abfrage der Parameteroptionen: ' . $options_result[1]
+				'msg' => 'Fehler bei der Abfrage der Parameteroptionen: ' . $result[1]
 			);
 		}
 		else {
