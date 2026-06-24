@@ -355,26 +355,13 @@ if ($gast_export === false) {
 		# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
 		if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars, $GUI->user)) {
 			$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
-	
-			if (is_login($GUI->formvars) AND defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $GUI->Stelle->totp_authentication AND $_SESSION['login_new_password'] != true) {
-				if ($GUI->user->totp_secret != '') {
-					if ($GUI->is_trusted_device($GUI->user) == false) {
-						$_SESSION['2fa_verification'] = true;
-						include(SNIPPETS . '2fa_verify.php');
-						exit;
-					}
-				} 
-				else {
-					$_SESSION['2fa_registration'] = true;
-					include(SNIPPETS . '2fa_enable.php');
-					exit;
-				}
-			}
-
 			$GUI->user->Stellen = $GUI->user->getStellen(0);
 			$permission = get_permission_in_stelle($GUI);
 	
 			if ($permission['allowed']) {
+
+				totp_check($GUI);
+
 				$GUI->debug->write('Nutzer ist in Stelle ' . $GUI->Stelle->id . ' erlaubt.', 4, $GUI->echo);
 				$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
 				$GUI->debug->write('Setze neue Stellen-ID: ' . $GUI->Stelle->id . ' für Nutzer: ' . $GUI->user->id, 4, $GUI->echo);
@@ -411,11 +398,13 @@ if ($gast_export === false) {
 								$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 								session_start();
 								$GUI->new_session = set_session_vars($GUI->formvars);
-								unset($_SESSION['login_new_password']);
 								$go = '';
 								$_SESSION['stelle_angemeldet'] = true;
 								$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
 								$GUI->user->stelle_id = $GUI->Stelle->id;
+
+								totp_check($GUI);
+
 								# login case 17
 								$GUI->debug->write('login case 17', 4, $GUI->echo);
 							}
@@ -453,7 +442,6 @@ if ($gast_export === false) {
 								$GUI->formvars['Stelle_id'] = $GUI->Stelle->id;
 								$show_login_form = true;
 								$go = 'login_new_password';
-								$_SESSION['login_new_password'] = true;
 								# login case 19
 								$GUI->debug->write('login case 19', 4, $GUI->echo);
 							}
@@ -1008,4 +996,22 @@ function prepare_sha1($login_name, $password) {
 	if (!$ret['success']) { $GUI->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>', 4); return 0; }
 	return $ret['success'];
 }
+
+function totp_check($GUI){
+	if (is_login($GUI->formvars) AND defined('TOTP_AUTHENTICATION') AND TOTP_AUTHENTICATION AND $GUI->Stelle->totp_authentication) {
+		if ($GUI->user->totp_secret != '') {
+			if ($GUI->is_trusted_device($GUI->user) == false) {
+				$_SESSION['2fa_verification'] = true;
+				include(SNIPPETS . '2fa_verify.php');
+				exit;
+			}
+		} 
+		else {
+			$_SESSION['2fa_registration'] = true;
+			include(SNIPPETS . '2fa_enable.php');
+			exit;
+		}
+	}
+}
+
 ?>

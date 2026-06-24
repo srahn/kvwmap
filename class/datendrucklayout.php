@@ -820,8 +820,9 @@ class ddl extends drucklayout{
 			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer anderen Seite beendet -> zu dieser Seite zurückkehren
 		}
 		if($offset_value - $ypos < 40){	# Seitenüberlauf
-			#$offset_value = $this->layout['height'] + $offset_value - 40 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
-			$offset_value = $this->layout['height'] + ($offset_value - $ypos - 40) - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
+			if ($this->debug_output) echo 'Seitenüberlauf in handlePageOverflow wegen $offset_value - $ypos < 40:  ' . $offset_value . ' - ' . $ypos . ' < 40<br>';
+			$offset_value = $this->layout['height'] + $offset_value - 40 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
+			#$offset_value = $this->layout['height'] + ($offset_value - $ypos - 40) - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
 			$next_page = $this->getNextPage($this->layout['page_id'][$offset_attribute]);
 			if($next_page != NULL){
 				$this->pdf->reopenObject($next_page);		# die nächste Seite der Seite des Offset-Attributes nehmen
