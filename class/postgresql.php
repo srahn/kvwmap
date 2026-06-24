@@ -141,7 +141,7 @@ class pgdatabase {
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
 			"password='" . addslashes($credentials['password']) . "' " .
-			"application_name=kvwmap_user_" . ($this->gui->user ? $this->gui->user->id : '');
+			"application_name=kvwmap_user_" . ($this->gui ? $this->gui->user->id : '');
 		return $connection_string;
 	}
 
