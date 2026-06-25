@@ -734,9 +734,9 @@ $GUI->mobile_reformat_fk_attributes = function ($attributes) use ($GUI) {
 	$attr_obj = new LayerAttribute($GUI);
 	foreach ($attributes AS $key => $attribute) {
 		if ($attribute['form_element_type'] === 'SubFormFK') {
-			if (is_json_string($attribute['options'])) {
+			$attribute['options_json'] = json_decode($attribute['options'], true);
+			if ($attribute['options_json'] != NULL) {
 				$options_type = 'options_json';
-				$attribute['options_json'] = json_decode($attribute['options'], true);
 			}
 			else {
 				$options_type = 'options';

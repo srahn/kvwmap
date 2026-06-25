@@ -4815,9 +4815,8 @@ echo '			</table>
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
-		if (is_json_string($attributes['options'][0])) {
-			$options = $attributes['options_json'][0];
-			$sql = $options['sql'];
+		if ($attributes['options_json'][0] != NULL) {
+			$sql = $attributes['options_json'][0]['sql'];
 		}
 		else {
 			$sql = $attributes['options'][0];
@@ -11329,8 +11328,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			include_once(CLASSPATH . 'LayerAttribute.php');
 			$attr_obj = new LayerAttribute($this);
 			foreach ($document_attributes as $i => $document_attribute) {
-				$options_type = $attr_obj->get_options_type($attributes, $document_attribute['attributename']);
-				$options = $attr_obj->get_options($attributes, $options_type, $document_attribute['attributename'], 'Dokument');
+				$options_type = $attr_obj->get_options_type($attributes, $attributes['indizes'][$document_attribute['attributename']]);
+				$options = $attr_obj->get_options($attributes, $options_type, $attributes['indizes'][$document_attribute['attributename']], 'Dokument');
 				if (substr($document_attribute['datatype'], 0, 1) == '_') {
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
@@ -22119,7 +22118,7 @@ DO $$
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
-			if ($rs['options'] AND is_json_string($rs['options'])) {
+			if ($rs['options']) {
 				$attributes['options_json'][$i] = json_decode($rs['options'], true);
 			}
 			$attributes['style_attribute'][$i] = $rs['style_attribute'];

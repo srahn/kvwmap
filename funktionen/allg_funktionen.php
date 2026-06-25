@@ -2688,11 +2688,6 @@ function is_true($val) {
 	}
 }
 
-function is_json_string($string) {
-  json_decode($string);
-  return json_last_error() === JSON_ERROR_NONE;
-}
-
 function count_or_0($val) {
 	if (is_null($val) OR !is_array($val)) {
 		return 0;
