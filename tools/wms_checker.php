@@ -2,6 +2,10 @@
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 
+if (getenv('HOSTNAME') != 'kvwmap_prod_web'){
+	exit;
+}
+
 ########################################################################################################################################################################
 #																																																																																			 #
 #	Dieses Skript kann in einem Web-Verzeichnis wie z.B. .../kvwmap/tools plaziert werden.																																							 #
@@ -125,6 +129,7 @@ include($credentials);
 include(CLASSPATH.'log.php');
 include(CLASSPATH.'postgresql.php');
 $debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
+$log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
 $userDb = new pgdatabase();
 $userDb->open();
 
