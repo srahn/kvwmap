@@ -112,27 +112,18 @@ if ($doit == true) {
 				<div style="flex: 1; position: sticky; left: calc(50% - 225px); min-width: 450px"> 
 					<h2 id="layername"><? echo $layer_name; ?></h2><?
 					echo value_of($layer, 'paging'); ?>
-				</div>
-				<? if ($layer['records_status'] !== '0') { ?>
-				<div class="gle-view">	<?
-					$s = ($layer['template'] == ''? 0 : 1);
-					for ($g = $s; $g < 3; $g++) {
-						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
-					}	?>
-				</div>
-				<div class="new-gle-dataset-button">
-					<a
-					  class="btn btn-new"
-						style="padding: 2px; border-radius: 12px; width: 12px; height: 12px; font-size: 12px;"
-						href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"
-						title="Neuer Datensatz"
-					><i
-						title="Neuer Datensatz"
-						class="fa fa-plus"
-						style="color: white; margin-bottom: 10px;"
-					></i></a>
-				</div>
-				<? } ?>
+				</div><?
+				if ($layer['records_status'] !== '0') { ?>
+					<div class="gle-view">	<?
+						$s = ($layer['template'] == ''? 0 : 1);
+						for ($g = $s; $g < 3; $g++) {
+							echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+						}	?>
+					</div><?
+					if ($this->qlayerset[$i]['privileg'] > 0) {
+						include(SNIPPETS . 'new_gle_dataset_button.php');
+					}
+				} ?>
 			</div> <?
 		}
 
