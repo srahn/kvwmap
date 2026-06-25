@@ -2660,7 +2660,7 @@ class Gml_extractor {
 							)
 							THEN ARRAY[
 								(
-									(
+									NULLIF((
 										SELECT DISTINCT
 											codespace
 										FROM
@@ -2668,7 +2668,7 @@ class Gml_extractor {
 										WHERE
 											gmlas.id = " . $norm_3 . ".parent_id
 										LIMIT 1
-									),
+									),''),
 									(
 										SELECT
 											string_agg(value,',')
@@ -2933,6 +2933,9 @@ class Gml_extractor {
 			$enum_geometrie_typ = 'Flächen';
 			$name = 'Flaechen';
 		}
+
+		// mapping exception for deprecated featureclass fp_landwirtschaftsflaeche (will not exist in xplan 6 anymore)
+		if($uml_class == 'FP_LandwirtschaftsFlaeche') $uml_class = 'FP_Landwirtschaft';
 
 		$sql  = "
 			INSERT INTO xplankonverter.regeln (

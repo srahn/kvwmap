@@ -1552,9 +1552,9 @@ class Konvertierung extends PgObject {
 						gmlas.internalid AS internalid,
 						gmlas.beschreibung AS beschreibung,
 						gmlas.kommentar AS kommentar,
-						to_char(gmlas.technherstelldatum, 'DD.MM.YYYY')::date AS technherstelldatum,
-						to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY')::date AS genehmigungsdatum,
-						to_char(gmlas.untergangsdatum, 'DD.MM.YYYY')::date AS untergangsdatum,
+						to_char(gmlas.technherstelldatum, 'YYYY.MM.DD')::date AS technherstelldatum,
+						to_char(gmlas.genehmigungsdatum, 'YYYY.MM.DD')::date AS genehmigungsdatum,
+						to_char(gmlas.untergangsdatum, 'YYYY.MM.DD')::date AS untergangsdatum,
 						aendert.aendert As aendert,
 						CASE
 							WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
@@ -1574,7 +1574,7 @@ class Konvertierung extends PgObject {
 							THEN externeref.externereferenz
 							ELSE NULL
 						END AS externereferenz,
-						NULLIF(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsenddatum,
+						auslegungsenddatum.auslegungsenddatum AS auslegungsenddatum,
 						CASE
 							WHEN count_gemeinde > 0
 							THEN gemeindelink.gemeinde
@@ -1584,17 +1584,17 @@ class Konvertierung extends PgObject {
 						gmlas.sachgebiet AS sachgebiet,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
 						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
-						to_char(gmlas.wirksamkeitsdatum, 'DD.MM.YYYY')::date AS wirksamkeitsdatum,
-						NULLIF(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsstartdatum,
-						NULLIF(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsstartdatum,
-						to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY')::date AS entwurfsbeschlussdatum,
-						to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
-						NULLIF(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsenddatum,
+						to_char(gmlas.wirksamkeitsdatum, 'YYYY.MM.DD')::date AS wirksamkeitsdatum,
+						auslegungsstartdatum.auslegungsstartdatum AS auslegungsstartdatum,
+						NULLIF(ARRAY[to_char(tbsd.value, 'YYYY.MM.DD')]::date[], '{NULL}') AS traegerbeteiligungsstartdatum,
+						to_char(gmlas.entwurfsbeschlussdatum, 'YYYY.MM.DD')::date AS entwurfsbeschlussdatum,
+						to_char(gmlas.aenderungenbisdatum, 'YYYY.MM.DD')::date AS aenderungenbisdatum,
+						NULLIF(ARRAY[to_char(tbed.value, 'YYYY.MM.DD')]::date[], '{NULL}') AS traegerbeteiligungsenddatum,
 						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
 						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
 						gmlas.planart::xplan_gml." . strtolower($plan_class) . "art AS planart,
-						to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY')::date AS planbeschlussdatum,
-						to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum,
+						to_char(gmlas.planbeschlussdatum, 'YYYY.MM.DD')::date AS planbeschlussdatum,
+						to_char(gmlas.aufstellungsbeschlussdatum, 'YYYY.MM.DD')::date AS aufstellungsbeschlussdatum,
 						" . ($zusammenzeichnung ? 'true' : 'false') . " AS zusammenzeichnung
 					FROM
 						" . $table_schema . "." . strtolower($plan_class) . " gmlas JOIN
@@ -1627,7 +1627,7 @@ class Konvertierung extends PgObject {
 										e_sub.referenzurl,
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 										e_sub.beschreibung,
-										to_char(e_sub.datum, 'DD.MM.YYYY'),
+										to_char(e_sub.datum, 'YYYY.MM.DD'),
 										e_sub.typ::xplan_gml.xp_externereferenztyp
 									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
 							FROM
@@ -1657,9 +1657,17 @@ class Konvertierung extends PgObject {
 						" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
-						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
+						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid JOIN LATERAL
+						(
+							SELECT
+								NULLIF(ARRAY_AGG(to_char(alsd.value, 'YYYY.MM.DD'))::date[], '{NULL}') AS auslegungsstartdatum
+							FROM " . $table_schema . "." . strtolower($plan_class) . "_auslegungsstartdatum alsd
+						) auslegungsstartdatum ON true JOIN LATERAL
+						(
+							SELECT
+								NULLIF(ARRAY_AGG(to_char(aled.value, 'YYYY.MM.DD'))::date[], '{NULL}') AS auslegungsenddatum
+								FROM " . $table_schema . "." . strtolower($plan_class) . "_auslegungsenddatum aled
+						) auslegungsenddatum ON true LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id;
 				";
@@ -3321,6 +3329,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 			// and ignore namespace, spaces, array brackets
 			$attr_str .= " AND '" . $row['art_attrs'] . "' = REPLACE(TRANSLATE(REPLACE(LOWER(p.art::text), 'xplan:', ''), '{}', ''), ' ', '')";
 
+			// needs to also check $row[index] to only apply stylesheets to correct xp_ppo for multiple xp_ppos relating to one object
 			$sql = "
 				UPDATE
 					xplan_gml.xp_ppo
@@ -3335,6 +3344,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 						ON p.dientzurdarstellungvon[1]::text = o.gml_id::text
 						AND p.konvertierung_id = o.konvertierung_id
 						WHERE p.konvertierung_id = " . $this->get($this->identifier) . "
+						AND p.index = '" . $row['origin_index'] . "'
 						AND stylesheetid IS NULL " .
 						$attr_str . "
 					)
