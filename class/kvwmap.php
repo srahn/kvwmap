@@ -4815,8 +4815,8 @@ echo '			</table>
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
-		if ($attributes['options_json'][0] != NULL) {
-			$sql = $attributes['options_json'][0]['sql'];
+		if ($attributes['options_struct'][0] != NULL) {
+			$sql = $attributes['options_struct'][0]['sql'];
 		}
 		else {
 			$sql = $attributes['options'][0];
@@ -11326,10 +11326,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$belated_files = array();
 			}
 			include_once(CLASSPATH . 'LayerAttribute.php');
-			$attr_obj = new LayerAttribute($this);
 			foreach ($document_attributes as $i => $document_attribute) {
-				$options_type = $attr_obj->get_options_type($attributes, $attributes['indizes'][$document_attribute['attributename']]);
-				$options = $attr_obj->get_options($attributes, $options_type, $attributes['indizes'][$document_attribute['attributename']], 'Dokument');
+				$index = $attributes['indizes'][$document_attribute['attributename']];
+				$options = $attributes['options_struct'][$index];
 				if (substr($document_attribute['datatype'], 0, 1) == '_') {
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
@@ -11383,10 +11382,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				for ($i = 0; $i < count($table['attributname']); $i++) {
 					if (array_key_exists($table['attributname'][$i], $attributes['constraints'])) { 	# Rechte
 						$this->sanitize([$table['formfield'][$i] => $table['datatype'][$i]], true);
-						include_once(CLASSPATH . 'LayerAttribute.php');
-						$attr_obj = new LayerAttribute($this);
-						$options_type = $attr_obj->get_options_type($attributes, $table['attributname'][$i]);
-						$attribute_options = $attr_obj->get_options($attributes, $options_type, $table['attributname'][$i], $table['type'][$i]);
+						$attribute_options = $attributes['options'][$i];
 						switch (true) {
 							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
 								if (in_array($attribute_options, array('', 'insert'))){
@@ -16398,13 +16394,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$belated_files = array();
 				include_once(CLASSPATH . 'BelatedFile.php');
 			}
-			include_once(CLASSPATH . 'LayerAttribute.php');
-			$attr_obj = new LayerAttribute($this);
 			foreach ($document_attributes as $i => $attr_oid) {
 				$doc_path = $layerset[$attr_oid['layer_id']][0]['document_path'];
 				$doc_url = $layerset[$attr_oid['layer_id']][0]['document_url'];
-				$options_type = $attr_obj->get_options_type($attributes, $attr_oid['attributename']);
-				$options = $attr_obj->get_options($attributes, $options_type, $attr_oid['attributename'], 'Dokument');
+				$index = $attributes['indizes'][$attr_oid['attributename']];
+				$options = $attributes['options_struct'][$index];
 				$attribute_names = $attributenames[$attr_oid['oid']];
 				$attribute_values = $attributevalues[$attr_oid['oid']];
 				$layer_db = $layerdb[$attr_oid['layer_id']];
@@ -22007,6 +22001,9 @@ DO $$
 	 */
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$attr_obj = new LayerAttribute($this);
+
 		$attributes = array(
 			'name' => array(),
 			'tab' => array()
@@ -22117,9 +22114,12 @@ DO $$
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$i] = $rs['options'];
 			if ($rs['options']) {
-				$attributes['options_json'][$i] = json_decode($rs['options'], true);
+				$options_json = json_decode($rs['options'], true);
+				$attributes['options_struct'][$i] = $attr_obj->get_options($options_json ?: $rs['options'], $rs['form_element_type']);
 			}
 			$attributes['style_attribute'][$i] = $rs['style_attribute'];
 			
@@ -22177,8 +22177,6 @@ DO $$
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			$attributes['form_element_type'][$i] = $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];

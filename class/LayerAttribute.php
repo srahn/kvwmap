@@ -99,45 +99,36 @@ class LayerAttribute extends PgObject {
 		return $selects;
 	}
 
-	/**
-	 * Function return String 'options_json' if the options of $attributes with $index
-	 * are of type json else return 'options' for options in string format 
-	 */
-	function get_options_type($attributes, $index) {
-		return (
-			isset($attributes['options_json'][$index]) &&
-			is_array($attributes['options_json'][$index]) &&
-			!empty($attributes['options_json'][$index]) ? 'options_json' : 'options'
-		);
-	}
-
-	function get_num_rows(array $options, int $size) {
+	static function get_num_rows(array $options, int $size) {
 		$default_rows = $size <= 65 ? 2 : 3;
 		$max_rows = 10;
-		if ($options === null || json_last_error() !== JSON_ERROR_NONE) {
+		if ($options === null) {
 			$num_rows = $default_rows;
 		};
+		$num_rows = (array_key_exists('rows', $options) AND $options['rows'] != '') ? $options['rows'] : $default_rows;
 		if (array_key_exists('rows_by_length', $options) AND $options['rows_by_length']) {
 			$num_rows = ceil($size / 65);
 		}
 		if (array_key_exists('max_rows', $options) AND $options['max_rows'] != '') {
 			$max_rows = $options['max_rows'];
 		}
-		$num_rows = (array_key_exists('rows', $options) AND $options['rows'] != '') ? $options['rows'] : $default_rows;
 		$num_rows = ($num_rows > $max_rows ? $max_rows : $num_rows);
 		return $num_rows;
 	}
 
-	function get_options($attributes, $options_type, $index, $form_element_type) {
-		$settings = $attributes[$options_type][$index];
+	function get_options($settings, $form_element_type) {
 		$default_rows = 3;
 		$default_cols = 60;
 		switch ($form_element_type) {
 			case 'SubFormFK' : {
-				$options = $this->get_SubFormFK_options($settings, $options_type);
+				$options = $this->get_SubFormFK_options($settings);
 			} break;
 			case 'Textfeld' : {
-				if ($options_type === 'options') {
+				if (is_array($settings)) {
+					$options = $settings;
+					$options['cols'] = (array_key_exists('cols', $settings) AND $settings['cols'] != '') ? $settings['cols'] : $default_cols;
+				}
+				else {
 					$options = array(
 						'rows' => $default_rows,
 						'cols' => $default_cols
@@ -149,33 +140,26 @@ class LayerAttribute extends PgObject {
 						$options['subform_url'] = $settings;
 					}
 				}
-				$options['cols'] = (array_key_exists('cols', $settings) AND $settings['cols'] != '') ? $settings['cols'] : $default_cols;
-				$options['sql'] = (array_key_exists('sql', $settings) AND $settings['sql'] != '') ? $settings['sql'] : '';
-				$options['subform_url'] = (array_key_exists('subform_url', $settings) AND $options['subform_url'] != '') ? $settings['subform_url'] : '';
 			} break;
 			case 'Dokument':
-			 	$options = $this->get_Dokument_options($settings, $options_type);
+			 	$options = $this->get_Dokument_options($settings);
 			break;
-			// case 'checkbox':
-			// 	$options = $this->get_checkbox_options($settings);
-			// 	break;
+			case 'Farbauswahl':
+			case 'Checkbox':
+				$options = $settings;
+			break;
 			// case 'radio':
 			// 	$options = $this->get_radio_options($settings);
 			// 	break;
 			default:
-				if (strpos($settings, '{') === 0) {
-					$options = array();
-				}
-				else {
-					$options = $settings;
-				}
+				$options = NULL;
 		}
 		return $options;
 	}
 
-	function get_SubFormFK_options($settings, $options_type) { // get_options
+	function get_SubFormFK_options($settings) { // get_options
 		$options = array();
-		if ($options_type === 'options_json') {
+		if (is_array($settings)) {
 			$options['parent_layer_id'] = $settings['ref_layer_id'];
 			$options['fk_name'] = $settings['ref_keys'][0]['fkey'];
 			$options['pk_name'] = $settings['ref_keys'][0]['pkey'];
@@ -208,9 +192,9 @@ class LayerAttribute extends PgObject {
 		return $options;
 	}
 
-	function get_Dokument_options($settings, $options_type = 'options') {
+	function get_Dokument_options($settings) {
 		$options = array();
-		if ($options_type === 'options_json') {
+		if (is_array($settings)) {
 			$options['dynamic_path'] = $settings['dynamic_path'] ?? '';
 			$options['show_hash_button'] = $settings['show_hash_button'] ?? false;
 		}

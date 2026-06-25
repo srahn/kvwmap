@@ -735,21 +735,7 @@ $GUI->mobile_reformat_fk_attributes = function ($attributes) use ($GUI) {
 	foreach ($attributes AS $key => $attribute) {
 		if ($attribute['form_element_type'] === 'SubFormFK') {
 			$attribute['options_json'] = json_decode($attribute['options'], true);
-			if ($attribute['options_json'] != NULL) {
-				$options_type = 'options_json';
-			}
-			else {
-				$options_type = 'options';
-			}
-			$attribute_options = $attr_obj->get_options(
-				array(
-					'options' => array($attribute['options']),
-					'options_json' => array($attribute['options_json'])
-				),
-				$options_type,
-				0,
-				'SubFormFK'
-			);
+			$attribute_options = $attr_obj->get_options($attribute['options_json'] ?: $attribute['options'], 'SubFormFK');
 			$attribute_options_old_version = $attribute_options['parent_layer_id'] . ',' . $attribute_options['fk_name'] . ':' . $attribute_options['pk_name'] . ';' . $attribute_options['window_option'];
 			$fk_attribute = array_filter(
 				$attributes,

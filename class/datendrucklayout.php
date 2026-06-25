@@ -1038,7 +1038,7 @@ class ddl extends drucklayout{
 				}			
 			}break;			
 			case 'Checkbox' : {
-				$option = $this->attributes['options_json'][$j];
+				$option = $this->attributes['options_struct'][$j];
 				$output = ($value != 'f' ? ($option['print']['true'] != '' ? $option['print']['true'] : 'ja') : ($option['print']['false'] != '' ? $option['print']['false'] : 'nein'));
 			} break;
 			case 'Zahl': {

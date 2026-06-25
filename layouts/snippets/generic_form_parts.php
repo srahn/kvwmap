@@ -350,16 +350,13 @@
 		if (in_array($attributes['type'][$j], ['numeric', 'float4', 'float8'])) {
 			$value = str_replace('.', ',', $value);
 		}
-		$attr_obj = new LayerAttribute($gui);
-		$options_type = $attr_obj->get_options_type($attributes, $j);
 		switch ($attributes['form_element_type'][$j]){
 			case 'Textfeld' : {
 				$input_tool = false;
 				$title = '';
 				$funct = '';
-				if ($options_type === 'json') {
-					$options = $attr_obj->get_options($attributes, $options_type, $j, 'Textfeld');
-					$options['rows'] = $attr_obj->get_num_rows($options, strlen($value));
+				if ($options = $attributes['options_struct'][$j]) {
+					$options['rows'] = LayerAttribute::get_num_rows($options, strlen($value));
 					$datapart .= FormObject::createTextarea(
 						$fieldname, // name
 						$value,
@@ -459,8 +456,7 @@
 			} break;
 			
 			case 'Farbauswahl' : {
-				if ($options_type === 'options_json') {
-					$options = $attributes['options_json'][$j];
+				if ($options = $attributes['options_struct'][$j]) {
 					if (array_key_exists('type', $options) AND $options['type'] == 'colorpicker') {
 						# Auswahl beliebiger Farben mit einem Colorpicker
 						$datapart .= '<input
@@ -754,8 +750,7 @@
 
 			case 'Dokument': {
 				if ($value != '') {
-					include_once(CLASSPATH.'LayerAttribute.php');
-					$options = $attr_obj->get_options($attributes, $options_type, $j, 'Dokument');
+					$options = $attributes['options_struct'][$i];
 					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url'], $attributes['type'][$j], $layer_id, $oid, $name);
 					if ($preview['doc_src'] != '') {
 						$datapart .= '<table border="0"><tr><td class="' . ($preview['doc_type'] == 'local_img'? 'td_preview_image' : '') . '">';
