@@ -2,6 +2,10 @@
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 
+if (getenv('HOSTNAME') != 'kvwmap_prod_web'){
+	exit;
+}
+
 ########################################################################################################################################################################
 #																																																																																			 #
 #	Dieses Skript kann in einem Web-Verzeichnis wie z.B. .../kvwmap/tools plaziert werden.																																							 #

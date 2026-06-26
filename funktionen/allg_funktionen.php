@@ -3248,6 +3248,7 @@ function get_value_by_path(array $array, array $path) {
  * Zählt die vollen Stunden zwischen $end und $start
  * @param string $start Format (Y-m-d H:i:s),
  * @param string $end Format (Y-m-d H:i:s)
+ * @return integer $hours Anzahl der Stunden
  */
 function volle_stunden($start, $end) {
 	$start = new DateTime($start);
