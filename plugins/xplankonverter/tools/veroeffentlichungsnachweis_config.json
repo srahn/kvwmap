@@ -1,10 +1,13 @@
 {
+  "environments" : [
+    "kvwmap_prod_web"
+  ],
   "is_testzeit" : false,
   "testzeitraum" : {
     "start" : "2026-04-24 09:53:15",
     "ende" : "2026-10-01 14:30:15"
   },
   "auslegung_url" : "https://bplan.geodaten-mv.de/bauportal/Uebersicht/Details",
-  "auslegung_fake_url" : "https://dev.bauleitplaene-mv.de/custom/layouts/snippets/Veroeffnachweis_Portal_Fake.php",
+  "auslegung_url_fake" : "https://dev.bauleitplaene-mv.de/custom/layouts/snippets/Veroeffnachweis_Portal_Fake.php",
   "debug_mode" : 2
 }
