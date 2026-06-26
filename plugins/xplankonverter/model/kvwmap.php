@@ -876,7 +876,6 @@
 		}
 		$GUI->titel = 'Stellendaten';
 		$GUI->main = '../../plugins/xplankonverter/view/stelle_kontaktdaten.php';
-		$GUI->output();
 	};
 
 ?>
