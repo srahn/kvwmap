@@ -22,15 +22,20 @@ class Auslegung extends PgObject {
    */
   public static	function find_aktuelle($gui, $plan_gml_id = NULL, $pruefzeit) {
 		$auslegung_obj = new Auslegung($gui);
+    // $auslegungen = $auslegung_obj->find_where("
+    //   '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= startdatum AND '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone < enddatum + 1 AND
+    //   COALESCE('" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= veroeffentlichungsdatum, false)"
+    //   . ($plan_gml_id ? " AND plan_gml_id = '" . $plan_gml_id . "'" : ''),
+    //   "planart",
+    //   "planart, plan_gml_id, lfdnr, startdatum, enddatum"
+    // );
     $auslegungen = $auslegung_obj->find_where("
-      '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= startdatum AND '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone < enddatum + 1 AND
-      COALESCE('" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= veroeffentlichungsdatum, false)"
+      '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= startdatum AND '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone < enddatum + 1"
       . ($plan_gml_id ? " AND plan_gml_id = '" . $plan_gml_id . "'" : ''),
       "planart",
-      "planart, plan_gml_id, lfdnr, startdatum, enddatum"
+      "planart, plan_gml_id, lfdnr, startdatum, enddatum, veroeffentlichungsdatum"
     );
     foreach ($auslegungen AS $auslegung) {
-      echo_log('Auslegung: ' . $auslegung->get('planart') . ' ' . $auslegung->get('plan_gml_id') . ' ' . $auslegung->get('lfdnr') . ' ' . $auslegung->get('startdatum') . ' ' . $auslegung->get('enddatum'), 2);
       $result = $auslegung->find_plan();
       if (!$result['success']) {
         return array(
@@ -146,7 +151,6 @@ class Auslegung extends PgObject {
         'msg' => 'Class Auslegung Func find_plan ' . __LINE__ . ': ' . $result['msg']
       );
     }
-    echo_log('Dokumente zum Plan gefunden: ' . count($plan->veroeffentlichungsprotokoll_dokumente), 2);
     return array(
       'success' => true,
       'plan' => $plan
@@ -174,4 +178,17 @@ class Auslegung extends PgObject {
     return $this->veroeffentlichungsprotokoll !== null;
   }
 
+  function is_veroeffentlicht($pruefzeit) {
+    $veroeffentlichungsdatum = $this->get('veroeffentlichungsdatum');
+    return $veroeffentlichungsdatum !== null && $pruefzeit >= strtotime($veroeffentlichungsdatum);
+  }
+
+  function veroeffentlicht_in_auslegungszeitraum() {
+    $veroeffentlichungsdatum = strtotime($this->get('veroeffentlichungsdatum'));
+    return $this->get('veroeffentlichungsdatum') !== null && $veroeffentlichungsdatum >= strtotime($this->get('startdatum')) && $veroeffentlichungsdatum <= strtotime($this->get('enddatum'));
+  }
+
+  function veroeffentlichung_zu_spaet() {
+    return $this->veroeffentlicht_in_auslegungszeitraum() && (strtotime($this->get('veroeffentlichungsdatum')) - strtotime($this->get('startdatum')) >= 5 * 3600);
+  }
 }

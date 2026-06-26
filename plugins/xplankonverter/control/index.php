@@ -2629,7 +2629,6 @@ function go_switch_xplankonverter($go) {
 
 		case 'xplankonverter_stelle_kontaktdaten' : {
 			$GUI->xplankonverter_stelle_kontaktdaten();
-			$GUI->main = '../../plugins/xplankonverter/view/stelle_kontaktdaten.php';
 			$GUI->output();
 		} break;
 
