@@ -1061,6 +1061,9 @@ class db_mapObj{
 
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$attr_obj = new LayerAttribute($this);
+
 		$attributes = array(
 			'name' => array(),
 			'tab' => array()
@@ -1171,7 +1174,13 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$i] = $rs['options'];
+			if ($rs['options']) {
+				$options_json = json_decode($rs['options'], true);
+				$attributes['options_struct'][$i] = $attr_obj->get_options($options_json ?: $rs['options'], $rs['form_element_type']);
+			}
 			$attributes['style_attribute'][$i] = $rs['style_attribute'];
 			
 			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
@@ -1211,6 +1220,7 @@ class db_mapObj{
 					}
 				}
 			}
+
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 				if (substr($attributes['type'][$i], 0, 1) == '_') {
@@ -1227,8 +1237,6 @@ class db_mapObj{
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			$attributes['form_element_type'][$i] = $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
