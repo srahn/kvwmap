@@ -26,6 +26,7 @@ if [ -f "${busyfile}" ]; then
   # Es gibt schon einen Prozess der die E-Mail-Dateien abarbeitet.
   echo "${busyfile} exists."
 else
+  touch "${busyfile}"
   # echo "Durchsuche ${mail_queue_path} nach E-Mail-Dateien."
   file=`find $mail_queue_path -name "email*" | head -n 1`
 
@@ -62,6 +63,7 @@ else
     mv $logfile $mail_archiv_path
     echo "E-Mail $file gesendet und nach $mail_archiv_path verschoben." >> $job_log_file
     file=`find $mail_queue_path -name "email*" | head -n 1` # Frage die nächste Mail-Datei aus dem Stapel ab.
+    sleep 1s
   done
   # Keine Mail-Dateien mehr im Stapel, lösche busyfile
   if [ -f "${busyfile}" ]; then
