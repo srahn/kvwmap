@@ -128,7 +128,7 @@ class Layer extends PgObject {
 	function has_fk_constraint($constraint) {
 		$has_fk_constraint = (
 			$this->fk_attribute = $this->get_fk_attribute() AND
-			$this->fk_options = $this->fk_attribute->get_SubFormFK_options($this->fk_attribute->get('options')) AND
+			$this->fk_options = $this->fk_attribute->get_SubFormFK_options(json_decode($this->fk_attribute->get('options'))) AND
 			array_key_exists('ref_constraint', $this->fk_options) AND
 			strpos($this->fk_options['ref_constraint'], $constraint) !== false
 		);
@@ -147,7 +147,7 @@ class Layer extends PgObject {
 	}
 
 	function get_fk_feature($x, $y) {
-		$this->parent_layer = Layer::find_by_id($this->gui, $this->fk_options['parent_layer_id']);
+		$this->parent_layer = Layer::find_by_id($this->gui, $this->fk_options['ref_layer_id']);
 		$constraint_parts = explode('where', replace_params_rolle($this->fk_options['ref_constraint']));
 		$fk_feature = $this->parent_layer->get_feature_by_point("ST_SetSrid(ST_MakePoint(" . $x . ", " . $y . "), ". $this->gui->user->rolle->epsg_code . ")", trim($constraint_parts[1]));
 		return $fk_feature;

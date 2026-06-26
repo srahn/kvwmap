@@ -160,35 +160,20 @@ class LayerAttribute extends PgObject {
 	function get_SubFormFK_options($settings) { // get_options
 		$options = array();
 		if (is_array($settings)) {
-			$options['parent_layer_id'] = $settings['ref_layer_id'];
-			$options['fk_name'] = $settings['ref_keys'][0]['fkey'];
-			$options['pk_name'] = $settings['ref_keys'][0]['pkey'];
-			$options['window_option'] = $settings['window_type'] ?? '';
-			$options['ref_constraint'] = $settings['ref_constraint'] ?? '';
+			$options = $settings;
 		}
 		else {
 			$semicolon_parts = explode(';', $settings);
 			$comma_parts = explode(',', $semicolon_parts[0]);
-			$colon_parts = explode(':', $comma_parts[1]);
-			$options['parent_layer_id'] = $comma_parts[0];
-			$options['fk_name'] = $colon_parts[0];
-			$options['pk_name'] = $colon_parts[1];
-			$options['window_option'] = $semicolon_parts[1] ?? '';
+			$options['ref_layer_id'] = $comma_parts[0];
+			for ($k = 1; $k < count($comma_parts); $k++) {
+				$colon_parts = explode(':', $comma_parts[$k]);
+				$keys['fkey'] = $colon_parts[0];		# Verknüpfungsattribut im Unter-Layer
+				$keys['pkey'] = end($colon_parts);	# Verknüpfungsattribut im Ober-Layer
+				$options['ref_keys'][] = $keys;
+			}
+			$options['window_type'] = $semicolon_parts[1] ?? '';
 		}
-
-		// $options = array();
-		// if (strpos($settings, '{') === 0) {
-		// 	$options = json_decode($settings, true);
-		// }
-		// else {
-		// 	$semicolon_parts = explode(';', $settings);
-		// 	$comma_parts = explode(',', $semicolon_parts[0]);
-		// 	$colon_parts = explode(':', $comma_parts[1]);
-		// 	$options['ref_layer_id'] = $comma_parts[0];
-		// 	$options['ref_keys'][0]['fkey'] = $colon_parts[0];
-		// 	$options['ref_keys'][0]['pkey'] = $colon_parts[1];
-		// 	$options['window_type'] = $semicolon_parts[1] ?? '';
-		// }
 		return $options;
 	}
 

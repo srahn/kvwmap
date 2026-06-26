@@ -6155,7 +6155,7 @@ echo '			</table>
 							$layer->has_fk_constraint('within')
 						) {
 							if ($parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])) {
-								$kvps[] = $layer->fk_options['fk_name'] . " = '" . $parent_feature->get_id() . "'";
+								$kvps[] = $layer->fk_options['ref_keys'][0]['fkey'] . " = '" . $parent_feature->get_id() . "'";
 							}
 							else {
 								$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
@@ -11571,7 +11571,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$layer->has_fk_constraint('within')
 				) {
 					if ($parent_feature = $layer->get_fk_feature($this->formvars['loc_x'], $this->formvars['loc_y'])) {
-						$insert[$layer->fk_options['fk_name']] = "'" . $parent_feature->get_id() . "'";
+						$insert[$layer->fk_options['ref_keys'][0]['fkey']] = "'" . $parent_feature->get_id() . "'";
 					}
 					else {
 						$msg = 'Punkt aus Layer ' . $layer->get('alias') . ' konnte räumlich keinem übergeordneten Objekt aus Layer ' . $layer->parent_layer->get('alias') . ' zugeordnet werden. Schalten Sie den übergeordneten Layer ' . $layer->parent_layer->get('alias') . ' ein und setzen Sie den Punkt innerhalb einer angezeigten Fläche.';
@@ -20148,37 +20148,14 @@ class db_mapObj{
 
 					# SubFormulare mit Fremdschlüssel
 					case 'SubFormFK' : {
-						if ($attributes['options'][$i] != '') {
-							if (strpos($attributes['options'][$i], '{') === 0) {
-								$json = json_decode($attributes['options'][$i], true);
-								$attributes['subform_layer_id'][$i] = $json['ref_layer_id'];
-								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
-								$attributes['no_new_window'][$i] = ($json['window_type'] === 'no_new_window');
-								$attributes['options_json'][$i] = $json;
-							}
-							else {
-								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options
-								$subform = explode(',', $options[0]);
-								$attributes['subform_layer_id'][$i] = $subform[0];
-								$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-								$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-								for ($k = 1; $k < count($subform); $k++) {
-									if (strpos($subform[$k], ':')) {
-										$exp = explode(':', $subform[$k]);
-										$keys['fkey'] = $exp[0];	# Verknüpfungsattribut in diesem Layer
-										$keys['pkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
-									}
-									else {
-										$keys['fkey'] = $keys['pkey'] = $subform[$k];
-									}
-									$attributes['subform_fkeys'][$i][] = $keys;
-									$attributes['SubFormFK_hidden'][$attributes['indizes'][$keys['fkey']]] = 1;
-								}
-								if ($options[1] != '') {
-									if ($options[1] == 'no_new_window') {
-										$attributes['no_new_window'][$i] = true;
-									}
-								}
+						if ($attributes['options_struct'][$i] != null) {
+							$attributes['subform_layer_id'][$i] = $attributes['options_struct'][$i]['ref_layer_id'];
+							$attributes['subform_fkeys'][$i] = $attributes['options_struct'][$i]['ref_keys'];
+							$attributes['no_new_window'][$i] = ($attributes['options_struct'][$i]['window_type'] === 'no_new_window');
+							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+							foreach ($attributes['subform_fkeys'][$i] as $ref_key) {
+								$attributes['SubFormFK_hidden'][$attributes['indizes'][$ref_key['fkey']]] = 1;
 							}
 						}
 					} break;
