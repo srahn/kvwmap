@@ -1319,7 +1319,7 @@ echo '			</table>
 			}
 			$legend .= '<script>';
 			foreach ($layernames as $layername => $layer_ids) {
-				$legend .=  "layernames['" . $layername . "'] = [" . implode(', ', $layer_ids) . "];\n";
+				$legend .=  "layernames['" . addslashes($layername) . "'] = [" . implode(', ', $layer_ids) . "];\n";
 			}
 			$legend .= "</script>";
 		}
