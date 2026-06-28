@@ -1,0 +1,14 @@
+<?php
+class AuthErrCodes {
+  const LOGIN_REQUIRED = 'AUTH-001';
+  const LOGIN_FAILED = 'AUTH-002';
+  const WRONG_PASSWORD = 'AUTH-003';
+  const WRONG_LOGIN_NAME = 'AUTH-004';
+  const ACCOUNT_NOT_YET_STARTED = 'AUTH-005';
+  const PASSWORD_EXPIRED = 'AUTH-006';
+  const LOGIN_IS_LOCKED = 'AUTH-007';
+  const ACCOUNT_ARCHIVED = 'AUTH-008';
+  const REGISTRATION_REQUIRED = 'AUTH-009';
+  const AGREEMENT_MISSING = 'AUTH-010';
+}
+?>

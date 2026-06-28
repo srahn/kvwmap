@@ -31,11 +31,11 @@
 							</tr><?
 							if ($this->login_failed_reason != '') {
 								switch ($this->login_failed_reason) {
-									case 'authentication' : {
-										$this->add_message('error', sprintf($strLoginFailedMsg['authentication'], $this->formvars['num_failed']));
+									case AuthErrCodes::WRONG_PASSWORD : {
+										$this->add_message('error', sprintf($strLoginFailedMsg[AuthErrCodes::WRONG_PASSWORD], $this->formvars['num_failed']));
 									} break;
-									case 'login_is_locked' : {
-										$this->add_message('error', sprintf($strLoginFailedMsg['login_is_locked'], (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s')));
+									case AuthErrCodes::LOGIN_IS_LOCKED : {
+										$this->add_message('error', sprintf($strLoginFailedMsg[AuthErrCodes::LOGIN_IS_LOCKED], (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s')));
 									} break;
 									default : {
 										$this->add_message('error', $strLoginFailedMsg[$this->login_failed_reason]);
