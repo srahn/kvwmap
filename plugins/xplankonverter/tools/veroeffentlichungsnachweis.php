@@ -8,15 +8,14 @@
   // ToDos:
   // debug_mode in veroeffentlichungsnachweis_config.json anpassen
   $config = json_decode(file_get_contents('veroeffentlichungsnachweis_config.json'));
-  echo "\nEnvironment: " . getenv('HOSTNAME') . ' zugelassen: ' . implode(', ', $config->environments);
+  // echo "\nEnvironment: " . getenv('HOSTNAME') . ' zugelassen: ' . (count($config->environments) === 0 ? 'keine' : implode(', ', $config->environments));
   if (!in_array(getenv('HOSTNAME'),  $config->environments)) {
-    echo "\nAbbruch weil nicht in einer der konfigurierten Umgebungen!";
+    echo "\nAbbruch weil nicht in einer der konfigurierten Umgebungen!\n";
     // Wenn das in anderen Umgebungen laufen werden soll, hier exit auskommentieren!
     exit;
   }
 
-
-  /**
+ /**
  * auslegung Auslegung
  *   hat veroeffentlichungsprotokoll Veroeffentlichungsprotokoll
  *     hat nachweise Veroeffentlichungsnachweise
@@ -34,20 +33,19 @@ try {
   include('../../../credentials.php');
   include('../../../config.php');
   include(PLUGINS . 'xplankonverter/config/config.php');
-  $debug_mode = 1;
   if (
     $config->is_testzeit AND
     date('Y-m-d H:m:s') >= $config->testzeitraum->start AND
     date('Y-m-d H:m:s') < $config->testzeitraum->ende
   ) {
     define('AUSLEGUNG_MODE', 'dev');
-    $debug_mode = $config->debug_mode;
     define('AUSLEGUNG_URL', $config->auslegung_url);
   }
   else {
     define('AUSLEGUNG_MODE', 'prod');
     define('AUSLEGUNG_URL', "https://bplan.geodaten-mv.de/bauportal/Uebersicht/Details");
   }
+  $debug_mode = $config->debug_mode;
   include(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
   include(CLASSPATH . 'kvwmap.php');
   include(CLASSPATH . 'log.php');
@@ -99,6 +97,8 @@ try {
   $GUI->user->setRolle($GUI->formvars['stelle_id']);
   $GUI->debug->user_funktion = 'admin';
 
+  // echo_log('Config: ' . print_r($config, true), 2);
+
   # Aktuelle Auslegungen abfragen
    $result = Auslegung::find_aktuelle($GUI, $GUI->formvars['plan_gml_id'], $pruefzeit);
   if (!$result['success']) {
@@ -110,28 +110,35 @@ try {
   if (count($auslegungen) === 0) {
     echo_log('Keine aktuellen Auslegungen gefunden.', 2);
   }
+  else {
+    echo_log(count($auslegungen) . ' aktuelle Auslegungen gefunden.', 2);
+  }
   foreach ($auslegungen AS $auslegung) {
-    echo_log('Auslegung ' . $auslegung->get('plan_gml_id') . ' von: ' . $auslegung->get('startdatum') . ' bis: ' . $auslegung->get('enddatum') . ' Anzahl Dokumente: ' . count($auslegung->plan->veroeffentlichungsprotokoll_dokumente), 2);
+    echo_log("\nAuslegung: " . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('plan_gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr') . ' von: ' . $auslegung->get('startdatum') . ' bis: ' . $auslegung->get('enddatum') . ' Veröff-Datum: ' . $auslegung->get('veroeffentlichungsdatum') . ' Anzahl Dokumente: ' . count($auslegung->plan->veroeffentlichungsprotokoll_dokumente), 2);
     if ($auslegung->veroeffentlichungsprotokoll_exists()) {
       echo_log('Veröffentlichungsprotokoll existiert bereits.', 2);
     }
     else {
       if ($auslegung->veroeffentlicht_in_auslegungszeitraum($pruefzeit)) {
+        echo_log('Veröffentlichungsdatum vor oder im Auslegungszeitraum', 2);
         // Protokoll anlegen und prüfen ob die Veröffentlichung zu spät ist
-        echo_log('Kein Veröffentlichungsprotokoll zur Auslegung gefunden, lege neues Protokoll an.', 2);
         $result = Veroeffentlichungsprotokoll::open($auslegung, $pruefstunde);
         if (!$result['success']) {
           echo_log('Fehler beim Anlegen des Veröffentlichungsprotokolls. ' . $result['msg'], 1);
           exit;
         }
         $auslegung->veroeffentlichungsprotokoll = $result['protokoll'];
-        echo_log('Veröffentlichungsprotokoll angelegt für Planart: ' . $auslegung->get('planart') . ' plan_gml_id: ' . $auslegung->get('plan_gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr'), 2);
+        echo_log('Veröffentlichungsprotokoll angelegt', 2);
+        $auslegung->veroeffentlichungsprotokoll->send_emails = $config->send_emails;
         $auslegung->veroeffentlichungsprotokoll->create_and_send_ueberwachungsbeginn_alert($auslegung, $pruefzeit);
       }
       else {
+        echo_log('Nicht im Auslegungszeitraum veröffentlicht.', 2);
         continue;
       }
     }
+
+    $auslegung->veroeffentlichungsprotokoll->send_emails = $config->send_emails;
 
     // Prüfe ob es Lücken in der Überwachung gab
     $pruef_result = pruefe_nachweisluecke($auslegung->veroeffentlichungsprotokoll, $pruefstunde);
@@ -143,7 +150,6 @@ try {
       }
       $auslegung->veroeffentlichungsprotokoll->create_and_send_nachweis_luecke_alert($auslegung, $pruef_result);
     }
-
 
     // Prüfe ob die Auslegung jetzt verfügbar ist.
     $pruef_result = pruefe_auslegung(AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get_plan_type()) . '&id=' . $auslegung->get('plan_gml_id'), $auslegung->get('plan_gml_id'));
@@ -173,10 +179,10 @@ try {
       exit;
     }
     if ($result['num_nachweisfehler'] < 5) {
-      echo_log('weniger als 5 Nachweisfehler in den letzten 5 Stunden.', 2);
+      echo_log('Keine gefunden.', 2);
       continue;
     }
-    echo_log('5 Nachweisfehler in den letzten 5 Stunden gefunden', 1);
+    echo_log('5 Nachweisfehler in den letzten 5 Stunden gefunden.', 1);
     echo_log('Der Plan ' . $auslegung->plan->get('name') . ' Nr ' . $auslegung->plan->get('nummer') . ' gml_id: ' . $auslegung->plan->get('gml_id') . ' mit Auslegungszeitraum von ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum') . ' war am ' . $pruefstundezeit . ' auf dem Bau- und Planungsportal für 5 Stunden nicht verfügbar!', 1);
 
     $auslegung->veroeffentlichungsprotokoll->create_and_send_auslegung_alert($auslegung, $pruefstunde);
@@ -193,20 +199,28 @@ try {
     );
   }
 
-  // Finde beendete Auslegungen. Erzeuge, versende und schließe die Veröffentlichungsprotokolle.
-  echo_log('Suche beendete Auslegungen:', 2);
-  $result = Auslegung::find_completed($GUI, $pruefzeit, $GUI->formvars['plan_gml_id']);
-  if (!$result['success']) {
-    echo_log('Fehler in find_completed ' . date('Y-m-d H:i:s', $pruefzeit) . ': ' . $result['msg'], 1);
-    exit;
-  }
-  foreach($result['completed_auslegungen'] AS $auslegung) {
-    echo_log('veroeffentlichungsnachweis.php ' . __LINE__ . ': Erzeuge und sende Protokoll der Auslegung mit ' . count($auslegung->veroeffentlichungsprotokoll->nachweise) . ' Nachweisen und ' . count($auslegung->veroeffentlichungsprotokoll->nachweis_luecken) . ' Lücken.', 2);
-    $auslegung->veroeffentlichungsprotokoll->create_and_send_protokoll($auslegung);
-    $result = $auslegung->veroeffentlichungsprotokoll->update_attr_prep(array("observationend" => date('Y-m-d H:i:s', $pruefzeit)), true);
+  if ($config->beende_auslegungen) {
+    //Finde beendete Auslegungen. Erzeuge, versende und schließe die Veröffentlichungsprotokolle.
+    echo_log('Suche beendete Auslegungen:', 2);
+    $result = Auslegung::find_completed($GUI, $pruefzeit, $GUI->formvars['plan_gml_id']);
     if (!$result['success']) {
-      echo_log('Fehler bei der Aktualisierung des observationend des Veröffentlichungsprotokolls in Line: ' . __LINE__ . ': ' . $result['msg'], 1);
+      echo_log('Fehler in find_completed ' . date('Y-m-d H:i:s', $pruefzeit) . ': ' . $result['msg'], 1);
       exit;
+    }
+    foreach($result['completed_auslegungen'] AS $auslegung) {
+      $auslegung->veroeffentlichungsprotokoll->send_emails = $config->send_emails;
+      $result = $auslegung->veroeffentlichungsprotokoll->create_and_send_protokoll($auslegung);
+      if (!$result['success']) {
+        echo_log('Fehler beim Erzeugen und Senden des Veröffentlichungsprotokolls: ' . $result['msg'], 1);
+      }
+      else {
+        $result = $auslegung->veroeffentlichungsprotokoll->update_attr_prep(array("observationend" => date('Y-m-d H:i:s', $pruefzeit)), true);
+        echo_log("Protokoll zur Auslegung: " . $auslegung->get('planart') . ' gml_id: ' . $auslegung->get('plan_gml_id') . ' lfdnr: ' . $auslegung->get('lfdnr') . ' von: ' . $auslegung->get('startdatum') . ' bis: ' . $auslegung->get('enddatum') . ' mit ' . count($auslegung->veroeffentlichungsprotokoll->nachweise) . ' Nachweisen und ' . count($auslegung->veroeffentlichungsprotokoll->nachweis_luecken) . ' Lücken abgeschlossen.', 2);
+        if (!$result['success']) {
+          echo_log('Fehler bei der Aktualisierung des observationend des Veröffentlichungsprotokolls in Line: ' . __LINE__ . ': ' . $result['msg'], 1);
+          exit;
+        }
+      }
     }
   }
 
@@ -217,6 +231,8 @@ try {
 catch (Exception $e) {
   echo_log('Fehler: ' . $e);
 }
+
+echo_log("\n". date('Y-m-d H:i:s', $pruefzeit) . " Ende Prüfung\n", 0);
 
 /**
  * 
@@ -267,8 +283,8 @@ function pruefe_auslegung($url, $gml_id) {
     $pruefcode = 2;
   }
   else {
-    echo_log('Prüfe ob gml_id: ' . $gml_id . ' im Body vorkommt', 2);
-    echo_log('Body: ' . $body, 3);
+    // echo_log('Prüfe ob gml_id: ' . $gml_id . ' im Body vorkommt', 2);
+    // echo_log('Body: ' . $body, 3);
     if (strpos($body, 'value="' . $gml_id . '"') !== false) {
       $msg = "Plan veröffentlicht";
       $pruefcode = 0;
@@ -306,7 +322,7 @@ function pruefe_nachweisluecke($veroeffentlichungsprotokoll, $pruefstunde) {
     // und es kann einfach geprüft werden ob die vollen Stunden von observationstart bis zur aktuellen Prüfstunde mit pruefungen_seit_observationstart übereinstimmen.
     $stunden_seit_last_pruefung = volle_stunden($veroeffentlichungsprotokoll->get('last_pruefung'), date("Y-m-d H:i:s", $pruefstunde));
   }
-  if ($stunden_seit_last_pruefung < 1) {
+  if ($stunden_seit_last_pruefung <= 1) {
     return array(
       'pruefcode' => 0,
       'msg' => 'Prüfung der Nachweise ergab keine Lücke.'
@@ -335,7 +351,7 @@ function pruefe_nachweisluecke($veroeffentlichungsprotokoll, $pruefstunde) {
  */
 function find_nachweisfehler($nachweis_obj, $auslegung, $pruefstunde) {
   global $debug_mode;
-  echo_log('Suche Nachweisfehler für den Zeitraum der letzten 5 Stunden für planart: ' . $auslegung->get('planart') . ', gml_id: ' . $auslegung->get('plan_gml_id') . ', lfdnr: ' . $auslegung->get('lfdnr'), 2);
+  echo_log('Suche Nachweisfehler für den Zeitraum der letzten 5 Stunden.', 2);
   $nachweisfehler = $nachweis_obj->find_where(
     "
       protokoll_id = " . $auslegung->veroeffentlichungsprotokoll->get('id') . " AND

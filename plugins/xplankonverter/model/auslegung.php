@@ -22,19 +22,21 @@ class Auslegung extends PgObject {
    */
   public static	function find_aktuelle($gui, $plan_gml_id = NULL, $pruefzeit) {
 		$auslegung_obj = new Auslegung($gui);
-    // $auslegungen = $auslegung_obj->find_where("
-    //   '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= startdatum AND '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone < enddatum + 1 AND
-    //   COALESCE('" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= veroeffentlichungsdatum, false)"
-    //   . ($plan_gml_id ? " AND plan_gml_id = '" . $plan_gml_id . "'" : ''),
-    //   "planart",
-    //   "planart, plan_gml_id, lfdnr, startdatum, enddatum"
-    // );
     $auslegungen = $auslegung_obj->find_where("
       '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone >= startdatum AND '" . date('Y-m-d H:i:s', $pruefzeit) . "'::timestamp without time zone < enddatum + 1"
       . ($plan_gml_id ? " AND plan_gml_id = '" . $plan_gml_id . "'" : ''),
       "planart",
       "planart, plan_gml_id, lfdnr, startdatum, enddatum, veroeffentlichungsdatum"
     );
+    // $auslegungen = $auslegung_obj->find_where("
+    //     enddatum >= '2026-06-08 00:00:00' AND
+    //     startdatum < '2026-06-27' AND   
+    //     veroeffentlichungsdatum < enddatum
+    //   "
+    //   . ($plan_gml_id ? " AND plan_gml_id = '" . $plan_gml_id . "'" : ''),
+    //   "planart",
+    //   "planart, plan_gml_id, lfdnr, startdatum, enddatum, veroeffentlichungsdatum"
+    // );
     foreach ($auslegungen AS $auslegung) {
       $result = $auslegung->find_plan();
       if (!$result['success']) {
@@ -74,6 +76,7 @@ class Auslegung extends PgObject {
       NULL,
       "
         v.id AS veroeff_id,
+        v.observationstart,
         a.planart,
         a.plan_gml_id,
         a.lfdnr,
@@ -107,7 +110,7 @@ class Auslegung extends PgObject {
       echo_log(count($completed_auslegungen) . ' beendete Auslegungen gefunden.', 2);
     }
     foreach ($completed_auslegungen AS $auslegung) {
-      echo_log('Class Auslegung Func find_completed ' . __LINE__ . ': Frage Plan zu Auslegung ab', 2);
+      // echo_log('Class Auslegung Func find_completed ' . __LINE__ . ': Frage Plan zu Auslegung ab', 2);
       $result = $auslegung->find_plan();
 
       if (!$result['success']) {
@@ -117,7 +120,7 @@ class Auslegung extends PgObject {
         );
       }
       $auslegung->plan = $result['plan'];
-      echo_log('Frage Veröffentlichungsprotokoll der Auslegung ab', 2);
+      // echo_log('Frage Veröffentlichungsprotokoll der Auslegung ab', 2);
       $result = Veroeffentlichungsprotokoll::find_by_auslegung($auslegung);
       if (!$result['success']) {
         return array(
@@ -143,7 +146,7 @@ class Auslegung extends PgObject {
       );
     }
     $plan = $result['plan'];
-    echo_log('Plan zur Auslegung gefunden: ' . $plan->get('name') . ' ' . $plan->get('nummer'), 2);
+    // echo_log('Plan zur Auslegung gefunden: ' . $plan->get('name') . ' ' . $plan->get('nummer'), 2);
     $result = $plan->find_veroeffentlichungsprotokoll_dokumente($this->get('plan_gml_id'));
     if (!$result['success']) {
       return array(
@@ -183,9 +186,12 @@ class Auslegung extends PgObject {
     return $veroeffentlichungsdatum !== null && $pruefzeit >= strtotime($veroeffentlichungsdatum);
   }
 
+  /**
+   * Prüft ob ein Veröffentlichungsdatum gesetzt ist und ob es vor oder am Ende der Auslegung liegt.
+   */
   function veroeffentlicht_in_auslegungszeitraum() {
     $veroeffentlichungsdatum = strtotime($this->get('veroeffentlichungsdatum'));
-    return $this->get('veroeffentlichungsdatum') !== null && $veroeffentlichungsdatum >= strtotime($this->get('startdatum')) && $veroeffentlichungsdatum <= strtotime($this->get('enddatum'));
+    return $this->get('veroeffentlichungsdatum') !== null && $veroeffentlichungsdatum <= strtotime($this->get('enddatum'));
   }
 
   function veroeffentlichung_zu_spaet() {

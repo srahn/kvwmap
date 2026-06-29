@@ -15,6 +15,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
   public $nachweise;
   public $nachweis_luecken;
   public $zustaendige_user;
+  public $send_emails;
 
 	function __construct($gui, $planart = NULL) {
 		parent::__construct($gui, Veroeffentlichungsprotokoll::$schema, Veroeffentlichungsprotokoll::$tableName);
@@ -273,11 +274,13 @@ class Veroeffentlichungsprotokoll extends PgObject {
         'msg' => 'Die Konstante XPLANKONVERTER_NACHWEIS_DDL ist nicht belegt.'
       );
     }
-    $this->gui->formvars['chosen_layer_id'] = XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID;
-    $this->gui->formvars['aktivesLayout'] = XPLANKONVERTER_VEROEFF_NACHWEIS_DDL;
-    $this->gui->formvars['checkbox_names_' . XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID] = 'check;vp;veroeffentlichungsprotokolle;' . $auslegung->get('veroeff_id') . ';' . XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID;
-    $this->gui->formvars['check;vp;veroeffentlichungsprotokolle;' . $auslegung->get('veroeff_id') . ';' . XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID] = 'on';
-    $result = $this->gui->generischer_sachdaten_druck_createPDF();
+    $auslegung->gui->formvars = array();
+    $auslegung->gui->formvars['chosen_layer_id'] = XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID;
+    $auslegung->gui->formvars['aktivesLayout'] = XPLANKONVERTER_VEROEFF_NACHWEIS_DDL;
+    $auslegung->gui->formvars['checkbox_names_' . XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID] = 'check;vp;veroeffentlichungsprotokolle;' . $auslegung->get('veroeff_id') . ';' . XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID;
+    $auslegung->gui->formvars['check;vp;veroeffentlichungsprotokolle;' . $auslegung->get('veroeff_id') . ';' . XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID] = 'on';
+    echo_log('Starte generischer_sachdaten_druch_createPDF mit formvars: ' . print_r($auslegung->gui->formvars, true), 2);
+    $result = $auslegung->gui->generischer_sachdaten_druck_createPDF();
     $path = XPLANKONVERTER_FILE_PATH . 'veroeffentlichungsprotokolle/';
     if (!is_dir($path)) {
       mkdir($path, 0777, true);
@@ -316,10 +319,9 @@ class Veroeffentlichungsprotokoll extends PgObject {
     //     $body .= "Prüfzeit: " . preg_replace('/:\d+(?:\.\d+)?$/', '', $nachweis->get('pruefstunde')) . ' Ergebnis: ' . $nachweis->get('pruefergebnis') . ' gemeldet: ' . (preg_replace('/:\d+(?:\.\d+)?$/', '', $nachweis->get('gemeldet_am')) ?: '') . "\n";
     //   }
     // }
+
     $fehler_dauer = count($this->nachweise);
     $verfuegbarkeit_p = round(100 - ($fehler_dauer / $auslegung_dauer * 100), 2);
-    $body .= "\nInsgesamt gab es " . count($this->nachweise) . " Fehlermeldungen im Auslegungszeitraum. Damit war der Plan in " . $verfuegbarkeit_p . "% der Zeit verfügbar.\n";
-
     $ausfall_dauer = 0;
     // Aktuell keine Ausgabe der Lücken in der E-Mail.
     if (count($this->nachweis_luecken) > 0) {
@@ -331,7 +333,12 @@ class Veroeffentlichungsprotokoll extends PgObject {
     }
     $ausfall_dauer = $ausfall_dauer / 3600;
     $ueberwachbarkeit_p = round(100 - ($ausfall_dauer / $auslegung_dauer * 100), 2);
-    $body .= "\nInsgesamt gab es einen Zeitraum von " . $ausfall_dauer . ' Stunden in denen die Auslegung nicht überwacht werden konnte. Das entspricht einer Überwachungszeit von ' . $ueberwachbarkeit_p . "% im gesamten Auslegungszeitraum.\n";
+
+    $body .= "\nStart der Überwachung war am " . date('d.m.Y H:m', $auslegung->get('observationstart')) . " Uhr.";
+
+    $body .= "\n\nDie Auslegung konnte in einem Zeitraum von " . $ausfall_dauer . ' Stunden nicht überwacht werden konnte. Das entspricht einer Überwachungszeit von ' . $ueberwachbarkeit_p . "% im gesamten Auslegungszeitraum.";
+
+    $body .= "\n\nIm Überwachungszeitraum gab es " . count($this->nachweise) . " Fehlermeldungen. Damit war der Plan in " . $verfuegbarkeit_p . "% der Überwachungszeit verfügbar.\n";
 
     $body .= "\n\n" . "Dies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an GDI-Servive robert.kraetschmer@gdi-service.de oder die Koordinierungsstelle im Landkreis LUP geodatenmanagement@kreis-lup.de oder Ihren jeweilgen Ansprechpartner im zuständigen Landkreis.";
     echo_log('class Veroeffentlichungsprotokoll func create_veroeffentlichungsprotokoll_mail ' . __LINE__ . ': Erstelle Mail mit Betreff: ' . $subject . ' und Body: ' . $body, 3);
@@ -350,7 +357,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
         $user->get('contact_name')
       );
     }
-    echo_log('E-Mail zum Überwachungsbeginn gesendet an Nutzer: ' . implode(', ', array_map(function($user) { return $user->get('contact_name'); }, $this->zustaendige_user)), 2);
+    // echo_log('E-Mail zum Überwachungsbeginn gesendet an Nutzer: ' . implode(', ', array_map(function($user) { return $user->get('contact_name'); }, $this->zustaendige_user)), 2);
   }
 
   function create_and_send_nachweis_luecke_alert($auslegung, $pruef_result) {
@@ -376,38 +383,45 @@ class Veroeffentlichungsprotokoll extends PgObject {
   }
 
   function create_and_send_protokoll($auslegung) {
-    echo_log('E-Mail mit Veröffentlichungsprotokoll gesendet an Nutzer: ' . implode(', ', array_map(function($user) { return $user->get('contact_name'); }, $this->zustaendige_user)), 2);
-    $this->create_pdf_datei($auslegung);
-    foreach ($this->zustaendige_user AS $user) {
-      $this->send_email(
-        $this->create_veroeffentlichungsprotokoll_mail($auslegung, $user->get('contact_name')),
-        $user->get('contact_email'),
-        $user->get('contact_name')
-      );
+    $result = $this->create_pdf_datei($auslegung);
+    if ($result['success']) {
+      foreach ($this->zustaendige_user AS $user) {
+        $this->send_email(
+          $this->create_veroeffentlichungsprotokoll_mail($auslegung, $user->get('contact_name')),
+          $user->get('contact_email'),
+          $user->get('contact_name')
+        );
+      }
     }
+    return $result;
   }
 
   function send_email($email, $to_email, $to_name) {
-    echo_log('Schreibe Mail in die mail_queue.', 3);
-    $mail = mail_att(
-      "Bauleitplanserver", // from_name
-      MAILREPLYADDRESS, // from_email
-      $to_email,
-      NULL, // cc_email
-      'peter.korduan@gdi-service.de', // reply_email
-      $email['subject'],
-      $email['body'], // message
-      $email['anhang'], // attachement
-      MAILMETHOD, // mode
-      MAILSMTPSERVER,
-      MAILSMTPPORT,
-      $to_name
-    );
-    echo_log('E-Mail an ' . $to_email . " erstellt: \n" . $email['body'], 3);
+    if ($this->send_emails) {
+      $mail = mail_att(
+        "Bauleitplanserver", // from_name
+        MAILREPLYADDRESS, // from_email
+        $to_email,
+        NULL, // cc_email
+        'peter.korduan@gdi-service.de', // reply_email
+        $email['subject'],
+        $email['body'], // message
+        $email['anhang'], // attachement
+        MAILMETHOD, // mode
+        MAILSMTPSERVER,
+        MAILSMTPPORT,
+        $to_name
+      );
+      echo_log('E-Mail mit ' . $email['subject'] . ' an ' . $to_email . " versendet.", 2);
+      echo_log("Body: " . $email['body'], 3);
+    }
+    else {
+      echo_log('E-Mail ' . $email['subject'] . ' an ' . $to_email . " nicht versendet.", 2);
+    }
 
     return array(
       'success' => $mail === 1,
-      'msg' => 'E-Mail erfolgreich versendet.'
+      'msg' => 'E-Mail ' . ($this->send_emails ? 'erfolgreich' : 'nicht') . ' versendet.'
     );
   }
 
