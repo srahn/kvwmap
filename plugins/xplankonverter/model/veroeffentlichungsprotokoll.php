@@ -279,7 +279,8 @@ class Veroeffentlichungsprotokoll extends PgObject {
     $auslegung->gui->formvars['aktivesLayout'] = XPLANKONVERTER_VEROEFF_NACHWEIS_DDL;
     $auslegung->gui->formvars['checkbox_names_' . XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID] = 'check;vp;veroeffentlichungsprotokolle;' . $auslegung->get('veroeff_id') . ';' . XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID;
     $auslegung->gui->formvars['check;vp;veroeffentlichungsprotokolle;' . $auslegung->get('veroeff_id') . ';' . XPLANKONVERTER_VEROEFF_NACHWEIS_LAYER_ID] = 'on';
-    echo_log('Starte generischer_sachdaten_druch_createPDF mit formvars: ' . print_r($auslegung->gui->formvars, true), 2);
+    $auslegung->gui->qlayerset[0]['shape'] = null;
+    // echo_log('Starte generischer_sachdaten_druch_createPDF mit formvars: ' . print_r($auslegung->gui->formvars, true), 2);
     $result = $auslegung->gui->generischer_sachdaten_druck_createPDF();
     $path = XPLANKONVERTER_FILE_PATH . 'veroeffentlichungsprotokolle/';
     if (!is_dir($path)) {

@@ -6,7 +6,7 @@
     "kvwmap_prod_web",
     "kvwmap_prod_dev"
   ],
-  "is_testzeit" : true,
+  "is_testzeit" : false,
   "send_emails" : true,
   "beende_auslegungen" : true,
   "testzeitraum" : {
