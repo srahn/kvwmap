@@ -2,11 +2,11 @@
 	$strLogin = 'Anmeldung';
 	$strLoginFailed = 'Anmeldung nicht erfolgreich';
 	$strLoginFailedMsg = array(
-		'authentication' => 'Passwort %s mal falsch eingegeben!',
-		'wrong_login_name' => 'Zugangsdaten falsch eingegeben!',
-		'login_is_locked' => 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>%s gesperrt!',
-		'expired' => 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen!',
-		'not_yet_started' => 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen!'
+		AuthErrCodes::WRONG_PASSWORD => 'Passwort %s mal falsch eingegeben!',
+		AuthErrCodes::WRONG_LOGIN_NAME => 'Zugangsdaten falsch eingegeben!',
+		AuthErrCodes::LOGIN_IS_LOCKED => 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>%s gesperrt!',
+		AuthErrCodes::PASSWORD_EXPIRED => 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen!',
+		AuthErrCodes::ACCOUNT_NOT_YET_STARTED => 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen!'
 	);
 	$strLoginLockedUntil = 'Login wieder freigegeben';
 	$strPassword = 'Passwort';
