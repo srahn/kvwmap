@@ -14,13 +14,13 @@
 		<label class="fetter" for="email">E-Mail *</label>
 		<input name="email" type="text" value="<? echo $this->formvars['email']; ?>">
 		<div class="clear"></div>
-		<label class="fetter" for="anrede"><? echo $this->strSalutation; ?> *</label>
-		<? echo FormObject::createSelectField('anrede', [$this->strMister, $this->strMisses], $this->invitation->get('anrede')); ?>
+		<label class="fetter" for="anrede"><? echo $this->strSalutation; ?></label>
+		<? echo FormObject::createSelectField('anrede', [$this->strMister, $this->strMisses], $this->formvars['anrede']); ?>
 		<div class="clear"></div>
 		<label class="fetter" for="name"><? echo $this->strSurName; ?> *</label>
 		<input name="name" type="text" value="<? echo $this->formvars['name']; ?>">
 		<div class="clear"></div>
-		<label class="fetter" for="name"><? echo $this->strForeName; ?></label>
+		<label class="fetter" for="name"><? echo $this->strForeName; ?> *</label>
 		<input name="vorname" type="text" value="<? echo $this->formvars['vorname']; ?>">
 		<div class="clear"></div>
 		<label class="fetter" for="loginname "><? echo $this->strLoginName; ?> *</label>
@@ -29,7 +29,7 @@
 		<div style="float: left"><? echo $strWhereShallBeWorked; ?></div>
 		<div class="clear"></div>
 		<label class="fetter" for="stelle_id"><? echo $this->strTask; ?> *</label>
-		<? echo FormObject::createSelectField('stelle_id', $this->invitation->stellen, $this->invitation->get('stelle_id'), 10, 'width: 370px', '', '', true); ?>
+		<? echo FormObject::createSelectField('stelle_id', $this->invitation->stellen, $this->formvars['stelle_id'], 10, 'width: 370px', '', '', true); ?>
 		<div class="clear"></div>
 		<label class="fetter" for="stop "><? echo $strStop; ?></label>
 		<input name="stop" type="text" value="<? echo $this->formvars['stop']; ?>">

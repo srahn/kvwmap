@@ -2239,7 +2239,14 @@ function go_switch($go, $exit = false) {
 
 			case 'Einladung_Speichern' : {
 				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
-				$GUI->invitation_save();
+				$result = $GUI->invitation_save();
+				if ($result['success']) {
+					$GUI->invitations_list();
+				}
+				else {
+					$GUI->add_message('array', $result['msg']);
+					$GUI->invitation_formular();
+				}
 			} break;
 
 			case 'Einladung_Ändern' : {

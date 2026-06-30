@@ -547,7 +547,7 @@ class PgObject {
 		if (!empty($data)) {
 			$this->data = $data;
 		}
-		if ($this->data[$this->identifier] == '' OR $this->data[$this->identifier] == 0) {
+		if ($this->data[$this->identifier] == '' OR ($this->identifier_type == 'integer' AND $this->data[$this->identifier] == 0)) {
 			unset($this->data[$this->identifier]);
 		}
 		$values = array_map(
@@ -609,9 +609,10 @@ class PgObject {
 		*/
 		$query = pg_query($this->database->dbConn, $sql);
 		if (!$query) {
-			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), true);
+			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), $this->show);
 			return array(
 				'success' => false,
+				'type' => 'error',
 				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn)
 			);
 		}
