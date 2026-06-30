@@ -36,7 +36,7 @@ BEGIN;
       SELECT
         p.gml_id,
         'B-Plan' AS plantyp,
-        xplankonverter.bplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename) anzeigename,
+        xplankonverter.bplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename, p.fassungsbezeichnung) anzeigename,
         p.raeumlichergeltungsbereich AS geom,
         p.konvertierung_id
       FROM
@@ -45,7 +45,7 @@ BEGIN;
       SELECT
         f.gml_id,
         'F-Plan' AS plantyp,
-        xplankonverter.fplan_anzeigename(f.name, f.planart, f.nummer, (f.gemeinde[1]).gemeindename) anzeigename,
+        xplankonverter.fplan_anzeigename(f.name, f.planart, f.nummer, (f.gemeinde[1]).gemeindename, f.fassungsbezeichnung) anzeigename,
         f.raeumlichergeltungsbereich AS geom,
         f.konvertierung_id
       FROM
@@ -54,7 +54,7 @@ BEGIN;
       SELECT
         so.gml_id,
         'SO-Plan' AS plantyp,
-        xplankonverter.soplan_anzeigename(so.name, so.planart, so.nummer, (so.gemeinde[1]).gemeindename) anzeigename,
+        xplankonverter.soplan_anzeigename(so.name, so.planart, so.nummer, (so.gemeinde[1]).gemeindename, so.fassungsbezeichnung) anzeigename,
         so.raeumlichergeltungsbereich AS geom,
         so.konvertierung_id
       FROM
