@@ -1,8 +1,14 @@
 {
   "environments" : [
-    "kvwmap_prod_web"
+    "kvwmap_prod"
+  ],
+  "environments_tmp" : [
+    "kvwmap_prod",
+    "kvwmap_dev"
   ],
   "is_testzeit" : false,
+  "send_emails" : true,
+  "beende_auslegungen" : true,
   "testzeitraum" : {
     "start" : "2026-04-24 09:53:15",
     "ende" : "2026-10-01 14:30:15"

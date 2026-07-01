@@ -68,7 +68,7 @@ class LayerClass extends PgObject {
 		if ($this->get('expression') == '') {
 			$def = '';
 		}
-		elseif (preg_match("/'\\[[^\\]]+\\]'\\s+in\\s+\\('[^']*'\\)/", $this->get('expression'))) {
+		elseif (preg_match("/^\s*\(.*\[[^\]]+\]\s*\S+\s*.+?\)\s*$/", $this->get('expression'))) {
 			$def = trim($this->get('expression'));
 		}
 		elseif ($classitem == '') {
