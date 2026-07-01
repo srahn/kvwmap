@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gdi-service.de/public/schemas/kvwmap/options/Textfeld.json",
+  "title": "Dokument options",
+  "description": "Options for kvwmap formular element type Testfeld.",
+  "type": "object",
+  "example": {
+    "rows" : 5,
+    "rows_by_length" : true,
+    "max_rows" : 25,
+    "cols" : 60,
+    "width": "500px",
+    "sql" : "SELECT text FROM my_table WHERE id = $ID",
+  },
+  "properties": {
+    "rows": {
+      "description": "The number of rows for the text field.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "rows_by_length": {
+      "description": "Wirkt sich nur aus wenn rows nicht gesetzt ist. Wenn das auf true gesetzt ist, wird die Anzahl der Zeilen automatisch anhand der Länge des Textes berechnet.",
+      "type": "boolean"
+    },
+    "max_rows": {
+      "description": "The maximum number of rows, calculated based on the text length.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "cols": {
+      "description": "The number of columns for the text field.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "sql": {
+      "description": "SQL-Abfrage, die den Inhalt des Textfeldes liefert. Die Abfrage muss mit SELECT beginnen und darf nur eine Spalte und eine Zeile zurückliefern. Wirkt sich nicht aus, wenn subform_url gesetzt ist.",
+      "type": "string"
+    },
+    "subform_url": {
+      "description": "URL zu einem externen Eingabewerkzeug, mit welchem der Inhalt des Textfeldes erzeugt werden wird.",
+      "type": "string"
+    },
+    "width": {
+      "description": "geplant. The width of the text field. This can be specified in pixels (e.g., '500px') or as a percentage (e.g., '100%'). If not specified, width is determined by the number of columns.",
+      "type": "string"
+    }
+  },
+  "required": [ "rows_by_length" ]
+}
