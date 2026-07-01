@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://gdi-service.de/public/schemas/kvwmap/options/Textfeld.json",
-  "title": "Dokument options",
-  "description": "Options for kvwmap formular element type Testfeld.",
+  "title": "Textfeld Optionen",
+  "description": "Option für den Formular-Element-Typ Textfeld",
   "type": "object",
   "example": {
     "rows" : 5,
@@ -10,7 +10,7 @@
     "max_rows" : 25,
     "cols" : 60,
     "width": "500px",
-    "sql" : "SELECT text FROM my_table WHERE id = $ID",
+    "sql" : "SELECT text FROM my_table WHERE id = $ID"
   },
   "properties": {
     "rows": {
