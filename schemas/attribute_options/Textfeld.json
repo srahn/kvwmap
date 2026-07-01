@@ -10,7 +10,7 @@
     "max_rows" : 25,
     "cols" : 60,
     "width": "500px",
-    "sql" : "SELECT text FROM my_table WHERE id = $ID"
+    "sql" : "SELECT text FROM my_table WHERE id = $id"
   },
   "properties": {
     "rows": {
@@ -45,5 +45,5 @@
       "type": "string"
     }
   },
-  "required": [ "rows_by_length" ]
+  "required": []
 }
