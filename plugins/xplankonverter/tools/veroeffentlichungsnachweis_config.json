@@ -1,10 +1,10 @@
 {
   "environments" : [
-    "kvwmap_prod_web"
+    "kvwmap_prod"
   ],
   "environments_tmp" : [
-    "kvwmap_prod_web",
-    "kvwmap_prod_dev"
+    "kvwmap_prod",
+    "kvwmap_dev"
   ],
   "is_testzeit" : false,
   "send_emails" : true,

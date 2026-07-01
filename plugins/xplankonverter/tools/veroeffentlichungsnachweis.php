@@ -1,20 +1,23 @@
 <?php
-  // Script zur Erstellung von Nachweisen der Veröffentlichung von Plänen auf dem Bau- und Planungsportal des Landes MV
-  // Running this script with a cron job like this:
-  // cd /var/www/apps/kvwmap/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan
-  // plan_gml_id= für einzelne Pläne
-  // gelogged wird in /var/www/logs/cron/veroeffentlichungsnachweis.log
-  // /var/www/logs/cron/veroeffentlichungsnachweis.log 2>&1
-  // ToDos:
-  // debug_mode in veroeffentlichungsnachweis_config.json anpassen
-  $config = json_decode(file_get_contents('veroeffentlichungsnachweis_config.json'));
-  // echo "\nEnvironment: " . getenv('HOSTNAME') . ' zugelassen: ' . (count($config->environments) === 0 ? 'keine' : implode(', ', $config->environments));
-  if (!in_array(getenv('HOSTNAME'),  $config->environments)) {
-    echo "\nAbbruch weil nicht in einer der konfigurierten Umgebungen!\n";
-    // Wenn das in anderen Umgebungen laufen werden soll, hier exit auskommentieren!
-    exit;
-  }
-
+// Script zur Erstellung von Nachweisen der Veröffentlichung von Plänen auf dem Bau- und Planungsportal des Landes MV
+// Running this script with a cron job like this:
+// cd /var/www/apps/kvwmap/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan
+// plan_gml_id= für einzelne Pläne
+// gelogged wird in /var/www/logs/cron/veroeffentlichungsnachweis.log
+// /var/www/logs/cron/veroeffentlichungsnachweis.log 2>&1
+// ToDos:
+// debug_mode in veroeffentlichungsnachweis_config.json anpassen
+$config = json_decode(file_get_contents('veroeffentlichungsnachweis_config.json'));
+$pruefzeit = time();
+$pruefstunde = (int)($pruefzeit / 3600) * 3600;
+echo_log("\n". date('Y-m-d H:i:s', $pruefzeit) . ' Starte Prüfung ----------------------------------------', 0);
+$environment = getenv('NETWORK_NAME');
+// echo "\nEnvironment: " . $environment . ' zugelassen: ' . (count($config->environments) === 0 ? 'keine' : implode(', ', $config->environments)) . ' vergleich: ' . in_array($environment, $config->environments);
+if (count($config->environments) === 0 OR !in_array($environment,  $config->environments)) {
+  echo "\nAbbruch weil " . $environment . " nicht in einer der konfigurierten Umgebungen ist. Zugelassen sind: " . (count($config->environments) === 0 ? 'keine' : implode(', ', $config->environments)) . "\n";
+  // Wenn das in anderen Umgebungen laufen werden soll, hier exit auskommentieren!
+  exit;
+}
  /**
  * auslegung Auslegung
  *   hat veroeffentlichungsprotokoll Veroeffentlichungsprotokoll
@@ -24,9 +27,6 @@
  *     hat veroeffentlichungsprotokoll_dokumente PgObject
  *
  */
-$pruefzeit = time();
-$pruefstunde = (int)($pruefzeit / 3600) * 3600;
-echo_log("\n". date('Y-m-d H:i:s', $pruefzeit) . ' Starte Prüfung', 0);
 error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
 
 try {
@@ -129,7 +129,8 @@ try {
         }
         $auslegung->veroeffentlichungsprotokoll = $result['protokoll'];
         echo_log('Veröffentlichungsprotokoll angelegt', 2);
-        $auslegung->veroeffentlichungsprotokoll->send_emails = $config->send_emails;
+        // $auslegung->veroeffentlichungsprotokoll->send_emails = $config->send_emails;
+        $auslegung->veroeffentlichungsprotokoll->send_emails = ($auslegung->get('startdatum') == '29.06.2026');
         $auslegung->veroeffentlichungsprotokoll->create_and_send_ueberwachungsbeginn_alert($auslegung, $pruefzeit);
       }
       else {
@@ -232,7 +233,7 @@ catch (Exception $e) {
   echo_log('Fehler: ' . $e);
 }
 
-echo_log("\n". date('Y-m-d H:i:s', $pruefzeit) . " Ende Prüfung\n", 0);
+echo_log(date('Y-m-d H:i:s', $pruefzeit) . " Ende Prüfung ========================================\n", 0);
 
 /**
  * 
