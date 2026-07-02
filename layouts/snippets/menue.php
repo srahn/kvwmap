@@ -30,10 +30,10 @@ function changemenue(id, auto_close){
 function hideMenue() {
 	if(document.getElementById('menue_switch').style.display != 'none'){
 		ahah('index.php', 'go=hideMenueWithAjax', new Array("", ""), new Array("", "execute_function"));
-		document.all.menue_options.innerHTML='';
-		document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
-		document.all.linkMinMax.onclick="showMenue()";
-		document.all.linkMinMax.title="Menü zeigen";
+		document.getElementById('menue_options').innerHTML='';
+		document.getElementById('imgMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
+		document.getElementById('linkMinMax').onclick = showMenue;
+		document.getElementById('linkMinMax').title = "Menü zeigen";
 	}
 }
 
@@ -42,9 +42,9 @@ function showMenue() {
   // löscht die aktuelle Tabelle mit dem Link auf das Nachladen des Menüs und
   // fügt das Menü in die Spalte der GUI wieder ein.
   ahah('index.php', 'go=getMenueWithAjax', new Array(document.all.menuebar, ""), new Array("", "execute_function"));
-  document.all.linkMinMax.onclick="hideMenue()";
-  document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>minimize_menue.png';
-  document.all.linkMinMax.title="Menü verstecken";
+  document.getElementById('linkMinMax').onclick = hideMenue;
+  document.getElementById('imgMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_menue.png';
+  document.getElementById('linkMinMax').title="Menü verstecken";
 }
 </script>
 <table id="menue_switch" width="100%" border="0" cellpadding="0" cellspacing="0">
