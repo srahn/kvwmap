@@ -234,7 +234,7 @@ function show_attribute_options_doc() {
 			});
 		}
 		response.text().then(text => {
-			message([{ type: 'info', msg: `${text}` }]);
+			message([{ type: 'info', msg: `${text}` }], 1000, 2000, null, null, null, 'Ja', 'Abbrechen', '900px', null);
 		});
 	})
 	.catch(error => message([ { type: 'error', msg: `${error.message}`}]));

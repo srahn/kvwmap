@@ -14,7 +14,7 @@
   },
   "properties": {
     "rows": {
-      "description": "The number of rows for the text field.",
+      "description": "Die Anzahl der Zeilen für das Textfeld.",
       "type": "integer",
       "minimum": 1
     },
@@ -23,12 +23,12 @@
       "type": "boolean"
     },
     "max_rows": {
-      "description": "The maximum number of rows, calculated based on the text length.",
+      "description": "Die maximale Anzahl an Zeilen, berechnet basierend auf der Textlänge.",
       "type": "integer",
       "minimum": 1
     },
     "cols": {
-      "description": "The number of columns for the text field.",
+      "description": "Die Anzahl der Spalten für das Textfeld.",
       "type": "integer",
       "minimum": 1
     },
@@ -41,8 +41,9 @@
       "type": "string"
     },
     "width": {
-      "description": "geplant. The width of the text field. This can be specified in pixels (e.g., '500px') or as a percentage (e.g., '100%'). If not specified, width is determined by the number of columns.",
-      "type": "string"
+      "description": "Die Breite des Textfeldes. Dies kann in Pixeln (z.B. '500px') oder als Prozentsatz (z.B. '100%') angegeben werden. Wenn nicht angegeben, wird die Breite basierend auf der Anzahl der Spalten bestimmt.",
+      "type": "string",
+      "draft" : true
     }
   },
   "required": []

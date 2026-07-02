@@ -50,6 +50,7 @@
 
         $typeLabel = $format ? $type . " (" . $format . ")" : $type;
         $desc = $field['description'] ?? '';
+        $anyof = $field['anyOf'] ?? null;
 
         $isRequired = in_array($name, $required);
 
@@ -57,8 +58,17 @@
 
         $html .= "<td>" . htmlspecialchars($name) . "</td>";
         $html .= "<td style=';font-family:monospace'>" . htmlspecialchars($typeLabel) . "</td>";
-        $html .= "<td>" . htmlspecialchars($desc) . "</td>";
-
+        $html .= "<td>" . htmlspecialchars($desc);
+        if ($anyof) {
+            $html .= 'zulässige Werte:<ul style="color: #444">';
+            foreach ($anyof as $value) {
+                $const = htmlspecialchars($value['const'] ?? '');
+                $valueDesc = htmlspecialchars($value['description'] ?? '');
+                $html .= '<li><span style="font-family: Arial, sans-serif; font-weight: bold;">' . htmlspecialchars($const) . '</span>' . ($valueDesc ? ': ' . htmlspecialchars($valueDesc) : '') . "</li>";
+            }
+            $html .= "</ul>";
+        }
+        $html .= "</td>";
         $html .= "<td>"
               . ($isRequired ? "<span style='color:red;font-weight:bold'>ja</span>" : "nein")
               . "</td>";

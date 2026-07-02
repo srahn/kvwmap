@@ -16,11 +16,11 @@
       "type": "object",
       "properties": {
         "true": {
-          "description": "Text to print if value is true.",
+          "description": "Text der gedruckt werden soll, wenn der Wert true ist.",
           "type": "string"
         },
         "false": {
-          "description": "Text to print if value is false.",
+          "description": "Text der gedruckt werden soll, wenn der Wert false ist.",
           "type": "string"
         }
       }

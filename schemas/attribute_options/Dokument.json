@@ -14,7 +14,7 @@
       "type": "string"
     },
     "show_hash_button": {
-      "description": "The name of the primary key attribute in parent layer respectively in there reference table.",
+      "description": "Zeit ein Button an über den der Hash zum Dokument angezeigt werden kann..",
       "type": "boolean",
       "default": true
     }
