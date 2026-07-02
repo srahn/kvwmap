@@ -5806,6 +5806,7 @@ echo '			</table>
 		// $this->loadMap('DataBase');
 		// $this->drawMap();
 		$this->user->rolle->hideMenue('false');
+		$this->user->rolle->hideMenue = false;
 		include(LAYOUTPATH . "snippets/menue.php");
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
 	}
