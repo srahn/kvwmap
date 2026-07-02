@@ -224,6 +224,22 @@ function clear_all(column){
 	}
 }
 
+function show_attribute_options_doc() {
+	fetch(`index.php?go=get_attribute_options_doc`)
+	.then(response => {
+		if (!response.ok) {
+			message([{ type: 'error', msg: `Fehler bei der Abfrage der Attribut-Optionen Dokumentation. Status: ${response.status} ${response.statusText}` }]);
+			response.text().then(text => {
+				message([{ type: 'error', msg: `<p>${text}` }]);
+			});
+		}
+		response.text().then(text => {
+			message([{ type: 'info', msg: `${text}` }]);
+		});
+	})
+	.catch(error => message([ { type: 'error', msg: `${error.message}`}]));
+}
+
 function set_all(column){
 	for(i = 0; i < attributes.length; i++){
 		field = document.getElementsByName(column + '_'+attributes[i])[0];
@@ -608,10 +624,12 @@ function render(i){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $this->layerOptions . '</div>';
 								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer">
-														<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
-													</div>';
+								if ($i == count_or_0($this->attributes['type']) - 1) { ?>
+									<div class="fett scrolltable_footer">
+										<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
+										<a href="javascript:show_attribute_options_doc();" title="Dokumentation zu Optionen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-question-circle-o"></i></a>
+									</div>
+									<?
 								} ?>
 								<div class="options_div"> <?
 									if (

@@ -563,6 +563,11 @@ class GUI {
 		$this->output();
 	}
 
+	function get_attribute_options_doc() {
+	  include_once(SNIPPETS . 'schema_doc.php');
+		exit;
+	}
+
 	function loadDrawingOrderForm(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->nurAktiveLayer = true;

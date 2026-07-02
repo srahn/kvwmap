@@ -2352,6 +2352,10 @@ function go_switch($go, $exit = false) {
 				readfile(LOGPATH . 'background_jobs_log.htm');
 			} break;
 
+			case 'get_attribute_options_doc' : {
+				$GUI->get_attribute_options_doc();
+			} break;
+
 			case "neu Laden" : {
 				$GUI->neuLaden();
 				$GUI->legende = $GUI->create_dynamic_legend();
