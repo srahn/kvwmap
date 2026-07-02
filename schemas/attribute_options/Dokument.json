@@ -14,10 +14,10 @@
       "type": "string"
     },
     "show_hash_button": {
-      "description": "The name of the primary key attribute in parent layer respectively in there reference table.",
+      "description": "Wird hier true angegeben erscheint neben der Größe der Datei ein Button zum Erzeugen und Anzeigen eines Hash vom Dokument. Damit läßt sich die Integrität des Dokumentes prüfen.",
       "type": "boolean",
       "default": true
     }
   },
-  "required": [ "show_hash_button" ]
+  "required": []
 }

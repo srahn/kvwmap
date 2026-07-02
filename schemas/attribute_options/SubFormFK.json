@@ -122,5 +122,5 @@
       ]
     }
   },
-  "required": [ "ref_layer_id", "keys", "window_type"]
+  "required": [ "ref_layer_id", "ref_keys", "window_type"]
 }
