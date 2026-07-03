@@ -1433,8 +1433,8 @@ a.menuered:hover {
 	position: absolute;
 	height: calc(100% - 2px);
 	width: calc(100% - 2px);
-	left: 1;
-	top: 2;
+	left: 1px;
+	top: 2px;
 }
 
 .button:active{
