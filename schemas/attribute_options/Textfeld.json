@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://gdi-service.de/public/schemas/kvwmap/options/Textfeld.json",
   "title": "Textfeld Optionen",
-  "description": "Option für den Formular-Element-Typ Textfeld",
+  "description": "Option für den Formularelementtyp Textfeld",
   "type": "object",
   "example": {
     "rows" : 5,

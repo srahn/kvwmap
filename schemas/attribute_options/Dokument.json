@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://gdi-service.de/public/schemas/kvwmap/options/Dokument.json",
-  "title": "Dokument options",
-  "description": "Options for kvwmap formular element type Dokument.",
+  "title": "Dokument Optionen",
+  "description": "Optionen für kvwmap Formularelementtyp Dokument.",
   "type": "object",
   "example": {
     "dynamic_path" : "my_documents/$STELLE_ID/$name",
