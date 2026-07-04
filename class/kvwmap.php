@@ -9810,18 +9810,29 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->invitation = new Invitation($this);
 		$this->invitation->data = formvars_strip($this->formvars, $this->invitation->setKeysFromTable(), 'keep');
 		$results = $this->invitation->validate();
-		if (empty($results)) {
-			$results = $this->invitation->create();
+		if (!empty($results)) {
+			// Validierung nicht bestanden
+			return array(
+				'success' => false,
+				'msg' => $results
+			);
 		}
-		if ($results['success']) {
-			$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
-			$this->invitation_send_email($this->invitation);
-			$this->invitations_list();
+		$result = $this->invitation->create();
+		if (!$result['success']) {
+			// Fehler beim Speichern
+			return array(
+				'success' => false,
+				'type' => 'array',
+				'msg' => array($result)
+			);
 		}
-		else {
-			$this->add_message('array', array_values($results));
-			$this->invitation_formular();
-		}
+		$this->add_message('notice', 'Einladung erfolgreich gespeichert.');
+		$this->invitation = Invitation::find_by_id($this, $this->formvars['token']);
+		$this->invitation_send_email($this->invitation);
+		return array(
+			'success' => true,
+			'msg' => 'Einladung erfolgreich.'
+		);
 	}
 
 	function invitation_update() {

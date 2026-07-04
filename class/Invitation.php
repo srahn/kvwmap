@@ -10,13 +10,31 @@ class Invitation extends PgObject {
 			array(
 				'attribute' => 'token',
 				'condition' => 'not_null',
-				'description' => 'Es muss ein UUID vorhanden sein.',
+				'description' => 'Es muss ein UUID für den Token vorhanden sein.',
 				'options' => null
 			),
 			array(
 				'attribute' => 'email',
 				'condition' => 'not_null',
 				'description' => 'Es muss eine E-Mail angegeben werden.',
+				'options' => null
+			),
+			array(
+				'attribute' => 'name',
+				'condition' => 'not_null',
+				'description' => 'Es muss ein Nachname angegeben werden.',
+				'options' => null
+			),
+			array(
+				'attribute' => 'vorname',
+				'condition' => 'not_null',
+				'description' => 'Es muss ein Vorname angegeben werden.',
+				'options' => null
+			),
+			array(
+				'attribute' => 'loginname',
+				'condition' => 'not_null',
+				'description' => 'Es muss ein Login-Name angegeben werden.',
 				'options' => null
 			),
 			array(
