@@ -114,7 +114,8 @@
           "desctiption": "Sucht die id des Features im übergeordneten Layer über eine räumliche Verschneidung oder ST_Within wenn der übergeordente Layer eine Polygon-Geometry hat und der untergeordnete Layer vom Typ Punkt ist. Es wird das erste Feature gefunden, das sich räumlich mit der Geometrie des Features überschneidet, das dieses Attribut hat. Es wird nur verwendet, wenn sowohl der übergeordnete als auch der untergeordnete Layer eine Geometriespalte in ihrer Layerdefinition haben und wenn das untergeordnete Feature eine Geometrie hat. Im Formular für ein neues Feature wird der Wert berechnet, wenn die Geometrie dieses Features erstellt oder geändert wurde und der Benutzer zum Datenformular-Tab zurückgekehrt ist."
         }
       ],
-      "default": "value"
+      "default": "value",
+      "draft" : true
     },
     "ref_constraint": {
       "description": "Ein optionale Bedingung für die WHERE KLausel, die angewendet wird, wenn der übergeordnete Layer abgefragt wird, um mögliche referenzierte Features zu finden.",
