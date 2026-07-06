@@ -173,6 +173,9 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			}
 			else {
 				field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+				if (!field) {
+					field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k + '_0');		// Radiobuttons haben noch einen Zähler hinten dran
+				}
 			}
 			return field_has_value(field, rule.operator, rule.value);
 		}
