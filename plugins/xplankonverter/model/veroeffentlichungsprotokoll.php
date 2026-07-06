@@ -335,7 +335,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
     $ausfall_dauer = $ausfall_dauer / 3600;
     $ueberwachbarkeit_p = round(100 - ($ausfall_dauer / $auslegung_dauer * 100), 2);
 
-    $body .= "\nStart der Überwachung war am " . date('d.m.Y H:m', $auslegung->get('observationstart')) . " Uhr.";
+    $body .= "\nStart der Überwachung war am " . date('d.m.Y H:m', $auslegung->veroeffentlichungsprotokoll->get('observationstart')) . " Uhr.";
 
     $body .= "\n\nDie Auslegung konnte in einem Zeitraum von " . $ausfall_dauer . ' Stunden nicht überwacht werden konnte. Das entspricht einer Überwachungszeit von ' . $ueberwachbarkeit_p . "% im gesamten Auslegungszeitraum.";
 
