@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://gdi-service.de/public/schemas/kvwmap/options/Dokument.json",
-  "title": "Dokument options",
-  "description": "Options for kvwmap formular element type Dokument.",
+  "title": "Dokument Optionen",
+  "description": "Optionen für kvwmap Formularelementtyp Dokument.",
   "type": "object",
   "example": {
     "dynamic_path" : "my_documents/$STELLE_ID/$name",
@@ -14,10 +14,10 @@
       "type": "string"
     },
     "show_hash_button": {
-      "description": "The name of the primary key attribute in parent layer respectively in there reference table.",
+      "description": "Wird hier true angegeben erscheint neben der Größe der Datei ein Button zum Erzeugen und Anzeigen eines Hash vom Dokument. Damit läßt sich die Integrität des Dokumentes prüfen.",
       "type": "boolean",
       "default": true
     }
   },
-  "required": [ "show_hash_button" ]
+  "required": []
 }

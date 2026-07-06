@@ -198,7 +198,7 @@ class LayerAttribute extends PgObject {
 	 * @param array $formvars The form variables containing geometry type, coordinates and dimension.
 	 * @return array An array containing success status and WKB geometry.
 	 */
-	function get_wkb_geometry($layerdb, $layerset, $epsg_code, $formvars) {
+	static function get_wkb_geometry($layerdb, $layerset, $epsg_code, $formvars) {
 		if ($formvars['geomtype'] == 'POINT') {
 			include_once (CLASSPATH . 'pointeditor.php');
 			$pointeditor = new pointeditor($layerdb, $layerset['epsg_code'], $epsg_code, $layerset['oid']);

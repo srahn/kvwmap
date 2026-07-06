@@ -563,6 +563,11 @@ class GUI {
 		$this->output();
 	}
 
+	function get_attribute_options_doc() {
+	  include_once(SNIPPETS . 'schema_doc.php');
+		exit;
+	}
+
 	function loadDrawingOrderForm(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->nurAktiveLayer = true;
@@ -5801,6 +5806,7 @@ echo '			</table>
 		// $this->loadMap('DataBase');
 		// $this->drawMap();
 		$this->user->rolle->hideMenue('false');
+		$this->user->rolle->hideMenue = false;
 		include(LAYOUTPATH . "snippets/menue.php");
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
 	}
@@ -11504,7 +11510,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 							case ($table['type'][$i] == 'Geometrie') : {
 								if ($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != '' OR $this->formvars['newpathwkt'] != '') {
-									$result = $attr_obj->get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
+									$result = LayerAttribute::get_wkb_geometry($layerdb, $layerset[0], $this->user->rolle->epsg_code, $this->formvars);
 									if ($result['success']) {
 										# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
 										$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
