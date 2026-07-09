@@ -45,22 +45,25 @@
 $fpsvg = fopen(IMAGEPATH.$svgfile, 'w') or die('fail: fopen('.$svgfile.')');
 chmod(IMAGEPATH.$svgfile, 0666);
 
+$jsfile  = $randomnumber . 'JS_map.js';
+$fpjs = fopen(IMAGEPATH . $jsfile, 'w') or die('fail: fopen(' . $jsfile . ')');
+chmod(IMAGEPATH . $svgfile, 0666);
+
 $svg = $SVG_begin;
-$svg .= '<script id="pscript" type="text/ecmascript"><![CDATA[';
-$svg .= $scriptdefinitions;
-$svg .= $basicfunctions;				# Basisfunktionen
-$svg .= $SVGvars_navscript;			# Funktionen zur Navigation
-$svg .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
-$svg .= $boxfunctions;
-$svg .= $flurstqueryfunctions;
-$svg .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
+$svg .= '<script href="' . TEMPPATH_REL . $jsfile . '" xlink:href="' . TEMPPATH_REL . $jsfile . '" type="application/ecmascript"/>';
+$js .= $scriptdefinitions;
+$js .= $basicfunctions;				# Basisfunktionen
+$js .= $SVGvars_navscript;			# Funktionen zur Navigation
+$js .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
+$js .= $boxfunctions;
+$js .= $flurstqueryfunctions;
+$js .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
 if($this->user->rolle->gps){
-	$svg .= $gps_functions;
+	$js .= $gps_functions;
 }
-$svg .= $SVGvars_coordscript;
-$svg .= $SVGvars_querytooltipscript;
-$svg .= $SVGvars_tooltipscript;
-$svg .= ']]></script>';
+$js .= $SVGvars_coordscript;
+$js .= $SVGvars_querytooltipscript;
+$js .= $SVGvars_tooltipscript;
 
 $svg .='
 	<defs>
@@ -93,6 +96,9 @@ $svg .= $SVG_end;
 fputs($fpsvg, $svg);
 fclose($fpsvg);
 
+fputs($fpjs, $js);
+fclose($fpjs);
+
 #
 # aufrufen der SVG
 # 
@@ -104,8 +110,8 @@ echo'
   <input type="hidden" name="hoehe1" value = "'.$res_y.'">
 ';
 #                  >>> object-tag: wmode="transparent" (hoehere anforderungen beim rendern!) <<<
-//echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
+echo '<EMBED align="center" name="SVG" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
-echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
+#echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
 ?>
 </div>
