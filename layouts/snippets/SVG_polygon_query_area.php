@@ -60,27 +60,31 @@
 $fpsvg = fopen(IMAGEPATH.$svgfile, 'w') or die('fail: fopen('.$svgfile.')');
 chmod(IMAGEPATH.$svgfile, 0666);
 
+$jsfile  = $randomnumber . 'JS_dokumentenformular.js';
+$fpjs = fopen(IMAGEPATH . $jsfile, 'w') or die('fail: fopen(' . $jsfile . ')');
+chmod(IMAGEPATH . $svgfile, 0666);
+
 $svg = $SVG_begin;
-$svg .= '<script id="pscript" type="text/ecmascript"><![CDATA[';
-$svg .= $scriptdefinitions;
-$svg .= $basicfunctions;				# Basisfunktionen
-$svg .= $SVGvars_navscript;			# Funktionen zur Navigation
-$svg .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
-$svg .= $boxfunctions;					# Funktionen zum Aufziehen eines Rechtecks
-$svg .= $vertex_catch_functions;# Punktfangfunktionen
-$svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
-$svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
-$svg .= $ortho_point_functions;	# Funktionen zum Erstellen von orthogonalen Fangpunkten
-$svg .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
-$svg .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
-$svg .= $measurefunctions;
+$svg .= '<script href="' . TEMPPATH_REL . $jsfile . '" xlink:href="' . TEMPPATH_REL . $jsfile . '" type="application/ecmascript"/>';
+$js .= $scriptdefinitions;
+$js .= $basicfunctions;				# Basisfunktionen
+$js .= $SVGvars_navscript;			# Funktionen zur Navigation
+$js .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
+$js .= $boxfunctions;					# Funktionen zum Aufziehen eines Rechtecks
+$js .= $vertex_catch_functions;# Punktfangfunktionen
+$js .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
+$js .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
+$js .= $ortho_point_functions;	# Funktionen zum Erstellen von orthogonalen Fangpunkten
+$js .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
+$js .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
+$js .= $measurefunctions;
 if($this->user->rolle->gps){
-	$svg .= $gps_functions;
+	$js .= $gps_functions;
 }
-$svg .= $SVGvars_coordscript;
-$svg .= $SVGvars_tooltipscript;
-$svg .= $SVGvars_querytooltipscript;
-$svg .= ']]></script>';
+$js .= $SVGvars_coordscript;
+$js .= $SVGvars_tooltipscript;
+$js .= $SVGvars_querytooltipscript;
+
 $svg .='
 	<defs>
 '.$SVGvars_defs.'
@@ -119,6 +123,9 @@ $svg .= $SVG_end;
 #
 fputs($fpsvg, $svg);
 fclose($fpsvg);
+
+fputs($fpjs, $js);
+fclose($fpjs);
 
 #
 # aufrufen der SVG

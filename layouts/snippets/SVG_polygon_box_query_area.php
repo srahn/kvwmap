@@ -45,7 +45,7 @@
 $fpsvg = fopen(IMAGEPATH.$svgfile, 'w') or die('fail: fopen('.$svgfile.')');
 chmod(IMAGEPATH.$svgfile, 0666);
 
-$jsfile  = $randomnumber . 'JS_map.js';
+$jsfile  = $randomnumber . 'JS_dokumentenformular.js';
 $fpjs = fopen(IMAGEPATH . $jsfile, 'w') or die('fail: fopen(' . $jsfile . ')');
 chmod(IMAGEPATH . $svgfile, 0666);
 
