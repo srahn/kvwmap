@@ -80,7 +80,7 @@ class Invitation extends PgObject {
 	}
 
 	function get_subject() {
-		return 'Einladung zur Registrierung bei ' . TITLE; 
+		return 'Einladung zur Registrierung bei ' . (TITLE ?: 'kvwmap'); 
 	}
 
 	function get_body() {
@@ -102,7 +102,7 @@ class Invitation extends PgObject {
 			. str_replace('$link', $link, $invitation_text) . $br
 			. $strInvitationLink . ':' . $br . $br
 			. $link . $br . $br
-			. $strInvitationLinkAlternative . ' "' . TITLE . '". ' . $strInvitationAfterLinkText . $br . $br
+			. $strInvitationLinkAlternative . ' "' . (TITLE ?: 'kvwmap') . '". ' . $strInvitationAfterLinkText . $br . $br
 			. $strInvitationQuestionsTo . ' ' . $this->inviter->get('vorname') . ' ' . $this->inviter->get('name') . ': ' . $this->inviter->get('email') . $br . $br
 			. str_replace('<br>', $br, $strInvitationAutomationText);
 		return $text;

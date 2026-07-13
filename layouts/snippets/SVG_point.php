@@ -1,7 +1,9 @@
-<?php
+<?
+	include(LAYOUTPATH.'snippets/SVG_Utilities.php');
+
 	$randomnumber = rand(0, 1000000);
 	$svgfile  = $randomnumber.'SVG_dokumentenformular.svg';
-	include(LAYOUTPATH.'snippets/SVG_Utilities.php');
+
 ?>
 <div id="map">
 	<input type="hidden" name="loc_x" value="<?php echo $this->formvars['loc_x']; ?>">
@@ -42,23 +44,27 @@
 #
 $fpsvg = fopen(IMAGEPATH.$svgfile, 'w') or die('fail: fopen('.$svgfile.')');
 chmod(IMAGEPATH.$svgfile, 0666);
+
+$jsfile  = $randomnumber . 'JS_dokumentenformular.js';
+$fpjs = fopen(IMAGEPATH . $jsfile, 'w') or die('fail: fopen(' . $jsfile . ')');
+chmod(IMAGEPATH . $svgfile, 0666);
+
 $svg = $SVG_begin;
-$svg .= '<script id="pscript" type="text/ecmascript"><![CDATA['; 
-$svg .= $scriptdefinitions;
-$svg .= $polygonANDpoint;	
-$svg .= $SVGvars_navscript;
-$svg .= $basicfunctions;
-$svg .= $vertex_catch_functions;# Punktfangfunktionen
-$svg .= $pointfunctions;
-$svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
-$svg .= $measurefunctions;
+$svg .= '<script href="' . TEMPPATH_REL . $jsfile . '" xlink:href="' . TEMPPATH_REL . $jsfile . '" type="application/ecmascript"/>';
+$js .= $scriptdefinitions;
+$js .= $polygonANDpoint;	
+$js .= $SVGvars_navscript;
+$js .= $basicfunctions;
+$js .= $vertex_catch_functions;# Punktfangfunktionen
+$js .= $pointfunctions;
+$js .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
+$js .= $measurefunctions;
 if($this->user->rolle->gps){
-	$svg .= $gps_functions;
+	$js .= $gps_functions;
 }
-$svg .= $SVGvars_coordscript;
-$svg .= $SVGvars_tooltipscript;
-$svg .= $SVGvars_querytooltipscript;
-$svg .= ']]></script>';
+$js .= $SVGvars_coordscript;
+$js .= $SVGvars_tooltipscript;
+$js .= $SVGvars_querytooltipscript;
 
 $svg .='
 	<defs>
@@ -93,6 +99,9 @@ $svg .= $SVG_end;
 #
 fputs($fpsvg, $svg);
 fclose($fpsvg);
+
+fputs($fpjs, $js);
+fclose($fpjs);
 
 #
 # aufrufen der SVG
