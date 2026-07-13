@@ -2307,7 +2307,7 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 	switch ($mode) {
 		case 'sendEmail async': {
 			# Erstelle Befehl für sendEmail und schreibe in mail queue Verzeichnis.
-			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'from_name' => $from_name, 'cc_email' => $cc_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+			$str = array('to_email' => trim($to_email), 'from_email' => trim($from_email), 'from_name' => $from_name, 'cc_email' => trim($cc_email), 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
 				chmod(MAILQUEUEPATH, 'g+w');
