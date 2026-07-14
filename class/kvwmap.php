@@ -22230,7 +22230,7 @@ DO $$
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['options'] = json_decode($rs['options']);
 			$groupname_short = explode('<br>', $rs['name']);
-			$rs['groupname_short'] = str_replace([' ', '"'], '_', $groupname_short[0]);
+			$rs['groupname_short'] = sonderzeichen_umwandeln($groupname_short[0]);
 			$groups[$rs['group_id']] = $rs;
 		}
 		return $groups;
