@@ -4101,7 +4101,7 @@ class db_mapObj{
 			return $groups;
 		}
 		while ($rs = pg_fetch_assoc($ret[1])) {
-			$rs['options'] = json_decode($rs['options']);
+			$rs['options'] = json_decode($rs['options'], true);
 			$groupname_short = explode('<br>', $rs['name']);
 			$rs['groupname_short'] = sonderzeichen_umwandeln($groupname_short[0]);
 			$groups[$rs['group_id']] = $rs;

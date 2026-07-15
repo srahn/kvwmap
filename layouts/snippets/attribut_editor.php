@@ -400,6 +400,20 @@ function render(i){
   syncHiddenField(i);
 }
 
+
+// Funktion zum Öffnen der Gruppen-option
+function open_group_options(event, group_id){
+	event.stopPropagation();
+	const options_div = document.getElementById('group_options_' + group_id);
+	options_div.style.display = 'block';
+	const parent = options_div.offsetParent; // Das positionierte Elternelement
+  const rect = parent.getBoundingClientRect();
+  const x = event.clientX - rect.left - 160;
+  const y = event.clientY - rect.top + 13;
+	options_div.style.left = x + "px";
+  options_div.style.top = y + "px";
+}
+
 //-->
 </script>
 
@@ -708,7 +722,14 @@ function render(i){
 													<a href="javascript:clear_all(\'group\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 												</div>';
 								} ?>
-								<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['groups'][$this->attributes['group_id'][$i]]['name']); ?>">
+								<div style="position: relative">
+									<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['groups'][$this->attributes['group_id'][$i]]['name']); ?>">
+									<div style="position: absolute; right: 2px; top: 1px; z-index: 1000; font-size: 14px;">
+										<a href="javascript:void(0);" onclick="open_group_options(event, <? echo $this->attributes['group_id'][$i]; ?>);" title="Optionen">
+											<i class="fa fa-bars <? echo ($this->attributes['groups'][$this->attributes['group_id'][$i]]['options']? ' firebrick' : ''); ?>"></i>
+										</a>
+									</div>
+								</div>
 							</td>
 							
 							<td align="left" valign="top">
@@ -1046,6 +1067,23 @@ function render(i){
 	?>
 </table>
 
-<? } ?>
+<? 
+
+foreach($this->attributes['groups'] as $group_id => $group) {
+	echo '<textarea id="group_options_' . $group_id . '" name="group_options_' . $group_id . '" style="position: absolute; display: none; z-index: 100000; height: 100px">' . ($group['options']? json_encode($group['options'], JSON_PRETTY_PRINT) : '') . '</textarea>';
+}
+
+
+} ?>
 
 <input type="hidden" name="go" value="Attributeditor">
+
+<script>
+
+	document.getElementById("attribut_editor").addEventListener("click", () => {
+		document.querySelectorAll("[id^='group_options_']").forEach((div) => {
+				div.style.display = "none";
+		});
+	});
+
+</script>

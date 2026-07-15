@@ -21743,9 +21743,6 @@ DO $$
 					$group_id++;
 					$groups[$group_id]['name'] = $formvars['group_' . $attributes['name'][$i]];
 				}
-				if ($formvars['group_options_' . $attributes['name'][$i]] != ''){
-					$groups[$group_id]['options'] = $formvars['group_options_' . $attributes['name'][$i]];
-				}
 				$last_group = $formvars['group_' . $attributes['name'][$i]];
 
 				if ($formvars['tab_' . $attributes['name'][$i]] == '' AND $last_tab != ''){
@@ -21795,7 +21792,7 @@ DO $$
 						$formvars['selected_layer_id'],
 						$group_id,
 						pg_escape_string($group['name']),
-						($group['options'] ? "'" . pg_escape_string($group['options']) . "'::jsonb" : 'NULL')
+						($formvars['group_options_' . $group_id] ? "'" . pg_escape_string($formvars['group_options_' . $group_id]) . "'::jsonb" : 'NULL')
 				);
 			}
 			$sql = "
@@ -22262,7 +22259,7 @@ DO $$
 			return $groups;
 		}
 		while ($rs = pg_fetch_assoc($ret[1])) {
-			$rs['options'] = json_decode($rs['options']);
+			$rs['options'] = json_decode($rs['options'], true);
 			$groupname_short = explode('<br>', $rs['name']);
 			$rs['groupname_short'] = sonderzeichen_umwandeln($groupname_short[0]);
 			$groups[$rs['group_id']] = $rs;
