@@ -1082,7 +1082,7 @@ foreach($this->attributes['groups'] as $group_id => $group) {
 
 	document.getElementById("attribut_editor").addEventListener("click", () => {
 		document.querySelectorAll("[id^='group_options_']").forEach((div) => {
-				div.style.display = "none";
+			div.style.display = "none";
 		});
 	});
 
