@@ -1187,8 +1187,8 @@ class data_import_export {
 			foreach ($result[0] AS $key => $value){
 				$i = $attributes['indizes'][$key];
 				if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
-					$groupname = explode(';', $attributes['group'][$i]);
-					$csv .= $groupname[0].';';
+					$group = $attributes['groups'][$attributes['group_id'][$i]];
+					$csv .= $group['name'].';';
 				}
 			}
 			$csv .= chr(13).chr(10);

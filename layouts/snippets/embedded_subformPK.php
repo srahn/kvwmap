@@ -78,8 +78,9 @@
 						for ($j = 0; $j < count($attributes['name']); $j++) {
 							if ($layer['attributes']['privileg'][$j] >= '0') {
 								if ($layer['attributes']['visible'][$j]) {
-									$explosion = explode(';', $layer['attributes']['group'][$j]);
-									if ($explosion[1] != 'collapsed') { ?>
+									$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+									$collapsed = $group['options']['collapsed'];
+									if (!$collapsed) { ?>
 										<td class="gle-attribute-name" style="height: auto">
 										<? if ($layer['attributes']['labeling'][$j] != 2) { ?>
 											<a href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 1, '', '', '&orderby<? echo $layer['layer_id']; ?>=<? echo $layer['attributes']['name'][$j]; ?>')" title="Sortieren nach <? echo $layer['attributes']['name'][$j]; ?>"><?
@@ -120,8 +121,9 @@
 										$editable = true;
 									}								
 									if ($layer['attributes']['visible'][$j]) {
-										$explosion = explode(';', $layer['attributes']['group'][$j]);
-										if ($explosion[1] != 'collapsed') { ?>
+										$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+										$collapsed = $group['options']['collapsed'];
+										if (!$collapsed) { ?>
 											<td id="value_<? echo $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '_' . $k; ?>" <? echo get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style_attribute'][$j]])); ?>><?
 												if (in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 													echo calendar($layer['attributes']['type'][$j], $layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);

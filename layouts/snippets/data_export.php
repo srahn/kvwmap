@@ -334,7 +334,7 @@ $j=0;
 						<div style="float: left; padding: 4px;"><?
 							for($i = 0; $i < $floor+$r; $i++) {
 								if(!in_array($this->attributes['form_element_type'][$j], ['dynamicLink']) AND ($this->attributes['type'][$j] != 'unknown' OR $this->attributes['form_element_type'][$j] == 'SubFormEmbeddedPK')){
-									if($this->attributes['group'][$j] != '') $groupnames = true;
+									if($this->attributes['group_id'][$j] != '') $groupnames = true;
 									if($this->attributes['form_element_type'][$j] == 'Time' AND $this->attributes['options'][$j] == 'export') $exporttimestamp = true;
 									if($this->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
 									<div style="padding: 4px;

@@ -186,10 +186,11 @@
 					// $layer['attributes']['form_element_type'][$j] .= '_not_saveable';
 				// }
 				
-				if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
-					$explosion = explode(';', $layer['attributes']['group'][$j]);
-					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-					$groupname = $explosion[0];
+				if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
+					$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+					$groupname = $group['name'];
+					$groupname_short = $group['groupname_short'];
+					$collapsed = $group['options']['collapsed'];
 					echo '<tr>
 									<td colspan="2" width="100%">
 										<table width="100%" id="colgroup'.$layer['layer_id'].'_'.$j.'_'.$k.'" class="tgle" '; if(!$collapsed)echo 'style="display:none"'; echo ' border="0"><tbody width="100%" class="gle">
@@ -264,7 +265,7 @@
 					else{
 						$invisible_attributes[$layer['layer_id']][] = '<input type="hidden" id="'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 					}
-					if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){		# wenn die n�chste Gruppe anders ist, Tabelle schliessen
+					if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 						echo '</table></td></tr>';
 					}
 				}
@@ -274,15 +275,15 @@
 				elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING')$geomtype = 'Line';
 				
 				if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
-					if($layer['attributes']['group'][0] != ''){ ?>
+					if($layer['attributes']['group_id'][0] != ''){ ?>
 						<tr><td colspan="2"><table width="100%" class="tgle" border="2" cellpadding="0" cellspacing="0"><tbody class="gle">
 					<? } ?>
 				 
 					<tr class="tr_hide">
 						<? if($layer['querymaps'][$k] != ''){ ?>
-						<td <? if($layer['attributes']['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
+						<td <? if($layer['attributes']['group_id'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
 						<? } else { ?>
-			    	    <td <? if($layer['attributes']['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
+			    	    <td <? if($layer['attributes']['group_id'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle">
 <?						
@@ -336,7 +337,7 @@
 							</td>
 			    </tr>
 			    
-			    <? if($layer['attributes']['group'][0] != ''){ ?>
+			    <? if($layer['attributes']['group_id'][0] != ''){ ?>
 								</table></td></tr>
 					<? }		    
 				}

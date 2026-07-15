@@ -7,6 +7,46 @@ function err_msg($file, $line, $msg, $find = '') {
 	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $msg) : $msg). "<p>" . INFO1;
 }
 
+function sonderzeichen_umwandeln($name) {
+	$name = umlaute_umwandeln($name);
+	$name = str_replace('.', '', $name);
+	$name = str_replace(':', '', $name);
+	$name = str_replace('(', '', $name);
+	$name = str_replace(')', '', $name);
+	$name = str_replace('[', '', $name);
+	$name = str_replace(']', '', $name);
+	$name = str_replace('/', '-', $name);
+	$name = str_replace(' ', '_', $name);
+	$name = str_replace('-', '_', $name);
+	$name = str_replace('?', '_', $name);
+	$name = str_replace('+', '_', $name);
+	$name = str_replace(',', '_', $name);
+	$name = str_replace('*', '_', $name);
+	$name = str_replace('$', '', $name);
+	$name = str_replace('&', '_', $name);
+	$name = str_replace('#', '_', $name);
+	$name = str_replace('"', '_', $name);
+	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
+	return $name;
+}
+
+function umlaute_umwandeln($name) {
+	$name = str_replace('ä', 'ae', $name);
+	$name = str_replace('ü', 'ue', $name);
+	$name = str_replace('ö', 'oe', $name);
+	$name = str_replace('Ä', 'Ae', $name);
+	$name = str_replace('Ü', 'Ue', $name);
+	$name = str_replace('Ö', 'Oe', $name);
+	$name = str_replace('a?', 'ae', $name);
+	$name = str_replace('u?', 'ue', $name);
+	$name = str_replace('o?', 'oe', $name);
+	$name = str_replace('A?', 'ae', $name);
+	$name = str_replace('U?', 'ue', $name);
+	$name = str_replace('O?', 'oe', $name);
+	$name = str_replace('ß', 'ss', $name);
+	return $name;
+}
+
 function count_or_0($val) {
 	if (is_null($val) OR !is_array($val)) {
 		return 0;
@@ -2010,7 +2050,7 @@ class db_mapObj{
 				form_element_type,
 				options,
 				tooltip,
-				\"group\",
+				group_id,
 				tab,
 				arrangement,
 				labeling,
@@ -2145,8 +2185,9 @@ class db_mapObj{
 			$attributes['alias_polish'][$i] = $rs['alias_polish'];
 			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
 			$attributes['tooltip'][$i] = $rs['tooltip'];
-			$attributes['group'][$i] = $rs['group'];
+			$attributes['group_id'][$i] = $rs['group_id'];
 			$attributes['tab'][$i] = $rs['tab'];
+			$attributes['tabs'][$rs['tab']] = true;
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
@@ -2172,8 +2213,34 @@ class db_mapObj{
 		else {
 			$attributes['all_table_names'] = array();
 		}
-		$attributes['tabs'] = array_values(array_filter(array_unique($attributes['tab']), 'strlen'));
+		$attributes['groups'] = $this->get_layer_attributes_groups($layer_id);
+		$attributes['tabs'] = array_keys($attributes['tabs']);
 		return $attributes;
+	}
+
+	function get_layer_attributes_groups($layer_id) {
+		$groups = array();
+		$sql = "
+			SELECT  
+				*
+			FROM
+				kvwmap.layer_attributes_groups 
+			WHERE
+				layer_id = " . $layer_id . "
+			ORDER BY
+				group_id";
+		$ret = $this->db->execSQL($sql);
+		if (!$ret['success']) {
+			$this->GUI->add_message('error', err_msg($this->script_name, __LINE__, $sql));
+			return $groups;
+		}
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['options'] = json_decode($rs['options']);
+			$groupname_short = explode('<br>', $rs['name']);
+			$rs['groupname_short'] = sonderzeichen_umwandeln($groupname_short[0]);
+			$groups[$rs['group_id']] = $rs;
+		}
+		return $groups;
 	}
 
 	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false) {

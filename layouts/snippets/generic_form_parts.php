@@ -75,7 +75,7 @@
 	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true, $field_id = NULL, $calendar = true) {
 		$field_id = $field_id ?: $layer_id.'_'.$attributes['name'][$j].'_'.$k;
 		$datapart = '<table ';
-		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
+		if($attributes['group_id'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
 		if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
