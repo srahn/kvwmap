@@ -21721,7 +21721,9 @@ DO $$
 	*/
 	function save_layer_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
-
+		$last_group = '';
+		$group_id = 0;
+		$groups = [];
 		for ($i = 0; $i < count($attributes['name']); $i++) {
 			if ($formvars['attribute_' . $attributes['name'][$i]] != '') {
 				$alias_rows = ["alias" => "'" . $formvars['alias_' . $attributes['name'][$i]] . "'"];
@@ -21737,7 +21739,15 @@ DO $$
 				if ($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
 					$formvars['group_' . $attributes['name'][$i]] = $last_group;
 				}
+				if ($last_group != $formvars['group_' . $attributes['name'][$i]]) {
+					$group_id++;
+					$groups[$group_id]['name'] = $formvars['group_' . $attributes['name'][$i]];
+				}
+				if ($formvars['group_options_' . $attributes['name'][$i]] != ''){
+					$groups[$group_id]['options'] = $formvars['group_options_' . $attributes['name'][$i]];
+				}
 				$last_group = $formvars['group_' . $attributes['name'][$i]];
+
 				if ($formvars['tab_' . $attributes['name'][$i]] == '' AND $last_tab != ''){
 					$formvars['tab_' . $attributes['name'][$i]] = $last_tab;
 				}
@@ -21750,7 +21760,7 @@ DO $$
 					'options' => "'" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "'",
 					'"default"' => "'" . pg_escape_string($formvars['default_' . $attributes['name'][$i]]) . "'",
 					'tooltip' => "'" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "'",
-					'"group"' => "'" . $formvars['group_' . $attributes['name'][$i]] . "'",
+					'group_id' => ($group_id ?: 'NULL'),
 					'tab' => "'" . $formvars['tab_' . $attributes['name'][$i]] . "'",
 					'arrangement' => ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]),
 					'labeling' => ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]),
@@ -21776,6 +21786,30 @@ DO $$
 				$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
 				$database->execSQL($sql, 4, 1);
 			}
+		}
+		if (!empty($groups)) {
+			$values = [];
+			foreach ($groups as $group_id => $group) {
+				$values[] = sprintf(
+						"(%d, %d, '%s', %s)",
+						$formvars['selected_layer_id'],
+						$group_id,
+						pg_escape_string($group['name']),
+						($group['options'] ? "'" . pg_escape_string($group['options']) . "'::jsonb" : 'NULL')
+				);
+			}
+			$sql = "
+				DELETE FROM	kvwmap.layer_attributes_groups
+				WHERE
+					layer_id = " . $formvars['selected_layer_id'] . ";
+
+				INSERT INTO	kvwmap.layer_attributes_groups
+					(layer_id, group_id, name, options)
+				VALUES
+					" . implode(",\n", $values);
+			#echo '<br>Sql: ' . $sql;
+			$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
+			$database->execSQL($sql, 4, 1);
 		}
 	}
 

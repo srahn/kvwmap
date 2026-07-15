@@ -42,9 +42,4 @@ WHERE
 	la.layer_id = lag.layer_id AND 
 	la."group" = lag.old_group;
 
-ALTER TABLE kvwmap.layer_attributes
-ADD CONSTRAINT layer_attributes_group_fk
-FOREIGN KEY (layer_id, group_id)
-REFERENCES kvwmap.layer_attributes_groups (layer_id, group_id);
-
 COMMIT;

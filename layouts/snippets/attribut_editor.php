@@ -708,7 +708,7 @@ function render(i){
 													<a href="javascript:clear_all(\'group\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 												</div>';
 								} ?>
-								<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['group'][$i]); ?>">
+								<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['groups'][$this->attributes['group_id'][$i]]['name']); ?>">
 							</td>
 							
 							<td align="left" valign="top">
