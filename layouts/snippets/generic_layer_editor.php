@@ -235,30 +235,37 @@ if ($doit == true) {
 					<table class="gle1_table" cellspacing="0" cellpadding="0" width="100%">
 						<thead>
 						<? # Gruppennamen
-							if($layer['attributes']['group'][0] != ''){
+							if($layer['attributes']['group_id'][0] != ''){
 								echo '<tr><td style="border:none"></td><td style="border:none"></td>';
-								$explosion = explode(';', $layer['attributes']['group'][0]);
-								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
-								echo '<td id="'.$groupname.'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
+
+								$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][0]];
+								$groupname = $group['name'];
+								$groupname_short = $group['groupname_short'];
+
+								echo '<td id="' . $groupname_short . '" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
 								$colspan = 0;
 								for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 									if($layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1)$colspan++;
-									if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
-										$explosion = explode(';', $layer['attributes']['group'][$j]);
-										if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-										$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
+									if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j+1]){
+				
+										$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+										$groupname = $group['name'];
+										$groupname_short = $group['groupname_short'];
+										$collapsed = $group['options']['collapsed'];
+
 										if($collapsed)echo '1';
 										else echo $colspan;
 										echo '" data-colspan="'.$colspan.'" data-origcolspan="'.$colspan.'">';
-										echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$explosion[0].'</span></td><td style="border:none;background: url('.BG_IMAGE.');"></td>';
+										echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\'' . $groupname_short . '\')"><img id="img_' . $groupname_short . '" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>' . $groupname . '</span></td><td style="border:none;background: url('.BG_IMAGE.');"></td>';
 										$colspan = 0;
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
 											#$colspan = 1;
 										}
 										if($j < count($this->qlayerset[$i]['attributes']['name'])-1){
-											$explosion = explode(';', $layer['attributes']['group'][$j+1]);
-											$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
-											echo '<td id="'.$groupname.'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
+											$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j+1]];
+											$groupname_short = $group['groupname_short'];
+
+											echo '<td id="' . $groupname_short . '" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
 										}
 									}
 								}
@@ -270,16 +277,18 @@ if ($doit == true) {
 					  <?
 							$has_geom = false;
 					  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-								$explosion = explode(';', $layer['attributes']['group'][$j]);
-								$collapsed = ($explosion[1] == 'collapsed');
-								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
-								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
+								$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+								$groupname = $group['name'];
+								$groupname_short = $group['groupname_short'];
+								$collapsed = $group['options']['collapsed'];
+
+								if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
+									echo '<td class="gap_' . $groupname_short . '" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
 								if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 									if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-											echo '<td style="' . ($collapsed ? 'display: none;' : '') . 'position: relative; background-clip: padding-box;" id="column_' . $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['layer_id'] . ' group_'.$groupname.'"';
+											echo '<td style="' . ($collapsed ? 'display: none;' : '') . 'position: relative; background-clip: padding-box;" id="column_' . $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['layer_id'] . ' group_' . $groupname_short . '"';
 											echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
 											if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
 												$this->editable = $layer['layer_id'];
@@ -367,11 +376,14 @@ if ($doit == true) {
 		<?
 
 				for($j = 0; $j < count($layer['attributes']['name']); $j++){
-					$explosion = explode(';', $layer['attributes']['group'][$j]);
-					if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-					$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
-					if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-						echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
+
+					$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+					$groupname = $group['name'];
+					$groupname_short = $group['groupname_short'];
+					$collapsed = $group['options']['collapsed'];
+
+					if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
+						echo '<td class="gap_' . $groupname_short . '" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 					}
 					// if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 						// $layer['attributes']['form_element_type'][$j] .= '_not_saveable';
@@ -379,7 +391,7 @@ if ($doit == true) {
 					if($layer['attributes']['visible'][$j]){
 						if($layer['attributes']['type'][$j] != 'geometry') {
 							if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-								echo '<td id="value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('gle_attribute_value group_'.$groupname.' value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j], $layer['shape'][$k][$layer['attributes']['style_attribute'][$j]], 'position: relative; text-align: left'.($collapsed ? ';display: none' : ''))) . '>';
+								echo '<td id="value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('gle_attribute_value group_' . $groupname_short . ' value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j], $layer['shape'][$k][$layer['attributes']['style_attribute'][$j]], 'position: relative; text-align: left'.($collapsed ? ';display: none' : ''))) . '>';
 								if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 									echo calendar($layer['attributes']['type'][$j], $layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 								}
@@ -460,19 +472,16 @@ if ($doit == true) {
 								<!-- ToDo: Noch nicht implementiert div class="statistic_box all_queried" onclick="toggle_statistic_row(event, <? echo $layer['layer_id']; ?>, 'all_queried');" title="Alle abgefragten Datensätze für die Statistik verwenden."><span style="font-size: 1.8em; margin-left: -2px; margin-top: 4px;">*</span></div//-->
 							</td><?
 							for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-								$explosion = explode(';', $layer['attributes']['group'][$j]);
-								if ($explosion[1] == 'collapsed') {
-									$collapsed = true;
-								}
-								else {
-									$collapsed = false;
-								}
-								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
-								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
+								$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+								$groupname = $group['name'];
+								$groupname_short = $group['groupname_short'];
+								$collapsed = $group['options']['collapsed'];
+
+								if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
+									echo '<td class="gap_' . $groupname_short . '" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
 								if ($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1) { ?>
-									<td valign="top" class="group_<? echo $groupname; ?>" <? if($collapsed)echo 'style="display: none"'; ?> >
+									<td valign="top" class="group_<? echo $groupname_short; ?>" <? if($collapsed)echo 'style="display: none"'; ?> >
 										<div class="statistic_row_<? echo $layer['layer_id']; ?>" style="display:none" data-attribute="<? echo $layer['attributes']['name'][$j]; ?>"><?php
 										$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
 										if ($layer['attributes']['statistic_visibility'][$j] == 1 AND in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
@@ -503,7 +512,7 @@ if ($doit == true) {
 							</tr><?
 						} ?>
 						<tr class="result_filter_tr">
-							<td style="border: none; padding: 0" <? if ($layer['attributes']['group'][0] != ''){echo 'colspan="2"';} ?>></td>
+							<td style="border: none; padding: 0" <? if ($layer['attributes']['group_id'][0] != ''){echo 'colspan="2"';} ?>></td>
 							<?
 							for ($j = 0; $j < count($layer['attributes']['name']); $j++){
 								if ($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1) {
@@ -540,16 +549,18 @@ if ($doit == true) {
 						<td></td>
 					  <?
 					  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-								$explosion = explode(';', $layer['attributes']['group'][$j]);
-								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
-								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
+								$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+								$groupname = $group['name'];
+								$groupname_short = $group['groupname_short'];
+								$collapsed = $group['options']['collapsed'];
+
+								if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
+									echo '<td class="gap_' . $groupname_short . '" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
 								if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 									if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-											echo '<td class="group_'.$groupname.'"';
+											echo '<td class="group_' . $groupname_short . '"';
 											if($collapsed)echo 'style="display: none"';
 											echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 											if($layer['attributes']['alias'][$j] == ''){
@@ -587,11 +598,13 @@ if ($doit == true) {
 							</td>
 							<?					
 								for($j = 0; $j < count($layer['attributes']['name']); $j++){
-									$explosion = explode(';', $layer['attributes']['group'][$j]);
-									if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-									$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['layer_id'];
-									if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-										echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
+									$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+									$groupname = $group['name'];
+									$groupname_short = $group['groupname_short'];
+									$collapsed = $group['options']['collapsed'];
+
+									if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
+										echo '<td class="gap_' . $groupname_short . '" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 									}
 									if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 										$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
@@ -599,7 +612,7 @@ if ($doit == true) {
 									if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 										if($layer['attributes']['type'][$j] != 'geometry'){
 											if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-												echo '<td class="group_'.$groupname.'" '.($collapsed? 'style="display: none"' : '').'>';
+												echo '<td class="group_' . $groupname_short . '" '.($collapsed? 'style="display: none"' : '').'>';
 												if(!in_array($layer['attributes']['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
 													if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 														echo calendar($layer['attributes']['type'][$j], $layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
