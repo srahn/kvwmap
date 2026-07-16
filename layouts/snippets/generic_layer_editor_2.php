@@ -206,6 +206,10 @@ if ($doit == true) {
 							}
 						}
 						
+						if ($layer['attributes']['group_id'][0] != '') {
+							echo '<tr><td>';
+						}
+						
 						for($j = 0; $j < count_or_0($layer['attributes']['name']); $j++) {
 							$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 							// if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
@@ -215,10 +219,15 @@ if ($doit == true) {
 								$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['layer_id'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j]];
 							}				
 				
+							if ($layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j-1]) {
+								# wenn der vorige Tab anders ist, Tab-div beginnen
+								echo '<div style="display: grid; gap: 7px;">';
+							}
 							if (
-									$layer['attributes']['group_id'][$j] != value_of($layer['attributes']['group_id'], $j-1) or 
-									$layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j-1]
-								) {		# wenn die vorige Gruppe anders ist, Tabelle beginnen
+								$layer['attributes']['group_id'][$j] != value_of($layer['attributes']['group_id'], $j-1) or 
+								$layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j-1]
+								) {		
+								# wenn die vorige Gruppe oder der vorige Tab anders ist, Gruppen-div beginnen
 								$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
 								$groupname = $group['name'];
 								$groupname_short = $group['groupname_short'];
@@ -231,17 +240,15 @@ if ($doit == true) {
 										$visibility = 'collapsed';
 									}
 								}
-								echo '<tr class="'.$layer['layer_id'].'_group_'.$groupname_short.' tab tab_' . $layer['layer_id'] . '_' . $k . '_' . $tabname . ' ' . $visibility . '">
-												<td colspan="2" width="100%">
-													<div>
-														<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
-															<tr>
-																<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['layer_id'].'_'.$j.'_'.$k.'\',\'' . $layer['gle_view'] . '\')">
-																	<img id="group_img'.$layer['layer_id'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH; if($collapsed)echo 'plus.gif'; else echo 'minus.gif'; echo '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
-																</td>
-															</tr>
-														</table>
-														<table width="100%" class="tgle" id="group'.$layer['layer_id'].'_'.$j.'_'.$k.'" '; if($collapsed)echo 'style="display:none"'; echo 'border="0"><tbody class="gle gledata">';
+								echo '<div class="'.$layer['layer_id'].'_group_'.$groupname_short.' tab tab_' . $layer['layer_id'] . '_' . $k . '_' . $tabname . ' ' . $visibility . '">
+												<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
+													<tr>
+														<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['layer_id'].'_'.$j.'_'.$k.'\',\'' . $layer['gle_view'] . '\')">
+															<img id="group_img'.$layer['layer_id'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH; if($collapsed)echo 'plus.gif'; else echo 'minus.gif'; echo '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
+														</td>
+													</tr>
+												</table>
+												<table width="100%" class="tgle" id="group'.$layer['layer_id'].'_'.$j.'_'.$k.'" '; if($collapsed)echo 'style="display:none"'; echo 'border="0"><tbody class="gle gledata">';
 							}
 
 							if($layer['attributes']['visible'][$j]){
@@ -339,13 +346,18 @@ if ($doit == true) {
 								$this->form_field_names .= $layer['layer_id'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 							}
 							if (
-									$layer['attributes']['group_id'][$j] != value_of($layer['attributes']['group_id'], $j+1) or 
-									$layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j+1]
-								){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+								$layer['attributes']['group_id'][$j] != value_of($layer['attributes']['group_id'], $j+1) or
+								$layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j+1]
+								){
+								# wenn die nächste Gruppe oder der nächste Tab anders ist, Gruppen-div schliessen
 								echo output_table($table);
 								unset($table);
 								$table = array();
-								echo '</table></div></td></tr>';
+								echo '</table></div>';
+							}
+							if ($layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j+1]){
+								# wenn der nächste Tab anders ist, Tab-div schliessen
+								echo '</div>';
 							}
 						}
 						if($table){
@@ -353,9 +365,16 @@ if ($doit == true) {
 							unset($table);
 							$table = '';
 						}						
-						if ($sachdaten_tab AND $layer['attributes']['group_id'][0] == '') {
-							echo '</tbody></table></td></tr>';
+						if ($sachdaten_tab) {
+							if ($layer['attributes']['group_id'][0] == '') {
+								echo '</tbody></table></td></tr>';
+							}
 						}
+
+						if ($layer['attributes']['group_id'][0] != '') {
+							echo '</td></tr>';
+						}
+
 						if ($show_geom_editor) {
 							echo '
 							<tr class="tab tab_' . $layer['layer_id'] . '_-1_Geometrie ' . $visibility_geom . '">

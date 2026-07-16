@@ -22030,8 +22030,9 @@ DO $$
 		$attr_obj = new LayerAttribute($this);
 
 		$attributes = array(
-			'name' => array(),
-			'tab' => array()
+			'name' => [],
+			'tab' => [],
+			'tabs' => []
 		);
 		$einschr = '';
 
@@ -22210,8 +22211,9 @@ DO $$
 			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
 			$attributes['tooltip'][$i] = $rs['tooltip'];
 			$attributes['group_id'][$i] = $rs['group_id'];
-			$attributes['tab'][$i] = $rs['tab'];
-			$attributes['tabs'][$rs['tab']] = true;
+			if ($attributes['tab'][$i] = $rs['tab']) {
+				$attributes['tabs'][$rs['tab']] = true;
+			}
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
