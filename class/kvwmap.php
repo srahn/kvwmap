@@ -13402,6 +13402,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$from_layer_id = $this->formvars['selected_layer_id'];
 		$to_layer_id = $this->formvars['for_attributes_selected_layer_id'];
 		$this->formvars['selected_layer_id'] = $to_layer_id;
+		foreach($this->formvars as $key => $value) {
+			if (substr($key, 0, 8) == 'default_' AND strpos($value, 'nextval') !== false) {
+				$this->formvars[$key] = '';
+			}
+		}
 		$this->add_message('info', 'Einstellungen der Attribute von Layer ID: ' . $from_layer_id . ' für die Attribute des Layers ID: ' . $to_layer_id . ' übernommen.<br>Ordne Attribute ohne Einstellungen neu ein!');
 		$this->save_layer_attributes($this->formvars);
 		$this->Attributeditor();
