@@ -125,7 +125,7 @@ class stelle {
 		$sql .=' AND obermenue = '.$id;
 		$sql .=' AND menueebene = 2';
 		$sql .=' AND u_menue2stelle.menue_id = u_menues.id';
-		$sql .= ' ORDER BY menue_order';
+		$sql .= ' ORDER BY coalesce(menue_order, order)';
 		$this->debug->write("<p>file:stelle.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines Menüpunktes:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -249,12 +249,13 @@ class stelle {
 				ows_contentvoicephone,
 				ows_contentfacsimile,
 
-				protected, check_client_ip::int, check_password_age, allowed_password_age, use_layer_aliases, selectable_layer_params, hist_timestamp, default_user_id,
+				protected, check_client_ip, totp_authentication, check_password_age, allowed_password_age, use_layer_aliases, selectable_layer_params, hist_timestamp, default_user_id,
 				style,
 				show_shared_layers,
 				reset_password_text,
 				invitation_text,
-				start_page_params
+				start_page_params,
+				quick_jump_layer_id
 			FROM
 				kvwmap.stelle s
 			WHERE
@@ -262,10 +263,30 @@ class stelle {
 		";
 		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
-		$ret = $this->database->execSQL($sql, 4, 0, true);
+		$ret = $this->database->execSQL($sql, 4, 0, false);
 		if(!$ret[0]) {
       $rs = pg_fetch_assoc($ret[1]);
     }
+		else {		# fallback
+			$sql = "
+				SELECT
+					id," .
+					$name_column . ",
+					start,
+					stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, Authentifizierung, wappen, wappen_link, 
+					check_client_ip, check_password_age, allowed_password_age, use_layer_aliases, hist_timestamp
+				FROM
+					kvwmap.stelle s
+				WHERE
+					id = " . $this->id . "
+			";
+			#echo 'SQL zum Abfragen der Stelle: ' . $sql;
+			$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
+			$ret = $this->database->execSQL($sql, 4, 0, false);
+			if(!$ret[0]) {
+				$rs = pg_fetch_assoc($ret[1]);
+			}
+		}
 		$this->data = $rs;
 		$this->Bezeichnung = $rs['bezeichnung'];
 		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
@@ -319,12 +340,14 @@ class stelle {
 
 		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
 		$this->check_client_ip = ($rs['check_client_ip'] == 't');
+		$this->totp_authentication = ($rs['totp_authentication'] == 't');
 		$this->checkPasswordAge = ($rs['check_password_age'] == 't');
 		$this->allowedPasswordAge = $rs['allowed_password_age'];
 		$this->useLayerAliases = ($rs['use_layer_aliases'] == 't');
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = ($rs['hist_timestamp'] == 't');
 		$this->default_user_id = $rs['default_user_id'];
+		$this->quick_jump_layer_id = $rs['quick_jump_layer_id'];
 		$this->show_shared_layers = ($rs['show_shared_layers'] == 't');
 		$this->style = $rs['style'];
 		$this->reset_password_text = $rs['reset_password_text'];
@@ -477,7 +500,10 @@ class stelle {
 		$rs = pg_fetch_array($ret[1]);
 		$rs['ows_inspireidentifiziert'] = ($rs['ows_inspireidentifiziert'] == 't');
 		$rs['check_client_ip'] = ($rs['check_client_ip'] == 't');
+		$rs['totp_authentication'] = ($rs['totp_authentication'] == 't');
 		$rs['check_password_age'] = ($rs['check_password_age'] == 't');
+		$rs['show_shared_layers'] = ($rs['show_shared_layers'] == 't');
+		$rs['use_layer_aliases'] = ($rs['use_layer_aliases'] == 't');
 		$this->data = $rs;
 		return $rs;
 	}
@@ -575,6 +601,7 @@ class stelle {
 				'wappen',
 				'default_user_id',
 				'check_client_ip',
+				'totp_authentication',
 				'check_password_age',
 				'allowed_password_age',
 				'use_layer_aliases',
@@ -588,8 +615,8 @@ class stelle {
 			])
 		);
 		$rows['ows_srs'] = preg_replace(array('/: +/', '/ +:/'), ':', $rows['ows_srs']);
-		$rows['wappen'] = ($rows['wappen'] ? $_files['wappen']['name'] : $rows['wappen_save']);
 		$rows['check_client_ip'] = ($rows['checkClientIP'] == '1'	? "true" : "false");
+		$rows['totp_authentication'] = ($rows['totp_authentication'] == '1'	? "true" : "false");
 		$rows['check_password_age'] = ($rows['checkPasswordAge'] == '1' ? "true" : "false");
 		$rows['allowed_password_age'] = ($rows['allowedPasswordAge'] ?: "6");
 		$rows['use_layer_aliases'] = ($rows['use_layer_aliases'] == '1'	? "true" : "false");
@@ -703,11 +730,13 @@ class stelle {
 				ows_srs = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				wappen_link = '" . $stellendaten['wappen_link'] . "',
 				check_client_ip =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
+				totp_authentication =				'" . ($stellendaten['totp_authentication'] 			== '1'	? "1" : "0") . "',
 				check_password_age =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
 				use_layer_aliases = 		'" . (value_of($stellendaten, 'use_layer_aliases') 	== '1'	? "1" : "0") . "',
 				hist_timestamp = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				allowed_password_age = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
 				default_user_id = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
+				quick_jump_layer_id = " . ($stellendaten['quick_jump_layer_id'] != '' ? $stellendaten['quick_jump_layer_id'] : 'NULL') . ",
 				show_shared_layers = " . ($stellendaten['show_shared_layers'] ? 'true' : 'false') . ",
 				version = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				reset_password_text = '" . $stellendaten['reset_password_text'] . "',
@@ -840,12 +869,18 @@ class stelle {
 			$stellen['ID'][] = $rs['id'];
 			$stellen['index'][$rs['id']] = $i;
 			$stellen['Bezeichnung'][] = $rs['bezeichnung'];
-			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
+			$stellen['show_shared_layers'][] = ($rs['show_shared_layers'] == 't');
 			$stellen['Bezeichnung_parent'][] = $rs['bezeichnung_parent'];
 			$stellen['last_time_id'][] = $rs['last_time_id'];
 			$i++;
 		}
 		return $stellen;
+	}
+
+	function is_admin_stelle($stelle_id = null) {
+		global $admin_stellen;
+		$stelle_id = $stelle_id ?? $this->id;
+		return in_array($stelle_id, $admin_stellen);
 	}
 	
 	function getStellenhierarchie() {
@@ -1089,15 +1124,15 @@ class stelle {
 		}
 	}
 
-	function getFlurstueckeAllowed($FlurstKennz, $database) {
+	function getFlurstueckeAllowed($FlurstKennz, $database, $eigentuemer = '') {
 		include_once(PLUGINS.'alkis/model/alkis.php');
-		$GemeindenStelle = $this->getGemeindeIDs();
+		$GemeindenStelle = $this->getGemeindeIDs($eigentuemer);
 		if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])) {   // Stelle ist auf Gemeinden eingeschränkt
 			$alkis = new alkis($database);
 			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
 				$anzFlurstKennz = count_or_0($ret[1]);
-				if ($anzFlurstKennz==0) {
+				if ($eigentuemer == ''AND $anzFlurstKennz==0) {
 					$ret[0]=1;
 					$ret[1]="Sie haben keine Berechtigung zur Ansicht diese(s)r Flurstücke(s)";
 				}
@@ -1125,9 +1160,10 @@ class stelle {
 		&$layer
 	) {
 		include_once(CLASSPATH . 'datendrucklayout.php');
+		include_once(CLASSPATH . 'kartendrucklayout.php');
 		$results = array();
 		$old_parents = $this->getParents('ORDER BY ID', 'only_ids');
-		$document = new Document($this->database);
+		$kdl = new kdl($this->database);
 		$ddl = new ddl($this->database);
 				
 		# immer alle Elternstellen und deren Zuordnungen entfernen und wieder neu hinzufügen
@@ -1136,7 +1172,7 @@ class stelle {
 			$menues = array_values(array_diff($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_diff($functions, $parent_stelle->getFunktionen('only_ids')));
 			$layouts = array_values(array_diff($layouts, $ddl->load_layouts($drop_parent_id, '', '', '', 'only_ids')));
-			$frames = array_values(array_diff($frames, $document->load_frames($drop_parent_id, false, 'only_ids')));
+			$frames = array_values(array_diff($frames, $kdl->load_frames($drop_parent_id, false, 'only_ids')));
 			$parent_layer = $parent_stelle->getLayer('', 'only_ids');
 			$layer = array_values(array_diff($layer, $parent_layer));
 			$this->dropParent($drop_parent_id);
@@ -1148,7 +1184,7 @@ class stelle {
 			$menues = $this->sort_menues(array_merge($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
 			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
-			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
+			$frames = array_values(array_unique(array_merge($frames, $kdl->load_frames($new_parent_id, false, 'only_ids'))));
 			$layer = array_values(array_unique(array_merge($layer, $parent_stelle->getLayer('', 'only_ids'))));
 			$results[] = $this->addParent($new_parent_id);
 		}
@@ -1286,41 +1322,20 @@ class stelle {
 	* Hinzufügen von Menuepunkten zur Stelle
 	*/
 	function addMenue($menue_ids) {
-		$sql = "
-			SELECT
-				MAX(menue_order)
-			FROM
-				kvwmap.u_menue2stelle
-			WHERE
-				stelle_id = " . $this->id . "
-		";
-		#echo '<br>stelle.php addMenue Sql: ' . $sql;
-		$this->debug->write("<p>file:stelle.php class:stelle->addMenue - Lesen der maximalen menue_order der Menuepunkte der Stelle:<br>".$sql,4);
-		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
-		}
-		else {
-			$rs = pg_fetch_array($ret[1]);
-		}
-		$count = ($rs[0] == '' ? 0 : $rs[0]);
 		for ($i = 0; $i <@ count($menue_ids); $i++) {
 			$sql ="
 				INSERT INTO kvwmap.u_menue2stelle 
 					(
 						stelle_id,
-						menue_id,
-						menue_order
+						menue_id
 					)
 				VALUES (
 					'" . $this->id ."',
-					'" . $menue_ids[$i] . "',
-					'" . $count . "'
+					'" . $menue_ids[$i] . "'
 				)
 				ON CONFLICT (stelle_id, menue_id) DO NOTHING
 			";
 			#echo '<br>stelle.php addMenue Sql: ' . $sql;
-			$count++;
 			$this->debug->write("<p>file:stelle.php class:stelle->addMenue - Hinzufügen von Menuepunkten zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -1344,18 +1359,23 @@ class stelle {
 
 		$sql = "
 			SELECT
-				menue_id," .
+				m.id AS menue_id," .
 				$name_column . ",
-				menueebene,
-				\"order\"
-			FROM
-				kvwmap.u_menues m JOIN
-				kvwmap.u_menue2stelle m2s ON m.id = m2s.menue_id
+				m.menueebene,
+				COALESCE(m2s.menue_order, m.\"order\") as \"order\"
+			FROM 
+				kvwmap.u_menues m
+				JOIN kvwmap.u_menue2stelle m2s ON m.id = m2s.menue_id
+				LEFT JOIN kvwmap.u_menues parent ON parent.id = m.obermenue
+				LEFT JOIN kvwmap.u_menue2stelle parent_m2s ON parent.id = parent_m2s.menue_id AND parent_m2s.stelle_id = m2s.stelle_id
 			WHERE
 				m2s.stelle_id = " . $this->id .
-				($ebene != 0 ? " AND menueebene = " . $ebene : "") . "
+				($ebene != 0 ? " AND m.menueebene = " . $ebene : "") . "
 			ORDER BY
-				menue_order
+				COALESCE(parent_m2s.menue_order, parent.\"order\", m2s.menue_order, m.\"order\"),	-- Order des Obermenüs
+				CASE WHEN m.menueebene = 1 THEN m.id ELSE m.obermenue	END,												-- stabile Gruppierung (Obermenü-ID)
+				CASE WHEN m.menueebene = 1 THEN 0 ELSE 1 END,																			-- Obermenü zuerst				
+				COALESCE(m2s.menue_order, m.\"order\")																						-- Order innerhalb der Gruppe
 		";
 		#echo '<br>stelle.php getMenue(' . $ebene . ') Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getMenue - Lesen der Menuepunkte zur Stelle:<br>".$sql,4);
@@ -1390,7 +1410,6 @@ class stelle {
 			$columns = '
 				layer_id, 
 				queryable, 
-				legendorder,
 				minscale, 
 				maxscale, 
 				offsite, 
@@ -1522,18 +1541,16 @@ class stelle {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
-			$insert = "(
+			$insert = "
 				stelle_id,
 				layer_id,
 				queryable,
 				use_geom,
-				legendorder,
 				minscale,
 				maxscale,
 				symbolscale,
 				offsite,
 				transparency,
-				Filter,
 				template,
 				header,
 				footer,
@@ -1541,24 +1558,22 @@ class stelle {
 				export_privileg,
 				postlabelcache,
 				requires,
-				start_aktiv
-			)";
+				start_aktiv";
 			if (!$assign_default_values) {
 				# Einstellungen von der ersten Elternstelle übernehmen (LIMTI 1)
 				$sql = "
-					INSERT INTO kvwmap.used_layer " . $insert . "
+					INSERT INTO kvwmap.used_layer 
+						(" . $insert . ")
 					SELECT
 						" . $this->id . ",
 						" . $layer_ids[$i] . ",
 						queryable,
 						use_geom,
-						legendorder, 
 						minscale, 
 						maxscale, 
 						symbolscale, 
 						offsite, 
 						transparency, 
-						filter,
 						template, 
 						header,
 						footer,
@@ -1579,13 +1594,11 @@ class stelle {
 					ON CONFLICT (stelle_id, layer_id) DO UPDATE SET
 						queryable = EXCLUDED.queryable, 
 						use_geom = EXCLUDED.use_geom, 
-						legendorder = EXCLUDED.legendorder, 
 						minscale = EXCLUDED.minscale, 
 						maxscale = EXCLUDED.maxscale, 
 						symbolscale = EXCLUDED.symbolscale, 
 						offsite = EXCLUDED.offsite, 
 						transparency = EXCLUDED.transparency, 
-						filter = EXCLUDED.filter,
 						template = EXCLUDED.template, 
 						header = EXCLUDED.header,
 						footer = EXCLUDED.footer,
@@ -1605,19 +1618,20 @@ class stelle {
 			}
 			if ($assign_default_values OR pg_affected_rows($ret[1]) == 0) {
 				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
-				$sql = "INSERT INTO kvwmap.used_layer " . $insert . "
+				$sql = "
+					INSERT INTO kvwmap.used_layer 
+						(" . $insert . ",
+						filter)
 					SELECT
 						'" . $this->id . "',
 						'" . $layer_ids[$i] . "',
 						queryable,
 						use_geom,
-						legendorder, 
 						minscale, 
 						maxscale, 
 						symbolscale, 
 						offsite, 
 						transparency, 
-						'" . $filter . "',
 						template, 
 						NULL,
 						NULL,
@@ -1625,7 +1639,8 @@ class stelle {
 						export_privileg,
 						postlabelcache,
 						requires,
-						'0'
+						'0',
+						'" . $filter . "'
 					FROM
 						kvwmap.layer as l
 					WHERE
@@ -1636,7 +1651,6 @@ class stelle {
 						UPDATE SET
 							queryable = EXCLUDED.queryable, 
 							use_geom = EXCLUDED.use_geom, 
-							legendorder = EXCLUDED.legendorder, 
 							minscale = EXCLUDED.minscale, 
 							maxscale = EXCLUDED.maxscale, 
 							symbolscale = EXCLUDED.symbolscale, 
@@ -1866,22 +1880,6 @@ class stelle {
 		}
 	}
 
-	function updateLayerOrder($formvars){
-		# Aktualisieren der LayerzuStelle-Eigenschaften
-		$sql = '
-			UPDATE 
-				kvwmap.used_layer 
-			SET 
-				legendorder = ' . ($formvars['legendorder'] ?: 'NULL') . '
-			WHERE 
-				stelle_id = ' . $formvars['selected_stelle_id'] . ' AND 
-				layer_id = ' . $formvars['selected_layer_id'];
-		#echo $sql.'<br>';
-		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-	}
-
   function getGroups() {
 		global $language;
 		$sql = 'SELECT DISTINCT';
@@ -1903,7 +1901,7 @@ class stelle {
     return $groups;
   }
 
-	function getLayers($group, $order = 'ul.legendorder, l.drawingorder desc', $return = '') {
+	function getLayers($group, $order = 'l.legendorder', $return = '') {
 		$layer = array(
 			'ID' => array(),
 			'Bezeichnung' => array(),
@@ -1913,19 +1911,19 @@ class stelle {
 
 		$condition = "
 			ul.stelle_id = " . $this->id .
-			($group != NULL ? " AND COALESCE(ul.group_id, l.Gruppe) = " . $group : "") . "
+			($group != NULL ? " AND COALESCE(ul.group_id, l.gruppe) = " . $group : "") . "
 		";
-		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY ul.legendorder, l.drawingorder desc');
+		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY l.legendorder');
 
 		# Lesen der Layer zur Stelle
 		$sql = "
 			SELECT
 				l.layer_id,
-				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
-				l.Name,
+				COALESCE(ul.group_id, l.gruppe) AS gruppe,
+				l.name,
 				l.alias,
 				l.drawingorder,
-				ul.legendorder
+				l.legendorder
 			FROM
 				kvwmap.used_layer ul JOIN
 				kvwmap.layer l ON ul.layer_id = l.layer_id 
@@ -2192,13 +2190,14 @@ class stelle {
 				l.name,
 				l.gruppe,
 				l.document_path,
+				l.maintable,
 				ul.use_parent_privileges,
 				ul.privileg,
 				ul.export_privileg,
 				ul.requires,
 				ul.queryable, 
 				l.drawingorder, 
-				ul.legendorder, 
+				l.legendorder, 
 				ul.minscale, 
 				ul.maxscale, 
 				ul.offsite, 
@@ -2211,7 +2210,6 @@ class stelle {
 				ul.start_aktiv, 
 				ul.use_geom,
 				ul.group_id,
-				parent_id,
 				string_agg(ul2.stelle_id::text, ',') as used_layer_parent_id,
 				string_agg(s.bezeichnung, ',') as used_layer_parent_bezeichnung
 			FROM
@@ -2229,7 +2227,7 @@ class stelle {
 				l.layer_id, l.name, l.gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
 				ul.queryable, 
 				l.drawingorder, 
-				ul.legendorder, 
+				l.legendorder, 
 				ul.minscale, 
 				ul.maxscale, 
 				ul.offsite, 
@@ -2242,14 +2240,15 @@ class stelle {
 				ul.start_aktiv, 
 				ul.use_geom,
 				ul.requires,
-				ul.group_id,
-				stellen_hierarchie.parent_id
+				ul.group_id
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['queryable'] = ($rs['queryable'] == 't');
+			$rs['use_parent_privileges'] = ($rs['use_parent_privileges'] == 't');
 			$layer[] = ($result == 'only_ids' ? $rs['layer_id'] : $rs);
 		}
 		return $layer;
@@ -2320,6 +2319,12 @@ class stelle {
 					}
 				},
 				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
+			),
+			'geocoder' => (Object) array(
+				'type' => 'nominatim',
+				'params' => (Object) array(
+					'viewbox' => round($stellenextent->minx, 5) . ',' . round($stellenextent->miny, 5) . ',' . round($stellenextent->maxx, 5) . ',' . round($stellenextent->maxy, 5)
+				)
 			)
 		);
 		return $layerdef;
@@ -2442,7 +2447,7 @@ class stelle {
 		}
 	}
 
-	function getGemeindeIDs() {
+	function getGemeindeIDs($eigentuemer = '') {
 		$liste = [];
 		$liste['ganze_gemeinde'] = Array();
 		$liste['eingeschr_gemeinde'] = Array();
@@ -2450,7 +2455,7 @@ class stelle {
 		$liste['eingeschr_gemarkung'] = Array();
 		$liste['ganze_flur'] = Array();
 		$liste['eingeschr_flur'] = Array();
-		$sql = 'SELECT gemeinde_id, gemarkung, flur, flurstueck FROM kvwmap.stelle_gemeinden WHERE stelle_id = '.$this->id;
+		$sql = 'SELECT gemeinde_id, gemarkung, flur, flurstueck FROM kvwmap.stelle_gemeinden' . ($eigentuemer) . ' WHERE stelle_id = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
@@ -2507,6 +2512,7 @@ class stelle {
 				$user['Bezeichnung'][] = $rs['name'].', '.$rs['vorname'];
 				$user['position'][] = $rs['position'];
 				$user['email'][] = $rs['email'];
+				$user['funktion'][] = $rs['funktion'];
 			}
 		}
 		if ($result == 'only_ids') {

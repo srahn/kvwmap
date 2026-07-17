@@ -1,4 +1,79 @@
 <?
+
+$GUI->nachweis_columns = [
+	'id' => [
+		'alias' => 'ID',
+		'width' => 15
+	],
+	'gemarkung' => [
+		'alias' => 'Gemkg',
+		'width' => 45
+	],
+	'flur' => [
+		'alias' => 'Flur',
+		'width' => 25
+	],
+	'stammnr' => [
+		'alias' => 'Antragsnr.',
+		'width' => 65
+	],	
+	'blattnummer' => [
+		'alias' => 'Blattnr.',
+		'width' => 55
+	],
+	'rissnummer' => [
+		'alias' => 'Rissnr.',
+		'width' => 45
+	],
+	'art' => [
+		'alias' => 'Dokumentart',
+		'width' => 85
+	],
+	'datum' => [
+		'alias' => 'Datum',
+		'width' => 45
+	],
+	'datum_bis' => [
+		'alias' => 'Datum bis',
+		'width' => 75
+	],
+	'rissfuehrer' => [
+		'alias' => 'Rissführer',
+		'width' => 75
+	],
+	'fortfuehrung' => [
+		'alias' => 'Fortführung',
+		'width' => 83
+	],
+	'antragsnummer_alt' => [
+		'alias' => 'GB/C-Nr.',
+		'width' => 60
+	],	
+	'vermst' => [
+		'alias' => 'Vermstelle',
+		'width' => 65
+	],
+	'gueltigkeit' => [
+		'alias' => 'gültig',
+		'width' => 42
+	],
+	'geprueft' => [
+		'alias' => 'geprüft',
+		'width' => 52
+	],	
+	'format' => [
+		'alias' => 'Format',
+		'width' => 45
+	],	
+	'zeit' => [
+		'alias' => 'Zeit',
+		'width' => 25
+	],	
+	'erstellungszeit' => [
+		'alias' => 'Erstellungszeit',
+		'width' => 100
+	]
+];
 	
 	/**
 	* Trigger für Bearbeitung im GLE
@@ -500,6 +575,26 @@
 		return 1;
 	};
 
+	$GUI->setColumns = function() use ($GUI){
+		foreach ($GUI->nachweis_columns as $column => $c) {
+			if ($GUI->formvars['column_' . $column]) {
+				$new_columns[] = $column;
+			}
+		}
+		$sql = "
+			UPDATE 
+				kvwmap.rolle_nachweise 
+			SET 
+				columns = '" . json_encode($new_columns) . "' 
+			WHERE 
+				user_id = " . $GUI->user->rolle->user_id . " AND 
+				stelle_id = " . $GUI->user->rolle->stelle_id;
+		#echo $sql;
+		$GUI->debug->write("<p>setColumns - Setzen der Spaltenauswahl für die Nachweisanzeige",4);
+		$GUI->pgdatabase->execSQL($sql,4, 1);
+		return 1;
+	};
+
 	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchfortfuehrung2,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $suchbemerkung, $flur_thematisch, $alle_der_messung, $order) use ($GUI){
 		if($suchhauptart == NULL)$suchhauptart = array();
 		if($suchunterart == NULL)$suchunterart = array();
@@ -584,6 +679,7 @@
 		$rs['suchunterart'] = array_filter(explode(',', $rs['suchunterart']));
 		$rs['showhauptart'] = array_filter(explode(',', $rs['showhauptart']));
 		$rs['markhauptart'] = array_filter(explode(',', $rs['markhauptart']));
+		$rs['columns'] = json_decode($rs['columns']);
 		return $rs;
 	};
 	
@@ -1069,9 +1165,10 @@
 			';
 			
 		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
-			$GUI->nachweis->Dokumente[$i]['bearbeitungshinweis'] = 'mailto:' . $GUI->nachweis->Dokumente[$i]['email'] . '?subject=Bearbeitungshinweis zum Nachweis ' . $GUI->nachweis->Dokumente[$i]['client_nachweis_id'];
-			$json = str_replace('\\"', '\\\"', str_replace('\\\"', '"', str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', str_replace('\\t', '\\\t', json_encode($GUI->nachweis->Dokumente[$i])))))));
-			$html.= "			nachweise.push(JSON.parse('".$json."'));\n";
+			$nachweis_data = $GUI->nachweis->Dokumente[$i];
+			unset($nachweis_data['the_geom']);	// wird nicht benötigt und kann zu Escape-Fehlern im JSON führen
+			$nachweis_data['bearbeitungshinweis'] = 'mailto:' . $nachweis_data['email'] . '?subject=Bearbeitungshinweis zum Nachweis ' . $nachweis_data['client_nachweis_id'];
+			$html .= "nachweise.push(" . json_encode($nachweis_data, JSON_UNESCAPED_UNICODE) . ");\n";
 		}	
 		
 		$html.= "
@@ -1833,6 +1930,7 @@
 			
     # erzeugen des Formularobjektes für die VermessungsStellen
     $GUI->FormObjVermStelle=$GUI->getFormObjVermStelle('sVermStelle', $GUI->formvars['sVermStelle']);
+		$GUI->FormObjVermStelle->addJavaScript('onchange', "document.getElementById('abfrageart_attr').checked = true;");
     $GUI->FormObjVermStelle->insertOption('', NULL, '--- Auswahl ---', 0);    
     # aktuellen Kartenausschnitt laden + zeichnen!
     $saved_scale = $GUI->reduce_mapwidth(207);
@@ -1842,6 +1940,9 @@
       # Nur Navigieren
       $GUI->navMap($GUI->formvars['CMD']);
     }
+		elseif($GUI->formvars['lea_id'] != '') {
+			$GUI->zoomToLEA($nachweis, $GUI->formvars['lea_id'], 10);
+		}
 	
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
     
@@ -1854,9 +1955,9 @@
 			$GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, $GUI->formvars['selected_group_id'], NULL, NULL, true, true);
 		}
 
-  	if(!$GUI->formvars['geom_from_layer']){
-      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $GUI->formvars['geom_from_layer'] = $layerset[0]['layer_id'];
+		if(!$GUI->formvars['geom_from_layer']){
+      $layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
+	    $GUI->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
     }
     $GUI->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -1895,6 +1996,23 @@
 			else {
 				$GUI->map_scaledenom = $GUI->map->scale;
 			}
+    }
+  };
+
+	$GUI->zoomToLEA = function($nachweis, $lea_id, $border) use ($GUI){
+    # Abfragen der Ausdehnung des Umringes des Nachweises
+    $ret = $nachweis->getLeaBBoxAsRectObj($lea_id);
+    if ($ret[0]) {
+      # Fehler bei der Abfrage der BoundingBox
+      # Es erfolgt keine Änderung der aktuellen Ausdehnung
+    }
+    else {
+      $rect=$ret[1];
+      # Berechnen des Randes in Abhängigkeit vom Parameter border gegeben in Prozent
+      $randx=($rect->maxx-$rect->minx)*$border/100;
+      $randy=($rect->maxy-$rect->miny)*$border/100;
+      $GUI->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+			$GUI->map_scaledenom = $GUI->map->scaledenom;
     }
   };
 	
@@ -2412,6 +2530,7 @@
     if ($back[0]=='') {
       # Fehlerfreie Datenabfrage
       $FormObjAntr_nr=new FormObject('suchantrnr','select',$back[1]['antr_nr_stelle_id'],array($antr_nr),$back[1]['antr_nr'],$size,0,0,NULL);
+			$FormObjAntr_nr->addJavaScript('onchange', "document.getElementById('abfrageart_antr').checked = true;");
     }
     else {
       $FormObjAntr_nr=new FormObject('suchantrnr','text',array($back[0]),'','',25,255,0,NULL);

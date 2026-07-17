@@ -1,7 +1,7 @@
 <tr>
 	<td colspan="2"><?php $maxRows = ($this->formvars['anzahl'] > MAXQUERYROWS ? $this->formvars['anzahl'] : MAXQUERYROWS); ?>
 		<i><? echo $layer['name']; ?></i>:
-		<a href="javascript:selectall(<? echo $layer['layer_id']; ?>);">
+		<a href="javascript:selectall(<? echo $layer['layer_id'] . ($template == 'generic_layer_editor_doc_raster.php'? ', true' : ''); ?>);">
 			<span id="selectDatasetsLinkText_<? echo $layer['layer_id']; ?>"><?
 			if ($layer['count'] > $maxRows) {
 				echo $strSelectAllShown;

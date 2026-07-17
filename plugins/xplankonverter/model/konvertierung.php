@@ -73,6 +73,7 @@ class Konvertierung extends PgObject {
 					'plan_abk' => 'bplan',
 					'plan_abk_plural' => 'bplaene',
 					'plan_layer_id' => XPLANKONVERTER_BP_PLAENE_LAYER_ID,
+					'konvertierung_layer_id' => XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID,
 					'plan_attribut_aktualitaet' => 'inkrafttretensdatum, genehmigungsdatum',
 					'plan_file_name' => 'Bebauungsplan.gml',
 					'mapfile_name' => 'bplaene.map',
@@ -81,8 +82,8 @@ class Konvertierung extends PgObject {
 						'import_zusammenzeichnung',
 						'create_plaene',
 						'convert_zusammenzeichnung',
-						'gml_generieren',
-						'check_class_completeness'
+						'gml_generieren'
+						#,'check_class_completeness'
 					)
 				);
 				// ToDo 'replace_zusammenzeichnung' noch nicht bei B-Plänen. Erst das optionale Überschreiben oder nicht in Dialog beim Upload einbauen, siehe Konzept bplan-Server.
@@ -327,7 +328,7 @@ class Konvertierung extends PgObject {
 		if ($konvertierung->get('planart') != '') {
 			if ($konvertierung->get_plan()) {
 				$konvertierung->plan->get_center_coord();
-				$konvertierung->plan->get_extent(OWS_SRS);
+				$konvertierung->plan->get_extent(OWS_SRS, 'konvertierung_id = ' . $id);
 			}
 			$konvertierung->set_config($konvertierung->get('planart'));
 		}
@@ -507,7 +508,7 @@ class Konvertierung extends PgObject {
 	// 	$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 	// 	$this->gui->debug->write('Archiviere Plan in zip_file: ' . $zip_file);
 	// 	if (!file_exists($zip_path)) {
-	// 		mkdir($zip_path, 0775, true);
+	// 		mkdir($zip_path, 0770, true);
 	// 	}
 
 	// 	$archive = new ZipArchive();
@@ -586,7 +587,7 @@ class Konvertierung extends PgObject {
 		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
 		if (!file_exists($zip_path)) {
-			mkdir($zip_path, 0775, true);
+			mkdir($zip_path, 0770, true);
 		}
 
 		$archive = new ZipArchive();
@@ -672,7 +673,7 @@ class Konvertierung extends PgObject {
 		$zip_file = $this->config['plan_short_title'] . '_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 		$this->gui->xlog->write('Archiviere ' . $this->config['singular'] . ' in zip_file: ' . $zip_path . $zip_file);
 		if (!file_exists($zip_path)) {
-			mkdir($zip_path, 0775, true);
+			mkdir($zip_path, 0770, true);
 		}
 
 		$archive = new ZipArchive();
@@ -784,10 +785,37 @@ class Konvertierung extends PgObject {
 			if (!is_dir($path)) {
 				$this->debug->show('Create directory', Konvertierung::$write_debug);
 				$old = umask(0);
-				mkdir($path, 0775, true);
+				mkdir($path, 0770, true);
 				umask($old);
 			}
 		}
+	}
+
+	function create_themenauswahl($xplan_layers) {
+		include_once(CLASSPATH . 'RolleSavedLayers.php');
+		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
+		if (! $result['success']) {
+			return $result;
+		}
+		$layers_with_content = $result['layers_with_content'];
+		$layers_with_content[] = array('id' => $this->plan->get_plan_layer_id());
+		$layers_with_content[] = array('id' => $this->plan->get_bereich_layer_id());
+		$layerset = array('list' => array());
+		foreach ($layers_with_content AS $layer) {
+			$layerset['list'][] = array(
+				'layer_id' => $layer['id'],
+				'aktivstatus' => 1,
+				'querystatus' => 0
+			);
+		}
+		if ($rolle_saved_layer = RolleSavedLayers::find_by_name($this->gui, $this->plan->get_anzeige_name())) {
+			$rolle_saved_layer->delete(); // Drop LayerComment if already exists and overwrite in next step.
+		}
+		$result = $this->gui->user->rolle->insertLayerComment($layerset, $this->plan->get_anzeige_name() . ' (' . $this->plan->get('gml_id') . ')', $this->gui->Stelle->id, NULL);
+		if ($result['success']) {
+			$this->update_attr(array('layer_selection_id = ' . $result['id']), true);
+		}
+		return $result;
 	}
 
 	/**
@@ -953,7 +981,7 @@ class Konvertierung extends PgObject {
 	function create_xplan_shapes() {
 		$path = $this->get_file_path('xplan_shapes');
 		if (!file_exists($path)) {
-			mkdir($path, 0775);
+			mkdir($path, 0770);
 		}
 
 		// Delete existing shapes
@@ -1170,7 +1198,7 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-	 * Return plan of konvertierung, query first from database if not already asigned to plan attribute 
+	 * Return plan of konvertierung, query first from database if not already assigned to plan attribute
 	 * return false if not found, else plan
 	 */
 	function get_plan() {
@@ -1178,12 +1206,12 @@ class Konvertierung extends PgObject {
 		if (!$this->plan) {
 			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get($this->identifier), Konvertierung::$write_debug);
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
-			$plan = $plan->find_where('konvertierung_id = ' . $this->get($this->identifier));
+			$plan = $plan->find_where('konvertierung_id = ' . $this->get($this->identifier), NULL, '*, to_json(externereferenz) AS externereferenz_json');
 			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
 			if (count($plan) > 0) {
 				$this->plan = $plan[0];
 				$this->plan->get_center_coord();
-				$this->plan->get_extent(OWS_SRS);
+				$this->plan->get_extent(OWS_SRS, 'konvertierung_id = ' . $this->get($this->identifier));
 				$this->debug->show('get_plan assign first plan with planart: ' . $this->plan->planart . ' gml_id: ' . $this->plan->get('gml_id') . ' to Konvertierung.', Konvertierung::$write_debug);
 			}
 			else {
@@ -1195,6 +1223,29 @@ class Konvertierung extends PgObject {
 
 	function get_plan_file_name() {
 		return ($this->get('uploaded_xplan_gml_file_name') ?: $this->config['plan_file_name']);
+	}
+
+	/**
+	 * Function search for $this->config['plan_file_name'] in $upload_files
+	 * If found set as uploaded_xplan
+	 */
+	function set_plan_file_name($upload_files) {
+		$this->set('uploaded_xplan_gml_file_name', $this->get_uploaded_gml_file_name($upload_files));
+	}
+
+	function get_uploaded_gml_file_name($upload_files) {
+		$plan_file_name = null;
+		foreach ($upload_files as $file) {
+			$basename = basename($file);
+			if (strcasecmp($basename, $this->config['plan_file_name']) === 0) {
+				$plan_file_name = $this->config['plan_file_name'];
+				break; // sofort stoppen
+			}
+			if ($plan_file_name === null && strtolower(substr($basename, -4)) === '.gml') {
+				$plan_file_name = $basename;
+			}
+		}
+		return $plan_file_name;
 	}
 
 	/**
@@ -1263,6 +1314,7 @@ class Konvertierung extends PgObject {
 	*	den Plan und Bereich in der Plan- und Bereichtabelle des Schemas xplan_gml je nach planart
 	*	Falls eine konvertierung_id übergeben wird, wird nur der Name und die Beschreibung der schon vorhandenen Konvertierung
 	*	überschrieben und keine neue Konvertierung angelegt.
+	* Wenn es für den Plan externe Referenzen gibt, die hochgeladen wurden, werden diese in das Zielverzeichnis kopiert.
 	*	@params $table_schema string: Schema aus dem die Daten entnommen werden
 	*	@params $plan_class string: Planart in der UML-Schreibweise mit Unterstrich, z.B. BP_Plan, FP_Plan, RP_Plan etc.
 	*	@return array
@@ -1382,7 +1434,9 @@ class Konvertierung extends PgObject {
 						versionsonstrechtsgrundlagedatum,
 						versionsonstrechtsgrundlagetext,
 						hoehenbezug,
-						gruenordnungsplan
+						gruenordnungsplan,
+						hatgenerattribut,
+						fassungsbezeichnung
 					)
 					SELECT
 						trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid AS gml_id,
@@ -1401,14 +1455,20 @@ class Konvertierung extends PgObject {
 								ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
 							ELSE NULL
 						END AS aendert,
-						CASE
-							WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
-								ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
-							ELSE NULL
-						END AS wurdegeaendertvon,
+						(
+							SELECT
+								array_agg((vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)::xplan_gml.xp_verbundenerplan)::xplan_gml.xp_verbundenerplan[]
+							FROM
+								xplan_gmlas_tmp_56.bp_plan gmlas LEFT JOIN
+								xplan_gmlas_tmp_56.bp_plan_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
+								xplan_gmlas_tmp_56.wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
+								xplan_gmlas_tmp_56.xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid  
+							WHERE
+								id = gmlas.id
+						) AS wurdegeaendertvon,
 						gmlas.erstellungsmassstab AS erstellungsmassstab,
 						gmlas.bezugshoehe AS bezugshoehe,
-						ST_Multi(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS raeumlichergeltungsbereich,
+						ST_Multi(ST_ForceRHR(ST_Transform(gmlas.raeumlichergeltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG . "))) AS raeumlichergeltungsbereich,
 						CASE
 							WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 								ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[]
@@ -1455,7 +1515,9 @@ class Konvertierung extends PgObject {
 						gmlas.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
 						gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
 						gmlas.hoehenbezug AS hoehenbezug,
-						gmlas.gruenordnungsplan AS gruenordnungsplan
+						gmlas.gruenordnungsplan AS gruenordnungsplan,
+						generattr_sub.hatgenerattribut AS hatgenerattribut,
+						xplankonverter.get_generattr_value(generattr_sub.hatgenerattribut, 'fassungsbezeichnung') AS fassungsbezeichnung
 					FROM
 						" . $table_schema . "." . strtolower($plan_class) . " gmlas JOIN
 						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
@@ -1484,7 +1546,7 @@ class Konvertierung extends PgObject {
 										e_sub.art::xplan_gml.xp_externereferenzart,
 										e_sub.informationssystemurl,
 										e_sub.referenzname,
-										e_sub.referenzurl,
+										'" . URL . "/download/' || e_sub.referenzurl,
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 										COALESCE(e_sub.beschreibung, e_sub.referenzname, e_sub.art, 'Dokument'),
 										to_char(e_sub.datum, 'DD.MM.YYYY'),
@@ -1500,16 +1562,48 @@ class Konvertierung extends PgObject {
 						" . $table_schema . "." . strtolower($plan_class) . "_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
 						" . $table_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
 						" . $table_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
-						" . $table_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
-						" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
 						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id;
+						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
+						(
+							SELECT
+								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
+							FROM (
+								SELECT
+									hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".bp_plan gap_1
+								LEFT JOIN " . $table_schema . ".bp_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id
+								INNER JOIN " . $table_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
+								UNION
+								SELECT
+									hga_2.parent_id,(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".bp_plan gap_2
+								LEFT JOIN " . $table_schema . ".bp_plan_hatgenerattribut hga_2 ON hga_2.parent_id = gap_2.id
+								INNER JOIN " . $table_schema . ".xp_datumattribut xpda ON xpda.ogr_pkid = hga_2.xp_generattribut_xp_datumattribut_pkid
+								UNION
+								SELECT
+									hga_3.parent_id,(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".bp_plan gap_3
+								LEFT JOIN " . $table_schema . ".bp_plan_hatgenerattribut hga_3 ON hga_3.parent_id = gap_3.id
+								INNER JOIN " . $table_schema . ".xp_integerattribut xpin ON xpin.ogr_pkid = hga_3.xp_generattribut_xp_integerattribut_pkid
+								UNION
+								SELECT
+									hga_4.parent_id,(xpur.name,xpur.wert,'XP_URLAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".bp_plan gap_4
+								LEFT JOIN " . $table_schema . ".bp_plan_hatgenerattribut hga_4 ON hga_4.parent_id = gap_4.id
+								INNER JOIN " . $table_schema . ".xp_urlattribut xpur ON xpur.ogr_pkid = hga_4.xp_generattribut_xp_urlattribut_pkid
+								UNION
+								SELECT
+									hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".bp_plan gap_5
+								LEFT JOIN " . $table_schema . ".bp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
+								INNER JOIN " . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+							) res GROUP BY parent_id
+						) generattr_sub ON generattr_sub.parent_id = gmlas.id;
 				";
 				# ToDo weitere relationen von bp_plan_ ... aus gmlas_tmp_41 im Left join einbinden
 				//  SELECT der Subquery mit spezexternereferenz statt spezexternereferenzauslegung
@@ -1542,7 +1636,10 @@ class Konvertierung extends PgObject {
 						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz,
 						auslegungsenddatum, gemeinde, status, sachgebiet, plangeber, rechtsstand, wirksamkeitsdatum, auslegungsstartdatum,
 						traegerbeteiligungsstartdatum, entwurfsbeschlussdatum, aenderungenbisdatum, traegerbeteiligungsenddatum, verfahren, sonstplanart,
-						planart, planbeschlussdatum, aufstellungsbeschlussdatum, zusammenzeichnung
+						planart, planbeschlussdatum, aufstellungsbeschlussdatum,
+						zusammenzeichnung,
+						hatgenerattribut,
+						fassungsbezeichnung
 					)
 					SELECT
 						trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid AS gml_id,
@@ -1567,7 +1664,7 @@ class Konvertierung extends PgObject {
 						END AS wurdegeaendertvon,
 						gmlas.erstellungsmassstab AS erstellungsmassstab,
 						gmlas.bezugshoehe AS bezugshoehe,
-						ST_Multi(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS raeumlichergeltungsbereich,
+						ST_Multi(ST_ForceRHR(ST_Transform(gmlas.raeumlichergeltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS raeumlichergeltungsbereich,
 						CASE
 							WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 								ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[]
@@ -1599,7 +1696,9 @@ class Konvertierung extends PgObject {
 						gmlas.planart::xplan_gml." . strtolower($plan_class) . "art AS planart,
 						to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY')::date AS planbeschlussdatum,
 						to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum,
-						" . ($zusammenzeichnung ? 'true' : 'false') . " AS zusammenzeichnung
+						" . ($zusammenzeichnung ? 'true' : 'false') . " AS zusammenzeichnung,
+						generattr_sub.hatgenerattribut AS hatgenerattribut,
+						xplankonverter.get_generattr_value(generattr_sub.hatgenerattribut, 'fassungsbezeichnung') AS fassungsbezeichnung
 					FROM
 						" . $table_schema . "." . strtolower($plan_class) . " gmlas JOIN
 						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
@@ -1652,7 +1751,42 @@ class Konvertierung extends PgObject {
 						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id;
+						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
+						(
+							SELECT
+								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
+							FROM (
+								SELECT
+									hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".fp_plan gap_1
+								LEFT JOIN " . $table_schema . ".fp_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id
+								INNER JOIN " . $table_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
+								UNION
+								SELECT
+									hga_2.parent_id,(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".fp_plan gap_2
+								LEFT JOIN " . $table_schema . ".fp_plan_hatgenerattribut hga_2 ON hga_2.parent_id = gap_2.id
+								INNER JOIN " . $table_schema . ".xp_datumattribut xpda ON xpda.ogr_pkid = hga_2.xp_generattribut_xp_datumattribut_pkid
+								UNION
+								SELECT
+									hga_3.parent_id,(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".fp_plan gap_3
+								LEFT JOIN " . $table_schema . ".fp_plan_hatgenerattribut hga_3 ON hga_3.parent_id = gap_3.id
+								INNER JOIN " . $table_schema . ".xp_integerattribut xpin ON xpin.ogr_pkid = hga_3.xp_generattribut_xp_integerattribut_pkid
+								UNION
+								SELECT
+									hga_4.parent_id,(xpur.name,xpur.wert,'XP_URLAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".fp_plan gap_4
+								LEFT JOIN " . $table_schema . ".fp_plan_hatgenerattribut hga_4 ON hga_4.parent_id = gap_4.id
+								INNER JOIN " . $table_schema . ".xp_urlattribut xpur ON xpur.ogr_pkid = hga_4.xp_generattribut_xp_urlattribut_pkid
+								UNION
+								SELECT
+									hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".fp_plan gap_5
+								LEFT JOIN " . $table_schema . ".fp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
+								INNER JOIN " . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+							) res GROUP BY parent_id
+						) generattr_sub ON generattr_sub.parent_id = gmlas.id;
 				";
 			} break;
 
@@ -1662,7 +1796,9 @@ class Konvertierung extends PgObject {
 						gml_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
 						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz,
 						plangeber,planart,gemeinde,versionbaugbdatum,versionbaugbtext,versionsonstrechtsgrundlagedatum,
-						versionsonstrechtsgrundlagetext
+						versionsonstrechtsgrundlagetext,
+						hatgenerattribut,
+						fassungsbezeichnung
 					)
 					SELECT
 						trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid AS gml_id,
@@ -1687,7 +1823,7 @@ class Konvertierung extends PgObject {
 						END AS wurdegeaendertvon,
 						gmlas.erstellungsmassstab AS erstellungsmassstab,
 						gmlas.bezugshoehe AS bezugshoehe,
-						ST_Multi(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS raeumlichergeltungsbereich,
+						ST_Multi(ST_ForceRHR(ST_Transform(gmlas.raeumlichergeltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS raeumlichergeltungsbereich,
 						CASE
 							WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 								ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[]
@@ -1709,7 +1845,9 @@ class Konvertierung extends PgObject {
 						b.versionbaugbdatum AS versionbaugbdatum,
 						b.versionbaugbtext AS versionbaugbtext,
 						b.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
-						b.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
+						b.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
+						generattr_sub.hatgenerattribut AS hatgenerattribut,
+						xplankonverter.get_generattr_value(generattr_sub.hatgenerattribut, 'fassungsbezeichnung') AS fassungsbezeichnung
 					FROM
 						" . $table_schema . "." . strtolower($plan_class) . " gmlas JOIN
 						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
@@ -1758,7 +1896,42 @@ class Konvertierung extends PgObject {
 						" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
-						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid;
+						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
+						(
+							SELECT
+								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
+							FROM (
+								SELECT
+									hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".so_plan gap_1
+								LEFT JOIN " . $table_schema . ".so_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id
+								INNER JOIN " . $table_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
+								UNION
+								SELECT
+									hga_2.parent_id,(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".so_plan gap_2
+								LEFT JOIN " . $table_schema . ".so_plan_hatgenerattribut hga_2 ON hga_2.parent_id = gap_2.id
+								INNER JOIN " . $table_schema . ".xp_datumattribut xpda ON xpda.ogr_pkid = hga_2.xp_generattribut_xp_datumattribut_pkid
+								UNION
+								SELECT
+									hga_3.parent_id,(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".so_plan gap_3
+								LEFT JOIN " . $table_schema . ".so_plan_hatgenerattribut hga_3 ON hga_3.parent_id = gap_3.id
+								INNER JOIN " . $table_schema . ".xp_integerattribut xpin ON xpin.ogr_pkid = hga_3.xp_generattribut_xp_integerattribut_pkid
+								UNION
+								SELECT
+									hga_4.parent_id,(xpur.name,xpur.wert,'XP_URLAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".so_plan gap_4
+								LEFT JOIN " . $table_schema . ".so_plan_hatgenerattribut hga_4 ON hga_4.parent_id = gap_4.id
+								INNER JOIN " . $table_schema . ".xp_urlattribut xpur ON xpur.ogr_pkid = hga_4.xp_generattribut_xp_urlattribut_pkid
+								UNION
+								SELECT
+									hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".so_plan gap_5
+								LEFT JOIN " . $table_schema . ".so_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
+								INNER JOIN " . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+							) res GROUP BY parent_id
+						) generattr_sub ON generattr_sub.parent_id = gmlas.id;
 				";
 			} break;
 
@@ -1800,7 +1973,9 @@ class Konvertierung extends PgObject {
 						planart,
 						planbeschlussdatum,
 						planungsregion,
-						aufstellungsbeschlussdatum
+						aufstellungsbeschlussdatum,
+						hatgenerattribut,
+						fassungsbezeichnung
 					)
 					SELECT
 						gmlas.amtlicherschluessel AS amtlicherschluessel,
@@ -1830,7 +2005,7 @@ class Konvertierung extends PgObject {
 						END AS wurdegeaendertvon,
 						gmlas.erstellungsmassstab AS erstellungsmassstab,
 						gmlas.bezugshoehe AS bezugshoehe,
-						ST_Multi(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS raeumlichergeltungsbereich,
+						ST_Multi(ST_ForceRHR(ST_Transform(gmlas.raeumlichergeltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS raeumlichergeltungsbereich,
 						CASE
 							WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 								ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[]
@@ -1854,7 +2029,9 @@ class Konvertierung extends PgObject {
 						gmlas.planart::xplan_gml." . $planartAbk . "_art AS planart,
 						to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY')::date AS planbeschlussdatum,
 						gmlas.planungsregion AS planungsregion,
-						to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum
+						to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum,
+						generattr_sub.hatgenerattribut AS hatgenerattribut,
+						xplankonverter.get_generattr_value(generattr_sub.hatgenerattribut, 'fassungsbezeichnung') AS fassungsbezeichnung
 					FROM
 						" . $table_schema . "." . strtolower($plan_class) . " gmlas JOIN
 						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
@@ -1890,7 +2067,43 @@ class Konvertierung extends PgObject {
 						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
 						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id;
+						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
+						(
+							SELECT
+								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
+							FROM (
+								SELECT
+									hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".rp_plan gap_1
+								LEFT JOIN " . $table_schema . ".rp_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id
+								INNER JOIN " . $table_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
+								UNION
+								SELECT
+									hga_2.parent_id,(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".rp_plan gap_2
+								LEFT JOIN " . $table_schema . ".rp_plan_hatgenerattribut hga_2 ON hga_2.parent_id = gap_2.id
+								INNER JOIN " . $table_schema . ".xp_datumattribut xpda ON xpda.ogr_pkid = hga_2.xp_generattribut_xp_datumattribut_pkid
+								UNION
+								SELECT
+									hga_3.parent_id,(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".rp_plan gap_3
+								LEFT JOIN " . $table_schema . ".rp_plan_hatgenerattribut hga_3 ON hga_3.parent_id = gap_3.id
+								INNER JOIN " . $table_schema . ".xp_integerattribut xpin ON xpin.ogr_pkid = hga_3.xp_generattribut_xp_integerattribut_pkid
+								UNION
+								SELECT
+									hga_4.parent_id,(xpur.name,xpur.wert,'XP_URLAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".rp_plan gap_4
+								LEFT JOIN " . $table_schema . ".rp_plan_hatgenerattribut hga_4 ON hga_4.parent_id = gap_4.id
+								INNER JOIN " . $table_schema . ".xp_urlattribut xpur ON xpur.ogr_pkid = hga_4.xp_generattribut_xp_urlattribut_pkid
+								UNION
+								SELECT
+									hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM " . $table_schema . ".rp_plan gap_5
+								LEFT JOIN " . $table_schema . ".rp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
+								INNER JOIN " . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+							) res GROUP BY parent_id
+						) generattr_sub ON generattr_sub.parent_id = gmlas.id;
+						;
 				";
 			} break;
 		}
@@ -1909,7 +2122,7 @@ class Konvertierung extends PgObject {
 						b.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
 						b.detailliertebedeutung AS detailliertebedeutung,
 						b.erstellungsmassstab AS erstellungsmassstab,
-						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, 25832))) AS geltungsbereich,
+						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS geltungsbereich,
 						" . $this->gui->user->id . " AS user_id,
 						k.id AS konvertierung_id,
 						trim(replace(lower(b.rasterbasis_href), '#gml_', ''))::text AS rasterbasis,
@@ -1938,7 +2151,7 @@ class Konvertierung extends PgObject {
 						b.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
 						b.detailliertebedeutung AS detailliertebedeutung,
 						b.erstellungsmassstab AS erstellungsmassstab,
-						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, 25832))) AS geltungsbereich,
+						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS geltungsbereich,
 						" . $this->gui->user->id . " AS user_id,
 						k.id AS konvertierung_id,
 						trim(replace(lower(b.rasterbasis_href), '#gml_', ''))::text AS rasterbasis,
@@ -1981,7 +2194,7 @@ class Konvertierung extends PgObject {
 						b.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
 						b.detailliertebedeutung AS detailliertebedeutung,
 						b.erstellungsmassstab AS erstellungsmassstab,
-						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, 25832))) AS geltungsbereich,
+						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS geltungsbereich,
 						" . $this->gui->user->id . " AS user_id,
 						k.id AS konvertierung_id,
 						trim(replace(lower(b.rasterbasis_href), '#gml_', ''))::text AS rasterbasis,
@@ -2009,7 +2222,7 @@ class Konvertierung extends PgObject {
 						b.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
 						b.detailliertebedeutung AS detailliertebedeutung,
 						b.erstellungsmassstab AS erstellungsmassstab,
-						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, 25832))) AS geltungsbereich,
+						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS geltungsbereich,
 						" . $this->gui->user->id . " AS user_id,
 						k.id AS konvertierung_id,
 						trim(replace(lower(b.rasterbasis_href), '#gml_', ''))::text AS rasterbasis,
@@ -2029,13 +2242,13 @@ class Konvertierung extends PgObject {
 				xplan_gml." . strtolower($plan_class) . " AS plan ON trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid = plan.gml_id
 		";
 
-		# echo '<br>SQL mit Anweisung zum Anlegen der Pläne und der Bereiche: ' . $sql; exit;
-/*
-		return array(
-			'success' => false,
-			'msg' => $sql
-		);
-*/
+		// echo '<br>SQL mit Anweisung zum Anlegen der Pläne und der Bereiche: ' . $sql; exit;
+
+		// return array(
+		// 	'success' => false,
+		// 	'msg' => 'SQL zum Anlegen des Planes: ' . $sql
+		// );
+
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$ret['success']) {
 			return array(
@@ -2198,7 +2411,7 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
-			$layer_group = new MyObject($this->gui, 'u_groups');
+			$layer_group = new PgObject($this->gui, 'kvwmap', 'u_groups');
 			if ($layer_type == 'GML') {
 				$layer_group = $layer_group->find_by('gruppenname', 'XPlanung');
 				$layer_group->create(array(
@@ -2225,7 +2438,7 @@ class Konvertierung extends PgObject {
 		$this->debug->show('delete_layer_group typ: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (!empty($layer_group_id)) {
-			$layer_group = new MyObject($this->gui, 'u_groups');
+			$layer_group = new PgObject($this->gui, 'kvwmap', 'u_groups');
 			$layer_group->set($this->identifier, $layer_group_id);
 			$layer_group->identifier = 'id';
 			$layer_group->identifier_type = 'integer';
@@ -2357,55 +2570,217 @@ class Konvertierung extends PgObject {
 	 * Function validiert ob die hochgeladenen Dateien in Ordnung sind,
 	 * sucht die Plandatei, benennt sie ggf. um und liefert den Plandateinamen zurück.
 	 * @param String $upload_path
+	 * @param String $profil // Sonderbehandlung für Pläne aus dem Digitalisierungsprojekt MV
 	 * @return array[
 	 *	'success' => Boolean, Erfolgreich validiert oder nicht
-	 *  'plan_file_name' => String, Bei Erfolg: Datei des hochgeladenen Planes
 	 *	'msg' => String, Meldung im Fehler- oder Erfolgsfall.
 	 * ]
 	 */
-	function validate_uploaded_files($upload_path) {
-		$uploaded_files = getAllFiles($upload_path);
-		$plan_file_name =  $this->config['plan_file_name'];
+	function validate_uploaded_files($upload_path, $upload_files, $profil = null) {
+		$validation_steps = array(
+			fn() => $this->validate_files_exists($upload_path, $upload_files),
+			fn() => $this->validate_gml_file_exists($upload_files)
+		);
 
+		$gml_file_name = $this->get_uploaded_gml_file_name($upload_files);
 
-		if (count($uploaded_files) == 0) {
-			return array(
-				'success' => false,
-				'msg' => 'Die hochgeladene ZIP-Datei enthält keine Dateien. Das Verzeichnis ' . $upload_path . ' ist leer!'
+		if ($profil === 'MV') {
+			$validation_steps = array_merge(
+				$validation_steps,
+				array(
+					fn() => $this->validate_gml_name_konvention($upload_path, $gml_file_name),
+					fn() => $this->validate_qualitaet_datei($upload_path, $gml_file_name),
+					// fn() => $this->validate_textzuweisungen($upload_path, $gml_file_name),
+					fn() => $this->validate_externe_referenz_konvention($upload_path, $upload_files)
+				)
 			);
 		}
 
-		if ($this->get('planart') == 'RP-Plan') {
-			$uploaded_xplangml_file = current($uploaded_files); // get the first file only
-			if ($uploaded_xplangml_file != $upload_path . $this->config['plan_file_name']) {
-				// ToDo: Umstellen, so dass auch der Name von $uploaded_xplangml_file verwendet werden kann
-				// und nicht mehr umbenannt werden muss
-				rename($uploaded_xplangml_file, $upload_path . $this->config['plan_file_name']);
-			}
-		}
-
-		if (!file_exists($upload_path . $this->config['plan_file_name'])) {
-			// Suche eine GML-Datei im upload_path.
-			// ToDo: Wenn es möglich ist einen beliebigen plan_file_name zu vergeben,
-			// bräuchte man auch keinen Standardmäßigen plan_file_name in config mehr.
-			$gml_files = glob($upload_path . '*.gml');
-			if (count($gml_files) > 0) {
-				$plan_file_name = basename($gml_files[0]);
-			}
-			else {
-				// Weder $this->get_plan_file_name() noch eine Datei mit .gml gefunden
-				$plan_file_name = $this->get_plan_file_name();
-				return array(
-					'success' => false,
-					'msg' => 'Die hochgeladene ZIP-Datei enthält keine Datei mit dem Namen: '. $plan_file_name
-				);
+		foreach ($validation_steps as $step) {
+			$result = $step();
+			if (!$result['success']) {
+				return $result;
 			}
 		}
 
 		return array(
 			'success' => true,
-			'plan_file_name' => $plan_file_name,
-			'msg' => 'Hochgeladene Datei wurde auf dem Server gefunden.'
+			'msg' => 'Validierung der hochgeladenen Dateien bestanden.'
+		);
+	}
+
+	function validate_files_exists($upload_path, $upload_files) {
+		if (count($upload_files) == 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Die hochgeladene ZIP-Datei enthält keine Dateien. Das ausgepackte Verzeichnis ist leer!'
+			);
+		}
+		return array('success' => true);
+	}
+
+	function validate_gml_file_exists($upload_files) {
+		if (empty(
+			array_filter(
+				$upload_files,
+				function ($file) {
+    			return strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'gml';
+				}
+			)
+		)) {
+			return array(
+				'success' => false,
+				'msg' => 'Die hochgeladene ZIP-Datei enthält keine Datei mit der Dateieindung .gml'
+			);
+		}
+		return array('success' => true);
+	}
+
+	/**
+	 * Validates the naming convention of the GML file.
+	 * DE__[8-stelliger AGS]__BP__[Plannummer]__[Dokumentenart].gml
+	 * @param String $path
+	 * @param String $gml_file_name
+	 * @return array
+	 */
+	function validate_gml_name_konvention($path, $gml_file_name) {
+		if (strpos($gml_file_name, '.gml') === false) {
+			return array(
+				'success' => false,
+				'msg' => 'Die hochgeladene Datei ' . $gml_file_name . ' ist keine GML-Datei. Es wird eine GML-Datei mit der Endung .gml erwartet.'
+			);
+		}
+		
+		if (strpos($gml_file_name, '__') === false) {
+			return array(
+				'success' => false,
+				'msg' => 'Der Name der GML-Datei ' . $gml_file_name . ' enthält keine doppelten Unterstriche "__" als Trenner der Namensbestandteile.'
+			);
+		}
+
+		$parts = explode('__', pathinfo($gml_file_name, PATHINFO_FILENAME));
+		if (count($parts) < 5) {
+			return array(
+				'success' => false,
+				'msg' => 'Der Name der GML-Datei ' . $gml_file_name . ' enthält nicht genügend Bestandteile, die durch doppelte Unterstriche "__" getrennt sind. Es werden mindestens 5 Bestandteile erwartet: DE__Gemeindeschlüssel__Planart__Plannummer__Dokumentenart.gml'
+			);
+		}
+
+		if ($parts[0] !== 'DE') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Name der GML-Datei ' . $gml_file_name . ' fängt nicht mit DE an.'
+			);
+		}
+
+		$pattern = '/^130(03|04|7[1-6])[0-9]{3}$/';
+		if (!preg_match($pattern, $parts[1])) {
+			return array(
+				'success' => false,
+				'msg' => 'Der zweite Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist kein gültiger 8-stelliger Gemeindeschlüssel.'
+			);
+		}
+
+		if ($parts[2] !== 'BP') {
+			return array(
+				'success' => false,
+				'msg' => 'Der dritte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP.'
+			);
+		}
+
+		// $pattern = '/^(0[1-9]|[1-9][0-9])$/';
+		// if (!preg_match($pattern, $parts[3])) {
+		// 	return array(
+		// 		'success' => false,
+		// 		'msg' => 'Der vierte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige zweistellige Plannummer.'
+		// 	);
+		// }
+
+		if (!in_array($parts[4], array('GP', 'SO', 'IS', 'KS', 'EnS', 'ErS', 'KES', 'AS'))) {
+			return array(
+				'success' => false,
+				'msg' => 'Der fünfte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Dokumentenart. Es sind nur folgende Kürzel erlaubt: GP, SO, IS, KS, EnS, ErS, KES, AS.'
+			);
+		}
+
+		return array('success' => true);
+	}
+
+	/**
+	 * Validates the quality of the uploaded file.
+	 * @param String $path
+	 * @return array
+	 */
+	function validate_qualitaet_datei($path, $gml_file_name) {
+		$basename = basename($path . $gml_file_name);
+		$qualitaet_datei = substr($basename, 0, strrpos($basename, '__')) . '__Dokumentation_Erfassungsqualitaet.xlsx';
+		if (!file_exists($path . $qualitaet_datei)) {
+			return array(
+				'success' => false,
+				'msg' => 'In der ZIP-Datei fehlt die Dokumentationsdatei zur Erfassungsqualität ' . $qualitaet_datei . '.'
+			);
+		}
+		return array('success' => true);
+	}
+
+	/**
+	 * Validiert die Existens der Textzuweisungsdatei.
+	 * @param String $path
+	 * @return array
+	 */
+	function validate_textzuweisungen($path, $gml_file_name) {
+		$basename = basename($path . $gml_file_name);
+		$textzuweisung_datei = substr($basename, 0, strrpos($basename, '__')) . '__Textzuweisung.xlsm';
+		if (!file_exists($path . $textzuweisung_datei)) {
+			return array(
+				'success' => false,
+				'msg' => 'In der ZIP-Datei fehlt die Textzuweisungsdatei ' . $textzuweisung_datei . '.'
+			);
+		}
+		return array('success' => true);
+	}
+
+	/**
+	 * Prüft alle Dateien, die nicht Plan-GML, Qualität oder Textzuweisung sind auf Namenskonvention.
+	 * @param String $path
+	 * @return array
+	 */
+	function validate_externe_referenz_konvention($path, $upload_files) {
+		$err_msg = array();
+		$msg = "upload_files: " . print_r($upload_files, true);
+		$gml_files = array_filter($upload_files, function ($file) {
+    	return preg_match('/\.gml$/i', $file);
+		});
+		$gml_file = reset($gml_files);
+		$gml_prefix = preg_replace('/__[^_]+\.[^.]+$/', '', $gml_file);
+
+		$externe_referenzen = array_filter($upload_files, function ($file) {
+    	return !preg_match(
+      	'/\.gml$|Dokumentation_Erfassungsqualitaet|Textzuweisung/i',
+      	$file
+    	);
+		});
+		$msg .= "<br>externereferenzen: " . print_r($externe_referenzen, true);
+		$all_match = true;
+		foreach ($externe_referenzen as $file) {
+			$parts = explode('__', $file);
+	    array_pop($parts);
+    	$prefix = implode('__', $parts);
+			$msg .= "<br>Vergleiche Prefix: {$prefix} mit GML-Prefix: {$gml_prefix} für Datei: {$file}";
+	    if ($prefix !== $gml_prefix) {
+  	    $all_match = false;
+        $err_msg[] = "Abweichender Prefix bei Datei: {$file}\n";
+    	}
+		}
+		if (!$all_match) {
+			return array(
+				'success' => false,
+				'msg' => $msg . '<br>Die folgenden Dateien entsprechen nicht der Namenskonvention der externen Referenzen:<br>' . implode('<br>', $err_msg)
+			);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Die Konvention der externen Referenzen wurde eingehalten.'
 		);
 	}
 
@@ -2918,6 +3293,7 @@ class Konvertierung extends PgObject {
 	 * @return array of strings Die die Dokumente enthalten
 	 */
 	function create_metadata_documents($md) {
+		$this->plan = $this->get_plan();
 		$plan = $this->plan;
 		$konvertierungen = Konvertierung::find_konvertierungen(
 			$this->gui,
@@ -2992,7 +3368,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		$md->set('service_layer_name', sonderzeichen_umwandeln($plan->get('name')));
 		$md->set('onlineresource', URL . 'ows/' . $this->gui->Stelle->id . '/fplan?');
 		$md->set('download_name', 'Download der XPlan-GML Dateien');
-		$md->set('download_url', URL . APPLVERSION . 'index.php?go=xplankonverter_download_uploaded_xplan_gml&amp;konvertierung_id=' . $this->get_id());
+		$md->set('download_url', URL . APPLVERSION . 'index.php?go=xplankonverter_download_uploaded_xplan_gml&amp;konvertierung_id=' . $this->get($this->identifier));
 		$md->set('search_name', 'Suche im UVP-Portal Niedersachsen');
 		$md->set('search_url', 'https://uvp.niedersachsen.de/kartendienste?layer=blp&amp;N=' . $this->plan->center_coord['lat'] . '&amp;E=' . $this->plan->center_coord['lon'] . '&amp;zoom=13');
 		$md->set('dataset_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Datensatz.png');
@@ -3009,7 +3385,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 			'metaDataView' =>  $metaDataCreator->createMetadataView()
 		);
 	}
-
+	
 	function get_metadata_uuids() {
 		$uuids = array();
 		foreach (array('dataset', 'viewservice', 'downloadservice') AS $type) {
@@ -3053,7 +3429,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 				xplankonverter.konvertierungen ko JOIN
 				plandigital.stelle_to_arl sa ON ko.stelle_id = sa.stelle_id
 			WHERE
-				ko.id = " . $this->get_id() . "
+				ko.id = " . $this->get($this->identifier) . "
 			LIMIT 1
 		";
 		#echo $sql;
@@ -3104,7 +3480,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 			LEFT JOIN
 				xplankonverter.zusammenzeichnung_der_stellen zs ON gv.stelle_id = zs.stelle_id
 			WHERE
-				zs.konvertierung_id = " . $this->get_id() . ";";
+				zs.konvertierung_id = " . $this->get($this->identifier) . ";";
 		#echo $sql;
 		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
 		$rs = pg_fetch_assoc($ret[1]);
@@ -3126,7 +3502,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 				FROM
 					gebietseinheiten.gemeindeverbaende AS gv
 					LEFT JOIN xplankonverter.zusammenzeichnung_der_stellen zs ON gv.stelle_id = zs.stelle_id
-				WHERE zs.konvertierung_id = " . $this->get_id() . "
+				WHERE zs.konvertierung_id = " . $this->get($this->identifier) . "
 			) AS sub
 			WHERE sub.gvb_name = gemvb.gvb_name
 			AND sub.idderstelle = gemvb.stelle_id

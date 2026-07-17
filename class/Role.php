@@ -100,7 +100,9 @@ class Role extends PgObject {
 					redline_text_color,
 					redline_font_family,
 					redline_font_size,
-					redline_font_weight
+					redline_font_weight,
+					layer_selection,
+					layer_selection_mode
 				)
 				SELECT " .
 					$user_id . ", " .
@@ -145,7 +147,9 @@ class Role extends PgObject {
 					redline_text_color,
 					redline_font_family,
 					redline_font_size,
-					redline_font_weight
+					redline_font_weight,
+					layer_selection,
+					layer_selection_mode
 				FROM
 					kvwmap.rolle
 				WHERE

@@ -1,4 +1,4 @@
-<?
+<?= "\n" . date("Y:m:d H:i:s", time()) . 'running ressources_cron.php'; ?><?
 /**
  * Script run Updates for outdated ressources
  *   - See ressource method find_outdated for more details about when a ressource is outdated.
@@ -37,7 +37,7 @@
 
     // if (!$GUI->is_tool_allowed('only_cli')) exit;
     $GUI->pgdatabase = new pgdatabase();
-    $GUI->pgdatabase->open(1);
+    $GUI->pgdatabase->open();
 
     if (isset($argv)) {
       array_shift($argv);
@@ -76,7 +76,7 @@
         $GUI->Stelle = new stelle($GUI->formvars['stelle_id'], $GUI->pgdatabase);
         $GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->pgdatabase);
         $GUI->user->setRolle($GUI->formvars['stelle_id']);
-        $response = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id'], $GUI->formvars['method_only']);
+        $response = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id'], $GUI->formvars['method_only'], $GUI->formvars['only_missing']);
         if (!$response['success']) {
           $GUI->debug->show($response['msg'], true);
           break;

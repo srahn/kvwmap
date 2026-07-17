@@ -2,13 +2,17 @@
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 
+if (!in_array(getenv('NETWORK_NAME'), ['', 'kvwmap_prod_web'])){
+	exit;
+}
+
 ########################################################################################################################################################################
 #																																																																																			 #
 #	Dieses Skript kann in einem Web-Verzeichnis wie z.B. .../kvwmap/tools plaziert werden.																																							 #
 # Es sind 2 Einstellungen zu machen: - die Variable $config muss auf den Pfad zur config.php gesetzt werden.																													 #
 #                                    - das Array $bbox muss gültige BBox-Werte im EPSG-Code 4326 enthalten; damit werden die Test-Requests gemacht										 #
 # Wenn man das Skript aufruft, werden alle WMS-Layer aus der in der config.php definierten DB ausgelesen und mit einem getMap-Request getestet.									 #
-# Das Ergebnis des Tests wird in die Spalte status der Tabelle layer geschrieben. Diese Spalte wird von kvwmap ausgewertet und der Status in der Legende visualisiert. #
+# Das Ergebnis des Tests wird in die Spalte errorstatus der Tabelle layer geschrieben. Diese Spalte wird von kvwmap ausgewertet und der Status in der Legende visualisiert. #
 # Ruft man das Skript im Browser auf, erhält man außerdem eine Übersicht über die getesteten Layer.																																		 #
 # Um den Status regelmäßig zu überprüfen, muss man sich einen entsprechenden cron-job einrichten, der das Skript aufruft. 																																		 #
 #																																																																																			 #
@@ -121,10 +125,11 @@ function getExceptionCode($data){
 }
 
 include($config);
-#include($credentials);
+include($credentials);
 include(CLASSPATH.'log.php');
 include(CLASSPATH.'postgresql.php');
 $debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
+$log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
 $userDb = new pgdatabase();
 $userDb->open();
 
@@ -136,7 +141,7 @@ $sql = "
 	FROM
 		kvwmap.layer_parameter
 ";
-$ret = $userDb->execSQL($sql);
+$ret = $userDb->execSQL($sql, 4, 0);
 while ($line = pg_fetch_assoc($ret[1])) {
 	$params[$line['key']] = $line['default_value'];
 }
@@ -155,7 +160,7 @@ if ($without_layer_id != '') {
 	$query .= '	AND layer_id NOT IN (' . $without_layer_id . ')';
 }
 #echo '<br>get layer with sql: ' . $query;
-$ret = $userDb->execSQL($query);
+$ret = $userDb->execSQL($query, 4, 0);
 
 while ($line = pg_fetch_assoc($ret[1])){
 	$extent = rectObj($bbox['left'], $bbox['bottom'], $bbox['right'], $bbox['top']);
@@ -191,7 +196,7 @@ while ($line = pg_fetch_assoc($ret[1])){
 			UPDATE
 				kvwmap.layer
 			SET
-				status = '" . addslashes($status[1]) . "'
+				errorstatus = '" . addslashes($status[1]) . "'
 			WHERE
 				layer_id = " . $line["layer_id"] . "
 		";
@@ -203,12 +208,12 @@ while ($line = pg_fetch_assoc($ret[1])){
 			UPDATE
 				kvwmap.layer
 			SET
-				status = ''
+				errorstatus = ''
 			WHERE
 				layer_id = " . $line["layer_id"] . "
 		";
 	}
-	$result2 = $userDb->execSQL($query);
+	$result2 = $userDb->execSQL($query, 4, 0);
 	echo '</div>';
 }
 ?>

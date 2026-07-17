@@ -246,6 +246,11 @@ $res_ym   = $map_height / 2;
 
 $fpsvg = fopen(IMAGEPATH . $svgfile, 'w') or die('fail: fopen(' . $svgfile . ')');
 chmod(IMAGEPATH . $svgfile, 0666);
+
+$jsfile  = $randomnumber . 'JS_map.js';
+$fpjs = fopen(IMAGEPATH . $jsfile, 'w') or die('fail: fopen(' . $jsfile . ')');
+chmod(IMAGEPATH . $svgfile, 0666);
+
 $svg = '<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -254,13 +259,9 @@ $svg = '<?xml version="1.0"?>
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>
  
-<script type="text/ecmascript"><![CDATA[ 
+<script href="' . TEMPPATH_REL . $jsfile . '" xlink:href="' . TEMPPATH_REL . $jsfile . '" type="application/ecmascript"/>';
 
-	try{
-		top.printNode = printNode;
-	}
-	catch(e){
-	} 
+$js = '
 
   var resx  = ' . $res_x . ';
   var resy  = ' . $res_y . ';
@@ -322,7 +323,7 @@ $svg = '<?xml version="1.0"?>
 	';
 
 if ($this->user->rolle->gps) {
-	$svg .= '  
+	$js .= '  
   function update_gps_position(){
 		navigator.geolocation.getCurrentPosition(
 			function(position){		//success
@@ -361,7 +362,7 @@ $conditional_output = function ($condition, $output = '', $else = '') {
 	return ($condition ? $output : $else);
 };
 $EPSGCODE_ALKIS = EPSGCODE_ALKIS;
-$svg .= <<<FUNCTIONDEF
+$js .= <<<FUNCTIONDEF
 function startup() {
 	{$conditional_output($this->user->rolle->gps, 'update_gps_position();')}
 	switch (top.document.GUI.previous_button.value) {
@@ -1934,7 +1935,9 @@ function highlightbyid(id){
 // -------------------------querytooltip------------------------------
 {$SVGvars_querytooltipscript}
 
-]]></script>
+FUNCTIONDEF;
+
+$svg .= <<<FUNCTIONDEF
 
   <defs id="defs">
 		{$SVGvars_defs}
@@ -1985,6 +1988,9 @@ FUNCTIONDEF;
 fputs($fpsvg, $svg);
 fclose($fpsvg);
 
+fputs($fpjs, $js);
+fclose($fpjs);
+
 #
 # aufrufen der SVG
 # 
@@ -1996,8 +2002,8 @@ echo '
   <input type="hidden" name="hoehe1" value = "' . $res_y . '">
 ';
 #                  >>> object-tag: wmode="transparent" (hoehere anforderungen beim rendern!) <<<
-#echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
+echo '<EMBED name="SVG" align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
-echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
+#echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
 
 ?>

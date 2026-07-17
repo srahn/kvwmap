@@ -522,6 +522,13 @@ SCRIPTDEFINITIONS;
 		}
 	}
 
+	function update_fk() {
+		console.log('Man könnte hier rausbekommen ob es einen Fremdschlüssel zu einem Parent-Layer gibt, ob die id leer ist und wenn ja ob man die über die Geometrie holen kann.');
+		console.log('update_fk not implemented yet');
+		console.log('ef: %o', enclosingForm);
+		console.log('layer_id: " . $this->formvars['selected_layer_id'] . "');
+	}
+
 	function sendBWlocation(loc_x,loc_y) {
       enclosingForm.loc_x.value    = loc_x;
       enclosingForm.loc_y.value    = loc_y;
@@ -987,9 +994,9 @@ SCRIPTDEFINITIONS;
 			case 'edit_other_object':
 				startPoint(client_x, client_y);
 			break;
-
 			case 'draw_point':
-	 			choose(world_x, world_y);
+				update_fk();
+				choose(world_x, world_y);
 	 			redrawpoint();
 			break;
 			case 'draw_multipoint':
@@ -3025,7 +3032,6 @@ function mouseup(evt){
 	  enclosingForm.newpath.value = path;
 	  if(pathy.length > 2){
 	  	enclosingForm.firstpoly.value = true;
-			if(enclosingForm.firstpoly.onchange)enclosingForm.firstpoly.onchange();
 	  	polygonarea();
 	  }
 	}
@@ -3804,6 +3810,9 @@ function mouseup(evt){
 	  		enclosingForm.area.value = "0.0";
 	  	}
 	  }
+		if (area.onchange) {
+			area.onchange();
+		}
 	}
 	';
 
@@ -3925,11 +3934,13 @@ $transformfunctions = '
 	}
 
 	function endRotateGeom(evt) {
+		var obj = document.getElementById("polygon_second");
 	  if(rotated){
 			enclosingForm.secondpoly.value = true;
 			enclosingForm.secondline.value = true;
 			must_redraw = true;
 			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&angle="+angle+"&operation=rotate&mousex="+mousex+"&mousey="+mousey+"&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+			obj.setAttribute("transform", "");
 		}
 	  rotatinggeom  = false;
 	  rotated  = false;

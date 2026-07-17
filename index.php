@@ -60,6 +60,7 @@ if (!file_exists('credentials.php') OR !file_exists('config.php')) {
 }
 include('credentials.php');
 include('config.php');
+include(CLASSPATH . 'AuthErrCodes.php');
 
 # Session
 if (!isset($_SESSION)) {
@@ -149,6 +150,11 @@ ob_start ();    // Ausgabepufferung starten
 
 $formvars = $_REQUEST;
 
+$go = (array_key_exists('go', $formvars) ? $formvars['go'] : '');
+if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
+	$go = $go.'_'.$formvars['go_plus'];
+}
+
 ###########################################################################################################
 define('CASE_COMPRESS', false);
 #																																																					#
@@ -222,14 +228,11 @@ else {
 }
 include(WWWROOT . APPLVERSION . 'start.php');
 
-if ($GUI->formvars['go'] == '') {
+if ($GUI->formvars['go'] == '' AND $GUI->Stelle->start_page_params != '') {
 	parse_str($GUI->Stelle->start_page_params, $params);
 	$GUI->formvars = array_merge($GUI->formvars, $params);
-}
-
-$go = (array_key_exists('go', $GUI->formvars) ? $GUI->formvars['go'] : '');
-if (array_key_exists('go_plus', $GUI->formvars) and $GUI->formvars['go_plus'] != '') {
-	$go = $go.'_'.$GUI->formvars['go_plus'];
+	$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
+	$go = $GUI->formvars['go'];
 }
 
 $GUI->go = $go;
@@ -296,6 +299,10 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap(true);
 				$GUI->mime_type = 'image/' . $format;
 				$GUI->output();
+			} break;
+
+			case 'save_legend_role_parameters' : {
+				$GUI->save_legend_role_parameters($GUI->formvars);
 			} break;
 
 			case 'get_route' : {
@@ -378,7 +385,7 @@ function go_switch($go, $exit = false) {
 					'selected_layer_id' => 'int',
 					'zoom_to_layer_extent' => 'boolean'
 				]);
-				$GUI->activate_layer_only($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
+				$GUI->activate_layer($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
 				$GUI->saveMap('');
 				// $currenttime = date('Y-m-d H:i:s',time());
 				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
@@ -532,9 +539,6 @@ function go_switch($go, $exit = false) {
 			case 'reset_layers' : {
 				$GUI->reset_layers(value_of($GUI->formvars, 'layer_id'));
 				$GUI->loadMap('DataBase');
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
@@ -542,9 +546,6 @@ function go_switch($go, $exit = false) {
 			case 'show_all_layers' : {
 				$GUI->user->rolle->update_layer_status(NULL, '1');
 				$GUI->loadMap('DataBase');
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
@@ -553,10 +554,12 @@ function go_switch($go, $exit = false) {
 				$GUI->reset_querys();
 				$GUI->loadMap('DataBase');
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
+			} break;
+
+			case 'hide_deactivated_layers' : {
+				$GUI->user->rolle->hide_deactivated_layers();
 			} break;
 
 			case 'zoom2coord' : {
@@ -596,9 +599,6 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['reloadmap']){
 					$GUI->loadMap('DataBase');
 					$GUI->scaleMap($GUI->formvars['nScale']);
-					// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-					// $GUI->drawMap();
-					// $GUI->saveMap('');
 					$GUI->legende = $GUI->create_dynamic_legend();
 					$GUI->output();
 				}
@@ -865,9 +865,6 @@ function go_switch($go, $exit = false) {
 				if ($GUI->formvars['CMD'] != '') {
 					$GUI->user->rolle->set_selected_button($GUI->formvars['CMD']);
 				}
-				if ($GUI->formvars['legendtouched']) {
-					$GUI->save_legend_role_parameters();
-				}
 				$GUI->queryMap();
 			}break;
 
@@ -1017,6 +1014,10 @@ function go_switch($go, $exit = false) {
 			case 'Layerauswahl_Laden' : {
 				$GUI->sanitize(['id' => 'int']);
 				$GUI->layerCommentLoad();
+				$GUI->loadMap('DataBase');
+				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$GUI->drawMap();
+				$GUI->output();
 			}break;
 
 			case 'Layerauswahl_loeschen' : {
@@ -1368,6 +1369,10 @@ function go_switch($go, $exit = false) {
 				$GUI->GenerischeSuche_Suchen();
 			} break;
 
+			case 'schnellsprung' : {
+				$GUI->schnellsprung();
+			} break;
+
 			case 'Layer-Suche' : {
 				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
@@ -1438,6 +1443,11 @@ function go_switch($go, $exit = false) {
 				$GUI->get_document();
 			} break;
 
+			case 'get_document_hash' : {
+				$GUI->check_csrf_token();
+				$GUI->get_document_hash();
+			} break;
+
 			case 'Dokument_Loeschen' : {
 				$GUI->check_csrf_token();
 				$GUI->sachdaten_speichern();
@@ -1479,7 +1489,8 @@ function go_switch($go, $exit = false) {
 					'value_attribute_name' => 'text',
 					'label_attribute_name' => 'text',
 					'beschreibung' => 'text',
-					'breite' => 'text'
+					'breite' => 'text',
+					'color' => 'text'
 				]);
 				include_once(CLASSPATH . 'LayerChart.php');
 				if ($GUI->formvars['id'] != '') {
@@ -1497,7 +1508,7 @@ function go_switch($go, $exit = false) {
 				$result = $GUI->layer_chart_Speichern($chart);
 				if ($result['success']) {
 					$GUI->add_message('notice', $result['msg']);
-					$GUI->layer_charts_Anzeigen();
+					header('location: index.php?go=layer_charts_Anzeigen&layer_id=' . $GUI->formvars['layer_id'] . '&csrf_token=' . $_REQUEST['csrf_token']);
 				}
 				else {
 					$GUI->add_message('error', $result['err_msg']);
@@ -1512,9 +1523,7 @@ function go_switch($go, $exit = false) {
 					'layer_id' => 'int'
 				]);
 				include_once(CLASSPATH . 'LayerChart.php');
-				$response = $GUI->layer_chart_Loeschen();
-				header('Content-Type: application/json');
-				echo json_encode($response);
+				$GUI->layer_chart_Loeschen();
 			} break;
 
 			case 'generisches_sachdaten_diagramm' : {
@@ -1898,18 +1907,21 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->stelle_bearbeiten_allowed($GUI->formvars['selected_stelle_id'], $GUI->user->id);
 				$GUI->Stelleneditor();
+				$GUI->output();
 			} break;
 
 			case 'Dienstmetadaten' : {
 				$GUI->checkCaseAllowed('Dienstmetadaten');
 				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
 				$GUI->Stelleneditor();
+				$GUI->output();
 			} break;
 
 			case 'Dienstmetadaten_Ändern' : {
 				$GUI->checkCaseAllowed('Dienstmetadaten');
 				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
 				$GUI->dienstmetadaten_aendern();
+				$GUI->output();
 			} break;
 
 			case 'Stelle_Löschen' : {
@@ -1921,11 +1933,13 @@ function go_switch($go, $exit = false) {
 			case 'Stelleneditor_Als neue Stelle eintragen' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->StelleAnlegen();
+				$GUI->output();
 			} break;
 
 			case 'Stelleneditor_Ändern' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->stelle_aendern();
+				$GUI->output();
 			} break;
 
 			case 'Stellen_Anzeigen' : {
@@ -2176,16 +2190,6 @@ function go_switch($go, $exit = false) {
 				$GUI->queryMap();
 			} break;
 
-			case "neu Laden" : {
-				$GUI->neuLaden();
-				// $GUI->saveMap('');
-				// $currenttime=date('Y-m-d H:i:s',time());
-				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				// $GUI->drawMap();
-				$GUI->legende = $GUI->create_dynamic_legend();
-				$GUI->output();
-			} break;
-
 			case "zoom_to_max_layer_extent" : {
 				$GUI->loadMap('DataBase');
 				$GUI->zoom_to_max_layer_extent($GUI->formvars['layer_id']);
@@ -2235,7 +2239,14 @@ function go_switch($go, $exit = false) {
 
 			case 'Einladung_Speichern' : {
 				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
-				$GUI->invitation_save();
+				$result = $GUI->invitation_save();
+				if ($result['success']) {
+					$GUI->invitations_list();
+				}
+				else {
+					$GUI->add_message('array', $result['msg']);
+					$GUI->invitation_formular();
+				}
 			} break;
 
 			case 'Einladung_Ändern' : {
@@ -2341,14 +2352,37 @@ function go_switch($go, $exit = false) {
 				readfile(LOGPATH . 'background_jobs_log.htm');
 			} break;
 
-			default : {
-				# Karteninformationen lesen
-				$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->saveMap('');
-				// $GUI->drawMap();
+			case 'get_attribute_options_doc' : {
+				$GUI->get_attribute_options_doc();
+			} break;
+
+			case "neu Laden" : {
+				$GUI->neuLaden();
 				$GUI->legende = $GUI->create_dynamic_legend();
-#				$GUI->add_message('info', 'Die Anwendung wird gerade überarbeitet. Es ist nicht sicher gestellt, dass sie richtig funktioniert und es können Fehlermeldungen auftreten!');
+				$GUI->output();
+			} break;
+
+			default : {
+				if ($GUI->formvars['format'] == 'json') {
+					$GUI->formvars['format'] = 'json_result';
+					$GUI->mime_type = 'application/json';
+					$GUI->data = array(
+						'success' => true,
+						'msg' => 'Login erfolgreich'
+					);
+					if ($GUI->new_session) {
+						$GUI->data['csrf_token'] = $_SESSION['csrf_token'];
+					}
+				}
+				else {
+					# Karteninformationen lesen
+						$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
+						// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+						// $GUI->saveMap('');
+						// $GUI->drawMap();
+						$GUI->legende = $GUI->create_dynamic_legend();
+		#				$GUI->add_message('info', 'Die Anwendung wird gerade überarbeitet. Es ist nicht sicher gestellt, dass sie richtig funktioniert und es können Fehlermeldungen auftreten!');
+				}
 				$GUI->output();
 			}
 		}

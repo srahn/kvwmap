@@ -28,7 +28,7 @@ class Debugger {
 		$this->filename = LOGPATH . (dirname($filename) != '.' ? dirname($filename) . '/' : '') . (array_key_exists('login_name', $_SESSION) ? $_SESSION['login_name'] : '') . basename($filename);
 		if (!file_exists($this->filename)) {
 			touch($this->filename);
-			chmod($this->filename, 0775);
+			chmod($this->filename, 0660);
 		}
 		$this->fp = fopen($this->filename, $mode);
 		$this->mime_type = $mime_type;
@@ -105,6 +105,10 @@ class LogFile {
 
 	# öffnet die Logdatei
 	function __construct($filename, $format, $title, $headline = '', $with_timestamp = false) {
+		$file_info = pathinfo($filename);
+		if ($file_info['dirname'] != '.' AND !is_dir($file_info['dirname'])) {
+			mkdir($file_info['dirname'], 0770, true);
+		}
 		$file_is_new = !file_exists($filename);
 		$this->fp = fopen($filename, "a");
 		$this->name = $filename;
@@ -142,6 +146,7 @@ class LogFile {
 			fwrite($this->fp, "\n<br>" . $msg);
 		}
 		if ($this->format == "text") {
+			$msg = str_replace('<br>', "\n", $msg);
 			fwrite($this->fp, "\n" . $msg);
 		}
 	}
@@ -151,6 +156,10 @@ class LogFile {
 			fwrite($this->fp, "\n</body>\n</html>");
 		}
 		fclose($this->fp);
+	}
+
+	function get_content() {
+		return file_get_contents($this->name);
 	}
 
 	function delete() {

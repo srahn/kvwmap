@@ -24,6 +24,10 @@ $type_symbols = [
   3 => 'picture-o'
 ];
 
+if ($this->formvars['auto_order']) {
+  $this->add_message('info', 'Die Reihenfolge wurde automatisch generiert und kann nun durch Klick auf "Speichern" übernommen werden.');
+}
+
 $layer = array_reverse($this->layerdaten);
 echo '
   <div style="display: flex; overflow-y: auto; height: ' . ($this->user->rolle->nImageHeight - 20) . 'px">
@@ -42,9 +46,11 @@ for ($i = 0; $i < count($layer['ID']); $i++) {
 echo '
     </div>
     <div>';
+$c = 0;
 for ($i = 0; $i < count($layer['ID']); $i++) {
   if ($layer['datentyp'][$i] != 5) {
-    echo '<div class="lzr_order"><input name="orders[]" type="text" value="'.$layer['drawingorder'][$i].'"></div>';
+    $c++;
+    echo '<div class="lzr_order"><input name="orders[]" type="text" value="' . ($this->formvars['auto_order'] ? $c : $layer['drawingorder'][$i]) . '"></div>';
   }
 }
 echo '
@@ -53,6 +59,8 @@ echo '
 ';
 ?>
 <br>
-<input type="hidden" name="go" value="Layer_Zeichenreihenfolge_Speichern">
-<input type="button" onclick="document.GUI.submit();" value="Speichern">
+<input type="hidden" name="go" value="Layer_Zeichenreihenfolge">
+<input type="hidden" name="auto_order" value="">
+<input type="submit" name="go_plus" value="Speichern">
+<input type="button" onclick="document.GUI.auto_order.value = 1; document.GUI.submit();" value="automatisch sortieren">
 <br><br>

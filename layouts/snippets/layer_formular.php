@@ -1,5 +1,6 @@
 <?php
 	global $supportedLanguages;
+	global $layer_status;
 	$language_file_name = 'layer_formular_' . rolle::$language . '.php';
 
 	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
@@ -64,7 +65,7 @@
 	function testConnection() {
 		if (document.getElementById('connectiontype').value == 7) {
 			getCapabilitiesURL=document.getElementById('connection').value+'&service=WMS&request=GetCapabilities';		
-			getMapURL = document.getElementById('connection').value+'&SERVICE=WMS&REQUEST=GetMap&srs=EPSG:<?php echo $this->formvars['epsg_code']; ?>&BBOX=<?php echo $this->user->rolle->oGeorefExt->minx; ?>,<?php echo $this->user->rolle->oGeorefExt->miny; ?>,<?php echo $this->user->rolle->oGeorefExt->maxx; ?>,<?php echo $this->user->rolle->oGeorefExt->maxy; ?>&WIDTH=<?php echo $this->user->rolle->nImageWidth; ?>&HEIGHT=<?php echo $this->user->rolle->nImageHeight; ?>';
+			getMapURL = document.getElementById('connection').value+'&SERVICE=WMS&REQUEST=GetMap&srs=EPSG:<?php echo $this->user->rolle->epsg_code; ?>&BBOX=<?php echo $this->user->rolle->oGeorefExt->minx; ?>,<?php echo $this->user->rolle->oGeorefExt->miny; ?>,<?php echo $this->user->rolle->oGeorefExt->maxx; ?>,<?php echo $this->user->rolle->oGeorefExt->maxy; ?>&WIDTH=<?php echo $this->user->rolle->nImageWidth; ?>&HEIGHT=<?php echo $this->user->rolle->nImageHeight; ?>';
 			if (getMapURL.toLowerCase().indexOf('version') == -1){
 				getMapURL += '&version=' + document.GUI.wms_server_version.value;
 			}
@@ -93,20 +94,19 @@
 		if(id == 'stellenzuweisung'){
 			document.GUI.stellenzuweisung.value = 1;
 			document.getElementById('layerform').style.display = 'none';
-			document.getElementById('layerform_link').style.backgroundColor = '';
-			document.getElementById('layerform_link').style.color = '#888';
+			document.getElementById('layerform_link').classList.remove('navigation-selected');
 			document.getElementById('saveAsNewLayerButton').style.display = 'none';
+			document.getElementById('layer_formular_delete_button').style.display = 'none';
 		}
 		else{
 			document.GUI.stellenzuweisung.value = 0;
 			document.getElementById('stellenzuweisung').style.display = 'none';
-			document.getElementById('stellenzuweisung_link').style.backgroundColor = '';
-			document.getElementById('stellenzuweisung_link').style.color = '#888';
+			document.getElementById('stellenzuweisung_link').classList.remove('navigation-selected');
 			document.getElementById('saveAsNewLayerButton').style.display = 'inline-block';
+			document.getElementById('layer_formular_delete_button').style.display = 'inline-block';
 		}
 		document.getElementById(id).style.display = 'inline-block';
-		document.getElementById(id+'_link').style.backgroundColor = '#c7d9e6';
-		document.getElementById(id+'_link').style.color = '#111';
+		document.getElementById(id+'_link').classList.add('navigation-selected');
 	}
 
 	function mandatoryValuesMissing() {
@@ -405,8 +405,8 @@ from
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th>
-						<a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a>
+					<th id="layerform_link">
+						<a href="javascript:toggleForm('layerform');"><div><? echo $strCommonData; ?></div></a>
 					</th><?
 					if (!in_array($this->formvars['datentyp'], [MS_LAYER_QUERY])) { ?>
 						<th>
@@ -421,8 +421,8 @@ from
 							<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a>
 						</th><?
 					} ?>
-					<th>
-						<a href="javascript:toggleForm('stellenzuweisung');"><div id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a>
+					<th id="stellenzuweisung_link">
+						<a href="javascript:toggleForm('stellenzuweisung');"><div><? echo $strStellenAsignment; ?></div></a>
 					</th><?
 					if (in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
 						<th>
@@ -694,7 +694,22 @@ from
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="schema" type="text" value="<?php echo $this->formvars['schema']; ?>" size="50" maxlength="100">
 						</td>
-					</tr>
+					</tr><?php
+						if (count($this->layerdata['parent_layers'])) { ?>
+							<tr>
+								<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 	$strParentLayer; ?></th>
+								<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+									<ul style="float: left"><?php
+										foreach($this->layerdata['parent_layers'] AS $parent_layer) {
+											?><li><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $parent_layer->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo ($parent_layer->get('name') ? $parent_layer->get('name') : $parent_layer->get('alias')); ?> (<?php echo $parent_layer->get_id(); ?>)</a></li><?php
+										}
+									?>
+									</ul>
+									<span style="float: right; margin: 12px" data-tooltip="Verlinkung zu Layern, die diesen Layer über SubFormEmbeddedPK als Sublayer eingebunden haben."></span>
+								</td>
+							</tr><?
+						}
+					?>
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
@@ -706,7 +721,13 @@ from
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="drawingorder" type="text" value="<?php echo $this->formvars['drawingorder']; ?>" size="50" maxlength="20">&nbsp;
 						</td>
-					</tr>					
+					</tr>	
+					<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLegendOrder; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="legendorder" type="text" value="<?php echo $this->formvars['legendorder']; ?>" size="50" maxlength="15">
+					</td>
+				</tr>					
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -1043,7 +1064,7 @@ from
 													'output' => $this->formvars['selstellen']['Bezeichnung'][$key]
 												);
 											},
-											array_keys($this->formvars['selstellen']['ID'])
+											array_keys($this->formvars['selstellen']['ID'] ?: [])
 										),
 										$this->formvars['ows_stelle_id'],
 										1,
@@ -1269,8 +1290,35 @@ from
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="status" type="text" value="<?php echo $this->formvars['status']; ?>" size="50" maxlength="255">&nbsp;
-							<span data-tooltip="<? echo $strStatusHelp; ?>"></span>
+							<?
+								echo FormObject::createSelectField(
+									'status',
+									array_map(
+										fn($key, $value) => [
+												'value'  => $key,
+												'output' => $value
+										],
+										array_keys($layer_status),
+										$layer_status
+									),
+									$this->formvars['status'],
+									1,
+									'',
+									'',
+									'',
+									'',
+									'',
+									' '
+								);
+							?>
+							&nbsp;<span data-tooltip="<? echo $strStatusHelp; ?>"></span>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strErrorStatus; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="errorstatus" type="text" value="<?php echo $this->formvars['errorstatus']; ?>" size="50" maxlength="255">&nbsp;
+							<span data-tooltip="<? echo $strErrorStatusHelp; ?>"></span>
 						</td>
 					</tr>
 					<tr>
@@ -1305,7 +1353,7 @@ from
 							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
 								if ($this->formvars['shared_from']) {
 									$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
-									$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
+									$shared_name = $shared_user['vorname'] . ' ' . $shared_user['name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
 								}
 								if ($this->is_admin_user($this->user->id)) { ?>
 									<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px"> <?
@@ -1319,6 +1367,34 @@ from
 							</td>
 						</tr><?
 					} ?>
+					<tr>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strCreatedAt; ?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<input name="created_at" type="text" value="<?php echo $this->formvars['created_at']; ?>" size="3">&nbsp;
+						</td>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<?
+								if ($this->formvars['created_by']) {
+									$created_user = $this->user->getUserDaten($this->formvars['created_by'], '', '')[0];
+									echo $created_user['vorname'] . ' ' . $created_user['name'] . (!empty($created_user['organisation']) ? ' (' . $created_user['organisation'] . ')' : '');
+								}
+							?>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strEditedAt; ?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<input name="edited_at" type="text" value="<?php echo $this->formvars['edited_at']; ?>" size="3">&nbsp;
+						</td>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<?
+								if ($this->formvars['edited_by']) {
+									$edited_user = $this->user->getUserDaten($this->formvars['edited_by'], '', '')[0];
+									echo $edited_user['vorname'] . ' ' . $edited_user['name'] . (!empty($edited_user['organisation']) ? ' (' . $edited_user['organisation'] . ')' : '');
+								}
+							?>							
+						</td>
+					</tr>
 				</table>
 			</div>
 		
@@ -1356,13 +1432,7 @@ from
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" value="<?php echo $this->formvars['transparency']; ?>" style="width: 95%">
 					</td>
-				</tr>
-				<tr>
-					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLegendOrder; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="legendorder" type="text" value="<?php echo $this->formvars['legendorder']; ?>" size="50" maxlength="15">
-					</td>
-				</tr>				
+				</tr>			
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strminscale; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -1548,7 +1618,7 @@ from
 					}
 				} ?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<textarea name="expression[<?php echo $this->classes[$i]['class_id']; ?>]" cols="28" rows="3"><?php echo $this->classes[$i]['Expression']; ?></textarea>
+					<textarea name="expression[<?php echo $this->classes[$i]['class_id']; ?>]" cols="28" rows="3"><?php echo $this->classes[$i]['expression']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<textarea name="text[<?php echo $this->classes[$i]['text']; ?>]" cols="18" rows="3"><?php echo $this->classes[$i]['text']; ?></textarea>

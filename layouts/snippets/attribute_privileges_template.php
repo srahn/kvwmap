@@ -27,7 +27,7 @@
 		?>"
 >
 <div class="apt-main-div">
-	<div class="apt-bezeichnung">
+	<div class="apt-bezeichnung scrolltable_header">
 		<? if($this->stelle->id != '' AND $this->layer[0]['name'] != ''){ ?>
 		<span class="fetter px16"><? echo $this->stelle->Bezeichnung; ?></span>
 		<? }elseif($this->layer[0]['name'] != ''){ ?>
@@ -137,9 +137,11 @@ if ($this->layer[0]['name'] != '' AND count($this->attributes) != 0) { ?>
 ?>
 					<select class="<? echo ($this->stelle->id == ''? 'default_' : ''); ?>privileg_<? echo $this->attributes['name'][$i]; ?>" style="width:100px; background-color: <? echo $privilege_options[$this->attributes_privileges[$this->attributes['name'][$i]]]['color']; ?>" name="privileg_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>" onchange="this.setAttribute('style', 'width: 100px;' + this.options[this.selectedIndex].getAttribute('style'))" <? echo $disabled; ?>>	<?
 						foreach($privilege_options AS $value => $option) {
-							$selected = (strval($this->attributes_privileges[$this->attributes['name'][$i]]) === strval($value) ? ' selected' : '');	?>
-							<option value="<? echo $value; ?>" style="background-color: <? echo $option['color']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option>
-<?					} ?>
+							if ($this->attributes['table_name'][$i] == '' OR $this->attributes['table_name'][$i] == $this->layer[0]['maintable'] OR $value != '1') {
+								$selected = (strval($this->attributes_privileges[$this->attributes['name'][$i]]) === strval($value) ? ' selected' : '');	?>
+								<option value="<? echo $value; ?>" style="background-color: <? echo $option['color']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option> <?
+							}
+						} ?>
 					</select>
 				</td>
 				<td style="padding: 0">
@@ -186,16 +188,8 @@ if ($this->layer[0]['name'] != '' AND count($this->attributes) != 0) { ?>
 	<div class="apt-defaultrechteanstelle">
 		<a href="javascript:get_from_default('<? echo $attributenames; ?>','<? echo $default_stellen_ids; ?>');"><? echo $default_privileges_link_text; ?></a>
 	</div>
-	<div class="apt-attributrechtespeichern">
-		<input type="button" onclick="save('<? echo $save_stellen_ids; ?>');" name="speichern" value="<? echo $this->strSave; ?>">
-	</div>
-<?		} ?>
-	<div class="apt-bezeichnung">
-		<span class="fetter px16">
-			<? if($this->stelle->id != '' AND $this->layer[0]['name'] != ''){ echo $this->stelle->Bezeichnung; } else { echo '&nbsp;'; } ?>
-		</span>
-	</div>
-<?	} ?>						
+<?		}
+	} ?>						
 <? 
 } else { ?>
 		<div>Keine Attribute zu diesem Layer</div>

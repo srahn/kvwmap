@@ -1,15 +1,14 @@
 <?
-	$layerset = $this->user->rolle->getLayer(LAYER_ID_SCHNELLSPRUNG);
+	$quick_jump_layer_id = ($this->Stelle->quick_jump_layer_id ?: LAYER_ID_SCHNELLSPRUNG);
+	$layerset = $this->user->rolle->getLayer($quick_jump_layer_id);
 	if($layerset != NULL){ ?>
 
-<div style="margin: 4 4 2 4;">
-	<table style="border:1px solid lightgrey" width="100%">
+<div id="schnellsprung_div">
 	<?
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-		$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
-		$path = $mapdb->getPath(LAYER_ID_SCHNELLSPRUNG);
-		$privileges = $this->Stelle->get_attributes_privileges(LAYER_ID_SCHNELLSPRUNG);
-		$attributes = $mapdb->read_layer_attributes(LAYER_ID_SCHNELLSPRUNG, $layerdb, $privileges['attributenames']);
+		$layerdb = $mapdb->getlayerdatabase($quick_jump_layer_id, $this->Stelle->pgdbhost);
+		$privileges = $this->Stelle->get_attributes_privileges($quick_jump_layer_id);
+		$attributes = $mapdb->read_layer_attributes($quick_jump_layer_id, $layerdb, $privileges['attributenames']);
 		# wenn Attributname/Wert-Paare �bergeben wurden, diese im Formular einsetzen
 		for($i = 0; $i < count($attributes['name']); $i++){
 			$qlayerset['shape'][0][$attributes['name'][$i]] = $this->formvars['value_'.$attributes['name'][$i]];
@@ -19,48 +18,85 @@
 	
 		for($i = 0; $i < count($attributes['name']); $i++){
 			if($attributes['name'][$i] == 'oid'){
-				echo '<tr><td>&nbsp;'.$attributes['alias'][$i].':</td></tr>';
-				?><tr>
-					<td align="left"><?php
-						 if($attributes['form_element_type'][$i] == 'Auswahlfeld'){
-								?><select class="schnellsprung-select-field" 
-								<?
-									if($attributes['req_by'][$i] != ''){
-										echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';
-									}
-									if($attributes['name'][$i] == 'oid'){
-										echo 'onchange="zoomto('.LAYER_ID_SCHNELLSPRUNG.', this.value, \''.$attributes['the_geom'].'\');"';
-									}
-								?> 
-									id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>"><?echo "\n"; ?>
-										<option value="">-- <? echo $this->strPleaseSelect; ?> --</option><?php echo "\n";
-										if (is_array($attributes['enum'][$i][0])){
-											$attributes['enum'][$i] = $attributes['enum'][$i][0];
-										}
-									foreach ($attributes['enum'][$i] as $enum_key => $enum){
-										?>
-										<option <? 
-											if ($this->formvars['value_'.$attributes['name'][$i]] == $enum_key) {
-												echo 'selected';
-											} ?> 
-											value="<?php echo $enum_key; ?>"><?php echo $enum['output']; ?>
-										</option><?php echo "\n";
-									} ?>
-									</select>
-									<input size="9" id="value2_<?php echo $attributes['name'][$i]; ?>" name="value2_<?php echo $attributes['name'][$i]; ?>" type="hidden" value="<?php echo $this->formvars['value2_'.$attributes['name'][$i]]; ?>">
-									<?php
+				echo $attributes['alias'][$i] . ':';
+				if ($attributes['form_element_type'][$i] == 'Auswahlfeld') {	?>
+					<input type="text" id="schnellsprung_filter" placeholder="Suchen...">
+					<select class="schnellsprung-select-field" 
+					<?
+						// if($attributes['req_by'][$i] != ''){
+						// 	echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.$quick_jump_layer_id.', this.value);" ';
+						// }
+						if($attributes['name'][$i] == 'oid'){
+							echo 'onchange="schnellsprung('.$quick_jump_layer_id.', this.value, \''.$attributes['the_geom'].'\');"';
+						}
+					?> 
+						id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>"><?echo "\n"; ?>
+							<option value="">-- <? echo $this->strPleaseSelect; ?> --</option><?php echo "\n";
+							if (is_array($attributes['enum'][$i][0])){
+								$attributes['enum'][$i] = $attributes['enum'][$i][0];
 							}
-							else { 
-								?>
-								<input size="<? if($this->formvars['value2_'.$attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>" type="text" value="<?php echo $this->formvars['value_'.$attributes['name'][$i]]; ?>">
-								&nbsp;<input size="9" id="value2_<?php echo $attributes['name'][$i]; ?>" name="value2_<?php echo $attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<?php echo $this->formvars['value2_'.$attributes['name'][$i]]; ?>">
-								<?php
-						 }
-				 ?></td>
-				</tr><?php
+						foreach ($attributes['enum'][$i] as $enum_key => $enum){
+							?>
+							<option <? 
+								if ($this->formvars['value_'.$attributes['name'][$i]] == $enum_key) {
+									echo 'selected';
+								} ?> 
+								value="<?php echo $enum_key; ?>"><?php echo $enum['output']; ?>
+							</option><?php echo "\n";
+						} ?>
+						</select>
+						<input size="9" id="value2_<?php echo $attributes['name'][$i]; ?>" name="value2_<?php echo $attributes['name'][$i]; ?>" type="hidden" value="<?php echo $this->formvars['value2_'.$attributes['name'][$i]]; ?>">
+						<?php
+				}
+				else { 
+					?>
+					<input size="<? if($this->formvars['value2_'.$attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>" type="text" value="<?php echo $this->formvars['value_'.$attributes['name'][$i]]; ?>">
+					&nbsp;<input size="9" id="value2_<?php echo $attributes['name'][$i]; ?>" name="value2_<?php echo $attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<?php echo $this->formvars['value2_'.$attributes['name'][$i]]; ?>">
+					<?php
+				}
 			}
 		}
 	 ?>
-	 </table>
 </div>
+<script>
+	const filter = document.getElementById("schnellsprung_filter");
+	const select = document.getElementById("value_oid");
+	const allOptions = Array.from(select.options);
+
+	filter.addEventListener("input", () => {
+		const value = filter.value.toLowerCase();
+
+		const filtered = allOptions.filter(o =>
+			o.text.toLowerCase().includes(value)
+		);
+
+		select.innerHTML = "";
+
+		filtered.forEach(o => select.appendChild(o));
+
+		if (value) {
+			select.style.position = "absolute";
+  		select.style.zIndex = "1000";
+			select.style.top = "65px";
+			select.style.width = "300px";
+			select.size = Math.min(filtered.length + 1, 8); // max 8 anzeigen
+		} 
+		else {
+			select.style.position = "";
+			select.size = 1;
+		}
+		if (filtered.length > 1) {
+			select.selectedIndex = 0;
+		}
+		else {
+			select.selectedIndex = -1;
+		}
+	});
+
+	select.addEventListener("change", () => {
+		select.style.position = "";
+		filter.value = "";
+		select.size = 1;
+	});
+</script>
 <? } ?>

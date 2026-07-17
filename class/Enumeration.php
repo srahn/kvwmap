@@ -1,11 +1,11 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class Enumeration extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class Enumeration extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui, $enum_table = '') {
-		parent::__construct($gui, 'enumerations');
+		parent::__construct($gui, 'kvwmap','enumerations');
 		$this->enum_table = $enum_table;
 	}
 

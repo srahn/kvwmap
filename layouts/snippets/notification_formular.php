@@ -88,11 +88,11 @@ include_once(CLASSPATH . 'FormObject.php');
 	</tr>
 	<tr>
 		<th align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_veroeffentlichungsdatum; ?> <span data-tooltip="<?php echo $strVeroeffentlichungsdatumHint; ?>"></span></th>
-		<td style="border-bottom:1px solid #C3C7C3"><input id="veroeffentlichungsdatum" name="veroeffentlichungsdatum" type="date" value="<?php echo $this->notification->get('veroeffentlichungsdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
+		<td style="border-bottom:1px solid #C3C7C3"><input id="veroeffentlichungsdatum" name="veroeffentlichungsdatum" type="text" value="<?php echo $this->notification->get('veroeffentlichungsdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
 	</tr>
 	<tr>
 		<th align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_ablaufdatum; ?>* <span data-tooltip="<?php echo $strAblaufdatumHint; ?>"></span></th>
-		<td style="border-bottom:1px solid #C3C7C3"><input id="ablaufdatum" name="ablaufdatum" type="date" value="<?php echo $this->notification->get('ablaufdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
+		<td style="border-bottom:1px solid #C3C7C3"><input id="ablaufdatum" name="ablaufdatum" type="text" value="<?php echo $this->notification->get('ablaufdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
 	</tr>
 	<tr>
 		<th align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_stellen_filter; ?> <span data-tooltip="<?php echo $strStellenFilterHint; ?>"></span></th>
@@ -103,7 +103,7 @@ include_once(CLASSPATH . 'FormObject.php');
 						<select name="selectedstellen" size="6" multiple style="position: relative; width: 340px">
 							<?
 							foreach ($this->notification->selstellen as $selstelle) { ?>
-								<option class="select_option_link" onclick="gotoStelle(event, this)" title="<?php echo str_replace(' ', '&nbsp;', $selstelle->get('Bezeichnung')); ?>" value="<?php echo $selstelle->get('ID'); ?>"><?php echo $selstelle->get('Bezeichnung'); ?></option>
+								<option class="select_option_link" onclick="gotoStelle(event, this)" title="<?php echo str_replace(' ', '&nbsp;', $selstelle->get('bezeichnung')); ?>" value="<?php echo $selstelle->get('id'); ?>"><?php echo $selstelle->get('bezeichnung'); ?></option>
 							<?php
 							} ?>
 						</select>
@@ -116,7 +116,7 @@ include_once(CLASSPATH . 'FormObject.php');
 					<td>
 						<select name="allstellen" size="6" multiple style="position: relative; width: 340px"><?
 							foreach ($this->allstellen as $stelle) { ?>
-								<option class="select_option_link" onclick="gotoStelle(event, this)" title="<?php echo str_replace(' ', '&nbsp;', $stelle->get('Bezeichnung')); ?>" value="<?php echo $stelle->get('ID'); ?>"><?php echo $stelle->get('Bezeichnung'); ?></option><?php
+								<option class="select_option_link" onclick="gotoStelle(event, this)" title="<?php echo str_replace(' ', '&nbsp;', $stelle->get('bezeichnung')); ?>" value="<?php echo $stelle->get('id'); ?>"><?php echo $stelle->get('bezeichnung'); ?></option><?php
 							} ?>
 						</select>
 					</td>

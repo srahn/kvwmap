@@ -12,5 +12,6 @@
 	var hist_timestamp = <?	echo (rolle::$hist_timestamp != ''? 'new Date("' . rolle::$hist_timestamp . '");' : "'';"); ?>
 	var earth_radius = <? echo EARTH_RADIUS ?>;
 	var layernames = new Array(); 	// für alphabetisch sortierte Legende
-
+	var legendwidth = <? echo $this->user->rolle->legendwidth ?>;
+	
 </script>

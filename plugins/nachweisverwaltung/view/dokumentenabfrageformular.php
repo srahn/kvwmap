@@ -157,6 +157,13 @@ function delete_dokauswahl(){
 		alert('Es wurde keine Dokumentauswahl ausgewählt.');
 	}
 }
+
+function set_all_hauptarten(checked){
+	var dokument_arten = document.getElementsByName('suchhauptart[]');
+	[].forEach.call(dokument_arten, function (d){
+		d.checked = checked;
+	});
+}
   
 //-->
 </script>
@@ -180,7 +187,7 @@ else {
 }
  ?>
 
-<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table id="dokumentenabfrageformular" style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td colspan="3" style="height: 30px">
 			<? if ($this->formvars['lea_layer_id'] != '') { ?>
@@ -200,25 +207,25 @@ else {
 			<input type="checkbox" style="display:none" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>
     </td>
 		<td valign="top">
-			<table>
+			<table id="dokumentenabfrageformular_right">
 				<tr> 
 					<td colspan="2">Recherche nach folgenden Dokumenten:</td>
 				</tr>
 				<tr>
 					<td colspan="2">
-						<table border="0" cellpadding="4" cellspacing="0" style="margin-left: -8px;">
+						<table border="0" cellpadding="0" cellspacing="0" style="margin-left: -8px;">
 					<?	$z_index = count($this->hauptdokumentarten)+1;
 							foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
 								<tr> 
 									<td>
 										<div style="display: flex;">
-											<div style="width: 209px;display: flex;justify-content: flex-start">
-												<div><input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php } ?>>&nbsp;</div>
+											<div style="width: 219px;padding: 4px;display: flex;justify-content: flex-start">
+												<div><input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php }else{$art_unchecked = true;} ?>>&nbsp;</div>
 												<div><? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?></div>
 											</div>
 											<div style="width: 215px;">
 							<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-												&nbsp;<select name="suchunterart[]" multiple="true" style="overflow: hidden;height: 24px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
+												&nbsp;<select name="suchunterart[]" multiple="true" style="overflow: hidden;height: 24px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 210px" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
 													<option value="">alle</option>
 													<? foreach($this->dokumentarten[$hauptdokumentart['id']] as $dokumentart){ ?>
 														<option <? if(in_array($dokumentart['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $dokumentart['id']; ?>"><? echo $dokumentart['art']; ?></option>	
@@ -230,6 +237,16 @@ else {
 									</td>
 								</tr>
 					<? } ?>
+								<tr> 
+									<td>
+										<div style="display: flex;">
+											<div style="width: 209px;padding: 4px;display: flex;justify-content: flex-start">
+												<div><input type="checkbox" name="suchhauptart_alle" onclick="set_all_hauptarten(this.checked);" value="" <? if (!$art_unchecked) { ?> checked<?} ?>>&nbsp;</div>
+												<div>- alle -</div>
+											</div>
+										</div>
+									</td>
+								</tr>
 						</table>
 					</td>
 				</tr>
@@ -303,7 +320,7 @@ else {
 						<table border="0" cellspacing="0" cellpadding="2" id="attribut_form">
 							<tr>
 								<td rowspan="11" valign="top">
-									<input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
+									<input type="radio" name="abfrageart" id="abfrageart_attr" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
 								</td>
 							</tr>
 							<tr>
@@ -314,9 +331,9 @@ else {
 									Gemarkung:&nbsp;
 								</td>
 								<td colspan="2">
-									<input name="gemschl1" type="text" value="13" style="width:23px" onkeyup="updateGemarkungsauswahl();">
-									<input name="gemschl2" type="text" value="<? echo substr($this->formvars['suchgemarkung'], 2, 4); ?>" style="width:40px" onkeyup="updateGemarkungsauswahl();">
-									<input name="gemschl" type="hidden" value="<? echo $this->formvars['suchgemarkung']; ?>">
+									<input name="gemschl1" type="text" value="13" style="width:23px" onkeyup="updateGemarkungsauswahl();" onchange="document.getElementById('abfrageart_attr').checked = true;">
+									<input name="gemschl2" type="text" value="<? echo substr($this->formvars['suchgemarkung'], 2, 4); ?>" style="width:40px" onkeyup="updateGemarkungsauswahl();"  onchange="document.getElementById('abfrageart_attr').checked = true;">
+									<input name="gemschl" type="hidden" value="<? echo $this->formvars['suchgemarkung']; ?>"  onchange="document.getElementById('abfrageart_attr').checked = true;">
 									<?php 
 										$this->GemkgFormObj->outputHTML();
 										echo $this->GemkgFormObj->html;
@@ -330,15 +347,15 @@ else {
 								<td colspan="2">
 									<div style="position: relative; display: flex">
 										<div>
-											<input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
+											<input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3"  onchange="document.getElementById('abfrageart_attr').checked = true;">
 										</div>
 										<div id="flur_raeumlich">
 											&nbsp;&nbsp;&nbsp;
-											<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] != '1')echo 'checked'; ?> value="0">räumlich
+											<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] != '1')echo 'checked'; ?> value="0"  onchange="document.getElementById('abfrageart_attr').checked = true;">räumlich
 										</div>
 										<div>
 											&nbsp;&nbsp;&nbsp;
-											<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] == '1')echo 'checked'; ?> value="1">thematisch
+											<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] == '1')echo 'checked'; ?> value="1"  onchange="document.getElementById('abfrageart_attr').checked = true;">thematisch
 											&nbsp;
 										</div>
 										<span style="--left: none" data-tooltip="Bei Auswahl von 'räumlich' erfolgt eine räumliche Suche über die aktuelle Flurgeometrie. Soll stattdessen über die in den Metainformationen gespeicherte Flur gesucht werden, muss 'thematisch' ausgewählt werden."></span>
@@ -351,9 +368,9 @@ else {
 									Rissnummer:&nbsp;
 								</td>
 								<td colspan="2">
-									<input type="text" name="suchrissnummer" value="<?php echo $this->formvars['suchrissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+									<input type="text" name="suchrissnummer" value="<?php echo $this->formvars['suchrissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>"  onchange="document.getElementById('abfrageart_attr').checked = true;">
 									<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnummer2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-									<input type="text" <? if($this->formvars['suchrissnummer2'] == '')echo 'style="display: none"'; ?> name="suchrissnummer2" value="<? echo $this->formvars['suchrissnummer2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+									<input type="text" <? if($this->formvars['suchrissnummer2'] == '')echo 'style="display: none"'; ?> name="suchrissnummer2" value="<? echo $this->formvars['suchrissnummer2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>"  onchange="document.getElementById('abfrageart_attr').checked = true;">
 								</td>
 							</tr>
 							<? } ?>
@@ -362,9 +379,9 @@ else {
 									Antragsnummer:&nbsp;
 								</td>
 								<td colspan="2">
-									<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
+									<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>"  onchange="document.getElementById('abfrageart_attr').checked = true;">
 									<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchstammnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-									<input type="text" <? if($this->formvars['suchstammnr2'] == '')echo 'style="display: none"'; ?> name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">&nbsp;
+									<input type="text" <? if($this->formvars['suchstammnr2'] == '')echo 'style="display: none"'; ?> name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" onchange="document.getElementById('abfrageart_attr').checked = true;">&nbsp;
 									<span style="--left: none" data-tooltip="Zur nicht exakten Suche können die Platzhalter % (beliebig viele Zeichen) und _ (ein Zeichen) verwendet werden."></span>
 								</td>
 							</tr>
@@ -374,9 +391,9 @@ else {
 									Rissnummer:&nbsp;
 								</td>
 								<td colspan="2">
-									<input type="text" name="suchrissnummer" value="<?php echo $this->formvars['suchrissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+									<input type="text" name="suchrissnummer" value="<?php echo $this->formvars['suchrissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>" onchange="document.getElementById('abfrageart_attr').checked = true;">
 									<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnummer2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-									<input type="text" <? if($this->formvars['suchrissnummer2'] == '')echo 'style="display: none"'; ?> name="suchrissnummer2" value="<? echo $this->formvars['suchrissnummer2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+									<input type="text" <? if($this->formvars['suchrissnummer2'] == '')echo 'style="display: none"'; ?> name="suchrissnummer2" value="<? echo $this->formvars['suchrissnummer2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>" onchange="document.getElementById('abfrageart_attr').checked = true;">
 								</td>
 							</tr>
 							<? } ?>
@@ -385,9 +402,9 @@ else {
 									Fortführungsjahr:&nbsp;
 								</td>
 								<td colspan="2" style="width: 80%">
-									<input type="text" name="suchfortfuehrung" value="<?php echo $this->formvars['suchfortfuehrung']; ?>" size="4" maxlength="4">
+									<input type="text" name="suchfortfuehrung" value="<?php echo $this->formvars['suchfortfuehrung']; ?>" size="4" maxlength="4" onchange="document.getElementById('abfrageart_attr').checked = true;">
 									<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchfortfuehrung2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-									<input type="text" <? if($this->formvars['suchfortfuehrung2'] == '')echo 'style="display: none"'; ?> name="suchfortfuehrung2" value="<?php echo $this->formvars['suchfortfuehrung2']; ?>" size="4" maxlength="4">
+									<input type="text" <? if($this->formvars['suchfortfuehrung2'] == '')echo 'style="display: none"'; ?> name="suchfortfuehrung2" value="<?php echo $this->formvars['suchfortfuehrung2']; ?>" size="4" maxlength="4" onchange="document.getElementById('abfrageart_attr').checked = true;">
 								</td>
 							</tr>
 							<tr> 
@@ -396,10 +413,10 @@ else {
 									<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum', 'date', false)"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_sdatum" class="calendar"></div>
 								</td>
 								<td colspan="2" style="position: relative">						
-									<input id="sdatum" name="sdatum" type="text" value="<?php echo $this->formvars['sdatum']; ?>" size="10" maxlength="50">
+									<input id="sdatum" name="sdatum" type="text" value="<?php echo $this->formvars['sdatum']; ?>" size="10" maxlength="50" onchange="document.getElementById('abfrageart_attr').checked = true;">
 									<a href="#" class="toggle_fa_off" title="von-bis-Suche" disabled="true" onclick="toggleBetweenSearch(this, GUI.sdatum2);toggleBetweenSearch(this, document.getElementById('caldatum2'), GUI.sdatum2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
 									<a href="javascript:;" title=" (TT.MM.JJJJ) " id="caldatum2" <? if($this->formvars['sdatum2'] == '')echo 'style="display: none"'; ?> onclick="new CalendarJS().init('sdatum2', 'date', false)"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_sdatum2" class="calendar"></div>
-									<input id="sdatum2" name="sdatum2" type="text" <? if($this->formvars['sdatum2'] == '')echo 'style="display: none"'; ?> onchange="" value="<?php echo $this->formvars['sdatum2']; ?>" size="10" maxlength="50">
+									<input id="sdatum2" name="sdatum2" type="text" <? if($this->formvars['sdatum2'] == '')echo 'style="display: none"'; ?> value="<?php echo $this->formvars['sdatum2']; ?>" size="10" maxlength="50" onchange="document.getElementById('abfrageart_attr').checked = true;">
 								</td>
 							</tr>
 							<tr>
@@ -418,7 +435,7 @@ else {
 									Bemerkung:&nbsp;
 								</td>
 								<td colspan="2">
-									<input type="text" name="suchbemerkung" size="29" value="<? echo $this->formvars['suchbemerkung']; ?>">&nbsp;
+									<input type="text" name="suchbemerkung" size="29" value="<? echo $this->formvars['suchbemerkung']; ?>" onchange="document.getElementById('abfrageart_attr').checked = true;">&nbsp;
 									<span style="--left: none" data-tooltip="Zur nicht exakten Suche können die Platzhalter % (beliebig viele Zeichen) und _ (ein Zeichen) verwendet werden."></span>
 								</td>
 							</tr>
@@ -446,7 +463,7 @@ else {
 				<? if ($this->formvars['lea_id'] == '') { ?>
 				<tr> 
 					<td valign="top" colspan="3" style="height: 27px">
-						<input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
+						<input type="radio" name="abfrageart" id="abfrageart_antr" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
 						<span class="fett">Vorbereitungsnummer:</span>
 						<?php $this->FormObjAntr_nr->outputHTML();
 							echo $this->FormObjAntr_nr->html;?>
@@ -460,7 +477,8 @@ else {
 					<td colspan="2"><hr align="center"></td>
 				</tr>
 				<tr>
-					<td colspan="2">Geometrie übernehmen von:<br>
+					<td colspan="2">
+						Geometrie übernehmen von:<br>
 						<select size="1" style="width: 250px" name="selected_group_id" onchange="ahah('index.php', 'go=getqueryableVectorLayers&group_id=' + this.value, [document.GUI.geom_from_layer], ['sethtml']);" <?php if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
 							<option value="">  -- <?php echo $this->strGroup; ?> --  </option>
 							<?
@@ -473,7 +491,7 @@ else {
 							}
 						?>
 						</select>
-						<select name="geom_from_layer">
+						<select name="geom_from_layer" onchange="geom_from_layer_change(<? echo LAYER_ID_NACHWEISE; ?>);">
 							<option value="">--- Auswahl ---</option>
 							<?
 								for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -483,13 +501,9 @@ else {
 								}
 							?>
 						</select> 
+						<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>Einzelgeometrien
 					</td>
 				</tr>
-				<tr>
-					<td colspan="2" style="padding-top: 5px">
-						<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
-					</td>
-				</tr>	
 				<tr> 
 					<td align="center" colspan="2" style="height: 55px"><input type="button" name="senden" value="Suchen" onclick="save();"> </td>
 				</tr>

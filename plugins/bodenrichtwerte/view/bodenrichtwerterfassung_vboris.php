@@ -139,7 +139,7 @@ update_require_attribute = function(attributes, layer_id, value){
  ?>
 
 	  
-<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table id="bodenrichtwerterfassung_vboris" style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td colspan="6"><h2><?php echo $this->titel; ?></h2></td>
   </tr>

@@ -37,6 +37,14 @@ class PgObject {
 	*
 	*/
 	static $write_debug = false;
+	static $schema;
+	static $tableName;
+	static $identifier;
+	public $columns;
+	public $debug;
+	public $gui;
+	public $database;
+	public $qualifiedTableName;
 	public $children_ids;
 	public $select;
 	public $from;
@@ -46,6 +54,12 @@ class PgObject {
 	public $fkeys;
 	public $pkey;
 	public $data;
+	public $identifier_type;
+	public $identifiers;
+	public $attribute_types;
+	public $geom_column;
+	public $extent;
+	public $extents;
 
 	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
@@ -112,7 +126,7 @@ class PgObject {
 	/**
 	 * @return PgObject $this->data is false if nothing found.
 	 */
-	function find_by($attribute, $value) {
+	function find_by($attribute, $value, $comp_operator = '=') {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, $this->show);
 		$sql = '
 			SELECT
@@ -120,17 +134,12 @@ class PgObject {
 			FROM
 				"' . $this->schema . '"."' . $this->tableName . '"
 			WHERE
-				"' . $attribute . '"';
-		if ($value == '') {
-			$sql .= ' IS NULL';
-		}
-		else {
-			$sql .= ' = \'' . $value . '\'';
-		}
+				' . pg_escape_identifier($attribute) . ($value == '' ? ' IS NULL' : ' ' . $comp_operator . ' ' . pg_escape_literal(pg_escape_string($value)));
+		// echo '<br>sql: ' . $sql;
 		$this->debug->show('find_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		if (!$query) {
-			echo $sql;
+			echo 'Fehler beim Ausführen von SQL: ' . $sql . pg_last_error($this->database->dbConn);
 			exit;
 		}
 		$this->data = pg_fetch_assoc($query);
@@ -143,12 +152,75 @@ class PgObject {
 			$ids = $this->get_ids();
 		}
 		foreach ($this->identifiers AS $identifier) {
-			$quote = ($identifier['type'] == 'text' ? "'" : "");
+			$quote = (array_filter(
+				array('text', 'varchar', 'character', 'date', 'time', 'uuid'),
+				function ($teil) use ($identifier) {
+						return strpos($identifier['type'], $teil) !== false;
+				}
+			) ? "'" : "");
 			$parts[] = '"' . $identifier['column'] . '" = ' . $quote . $ids[$identifier['column']] . $quote;
 		}
 		return implode(' AND ', $parts);
 	}
 
+	function get_where_parts(array $filter = array(), array $params, int $index = 1) {
+		if (count($filter) == 0) {
+			$filter = array_map(
+				function ($value) {
+					return array(
+						'operator' => '=',
+						'value' => $value
+					);
+				},
+				$this->get_ids()
+			);
+		}
+		foreach ($filter as $column => $condition) {
+			$safe_column = '"' . str_replace('"', '""', $column) . '"';
+			if ($condition['value'] === null) {
+				$where_parts[] = sprintf(
+					'%s IS NULL',
+					$safe_column
+				);
+				continue;
+			}
+			$where_parts[] = sprintf(
+				'%s ' . $condition['operator'] . ' $%d',
+				$safe_column,
+				$index
+			);
+			$params[] = $this->normalize_postgres_value($condition['value']);
+			$index++;
+		}
+		return [$where_parts, $params, $index];
+	}
+
+	function get_set_parts(array $attributes, int $index = 1) {
+		$set_parts = array();
+		$params = array();
+		foreach ($attributes as $column => $value) {
+      $safe_column = '"' . str_replace('"', '""', $column) . '"';
+			if ($value === null) {
+				$set_parts[] = sprintf(
+					'%s = NULL',
+					$safe_column
+				);
+				continue;
+			}
+			$set_parts[] = sprintf(
+				'%s = $%d',
+				$safe_column,
+				$index
+			);
+			$params[] = $this->normalize_postgres_value($value);
+			$index++;
+    }
+		return [$set_parts, $params, $index];
+	}
+
+	/**
+	 * @return PgObject $this->data is false if nothing found.
+	 */
 	function find_by_ids($ids) {
 		$where_condition = $this->get_id_condition($ids);
 		$sql = "
@@ -209,6 +281,34 @@ class PgObject {
 		return $results;
 	}
 
+	function find_where_ohne_clone($where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
+		$select = (empty($select) ? $this->select : $select);
+		$from   = (empty($from) ? $this->schema . ".\"" . $this->tableName . "\"" : $from);
+		$where  = (empty($where) ? "true" : $where);
+		$order  = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
+		$limit  = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
+		$sql = "
+			SELECT
+				" . $select . "
+			FROM
+				" . $from . "
+			WHERE
+				" . $where . "
+			" . $order . "
+			" . $limit . "
+		";
+		$this->debug->show('find_where sql: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		if ($query == false) {
+			echo $sql; exit;
+		}
+		$results = array();
+		while ($data = pg_fetch_assoc($query)) {
+			$results[] = $data;
+		}
+		return $results;
+	}
+
 	/**
 	 * Function query, set and return extent of all features in epsg of $this->geom_column in $this->extent variable
 	 * additional it query and set the extents in epsg given in $ows_srs string
@@ -264,16 +364,38 @@ class PgObject {
 		return $this->extent;
 	}
 
-	function exists($key) {
+	/**
+	 * Check if a record with the same value for the given key already exists in the database, excluding the current record by id condition.
+	 */
+	function unique($key) {
 		$sql = "
 			SELECT
-				" . $key . "
+				count(" . $key . ") AS num_rows
 			FROM
 				\"{$this->schema}\".\"{$this->tableName}\"
 			WHERE
 				" . $key . " = " . quote($this->get($key)) . " AND
 				NOT " . $this->get_id_condition() . "
 		";
+		$this->debug->show('unique sql: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		$result = pg_fetch_assoc($query);
+		return ($result['num_rows'] > 0);
+	}
+
+	/**
+	 * Check if a record with the same value for the given key already exists in the database.
+	 */
+	function exists($key) {
+		$sql = "
+			SELECT
+				count(" . $key . ") AS num_rows
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				" . $key . " = " . quote($this->get($key)) . "
+		";
+		$this->debug->show('exists sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$result = pg_fetch_assoc($query);
 		return ($result['num_rows'] > 0);
@@ -294,6 +416,7 @@ class PgObject {
 
 	function getAttributes() {
 		$attributes = [];
+		$this->columns = $this->get_attribute_types();
 		foreach ($this->data AS $key => $value) {
 			$attribute_validations  = array_filter(
 				$this->validations,
@@ -301,7 +424,7 @@ class PgObject {
 					return $validation['attribute'] == $key;
 				}
 			);
-			$attributes[] = new MyAttribute($this->debug, $key, $this->columns[$key]['Type'], $value, $attribute_validations, $this->identifier);
+			$attributes[] = new PgAttribute($this->debug, $key, $this->columns[$key], $value, $attribute_validations, $this->identifier);
 		}
 		return $attributes;
 	}
@@ -399,6 +522,10 @@ class PgObject {
 		return $ids;
 	}
 
+	function get_id_keys() {
+		return array_keys($this->get_ids());
+	}
+
 	function set($attribute, $value) {
 		$this->data[$attribute] = $value;
 		return $value;
@@ -413,11 +540,14 @@ class PgObject {
 		return $this->data[$attribute];
 	}
 
+	/**
+	 * Function create a dataset of this object type with $data if given, else with current values from $this->data.
+	 */
 	function create($data = '') {
 		if (!empty($data)) {
 			$this->data = $data;
 		}
-		if ($this->data[$this->identifier] == '' OR $this->data[$this->identifier] == 0) {
+		if ($this->data[$this->identifier] == '' OR ($this->identifier_type == 'integer' AND $this->data[$this->identifier] == 0)) {
 			unset($this->data[$this->identifier]);
 		}
 		$values = array_map(
@@ -482,8 +612,8 @@ class PgObject {
 			$this->debug->show('Error in create query: ' . pg_last_error($this->database->dbConn), $this->show);
 			return array(
 				'success' => false,
-				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn),
-				'sql' => $sql
+				'type' => 'error',
+				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn)
 			);
 		}
 		$oid = pg_last_oid($query);
@@ -551,6 +681,66 @@ class PgObject {
 		return $this->get('id');
 	} */
 
+
+	/*
+	* Function insert new dataset if not exists else update it with data values
+	* corresonding to identifier attributes
+	* INSERT INTO users (id, name, email)
+	* VALUES (1, 'John', 'j@url.de')
+	* ON CONFLICT (id)
+	* DO UPDATE SET name = EXCLUDED.name;
+	*/
+	function insert_or_update($data = '') {
+		if (!empty($data)) {
+			$this->data = $data;
+		}
+		if ($this->data[$this->identifier] == '' OR $this->data[$this->identifier] == 0) {
+			unset($this->data[$this->identifier]);
+		}
+		$values = array_map(
+			function($value) {
+				return (is_array($value) ? "{" . implode(", ", $value) . "}" : $value);
+			},
+			$this->getValues()
+		);
+		$sql = "
+			INSERT INTO " . $this->qualifiedTableName . " (
+				" . implode(', ', array_map(function($key) { return '"' . $key . '"'; }, $this->getKeys())) . "
+			)
+			VALUES (" .
+				implode(
+					", ",
+					array_map(
+						function($value) {
+							return (($value === '' OR $value === null) ? "NULL" : "'" . pg_escape_string($value) . "'");
+						},
+						$values
+					)
+				) . "
+			)
+			ON CONFLICT (" . implode(', ' , $this->get_id_keys()) . ")
+			DO UPDATE SET
+				" . implode(', ', array_map(function($key) { return $key . ' = EXCLUDED.' . $key; }, $this->getKeys())) . "
+			RETURNING *;
+		";
+		$this->debug->show('SQL zum Insert on Conflict: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		if ($query === false) {
+			return array(
+				'success' => false,
+				'msg' => 	pg_last_error($this->database->dbConn) . ' Aufgetreten bei SQL: ' . $sql . 'keys: -' . implode(', ', $this->getKeys()) . '-' . ' data: ' . print_r($this->data, true)
+			);
+		}
+		$results = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$results[] = $rs;
+		}
+		return array(
+			'success' => true,
+			'msg' => $results
+		);
+	}
+
 	function update($data = array(), $update_all_attributes = true) {
 		$results = array();
 		if (!empty($data)) {
@@ -567,8 +757,9 @@ class PgObject {
 		";
 		$this->debug->show('update sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
-		if(!$query){echo $sql; exit;}
-		$err_msg = $this->database->errormessage;
+		if (!$query) {
+			$err_msg = pg_last_error($this->database->dbConn);
+		}
 		$results = array(
 			'success' => ($err_msg == ''),
 			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
@@ -577,43 +768,151 @@ class PgObject {
 		return $results;
 	}
 
-	function update_attr($attributes, $set = false) {
-		if (is_array($attributes) AND count($attributes) > 0) {
-			$quote = ($this->identifier_type == 'text' ? "'" : "");
-			$sql = "
-				UPDATE
-					\"" . $this->schema . "\".\"" . $this->tableName . "\"
-				SET
-					" . implode(', ', $attributes) . "
-				WHERE
-					" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
-			";
-			// echo $sql;
-			$this->debug->show('update sql: ' . $sql, $this->show);
-			try {
-				pg_query($this->database->dbConn, $sql);
-				if ($set) {
-					foreach($attributes AS $attribute) {
-						$parts = explode('=', $attribute);
-						$this->set(trim($parts[0]), trim($parts[1], "'"));
-					}
-				}
-				return array(
-					'success' => true,
-					'msg' => 'Attributes erfolgreich geupdated mit sql:' . $sql
-				);
-			}
-			catch (Exception $e) {
-				return array(
-					'success' => false,
-					'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' .  $e->getMessage()
-				);
+	function update_attr($attributes, $set = false, $where = NULL) {
+		if (!is_array($attributes)) {
+			$attributes = array($attributes);
+		}
+		$sql = "
+			UPDATE
+				\"" . $this->schema . "\".\"" . $this->tableName . "\"
+			SET
+				" . implode(', ', $attributes) . "
+			WHERE
+				" . ($where !== NULL ? $where : $this->get_id_condition()) . "
+		";
+		#echo $sql;
+		$this->debug->show('update sql: ' . $sql, $this->show);
+		pg_query($this->database->dbConn, $sql);
+		$fehler = pg_last_error($this->database->dbConn);
+		if ($fehler) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' . $fehler
+			);
+		}
+		if ($set) {
+			foreach($attributes AS $attribute) {
+				$parts = explode('=', $attribute);
+				$this->set(trim($parts[0]), trim(trim($parts[1]), "'"));
 			}
 		}
 		return array(
 			'success' => true,
-			'msg' => 'Nichts geupdated weil keine Werte übergeben wurden.'
+			'msg' => 'Attributes erfolgreich geupdated'
 		);
+	}
+
+	function update_attr_prep(array $attributes, bool $set, array $where = array()) {
+		$stmt_name = 'update_' . $this->schema . '_' . $this->tableName . '_' . uniqid();
+		[$sql, $params] = $this->build_update_query($attributes, $where);
+
+		pg_prepare($this->database->dbConn, $stmt_name, $sql);
+		$result = pg_execute($this->database->dbConn, $stmt_name, $params);
+		if ($result === false) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' . pg_last_error($this->database->dbConn)
+			);
+		}
+		if ($set) {
+			foreach($attributes as $column => $value) {
+				$this->set($column, $value);
+			}
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Attributes erfolgreich geupdated'
+		);
+	}
+
+  function build_update_query(array $attributes, array $where = array()): array {
+    if (empty($attributes)) {
+      return array(
+				'success' => false,
+				'msg' => 'Keine Daten zum Aktualisieren angegeben'
+			);
+    }
+
+    $set_parts = [];
+    $where_parts = [];
+    $params = [];
+
+    $index = 1;
+		[$set_parts, $params, $index] = $this->get_set_parts($attributes, $index);
+		[$where_parts, $params, $index] = $this->get_where_parts($where, $params, $index);
+
+		$safe_schema = '"' . str_replace('"', '""', $this->schema) . '"';
+    $safe_table = '"' . str_replace('"', '""', $this->tableName) . '"';
+
+    $sql = sprintf(
+        'UPDATE %s.%s SET %s WHERE %s',
+        $safe_schema,
+        $safe_table,
+        implode(', ', $set_parts),
+        implode(' AND ', $where_parts)
+    );
+
+    return [$sql, $params];
+	}
+
+	function normalize_postgres_value($value): string {
+    // NULL
+    if ($value === null) {
+      return null;
+    }
+
+    // Boolean
+    if (is_bool($value)) {
+      return $value;
+    }
+
+    // Integer / Float
+    if (is_int($value) || is_float($value)) {
+      return $value;
+    }
+
+    // DateTime Objekt
+    if ($value instanceof DateTimeInterface) {
+      return $value->format('Y-m-d H:i:s');
+    }
+
+    // String
+    if (is_string($value)) {
+			$value = trim($value);
+			// Y-m-d H:i:s
+			if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $value)) {
+				$dt = DateTime::createFromFormat('Y-m-d H:i:s', $value);
+				if ($dt !== false) {
+					return $dt->format('Y-m-d H:i:s');
+				}
+			}
+
+			// Y-m-d
+			if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+				$dt = DateTime::createFromFormat('Y-m-d', $value);
+				if ($dt !== false) {
+					return $dt->format('Y-m-d');
+				}
+			}
+
+			// d.m.Y H:i:s
+			if (preg_match('/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}:\d{2}$/', $value)) {
+				$dt = DateTime::createFromFormat('d.m.Y H:i:s', $value);
+				if ($dt !== false) {
+						return $dt->format('Y-m-d H:i:s');
+				}
+			}
+
+			// d.m.Y
+			if (preg_match('/^\d{2}\.\d{2}\.\d{4}$/', $value)) {
+				$dt = DateTime::createFromFormat('d.m.Y', $value);
+				if ($dt !== false) {
+					return $dt->format('Y-m-d');
+				}
+			}
+			return $value;
+    }
+    return (string)$value;
 	}
 
 	function delete($where = NULL) {
@@ -627,12 +926,12 @@ class PgObject {
 		$this->debug->show('delete sql: ' . $sql, $this->show);
 		$result = pg_query($this->database->dbConn, $sql);
 		$err_msg = $this->database->errormessage;
-		$result = array(
+		return array(
 			'success' => ($err_msg == ''),
 			'msg' => ($err_msg == '' ? 'Abfrage zum Löschen erfolgreich' : 'Fehler bei Ausführung der Löschanfrage!'),
-			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
+			'result' => $result
 		);
-		return $result;
 	}
 
 	function getSQLResults($sql) {
@@ -650,7 +949,7 @@ class PgObject {
 	 * @param array $params: Array with select, from, where and order parts of sql.
 	 * @return array $results: All found objects.
 	 */
-	function find_by_sql($params, $hierarchy_key = NULL) {
+	function find_by_sql($params, $hierarchy_key = NULL, $suppress_err_msg = true) {
 		$sql = "
 			SELECT
 				" . (!empty($params['select']) ? $params['select'] : '*') . "
@@ -662,7 +961,19 @@ class PgObject {
 		// echo '<br>PgObject->find_by_sql with sql: ' . $sql;
 		$this->debug->show('PgObject find_by_sql sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
-		if (!$query){echo $sql; exit;}
+		if ($suppress_err_msg) {
+			if (!$query){echo $sql; exit;}
+		}
+		else {
+			$fehler = pg_last_error();
+			if ($fehler) {
+				return array(
+					'success' => false,
+					'msg' => 'Class: PgObject, Func: find_by_sql, Line: ' . __LINE__ . ' SQL: ' . $sql . ' ' . $fehler
+				);
+			}
+		}
+
 		$results = array();
 		while ($this->data = pg_fetch_assoc($query)) {
 			if ($hierarchy_key == NULL) {
@@ -675,7 +986,46 @@ class PgObject {
 				}
 			}
 		}
-		return $results;
+		if ($suppress_err_msg) {
+			return $results;
+		}
+		else {
+			return array(
+				'success' => true,
+				'msg' => 'Datensätze erfolgreich abgefragt mit SQL : ' . $sql,
+				'rows' => $results
+			);
+		}
+	}
+
+	function getColumnsFromTable() {
+		$this->debug->show('getColumnsFromTable', PgObject::$write_debug);
+		$this->columns = array();
+		$sql = "
+			SELECT
+				*
+			FROM
+				information_schema.columns
+			WHERE
+			  table_schema = 'kvwmap' AND
+				table_name = '" . $this->tableName . "'
+		";
+		$this->debug->show('SQL zum Abfragen der Spalten der Tabelle SQL: ' . $sql, $this->show);
+		$query = pg_query($this->database->dbConn, $sql);
+		if (!$query) {
+			return array(
+				'success' => false,
+				'msg' => pg_last_error($this->database->dbConn)
+			);
+		}
+		$this->columns = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$this->columns[] = $rs;
+		}
+		return array(
+			'success' => true,
+			'columns' => $this->columns
+		);
 	}
 
 	function setKeysFromTable() {
@@ -689,9 +1039,30 @@ class PgObject {
 
 	function setKeysFromFormvars($formvars) {
 		$this->debug->show('setKeysFromFormvars', PgObject::$write_debug);
-		$this->data = array_map(function($attribute) { return null; }, array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable()))));
+		$result = $this->getColumnsFromTable();
+		if (!$result['success']) {
+			echo '<br>hier';
+			return $result;
+		}
+		$this->data = array_map(
+			function($attribute) { return null; },
+			array_flip(
+				array_intersect(
+					array_keys($formvars),
+					array_map(
+						function($attribute) {
+							return $attribute['column_name'];
+						},
+						$this->columns
+					)
+				)
+			)
+		);
+		return array(
+			'success' => true,
+			'data' => $this->data
+		);
 	}
-
 
 	/*
 	* Fragt die foreign constraints der Tabelle ab und
@@ -971,8 +1342,8 @@ class PgObject {
 		if ($msg == '') {
 			$msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
 		}
-
-		return ($this->get($key) != '' ? '' : $msg);
+		$value = $this->get($key) === 0 ? '0' : $this->get($key);
+		return ($value != '' ? '' : $msg);
 	}
 
 	function validate_presence_one_of($keys, $msg = '') {
@@ -999,7 +1370,7 @@ class PgObject {
 	function validate_unique($key, $msg = '', $option = '', $on = '') {
 		$msg = $msg . ' Der Wert ' . $this->get($key) . ' im Attribut ' . $key . ' existiert schon.';
 		if ($option == $on) {
-			return ($this->exists($key) ? $msg : '');
+			return ($this->unique($key) ? $msg : '');
 		}
 		else {
 			return ''; # nicht validieren
@@ -1116,7 +1487,7 @@ VALUES (" . implode(
 
 		if (!empty($this->has_many) AND is_array($this->has_many)) {
 			foreach ($this->has_many AS $key => $relation) {
-				$many_attribut = new MyAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
+				$many_attribut = new PgAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
 				array_push($attributes_html, $many_attribut->as_form_html());
 			}
 		}

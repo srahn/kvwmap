@@ -3,7 +3,7 @@ include(LAYOUTPATH . 'languages/layer2stelle_formular_' . rolle::$language . '.p
 include_once(CLASSPATH . 'FormObject.php');
 include_once(CLASSPATH . 'LayerGroup.php');
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table id="layer2stelle_formular" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
 	<tr align="center">
 		<td>
 			<h2 style="line-height: 1.2;">

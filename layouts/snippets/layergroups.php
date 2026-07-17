@@ -5,7 +5,7 @@
 	$has_shared_group = array_reduce(
 		$this->layergruppen,
 		function($has_shared_group, $layergruppe) {
-			return $has_shared_group OR $layergruppe->get('selectable_for_shared_layers');
+			return $has_shared_group OR ($layergruppe->get('selectable_for_shared_layers') == 't');
 		},
 		0
 	);
@@ -31,7 +31,7 @@
 		}
 	}
 </script>
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table id="layergroups" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
 	<tr align="center">
 		<td><h2><?php echo $strTitel; ?></h2></td>
 	</tr>
@@ -69,7 +69,7 @@
 						</td><?
 						if ($has_shared_group) { ?>
 							<td align="right"><?
-								if ($this->layergruppen[$i]->get('selectable_for_shared_layers')) { ?>
+								if ($this->layergruppen[$i]->get('selectable_for_shared_layers') == 't') { ?>
 									<i class="fa fa-share-alt" style="padding: 3px"></i><?
 								} else { ?>
 									&nbsp;<?

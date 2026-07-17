@@ -1,7 +1,6 @@
  <?php
   $strTitle="Layer der Stelle";
-  $strDrawingOrder="Zeichen-<br>reihenfolge ";
-	$strLegendOrder="Legenden-<br>reihenfolge ";
+	$strLegendOrder="Legendenreihenfolge ";
   $strProperties="Eigenschaften";
   $strGlobal="allgemein";
   $strTask="stellenbezogen";

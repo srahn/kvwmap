@@ -43,7 +43,10 @@ function verify_totp($secret, $code, $window = 1, $period = 30) {
 			$offset = ord(substr($hash, -1)) & 0x0F;
 			$truncated = unpack('N', substr($hash, $offset, 4))[1] & 0x7FFFFFFF;
 			$test_code = str_pad($truncated % 1000000, 6, '0', STR_PAD_LEFT);
-			if (hash_equals($test_code, $code)) return true;
+			if (hash_equals($test_code, $code) AND $counter > $_SESSION['last_totp_counter']) {
+				$_SESSION['last_totp_counter'] = $counter;
+				return true;
+			}
 	}
 	return false;
 }
@@ -91,7 +94,7 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
  * @return String Die aus der MapServer-Expression erzeugte SQL-Expression
  */
 function mapserverExp2SQL($exp, $classitem) {
-	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
+	$exp = preg_replace("/'\\[(\\D[^\\]]*|[^\\]]*\\D[^\\]]*)\\]'|\\[(\\D[^\\]]*|[^\\]]*\\D[^\\]]*)\\]/", "$1$2", $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
 	$exp = str_replace(' ne ', ' != ', $exp);
 	$exp = str_replace(' ge ', ' >= ', $exp);
@@ -100,7 +103,11 @@ function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
-
+	if (strpos($exp, ' IN ') != false) {
+		$array = get_first_word_after($exp, ' IN');
+		$exp = str_replace(' IN ', '::text = ANY(ARRAY[', $exp);
+		$exp = str_replace($array, $array . '])', $exp);
+	}
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
@@ -167,6 +174,10 @@ function quote_or_null($var) {
 	return (($var === '' OR $var === null) ? 'NULL' : quote($var));
 }
 
+function value_or_null($var) {
+	return (($var === '' OR $var === null) ? 'NULL' : $var);
+}
+
 function append_slash($var) {
 	return $var . ((trim($var) != '' AND substr(trim($var), -1) != '/') ? '/' : '');
 }
@@ -177,24 +188,6 @@ function pg_quote($column) {
 
 function is_valid_pg_name($name) {
 	return preg_match('/^[a-z_][a-z0-9_]*$/', $name);
-}
-
-function get_din_formats() {
-	$din_formats = array(
-		'A5hoch' => array('value' => 'A5hoch', 'output' => 'A5 hoch', 'size' => '(420 x 595)'),
-		'A5quer' => array('value' => 'A5quer', 'output' => 'A5 quer', 'size' => '(595 x 420)'),
-		'A4hoch' => array('value' => 'A4hoch', 'output' => 'A4 hoch', 'size' => '(595 x 842)'),
-		'A4quer' => array('value' => 'A4quer', 'output' => 'A4 quer', 'size' => '(842 x 595)'),
-		'A3hoch' => array('value' => 'A3hoch', 'output' => 'A3 hoch', 'size' => '(842 x 1191)'),
-		'A3quer' => array('value' => 'A3quer', 'output' => 'A3 quer', 'size' => '(1191 x 842)'),
-		'A2hoch' => array('value' => 'A2hoch', 'output' => 'A2 hoch', 'size' => '(1191 x 1684)'),
-		'A2quer' => array('value' => 'A2quer', 'output' => 'A2 quer', 'size' => '(1684 x 1191)'),
-		'A1hoch' => array('value' => 'A1hoch', 'output' => 'A1 hoch', 'size' => '(1684 x 2384)'),
-		'A1quer' => array('value' => 'A1quer', 'output' => 'A1 quer', 'size' => '(2384 x 1684)'),
-		'A0hoch' => array('value' => 'A0hoch', 'output' => 'A0 hoch', 'size' => '(2384 x 3370)'),
-		'A0quer' => array('value' => 'A0quer', 'output' => 'A0 quer', 'size' => '(3370 x 2384)'),
-	);
-	return $din_formats;
 }
 
 function str_replace_first($search, $replace, $subject){
@@ -1405,6 +1398,7 @@ function sonderzeichen_umwandeln($name) {
 	$name = str_replace('$', '', $name);
 	$name = str_replace('&', '_', $name);
 	$name = str_replace('#', '_', $name);
+	$name = str_replace('"', '_', $name);
 	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
 	return $name;
 }
@@ -1500,21 +1494,96 @@ function searchdir($path, $recursive){
     return ($dirlist);
 }
 
-function get_select_parts($select) {
-	$column = explode(',', $select); # an den Kommas splitten
-	for($i = 0; $i < count($column); $i++) {
-		$klammerauf = substr_count($column[$i], '(');
-		$klammerzu = substr_count($column[$i], ')');
-		$hochkommas = substr_count($column[$i], "'");
-		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
-		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
-		if ($hochkommas % 2 != 0 OR $klammerauf > $klammerzu) {
-			$column[$i] = $column[$i] . ',' . $column[$i + 1];
-			array_splice($column, $i + 1, 1);
-			$i--; # und nochmal prüfen, falls mehrere Kommas drin sind
-		}
+function extract_select_clause($sql) {
+	$sql = trim($sql);
+	$len = strlen($sql);
+	$buffer = '';
+	$klammer = 0;
+	$inString = false;
+	$i = 0;
+
+	// Groß-/Kleinschreibung ignorieren
+	$upperSql = strtoupper($sql);
+
+	// Stelle sicher, dass es mit SELECT beginnt
+	if (substr($upperSql, 0, 6) !== "SELECT") {
+			throw new Exception("Not a SELECT query");
 	}
-	return $column;
+
+	// Start nach "SELECT "
+	$i = 6;
+	while ($i < $len) {
+			$char = $sql[$i];
+			$prev = $i > 0 ? $sql[$i - 1] : '';
+
+			// String beginnen / beenden
+			if ($char === "'" && $prev !== "\\") {
+					$inString = !$inString;
+					$buffer .= $char;
+					$i++;
+					continue;
+			}
+
+			// Klammern zählen
+			if (!$inString) {
+					if ($char === '(') $klammer++;
+					if ($char === ')') $klammer--;
+			}
+
+			// Prüfen, ob hier ein FROM kommt (außerhalb von Strings/Klammern)
+			if (!$inString && $klammer === 0) {
+					// Prüfe 4 Zeichen ab Position
+					if (strtoupper(substr($sql, $i, 4)) === "FROM") {
+							break; // oberster FROM gefunden
+					}
+			}
+
+			$buffer .= $char;
+			$i++;
+	}
+
+	return trim($buffer);
+}
+
+function get_select_parts($select) {
+	$parts = [];
+	$buffer = '';
+	$klammer = 0;        // Verschachtelte Klammern
+	$inString = false;   // Innerhalb von Hochkommas
+	$len = strlen($select);
+
+	for ($i = 0; $i < $len; $i++) {
+			$char = $select[$i];
+			$prev = $i > 0 ? $select[$i - 1] : '';
+
+			// String beginnen / beenden (Hochkomma)
+			if ($char === "'" && $prev !== "\\") {
+					$inString = !$inString;
+					$buffer .= $char;
+					continue;
+			}
+
+			// Klammern zählen, aber nur außerhalb von Strings
+			if (!$inString) {
+					if ($char === '(') $klammer++;
+					if ($char === ')') $klammer--;
+			}
+
+			// Komma als Trennzeichen nur außerhalb von Klammern und Strings
+			if ($char === ',' && !$inString && $klammer === 0) {
+					$parts[] = trim($buffer);
+					$buffer = '';
+			} else {
+					$buffer .= $char;
+			}
+	}
+
+	// Letzten Teil hinzufügen
+	if (trim($buffer) !== '') {
+			$parts[] = trim($buffer);
+	}
+
+	return $parts;
 }
 
 function microtime_float(){
@@ -1941,6 +2010,85 @@ function getArrayOfChars() {
 	return $characters;
 }
 
+function create_document_hash($layer_id, $document) {
+	if (document_exists_local($layer_id, $document)) {
+		return hash_file('sha256', get_local_path($layer_id, $document));
+	}
+	if (document_exists_remote($document)) {
+		return hash('sha256', url_get_contents($document));
+	}
+	return false;
+}
+
+function document_exists_local($layer_id, $document) {
+	$local_path = get_local_path($layer_id, $document);
+	return file_exists($local_path);
+}
+
+function document_exists_remote($document) {
+	if (is_valid_url($document)) {
+		$headers = @get_headers(urlEncodeUrl($document));
+		return is_array($headers) && strpos($headers[0], '200') !== false;
+	}
+	return false;
+}
+
+function get_local_path($layer_id, $document) {
+	if (is_local_file($document)) {
+		return explode('&original_name', $document)[0];
+	}
+	global $GUI;
+	include_once(CLASSPATH . 'Layer.php');
+	$layer = Layer::find_by_id($GUI, $layer_id);
+	if (
+		is_valid_url($document) AND
+		strpos($document, $layer->get('document_url')) === 0
+	) {
+    return rtrim($layer->get('document_path'), '/') . '/' . end(explode('/', $document));
+	}
+	return '';
+}
+
+function is_local_file($pfad) {
+	return (strpos($pfad, '&original_name=') !== false);
+}
+
+function is_valid_url($url) {
+	$parts = parse_url($url);
+	return filter_var(urlEncodeUrl($url), FILTER_VALIDATE_URL) !== false AND
+		isset($parts['scheme'], $parts['host']) AND
+		in_array(strtolower($parts['scheme']), ['http', 'https'], true);
+}
+
+function urlEncodeUrl($url) {
+  $url = trim($url);
+  $parts = parse_url($url);
+  if (!$parts || !isset($parts['scheme'], $parts['host'])) {
+    return false;
+  }
+
+	$scheme = $parts['scheme'] . '://';
+	$host   = $parts['host'];
+	$port   = isset($parts['port']) ? ':' . $parts['port'] : '';
+
+	// Path sauber encoden
+	$path = '';
+  if (isset($parts['path'])) {
+    $segments = explode('/', $parts['path']);
+    $segments = array_map('rawurlencode', $segments);
+    $path = implode('/', $segments);
+  }
+  // Query optional encoden
+  $query = '';
+  if (isset($parts['query'])) {
+    parse_str($parts['query'], $q);
+    $query = '?' . http_build_query($q);
+  }
+  // Fragment optional encoden
+  $fragment = isset($parts['fragment']) ? '#' . rawurlencode($parts['fragment']) : '';
+  return $scheme . $host . $port . $path . $query . $fragment;
+}
+
 function url_get_contents($url, $username = NULL, $password = NULL, $useragent = NULL) {
 	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
@@ -2151,31 +2299,16 @@ function replace_params_link($str, $params, $layer_id) {
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe [http://www.php-einfach.de/codeschnipsel_1114.php](http://www.php-einfach.de/codeschnipsel_1114.php)
 *
-* @param $anhang Array mit den Elementen "name", "size" und "data" oder Array mit Elementen solcher Arrays
-* $pfad = array();
-* $pfad[] = "ordner/datei1.exe";
-* $pfad[] = "ordner/datei2.zip";
-* $pfad[] = "ordner/datei3.gif";
-*
-* $anhang = array();
-* foreach($pfad AS $name) {
-*   $name = basename($name);
-*   $size = filesize($name);
-*   $data = implode("",file($name));
-*   if (function_exists("mime_content_type"))
-*     $type = mime_content_type($name);
-*   else
-*     $type = "application/octet-stream";
-*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data);
-* }
-* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang);
-**/
+* @param $attachement String Pfad zur Datei, die als Anhang an die E-Mail angehängt werden soll.
+* mail_att("from name", "from@domain", "empf@domain", "ccempf@dmain", "reply@domain", "Email mit Anhang", "Im Anhang sind mehrere Datei", '/var/www/logs/kvwmap/mail_queue/anhang.txt', 'to name');
+*	Wenn eine E-Mail ohne Attachment gesendet werden soll, muss der Parameter einen leeren String enthalten.
+*/
 function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
 	$success = false;
 	switch ($mode) {
 		case 'sendEmail async': {
 			# Erstelle Befehl für sendEmail und schreibe in mail queue Verzeichnis.
-			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'from_name' => $from_name, 'cc_email' => $cc_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+			$str = array('to_email' => trim($to_email), 'from_email' => trim($from_email), 'from_name' => $from_name, 'cc_email' => trim($cc_email), 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
 				chmod(MAILQUEUEPATH, 'g+w');
@@ -2251,11 +2384,11 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 				$botschaft.="\n\n";
 				$botschaft.="--$grenze";
 			}
-			#  echo 'to_email: '.$to_email.'<br>';
-			#  echo 'subject: '.$subject.'<br>';
-			#  echo 'botschaft: '.$botschaft.'<br>';
-			#  echo 'headers: '.$headers.'<br>';
-			$success = @mail($to_email, $subject, $botschaft, $headers);
+			// echo "\nto_email: ".$to_email."<br>";
+			// echo "\nsubject: ".$subject."<br>";
+			// echo "\nbotschaft: ".$botschaft."<br>";
+			// echo "\nheaders: ".$headers."<br>";
+			$success = mail($to_email, $subject, $botschaft, $headers);
 		}
 	}
 	if ($success)
@@ -2648,10 +2781,11 @@ function before_last($txt, $delimiter) {
  * @return Array (geom, inner select, using)
  */
 function getDataParts($data){
+	$data = str_ireplace(chr(10).'using', ' using', $data);
 	$first_space_pos = strpos($data, ' ');
 	$geom = substr($data, 0, $first_space_pos);					# geom am Anfang
 	$rest = substr($data, $first_space_pos);
-	$usingposition = stripos($rest, 'using');
+	$usingposition = stripos($rest, ' using');
 	$from = substr($rest, 0, $usingposition);						# from (alles zwischen geom und using)
 	$using = substr($rest, $usingposition);							# using ...
 	if(strpos($from, '(') === false){		# from table
@@ -3034,5 +3168,77 @@ function set_href($text) {
 		$text = '<a href="http' . $parts[1] . '" target="Urheber" title="' . $parts[0] . '">' . $parts[0] .'</a>';
 	}
 	return $text;
+}
+
+/**
+ * Function check if $str is a valid json and has key href. If yes it returns a decoded data object with trimed values. If not it returns false.
+ */
+function getTooltipJSON($str) {
+  $data = json_decode($str, true);
+  if (json_last_error() !== JSON_ERROR_NONE) return false;
+	foreach ($data as $key => $value) {
+    $data[$key] = trim($value);
+  }
+	if (isset($data['href']) && is_string($data['href']) && $data['href'] !== '') return $data;
+  return false;
+}
+
+function imagettftext_wrap($image, $fontsize, $angle, $x, $y, $color, $font, $text, $maxwidth, $direction = 'down') {
+	$words = explode(' ', $text);
+	$lines = [];
+	$currentline = '';
+	foreach ($words as $word) {
+		$testLine = $currentline . ($currentline ? ' ' : '') . $word;
+		$box = imagettfbbox($fontsize, 0, $font, $testLine);
+		$textwidth = max($box[2], $box[4]) - min($box[0], $box[6]);
+		if ($textwidth > $maxwidth) {
+			$lines[] = $currentline;
+			$currentline = $word;
+		} 
+		else {
+			$currentline = $testLine;
+		}
+	}
+	if ($currentline) {
+		$lines[] = $currentline;
+	}
+	if ($direction == 'up') {
+		$y =  $y - ($fontsize * 1.4 * (count($lines) - 1));
+	}
+	foreach ($lines as $line) {
+		imagettftext($image, $fontsize, $angle, $x, $y, $color, $font, $line);
+		$y +=  $fontsize * 1.4;
+	}
+}
+
+function is_datatype_value_path($value_path) {
+	$count = count($value_path);
+	return $count >= 4
+    && is_int($value_path[$count - 1])
+    && is_int($value_path[$count - 2]);
+}
+
+function get_value_by_path(array $array, array $path) {
+	foreach ($path as $key) {
+		if (!isset($array[$key])) {
+			return null; // oder Exception
+		}
+		$array = $array[$key];
+	}
+	return $array;
+}
+
+/**
+ * Zählt die vollen Stunden zwischen $end und $start
+ * @param string $start Format (Y-m-d H:i:s),
+ * @param string $end Format (Y-m-d H:i:s)
+ * @return integer $hours Anzahl der Stunden
+ */
+function volle_stunden($start, $end) {
+	$start = new DateTime($start);
+	$end   = new DateTime($end);
+	$diff = $start->diff($end);
+	$hours = ($diff->days * 24) + $diff->h;
+	return $hours;
 }
 ?>

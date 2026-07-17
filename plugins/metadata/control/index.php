@@ -17,6 +17,7 @@
 // metadata_set_ressource_status
 // metadata_show_data_packages
 // metadata_show_ressources_status
+// metadata_show_outdated
 // metadata_update_outdated
 // Metadaten_Auswaehlen_Senden
 // Metadaten_Recherche
@@ -202,6 +203,10 @@ function go_switch_metadata($go){
 			$GUI->metadata_show_ressources_status($GUI->formvars['ressource_id']);
 		} break;
 
+		case 'metadata_show_outdated' : {
+			$GUI->metadata_show_outdated();
+		} break;
+
 		case 'metadata_update_outdated' : {
 			$GUI->sanitize([
 				'ressource_id' => 'int',
@@ -215,7 +220,7 @@ function go_switch_metadata($go){
 			);
 			// header('Content-Type: application/json; charset=utf-8');
 			// echo json_encode($result);
-			echo $result['msg'];
+			echo '<br>' . $result['msg'];
 		} break;
 
 		case 'metadata_test' : {

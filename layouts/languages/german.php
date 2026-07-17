@@ -3,6 +3,8 @@
 	$this->activatelayer = 'Dieses Thema sichtbar schalten';
 	$this->activatequery = 'Dieses Thema abfragbar schalten';
 	$this->attributeditor = 'Attributeditor';
+	$this->klassen = 'Klassen';
+	$this->stellenzuweisung = 'Stellen-Zuweisung';
 	$this->deactivateAllClasses = 'Klassen deaktivieren';
 	$this->deactivatelayer = 'Dieses Thema ausschalten';
 	$this->deactivatequery = 'Die Abfrage dieses Themas ausschalten';
@@ -102,4 +104,5 @@
 	$this->strYes = 'Ja';
 	$this->TaskChangeWarning = 'Sie sind nicht berechtigt zur Ausführung der Funktion in dieser Stelle.';
 	$this->transparency = 'Deckkraft';
+	$this->strLayerSelection = 'Themenauswahl';
 ?>

@@ -1,5 +1,6 @@
 <?php
 include_once(CLASSPATH . 'PgObject.php');
+include_once(CLASSPATH . 'PgAttribute.php');
 include_once(CLASSPATH . 'Layer.php');
 class LayerGroup extends PgObject {
 
@@ -24,6 +25,18 @@ class LayerGroup extends PgObject {
 				'attribute' => 'gruppenname',
 				'condition' => 'not_null',
 				'description' => 'Es muss ein Gruppenname angegeben werden.',
+				'options' => null
+			),
+			array(
+				'attribute' => 'selectable_for_shared_layers',
+				'condition' => 'not_null',
+				'description' => 'Es muss angegeben werden ob die Layergruppe für das Teilen von importierten Layern ausgewählt werden darf.',
+				'options' => null
+			),
+			array(
+				'attribute' => 'checkbox',
+				'condition' => 'not_null',
+				'description' => 'Es muss angegeben werden ob die Layergruppe in der Legende eine Checkbox zum Ein- und Ausschalten von Untergruppen haben soll.',
 				'options' => null
 			)
 		);

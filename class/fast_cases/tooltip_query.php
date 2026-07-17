@@ -27,8 +27,23 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 	}
 }
 
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false) {
+	if ($last) {
+		$word_pos = strripos($str, $word);
+	}
+	else {
+		$word_pos = stripos($str, $word);
+	}
+	if ($word_pos !== false) {
+		$str_from_word_pos = substr($str, $word_pos + strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return trim($parts[0]);
+	}
+	return '';
+}
+
 function mapserverExp2SQL($exp, $classitem) {
-	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
+	$exp = preg_replace("/'\\[(\\D[^\\]]*|[^\\]]*\\D[^\\]]*)\\]'|\\[(\\D[^\\]]*|[^\\]]*\\D[^\\]]*)\\]/", "$1$2", $exp);
 	$exp = str_replace(' eq ', ' = ', $exp);
 	$exp = str_replace(' ne ', ' != ', $exp);
 	$exp = str_replace(' ge ', ' >= ', $exp);
@@ -37,7 +52,11 @@ function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
-
+	if (strpos($exp, ' IN ') != false) {
+		$array = get_first_word_after($exp, ' IN');
+		$exp = str_replace(' IN ', '::text = ANY(ARRAY[', $exp);
+		$exp = str_replace($array, $array . '])', $exp);
+	}
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
@@ -544,7 +563,7 @@ class GUI {
 				if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){
 					$rand = $this->map_scaledenom/1000;
 					$tolerance = $this->map_scaledenom/10000;
-					if($client_epsg == 4326){
+					if(in_array($layer_epsg, [4326, 4258])){
 						$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
 						$rand = $rand / 60000;		# wegen der Einheit Grad
 					}
@@ -568,7 +587,7 @@ class GUI {
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['layer_id'], $disabled_class_expressions)) {
 					foreach($disabled_class_expressions[$layerset[$i]['layer_id']] as $disabled_class) {
-						$disabled_class_filter[$layerset[$i]['layer_id']][] = '(' . (mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
+						$disabled_class_filter[$layerset[$i]['layer_id']][] = '(' . (mapserverExp2SQL($disabled_class['expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
 					}
 					$sql_where .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter[$layerset[$i]['layer_id']]) . "), true)";
 				}	
@@ -874,7 +893,7 @@ class user {
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
-		$this->funktion = $rs['Funktion'];
+		$this->funktion = $rs['funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'] === 't';
@@ -1308,6 +1327,8 @@ class rolle {
 			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
+			$this->layer_selection_mode=$rs['layer_selection_mode'];
+			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
@@ -1423,10 +1444,10 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, errorstatus, trigger_function, version,
 				ul.queryable,
 				l.drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale,
 				ul.maxscale,
 				ul.offsite,
@@ -1544,9 +1565,12 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		$layer = array();
+		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Name_or_alias'] = $rs['name'];
-			$layer[] = $rs;
+			$layer[$i] = $rs;
+			$layer['layer_ids'][$rs['layer_id']] = &$layer[$i];
+			$i++;
 		}
 		return $layer;
 	}
@@ -1885,18 +1909,16 @@ class db_mapObj{
 				}
 			}
 		}
-
+		$lastwhereposition = strrpos(strtolower($path), 'where');
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($path), 'order by');
-		$lastfromposition = strrpos(strtolower($path), 'from');
-		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+		if($orderbyposition !== false AND $orderbyposition > $lastwhereposition){
 			$orderby = ' '.substr($path, $orderbyposition);
 			$path = substr($path, 0, $orderbyposition);
 		}
 
 		# group by rausnehmen
 		$groupbyposition = strrpos(strtolower($path), 'group by');
-		$lastwhereposition = strrpos(strtolower($path), 'where');
 		if($groupbyposition !== false AND $groupbyposition > $lastwhereposition){
 			$layerset['attributes']['groupby'] = ' '.substr($path, $groupbyposition);
 			$path = substr($path, 0, $groupbyposition);
@@ -1938,8 +1960,11 @@ class db_mapObj{
 			];
 	}
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value'), $attribute_values = []) {
+	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$attr_obj = new LayerAttribute($this);
+
 		$attributes = array(
 			'name' => array(),
 			'tab' => array()
@@ -1990,16 +2015,17 @@ class db_mapObj{
 				arrangement,
 				labeling,
 				raster_visibility,
+				statistic_visibility,
 				dont_use_for_new,
 				mandatory,
 				quicksearch,
 				visible,
-				vcheck_attribute,
-				vcheck_operator,
-				vcheck_value,
+				visibility_rules,
 				\"order\",
 				privileg,
-				query_tooltip
+				query_tooltip,
+				style_attribute,
+				visibility_rules
 			FROM
 				kvwmap.layer_attributes as a LEFT JOIN
 				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
@@ -2049,33 +2075,69 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$i] = $rs['options'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];			
+			if ($rs['options']) {
+				$options_json = json_decode($rs['options'], true);
+				$attributes['options_struct'][$i] = $attr_obj->get_options($options_json ?: $rs['options'], $rs['form_element_type']);
+			}
+			$attributes['style_attribute'][$i] = $rs['style_attribute'];
+			
+			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
+			// Referenz auf dependents
+    	$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			// JSON parsen
+			$rulesJson = $rs['visibility_rules'] ?? '';
+			$rules = $rulesJson ? json_decode($rulesJson, true) : null;
+
+			// Abhängige Attribute sammeln
+			$dependentAttributes = [];
+			if ($rules) {
+				$collectAttributes = function($node) use (&$dependentAttributes, &$collectAttributes) {
+						if (isset($node['rules'])) {
+								foreach ($node['rules'] as $child) $collectAttributes($child);
+						} elseif (isset($node['attribute'])) {
+								$dependentAttributes[] = $node['attribute'];
+						}
+				};
+				$collectAttributes($rules);
+				$dependentAttributes = array_unique($dependentAttributes);
+			}
+
+			// Abhängigkeiten eintragen
+			foreach ($dependentAttributes as $depAttr) {
+					$dependents[$depAttr][] = $rs['name'];
+			}
+
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
 						$attributes[$column][$i] = 	replace_params_rolle(
-																					$attributes[$column][$i],
-																					((count($attribute_values) > 0 AND $replace_only == 'default') ? $attribute_values : NULL)
-																				);
+							$attributes[$column][$i],
+							((count($attribute_values) > 0 AND in_array('default', $replace_only)) ? $attribute_values : NULL)
+						);
 					}
 				}
 			}
 
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
+				if (substr($attributes['type'][$i], 0, 1) == '_') {
+					# Array-Datentyp
+					$type = substr($attributes['type'][$i], 1) . '[]';
+					$default = 'to_json((' . $attributes['default'][$i] . ')::' . $type . ')';
+				}
+				else {
+					$type = $attributes['type'][$i];
+					$default = '(' . $attributes['default'][$i] . ')::' . $type;
+				}
+				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			$attributes['form_element_type'][$i] = $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
@@ -2088,6 +2150,7 @@ class db_mapObj{
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['statistic_visibility'][$i] = $rs['statistic_visibility'];
 			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
@@ -2095,7 +2158,7 @@ class db_mapObj{
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
-				$attributes['style'] = $rs['name'];
+				$attributes['style'][] = $rs['name'];
 				$attributes['visible'][$i] = 0;
 			}
 			if ($rs['form_element_type'] == 'Editiersperre') {
@@ -2113,22 +2176,26 @@ class db_mapObj{
 		return $attributes;
 	}
 
-	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false, $with_requires_options = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for ($i = 0; $i < count_or_0($attributes['name']); $i++) {
+		for ($i = 0; $i < count_or_0($attributes['name'] ?: []); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
-				$query_result2 = array();
+				$type_attributes = $attributes['type_attributes'][$i];
 				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
 					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $query_result[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
-					@$datatype_query_result = json_decode($json, true);
-					if ($attributes['type'][$i] != $type) {
-						$datatype_query_result = $datatype_query_result[0];		# falls das Attribut ein Array von Datentypen ist, behelfsweise erstmal nur das erste Array-Element berücksichtigen
+						if (is_string($json)){
+							@$datatype_query_result = json_decode($json, true);
+						}
+						else {
+							$datatype_query_result = $json;
+						}
+					if (!empty($datatype_query_result) AND $type == $attributes['type'][$i]) {	# kein Array von Datentypen --> zur weiteren einheitlichen Verarbeitung num. Array draus machen
+						$datatype_query_result = [$datatype_query_result];
 					}
-					$query_result2[$k] = $datatype_query_result;
+					$attributes['type_attributes'][$i][$k] = $this->add_attribute_values($type_attributes, $database, $datatype_query_result, $withvalues, $stelle_id, $only_current_enums);
 				}
-				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result2, $withvalues, $stelle_id, $only_current_enums);
 			}
 			if (
 				$attributes['options'][$i] == '' AND
@@ -2155,14 +2222,14 @@ class db_mapObj{
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {
 								# SQL-Abfrage wie select attr1 as value, atrr2 as output from table1
-								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen // get_options
+								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen  // get_options
 								# --------- weitere Optionen -----------
 								if (value_of($optionen, 1) != '') {
 									# die weiteren Optionen exploden (opt1 opt2 opt3)
 									$further_options = explode(' ', $optionen[1]);
 									for ($k = 0; $k < count($further_options); $k++) {
 										if (strpos($further_options[$k], 'layer_id') !== false) {
-											#layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+											#layer_id=XX bietet die Möglichkeit hier eine layer_id zu definieren, für die man einen neuen Datensatz erzeugen kann
 											$attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
 											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
@@ -2176,7 +2243,7 @@ class db_mapObj{
 								# --------- weitere Optionen -----------
 								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
 									 # auch die oid abfragen
-									 $attributes['options'][$i] = str_replace(' from ', ', ' . $layer['oid'] . ' as oid from ', strtolower($optionen[0]));
+									 $attributes['options'][$i] = str_ireplace('output', 'output, ' . $layer['oid'] . ' as oid ', $optionen[0]);
 								}
 								# ------------ SQL ---------------------
 								else {
@@ -2200,7 +2267,7 @@ class db_mapObj{
 												$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 											}
 										}
-										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
+										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where')) . substr($attributes['options'][$i], stripos($attributes['options'][$i], 'order by'));;
 									}
 									else {
 										if ($query_result != NULL) {
@@ -2213,7 +2280,11 @@ class db_mapObj{
 											foreach ($query_result as $k => $record) { # bei Erfassung eines neuen DS hat $k den Wert -1
 												$options = $attributes['options'][$i];
 												foreach ($attributes['req'][$i] as $attributename) {
+													#	Ein <requires>-Tag in Hochkommas kann immer durch den Attributwert in Hochkommas ersetzt werden. 
+													# Das ist z.B. dafür notwendig , wenn sich auch bei leerem Attributwert Auswahlmöglichkeiten ergeben sollen.
+													$options = str_replace("'<requires>" . $attributename . "</requires>'", "'" . $query_result[$k][$attributename] . "'", $options);
 													if ($query_result[$k][$attributename] != '') {
+														# Wenn der <requires>-Tag nicht in Hochkommas steht, soll nur ersetzt werden, wenn der Attributwert nicht leer ist.
 														if (is_array($query_result[$k][$attributename])) {
 															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
 														}
@@ -2250,6 +2321,7 @@ class db_mapObj{
 										# bei Erfassung eines neuen DS hat $k den Wert -1
 										$sql = $attributes['dependent_options'][$i][$k];
 										if ($sql != '') {
+											#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
 											$ret = $database->execSQL($sql, 4, 0);
 											if ($ret[0]) {
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
@@ -2264,16 +2336,13 @@ class db_mapObj{
 													'image'		=> value_of($rs, 'image')
 												];
 											}
+											$query_result[$k]['enum_' .  $attributes['name'][$i]] = $enum;
 										}
 									}
 								}
 								elseif ($attributes['options'][$i] != '') {
-									if ($requires_options != '') {
-										$sql = $requires_options;
-									}
-									else {
-										$sql = $attributes['options'][$i];
-									}
+									$sql = $attributes['options'][$i];
+									#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while ($rs = pg_fetch_array($ret[1])) {
@@ -2286,11 +2355,7 @@ class db_mapObj{
 										if ($rs['requires']) {
 											$attributes['enum'][$i][$rs['value']]['requires_value'] = $rs['requires'];
 										}
-										// if ($requires_options != '') {
-										// 	$attributes['enum_requires_value'][$i][] = $rs['requires'];
-										// }
 									}
-									#echo '<br>attr: ' . print_r($attributes['enum'], true);
 								}
 							}
 						}
@@ -2301,6 +2366,44 @@ class db_mapObj{
 							if (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
 								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen // get_options
 								$attributes['options'][$i] = $optionen[0];
+
+								# ------<required by>------
+								$req_by_start = strpos(strtolower($attributes['options'][$i]), "<required by>");
+								if ($req_by_start > 0) {
+									$req_by_end = strpos(strtolower($attributes['options'][$i]), "</required by>");
+									$req_by = trim(substr($attributes['options'][$i], $req_by_start + 13, $req_by_end - $req_by_start - 13));
+									$attributes['req_by'][$i] = $req_by; # das abhängige Attribut
+									$attributes['options'][$i] = substr($attributes['options'][$i], 0, $req_by_start); # required-Tag aus SQL entfernen
+								}
+								# ------<required by>------
+								# -----<requires>------
+								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
+									foreach ($attributes['name'] as $attributename) {
+										if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
+											$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
+										}
+									}
+									if ($all_options) {
+										# alle Auswahlmöglichkeiten -> where abschneiden
+										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
+										$sql = $attributes['options'][$i];
+										#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
+										$ret = $database->execSQL($sql, 4, 0);
+										if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+										while ($rs = pg_fetch_array($ret[1])) {
+											$attributes['enum'][$i][$rs['value']] = [
+												'value' 	=> $rs['value'],
+												'output' 	=> $rs['output'],
+												'oid'			=> $rs['oid']
+											];
+											if ($rs['requires']) {
+												$attributes['enum'][$i][$rs['value']]['requires_value'] = $rs['requires'];
+											}
+										}
+									}
+								}
+								# -----<requires>------
+
 								if ($query_result != NULL) {
 									foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
 										$options_sql = $attributes['options'][$i];
@@ -2330,7 +2433,7 @@ class db_mapObj{
 								if ($optionen[1] != '') {
 									$further_options = explode(' ', $optionen[1]);			# die weiteren Optionen exploden (opt1 opt2 opt3)
 									for($k = 0; $k < count($further_options); $k++) {
-										if (strpos($further_options[$k], 'layer_id') !== false) {		 #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+										if (strpos($further_options[$k], 'layer_id') !== false) {		 #layer_id=XX bietet die Möglichkeit hier eine layer_id zu definieren, für die man einen neuen Datensatz erzeugen kann
 											$attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
 											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
@@ -2359,6 +2462,7 @@ class db_mapObj{
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
 								if ($attributes['options'][$i] != '') {
+									$sql = $attributes['options'][$i];
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while($rs = pg_fetch_array($ret[1])) {
@@ -2408,20 +2512,14 @@ class db_mapObj{
 
 					# SubFormulare mit Fremdschlüssel
 					case 'SubFormFK' : {
-						if ($attributes['options'][$i] != '') {
-							$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options
-							$subform = explode(',', $options[0]);
-							$attributes['subform_layer_id'][$i] = $subform[0];
+						if ($attributes['options_struct'][$i] != null) {
+							$attributes['subform_layer_id'][$i] = $attributes['options_struct'][$i]['ref_layer_id'];
+							$attributes['subform_fkeys'][$i] = $attributes['options_struct'][$i]['ref_keys'];
+							$attributes['no_new_window'][$i] = ($attributes['options_struct'][$i]['window_type'] === 'no_new_window');
 							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-							for($k = 1; $k < count($subform); $k++) {
-								$attributes['subform_fkeys'][$i][] = $subform[$k];
-								$attributes['SubFormFK_hidden'][$attributes['indizes'][$subform[$k]]] = 1;
-							}
-							if ($options[1] != '') {
-								if ($options[1] == 'no_new_window') {
-									$attributes['no_new_window'][$i] = true;
-								}
+							foreach ($attributes['subform_fkeys'][$i] as $ref_key) {
+								$attributes['SubFormFK_hidden'][$attributes['indizes'][$ref_key['fkey']]] = 1;
 							}
 						}
 					} break;
@@ -2454,6 +2552,9 @@ class db_mapObj{
 										case 'reload': {														# die komplette Sachdatenanzeige soll neu geladen werden
 											$attributes['reload'][$i] = true;
 										} break;
+										case 'no_subform_reload': {														# die SubForm-Liste soll nicht neu geladen werden
+											$attributes['no_subform_reload'][$i] = true;
+										} break;										
 										case 'show_count': {														# die Anzahl der Subform-Datensätze anzeigen
 											$attributes['show_count'][$i] = true;
 										} break;										

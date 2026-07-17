@@ -85,6 +85,9 @@ class pointeditor {
 	}
 
 	function eintragenPunkt($pointx, $pointy, $oid, $tablename, $columnname, $dimension, $kvps) {
+		if (is_array($kvps) AND array_key_exists('success', $kvps) AND $kvps['success'] === false) {
+			return $kvps;
+		}
 		if ($pointx == '') {
 			$wkb_geometry = 'NULL';
 		}

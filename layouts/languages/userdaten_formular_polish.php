@@ -29,7 +29,7 @@
 	$strNewPassword = 'New Password';
 	$strOrganisation = 'organizacja';
 	$strPassword = 'hasło';
-	$strPasswordExpired = 'Expired';
+	$strPasswordExpired = 'expired';
 	$strPasswordExpiredDays = 'Days';
 	$strPasswordValid = 'Valid';
 	$strPasswordVisiblitiy = 'Show/Hide password';

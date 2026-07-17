@@ -1,7 +1,6 @@
 <?php
 	include(LAYOUTPATH.'languages/userdaten_formular_' . rolle::$language . '.php');
 	include(LAYOUTPATH.'languages/userdaten_' . rolle::$language . '.php');
-	
 	$loeschen = (NUTZER_ARCHIVIEREN ? 'archivieren' : 'löschen');
 	
 	$has_shared_user = array_reduce(
@@ -66,6 +65,9 @@
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=position&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strPosition;?></a></th>
 						<th align="left"><?php echo $this->strTel;?></th>
 						<th align="left"><?php echo $this->strEMail;?></th><?
+						if (in_array($this->Stelle->id, $admin_stellen)) { ?>
+							<th align="left"><? echo $strFunktion; ?></th><?
+						}
 						if ($has_shared_user) { ?>
 							<th>&nbsp;</th><?
 						} ?>
@@ -130,6 +132,9 @@
 							<td><?php echo $this->userdaten[$i]['position']; ?>&nbsp;</td>
 							<td><?php echo $this->userdaten[$i]['phon']; ?>&nbsp;</td>
 							<td><?php echo $this->userdaten[$i]['email']; ?>&nbsp;</td><?
+							if (in_array($this->Stelle->id, $admin_stellen)) { ?>
+								<td><?php echo $this->userdaten[$i]['funktion']; ?>&nbsp;</td><?
+							}
 							if ($has_shared_user) { ?>
 								<td><?
 									if ($this->userdaten[$i]['share_rollenlayer_allowed']) { ?>
@@ -142,7 +147,7 @@
 							} ?>
 							<td>
 								<? if (!$this->userdaten[$i]['archived']) { ?>
-								<a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['id']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->userdaten[$i]['Vorname'] . ' ' . $this->userdaten[$i]['name'], $loeschen); ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a>
+								<a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['id']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->userdaten[$i]['vorname'] . ' ' . $this->userdaten[$i]['name'], $loeschen); ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a>
 								<? } ?>
 							</td>
 						</tr><?

@@ -118,20 +118,34 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 		}
 	}
-		
-	toggle_group = function(id){
-		var group = document.getElementById('group'+id);
-		var group_img = document.getElementById('group_img'+id);
-		if(group.style.display == 'none'){
-			group.style.display = '';
-			group_img.src = 'graphics/minus.gif';
+
+	toggle_group = function(id, gle_view = '1') {
+		var groups = [];
+		var group_imgs = [];
+		if (gle_view == '1') {
+			groups[0] = document.getElementById('group'+id);
+			group_imgs[0] = document.getElementById('group_img'+id);
 		}
-		else{
-			group.style.display = 'none';
-			group_img.src = 'graphics/plus.gif';
+		else {
+			console.log('gle_view not 1');
+			const parts = id.split('_');
+			groups = document.querySelectorAll(`[id^="group${parts[0]}_${parts[1]}_"]`);
+			group_imgs = document.querySelectorAll(`[id^="group_img${parts[0]}_${parts[1]}_"]`);
 		}
+		console.log('groups: %o', groups);
+		groups.forEach((group, i) => {
+			console.log('Handle group: %o', group.id);
+			if (group.style.display == 'none') {
+				group.style.display = '';
+				group_imgs[i].src = 'graphics/minus.gif';
+			}
+			else {
+				group.style.display = 'none';
+				group_imgs[i].src = 'graphics/plus.gif';
+			}
+		});
 	}
-	
+
 	toggle_tab = function(tab, layer_id, k, t, tabname){
 		var dataset = document.getElementById('datensatz_' + layer_id + '_' + k);
 		var opentab_field = document.getElementById('opentab_' + layer_id + '_' + k);
@@ -156,29 +170,62 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		tab.classList.add("active_tab");
 		var layer_to_close = document.querySelectorAll('.layer_results');
 		[].forEach.call(layer_to_close, function (layer){
-			layer.classList.add('collapsed');
+			layer.classList.add('collapsedfull');
 		});
 		var layer_to_open = document.querySelector('#result_' + layer_id);
-		layer_to_open.classList.remove('collapsed');
+		layer_to_open.classList.remove('collapsedfull');
 		scrollto_saved_position();
 		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
+
+	check_visibility_rule = function(layer_id, rule, scope, k) {
+		// Leaf-Regel (kein logic → einfache Bedingung)
+		if (!rule.logic && rule.attribute) {
+			var field;
+			if (scope != document) {
+				field = scope.querySelector('.attr_' + layer_id + '_' + rule.attribute);
+			}
+			else {
+				field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+				if (!field) {
+					field = document.getElementById(layer_id + '_' + rule.attribute + '_' + '0_' + k);		// Radiobuttons haben noch einen Zähler zusätzlich
+				}
+			}
+			return field_has_value(field, rule.operator, rule.value);
+		}
+		// Logische Gruppe (AND / OR)
+		if (rule.logic && Array.isArray(rule.rules)) {
+			const results = rule.rules.map(r => check_visibility_rule(layer_id, r, scope, k));
+
+			if (rule.logic === 'AND') {
+				return results.every(Boolean);
+			}
+
+			if (rule.logic === 'OR') {
+				return results.some(Boolean);
+			}
+		}
+		// Fallback (ungültige Regel)
+		return false;
+	}
 	
-	check_visibility = function(layer_id, object, dependents, k){
+	check_visibility_dependents = function(layer_id, object, dependents, k) {
 		if(object == null)return;
 		var group_display;
 		dependents.forEach(function(dependent){
-			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen
-			if(scope.querySelector('#vcheck_operator_'+dependent) == undefined){
+			if (object.classList.contains('datatype_attr')) {
+				var scope = object.closest('table');		// den scope auf die umschliessende Tabelle setzen da man verschachtelt in einem Datentyp ist
+			}
+			else {
 				scope = document;			// ansonsten global
 			}
-			var operator = scope.querySelector('#vcheck_operator_'+dependent).value;
-			var value = scope.querySelector('#vcheck_value_'+dependent).value;
-			if(operator == '=')operator = '==';
+			var rule = JSON.parse(scope.querySelector('#visibility_rules_'+dependent).value);
+			
 			// visibility of attribute
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
-			if(field_has_value(object, operator, value)){
+
+			if (check_visibility_rule(layer_id, rule, scope, k)){
 				if (name_dependent != null) {
 					name_dependent.classList.remove('collapsedfull');
 				}
@@ -233,6 +280,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	}
 
 	field_has_value = function(field, operator, value) {
+		if (operator == '=')operator = '==';
 		var field_value = field.value;
 		if (field.type == 'radio') {
 			field_value = '';
@@ -256,13 +304,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 		else {
 			if (operator == 'IN') {
-				value_array = value.split('|');
-				if (value_array.indexOf(field_value) > -1) {
-					return true;
-				}
-				else {
-					return false;
-				}
+				return Array.isArray(value) && value.includes(field_value);
 			}
 			else {
 				return eval("'" + field_value + "' " + operator + " '" + value + "'");
@@ -297,16 +339,76 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 	
-	toggle_statistic_row = function(layer_id) {
-		var x = document.getElementsByClassName('statistic_row_'+layer_id),
-				i;
-		for (i = 0; i < x.length; i++) {
-			if (x[i].style.display == '') {
-				x[i].style.display = 'none';
+	toggle_statistic_row = function(evt, layer_id, mode = 'only_toggle') {
+		var b = document.querySelectorAll(".statistic_box");
+		if (mode == 'only_toggle') {
+			console.log('only toggle statistic row');
+			var x = document.getElementsByClassName('statistic_row_'+layer_id),
+					i;
+
+			for (i = 0; i < x.length; i++) {
+				if (x[i].style.display == '') {
+					x[i].style.display = 'none';
+					b.forEach(el => { el.style.display = "none"; });
+				}
+				else {
+					x[i].style.display = '';
+					b.forEach(el => {
+						el.style.display = "flex";
+					});
+				}
 			}
-			else {
-				x[i].style.display = '';
+		}
+		else {
+			b.forEach(el => { el.style.background = "none"; });
+			var y = document.getElementsByClassName(mode);
+			y[0].style.background = 'linear-gradient(#DAE4EC 0%, #c7d9e6 100%)';
+
+			var c = [];
+			if (mode == 'all_visible') {
+				console.log('use all visible for statistic class .check_' + layer_id);
+				c = document.querySelectorAll(".check_" + layer_id);
 			}
+			else if (mode == 'only_checked') {
+				console.log('use only checked for statistic');
+				c = document.querySelectorAll(".check_" + layer_id + ":checked");
+			}
+			else if (mode == 'all_queried') {
+				console.log('use all queried for statistic');
+				// get values of all queried by query remotely last query result from server and save in hidden input field, then read from there
+			}
+
+			const statistic_attribute_names = Array.from(document.querySelectorAll(".statistic_row_" + layer_id))
+				.filter(el => el.textContent.trim() !== "")
+				.map(el => el.dataset.attribute);
+			console.log('statistic attributes: %o', statistic_attribute_names);
+			const row_ids = Array.from(c).map(cb => cb.id.split('_')[1])
+			console.log('row_ids for statistic: %o', row_ids);
+
+			statistic_attribute_names.forEach(attr => {
+				let values = [];
+				row_ids.forEach(row => {
+					const id = `${layer_id}_${attr}_${row}`;
+					const el = document.getElementById(id);
+					if (el) {
+						values.push(parseFloat(el.value || '0'));
+					}
+				});
+				const sum = values.reduce((a, b) => a + b, 0);
+				const avg = values.length > 0 ? sum / values.length : 0;
+				const min = values.length > 0 ? Math.min(...values) : 0;
+				const max = values.length > 0 ? Math.max(...values) : 0;
+				console.log('values for statistic: %o', values);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Summe`).textContent = sum.toFixed(2);
+				console.log('sum for statistic: %o', sum);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Durchschnitt`).textContent = avg.toFixed(2);
+				console.log('avg for statistic: %o', avg);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Min`).textContent = min.toFixed(2);
+				console.log('min for statistic: %o', min);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Max`).textContent = max.toFixed(2);
+				console.log('max for statistic: %o', max);
+			});
+			evt.stopPropagation();
 		}
 	}
 
@@ -618,6 +720,48 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		root.overlay_submit(enclosingForm, false);
 	}
 
+	newDataset = function() {
+		var open_subforms = document.querySelectorAll('.subForm:not(:empty)');
+		if (open_subforms.length > 0) {
+			message([{'type': 'info', 'msg': 'Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!'}]);
+			return;
+		}
+		form_fieldstring = enclosingForm.form_field_names.value + '';
+		form_fields = form_fieldstring.split('|');
+		for (i = 0; i < form_fields.length-1; i++) {
+			fieldstring = form_fields[i]+'';
+			field = fieldstring.split(';');
+			var element = document.getElementsByName(fieldstring)[0];
+			
+			if (element != undefined && element.type != 'hidden' && field[4] != 'Dokument' && (element.readOnly != true) && field[5] == '0' && element.value == '') {
+				message('Das Feld ' + element.title + ' erfordert eine Eingabe.');
+				return;
+			}
+
+			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '') {
+				completeDate(element);
+				if (!checkDate(element.value)) {
+					message('Das Datumsfeld ' + element.title + ' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
+			}
+
+			if (element != undefined && field[6] == 'time' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)) {
+				completeTime(element);
+				if(!checkTime(element.value)){
+					message('Das Uhrzeitfeld ' + element.title + ' hat nicht das Format hh:mm:ss.');
+					return;
+				}
+			}
+			if (upload_only_file_metadata == 1) {
+				if (field[4] == 'Dokument') {
+					convert_belated(element);
+				}
+			}
+		}
+		document.location = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>';
+	}
+
 	save_new_dataset = function(){
 		if (
 			(enclosingForm.newpath != undefined && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) 
@@ -681,6 +825,30 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			formData.append('chosen_layer_id', layer_id);
 			formData.append('oid', oid);
 			formData.append('reload_object', reload_object);
+			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
+		}
+	}
+
+	subdelete_all = function(layer_id, fromobject, targetobject, reload) {
+		// layer_id ist die von dem Layer, in dem die Datensätze gespeichert werden soll
+		// fromobject ist die id von dem div, welches das Formular der Datensätze enthält
+		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
+		if (confirm('Wollen Sie die Datensätze wirklich löschen?')) {
+			checkboxes = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.check_' + layer_id));
+			checkbox_names = '';
+			var formData = new FormData();
+			for (i = 0; i < checkboxes.length; i++) {
+				checkbox_names += checkboxes[i].name + '|';
+				formData.append(checkboxes[i].name, 'on');
+			}
+			formData.append('go', 'Layer_Datensaetze_Loeschen');
+			if (reload) {
+				formData.append('reload', reload);
+			}
+			formData.append('chosen_layer_id', layer_id);
+			formData.append('targetobject', targetobject);
+			formData.append('checkbox_names_' + layer_id, checkbox_names);
+			formData.append('embedded', 'true');
 			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 		}
 	}
@@ -797,7 +965,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	switch_gle_view1 = function(layer_id, from_mode, to_mode, button){
 		var active_button = enclosingForm.querySelector('.gle-view-button.active');
 		var div = enclosingForm.querySelector('#result_' + layer_id + '>#layer>div.records');
-		var req = 'go=switch_gle_view&chosen_layer_id=' + layer_id + '&mode=' + to_mode;
+		var req = 'go=switch_gle_view&chosen_layer_id=' + layer_id + '&mode=' + to_mode + '&anzahl=' + enclosingForm.anzahl.value;
 		var reload = false;
 
 		if (from_mode == 0 && to_mode > 0 || from_mode > 0 && to_mode == 0){		// Wechsel zwischen 0 und 1/2
@@ -931,13 +1099,13 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	} 
 
-	selectall = function(layer_id) {
+	selectall = function(layer_id, also_invisible) {
 		var k = 0,
 				obj = document.getElementById(layer_id + '_' + k),
 				status = obj.checked;
 
 		while (obj != undefined) {
-			if (obj.offsetParent !== null) {	// nur wenn Datensatz sichtbar
+			if (also_invisible || obj.offsetParent !== null) {	// nur wenn also_invisible oder Datensatz sichtbar
 				obj.checked = !status;
 			}
 			k++;
@@ -967,6 +1135,17 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 		else {
 			root.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+		}
+	}
+
+	zoomto_datasets = function(layer_id, tablename, columnname, selektieren){
+		if(check_for_selection(layer_id)){
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.layer_tablename.value = tablename;
+			enclosingForm.layer_columnname.value = columnname;
+			enclosingForm.selektieren.value = selektieren;
+			enclosingForm.go.value = 'zoomto_selected_datasets';
+			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
 	
@@ -1000,16 +1179,6 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 
-	zoomto_datasets = function(layer_id, tablename, columnname){
-		if(check_for_selection(layer_id)){
-			enclosingForm.chosen_layer_id.value = layer_id;
-			enclosingForm.layer_tablename.value = tablename;
-			enclosingForm.layer_columnname.value = columnname;
-			enclosingForm.go.value = 'zoomto_selected_datasets';
-			root.overlay_submit(enclosingForm, false, 'root');
-		}
-	}
-
 	delete_datasets = function(layer_id) {
 		var no_edit_checkboxes = document.querySelectorAll('.no_edit');
 		[].forEach.call(no_edit_checkboxes, function (checkbox){
@@ -1040,6 +1209,15 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				root.overlay_submit(enclosingForm, false);
 			}
 		}
+	}
+
+	show_document_hash = function(layer_id, value_path) {
+		const params = new URLSearchParams({
+  		go: "get_document_hash",
+  		layer_id: layer_id,
+			value_path: value_path
+		});
+		ahah("index.php", params.toString(), new Array('message_box'), new Array('showMessage'));
 	}
 
 	daten_export = function(layer_id, anzahl, format){
@@ -1187,7 +1365,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			field = get_attribute_field(object, k, layer_id, attributenamesarray[i])[0];
 			if (field != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += field.value + '|';
+				attributevalues += encodeURIComponent(field.value) + '|';
 			}
 		}
 		return {
@@ -1214,9 +1392,6 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				if(['text', 'select-one', 'hidden'].indexOf(type) !== -1){
 					if (type == 'text'){
 						action = 'setvalue';
-					}
-					if (type == 'hidden') {	// image-select
-						target = scope.querySelector('#image_select_' + element.id + ' .dropdown');
 					}
 					ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attribute_data['attributenames']+"&attributevalues="+attribute_data['attributevalues']+"&type="+type, new Array(target), new Array(action));
 				}
@@ -1278,6 +1453,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				same_field.value = field.value;	// alle gleichen Felder auf den selben Wert setzen, falls der gleiche Datensatz im GLE nochmal vorkommt (durch Subforms)
 			});
 		}*/
+		root.changed_form_fields.push(field);
 		var flags = document.querySelectorAll('[name="' + flag_name + '"]');
 		[].forEach.call(flags, function (flag){
 			if(flag != undefined){

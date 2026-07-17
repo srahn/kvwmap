@@ -30,10 +30,10 @@ function changemenue(id, auto_close){
 function hideMenue() {
 	if(document.getElementById('menue_switch').style.display != 'none'){
 		ahah('index.php', 'go=hideMenueWithAjax', new Array("", ""), new Array("", "execute_function"));
-		document.all.menue_options.innerHTML='';
-		document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
-		document.all.linkMinMax.onclick="showMenue()";
-		document.all.linkMinMax.title="Menü zeigen";
+		document.getElementById('menue_options').innerHTML='';
+		document.getElementById('imgMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
+		document.getElementById('linkMinMax').onclick = showMenue;
+		document.getElementById('linkMinMax').title = "Menü zeigen";
 	}
 }
 
@@ -42,9 +42,9 @@ function showMenue() {
   // löscht die aktuelle Tabelle mit dem Link auf das Nachladen des Menüs und
   // fügt das Menü in die Spalte der GUI wieder ein.
   ahah('index.php', 'go=getMenueWithAjax', new Array(document.all.menuebar, ""), new Array("", "execute_function"));
-  document.all.linkMinMax.onclick="hideMenue()";
-  document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>minimize_menue.png';
-  document.all.linkMinMax.title="Menü verstecken";
+  document.getElementById('linkMinMax').onclick = hideMenue;
+  document.getElementById('imgMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_menue.png';
+  document.getElementById('linkMinMax').title="Menü verstecken";
 }
 </script>
 <table id="menue_switch" width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -121,19 +121,21 @@ function showMenue() {
 			echo $refmap_html;
 		} ?>
 
-		<div id="menueTable"><?
-			if ($this->user->rolle->menue_buttons) {
+		<div id="menueTable" style="height: <? echo $menue_height; ?>"><?
+			if ($this->user->rolle->menue_buttons) {?>
+				<div id="menueButtons"><?
 				$button_menues = Menue::loadMenue($this, 'button');		# erst nur die Button-Menüpunkte
 				foreach($button_menues as $menue){
 					echo $menue->html();
 				}
 				$this->menues = Menue::loadMenue($this, 'all-buttons');		# dann alle Menüpunkte, wobei Obermenüpunkte, die Buttons sind, weggelassen werden
-				$menue_height = $menue_height - 38;
+				?>
+				</div><?
 			}
 			else {
 				$this->menues = Menue::loadMenue($this, 'all-no_buttons');		# ansonsten alle Menüpunkte, keine Buttons
 			}
-			?><div id="menueScrollTable" style="max-height: <? echo $menue_height; ?>"><?
+			?><div id="menueScrollTable"><?
 			foreach($this->menues as $menue){
 				if($menue->get('menueebene') == 1) echo $menue->html();
 			} ?>

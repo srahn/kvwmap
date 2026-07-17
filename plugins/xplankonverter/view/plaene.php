@@ -371,8 +371,8 @@
 
 					message([{
 						"type": "notice",
-						"msg" : 'Neues Veröffentlichungsdatum erfolgreich eingetragen!'
-					}]);
+						"msg" : (result.veroeffentlichungsdatum != '' ? 'Neues Veröffentlichungsdatum erfolgreich eingetragen!' : 'Veröffentlichungsdatum gelöscht!')
+					}], 5000);
 				}
 				else {
 					message([{
@@ -481,9 +481,13 @@
 				funcIsInProgress,
 				disableFrag = ' disabled" onclick="return false',
 				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
-		output += `<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="javascript:void(0)" onClick="showPlanDetails('${row.plan_gml_id}');"><i class="btn-link fa fa-lg fa-pencil"></i></a>`;
 		output += '<a id="delButton' + row.plan_gml_id + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
+		return output;
+	}
+
+	function konvertierungEditLinkFormatter(value, row) {
+		output = `<a title="Plan bearbeiten" href="javascript:void(0)" onClick="showPlanDetails('${row.plan_gml_id}');">${htmlspecialchars(row.anzeigename)}</a>`;
 		return output;
 	}
 
@@ -800,7 +804,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-field="anzeigename"
 					data-sortable="true"
 					data-visible="true"
-					data-formatter="konvertierungHtmlSpecialchars"
+					data-formatter="konvertierungEditLinkFormatter"
 					class="col-md-7"
 					data-filter-control="input"
 					data-filter-control-placeholder="Filtern"
@@ -811,7 +815,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-visible="<? echo ((!array_key_exists('nummer', $rolle_attribute_settings) OR $rolle_attribute_settings['nummer']['switched_on'] == 1) ? 'true' : 'false'); ?>"
 					data-sort-name="nummer"
 					data-order="<? echo ((!array_key_exists('nummer', $rolle_attribute_settings) OR $rolle_attribute_settings['nummer']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
-					class="col-md-2"
+					class="col-md-1"
 					data-filter-control="input"
 				>Nr</th><?php
 				if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
@@ -885,7 +889,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 						data-order="<? echo ((!array_key_exists('inkrafttretensdatum', $rolle_attribute_settings) OR $rolle_attribute_settings['inkrafttretensdatum']['sort_direction'] == 'asc') ? 'asc' : 'desc'); ?>"
 						class="col-md-2"
 						data-filter-control="input"
-					>Inkrafttretensdatum</th><?
+					>Datum<br>Inkraft-<br>treten</th><?
 				} ?>
 				<th
 					data-field="genehmigungsdatum"
@@ -897,7 +901,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					class="col-md-2"
 					data-filter-control="input"
 				>Genehmigung</th>
-				<? if ($this->plan_layer_id != XPLANKONVERTER_SO_PLAENE_LAYER_ID) { ?>
+				<? if ($this->plan_layer_id != XPLANKONVERTER_SO_PLAENE_LAYER_ID && $this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
 				<th
 					data-field="auslegungsstartdatum"
 					data-sortable="true"
@@ -908,7 +912,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-formatter="konvertierungAuslegungsstartdatumFormatter"
 					class="col-md-2"
 					data-filter-control="input"
-				>Bekanntmachung</th>
+				>Bekannt-<br>machung</th>
 				<? } ?>
 				<th
 					data-field="konvertierung_id"
@@ -920,8 +924,8 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-searchable="true"
 					data-search_selector="input"
 					data-filter-control="input"
-					>Konvertierung Id</th>
-				<th
+					>Kon.<br> Id</th>
+					<th
 					data-field="plan_gml_id"
 					data-visible="<? echo ((!array_key_exists('plan_gml_id', $rolle_attribute_settings) OR $rolle_attribute_settings['plan_gml_id']['switched_on'] == 1) ? 'true' : 'false'); ?>"
 					data-sort-name="plan_gml_id"
@@ -976,35 +980,14 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-visible="true"
 					data-formatter="konvertierungDownloadsFormatter"
 					data-switchable="false"
-					class="col-md-2 align-top text-center"
+					class="col-md-2 text-center"
 				>Downloads</th>
 				<th
 					data-visible="true"
 					data-formatter="konvertierungEditFunctionsFormatter"
 					data-switchable="false"
 					class="col-md-2 text-center"
-				>Edit</th>
-				<th
-					data-field="konvertierung_id"
-					data-sortable="true"
-					data-visible="false"
-					data-switchable="true"
-					data-searchable="true"
-				>Konvertierung Id</th>
-				<th
-					data-field="plan_gml_id"
-					data-sortable="true"
-					data-visible="false"
-					data-switchable="true"
-					data-searchable="true"
-					data-search_selector="input"
-				>Plan-Id</th>
-				<th
-					data-field="stelle_id"
-					data-sortable="true"
-					data-visible="false"
-					data-switchable="true"
-				>Stelle Id</th>
+				></th>
 			</tr>
 		</thead>
 	</table>

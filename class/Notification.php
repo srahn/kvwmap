@@ -98,10 +98,10 @@ class Notification extends PgObject {
 		$notification = new Notification($gui);
 		$notification->find_by('id', $id);
 		if ($notification->get('user_filter') != '') {
-			$notification->selusers = Nutzer::find($gui, 'ID IN (' . $notification->get('user_filter') . ')', 'Vorname, Name');
+			$notification->selusers = Nutzer::find($gui, 'id IN (' . $notification->get('user_filter') . ')', 'Vorname, Name');
 		}
 		if ($notification->get('stellen_filter') != '') {
-			$notification->selstellen = Stelle::find($gui, 'ID IN (' . $notification->get('stellen_filter') . ')', 'Bezeichnung');
+			$notification->selstellen = Stelle::find($gui, 'id IN (' . $notification->get('stellen_filter') . ')', 'Bezeichnung');
 		}
 		$notification->set('users', User2Notification::find_by_notification_id($gui, $id));
 		return $notification;

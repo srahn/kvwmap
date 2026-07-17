@@ -93,7 +93,7 @@ else { ?>
 			<select class="form-field" name="type">
 				<option value="bar"<? echo ($this->layer_chart->get('type') == 'bar' ? ' selected' : ''); ?>>Balken</option>
 				<option value="pie"<? echo ($this->layer_chart->get('type') == 'pie' ? ' selected' : ''); ?>>Torten</option>
-				<option value="doughnut"<? echo ($this->layer_chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
+				<option value="doughnut"<? echo ($this->layer_chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Ring</option>
 				<option value="line"<? echo ($this->layer_chart->get('type') == 'line' ? ' selected' : ''); ?>>Linien</option>
 			</select>
 			<div style="clear: both"></div>
@@ -129,6 +129,10 @@ else { ?>
 				position: relative;
 				left: 17px;
 			"></span>
+			<div style="clear: both"></div>
+
+			<label class="fetter form-label" for="label_attribute_name">Farbe: * </label>
+			<input type="color" class="form-field" name="color" value="<? echo $this->layer_chart->get('color'); ?>" style="margin-left:5px; float:left"/>
 			<div style="clear: both"></div>
 		</div>
 		<div style="clear: both"></div>

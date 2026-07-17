@@ -71,6 +71,7 @@
 	$strOrder = "Order";
 	$strOWSParameter = "OWS-Parameters";
 	$strOwsSrs = "OWS-SRS";
+	$strParentLayer = "Parent Layers";
 	$strPath = "Query";
 	$strPostlabelcache = "Postlabelcache";
 	$strPrintConnection = "Print-Connection";
@@ -85,10 +86,16 @@
 	$strSelectionTypeHelp = "'radio' can be entered here. All layers of a group with this entry get a radio button in the legend. You can only switch on one of the layers at a time. Makes sense for background maps for example.";
 	$strSharedFrom = "Shared from user";
 	$strSharedFromHelp = "Remove the ID when the layer should not be marked as shared by another user in the layer legend any longer.";
+	$strCreatedAt = 'Created At';
+	$strEditedAt = 'Edited At';
 	$strSignOrder = "Drawingorder";
 	$strSizeUnits = "Sizeunits";
 	$strStatus = "Status";
-	$strStatusHelp = "This field can be filled with an error status. This deactivates the layer and has a hint symbol in the legend.&#xa;The 'wms_checker.php' tool fills this field automatically.";
+	$strStatusHelp = "Optional Status. Possible Values are: 
+	sensible - the layer has a hint symbol in the legend and in the header
+	under_construction - the layer has a hint symbol in the legend";
+	$strErrorStatus = "Error Status";
+	$strErrorStatusHelp = "This field can be filled with an error status. This deactivates the layer and has a hint symbol in the legend.&#xa;The 'wms_checker.php' tool fills this field automatically.";
 	$strStellenAsignment = "Usergroup-Assignment";
 	$strStyleItem = "Styleitem";
 	$strStylesLabels = "Styles and Labels";

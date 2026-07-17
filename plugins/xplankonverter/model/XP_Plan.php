@@ -6,6 +6,7 @@
 class XP_Plan extends PgObject {
 
 	static $schema = 'xplan_gml';
+	public $veroeffentlichungsprotokoll_dokumente = array();
 
 	function __construct($gui, $planart, $select = '*') {
 		$this->planart = $planart;
@@ -35,14 +36,88 @@ class XP_Plan extends PgObject {
 	public static	function find_by_id($gui, $by, $id, $planart) {
 		$xp_plan = new XP_Plan($gui, $planart);
 		$xp_plan->find_by($by, $id);
-		$xp_plan->get_extent();
+		$xp_plan->get_extent(OWS_SRS);
 		return $xp_plan;
+	}
+
+	public static	function find_by_id_with_stelle_id($gui, $id, $planart) {
+		$plan_obj = new XP_Plan($gui, $planart);
+		$results = $plan_obj->find_where(
+      "p.gml_id = '" . $id . "'",
+      NULL,
+      "
+        k.stelle_id,
+        p.*,
+				" . $plan_obj->get_anzeige_name_function() . " AS anzeigename
+      ",
+      NULL,
+      "
+        xplan_gml." . $plan_obj->tableName . " p JOIN
+        xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+      "
+    );
+		$fehler = pg_last_error();
+		if ($fehler) {
+			return array(
+				'success' => false,
+				'msg' => 'Class XP_Plan Func find_by_id_with_stelle_id: Fehler bei der Abfrage des Plans mit stelle_id: ' . $fehler
+			);
+		}
+		$plan = $results[0];
+		$plan->planart = $planart;
+		return array(
+			'success' => true,
+			'plan' => $plan
+		);
 	}
 
 	public static	function find_where_by_planart($gui, $planart, $where, $order = '', $select = '*', $limit = '') {
 		$plan = new XP_Plan($gui, $planart);
 		$plaene = $plan->find_where($where, $order, $select, $limit);
 		return $plaene;
+	}
+
+	function find_veroeffentlichungsprotokoll_dokumente ($plan_gml_id = NULL) {
+		$pg_obj = new PgObject($this->gui, 'xplankonverter', 'veroeffentlichungsprotokoll_dokumente');
+		$this->veroeffentlichungsprotokoll_dokumente = $pg_obj->find_by_sql(array(
+			'select' => "
+				d.art,
+				d.referenzurl,
+				d.beschreibung,
+				d.datum,
+				d.typ,
+				e.beschreibung AS typ_beschreibung
+			",
+			'from' => "
+				(
+					SELECT
+						gml_id,
+						UNNEST(externereferenz),
+						(UNNEST(externereferenz)).art,
+						(UNNEST(externereferenz)).referenzurl,
+						(UNNEST(externereferenz)).beschreibung,
+						(UNNEST(externereferenz)).datum,
+						(UNNEST(externereferenz)).typ
+					FROM
+						xplan_gml.xp_plan
+				) d JOIN
+				xplan_gml.enum_xp_externereferenztyp e ON d.typ::text::integer = e.wert
+			",
+			'where' => "
+			  d.gml_id = '" . ($plan_gml_id ?? $this->get('plan_gml_id')) . "'
+			"
+		));
+		$fehler = pg_last_error();
+		if ($fehler) {
+			return array(
+				'success' => false,
+				'msg' => 'Class: XP_Plan, Func: find_veroeffentlichungsprotokoll_dokumente, ' . __LINE__ . ' Fehler bei der Abfrage der Veröffentlichungsdokumente: ' . $fehler
+			);
+		}
+		return array(
+			'success' => true,
+			'veroeffentlichungsprotokoll_dokumente' => $this->veroeffentlichungsprotokoll_dokumente
+		);
 	}
 
 	/**
@@ -58,6 +133,18 @@ class XP_Plan extends PgObject {
 			if ($plan_attribut['type'] == 'xp_spezexternereferenzauslegung' AND $plan_attribut['type_type'] == 'c') {
 				$plan_attribs[$i]['type'] = str_replace('auslegung', '', $plan_attribs[$i]['type']);
 				$plan_attribs[$i]['type_name'] = str_replace('auslegung', '', $plan_attribs[$i]['type_name']);
+				$plan_attribs[$i]['type_schema'] = 'xplan_gml';
+			}
+		}
+		return $plan_attribs;
+	}
+	
+	public static function convert_xp_generattribut_erweitert($plan_attribs) {
+		// Entfernt die Enumeration typ in Planattribut type und type_name für typ xp_generattribut_erweitert
+		foreach ($plan_attribs AS $i => $plan_attribut) {
+			if ($plan_attribut['type'] == 'xp_generattribut_erweitert' AND $plan_attribut['type_type'] == 'c') {
+				$plan_attribs[$i]['type'] = str_replace('_erweitert', '', $plan_attribs[$i]['type']);
+				$plan_attribs[$i]['type_name'] = str_replace('_erweitert', '', $plan_attribs[$i]['type_name']);
 				$plan_attribs[$i]['type_schema'] = 'xplan_gml';
 			}
 		}
@@ -113,7 +200,16 @@ class XP_Plan extends PgObject {
 	}
 
 	function get_anzeige_name() {
-		return $this->get_first_planart_name() . ' ' . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
+		return ($this->get_first_planart_name() ? $this->get_first_planart_name() . ' ' : '') . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
+	}
+
+	function get_anzeige_name_function() {
+		switch ($this->planart) {
+			case 'BP-Plan' : return "xplankonverter.bplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename)";
+			case 'FP-Plan' : return "xplankonverter.fplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename)";
+			case 'SO-Plan' : return "xplankonverter.soplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename)";
+			default : return "p.name";
+		}
 	}
 
 	/**
@@ -129,6 +225,32 @@ class XP_Plan extends PgObject {
 			}
 		}
 		return null;
+	}
+
+	function get_plan_layer_id($planart = NULL) {
+		if (empty($planart)) {
+			$planart = $this->planart;
+		}
+		switch ($planart) {
+			case 'BP-Plan' : $plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
+			case 'FP-Plan' : $plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID; break;
+			case 'SO-Plan' : $plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID; break;
+			case 'RP-Plan' : $plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID; break;
+		}
+		return $plan_layer_id;
+	}
+
+	function get_bereich_layer_id($planart = NULL) {
+		if (empty($planart)) {
+			$planart = $this->planart;
+		}
+		switch ($planart) {
+			case 'BP-Plan' : $bereich_layer_id = XPLANKONVERTER_BP_BEREICHE_LAYER_ID; break;
+			case 'FP-Plan' : $bereich_layer_id = XPLANKONVERTER_FP_BEREICHE_LAYER_ID; break;
+			case 'SO-Plan' : $bereich_layer_id = XPLANKONVERTER_SO_BEREICHE_LAYER_ID; break;
+			case 'RP-Plan' : $bereich_layer_id = XPLANKONVERTER_RP_BEREICHE_LAYER_ID; break;
+		}
+		return $bereich_layer_id;
 	}
 
 	/**
@@ -199,6 +321,7 @@ class XP_Plan extends PgObject {
 	function get_extent($ows_srs = '', $where = '') {
 		if ($where == '') {
 			$where = $this->get_id_condition(array($this->get($this->identifier)));
+			//$where = 'p.gml_id = ' . $this->identifier;
 		}
 		$epsg_codes = explode(' ', trim(preg_replace('~[EPSGepsg: ]+~', ' ', $ows_srs)));
 		$extents = array();
@@ -387,7 +510,7 @@ class XP_Plan extends PgObject {
 					str_replace(
 						$zusatz,
 						'',
-						$this->get(kommentar)
+						$this->get('kommentar')
 					)
 				)
 			);
@@ -421,6 +544,7 @@ class XP_Plan extends PgObject {
 			$bereich->destroy();
 		}
 		$this->destroy_associated_textabschnitte();
+		$this->destroy_externereferenz_dokumente();
 		$sql = "
 			DELETE FROM
 				xplan_gml." . $this->planartAbk . "_plan
@@ -429,6 +553,16 @@ class XP_Plan extends PgObject {
 		";
 		$result = $this->database->execSQL($sql, 0, 3);
 		//$this->delete();
+	}
+
+	function destroy_externereferenz_dokumente() {
+		$layer = Layer::find_by_id($this->gui, $this->get_plan_layer_id());
+		$this->gui->processJSON(
+			$this->get('externereferenz_json'),
+			$layer->get('document_path'),
+			$layer->get('document_url'),
+			NULL, NULL, NULL, NULL, '', true
+		);
 	}
 }
 ?>

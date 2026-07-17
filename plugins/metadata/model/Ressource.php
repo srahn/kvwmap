@@ -16,6 +16,24 @@ class Ressource extends PgObject {
 	public $layer_id = METADATA_RESSOURCES_LAYER_ID;
 	public $unlogged = true;
 
+	public $outdated_expression = "
+		r.auto_update AND
+		(
+			r.last_updated_at IS NULL OR 
+			(
+				(
+					r.next_update_at IS NOT NULL AND
+					r.next_update_at > last_updated_at AND
+					r.next_update_at < now()
+				) OR
+				(
+					r.update_interval IS NOT NULL AND
+					DATE(r.last_updated_at) + r.update_time + r.update_interval < now()
+				)
+			)
+		)
+	";
+
 	function __construct($gui) {
 		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->show);
 		parent::__construct($gui, Ressource::$schema, Ressource::$tableName);
@@ -45,28 +63,15 @@ class Ressource extends PgObject {
 		}
 	}
 
-	public static	function find($gui, $where, $order = '') {
+	public static	function find($gui, $where, $order = '', $limit = '') {
 		$ressource = new Ressource($gui);
-		$select = "ampel_id, r.gruppe_id, r.bezeichnung, r.hinweise_auf, r.beschreibung, r.datasource_id, r.ansprechperson, r.format_id, r.aktualitaet, r.url, r.datenguete_id, r.quelle, r.github, r.download_url, r.dest_path, r.download_method, r.id, r.download_path, r.last_updated_at, r.auto_update, r.update_interval, r.import_epsg, r.error_msg, r.relevanz, r.digital, r.flaechendeckend, r.bemerkung_prioritaet, r.inquiries_required, r.inquiries, r.inquiries_responses, r.inquiries_responsible, r.inquiries_to, r.check_required, r.created_at, r.created_from, r.updated_at, r.updated_from, r.use_for_datapackage, r.transform_command, r.unpack_method, r.import_method, r.transform_method, r.status_id, r.von_eneka, r.documents, r.import_layer, r.import_schema, r.import_table, r.layer_id, r.update_time, r.import_filter, r.import_file, r.metadata_document, r.gebietseinheit_id, r.next_update_at,
+		$select = "r.ampel_id, r.gruppe_id, r.bezeichnung, r.hinweise_auf, r.beschreibung, r.datasource_id, r.ansprechperson, r.format_id, r.aktualitaet, r.url, r.datenguete_id, r.quelle, r.github, r.download_url, r.dest_path, r.download_method, r.id, r.download_path, r.last_updated_at, r.auto_update, r.update_interval, r.import_epsg, r.error_msg, r.relevanz, r.digital, r.flaechendeckend, r.bemerkung_prioritaet, r.inquiries_required, r.inquiries, r.inquiries_responses, r.inquiries_responsible, r.inquiries_to, r.check_required, r.created_at, r.created_from, r.updated_at, r.updated_from, r.use_for_datapackage, r.transform_command, r.unpack_method, r.import_method, r.transform_method, r.status_id, r.von_eneka, r.documents, r.import_layer, r.import_schema, r.import_table, r.layer_id, r.update_time, r.import_filter, r.import_file, r.metadata_document, r.gebietseinheit_id, r.next_update_at,
 		DATE(r.last_updated_at) + r.update_time + r.update_interval AS next_interval_date,
 		s.status,
-		(status_id IS NULL OR status_id = 0) AND
-		auto_update AND
-		(
-			last_updated_at IS NULL OR 
-			(
-				(
-					next_update_at IS NOT NULL AND
-					next_update_at > last_updated_at AND
-					next_update_at < now()
-				) OR
-				(
-					update_interval IS NOT NULL AND
-					DATE(last_updated_at) + update_time + update_interval < now()
-				)
-			)
-		) AS outdated";
-		return $ressource->find_where($where, $order, $select, NULL, 'metadata.ressources r JOIN metadata.update_status AS s ON r.status_id = s.id');
+		(r.status_id IS NULL OR r.status_id = 0) AND
+		" . $ressource->outdated_expression . " AS outdated";
+		$ressource->show = false;
+		return $ressource->find_where($where, $order, $select, $limit, 'metadata.ressources r JOIN metadata.update_status AS s ON r.status_id = s.id');
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
@@ -97,7 +102,19 @@ class Ressource extends PgObject {
 	 * @param integer $ressource_id
 	 * @param integer $limit If limit is given only the amount of ressources will be replied
 	 * @return Ressource[] An Array of Ressources that are outdated
-	 */
+	 * WHERE
+	 * 	(von_eneka
+	 * 		OR use_for_datapackage)
+	 * 	AND (status_id IS NULL
+	 * 		OR status_id = 0)
+	 * 	AND auto_update
+	 * 	AND ( last_updated_at IS NULL
+	 * 		OR ( ( next_update_at IS NOT NULL
+	 * 			AND next_update_at > last_updated_at
+	 * 			AND next_update_at < now() )
+	 * 		OR ( update_interval IS NOT NULL
+	 * 			AND DATE(last_updated_at) + update_time + update_interval < now() ) ) )
+	*/
 	public static function find_outdated($gui, $ressource_id = NULL, $limit = NULL, $force = false) {
 		$ressources = array();
 		$ressource = new Ressource($gui);
@@ -109,33 +126,42 @@ class Ressource extends PgObject {
 			// only ressouces with state Uptodate will be find as outdated
 			$status_condition = "= 0";
 		}
-		$ressource->show = false;
-		$gui->debug->show('Suche Ressourcen die aktualisiert werden müssen mit SQL:', true);
-		$ressources = $ressource->find_where(
+		$ressources = $ressource->find(
+			$gui,
 			"
-				(von_eneka OR use_for_datapackage) AND
-				(status_id IS NULL OR status_id " . $status_condition . ") AND
-				auto_update AND
-				(
-					last_updated_at IS NULL OR
-					(
-						(
-							next_update_at IS NOT NULL AND
-							next_update_at > last_updated_at AND
-							next_update_at < now()
-						) OR
-						(
-							update_interval IS NOT NULL AND
-							DATE(last_updated_at) + update_time + update_interval < now()
-						)
-					)
-				)
-			" .
-			($ressource_id ? " AND id " . (is_array($ressource_id) ? "IN (" . implode(', ', $ressource_id) . ")" : "= " . $ressource_id) : ""),
-			"last_updated_at",
-			"*",
+				(r.von_eneka OR r.use_for_datapackage) AND
+				(r.status_id IS NULL OR r.status_id " . $status_condition . ") AND
+			" . $ressource->outdated_expression .
+			($ressource_id ? " AND r.id " . (is_array($ressource_id) ? "IN (" . implode(', ', $ressource_id) . ")" : "= " . $ressource_id) : ""),
+			"r.last_updated_at",
 			$limit
 		);
+		// $ressources = $ressource->find_where(
+		// 	"
+		// 		(r.von_eneka OR r.use_for_datapackage) AND
+		// 		(r.status_id IS NULL OR r.status_id " . $status_condition . ") AND
+		// 		r.auto_update AND
+		// 		(
+		// 			r.last_updated_at IS NULL OR
+		// 			(
+		// 				(
+		// 					r.next_update_at IS NOT NULL AND
+		// 					r.next_update_at > r.last_updated_at AND
+		// 					r.next_update_at < now()
+		// 				) OR
+		// 				(
+		// 					r.update_interval IS NOT NULL AND
+		// 					DATE(r.last_updated_at) + r.update_time + r.update_interval < now()
+		// 				)
+		// 			)
+		// 		)
+		// 	" .
+		// 	($ressource_id ? " AND r.id " . (is_array($ressource_id) ? "IN (" . implode(', ', $ressource_id) . ")" : "= " . $ressource_id) : ""),
+		// 	"r.last_updated_at",
+		// 	"r.*, s.status",
+		// 	$limit,
+		// 	'metadata.ressources r JOIN metadata.update_status s ON r.status_id = s.id'
+		// );
 		return $ressources;
 	}
 
@@ -155,7 +181,6 @@ class Ressource extends PgObject {
 		) {
 			return $this->get('next_update_at');
 		}
-
 		$last_update_at = new DateTime($last_updated_at->format('d.m.Y'));
 		if ($this->get('update_time') != '') {
 			list($hours,$minutes,$seconds) = explode(':', $this->get('update_time'));
@@ -169,6 +194,15 @@ class Ressource extends PgObject {
 	
 	function get_sources() {
 		return Lineage::find_sources($this->gui, $this->get('id'));
+	}
+
+	function get_source_ids() {
+		return array_map(
+			function($source) {
+				return $source->get_id();
+			},
+			$this->get_sources()
+		);
 	}
 
 	function get_targets() {
@@ -194,8 +228,8 @@ class Ressource extends PgObject {
 	}
 
 	/**
-	 * Function find first outdated ressource and run the update process
-	 * if less than 10 processes running already
+	 * Function find outdated ressource which sources are up to date allready and run the update process
+	 * for 1 to 10 of it, if less than 10 processes running already.
 	 * A ressource is outdated if
 	 * status is not set or 0 and
 	 * auto_update is set to true and (
@@ -224,61 +258,90 @@ class Ressource extends PgObject {
 	 *  9 - Transformation fertig
 	 */
 	public static function update_outdated($gui, $ressource_id = null, $method_only = '', $only_missing = false, $force = false) {
-		$gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ' ohne Ressource id'), true);
+		$gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ' ohne Ressource id') . ($only_missing ? ' only missing' : ''), true);
+		$msg = '';
 		$ressource = new Ressource($gui);
 		if ($ressource_id != null) {
 			$ressources = $ressource->find_where('id = ' . $ressource_id);
+			$num_updateable = 1;
 		}
 		else {
 			$results = $ressource->getSQLResults("
-				SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0 AND status_id < 11;
+				SELECT count(id) AS num_running FROM metadata.ressources WHERE use_for_datapackage AND status_id > 0 AND status_id < 11;
 			");
+			$num_updateable = 10 - $results[0]['num_running'];
 			if ($results[0]['num_running'] < 10) {
-				$gui->debug->show('Es laufen bereits ' . $results[0]['num_running'] . ' Updates.', true);
-				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running'], $force); // liefert nur die ersten 1 - 10 gefundenen zurück
+				$gui->debug->show('Es laufen ' . $results[0]['num_running'] . ' Updates.', true);
+				$ressources = Ressource::find_outdated($gui, NULL, '', $force); // liefert nur die ersten 1 - 10 gefundenen zurück
 			}
 			else {
 				$gui->debug->show('Abbruch weil bereits 10 Updates laufen.', true);
+				return array(
+					'success' => true,
+					'msg' => 'Es laufen bereits 10 Updates.'
+				);
 			}
 		}
-
 		if (count($ressources) > 0) {
 			$gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
+			$num_updated = 0;
 			foreach ($ressources AS $ressource) {
-				// ToDo: A ressource shall only be updated when all its source ressources are uptodate yet.
+				// A ressource shall only be updated when all its source ressources are uptodate yet.
 				// Test it with a stack of pending ressources.
-				// if ($this->all_source_ressources_uptodate($ressource->get_id())) {
-					// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
-					if ($only_missing === false) {
-						$only_missing = $ressource->get('only_missing');
-					}
+				if ($ressource->sources_uptodate()) {
+					$gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
 					if ($gui->formvars['dry_run'] == 1) {
 						echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '') . ($only_missing ? ' only_missing' : ' download all');
 					}
 					else {
 						$result = $ressource->run_update($method_only, $only_missing);
+						if ($result['success'] === false) {
+							$msg .= '<br>Fehler bei der Aktualisierung der Ressource ' . $ressource->get_id() . ': ' . $result['msg'];
+						}
+						else {
+							$msg .= 'Ressource ' . $ressource->get_id() . ' aktualisiert';
+						}
 						$ressource->log($result, false);
-						return $result;
 					}
-				// }
+					$num_updated += 1;
+				}
+				else {
+					$msg .= '<br>Quellen von Ressource ' . $ressource->get_id() . ' nicht aktuell.';
+				}
+				if ($num_updateable <= $num_updated) {
+					$gui->debug->show('Genug geupdated.');
+					break;
+				}
 			}
+			return array(
+				'success' => true,
+				'msg' => $msg
+			);
 		}
 		else {
 			return array(
 				'success' => true,
-				'msg' => 'Nichts zu tun'
+				'msg' => 'Nichts zu tun. ' . $msg
 			);
 		}
 	}
 
 	/**
-	 * Function count all source ressources of ressource with $ressource_id that are outdated
-	 * and return true if the number is 0 else false.
+	 * Function determine if the sources of the ressource are uptodate.
+	 * It returns allways true if no sources exists.
 	 */
-	function all_source_ressources_uptodate($ressource_id) {
-		// ToDo: to implement
-		$ressources = $this->find_outdated($this, Lineage::find_sources($ressource_id), NULL, false);
-		return (count($ressources) == 0);
+	function sources_uptodate() {
+		$source_ids = $this->get_source_ids();
+		if (count($source_ids === 0)) {
+			return true;
+		}
+		$ressources = $this->find_outdated(
+			$this->gui,
+			$source_ids,
+			'',
+			false
+		);
+		return (count($ressources) === 0);
 	}
 
 	function log($result, $show = false) {
@@ -310,6 +373,10 @@ class Ressource extends PgObject {
 
 	function run_update($method_only = '', $only_missing = false) {
 		$this->debug->show('Update Ressource ' . $this->get_id(), true);
+		if ($only_missing === false) {
+			$only_missing = $this->get('only_missing');
+		}
+
 		$this->update_status(1);
 
 		if ($this->must_be_executed('download', $method_only)) {
@@ -552,9 +619,10 @@ class Ressource extends PgObject {
 			$this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 
 			$epsg = ($this->get('import_epsg') ? $this->get('import_epsg') : '25832');
+			$version = $this->get_wfs_version($url, '1.1.0');
 			$params = array(
 				'Service' => 'WFS',
-				'Version' => $this->get_wfs_version($url, '1.1.0'),
+				'Version' => $version,
 				'Request' => 'GetFeature',
 				'SRS' => 'urn:ogc:def:crs:EPSG::' . $epsg
 			);
@@ -573,7 +641,7 @@ class Ressource extends PgObject {
 				) {
 					continue;
 				}
-				$params['TypeNames'] = $featuretype['name'];
+				$params['TypeName' . (strpos($version, '2.') !== false ? 's' : '')] = $featuretype['name'];
 				$download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
 				$download_file = strtolower(sonderzeichen_umwandeln(str_replace(':', '_', umlaute_umwandeln($featuretype['name'])))) . '.gml';
 				$this->debug->show('Download FeatureType: ' . $featuretype['name'] . ' (' . $featuretype['title'] . ') from<br>' . $download_url . '<br>in Datei: ' . $download_path . $download_file, true);
@@ -1554,7 +1622,7 @@ class Ressource extends PgObject {
 		$this->debug->show('Starte mit Einlesen der GDB-Datei ' . $gdb_file, true);
 		$result = $this->gui->data_import_export->ogr2ogr_import(
 			$this->get('import_schema'),
-			'',
+			$this->get('import_table') != '' ? $this->get('import_table') : '',
 			$this->get('import_epsg') != '' ? $this->get('import_epsg') : 25833,
 			$gdb_file,
 			$this->database,
@@ -1737,7 +1805,7 @@ class Ressource extends PgObject {
 				$this->database,
 				$this->get('import_layer'),
 				NULL,
-				($first ? '-overwrite' : '-append') . ' -nlt MULTIPOLYGON',
+				($first ? '-overwrite' : '-append') . ' -nlt convert_to_linear', // . ' -nlt MULTIPOLYGON',
 				'UTF-8',
 				false,
 				$this->unlogged,
@@ -1805,7 +1873,13 @@ class Ressource extends PgObject {
 
 		// get the files from dest_path
 		$dest_path = $this->get_full_path($this->get('dest_path'));
-		$csv_file = $this->get('import_layer') . '.csv';
+		if ($this->get('import_file') != '') {
+			$csv_file = $this->get('import_file');
+		}
+		else {
+			$csv_file = $this->get('import_layer') . '.csv';
+		}
+		echo '<br>importiere: ' . $dest_path . $csv_file;
 
 		if (!is_file($dest_path . $csv_file)) {
 			return array(
@@ -1819,48 +1893,63 @@ class Ressource extends PgObject {
 		// Lege Tabelle an wenn es sie noch nicht gibt
 		$importer = new data_import_export();
 		$encoding = $importer->getEncoding($dest_path . $csv_file);
+		echo '<br>encoding: ' . $encoding;
 
-		$csv_fp = fopen($dest_path . $csv_file, "r");
-		if (!$csv_fp) {
-			$err_msg[] = 'Konnte Datei ' . $dest_path . $csv_filey . ' nicht zum lesen öffnen.';
-		}
-		$i = 0;
+		$import_filter = json_decode($this->get('import_filter'), true);
+		echo '<br>import_filter: ' . print_r($import_filter, true);
+		$start_line = ((!empty($import_filter['start_line']) && ctype_digit((string)$import_filter['start_line'])) ? (int)$import_filter['start_line'] : 1);
+		echo '<br>start_line: ' . $start_line;
+		$first_line = null;
 
-		while (($line = fgets($csv_fp)) !== false AND trim($line, $delimiter ."\n\r") != '' AND $i < 100) {
-			$first_line = $line;
-			break;
-			$i++; // only to prevent from endless loop
+		$content = file_get_contents($dest_path . $csv_file);
+
+		// Prüfen auf BOM
+		$firstTwoBytes = substr($content, 0, 2);
+		if ($firstTwoBytes === "\xFF\xFE") {
+				$content = mb_convert_encoding($content, 'UTF-8', 'UTF-16LE');
+		} elseif ($firstTwoBytes === "\xFE\xFF") {
+				$content = mb_convert_encoding($content, 'UTF-8', 'UTF-16BE');
+		} else {
+				// Andere Encodings erkennen
+				$encoding = mb_detect_encoding($content, ['UTF-8','ISO-8859-1','Windows-1252'], true);
+				if ($encoding !== 'UTF-8') {
+						$content = mb_convert_encoding($content, 'UTF-8', $encoding);
+				}
 		}
-		fclose($csv_fp);
+		echo '<br><textarea rows="10" cols="100">' . $content . '</textarea>';
+		$lines = preg_split('/\r\n|\r|\n/', $content);
+		if ($start_line == 1) {
+    	foreach ($lines as $line) {
+        if (trim($line) !== '') {
+        	$first_line = $line;
+          break;
+        }
+    	}
+		}
+		else {
+    	$first_line = $lines[$start_line - 1] ?? '';
+		}
 
 		$this->debug->show('Analysiere Kopfzeile: ' . $first_line, true);
 		$delimiter = detect_delimiter($first_line);
 		$this->debug->show('Ermittelter Delimiter: ' . $delimiter, true);
-
 		$columns = array_map(
-			function($column) use ($encoding) { 
-				if ($encoding != 'UTF-8') {
-					$column = utf8_encode($column);
-				}
+			function($column) {
 				return strtolower(sonderzeichen_umwandeln($column));
 			},
 			explode($delimiter, $first_line)
 		);
-
 		$this->debug->show('Ermittelte Spalten: ' . implode(', ', $columns), true);
-
 		$sql = "
 			DROP TABLE IF EXISTS " . $this->get('import_schema') . "." . $this->get('import_table') . ";
 			CREATE TABLE IF NOT EXISTS " . $this->get('import_schema') . "." . $this->get('import_table') . " (
-				" . implode(",
-				", array_map(
-							function($column) {
-								return $column . " character varying";
-							},
-							$columns
-						)
-				) . "
-			)
+				" . implode(",", array_map(
+					function($c) {
+						return $c . ' varchar';
+					},
+					$columns
+				)) . "
+			);
 		";
 		$this->debug->show('SQL zum anlegen der Tabelle: ' . $sql, true);
 		$query = $this->execSQL($sql);
@@ -1877,15 +1966,35 @@ class Ressource extends PgObject {
 		$maxy = $this->Stelle->MaxGeorefExt->maxy;
 
 		// Lese Daten in die Tabelle ein
-		$where = ($this->get('import_filter') ? 'WHERE ' . $this->get('import_filter') : '');
+		$where = '';
+		if (is_array($import_filter) && isset($import_filter['where'])) {
+  	  $where = $import_filter['where'];
+		} elseif (is_string($this->get('import_filter')) && !empty($this->get('input_filter'))) {
+ 		  // Plain text input
+    	$where = $this->get('import_filter');
+		}
+		else {
+			$where = '';
+		}
+		echo "<br>WHERE: " . $where;
+
+		$import_file = $importer->prepare_for_postgres($dest_path, $csv_file);
+
+		if ($start_line > 1) {
+			$from = "PROGRAM 'tail -n +" . $start_line . " \"" . $import_file ."\"'";
+			$from = "PROGRAM 'awk -F\";\" \"NR==" . $start_line . " {header=$0; n=NF; print header; next} NR>" . $start_line . " && NF==n\" \"" . $import_file ."\"'";
+		}
+		else {
+			$from = "'" . $import_file . "'";
+		}
 		$sql = "
 			COPY " . $this->get('import_schema') . "." . $this->get('import_table') . "(" . implode(', ', $columns) . ")
-			FROM '" . $dest_path . $csv_file . "'
+			FROM " . $from . "
 			WITH (
 				FORMAT CSV,
 				DELIMITER '" . $delimiter . "',
 				HEADER true,
-				ENCODING '" . $encoding . "'
+				ENCODING 'UTF8'
 			)
 			" . $where . "
 		";

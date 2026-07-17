@@ -47,10 +47,10 @@ function send(zoom){
 	}
 ?>
 
-<table style="border-bottom: 1px solid grey; border-collapse: separate; width: 100%" border="0" cellpadding="0" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
+<table id="PolygonEditor" style="border-bottom: 1px solid grey; border-collapse: separate; width: 100%" border="0" cellpadding="0" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td valign="top">
-			<table cellspacing="0" cellpadding="0">
+			<table id="PolygonEditor_map" cellspacing="0" cellpadding="0">
 				<tr>
 					<td colspan="6">
 						<?
@@ -91,7 +91,7 @@ function send(zoom){
 			</table>
     </td>
   	<td valign="top" width="100%">
-			<table cellspacing="0" cellpadding="0">
+			<table id="PolygonEditor_right" cellspacing="0" cellpadding="0">
 				<tr>
 					<td>
 						<div id="legenddiv" style="height: <? echo $this->map->height-215; ?>px;"	class="normallegend">

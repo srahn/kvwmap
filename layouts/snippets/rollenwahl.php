@@ -408,6 +408,15 @@ if ($this->Fehlermeldung!='') {
 										<span data-tooltip="<? echo $strHintMenueButtons; ?>"></span>
 									</td>
 								</tr>
+								<tr>
+									<td class="rollenwahl-option-header">
+										<? echo $strLayerSelectionMode; ?>:
+									</td>
+									<td class="rollenwahl-option-data">
+										<input name="layer_selection_mode" type="checkbox" value="1" <? if ($this->user->rolle->layer_selection_mode == '1'){echo 'checked="true"';} ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintLayerSelection; ?>"></span>
+									</td>
+								</tr>
 							</table>
 						</td>
 					</tr>
@@ -548,29 +557,30 @@ if ($this->Fehlermeldung!='') {
 									</td>
 									<td class="rollenwahl-option-data">
 									<?
-									
-									for($i = 0; $i < count($this->result_colors); $i++){
-										if($this->user->rolle->result_color == $this->result_colors[$i]['id']){
-											$bgcolor = str_pad(dechex($this->result_colors[$i]['red']), 2, '0').str_pad(dechex($this->result_colors[$i]['green']), 2, '0').str_pad(dechex($this->result_colors[$i]['blue']), 2, '0');
+
+										for($i = 0; $i < count($this->result_colors); $i++){
+											$option['style'] = 'background-color: rgb('.$this->result_colors[$i]['red'].', '.$this->result_colors[$i]['green'].', '.$this->result_colors[$i]['blue'].')';
+											$option['value'] = $this->result_colors[$i]['id'];
+											$option['output'] = '';
+											$options[] = $option;
 										}
-									}
-									
-									?>
-										<select name="result_color" style="background-color:#<? echo $bgcolor; ?>" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'));">
-											<?
-											for($i = 0; $i < count($this->result_colors); $i++){
-												echo '<option ';
-												if($this->user->rolle->result_color == $this->result_colors[$i]['id']){
-													echo ' selected';
-												}
-												echo ' style="background-color: rgb('.$this->result_colors[$i]['red'].', '.$this->result_colors[$i]['green'].', '.$this->result_colors[$i]['blue'].')"';
-												echo ' value="'.$this->result_colors[$i]['id'].'">';
-												echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-												echo "</option>\n";
-											}
-											?>
-										</select>&nbsp;
-										<span data-tooltip="<? echo $strHintColor; ?>"></span>
+
+										echo FormObject::createCustomSelectField(
+											'result_color',																			# name
+											$options,																						# options
+											$this->user->rolle->result_color,										# value
+											1,																									# size
+											'width: 80px',																			# style
+											'',																									# onchange
+											'result_color',																			# id
+											'',																									# multiple
+											'',																									# class
+											' ',																								# firstoption
+											'min-width: 80px'																		# optionstyle
+										);
+
+										?>
+										&nbsp;<span data-tooltip="<? echo $strHintColor; ?>"></span>
 									</td>
 								</tr>
 								<tr>

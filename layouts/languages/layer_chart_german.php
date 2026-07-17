@@ -7,4 +7,5 @@
 	$strLayerChartSaveSuccessMsg = 'Diagramm erfolgreich angelegt.';
 	$strLayerChartTitle = 'Diagramme';
 	$strLayerChartUpdateSuccessMsg = 'Diagramm erfolgreich gespeichert.';
+	$strDeleteWarningMessage = 'Soll das Diagramm wirklich gelöscht werden?';
 ?>

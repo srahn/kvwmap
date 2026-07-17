@@ -1,10 +1,10 @@
 <?php
-class DataTypeAttribute extends MyObject {
+class DataTypeAttribute extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'datatype_attributes');
+		parent::__construct($gui, 'kvwmap', 'datatype_attributes');
 	}
 
 	public static	function find($gui, $where) {

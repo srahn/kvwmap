@@ -40,22 +40,15 @@
 <? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
-		<!--td valign="top" style="padding: 0 0 0 0">
-			<? if($layer['template'] != 'generic_layer_editor.php'){ ?>
-			<a href="javascript:switch_gle_view1(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
-			<? }else{ ?>
-			<a href="javascript:switch_gle_view1(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
-			<? } ?>
-		</td-->
 		<td height="30" width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['name']; ?></h2></td>
-		<!--td valign="top" style="padding: 0 10 0 0">
-			<? if($layer['template'] != 'generic_layer_editor.php'){ ?>
-			<a href="javascript:switch_gle_view1(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
-			<? }else{ ?>
-			<a href="javascript:switch_gle_view1(<? echo $layer['layer_id']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
-			<? } ?>
-		</td-->
 		<td align="right" valign="top">
+			<? if ($layer['records_status'] !== '0') { ?>
+				<div class="gle-view" style="margin-right: 16px;">	<?
+					for ($g = 0; $g < 3; $g = $g + 2) {
+						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+					}	?>
+				</div>
+			<? } ?>
 		</td>
 	</tr>
 	<tr><td><img height="7" src="<? echo GRAPHICSPATH ?>leer.gif"></td></tr>
@@ -248,7 +241,7 @@
 							';
 						}
 						echo '</td></tr></table>';
-						echo '</td><td '.get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value')).'><div id="formelement">';
+						echo '</td><td '.get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style_attribute'][$j]], 'gle_attribute_value')).'><div id="formelement">';
 						echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname);
 						if($layer['attributes']['privileg'][$j] >= '0' AND !($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld')){
 							$this->form_field_names .= $layer['layer_id'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
@@ -370,149 +363,9 @@
 ?>
 			</div>
 		</td>
-	</tr>
-	
-<?	if($this->formvars['embedded_subformPK'] == '' AND $this->formvars['printversion'] == ''){?>
-	<tr>
-		<td colspan="2"align="left">
-		<? if($layer['connectiontype'] == 6 AND $this->new_entry != true AND $layer['layer_id'] > 0){ ?>
-			<table width="100%" border="0" cellspacing="4" cellpadding="0">
-				<tr>
-					<td colspan="2">
-						<i><? echo $layer['name'] ?></i>:&nbsp;<a href="javascript:selectall(<? echo $layer['layer_id']; ?>);">
-						<? if ($layer['count'] > MAXQUERYROWS) {
-						    echo $strSelectAllShown;
-						   } else {
-						    echo $strSelectAll;
-						   } ?>
-						</a>
-					</td>
-				</tr>
-				<tr>
-					<? if($layer['export_privileg'] != 0){ ?>
-					<td style="padding: 5 0 0 0;">
-						<select id="all_<? echo $layer['layer_id']; ?>" name="all_<? echo $layer['layer_id']; ?>" onchange="update_buttons(this.value, <? echo $layer['layer_id']; ?>);">
-							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
-							<option value="true"><? echo $strAllDatasets.':'; ?><? if ($layer['count'] > MAXQUERYROWS){	echo "&nbsp;(".$layer['count'].")"; } ?></option>
-						</select>
-					</td>					
-					<? }else{ ?>
-					<td style="padding: 5 0 0 0;"><? echo $strSelectedDatasets.':'; ?></td>
-					<? } ?>
-				</tr>
-				<tr>
-					<td>
-						<table cellspacing="0" cellpadding="0" class="button_background" style="box-shadow: none; border: 1px solid #bbb">
-							<tr>
-						<? if($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
-								<td><a title="<? echo $strDontRememberDataset; ?>" href="javascript:remove_from_clipboard(<? echo $layer['layer_id']; ?>);"><div class="button nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-							<? }else{ ?>
-								<td id="merk_link_<? echo $layer['layer_id']; ?>"><a title="<? echo $strRemember; ?>" href="javascript:add_to_clipboard(<? echo $layer['layer_id']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-							<? } ?>
-					<? if($layer['privileg'] == '2'){ ?>
-								<td id="delete_link_<? echo $layer['layer_id']; ?>"><a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['layer_id']; ?>);"><div class="button datensatz_loeschen"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></td>
-					<?} if($layer['export_privileg'] != 0){ ?>
-								<td><a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['layer_id']; ?>, <? echo $layer['count']; ?>);"><div class="button datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-					<? } if($layer['layouts']){ ?>
-								<td id="print_link_<? echo $layer['layer_id']; ?>"><a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['layer_id']; ?>);"><div class="button drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-					<? } ?>
-					<? if($privileg != ''){ ?>
-								<td id="zoom_link_<? echo $layer['layer_id']; ?>" style="padding: 0 0 0 15px"><a title="<? echo $strzoomtodatasets; ?>" href="javascript:zoomto_datasets(<?php echo $layer['layer_id']; ?>, '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-								<td id="classify_link_<? echo $layer['layer_id']; ?>" style="padding: 0 5px 0 0">
-									<select style="width: 130px" name="klass_<?php echo $layer['layer_id']; ?>">
-										<option value=""><? echo $strClassify; ?>:</option>
-										<?
-										for($j = 0; $j < count($layer['attributes']['name']); $j++){
-											if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
-												echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
-											}
-										}
-										?>
-									</select>
-								</td>
-					<?}?>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr style="display:none">
-					<td height="23" colspan="3">
-						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['layer_id']; ?>);"><? echo $strCreateChart; ?></a>
-					</td>
-				</tr>
-				<tr id="charts_<?php echo $layer['layer_id']; ?>" style="display:none">
-					<td></td>
-					<td>
-						<table>
-							<tr>
-								<td colspan="2">
-									&nbsp;&nbsp;<select name="charttype_<?php echo $layer['layer_id']; ?>" onchange="change_charttype(<?php echo $layer['layer_id']; ?>);">
-										<option value="bar">Balkendiagramm</option>
-										<option value="mirrorbar">doppeltes Balkendiagramm</option>
-										<option value="circle">Kreisdiagramm</option>
-									</select>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									&nbsp;&nbsp;Beschriftung:
-								</td>
-								<td>
-									<select style="width:133px" id="" name="chartlabel_<?php echo $layer['layer_id']; ?>" >
-										<?
-										for($j = 0; $j < count($layer['attributes']['name']); $j++){
-											if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
-												echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
-											}
-										}
-										?>
-									</select>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									&nbsp;&nbsp;Wert:
-								</td>
-								<td>
-									<select style="width:133px" name="chartvalue_<?php echo $layer['layer_id']; ?>" onchange="create_chart(<?php echo $layer['layer_id']; ?>);">
-										<option value="">--- Bitte W�hlen ---</option>
-										<?
-										for($j = 0; $j < count($layer['attributes']['name']); $j++){
-											if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
-												echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
-											}
-										}
-										?>
-									</select>
-								</td>
-							</tr>
-							<tr id="split_<?php echo $layer['layer_id']; ?>" style="display:none">
-								<td>
-									&nbsp;&nbsp;Trenn-Attribut:
-								</td>
-								<td>
-									<select style="width:133px" name="chartsplit_<?php echo $layer['layer_id']; ?>" onchange="create_chart(<?php echo $layer['layer_id']; ?>);">
-										<option value="">--- Bitte W�hlen ---</option>
-										<?
-										for($j = 0; $j < count($layer['attributes']['name']); $j++){
-											if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
-												echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
-											}
-										}
-										?>
-									</select>
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-			</table>
-		<?} ?>
-		</td>
-	</tr>
-	<? } ?>
-	
+	</tr>	
 </table>
+<? include('dataset_operations.php'); ?>
 </div>
 
 <?

@@ -368,42 +368,6 @@ class GUI {
 		global $kvwmap_plugins;
 		return in_array($plugin, $kvwmap_plugins);
 	}
-
-	function resizeMap2Window() {
-		global $sizes;
-		$size = $sizes[$this->user->rolle->gui];
-		$gui_light = ($this->user->rolle->gui == 'layouts/gui_light.php');
-
-		if (array_key_exists('legenddisplay', $this->formvars) AND $this->formvars['legenddisplay'] !== NULL) {
-			$hideLegend = $this->formvars['legenddisplay'];		// falls die Legende gerade ein/ausgeblendet wurde
-		}
-		else {
-			$hideLegend = $this->user->rolle->hideLegend;
-		}
-
-		$width = $this->formvars['browserwidth'] -
-			$size['margin']['width']
-			- ($this->user->rolle->hideMenue == 1 ? $size['menue']['hide_width'] : $size['menue']['width'])
-			- ($gui_light? 0 : ($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']))
-			- ($gui_light ? 0 : 18);	# Breite für möglichen Scrollbalken
-
-		$height = $this->formvars['browserheight'] -
-			$size['margin']['height'] -
-			$size['header']['height'] -
-			$size['scale_bar']['height'] -
-			((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0) -
-			($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0) -
-			$size['footer']['height'];
-
-		if($width  < 0) $width = 1000;
-		if($height < 0) $height = 800;
-		if($height % 2 != 0)$height = $height - 1;		# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
-		if($width  % 2 != 0)$width = $width - 1;				# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
-
-		// $this->debug->write('<br>resizeMap2Window for gui: ' . $this->user->rolle->gui . ' to: ' . $width . 'x' . $height, 4, false);
-		$this->user->rolle->setSize($width.'x'.$height);
-		$this->user->rolle->readSettings();
-	}
 		
 	/**
 	 * Function zoom to maximum extent of Layer with $layer_id in current map object $this->map
@@ -615,7 +579,7 @@ class GUI {
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'status') != ''){
+		if(value_of($layerset, 'errorstatus') != ''){
 			$layerset['aktivstatus'] = 0;
 		}
 
@@ -869,10 +833,6 @@ class GUI {
   function neuLaden() {
 		$this->save_legend_role_parameters();
 		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->set_selected_button($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
-		if($this->formvars['delete_rollenlayer'] != ''){
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
-		}
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
@@ -1143,7 +1103,7 @@ class GUI {
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
 				if ($this->user->rolle->oGeorefExt->minx==='') {
-				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
+				  echo "Richten Sie in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
 				  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
 				  exit;
@@ -1313,7 +1273,9 @@ class GUI {
 					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivstatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
-
+						if ($layerset['list'][$i]['status'] == 'sensible') {
+							$this->sensible_layers_active = true;
+						}
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
 						$error = msGetErrorObj();
 						$test = 0;
@@ -1595,7 +1557,7 @@ class GUI {
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
 					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
+					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");
         }
 				if($dbStyle['colorrange'] != '') {
 					$style->updateFromString("STYLE COLORRANGE " . $dbStyle['colorrange']." END");
@@ -1640,12 +1602,25 @@ class GUI {
 					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
 				}				
 				$label->font = $dbLabel['font'];
-				$RGB=explode(" ",$dbLabel['color']);
-				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-				$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				$label->align = $dbLabel['align'];
+				$RGB = explode(" ",$dbLabel['color']);
+				if ($RGB[0] == '') { 
+					$RGB[0]=0; $RGB[1]=0; $RGB[2]=0; 
+				}
+				if (is_numeric($RGB[0])) {
+					$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				}
+				else {
+					$label->updateFromString("LABEL COLOR [" . $dbLabel['color']."] END");
+				}
 				if($dbLabel['outlinecolor'] != ''){
 					$RGB=explode(" ",$dbLabel['outlinecolor']);
-					$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$label->updateFromString("LABEL OUTLINECOLOR [" . $dbLabel['outlinecolor']."] END");
+					}
 				}
 				if ($dbLabel['shadowcolor']!='') {
 					$RGB=explode(" ",$dbLabel['shadowcolor']);
@@ -1680,9 +1655,19 @@ class GUI {
 						$style = new styleObj();
 					}
 					$style->setGeomTransform('labelpoly');
-					$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if (is_numeric($RGB[0])) {
+						$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
+					else {
+						$style->updateFromString("STYLE COLOR [" . $dbLabel['backgroundcolor']."] END");
+					}
 					if ($dbLabel['buffer']!='') {
-						$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						if (is_numeric($RGB[0])) {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						}
+						else {
+							$style->updateFromString("STYLE OUTLINECOLOR [" . $dbLabel['backgroundcolor']."] END");
+						}
 						$style->width = $dbLabel['buffer'];
 					}
 					$label->insertStyle($style);
@@ -1708,9 +1693,14 @@ class GUI {
 				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
-				$label->size = $dbLabel['size'];
-				$label->minsize = $dbLabel['minsize'];
-				$label->maxsize = $dbLabel['maxsize'];
+				if (is_numeric($dbLabel['size'])) {
+					$label->size = $dbLabel['size'];
+					$label->minsize = $dbLabel['minsize'];
+					$label->maxsize = $dbLabel['maxsize'];
+				}
+				else {
+					$label->updateFromString("LABEL SIZE [" . $dbLabel['size']."] END");
+				}
 				$label->minfeaturesize = $dbLabel['minfeaturesize'];
 				if ($dbLabel['maxscale'] != '') {
 					$label->maxscaledenom = $dbLabel['maxscale'];
@@ -2112,7 +2102,7 @@ class GUI {
   }
 
 	function check_layer_visibility(&$layer){
-		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
+		if($layer['errorstatus'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
 			return false;
 		}
 		return true;
@@ -2391,7 +2381,7 @@ class user {
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
-		$this->funktion = $rs['Funktion'];
+		$this->funktion = $rs['funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'] === 't';
@@ -2898,26 +2888,32 @@ class rolle {
 
 	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
 		$this->layerset = $this->getLayer('');
-		if (!$ignore_rollenlayer) {
-			$rollenlayer = $this->getRollenLayer('', NULL);
-			$this->layerset = array_merge($this->layerset, $rollenlayer);
+		if (!$ignore_rollenlayer AND $rollenlayer = $this->getRollenLayer('', NULL)) {
+			$this->layerset['layer_ids'] = $this->layerset['layer_ids'] + $rollenlayer['layer_ids'];
+			$this->layerset = $this->layerset + $rollenlayer;
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		foreach ($formvars['thema'] as $layer_id => $aktiv_status) {
 			$layer = $this->layerset['layer_ids'][$layer_id];
-			$requires_status = value_of($formvars, 'thema[' . value_of($layer, 'requires') . '');
-			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
+			if ($aktiv_status !== '') {
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
 				if ($layer['layer_id'] > 0) {
 					$sql ="
 						UPDATE
-							kvwmap.u_rolle2used_layer
+							kvwmap.u_rolle2used_layer r
 						SET
 							aktivstatus = " . $aktiv_status . "
+						FROM
+							kvwmap.used_layer ul
 						WHERE
-							user_id = " . $this->user_id . " AND
-							stelle_id = " . $this->stelle_id . " AND
-							layer_id = " . $layer['layer_id'] . "
+							r.user_id = " . $this->user_id . " AND
+							r.stelle_id = " . $this->stelle_id . " AND
+							ul.stelle_id = " . $this->stelle_id . " AND
+							ul.layer_id = r.layer_id and 
+							(
+								r.layer_id = " . $layer['layer_id'] . " OR
+								ul.requires = " . $layer['layer_id'] . "
+							)
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
@@ -3059,10 +3055,10 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, errorstatus, trigger_function, version,
 				ul.queryable,
 				l.drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale,
 				ul.maxscale,
 				ul.offsite,
@@ -3180,9 +3176,12 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		$layer = array();
+		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Name_or_alias'] = $rs['name'];
-			$layer[] = $rs;
+			$layer[$i] = $rs;
+			$layer['layer_ids'][$rs['layer_id']] = &$layer[$i];
+			$i++;
 		}
 		return $layer;
 	}
@@ -3230,6 +3229,8 @@ class rolle {
 			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
+			$this->layer_selection_mode=$rs['layer_selection_mode'];
+			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
@@ -3865,8 +3866,11 @@ class db_mapObj{
     return $filter;
   }	
 	
-	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value'), $attribute_values = []) {
+	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$attr_obj = new LayerAttribute($this);
+
 		$attributes = array(
 			'name' => array(),
 			'tab' => array()
@@ -3917,16 +3921,17 @@ class db_mapObj{
 				arrangement,
 				labeling,
 				raster_visibility,
+				statistic_visibility,
 				dont_use_for_new,
 				mandatory,
 				quicksearch,
 				visible,
-				vcheck_attribute,
-				vcheck_operator,
-				vcheck_value,
+				visibility_rules,
 				\"order\",
 				privileg,
-				query_tooltip
+				query_tooltip,
+				style_attribute,
+				visibility_rules
 			FROM
 				kvwmap.layer_attributes as a LEFT JOIN
 				kvwmap.datatypes as d ON d.id::text = REPLACE(type, '_', '')
@@ -3976,33 +3981,69 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$i] = $rs['options'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];			
+			if ($rs['options']) {
+				$options_json = json_decode($rs['options'], true);
+				$attributes['options_struct'][$i] = $attr_obj->get_options($options_json ?: $rs['options'], $rs['form_element_type']);
+			}
+			$attributes['style_attribute'][$i] = $rs['style_attribute'];
+			
+			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
+			// Referenz auf dependents
+    	$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			// JSON parsen
+			$rulesJson = $rs['visibility_rules'] ?? '';
+			$rules = $rulesJson ? json_decode($rulesJson, true) : null;
+
+			// Abhängige Attribute sammeln
+			$dependentAttributes = [];
+			if ($rules) {
+				$collectAttributes = function($node) use (&$dependentAttributes, &$collectAttributes) {
+						if (isset($node['rules'])) {
+								foreach ($node['rules'] as $child) $collectAttributes($child);
+						} elseif (isset($node['attribute'])) {
+								$dependentAttributes[] = $node['attribute'];
+						}
+				};
+				$collectAttributes($rules);
+				$dependentAttributes = array_unique($dependentAttributes);
+			}
+
+			// Abhängigkeiten eintragen
+			foreach ($dependentAttributes as $depAttr) {
+					$dependents[$depAttr][] = $rs['name'];
+			}
+
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
 						$attributes[$column][$i] = 	replace_params_rolle(
-																					$attributes[$column][$i],
-																					((count($attribute_values) > 0 AND $replace_only == 'default') ? $attribute_values : NULL)
-																				);
+							$attributes[$column][$i],
+							((count($attribute_values) > 0 AND in_array('default', $replace_only)) ? $attribute_values : NULL)
+						);
 					}
 				}
 			}
 
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
+				if (substr($attributes['type'][$i], 0, 1) == '_') {
+					# Array-Datentyp
+					$type = substr($attributes['type'][$i], 1) . '[]';
+					$default = 'to_json((' . $attributes['default'][$i] . ')::' . $type . ')';
+				}
+				else {
+					$type = $attributes['type'][$i];
+					$default = '(' . $attributes['default'][$i] . ')::' . $type;
+				}
+				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			$attributes['form_element_type'][$i] = $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
@@ -4015,6 +4056,7 @@ class db_mapObj{
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['statistic_visibility'][$i] = $rs['statistic_visibility'];
 			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
@@ -4022,7 +4064,7 @@ class db_mapObj{
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
-				$attributes['style'] = $rs['name'];
+				$attributes['style'][] = $rs['name'];
 				$attributes['visible'][$i] = 0;
 			}
 			if ($rs['form_element_type'] == 'Editiersperre') {
@@ -4128,7 +4170,7 @@ class db_mapObj{
 		}
 
 		$sql = "
-			SELECT DISTINCT
+			SELECT 
 				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency,
 				rl.aktivstatus,
@@ -4138,7 +4180,7 @@ class db_mapObj{
 				rl.rollenfilter,
 				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale, ul.maxscale,
 				ul.offsite,
 				ul.postlabelcache,
@@ -4165,7 +4207,7 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.errorstatus, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
@@ -4235,7 +4277,7 @@ class db_mapObj{
 				rolle::$layer_params,
 				$rs['layer_id']
 			);
-			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data') AS $key) {
+			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data', 'wms_name') AS $key) {
 				$rs[$key] = replace_params_rolle(
 					$rs[$key],
 					['duplicate_criterion' => $rs['duplicate_criterion']]

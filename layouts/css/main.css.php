@@ -146,7 +146,7 @@ body {
 	margin: auto;
 }
 
-.collapsed, .dstable .collapsedfull {
+.collapsed, div:not(.gle_tabular)~.collapsedfull {
 	visibility: collapse;
   height: 0;
 	padding: 0 !important;
@@ -367,11 +367,19 @@ hr {
 	display: none !important;
 }
 
+.changed{
+	border: 3px solid tomato !important;
+}
+
 ul{
 	color: lightsteelblue;
 	margin: 5px;
 	padding: 0 0 0 <? echo $font_size_factor * 15; ?>px;
 	list-style: square outside none;
+}
+
+.ul_table {
+	width: max-content;
 }
 
 .ul_table td:first-of-type{
@@ -488,7 +496,6 @@ span[data-tooltip]:hover::after {
 	box-shadow: 1px 1px 6px 1px #ddd;
   position: absolute;
 	width: max-content;
-	min-width: 200px;
 	max-width: 400px;
   top: 1px;
   right: 0;
@@ -530,7 +537,8 @@ span[data-tooltip]:hover::after {
 }
 
 .custom-select .dropdown li.selected {
-  background-color: #e0e0e6;
+  background-color: #cdcdd4;
+	filter: brightness(1.1);
 }
 
 .custom-select img {
@@ -684,9 +692,12 @@ span[data-tooltip]:hover::after {
 }
 
 select {
-
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
+}
+
+select:not([multiple]) {
+	padding-right: 16px;
 }
 
 select option{
@@ -830,12 +841,45 @@ a.invisiblelayerlink {
 	cursor: context-menu;
 }
 
+a.under_construction span::after{
+  content: url('graphics/under_construction.png');
+  padding: 3px;
+	vertical-align: -4px;
+}
+
+a.sensible span::after{
+  content: url('graphics/critical.png');
+  padding: 3px;
+	vertical-align: -4px;
+}
+
+#sensible_layer_warning {
+	pointer-events: none;
+  position: absolute;        /* relativ zu #map_frame */
+  top: 6px;
+	right: 30px;
+  max-width: 400px;          /* Breite begrenzen */
+  background-color: rgba(211, 47, 47, 0.8); /* kräftig Rot, 80% Deckkraft */
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px 20px;
+  font-family: sans-serif;
+  font-size: 16px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
 .sachdatenanzeige_paging{
 	margin-top: 10px;
 }
 
 a.invisiblelayerlink:hover{
 	color: gray;
+}
+
+#schnellsprung_filter {
+	display: none;
 }
 
 select[name="geom_from_layer"] {
@@ -1066,12 +1110,18 @@ select[name="geom_from_layer"] {
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	text-align: center;
 	display: flex; 
-	flex-wrap: wrap;
-	justify-content: flex-start;
+	flex-direction: column;
+  min-height: 0;
 }
 
 #menueTable a {
 	color: firebrick;
+}
+
+#menueButtons {
+	display: flex;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
 }
 
 #menueScrollTable{
@@ -1211,7 +1261,6 @@ a.menuered:hover {
 }
 
 .button-menue{
-	flex: 0 0 auto;
 	margin: 0 0 2 0;
 }
 
@@ -1384,8 +1433,8 @@ a.menuered:hover {
 	position: absolute;
 	height: calc(100% - 2px);
 	width: calc(100% - 2px);
-	left: 1;
-	top: 2;
+	left: 1px;
+	top: 2px;
 }
 
 .button:active{
@@ -1542,6 +1591,7 @@ a.menuered:hover {
 }
 
 #legenddiv {
+	position: relative;
 	border-left: 1px solid #ccc;
 	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
@@ -1603,8 +1653,8 @@ a.menuered:hover {
 	background-color: #f6f6f6;
 	box-shadow: 1px 1px 4px #aaa;
 	z-index: 100;
-	margin: 3 0 0 15;
-	padding: 2 2 2 3;
+	margin: 3px 0 0 15px;
+	padding: 2px 2px 2px 3px;
 	height: 23px;
 	min-width: 177px;
 	border: 1px solid grey;
@@ -1638,7 +1688,6 @@ a.menuered:hover {
 }
 
 #scrolldiv{
-	width: <?php echo ($size['legend']['width'] - 3); ?>px;
 	margin-right: 2px;
 	flex: 1 1 0; 
 	overflow:auto; 
@@ -1652,13 +1701,13 @@ a.menuered:hover {
 
 .normallegend {
 	float: right;
-	width: <?php echo ($size['legend']['width'] - 1); ?>px;
+	width: 100%;
 	vertical-align: top;
 }
 
 .slidinglegend_slideout {
+	width: <?php echo $this->user->rolle->legendwidth; ?>px;
 	cursor: pointer;
-	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
 	transform: translate3d(-<? echo ($size['legend']['hide_width'] + 2); ?>px,0px,0px);
 	transition: all 0.3s ease;
@@ -1671,9 +1720,9 @@ a.menuered:hover {
 }
 
 .slidinglegend_slidein {
-	right: -<?php echo $size['legend']['width']; ?>px;
+	width: <?php echo $this->user->rolle->legendwidth; ?>px;
 	position: absolute;
-	transform: translate3d(-<?php echo $size['legend']['width']; ?>px,0px,0px);
+	transform: translate3d(-<?php echo ($this->user->rolle->legendwidth - $size['legend']['hide_width']); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
 
@@ -1885,7 +1934,7 @@ a .preview_image_hover{
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
 	margin: 7px 5px 11px 0;
-	width: fit-content;
+	<!-- width: fit-content; -->
 }
 
 #nds_edit .datensatz {
@@ -1980,7 +2029,7 @@ a .preview_image_hover{
 
 #contentdiv {
 	background: url(<? echo BG_IMAGE; ?>);
-	width: fit-content;
+	width: 100%;
 	position:relative;
 }
 
@@ -2071,7 +2120,6 @@ thead.gle th {
 	color: #aaa;
 	white-space: nowrap;
 	border-radius: 0 5px 0 0;
-	height: 21px;
 }
 
 .gle_tabs > div.active_tab{
@@ -2145,6 +2193,12 @@ thead.gle th {
 	vertical-align: bottom;
 }
 
+.gle_attribute_tooltip {
+	width: 16px;
+	height: 16px;
+	background-image: url(<? echo GRAPHICSPATH; ?>emblem-important.png);
+}
+
 table.tgle .glehead tr {
 	height: 26px;
 }
@@ -2164,6 +2218,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .readonly_text{
 	word-wrap: break-word;
+	width: max-content;
+  max-width: 700px;
 }
 
 .list_edit_div {
@@ -2470,6 +2526,14 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	border-right: 1px solid #CCCCCC;
 }
 
+#layer_selection_div, #schnellsprung_div{
+	display: flex;
+  flex-flow: column;
+  border: 1px solid #bbb;
+  margin: 4px;
+  padding: 3px;
+}
+
 #rollenwahl_main_div {
 	width: 830px; 
 	min-height: 430px
@@ -2495,7 +2559,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .rollenwahl-option-header {
-	<!-- width: 270px; -->
+	width: 285px;
 	padding : 4px;
 }
 
@@ -2892,8 +2956,20 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	color: green;
 }
 
+.darkgreen {
+	color: darkgreen;
+}
+
+.darkgreen > a {
+	color: darkgreen !important;
+}
+
 .orange {
 	color: orange;
+}
+
+.orange > a {
+	color: orange !important;
 }
 
 .blue {
@@ -2910,6 +2986,35 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .red {
 	color: red;
+}
+
+.red > a {
+	color: red !important;
+}
+
+.darkred {
+	color: darkred;
+}
+
+.darkred > a {
+	color: darkred !important;
+}
+
+.firebrick {
+	color: 	firebrick;
+}
+
+.gray {
+	color: gray;
+}
+
+.gray > a {
+	color: gray !important;
+}
+
+.inactive_class {
+	color: red;
+	font-style: italic;
 }
 
 .edit_button {
@@ -3167,4 +3272,47 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .delete-button:hover {
 	background-color: #ffa2a2;
+}
+
+.layer_comment_select_func {
+	padding-left: 7px;
+}
+.layer_comment_select_name_field {
+}
+.layer_comment_select_name_div {
+	background-color:<? echo BG_GLEATTRIBUTE; ?>;
+	border:1px solid #C3C7C3;
+	padding: 4px;
+	margin-left: 7px;
+}
+
+.hashtag-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  background: white;
+  transition: background 0.2s ease;
+	font-size: 60%;
+	margin-bottom: 5px;
+}
+
+.hashtag-icon .fa {
+  color: firebrick;
+}
+
+.hashtag-icon .fa-hashtag {
+	margin-top: 5px
+}
+
+.hashtag-icon:hover .fa {
+  color: black;
+}
+
+.new-gle-dataset-button {
+	display: none;
+  position: sticky;
+	right: 0px;
+	height: 18px;
 }

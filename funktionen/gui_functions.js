@@ -24,13 +24,28 @@ var loc = window.location.href.toString().split('index.php')[0];
 var mapimg, mapimg0, mapimg3, mapimg4;
 var compare_clipping = false;
 var formdata = new FormData();
+root.changed_form_fields = new Array();
 
-window.onbeforeunload = function(){
-	document.activeElement.blur();
-	if(root.document && root.document.GUI && root.document.GUI.gle_changed.value == 1){
-		return "Es existieren ungespeicherte Datensätze. Wollen Sie wirklich fortfahren?";
+window.addEventListener("beforeunload", function (e) {
+	if (
+			root.document &&
+			root.document.GUI &&
+			root.document.GUI.gle_changed.value == 1
+	) {
+			highlightChangedFormFields();
+			// Browser-Warnung auslösen (eigener Text wird ignoriert)
+			e.preventDefault();
+			e.returnValue = "";
 	}
-}
+});
+
+window.addEventListener("unload", function () {
+	try {
+		if (window.opener && window.opener.document) {
+			window.opener.document.GUI.gle_changed.value = 0;
+		}
+	} catch (err) {}
+});
 
 /*
 * @param url string
@@ -38,7 +53,7 @@ window.onbeforeunload = function(){
 * @param target array ['divname', ...]
 * @param action array ['sethtml'. ...]
 */
-function ahah(url, data, target, action, progress, loading_img = true) {
+function ahah(url, data, target, action, progress, loading_img = true, successCallback = null) {
 	if (csrf_token && csrf_token !== '') {
 		if (typeof data == 'string') {
 			data = data + '&csrf_token=' + csrf_token;
@@ -59,7 +74,7 @@ function ahah(url, data, target, action, progress, loading_img = true) {
 	var req = new XMLHttpRequest();
 	if (req != undefined) {
 		req.onreadystatechange = function() {
-			ahahDone(url, target, req, action);
+			ahahDone(url, target, req, action, successCallback);
 		};
 		if (typeof progress !== 'undefined') {
 			req.upload.addEventListener("progress", progress);
@@ -73,7 +88,7 @@ function ahah(url, data, target, action, progress, loading_img = true) {
 	return req;
 }
 
-function ahahDone(url, targets, req, actions) {
+function ahahDone(url, targets, req, actions, successCallback) {
 	if (req.readyState == 4) { // only if req is "loaded"
 		if (req.getResponseHeader('error') == 'true'){
 			message(req.responseText);
@@ -134,7 +149,11 @@ function ahahDone(url, targets, req, actions) {
 						case "setouterhtml":
 							targets[i].outerHTML = responsevalues[i];
 						break;
-						
+
+						case "showMessage":
+							message(JSON.parse(responsevalues[i]), 1000, 2000, top, null, null, 'OK', null, '600px');
+						break;
+
 						case "prependhtml":
 							targets[i].insertAdjacentHTML('beforebegin', responsevalues[i]);
 						break;
@@ -188,6 +207,9 @@ function ahahDone(url, targets, req, actions) {
 						}
 					}
 				}
+			}
+			if (successCallback) {
+				successCallback();
 			}
 		} 
 		else{
@@ -397,10 +419,13 @@ function printMapFast(filetype = 'pdf'){
 function checkForUnsavedChanges(event){
 	var sure = true;
 	if(root.document.GUI.gle_changed.value == 1){
-		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
+		var c = root.changed_form_fields.length;
+		highlightChangedFormFields();
+		sure = confirm('Es gibt noch ungespeicherte Datensätze (' + c + ' Feld' + (c > 1 ? 'er' : '') + '). Wollen Sie dennoch fortfahren?');
 	}
 	if(!sure){
 		if(event != undefined)event.preventDefault();
+		query_tab?.focus();
 		preventSubmit();
 	}
 	else{
@@ -408,6 +433,12 @@ function checkForUnsavedChanges(event){
 		root.allowSubmit();
 	}
 	return sure;
+}
+
+function highlightChangedFormFields(){
+	[].forEach.call(root.changed_form_fields, function (field)	{
+		field.classList.add('changed');
+	});
 }
 
 function startwaiting(lock) {
@@ -444,7 +475,12 @@ function getBrowserSize(){
 
 function resizemap2window(){
 	getBrowserSize();
-	params = 'go=ResizeMap2Window&browserwidth='+document.GUI.browserwidth.value+'&browserheight='+document.GUI.browserheight.value;
+	new_legendwidth = document.getElementById('container_paint').clientWidth - 
+								document.getElementById('map').clientWidth;
+	if (new_legendwidth < 230) {
+		new_legendwidth = legendwidth;
+	}
+	params = 'go=ResizeMap2Window&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value + '&legendwidth=' + new_legendwidth;
 	if(document.getElementById('map_frame') != undefined){
 		startwaiting();
 		document.location.href='index.php?'+params+'&nScale='+document.GUI.nScale.value+'&reloadmap=true';			// in der Hauptkarte neuladen
@@ -617,8 +653,11 @@ function dragstart(element){
 	}
 }
 
-function resizestart(element, type){
+function resizestart(event, element, type){
+	preventDefault(event);
 	if(document.fullyLoaded){
+		posx =  event.screenX;
+  	posy = event.screenY;
 		resizeobjekt = element;
 		resizetype = type;
 		dragx = posx - resizeobjekt.parentNode.offsetLeft;
@@ -692,9 +731,12 @@ function drag(event) {
 function auto_resize_overlay(){
 	if (root.resized < 2) {		// wenn resized > 1 hat der Nutzer von Hand die Groesse veraendert, dann keine automatische Anpassung
 		root.resized = 0;
-		var contentWidth = Math.max(document.getElementById("overlayheader")?.offsetWidth, document.getElementById("contentdiv")?.scrollWidth);
-		if (contentWidth < screen.width) {
-			window.resizeTo(contentWidth+35, 800);
+		var scrollWidth = document.getElementById("contentdiv")?.scrollWidth;
+		var clientWidth = document.getElementById("contentdiv")?.clientWidth;
+		if (scrollWidth < screen.width) {
+			if (scrollWidth > clientWidth) {
+				window.resizeTo(scrollWidth + 33, 800);
+			}
 		}
 		else {
 			window.resizeTo(screen.width, screen.height);
@@ -704,6 +746,7 @@ function auto_resize_overlay(){
 }
 
 function activate_overlay(){
+	root.changed_form_fields = [];
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
 	window.onmouseout = function(evt){
@@ -856,11 +899,13 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	var browserwidth = '';
 	var browserheight = '';
 	var legendtouched = '';
+	var zoom_layer_id = '';
 	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
 	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
 	if(document.GUI.browserwidth)browserwidth = document.GUI.browserwidth.value;
 	if(document.GUI.browserheight)browserheight = document.GUI.browserheight.value;
 	if(document.GUI.legendtouched)legendtouched = document.GUI.legendtouched.value;
+	if(document.GUI.zoom_layer_id)zoom_layer_id = document.GUI.zoom_layer_id.value;
 	
 	if(browser == 'ie'){
 		code2execute_after += 'moveback();';
@@ -868,7 +913,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
-	postdata = postdata+"&mime_type=map_ajax&legendtouched="+legendtouched+"&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
+	postdata = postdata+"&mime_type=map_ajax&legendtouched="+legendtouched+"&zoom_layer_id="+zoom_layer_id+"&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
 	postdata.split("&")
 		.forEach(function (item) {
@@ -966,6 +1011,14 @@ function handleCustomSelectKeyDown(event, dropdown) {
 	}
 }
 
+document.addEventListener("click", (e) => {
+  document.querySelectorAll(".custom-select").forEach(select => {
+    if (!select.contains(e.target)) {
+      select.classList.remove("active");
+    }
+  });
+});
+
 function toggle_custom_select(id) {
 	var custom_select_div = document.getElementById('custom_select_' + id);
 	var dropdown = custom_select_div.querySelector('.dropdown');
@@ -1002,6 +1055,8 @@ function custom_select_click(option) {
 		custom_select_div.querySelector('.placeholder img').src = option.querySelector('img').src;
 	}
 	custom_select_div.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
+	custom_select_div.style.backgroundColor = option.style.backgroundColor;
+	custom_select_div.style.color = option.style.color;
 	if (field.onchange) {
 		field.onchange();
 	}
@@ -1024,6 +1079,13 @@ function add_to_formdata(element){
 		value = 0;
 	}
 	formdata.set(element.name, value);
+}
+
+function hide_deactivated_layers(){
+	var icon = document.getElementById('hide_deactivated_layers_icon');
+	icon.classList.toggle("fa-eye");
+  icon.classList.toggle("fa-eye-slash");
+	ahah("index.php",	"go=hide_deactivated_layers", '', '', function () {update_legend('reload ');});	
 }
 
 function update_legend(layerhiddenstring){
@@ -1074,7 +1136,7 @@ function getlegend(groupid, status) {
 	}	
 }
 
-function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
+function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload, save_legend_role_params = true){
 	var status = query.checked;
 	var reload = false;
 	document.GUI.legendtouched.value = 1;
@@ -1143,10 +1205,15 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
   }
 	add_to_formdata(thema);
 	add_to_formdata(query);
-	if(reload)neuLaden();
+	if (reload) {
+		neuLaden();
+	}
+	else if (save_legend_role_params) {
+		save_legend_role_parameters();
+	}
 }
 
-function updateQuery(event, thema, query, radiolayers, instantreload){
+function updateQuery(event, thema, query, radiolayers, instantreload, save_legend_role_params = true){
 	document.GUI.legendtouched.value = 1;
   if(query){
     if(thema.checked == false){
@@ -1179,14 +1246,24 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   	}
   }
 	add_to_formdata(thema);
-	if(instantreload)neuLaden();
+	if (instantreload) {
+		neuLaden();
+	}
+	else if (save_legend_role_params) {
+		save_legend_role_parameters();
+	}
 }
 
 function deleteRollenlayer(type){
 	document.GUI.delete_rollenlayer.value = 'true';
 	document.GUI.delete_rollenlayer_type.value = type;
-	document.GUI.go.value='neu Laden';
+	document.GUI.go.value='delete_rollenlayer';
 	document.GUI.submit();
+}
+
+function save_legend_role_parameters(){
+	ahah("index.php?go=save_legend_role_parameters", formdata, [], []);
+	formdata = new FormData();
 }
 
 function neuLaden(){
@@ -1239,10 +1316,15 @@ function selectgroupquery(group, instantreload){
 			if(query){
 				query.checked = check;
 				thema = document.getElementById("thema"+layers[i]);
-				updateThema('', thema, query, '', '', 0);
+				updateThema('', thema, query, '', '', false, false);
 			}
 		}
-		if(instantreload)neuLaden();
+			if (instantreload) {
+				neuLaden();
+			}
+			else {
+				save_legend_role_parameters();
+			}
 	}
 }
 
@@ -1271,15 +1353,25 @@ function selectgroupthema(group, instantreload){
     if(thema && (!check || thema.type == 'checkbox')){		// entweder alle Layer sollen ausgeschaltet werden oder es ist ein checkbox-Layer
       thema.checked = check;
       query = document.getElementById("qLayer"+layers[i]);
-      updateQuery('', thema, query, '', 0);
+      updateQuery('', thema, query, '', false, false);
     }
   }
-	if(instantreload)neuLaden();
+	if (instantreload) {
+		neuLaden();
+	}
+	else {
+		save_legend_role_parameters();
+	}
 }
 
 function selectgroupthemaAll(group_checkbox, instantreload){
 	add_to_formdata(group_checkbox);
-	if(instantreload)neuLaden();
+	if (instantreload) {
+		neuLaden();
+	}
+	else {
+		save_legend_role_parameters();
+	}
 }
 
 function zoomToMaxLayerExtent(zoom_layer_id){
@@ -1344,11 +1436,10 @@ function closeGroupOptions(group_id) {
 	document.getElementById('group_options_' + group_id).innerHTML = ' ';
 }
 
-function saveLayerOptions(layer_id){	
+function saveLayerOptions(){	
 	var formdata = new FormData(document.GUI);
 	formdata.set('go', 'saveLayerOptions');
-	ahah("index.php",	formdata, [], []);
-	neuLaden();
+	ahah("index.php",	formdata, [], [], null, true, neuLaden);
 }
 
 function setLayerParam(name) {
@@ -1492,13 +1583,13 @@ function slide_legend_out(evt) {
 function switchlegend(){
 	if (document.getElementById('legenddiv').className == 'normallegend') {
 		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
-		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
+		ahah('index.php', 'go=changeLegendDisplay&hide=true', new Array('', ''), new Array("", "execute_function"));
 		document.getElementById('LegendMinMax').src = 'graphics/maximize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}
 	else {
 		document.getElementById('legenddiv').className = 'normallegend';
-		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
+		ahah('index.php', 'go=changeLegendDisplay&hide=false', new Array('', ''), new Array("", "execute_function"));
 		document.getElementById('LegendMinMax').src = 'graphics/minimize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende verstecken";
 	}
@@ -1526,7 +1617,6 @@ function activateAllClasses(class_ids){
 		selClass = document.getElementsByName("class[" + classids[i] + "]")[0];
 		if (selClass != undefined) {
 			selClass.value = 1;
-			add_to_formdata(selClass);
 		}
 	}
 	overlay_submit(currentform);
@@ -1538,7 +1628,6 @@ function deactivateAllClasses(class_ids){
 		selClass = document.getElementsByName("class[" + classids[i] + "]")[0];
 		if (selClass != undefined) {
 			selClass.value = 0;
-			add_to_formdata(selClass);
 		}
 	}
 	overlay_submit(currentform);

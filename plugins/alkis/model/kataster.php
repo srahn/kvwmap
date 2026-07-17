@@ -427,39 +427,19 @@ class flurstueck {
 	
 	function getFlstHistorie(){
 		$sql = "
-			with recursive child_tree (all_fkz, fkz, zde, nkz, vkz) as (
-			select
-				array_cat(vorgaengerflurstueckskennzeichen, nachfolgerflurstueckskennzeichen),
-				flurstueckskennzeichen as fkz,
-				zeitpunktderentstehung as zde,
-				nachfolgerflurstueckskennzeichen as nkz,
-				vorgaengerflurstueckskennzeichen as vkz
-			from
-				alkis.pp_flurstueckshistorie
-			where
-				flurstueckskennzeichen = '" . $this->FlurstKennz . "'
-			union all
-			select
-				array_cat(all_fkz, array_cat(f.vorgaengerflurstueckskennzeichen, f.nachfolgerflurstueckskennzeichen)),
-				f.flurstueckskennzeichen,
-				f.zeitpunktderentstehung,
-				f.nachfolgerflurstueckskennzeichen,
-				f.vorgaengerflurstueckskennzeichen
-			from
-				child_tree ct
-				join alkis.pp_flurstueckshistorie f on (select count(*) from unnest(ct.all_fkz) u (all_fkz) where u.all_fkz = f.flurstueckskennzeichen) < 2 AND (f.flurstueckskennzeichen= any(ct.nkz) OR f.flurstueckskennzeichen = any(ct.vkz))
-			)
-			SELECT distinct on (fkz)
-				fkz,
-				concat_ws(
-					'/',
-					substring(fkz from 10 for 5)::int,
-					nullif(substring(fkz from 15 for 4), '____')::int
-				) as name, 
-				coalesce(CASE WHEN date_part('DOY', zde) = 1 THEN date_part('year', zde)::text ELSE zde::text END, 'n.n.') as zde, 
-				to_json(nkz) as nkz 
-			FROM
-				child_tree
+		select
+			fkz,
+			concat_ws(
+				'/',
+				substring(fkz from 10 for 5)::int,
+				nullif(substring(fkz from 15 for 4), '____')::int
+			) as name,
+			coalesce(CASE WHEN date_part('DOY', zde) = 1 THEN date_part('year', zde)::text ELSE zde::text END, 'n.n.') as zde,
+			to_json(nkz) as nkz
+		FROM
+			unnest(alkis.fkz_child_tree('" . $this->FlurstKennz . "')) ct (fkz)
+			left join alkis.pp_flurstueckshistorie f(fkz,zde,vkz,nkz) using(fkz)
+		;
 			";
 		#echo $sql;
     $ret=$this->database->execSQL($sql, 4, 0);
@@ -1571,9 +1551,9 @@ class flurstueck {
     return $Vorgaenger;
   }
 
-  function readALB_Data($FlurstKennz, $without_temporal_filter = false, $oid_column) {
+  function readALB_Data($FlurstKennz, $without_temporal_filter = false, $oid_column, $eigentuemer_vcheck = NULL) {
     $this->debug->write("<p>kataster.php flurstueck->readALB_Data (vom Flurstück)",4);
-    $ret=$this->database->getALBData($FlurstKennz, $without_temporal_filter, $oid_column);
+    $ret=$this->database->getALBData($FlurstKennz, $without_temporal_filter, $oid_column, $eigentuemer_vcheck);
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<p>kvwmap readALB_Data Abfragen der ALB-Flurstücksdaten';
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
@@ -1640,6 +1620,9 @@ class flurstueck {
 		}
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
+		if ($eigentuemer_vcheck) {
+			$this->eigentuemer_vcheck_value = $rs[$eigentuemer_vcheck['attribute']];
+		}
   }
 
   function getFlstListe($GemID, $GemkgID, $FlurID, $FlstID, $history_mode = 'aktuell') {

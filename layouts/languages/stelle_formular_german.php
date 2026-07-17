@@ -3,6 +3,7 @@
   $strAsteriskRequired = 'Werte mit * mussen eingetragen werden';
   $strDataBankID = 'Datenbank ID';
   $strDefaultUserID = 'Standardnutzer';
+  $strQuickJumpLayer = 'Schnellsprung-Layer';
   $strTask = 'Bezeichnung*';
   $strReferenceMap = 'Referenzkarte';
   $strMaxExtent = 'Max Ausdehnung';
@@ -80,4 +81,5 @@
   $strInvitationTextDescription = 'Hier kann ein alternativer Text angegeben werden, der für Nutzer dieser Stelle in der Einladungsmail verwendet werden soll. Der Text muss den Platzhalter $link enthalten, der für den Link zur Registrierung verwendet wird.';
   $strStartPageParams = 'Startseiten-Parameter';
   $strStartPageParamsDescription = 'Wenn beim Aufruf von kvwmap ohne URL-Parameter nicht die Karte angezeigt werden soll, sondern ein anderer Anwendungsfall, können hier die dafür notwendigen Parameter angegeben werden. Z.B.: go=Layer-Suche_Suchen&selected_layer_id=123';
+  $strtotp_authentication = 'TOTP-Authentifizierung';
 ?>

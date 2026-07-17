@@ -8,6 +8,9 @@
 	else {
 		$explosion = explode(' ', $ausgabe[0]);
 		$branch = array_pop($explosion);
+		if (!in_array($branch, $branches)) {
+			$branches[] = $branch;
+		}
 		$branch_select = FormObject::createSelectField(
 			'branch',
 			$branches,
@@ -29,7 +32,7 @@
 				<tr>
 					<td>Status:</td>
 					<td>';
-		$diverged = (strpos($ausgabe[1], "Your branch and 'origin/develop' have diverged") !== false);
+		$diverged = (strpos($ausgabe[1], "Your branch and 'origin/" . $branch . "' have diverged") !== false);
 
 		if (strpos($ausgabe[1], 'Your branch is behind') !== false OR $diverged) {
 			$explosion = explode(' ', $ausgabe[1]);

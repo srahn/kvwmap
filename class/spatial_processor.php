@@ -798,7 +798,7 @@ class spatial_processor {
 				# EPSG-Code des Layers der Abgefragt werden soll
 				$layer_epsg = $layerset[0]['epsg_code'];
 
-				$data = $layerset[0]['data'];
+				$data = str_replace('$SCALE', '1000', $layerset[0]['data']);
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = getDataParts($data)['select'];

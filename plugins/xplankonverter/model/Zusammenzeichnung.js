@@ -135,6 +135,7 @@ class Zusammenzeichnung {
       form_data.append('format', 'json_result');
       form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
+      form_data.append('digital_mv', $('#digital_mv').is(':checked'));
       form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
 			form_data.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'));
       var xhttp = new XMLHttpRequest();
@@ -182,8 +183,8 @@ class Zusammenzeichnung {
             id="upload_zusammenzeichnung_finish_button"
             style="display: none"
             type="button"
-            value="Zur Anzeige ${this.config.genitiv}"
-            onclick="window.location='index.php?go=xplankonverter_konvertierung_anzeigen&planart=${this.planart}&csrf_token=${this.csrf_token}'"
+            value="Zur Anzeige der Konvertierung und ${this.config.genitiv}"
+            onclick="window.location='index.php?go=Layer-Suche&selected_layer_id=${this.config.konvertierung_layer_id}&csrf_token=${this.csrf_token}'"
           >
         </div>
       `);
@@ -641,13 +642,18 @@ class Zusammenzeichnung {
     }
     // let nextFunction = (nextStep != '' ? nextStep : this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]);
     // confirm step
-    console.log('confirm_step: %o', this.process[step]);
+    console.log('confirm_step: %o', step);
     $('#upload_zusammenzeichnung_step_' + this.process[step].nr).addClass(this.confirm_class[success]);
     $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success] + '" aria-hidden="true" ></i>');
-    if (success == 'ok' && nextFunction !== '') {
-      console.log(`call next step function: ${this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]}()`);
-      console.log(`call next step function nextFunction: ${nextFunction}()`);
-      this[nextFunction]();
+    if (success == 'ok') {
+      if (nextFunction !== '') {
+        console.log(`call next step function: ${this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]}()`);
+        console.log(`call next step function nextFunction: ${nextFunction}()`);
+        this[nextFunction]();
+      }
+      else {
+        $('#upload_zusammenzeichnung_finish_button').show();
+      }
     }
     else {
       console.log(`Step ${step} has not successfully finished.`);

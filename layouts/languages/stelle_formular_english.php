@@ -3,6 +3,7 @@
   $strAsteriskRequired = 'Fields marked with an asterisk * are required';
   $strDataBankID = 'Database ID';
 	$strDefaultUserID = 'Standard user';
+  $strQuickJumpLayer = 'Quick Jump Layer';
   $strTask = 'Task';
   $strReferenceMap = 'Reference map*';
   $strMaxExtent = 'Max Extent';
@@ -69,4 +70,5 @@
   $strResetPasswordText = "Reset password text";
   $strInvitationText = 'You have been invited to participate in the application "' . TITLE . '"';
   $strStartPageParams = 'Startpage Parameter';
+  $strtotp_authentication = 'TOTP-Authentification';
 ?>

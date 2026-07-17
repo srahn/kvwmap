@@ -16,36 +16,77 @@ class PrintJob extends PgObject {
 		$this->where = "";
 	}
 
-  public static function find_next($gui) {
-    $pj = new PrintJob($gui);
-	  $print_jobs = $pj->find_where("status = 'beauftragt'", 'created_at', '*', 1);
-    if (count($print_jobs) > 0) {
-      return $print_jobs[0];
-    }
-    return null;
-  }
+  public static function find_by_id($gui, $id) {
+		$obj = new PrintJob($gui);
+		$print_job = $obj->find_by('id', $id);
+		return $print_job;
+	}
 
-  function print() {
-    // get layer for bogen
-    $this->gui->formvars['aktivesLayout'] = $this->get('ddl_id');
-    $this->gui->formvars['chosen_layer_id'] = $this->get('layer_id');
-    $this->gui->formvars['checkbox_names_' . $this->get('layer_id')] = 'check;' . $this->get('table_alias') . ';' . $this->get('table_name') . ';' . $this->get('feature_id') . ';' . $this->get('layer_id');
-    $this->gui->formvars['check;' . $this->get('table_alias') . ';' . $this->get('table_name') . ';' . $this->get('feature_id') . ';' . $this->get('layer_id')] = 'on';
-    $result = $this->gui->generischer_sachdaten_druck_createPDF();
-    $dest_path = pathinfo($this->get('pdf_path'),  PATHINFO_DIRNAME);
-    if (!is_dir($dest_path)) {
-      mkdir($dest_path, 0777, true);
-    }
-    // copy pdf to Bogen Ordner
-    if (!rename($result['pdf_file'], $this->get('pdf_path'))) {
-      return array(
-        'success' => false,
-        'msg' => 'Fehler: Datei: ' . $this->get('pdf_path') . ' konnte nicht erstellt werden.'
-      );
-    }
-    return array(
-      'success' => true,
-      'msg' => 'Datei ' . $this->get('pdf_path') . ' mit Druckjob id: ' . $this->get_id() . ' gedruckt.'
-    );
-  }
+	/**
+	 * Function find $num_jobs with status beauftragt and block it
+	 * with status running for next calls.
+	 * @return array(PrintJob) or empty Array if no found.
+	 */
+	public static function find_next($gui) {
+		$print_job = new PrintJob($gui);
+		$running_print_jobs = $print_job->find_where("status = 'running'");
+		if (count($running_print_jobs) > 150) {
+			return null;
+		}
+		$sql = "
+			WITH next AS (
+				SELECT
+					*
+				FROM
+					public.print_jobs
+				WHERE
+					status = 'beauftragt'
+				ORDER BY
+					created_at
+				LIMIT " . $num_jobs . "
+			)
+			UPDATE
+				public.print_jobs p
+			SET
+				status = 'running',
+				started_at = now()
+			FROM
+				next
+			WHERE
+			  p.id = next.id
+			RETURNING p.*
+		";
+		#echo "\nSQL zur Abfrage des nächsten print_jobs: " . $sql;
+		$query = $print_job->execSQL($sql);
+		$results = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$results[] = PrintJob::find_by_id($gui, $rs['id']);
+		}
+		return $results;
+	}
+
+	function print() {
+		$this->gui->debug->write("\nDruckjob mit ID " . $this->get_id() . " wird ausgeführt.");
+		// get layer for bogen
+		$this->gui->formvars['aktivesLayout'] = $this->get('ddl_id');
+		$this->gui->formvars['chosen_layer_id'] = $this->get('layer_id');
+		$this->gui->formvars['checkbox_names_' . $this->get('layer_id')] = 'check;' . $this->get('table_alias') . ';' . $this->get('table_name') . ';' . $this->get('feature_id') . ';' . $this->get('layer_id');
+		$this->gui->formvars['check;' . $this->get('table_alias') . ';' . $this->get('table_name') . ';' . $this->get('feature_id') . ';' . $this->get('layer_id')] = 'on';
+		$result = $this->gui->generischer_sachdaten_druck_createPDF();
+		$dest_path = pathinfo($this->get('pdf_path'),  PATHINFO_DIRNAME);
+		if (!is_dir($dest_path)) {
+			mkdir($dest_path, 0777, true);
+		}
+		// copy pdf to Bogen Ordner
+		if (!rename($result['pdf_file'], $this->get('pdf_path'))) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler: Datei: ' . $this->get('pdf_path') . ' konnte nicht erstellt werden.'
+			);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Datei ' . $this->get('pdf_path') . ' mit Druckjob id: ' . $this->get_id() . ' gedruckt.'
+		);
+	}
 }

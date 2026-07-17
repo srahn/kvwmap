@@ -138,6 +138,20 @@ class rolle {
     return 1;
   }
 
+	function setLayerSelection($id) {
+    $sql = "
+			UPDATE 
+				kvwmap.rolle 
+			SET 
+				layer_selection = " . ($id ?: 'NULL') . "
+    	WHERE 
+				user_id = " . $this->user_id . ' 
+				AND stelle_id = ' . $this->stelle_id;
+    $this->debug->write("<p>file:rolle.php class:rolle->setLayerSelection:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
+
 	function getLayer($LayerName, $only_active = false, $replace_params = true) {
 		$layer = [];
 		$layer_name_filter = '';
@@ -195,10 +209,10 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, errorstatus, trigger_function, version,
 				ul.queryable,
 				l.drawingorder,
-				ul.legendorder,
+				l.legendorder,
 				ul.minscale,
 				ul.maxscale,
 				ul.offsite,
@@ -246,6 +260,7 @@ class rolle {
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['queryable'] = ($rs['queryable'] === 't');
+			$rs['querymap'] = ($rs['querymap'] === 't');
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
 					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
@@ -517,6 +532,7 @@ class rolle {
 			rolle::$language = $rs['language'];
 			$this->hideMenue = ($rs['hidemenue'] == 'f'? false : true);
 			$this->hideLegend = ($rs['hidelegend'] == 'f'? false : true);
+			$this->legendwidth = $rs['legendwidth'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -528,8 +544,11 @@ class rolle {
 			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
+			$this->layer_selection_mode=$rs['layer_selection_mode'];
+			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
+			$this->hide_deactivated_layers = ($rs['hide_deactivated_layers'] == 't');
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
@@ -1282,7 +1301,7 @@ class rolle {
 				l.query as pfad,
 				1 as queryable,
 				gle_view,
-				'(' || rollenfilter || ')' as filter
+				'(' || nullif(rollenfilter, '') || ')' as filter
 			FROM
 				kvwmap.rollenlayer AS l
 			WHERE
@@ -1305,18 +1324,21 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		$layer = array();
+		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Name_or_alias'] = $rs['name'];
-			$layer[] = $rs;
+			$layer[$i] = $rs;
+			$layer['layer_ids'][$rs['layer_id']] = &$layer[$i];
+			$i++;
 		}
 		return $layer;
 	}
 
-	function resetLayers($layer_id){
-		$this->update_layer_status($layer_id, '0');
+	function resetLayers($layer_id, $ignore_rollenlayer = false){
+		$this->update_layer_status($layer_id, '0', $ignore_rollenlayer);
 	}
 
-	function update_layer_status($layer_id, $status) {
+	function update_layer_status($layer_id, $status, $ignore_rollenlayer = false) {
 		if($layer_id > 0 OR $layer_id == NULL){
 			$sql = "
 				UPDATE
@@ -1331,7 +1353,7 @@ class rolle {
 			$this->debug->write("<p>file:rolle.php class:rolle->update_layer_status - schalte ein oder alle Layer Stati der Rolle um:", 4);
 			$this->database->execSQL($sql, 4, $this->loglevel);		
 		}
-		if($layer_id < 0 OR $layer_id == NULL){
+		if (!$ignore_rollenlayer AND ($layer_id < 0 OR $layer_id == NULL)){
 			$sql = "
 				UPDATE
 					kvwmap.rollenlayer
@@ -1385,26 +1407,32 @@ class rolle {
 
 	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
 		$this->layerset = $this->getLayer('');
-		if (!$ignore_rollenlayer) {
-			$rollenlayer = $this->getRollenLayer('', NULL);
-			$this->layerset = array_merge($this->layerset, $rollenlayer);
+		if (!$ignore_rollenlayer AND $rollenlayer = $this->getRollenLayer('', NULL)) {
+			$this->layerset['layer_ids'] = $this->layerset['layer_ids'] + $rollenlayer['layer_ids'];
+			$this->layerset = $this->layerset + $rollenlayer;
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		foreach ($formvars['thema'] as $layer_id => $aktiv_status) {
 			$layer = $this->layerset['layer_ids'][$layer_id];
-			$requires_status = value_of($formvars, 'thema[' . value_of($layer, 'requires') . '');
-			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
+			if ($aktiv_status !== '') {
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
 				if ($layer['layer_id'] > 0) {
 					$sql ="
 						UPDATE
-							kvwmap.u_rolle2used_layer
+							kvwmap.u_rolle2used_layer r
 						SET
 							aktivstatus = " . $aktiv_status . "
+						FROM
+							kvwmap.used_layer ul
 						WHERE
-							user_id = " . $this->user_id . " AND
-							stelle_id = " . $this->stelle_id . " AND
-							layer_id = " . $layer['layer_id'] . "
+							r.user_id = " . $this->user_id . " AND
+							r.stelle_id = " . $this->stelle_id . " AND
+							ul.stelle_id = " . $this->stelle_id . " AND
+							ul.layer_id = r.layer_id and 
+							(
+								r.layer_id = " . $layer['layer_id'] . " OR
+								ul.requires = " . $layer['layer_id'] . "
+							)
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
@@ -1503,7 +1531,7 @@ class rolle {
 					WHERE 
 						user_id = ' . $this->user_id . ' AND 
 						stelle_id = ' . $this->stelle_id . ' AND 
-						' . $id . ' = ' . $layer_id;
+						' . $id . ' = ' . abs($layer_id);
 				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
 				$this->database->execSQL($sql,4, $this->loglevel);
 			}
@@ -1600,12 +1628,15 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
-	function setRollenLayerName($formvars){
+	function setRollenLayerParams($formvars){
 		$sql = "
 			UPDATE
 				kvwmap.rollenlayer
 			SET
-				name = '" . $formvars['layer_options_name'] . "'
+				name = '" . $formvars['layer_options_name'] . "',
+				autodelete = '" . ($formvars['layer_options_autodelete'] ?: '0') . "',
+				buffer = " . quote_or_null($formvars['layer_options_buffer']) . ",
+				classitem = " . quote_or_null($formvars['classitem']) . "
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . " AND
@@ -1614,21 +1645,6 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
-	
-	function setRollenLayerAutoDelete($formvars){
-		$sql = "
-			UPDATE
-				kvwmap.rollenlayer
-			SET
-				autodelete = '" . ($formvars['layer_options_autodelete'] ?: '0') . "'
-			WHERE
-				user_id = " . $this->user_id . " AND
-				stelle_id = " . $this->stelle_id . " AND
-				id = -1*" . $formvars['layer_options_open'] . "
-		";
-		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerAutoDelete:",4);
-		$this->database->execSQL($sql,4, $this->loglevel);
-	}	
 
 	function setLabelitem($formvars) {
 		if (isset($formvars['layer_options_labelitem'])) {
@@ -1694,7 +1710,7 @@ class rolle {
 				UPDATE
 					kvwmap." . $table_name . "
 				SET
-					rollenfilter = '" . pg_escape_string($formvars['layer_options_rollenfilter']) . "'
+					rollenfilter = '" . $formvars['layer_options_rollenfilter'] . "'
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
@@ -1719,23 +1735,6 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
-	
-	function setBuffer($formvars) {
-		if ($formvars['layer_options_open'] < 0) { # Rollenlayer
-			$sql = "
-				UPDATE
-					kvwmap.rollenlayer
-				SET
-					buffer = " . ($formvars['layer_options_buffer'] ?: 'NULL') . "
-				WHERE
-					user_id = " . $this->user_id . " AND
-					stelle_id = " . $this->stelle_id . " AND
-					id = -1* " . $formvars['layer_options_open'] . "
-			";
-			$this->debug->write("<p>file:rolle.php class:rolle->setBuffer:",4);
-			$this->database->execSQL($sql,4, $this->loglevel);
-		}
-	}	
 
 	function setTransparency($formvars) {
 		if ($formvars['layer_options_transparency'] < 0 OR $formvars['layer_options_transparency'] > 100) {
@@ -1788,6 +1787,20 @@ class rolle {
 				layer_id = " . $formvars['layer_options_open'] . "
 		";
 		$this->debug->write("<p>file:rolle.php class:rolle->removeTransparency:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+
+	function setLegendWidth($width) {
+		$sql = "
+			UPDATE
+				kvwmap.rolle
+			SET
+				legendwidth = " . $width . "
+			WHERE
+				user_id= " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " 
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->setLegendWidth:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
@@ -1883,7 +1896,7 @@ class rolle {
 
 	/**
 	 * Function set the layer parameter for rolle attribut layer_params as string
-	 * @param MyObject The MyObject of the rolle.
+	 * @param PgObject The PgObject of the rolle.
 	 * @param Array The assoziative array with layer params of rolle.
 	 * @return void
 	 */
@@ -2382,6 +2395,21 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle function:set_last_query_layer - :",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
+	}
+
+	function hide_deactivated_layers(){
+		$sql = '
+			UPDATE 
+				kvwmap.rolle 
+			SET 
+				hide_deactivated_layers = NOT hide_deactivated_layers
+			WHERE 
+				user_id = ' . $this->user_id . ' AND 
+				stelle_id = ' . $this->stelle_id;
+		#echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:hide_deactivated_layers - :",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		return 1;
 	}	
 
 	function getMapComments($consumetime, $public = false, $order) {
@@ -2410,25 +2438,32 @@ class rolle {
 		return $ret;
 	}
 	
-	function getLayerComments($id, $user_id) {
-		$where_id = ($id != '' ? " AND id = " . $id : "");
+	function getLayerComments($id, $stelle_id, $user_id) {
+		global $admin_stellen;
+		$conditions = array();
+		$conditions[] = "(user_id = " . $user_id . " OR user_id IS NULL)";
+		if ($stelle_id != '') {
+			$conditions[] = "stelle_id = " . $stelle_id;
+		}
+		if ($id != '') {
+			$conditions[] = "id = " . $id;
+		}
 		$sql = "
 			SELECT
 				id,
+				user_id,
+				stelle_id,
 				name,
 				array_to_string(layers, ',') as layers,
 				query
 			FROM
 				kvwmap.rolle_saved_layers
 			WHERE
-				user_id = " . $user_id . " AND
-				stelle_id = " . $this->stelle_id .
-				$where_id . "
+				" . implode(" AND\n				", $conditions) . "
 			ORDER BY
 				name
 		";
-		#echo '<br>Sql: ' . $sql;
-
+		// echo '<br>Sql: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$this->database->success) {
 			# Fehler bei Datenbankanfrage
@@ -2445,7 +2480,7 @@ class rolle {
 		return $ret;
 	}
 
-	function insertMapComment($consumetime,$comment,$public) {
+	function insertMapComment($consumetime, $comment, $public) {
 		if($public == '')$public = 0;
 		$rows = [
 			'user_id' => $this->user_id, 
@@ -2477,40 +2512,47 @@ class rolle {
 		return $ret;
 	}
 	
-	function insertLayerComment($layerset,$comment) {
+	function insertLayerComment($layerset, $comment, $stelle_id, $user_id) {
 		$layers = array();
 		$query = array();
-		for($i=0; $i < count($layerset['list']); $i++){
-			if($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivstatus'] == 1){
+		for ($i=0; $i < count($layerset['list']); $i++) {
+			if ($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivstatus'] == 1) {
 				$layers[] = $layerset['list'][$i]['layer_id'];
-				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
+				if ($layerset['list'][$i]['querystatus'] == 1) {
+					$query[] = $layerset['list'][$i]['layer_id'];
+				}
 			}
 		}
-		$rows = [
-			'user_id' => $this->user_id,
-			'stelle_id' => $this->stelle_id,
+		$record = array(
+			'user_id' => $user_id ?: 'NULL',
+			'stelle_id' => $stelle_id ?: 'NULL',
 			'name' => "'" . $comment . "'",
-			'layers' => "'{" . implode(',', $layers) . "'}",
+			'layers' => "'{" . implode(',', $layers) . "}'",
 			'query' => "'" . implode(',', $query) . "'"
-		];
+		);
 		$sql = "
 			INSERT INTO
 				kvwmap.rolle_saved_layers
-				(" . implode(', ', array_keys($rows)) . ")
-			VALUES	
-				(" . implode(', ', $rows) . ")";
-		#echo '<br>'.$sql;
-		$queryret=$this->database->execSQL($sql,4, 1);
-		if ($queryret[0]) {
+				(" . implode(', ', array_keys($record)) . ")
+			VALUES
+				(" . implode(', ', array_values($record)) . ")
+			RETURNING
+				(id)
+		";
+		// echo '<br>' . $sql;
+		$ret = $this->database->execSQL($sql,4, 1);
+		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
-			$ret[0]=1;
-			$ret[1]='<br>Fehler beim Speichern des Kommentares zur Layerauswahl.<br>'.$ret[1];
+			return array(
+				'success' => false,
+				'msg' => '<br>Fehler beim Speichern des Kommentares zur Layerauswahl.<br>' . $ret[1]
+			);
 		}
-		else {
-			$ret[0]=0;
-			$ret[1]=1;
-		}
-		return $ret;
+		$rs = pg_fetch_assoc($ret['query']);
+		return array(
+			'success' => true,
+			'id' => $rs['id']
+		);
 	}
 
 	function deleteMapComment($storetime){
@@ -2530,15 +2572,15 @@ class rolle {
 		}
 	}
 		
-	function deleteLayerComment($id){
+	function deleteLayerComment($id, $stelle_id, $user_id) {
 		$sql = "
 			DELETE FROM 
 				kvwmap.rolle_saved_layers 
-			WHERE 
-				user_id = " . $this->user_id . " AND 
-				stelle_id = " . $this->stelle_id . " AND 
-				id = " . $id;
-		#echo '<br>'.$sql;
+			WHERE
+				id = " . $id
+				. ($stelle_id ? " AND stelle_id = " . $stelle_id : '')
+				. ($user_id ? " AND user_id = " . $user_id : '') . "
+		";
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
 			# Fehler bei Datenbankanfrage

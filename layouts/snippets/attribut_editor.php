@@ -224,6 +224,22 @@ function clear_all(column){
 	}
 }
 
+function show_attribute_options_doc() {
+	fetch(`index.php?go=get_attribute_options_doc`)
+	.then(response => {
+		if (!response.ok) {
+			message([{ type: 'error', msg: `Fehler bei der Abfrage der Attribut-Optionen Dokumentation. Status: ${response.status} ${response.statusText}` }]);
+			response.text().then(text => {
+				message([{ type: 'error', msg: `<p>${text}` }]);
+			});
+		}
+		response.text().then(text => {
+			message([{ type: 'info', msg: `${text}` }], 1000, 2000, null, null, null, 'Ja', 'Abbrechen', '900px', null);
+		});
+	})
+	.catch(error => message([ { type: 'error', msg: `${error.message}`}]));
+}
+
 function set_all(column){
 	for(i = 0; i < attributes.length; i++){
 		field = document.getElementsByName(column + '_'+attributes[i])[0];
@@ -232,6 +248,156 @@ function set_all(column){
 			field.onchange();
 		}
 	}
+}
+
+
+
+// ----------------- Visibility Rules ----------------------
+let visibilityRules = [];
+<?	for ($i = 0; $i < count_or_0($this->attributes['type']); $i++) { 
+			if ($this->attributes['visibility_rules'][$i]) { ?>
+				visibilityRules[<? echo $i; ?>] = <? echo $this->attributes['visibility_rules'][$i]; ?>;
+<?		}
+		} ?>
+
+const operators = ['=', '!=', '<', '>', 'IN'];
+
+function syncHiddenField(i) {
+  const input = document.getElementById('visibilityRulesInput_' + i);
+  if(input) input.value = JSON.stringify(visibilityRules[i]);
+}
+
+function addEmptyRule(i){
+	visibilityRules[i] = {"logic":"AND","rules":[{"attribute":"","operator":"=","value":""}]};
+	render(i);
+}
+
+// --------------------
+// Rekursiver Renderer
+// --------------------
+function renderNode(node, i, parent=null, index=null){
+  if(node.rules) return renderGroup(node, i, parent, index);
+  return renderRule(node, i, parent, index);
+}
+
+function renderGroup(group, i, parent=null, index=null){
+  const div = document.createElement('div');
+  div.className = 'group';
+
+  // Logic
+  const logicSelect = document.createElement('select');
+  ['AND','OR'].forEach(op => {
+    const option = document.createElement('option');
+    option.textContent = option.value = op;
+    if(group.logic===op) option.selected=true;
+    logicSelect.appendChild(option);
+  });
+  logicSelect.onchange = () => { group.logic = logicSelect.value; syncHiddenField(i); };
+  div.appendChild(logicSelect);
+
+  // Kinder
+  group.rules.forEach((child, idx) => {
+    const childEl = renderNode(child, i, group, idx);
+    childEl.classList.add('child');
+    div.appendChild(childEl);
+  });
+
+  // Buttons
+  div.appendChild(createAddRuleButton(group, i));
+  div.appendChild(createAddGroupButton(group, i));
+
+  // Delete-Button für Gruppe, außer Root
+  if(parent){
+    const delBtn = document.createElement('button');
+    delBtn.type='button';
+    delBtn.textContent='Löschen';
+    delBtn.onclick = () => { parent.rules.splice(index,1); render(i); };
+    div.appendChild(delBtn);
+  }
+
+  return div;
+}
+
+function renderRule(rule, i, parent=null, index=null){
+  const div = document.createElement('div');
+  div.className = 'rule';
+
+  // Attribut
+  const attrSelect = document.createElement('select');
+  attributes.forEach(attr => {
+    const o = document.createElement('option');
+    o.value = attr; o.textContent = attr;
+    if(rule.attribute===attr) o.selected=true;
+    attrSelect.appendChild(o);
+  });
+  attrSelect.onchange = () => { rule.attribute=attrSelect.value; syncHiddenField(i); };
+
+  // Operator
+  const opSelect = document.createElement('select');
+  operators.forEach(op => {
+    const o = document.createElement('option');
+    o.value = op; o.textContent = op;
+    if(rule.operator===op) o.selected=true;
+    opSelect.appendChild(o);
+  });
+  opSelect.onchange = () => { rule.operator=opSelect.value; syncHiddenField(i); };
+
+  // Value
+  const valueInput = document.createElement('input');
+  if(rule.operator==='IN'){
+    valueInput.value = Array.isArray(rule.value)?rule.value.join('|'):'';
+  } else {
+    valueInput.value = rule.value || '';
+  }
+  valueInput.oninput = () => {
+    if(rule.operator==='IN') rule.value=valueInput.value.split('|').map(s=>s.trim());
+    else rule.value=valueInput.value;
+    syncHiddenField(i);
+  };
+
+  div.append(attrSelect, opSelect, valueInput);
+
+  // Delete-Button
+  if(parent){
+    const delBtn = document.createElement('button');
+    delBtn.type='button';
+    delBtn.textContent='Löschen';
+    delBtn.onclick = () => { parent.rules.splice(index,1); render(i); };
+    div.appendChild(delBtn);
+  }
+
+  return div;
+}
+
+// --------------------
+// Buttons hinzufügen
+// --------------------
+function createAddRuleButton(group, i){
+  const btn = document.createElement('button');
+  btn.type='button';
+  btn.textContent='+ Bedingung';
+  btn.onclick = () => { group.rules.push({attribute:'', operator:'=', value:''}); render(i); };
+  return btn;
+}
+
+function createAddGroupButton(group, i){
+  const btn = document.createElement('button');
+  btn.type='button';
+  btn.textContent='+ Gruppe';
+  btn.onclick = () => { group.rules.push({logic:'AND', rules:[]}); render(i); };
+  return btn;
+}
+
+// --------------------
+// Render-Funktion für Attribut i
+// --------------------
+function render(i){
+  const container = document.getElementById('rulesDiv_' + i);
+  container.innerHTML='';
+	if (visibilityRules[i]) {
+  	container.appendChild(renderNode(visibilityRules[i], i));
+	}
+  syncHiddenField(i);
 }
 
 //-->
@@ -255,15 +421,69 @@ function set_all(column){
 		padding: 3px;
 		padding: 9px 0 9px 0;
 	}	
-	
-	.navigation th a{
+		
+	.navigation th:not(.navigation-selected) a{
 		color: #888;
 	}	
-	
-	.navigation th:hover{
+	.navigation th:not(.navigation-selected):hover{
 		background-color: rgb(238, 238, 239);
-		color: #666;
 	}
+	.navigation-selected{
+		background-color: #c7d9e6;
+	}
+	.navigation-selected div{
+		color: #111;
+	}
+
+	td {
+		vertical-align: top;
+	}
+
+	.rulediv {
+		overflow: hidden;
+		max-height: 24px; /* Höhe des ersten Elements */
+		transition: max-height 0.3s ease;
+	}
+
+	.rulediv.open {
+		max-height: 500px; /* ausreichend groß */
+		transition: max-height 0.3s ease;
+	}
+
+	.rule {
+		display: flex;
+	}
+
+	.rule *, .group *{
+		margin: 0 1px 2px 1px;
+	}
+
+	.rulediv.open .group {
+		border: 1px solid #aaa;
+		padding: 2px;
+	}
+
+	.group:not(:has(> :nth-child(5))) > :first-child {
+		display: none;
+	}
+
+	.group.child:not(:has(> :nth-child(6))) > :first-child {
+		display: none;
+	}
+
+	.child {
+		margin: 0px 2px 2px 10px;
+	}
+
+	.options_div {
+		display: flex;
+    gap: 2px;
+	}
+
+	.options_div a {
+		padding-top: 5px;
+	}
+
 </style>
 
 <table style="width: 700px; margin: 15px 40px 0 40px">
@@ -322,8 +542,8 @@ function set_all(column){
 							<a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a>
 						</th><?
 					} ?>
-					<th>
-						<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strAttributes; ?></div></a>
+					<th class="navigation-selected">
+						<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a>
 					</th>
 					<th>
 						<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a>
@@ -345,7 +565,7 @@ function set_all(column){
 <? }
 	if($this->formvars['selected_layer_id'] != '' OR $this->formvars['selected_datatype_id']){ ?>
 
-<table style="position: relative; display: block; max-width: 1670px; overflow-x: auto;" cellpadding="5" cellspacing="2" bgcolor="#f8f8f9">
+<table id="attribut_editor" style="position: relative; display: block; max-width: 1670px; overflow-x: auto;" cellpadding="5" cellspacing="2" bgcolor="#f8f8f9">
   <tr>
     <td colspan="2">&nbsp;</td>
   </tr>
@@ -404,19 +624,30 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $this->layerOptions . '</div>';
 								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer">
-														<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
-													</div>';
-								}
-								if (
-									$this->attributes['options'][$i] == '' AND
-									$this->attributes['constraints'][$i] != '' AND
-									!in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
-								) {
-									$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
+								if ($i == count_or_0($this->attributes['type']) - 1) { ?>
+									<div class="fett scrolltable_footer">
+										<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
+										<a href="javascript:show_attribute_options_doc();" title="Dokumentation zu Optionen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-question-circle-o"></i></a>
+									</div>
+									<?
 								} ?>
-								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
+								<div class="options_div"> <?
+									if (
+										$this->attributes['options'][$i] == '' AND
+										$this->attributes['constraints'][$i] != '' AND
+										!in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
+									) {
+										$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
+									} ?>
+									<textarea class="select_option_link" name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
+									<?
+									if (in_array($this->attributes['form_element_type'][$i], ['SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'])) {
+										if ($sublayer_id = explode(',', $this->attributes['options'][$i])[0]) {
+											echo '<a href="index.php?go=Layereditor&selected_layer_id=' . $sublayer_id . '&csrf_token=' . $_SESSION['csrf_token'] .'"><img src="graphics/pfeil_rechts.gif"></a>';
+										}
+									}
+									?>
+								</div>
 						  </td>
 							
 						  <td align="left" valign="top">
@@ -574,6 +805,42 @@ function set_all(column){
 									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 88px;' + this.options[this.selectedIndex].getAttribute('style'));"
 								); ?>
 							</td>
+
+							<? if ($this->attributes['style'][0] != '') { ?>
+							<td>
+								<?	if ($i == 0) {
+											echo '<div class="fett scrolltable_header">' . $strStyleAttribute . '</div>';
+										}
+										if ($i == count_or_0($this->attributes['type']) - 1) {
+											echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
+															FormObject::createSelectField(
+															'style_attribute',
+															$this->attributes['style'],
+															$this->attributes['style_attribute'][$i],
+															1,
+															'',
+															"set_all('style_attribute');",
+															'',
+															'',
+															'',
+															'- Auswahl -'
+														) .
+														'</div>';
+										}
+										echo FormObject::createSelectField(
+											'style_attribute_' . $this->attributes['name'][$i],
+											$this->attributes['style'],
+											$this->attributes['style_attribute'][$i],
+											1,
+											'',
+											'',
+											'',
+											'',
+											'',
+											'- Auswahl -'
+										); ?>
+							</td>
+							<? } ?>
 							
 							<td align="center" valign="top"><?
 								if($i == 0) {
@@ -686,34 +953,15 @@ function set_all(column){
 												$this->attributes['visible'][$i],
 												1,
 												'outline: 1px solid lightgrey; border: none; width: 75px; background-color: white;',
-												'update_visibility_form(this.value, \''.$this->attributes['name'][$i].'\')'
+												'update_visibility_form(this.value, \''.$this->attributes['name'][$i].'\');addEmptyRule(' . $i . ');'
 											); ?>
 										</td>
 										<td id="visibility_form_<? echo $this->attributes['name'][$i]; ?>" style="<? echo ($this->attributes['visible'][$i] == 2 ? '' : 'display:none') ?>">
-											<table style="width: 100%" cellspacing="0" cellpadding="0">
-												<tr>
-													<td><?
-														echo FormObject::createSelectField(
-															'vcheck_attribute_' . $this->attributes['name'][$i],
-															$this->attributes['name'],
-															$this->attributes['vcheck_attribute'][$i],
-															1
-														); ?>
-													</td>
-													<td><?
-														echo FormObject::createSelectField(
-															'vcheck_operator_' . $this->attributes['name'][$i],
-															array('=', '!=', '<', '>', 'IN'),
-															$this->attributes['vcheck_operator'][$i],
-															1,
-															'width: 35px'
-														); ?>
-													</td>
-													<td>
-														<input type="text" style="width: 60px" name="vcheck_value_<? echo $this->attributes['name'][$i]; ?>" value="<? echo htmlentities($this->attributes['vcheck_value'][$i]); ?>">
-													</td>
-												</tr>
-											</table>
+											<div id="rulesDiv_<? echo $i; ?>" class="rulediv" onmouseenter="this.classList.add('open');" onmouseleave="this.classList.remove('open');"></div>
+  										<input type="hidden" id="visibilityRulesInput_<? echo $i; ?>" name="visibility_rules_<? echo $this->attributes['name'][$i]; ?>">
+											<script>
+												render(<? echo $i; ?>);
+											</script>
 										</td>
 									</tr>
 								</table>
@@ -735,6 +983,13 @@ function set_all(column){
 								} ?>
 								<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
+							<td align="center" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header" style="margin-top: 5px; margin-left:5px"><span style="font-size:25px" title="' . $strUseForStatistics . '">&Sigma;</span></div>';
+								} ?>
+								<input name="statistic_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['statistic_visibility'][$i] ? ' checked="true"' : ''); ?>>
+						  </td>
+
 							<td>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							</td>

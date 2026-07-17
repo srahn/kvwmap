@@ -1,10 +1,10 @@
 <?php
-class LayerStyle extends MyObject {
+class LayerStyle extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'styles', 'Style_ID');
+		parent::__construct($gui, 'kvwmap', 'styles', 'style_id');
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
@@ -103,7 +103,8 @@ class LayerStyle extends MyObject {
 					'color'				=> 'rgb(' . $this->get('outlinecolor') . ')',
 					'fill'				=> ($color != '' AND $color != '-1 -1 -1'),
 					'fillColor'		=> (($color == '' OR $color == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $color . ')'),
-					'fillOpacity'	=> ($this->get('opacity') == '' ? $layer_opacity / 100 : $this->get('opacity') / 100)
+					'fillOpacity'	=> ($this->get('opacity') == '' ? $layer_opacity / 100 : $this->get('opacity') / 100),
+					'angle'       => ($this->get('angle') == '' ? 0 : $this->get('angle'))
 				);
 			} break;
 			default : {
