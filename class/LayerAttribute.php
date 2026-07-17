@@ -99,57 +99,93 @@ class LayerAttribute extends PgObject {
 		return $selects;
 	}
 
-	function get_options($settings, $type) {
-		switch ($type) {
-			case 'SubFormFK':
+	static function get_num_rows(array $options, int $size) {
+		$default_rows = $size <= 65 ? 2 : 3;
+		$max_rows = 10;
+		if ($options === null) {
+			$num_rows = $default_rows;
+		};
+		$num_rows = (array_key_exists('rows', $options) AND $options['rows'] != '') ? $options['rows'] : $default_rows;
+		if (array_key_exists('rows_by_length', $options) AND $options['rows_by_length']) {
+			$num_rows = ceil($size / 65);
+		}
+		if (array_key_exists('max_rows', $options) AND $options['max_rows'] != '') {
+			$max_rows = $options['max_rows'];
+		}
+		$num_rows = ($num_rows > $max_rows ? $max_rows : $num_rows);
+		return $num_rows;
+	}
+
+	function get_options($settings, $form_element_type) {
+		$default_rows = 3;
+		$default_cols = 60;
+		switch ($form_element_type) {
+			case 'SubFormFK' : {
 				$options = $this->get_SubFormFK_options($settings);
-				break;
-			// case 'checkbox':
-			// 	$options = $this->get_checkbox_options($settings);
-			// 	break;
+			} break;
+			case 'Textfeld' : {
+				if (is_array($settings)) {
+					$options = $settings;
+					$options['cols'] = (array_key_exists('cols', $settings) AND $settings['cols'] != '') ? $settings['cols'] : $default_cols;
+				}
+				else {
+					$options = array(
+						'rows' => $default_rows,
+						'cols' => $default_cols
+					);
+					if (strtolower(substr($settings, 0, 6)) == 'select') {
+						$options['sql'] = $settings;
+					}
+					else {
+						$options['subform_url'] = $settings;
+					}
+				}
+			} break;
+			case 'Dokument':
+			 	$options = $this->get_Dokument_options($settings);
+			break;
+			case 'Farbauswahl':
+			case 'Checkbox':
+				$options = $settings;
+			break;
 			// case 'radio':
 			// 	$options = $this->get_radio_options($settings);
 			// 	break;
 			default:
-				$options = array();
-				break;
+				$options = NULL;
 		}
 		return $options;
 	}
 
 	function get_SubFormFK_options($settings) { // get_options
 		$options = array();
-		if (strpos($settings, '{') === 0) {
-			$json = json_decode($settings, true);
-			$options['parent_layer_id'] = $json['ref_layer_id'];
-			$options['fk_name'] = $json['ref_keys'][0]['fkey'];
-			$options['pk_name'] = $json['ref_keys'][0]['pkey'];
-			$options['window_option'] = $json['window_type'] ?? '';
-			$options['ref_constraint'] = $json['ref_constraint'] ?? '';
+		if (is_array($settings)) {
+			$options = $settings;
 		}
 		else {
 			$semicolon_parts = explode(';', $settings);
 			$comma_parts = explode(',', $semicolon_parts[0]);
-			$colon_parts = explode(':', $comma_parts[1]);
-			$options['parent_layer_id'] = $comma_parts[0];
-			$options['fk_name'] = $colon_parts[0];
-			$options['pk_name'] = $colon_parts[1];
-			$options['window_option'] = $semicolon_parts[1] ?? '';
+			$options['ref_layer_id'] = $comma_parts[0];
+			for ($k = 1; $k < count($comma_parts); $k++) {
+				$colon_parts = explode(':', $comma_parts[$k]);
+				$keys['fkey'] = $colon_parts[0];		# Verknüpfungsattribut im Unter-Layer
+				$keys['pkey'] = end($colon_parts);	# Verknüpfungsattribut im Ober-Layer
+				$options['ref_keys'][] = $keys;
+			}
+			$options['window_type'] = $semicolon_parts[1] ?? '';
 		}
+		return $options;
+	}
 
-		// $options = array();
-		// if (strpos($settings, '{') === 0) {
-		// 	$options = json_decode($settings, true);
-		// }
-		// else {
-		// 	$semicolon_parts = explode(';', $settings);
-		// 	$comma_parts = explode(',', $semicolon_parts[0]);
-		// 	$colon_parts = explode(':', $comma_parts[1]);
-		// 	$options['ref_layer_id'] = $comma_parts[0];
-		// 	$options['ref_keys'][0]['fkey'] = $colon_parts[0];
-		// 	$options['ref_keys'][0]['pkey'] = $colon_parts[1];
-		// 	$options['window_type'] = $semicolon_parts[1] ?? '';
-		// }
+	function get_Dokument_options($settings) {
+		$options = array();
+		if (is_array($settings)) {
+			$options['dynamic_path'] = $settings['dynamic_path'] ?? '';
+			$options['show_hash_button'] = $settings['show_hash_button'] ?? false;
+		}
+		else {
+			$options['dynamic_path'] = (strpos(strtolower($settings), 'select') !== false ? $settings : '');
+		}
 		return $options;
 	}
 
@@ -162,7 +198,7 @@ class LayerAttribute extends PgObject {
 	 * @param array $formvars The form variables containing geometry type, coordinates and dimension.
 	 * @return array An array containing success status and WKB geometry.
 	 */
-	function get_wkb_geometry($layerdb, $layerset, $epsg_code, $formvars) {
+	static function get_wkb_geometry($layerdb, $layerset, $epsg_code, $formvars) {
 		if ($formvars['geomtype'] == 'POINT') {
 			include_once (CLASSPATH . 'pointeditor.php');
 			$pointeditor = new pointeditor($layerdb, $layerset['epsg_code'], $epsg_code, $layerset['oid']);

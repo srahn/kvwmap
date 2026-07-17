@@ -179,7 +179,7 @@ if ($rest % 4 != 0) {
 $j=0;
 ?>
 
-<table id="data_export" width="<?php echo ($simple ? ($this->user->rolle->nImageWidth + $sizes[$this->user->rolle->gui]['legend']['width']) : '100%'); ?>" border="0" cellpadding="1" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
+<table id="data_export" width="<?php echo ($simple ? ($this->user->rolle->nImageWidth + $this->user->rolle->legendwidth) : '100%'); ?>" border="0" cellpadding="1" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
   <tr>
     <td align="center" colspan="8" height="40" valign="middle"><h2><?php echo $strTitle; ?></h2></td>
   </tr>

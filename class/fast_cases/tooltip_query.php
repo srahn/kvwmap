@@ -893,7 +893,7 @@ class user {
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
-		$this->funktion = $rs['Funktion'];
+		$this->funktion = $rs['funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'] === 't';
@@ -1960,8 +1960,11 @@ class db_mapObj{
 			];
 	}
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
+	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$attr_obj = new LayerAttribute($this);
+
 		$attributes = array(
 			'name' => array(),
 			'tab' => array()
@@ -2012,6 +2015,7 @@ class db_mapObj{
 				arrangement,
 				labeling,
 				raster_visibility,
+				statistic_visibility,
 				dont_use_for_new,
 				mandatory,
 				quicksearch,
@@ -2071,7 +2075,13 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$i] = $rs['options'];
+			if ($rs['options']) {
+				$options_json = json_decode($rs['options'], true);
+				$attributes['options_struct'][$i] = $attr_obj->get_options($options_json ?: $rs['options'], $rs['form_element_type']);
+			}
 			$attributes['style_attribute'][$i] = $rs['style_attribute'];
 			
 			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
@@ -2128,8 +2138,6 @@ class db_mapObj{
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			$attributes['form_element_type'][$i] = $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
@@ -2142,6 +2150,7 @@ class db_mapObj{
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['statistic_visibility'][$i] = $rs['statistic_visibility'];
 			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
@@ -2234,7 +2243,7 @@ class db_mapObj{
 								# --------- weitere Optionen -----------
 								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
 									 # auch die oid abfragen
-									 $attributes['options'][$i] = str_ireplace(' from ', ', ' . $layer['oid'] . ' as oid from ', $optionen[0]);
+									 $attributes['options'][$i] = str_ireplace('output', 'output, ' . $layer['oid'] . ' as oid ', $optionen[0]);
 								}
 								# ------------ SQL ---------------------
 								else {
@@ -2503,37 +2512,14 @@ class db_mapObj{
 
 					# SubFormulare mit Fremdschlüssel
 					case 'SubFormFK' : {
-						if ($attributes['options'][$i] != '') {
-							if (strpos($attributes['options'][$i], '{') === 0) {
-								$json = json_decode($attributes['options'][$i], true);
-								$attributes['subform_layer_id'][$i] = $json['ref_layer_id'];
-								$attributes['subform_fkeys'][$i] = $json['ref_keys'];
-								$attributes['no_new_window'][$i] = ($json['window_type'] === 'no_new_window');
-								$attributes['options_json'][$i] = $json;
-							}
-							else {
-								$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen // get_options
-								$subform = explode(',', $options[0]);
-								$attributes['subform_layer_id'][$i] = $subform[0];
-								$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-								$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-								for ($k = 1; $k < count($subform); $k++) {
-									if (strpos($subform[$k], ':')) {
-										$exp = explode(':', $subform[$k]);
-										$keys['fkey'] = $exp[0];	# Verknüpfungsattribut in diesem Layer
-										$keys['pkey'] = $exp[1];	# Verknüpfungsattribut im Ober-Layer
-									}
-									else {
-										$keys['fkey'] = $keys['pkey'] = $subform[$k];
-									}
-									$attributes['subform_fkeys'][$i][] = $keys;
-									$attributes['SubFormFK_hidden'][$attributes['indizes'][$keys['fkey']]] = 1;
-								}
-								if ($options[1] != '') {
-									if ($options[1] == 'no_new_window') {
-										$attributes['no_new_window'][$i] = true;
-									}
-								}
+						if ($attributes['options_struct'][$i] != null) {
+							$attributes['subform_layer_id'][$i] = $attributes['options_struct'][$i]['ref_layer_id'];
+							$attributes['subform_fkeys'][$i] = $attributes['options_struct'][$i]['ref_keys'];
+							$attributes['no_new_window'][$i] = ($attributes['options_struct'][$i]['window_type'] === 'no_new_window');
+							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+							foreach ($attributes['subform_fkeys'][$i] as $ref_key) {
+								$attributes['SubFormFK_hidden'][$attributes['indizes'][$ref_key['fkey']]] = 1;
 							}
 						}
 					} break;

@@ -118,20 +118,34 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 		}
 	}
-		
-	toggle_group = function(id){
-		var group = document.getElementById('group'+id);
-		var group_img = document.getElementById('group_img'+id);
-		if(group.style.display == 'none'){
-			group.style.display = '';
-			group_img.src = 'graphics/minus.gif';
+
+	toggle_group = function(id, gle_view = '1') {
+		var groups = [];
+		var group_imgs = [];
+		if (gle_view == '1') {
+			groups[0] = document.getElementById('group'+id);
+			group_imgs[0] = document.getElementById('group_img'+id);
 		}
-		else{
-			group.style.display = 'none';
-			group_img.src = 'graphics/plus.gif';
+		else {
+			console.log('gle_view not 1');
+			const parts = id.split('_');
+			groups = document.querySelectorAll(`[id^="group${parts[0]}_${parts[1]}_"]`);
+			group_imgs = document.querySelectorAll(`[id^="group_img${parts[0]}_${parts[1]}_"]`);
 		}
+		console.log('groups: %o', groups);
+		groups.forEach((group, i) => {
+			console.log('Handle group: %o', group.id);
+			if (group.style.display == 'none') {
+				group.style.display = '';
+				group_imgs[i].src = 'graphics/minus.gif';
+			}
+			else {
+				group.style.display = 'none';
+				group_imgs[i].src = 'graphics/plus.gif';
+			}
+		});
 	}
-	
+
 	toggle_tab = function(tab, layer_id, k, t, tabname){
 		var dataset = document.getElementById('datensatz_' + layer_id + '_' + k);
 		var opentab_field = document.getElementById('opentab_' + layer_id + '_' + k);
@@ -173,6 +187,9 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			}
 			else {
 				field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+				if (!field) {
+					field = document.getElementById(layer_id + '_' + rule.attribute + '_' + '0_' + k);		// Radiobuttons haben noch einen Zähler zusätzlich
+				}
 			}
 			return field_has_value(field, rule.operator, rule.value);
 		}
@@ -322,16 +339,76 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 	
-	toggle_statistic_row = function(layer_id) {
-		var x = document.getElementsByClassName('statistic_row_'+layer_id),
-				i;
-		for (i = 0; i < x.length; i++) {
-			if (x[i].style.display == '') {
-				x[i].style.display = 'none';
+	toggle_statistic_row = function(evt, layer_id, mode = 'only_toggle') {
+		var b = document.querySelectorAll(".statistic_box");
+		if (mode == 'only_toggle') {
+			console.log('only toggle statistic row');
+			var x = document.getElementsByClassName('statistic_row_'+layer_id),
+					i;
+
+			for (i = 0; i < x.length; i++) {
+				if (x[i].style.display == '') {
+					x[i].style.display = 'none';
+					b.forEach(el => { el.style.display = "none"; });
+				}
+				else {
+					x[i].style.display = '';
+					b.forEach(el => {
+						el.style.display = "flex";
+					});
+				}
 			}
-			else {
-				x[i].style.display = '';
+		}
+		else {
+			b.forEach(el => { el.style.background = "none"; });
+			var y = document.getElementsByClassName(mode);
+			y[0].style.background = 'linear-gradient(#DAE4EC 0%, #c7d9e6 100%)';
+
+			var c = [];
+			if (mode == 'all_visible') {
+				console.log('use all visible for statistic class .check_' + layer_id);
+				c = document.querySelectorAll(".check_" + layer_id);
 			}
+			else if (mode == 'only_checked') {
+				console.log('use only checked for statistic');
+				c = document.querySelectorAll(".check_" + layer_id + ":checked");
+			}
+			else if (mode == 'all_queried') {
+				console.log('use all queried for statistic');
+				// get values of all queried by query remotely last query result from server and save in hidden input field, then read from there
+			}
+
+			const statistic_attribute_names = Array.from(document.querySelectorAll(".statistic_row_" + layer_id))
+				.filter(el => el.textContent.trim() !== "")
+				.map(el => el.dataset.attribute);
+			console.log('statistic attributes: %o', statistic_attribute_names);
+			const row_ids = Array.from(c).map(cb => cb.id.split('_')[1])
+			console.log('row_ids for statistic: %o', row_ids);
+
+			statistic_attribute_names.forEach(attr => {
+				let values = [];
+				row_ids.forEach(row => {
+					const id = `${layer_id}_${attr}_${row}`;
+					const el = document.getElementById(id);
+					if (el) {
+						values.push(parseFloat(el.value || '0'));
+					}
+				});
+				const sum = values.reduce((a, b) => a + b, 0);
+				const avg = values.length > 0 ? sum / values.length : 0;
+				const min = values.length > 0 ? Math.min(...values) : 0;
+				const max = values.length > 0 ? Math.max(...values) : 0;
+				console.log('values for statistic: %o', values);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Summe`).textContent = sum.toFixed(2);
+				console.log('sum for statistic: %o', sum);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Durchschnitt`).textContent = avg.toFixed(2);
+				console.log('avg for statistic: %o', avg);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Min`).textContent = min.toFixed(2);
+				console.log('min for statistic: %o', min);
+				document.getElementById(`statistic_value_${layer_id}_${attr}_Max`).textContent = max.toFixed(2);
+				console.log('max for statistic: %o', max);
+			});
+			evt.stopPropagation();
 		}
 	}
 
@@ -641,6 +718,48 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
 		root.document.GUI.gle_changed.value = '';
 		root.overlay_submit(enclosingForm, false);
+	}
+
+	newDataset = function() {
+		var open_subforms = document.querySelectorAll('.subForm:not(:empty)');
+		if (open_subforms.length > 0) {
+			message([{'type': 'info', 'msg': 'Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!'}]);
+			return;
+		}
+		form_fieldstring = enclosingForm.form_field_names.value + '';
+		form_fields = form_fieldstring.split('|');
+		for (i = 0; i < form_fields.length-1; i++) {
+			fieldstring = form_fields[i]+'';
+			field = fieldstring.split(';');
+			var element = document.getElementsByName(fieldstring)[0];
+			
+			if (element != undefined && element.type != 'hidden' && field[4] != 'Dokument' && (element.readOnly != true) && field[5] == '0' && element.value == '') {
+				message('Das Feld ' + element.title + ' erfordert eine Eingabe.');
+				return;
+			}
+
+			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '') {
+				completeDate(element);
+				if (!checkDate(element.value)) {
+					message('Das Datumsfeld ' + element.title + ' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
+			}
+
+			if (element != undefined && field[6] == 'time' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)) {
+				completeTime(element);
+				if(!checkTime(element.value)){
+					message('Das Uhrzeitfeld ' + element.title + ' hat nicht das Format hh:mm:ss.');
+					return;
+				}
+			}
+			if (upload_only_file_metadata == 1) {
+				if (field[4] == 'Dokument') {
+					convert_belated(element);
+				}
+			}
+		}
+		document.location = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>';
 	}
 
 	save_new_dataset = function(){
@@ -1018,6 +1137,17 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			root.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}
+
+	zoomto_datasets = function(layer_id, tablename, columnname, selektieren){
+		if(check_for_selection(layer_id)){
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.layer_tablename.value = tablename;
+			enclosingForm.layer_columnname.value = columnname;
+			enclosingForm.selektieren.value = selektieren;
+			enclosingForm.go.value = 'zoomto_selected_datasets';
+			root.overlay_submit(enclosingForm, false, 'root');
+		}
+	}
 	
 	zoom2wkt = function(wkt, epsg){
 		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
@@ -1046,16 +1176,6 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 		else{
 			return true;
-		}
-	}
-
-	zoomto_datasets = function(layer_id, tablename, columnname){
-		if(check_for_selection(layer_id)){
-			enclosingForm.chosen_layer_id.value = layer_id;
-			enclosingForm.layer_tablename.value = tablename;
-			enclosingForm.layer_columnname.value = columnname;
-			enclosingForm.go.value = 'zoomto_selected_datasets';
-			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
 
@@ -1089,6 +1209,15 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				root.overlay_submit(enclosingForm, false);
 			}
 		}
+	}
+
+	show_document_hash = function(layer_id, value_path) {
+		const params = new URLSearchParams({
+  		go: "get_document_hash",
+  		layer_id: layer_id,
+			value_path: value_path
+		});
+		ahah("index.php", params.toString(), new Array('message_box'), new Array('showMessage'));
 	}
 
 	daten_export = function(layer_id, anzahl, format){

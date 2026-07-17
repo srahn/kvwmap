@@ -83,16 +83,16 @@ function toggle_unterstellen(){
 }
 
 function update_stellen_visibility(){
-	var stellen = document.getElementById('stellen_visibility');
-	if (stellen.value != '') {
+	var stellen_visibility = document.getElementById('stellen_visibility');
+	if (stellen_visibility.value != '') {
 		document.getElementById('stellendiv').classList.add('filtered');
 	}
 	else {
 		document.getElementById('stellendiv').classList.remove('filtered');
 	}
-	for (var i=1; i < stellen.options.length; i++) {
-		var td = document.getElementById('stellen_td_' + stellen.options[i].value);
-    if (stellen.options[i].selected) {
+	for (var i=1; i < stellen_visibility.options.length; i++) {
+		var td = document.getElementById('stellen_td_' + stellen_visibility.options[i].value);
+    if (stellen_visibility.options[i].selected) {
       td.classList.add('visible');
     }
 		else {
@@ -136,34 +136,51 @@ function update_stellen_visibility(){
 	}
 	.apf-template-div-default, .apf-template-div {
 		background-color: #f8f8f9; 
-		border-width:1px 0px 1px 1px;
-		border-style: solid;
-		border-color: #bbb;
+		padding-top: 30px;
+	}
+	.apf-template-div-default tbody{
+		scrollbar-width: none;
 	}
 	.apf-template-div {
-		 float:right; 
-		 overflow:auto; 
-		 overflow-y:hidden;
+		position: relative;
+		display: block; 
+		overflow-x: auto;
 	}
-	.apt-main-td {
-		width:280px;
+	.apt-main-td:not(:last-child) {
 		border-right: 1px solid #bbb;
+	}	
+	.apt-main-div {
+		min-width:286px;
 	}
 	.apt-bezeichnung, .apt-defaultrechteanstelle, .apt-attributrechtespeichern {
 		text-align: center;
 		margin: 10px 0px 20px 0px;
 	}
 	.apt-bezeichnung {
-		height: 40px;
+		height: 22px;
+		width: 286px;
+		margin-top: 0;
+		padding-top: 8;
+		z-index: 1000;
+	}
+	.apf-template-div-default .apt-bezeichnung {
+		width: 305px;
+	}
+	#stellenscrolltable.scrolled .apt-bezeichnung, #defaultscrolltable.scrolled .apt-bezeichnung{
+    box-shadow: 0 4px 4px -1px #bbb;
+	}
+	#stellendiv .apt-main-td:not(:last-child) .apt-bezeichnung {
+		margin-right: -1px;
+		border-right: 1px solid #bbb;
 	}
 	.apt-layerzugriffsrechte, .apt-layerexportrechte {
-		margin: 10px 10px 0 4px;
+		margin: 10px 10px 0 14px;
 	}
 	.apt-use_parent_privileges {
-		margin-top: -30px;
+		margin: -2px 0 -2px 5px;
 	}	
 	.apt-attributrechte {
-		margin: 20px 0 10px 0;
+		margin: 20px 0 10px 10px;
 	}
 	.apt-attributrechte table{
 		border-spacing: 0;
@@ -307,13 +324,16 @@ function update_stellen_visibility(){
 				<div style="flex-grow: 2; text-align: center; position: relative">
 					<div style="display:flex; justify-content: center; position: absolute; width: 100%;">
 						<div style="margin-top: 3px;">Stellen:&nbsp;</div>
-						<select name="stellen_visibility[]" id="stellen_visibility" style="z-index: 1000; height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
+						<select name="stellen_visibility[]" id="stellen_visibility" style="z-index: 10000; height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
 							<option value="">- alle -</option>
 							<?
 							for($i = 0; $i < count($this->stellen['ID']); $i++){
 								echo '<option value="'.$this->stellen['ID'][$i].'" ';
 								if (in_array($this->stellen['ID'][$i], $this->formvars['stellen_visibility'] ?: [])){
 									echo 'selected';
+								}
+								if ($this->stellen['parent_id'][$i]) {
+									echo ' class="unterstelle"';
 								}
 								echo '>'.$this->stellen['Bezeichnung'][$i].'</option>';
 							}
@@ -330,26 +350,22 @@ function update_stellen_visibility(){
   </tr>
   <tr>
   	<td>
-  		<table>
+  		<table cellpadding="0" cellspacing="2">
 				<tr>
 					<td></td>
 					<td></td>
 					<td><?
 						$stellenanzahl = ($this->stellen ? count($this->stellen['ID']) : 0);
-						if($stellenanzahl > 0){
-						$width1 = $width = 297*$stellenanzahl;
-						if($width > 1187)$width = 1187;
-						if($width1 > 1187){ ?>
-						<div id="upperscrollbar" style="overflow:auto; overflow-y:hidden;width:1187px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
-							<div style="width:<? echo $width1; ?>px;height:1px"></div>
-						</div>
-						<? } ?>
+						if ($stellenanzahl > 0) {
+							$width = 297*$stellenanzahl;
+							if ($width > 1187)$width = 1187; ?>
 					</td>
 				</tr>
   			<tr>
-			  	<td valign="top">
+			  	<td valign="top" style="border: 1px solid #bbb;">
 			  		<div class="apf-template-div-default">
-							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
+							<table border="0" class="scrolltable" style="border-collapse:collapse" cellspacing="0" cellpadding="0">
+							<tbody id="defaultscrolltable" style="max-height: 650px" onscroll="document.getElementById('stellenscrolltable').scrollTop=this.scrollTop">
 								<tr>  	
 			  					<? $template_div = 'default'; ?>
 								<? include(LAYOUTPATH.'snippets/attribute_privileges_template.php'); ?>
@@ -357,9 +373,10 @@ function update_stellen_visibility(){
 							</table>
 						</div>
 					<td>	
-					<td valign="top">
+					<td valign="top" style="border: 1px solid #bbb;">
 						<div id="stellendiv" class="apf-template-div <? if ($this->formvars['stellen_visibility'] != '') {echo 'filtered';}?>" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
-							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
+							<table border="0" class="scrolltable" style="border-collapse:collapse" cellspacing="0" cellpadding="0">
+							<tbody id="stellenscrolltable" style="max-height: 650px" onscroll="document.getElementById('defaultscrolltable').scrollTop=this.scrollTop">
 								<tr>
 							<?
 								for($s = 0; $s < count($this->stellen['ID']); $s++){
@@ -380,7 +397,11 @@ function update_stellen_visibility(){
 		</td>
   </tr>
   <tr> 
-    <td colspan="4" >&nbsp;</td>
+    <td colspan="4" >
+			<div class="apt-attributrechtespeichern">
+				<input type="button" onclick="save('<? echo $save_stellen_ids; ?>');" name="speichern" value="<? echo $this->strSave; ?>">
+			</div>
+		</td>
   </tr>
   <? } ?>
 </table>
@@ -393,7 +414,28 @@ function update_stellen_visibility(){
 <input type="hidden" name="to_layer_id" value="">
 <script type="text/javascript">
 
-	if(document.getElementById("stellendiv"))document.getElementById("stellendiv").scrollLeft="<? echo $this->formvars['scrollposition']; ?>"
+let isSyncing = false;
+
+function syncScroll(source, target) {
+	source.addEventListener('scroll', () => {
+			if (isSyncing) return;
+			isSyncing = true;
+			if (source.scrollTop > 0) {
+				source.classList.add('scrolled');
+			} 
+			else {
+				source.classList.remove('scrolled');
+			}
+			target.scrollTop = source.scrollTop;
+			isSyncing = false;
+	});
+}
+
+const stellenscrolltable = document.getElementById('stellenscrolltable');
+const defaultscrolltable = document.getElementById('defaultscrolltable');
+
+syncScroll(stellenscrolltable, defaultscrolltable);
+syncScroll(defaultscrolltable, stellenscrolltable);
 
 </script>
 

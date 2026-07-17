@@ -224,6 +224,22 @@ function clear_all(column){
 	}
 }
 
+function show_attribute_options_doc() {
+	fetch(`index.php?go=get_attribute_options_doc`)
+	.then(response => {
+		if (!response.ok) {
+			message([{ type: 'error', msg: `Fehler bei der Abfrage der Attribut-Optionen Dokumentation. Status: ${response.status} ${response.statusText}` }]);
+			response.text().then(text => {
+				message([{ type: 'error', msg: `<p>${text}` }]);
+			});
+		}
+		response.text().then(text => {
+			message([{ type: 'info', msg: `${text}` }], 1000, 2000, null, null, null, 'Ja', 'Abbrechen', '900px', null);
+		});
+	})
+	.catch(error => message([ { type: 'error', msg: `${error.message}`}]));
+}
+
 function set_all(column){
 	for(i = 0; i < attributes.length; i++){
 		field = document.getElementsByName(column + '_'+attributes[i])[0];
@@ -459,6 +475,15 @@ function render(i){
 		margin: 0px 2px 2px 10px;
 	}
 
+	.options_div {
+		display: flex;
+    gap: 2px;
+	}
+
+	.options_div a {
+		padding-top: 5px;
+	}
+
 </style>
 
 <table style="width: 700px; margin: 15px 40px 0 40px">
@@ -599,19 +624,30 @@ function render(i){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $this->layerOptions . '</div>';
 								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer">
-														<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
-													</div>';
-								}
-								if (
-									$this->attributes['options'][$i] == '' AND
-									$this->attributes['constraints'][$i] != '' AND
-									!in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
-								) {
-									$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
+								if ($i == count_or_0($this->attributes['type']) - 1) { ?>
+									<div class="fett scrolltable_footer">
+										<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
+										<a href="javascript:show_attribute_options_doc();" title="Dokumentation zu Optionen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-question-circle-o"></i></a>
+									</div>
+									<?
 								} ?>
-								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
+								<div class="options_div"> <?
+									if (
+										$this->attributes['options'][$i] == '' AND
+										$this->attributes['constraints'][$i] != '' AND
+										!in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
+									) {
+										$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
+									} ?>
+									<textarea class="select_option_link" name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
+									<?
+									if (in_array($this->attributes['form_element_type'][$i], ['SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'])) {
+										if ($sublayer_id = explode(',', $this->attributes['options'][$i])[0]) {
+											echo '<a href="index.php?go=Layereditor&selected_layer_id=' . $sublayer_id . '&csrf_token=' . $_SESSION['csrf_token'] .'"><img src="graphics/pfeil_rechts.gif"></a>';
+										}
+									}
+									?>
+								</div>
 						  </td>
 							
 						  <td align="left" valign="top">
@@ -947,6 +983,13 @@ function render(i){
 								} ?>
 								<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
+							<td align="center" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header" style="margin-top: 5px; margin-left:5px"><span style="font-size:25px" title="' . $strUseForStatistics . '">&Sigma;</span></div>';
+								} ?>
+								<input name="statistic_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['statistic_visibility'][$i] ? ' checked="true"' : ''); ?>>
+						  </td>
+
 							<td>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							</td>

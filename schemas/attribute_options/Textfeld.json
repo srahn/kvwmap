@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gdi-service.de/public/schemas/kvwmap/options/Textfeld.json",
+  "title": "Textfeld Optionen",
+  "description": "Option für den Formularelementtyp Textfeld",
+  "type": "object",
+  "example": {
+    "rows" : 5,
+    "rows_by_length" : true,
+    "max_rows" : 25,
+    "cols" : 60,
+    "width": "500px",
+    "sql" : "SELECT text FROM my_table WHERE id = $id"
+  },
+  "properties": {
+    "rows": {
+      "description": "Die Anzahl der Zeilen für das Textfeld.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "rows_by_length": {
+      "description": "Wirkt sich nur aus wenn rows nicht gesetzt ist. Wenn das auf true gesetzt ist, wird die Anzahl der Zeilen automatisch anhand der Länge des Textes berechnet.",
+      "type": "boolean"
+    },
+    "max_rows": {
+      "description": "Die maximale Anzahl an Zeilen, berechnet basierend auf der Textlänge.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "cols": {
+      "description": "Die Anzahl der Spalten für das Textfeld.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "sql": {
+      "description": "SQL-Abfrage, die den Inhalt des Textfeldes liefert. Die Abfrage muss mit SELECT beginnen und darf nur eine Spalte und eine Zeile zurückliefern. Wirkt sich nicht aus, wenn subform_url gesetzt ist.",
+      "type": "string"
+    },
+    "subform_url": {
+      "description": "URL zu einem externen Eingabewerkzeug, mit welchem der Inhalt des Textfeldes erzeugt werden wird.",
+      "type": "string"
+    },
+    "width": {
+      "description": "Die Breite des Textfeldes. Dies kann in Pixeln (z.B. '500px') oder als Prozentsatz (z.B. '100%') angegeben werden. Wenn nicht angegeben, wird die Breite basierend auf der Anzahl der Spalten bestimmt.",
+      "type": "string",
+      "draft" : true
+    }
+  },
+  "required": []
+}

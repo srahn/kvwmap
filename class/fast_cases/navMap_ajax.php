@@ -368,42 +368,6 @@ class GUI {
 		global $kvwmap_plugins;
 		return in_array($plugin, $kvwmap_plugins);
 	}
-
-	function resizeMap2Window() {
-		global $sizes;
-		$size = $sizes[$this->user->rolle->gui];
-		$gui_light = ($this->user->rolle->gui == 'layouts/gui_light.php');
-
-		if (array_key_exists('legenddisplay', $this->formvars) AND $this->formvars['legenddisplay'] !== NULL) {
-			$hideLegend = $this->formvars['legenddisplay'];		// falls die Legende gerade ein/ausgeblendet wurde
-		}
-		else {
-			$hideLegend = $this->user->rolle->hideLegend;
-		}
-
-		$width = $this->formvars['browserwidth'] -
-			$size['margin']['width']
-			- ($this->user->rolle->hideMenue == 1 ? $size['menue']['hide_width'] : $size['menue']['width'])
-			- ($gui_light? 0 : ($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']))
-			- ($gui_light ? 0 : 18);	# Breite für möglichen Scrollbalken
-
-		$height = $this->formvars['browserheight'] -
-			$size['margin']['height'] -
-			$size['header']['height'] -
-			$size['scale_bar']['height'] -
-			((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0) -
-			($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0) -
-			$size['footer']['height'];
-
-		if($width  < 0) $width = 1000;
-		if($height < 0) $height = 800;
-		if($height % 2 != 0)$height = $height - 1;		# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
-		if($width  % 2 != 0)$width = $width - 1;				# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
-
-		// $this->debug->write('<br>resizeMap2Window for gui: ' . $this->user->rolle->gui . ' to: ' . $width . 'x' . $height, 4, false);
-		$this->user->rolle->setSize($width.'x'.$height);
-		$this->user->rolle->readSettings();
-	}
 		
 	/**
 	 * Function zoom to maximum extent of Layer with $layer_id in current map object $this->map
@@ -1139,7 +1103,7 @@ class GUI {
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
 				if ($this->user->rolle->oGeorefExt->minx==='') {
-				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
+				  echo "Richten Sie in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
 				  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
 				  exit;
@@ -2417,7 +2381,7 @@ class user {
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
-		$this->funktion = $rs['Funktion'];
+		$this->funktion = $rs['funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'] === 't';
@@ -3902,8 +3866,11 @@ class db_mapObj{
     return $filter;
   }	
 	
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
+	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$attr_obj = new LayerAttribute($this);
+
 		$attributes = array(
 			'name' => array(),
 			'tab' => array()
@@ -3954,6 +3921,7 @@ class db_mapObj{
 				arrangement,
 				labeling,
 				raster_visibility,
+				statistic_visibility,
 				dont_use_for_new,
 				mandatory,
 				quicksearch,
@@ -4013,7 +3981,13 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$i] = $rs['options'];
+			if ($rs['options']) {
+				$options_json = json_decode($rs['options'], true);
+				$attributes['options_struct'][$i] = $attr_obj->get_options($options_json ?: $rs['options'], $rs['form_element_type']);
+			}
 			$attributes['style_attribute'][$i] = $rs['style_attribute'];
 			
 			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
@@ -4070,8 +4044,6 @@ class db_mapObj{
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			$attributes['form_element_type'][$i] = $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
@@ -4084,6 +4056,7 @@ class db_mapObj{
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['statistic_visibility'][$i] = $rs['statistic_visibility'];
 			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];

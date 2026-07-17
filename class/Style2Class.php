@@ -8,7 +8,7 @@ class Style2Class extends PgObject {
 
 	public static	function find($gui, $where) {
 		$style2class = new Style2Class($gui);
-		return $style2class->find_where($where);
+		return $style2class->find_where($where, 'drawingorder');
 	}
 
 	function copy($class_id) {

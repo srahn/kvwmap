@@ -1,5 +1,0 @@
-BEGIN;
-
-ALTER TABLE `layer` CHANGE `oid` `oid` VARCHAR(63) NULL DEFAULT 'oid';
-
-COMMIT;

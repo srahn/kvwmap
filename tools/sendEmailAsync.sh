@@ -26,8 +26,11 @@ if [ -f "${busyfile}" ]; then
   # Es gibt schon einen Prozess der die E-Mail-Dateien abarbeitet.
   echo "${busyfile} exists."
 else
+  touch "${busyfile}"
   # echo "Durchsuche ${mail_queue_path} nach E-Mail-Dateien."
   file=`find $mail_queue_path -name "email*" | head -n 1`
+  export LANG=C.UTF-8
+  export LC_ALL=C.UTF-8
 
   while [ ! -z $file -a -e $file ]
   do
@@ -41,14 +44,42 @@ else
     #tls=auto will only use tls if available
     if [[ -z $attachment ]]; then
       #echo Ohne Attachement sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -u ${subject} -m ${message}
-      sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -u "${subject}" -m "${message}" > $logfile 2>&1
-      echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=utf8 -u \"${subject}\" -m \"${message}\"" >> $job_log_file
-      #sendEmail -v -t 'peter.korduan@gdi-service.de' -f 'info@gdi-service.de' -s smtp.ionos.de:587 -o tls=yes -xu 'peter.korduan@gdi-backup.de' -xp '*****' -o message-charset=utf8 -u "Testkvwmap" -m "TestMessage"
+      #sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=UTF-8 -o message-content-type=text/plain;charset=UTF-8 -u "${subject}" -m "${message}" > $logfile 2>&1
+      #sendEmail -v -t 'peter.korduan@gdi-service.de' -f 'info@gdi-service.de' -s smtp.ionos.de:587 -o tls=yes -xu 'peter.korduan@gdi-backup.de' -xp '*****' -o message-charset=UTF-8 -o message-content-type=text/plain;charset=UTF-8 -u "Testkvwmap" -m "TestMessage"
+
+      printf '%s' "$message" | sendEmail \
+        -v \
+        -t "$to_email" \
+        -f "$from_email" \
+        -s "${smtp_server}:${smtp_port}" \
+        -o tls=auto \
+        -xu "${mail_smtp_user}" \
+        -xp "${mail_smtp_password}" \
+        -u "$subject" \
+        -o message-charset=UTF-8 \
+        -o message-content-type=text/plain\;charset=UTF-8 \
+        > $logfile 2>&1
+      echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=UTF-8 -o message-content-type=text/plain;charset=UTF-8 -u \"${subject}\" -m \"${message}\"" >> $job_log_file
     else
       #echo Mit attachement sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -u ${subject} -m ${message} -a $attachment
       #sendEmail -v -t $to_email -f $from_email -s ${smtp} -o tls=yes  -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -u "TestPlandigital" -m "Testcontent" -a $attachment > /dev/null 2>&1
-      sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -u "${subject}" -m "${message}" -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -a $attachment > $logfile 2>&1
-      echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=utf8 -u \"${subject}\" -m \"${message}\" -a $attachment" >> $job_log_file
+      #sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -u "${subject}" -m "${message}" -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=UTF-8 -o message-content-type=text/plain;charset=UTF-8 -a $attachment > $logfile 2>&1
+      printf '%s' "$message" | sendEmail \
+        -v \
+        -t "$to_email" \
+        -f "$from_email" \
+        -s "${smtp_server}:${smtp_port}" \
+        -o tls=auto \
+        -xu "${mail_smtp_user}" \
+        -xp "${mail_smtp_password}" \
+        -u "$subject" \
+        -o message-charset=UTF-8 \
+        -o message-content-type=text/plain\;charset=UTF-8 \
+        -a $attachment \
+        > $logfile 2>&1
+      echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=UTF-8-o message-content-type=text/plain;charset=UTF-8 -u \"${subject}\" -m \"${message}\" -a $attachment" >> $job_log_file
+
+
 
       if [[ -z $mail_copy_attachment ]]; then
           mv $attachment $mail_archiv_path
@@ -62,6 +93,7 @@ else
     mv $logfile $mail_archiv_path
     echo "E-Mail $file gesendet und nach $mail_archiv_path verschoben." >> $job_log_file
     file=`find $mail_queue_path -name "email*" | head -n 1` # Frage die nächste Mail-Datei aus dem Stapel ab.
+    sleep 1s
   done
   # Keine Mail-Dateien mehr im Stapel, lösche busyfile
   if [ -f "${busyfile}" ]; then

@@ -1159,6 +1159,28 @@ class data_import_export {
 		return $encoding;
 	}
 
+	function prepare_for_postgres($path, $file) {
+    $content = file_get_contents($path . $file);
+
+    // 1. BOM check oder UTF-16 Heuristik
+    $encoding = 'ISO-8859-1'; // default
+    if (substr($content, 0, 3) === "\xEF\xBB\xBF" || mb_detect_encoding($content, ['UTF-8'], true)) {
+      $encoding = 'UTF-8';
+    } elseif (substr($content, 0, 2) === "\xFF\xFE" || substr($content, 0, 2) === "\xFE\xFF" || strpos($content, "\x00") !== false) {
+      $encoding = 'UTF-16LE'; // oder BE → wir wandeln einfach in UTF-8
+    }
+
+    // 2. In UTF-8 konvertieren
+    $contentUtf8 = mb_convert_encoding($content, 'UTF-8', $encoding);
+		echo '<textarea>' . $contentUtf8 . '</textarea>';
+
+    // 3. Datei speichern
+    file_put_contents($path . $file, $contentUtf8);
+		echo '<br>write to file: ' . $path . $file;
+
+    return $path . $file;
+	}
+
 	function create_csv($result, $attributes, $groupnames) {
 		# Gruppennamen in die erste Zeile schreiben
 		if ($groupnames != ''){

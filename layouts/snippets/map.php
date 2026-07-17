@@ -16,7 +16,7 @@
 	$map_width = $this->user->rolle->nImageWidth;
 	$map_height = $this->user->rolle->nImageHeight;
 	$legend_hide_width = $size['legend']['hide_width'];
-	$legend_width = ($this->user->rolle->hideLegend == 1 ? $legend_hide_width : $size['legend']['width']);
+	$legend_width = ($this->user->rolle->hideLegend == 1 ? $legend_hide_width : $this->user->rolle->legendwidth);
 
 	$legend_height = $this->map->height +
 		$size['scale_bar']['height'] +
@@ -34,8 +34,8 @@
 
 <script type="text/javascript">
 
-function zoomto(layer_id, oid, columnname){
-  location.href="index.php?go=zoomto_dataset&oid="+oid+"&layer_columnname="+columnname+"&layer_id="+layer_id+"&selektieren=zoomonly";
+function schnellsprung(layer_id, oid, columnname){
+  location.href="index.php?go=schnellsprung&oid="+oid+"&layer_columnname="+columnname+"&layer_id="+layer_id+"&selektieren=zoomonly";
 }
 
 function toggle_vertices(){	
@@ -128,7 +128,7 @@ if($this->formvars['gps_follow'] == ''){
 					<?php include(SNIPPETS . 'mapdiv.php'); ?>
 				</div>
 			</td>
-			<td valign="top">
+			<td valign="top" style="width: 100%">
 				<div id="legenddiv" style="height: <? echo $legend_height; ?>px;"<?
 					if ($this->user->rolle->hideLegend) { ?>
 						onmouseenter="slide_legend_in(event);"

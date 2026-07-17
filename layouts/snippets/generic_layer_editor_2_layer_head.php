@@ -16,7 +16,7 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 								class="check_<? echo $layer['layer_id']; ?> <? if (value_of($layer['attributes'], 'Editiersperre') AND $layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
 								name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['layer_id']; ?>"
 								onchange="count_selected(<? echo $layer['layer_id']; ?>);"
-							>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
+							>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset . ' ' . ($this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] + $k + 1) . $strSelectThisDataset2; ?></span><?
 							if (($layer['status']) != '') {
 								echo '<a class="' . $layer['status'] . '" title="' . $layer_status[$layer['status']] . '"><span></span></a>';
 							}

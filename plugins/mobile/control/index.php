@@ -22,6 +22,62 @@ if (strpos($go, '_') !== false AND substr($go, 0, strpos($go, '_')) === 'mobile'
 function go_switch_mobile($go) {
 	global $GUI;
 	switch ($GUI->go) {
+// 		case 'mobile_test': {
+// 			echo "<h2>Test SQL Adjustment for Mobile Sync</h2>";
+// 			include_once(CLASSPATH . 'sql.php');
+// 			include_once(CLASSPATH . 'synchronisation.php');
+// 			$synchro = new synchro($GUI->Stelle, $GUI->user, $GUI->pgdatabase);
+// 			$row = new stdClass();
+// 			$row->schema_name = 'kob';
+// 			$row->table_name = 'baum';
+
+// 			$row->sql = "
+// INSERT INTO kob.baum (
+// 	standort_uuid, id_nr, baumart_id, baumnummer, baumform_id, veredelungsstelle_id, unterlage_id, entwicklungsphase_id, vitalitaet_jungbaum_id, vitalitaet_altbaum_id, pflanzjahr, bilder, bemerkung, mehrsortenbaum, sorte_id, arbeitsname, sortenbemerkung, mit_behang, fruchtprobe_genommen, blattprobe_genommen, kronenhabitus_ids, wuchsstaerke_id, wiedervorlage, reiserschnitteignung_id, reiser_schneiden, reiser_geschnitten, bekanntheit_id, verwendungstyp_id, verwendung_ids, pflueckreife_id, ertragseigenschaft_ids, genussreife_id, alternanz_id, datum_erfassung, kontakt, bilder_updated_at, updated_at_client, updated_at_server, version, geom, created_at, user_name, user_id,
+// 	uuid, test_not_alllowed_colunn
+// )
+// VALUES (
+// 	'bf204e5c-1568-4d36-8a78-d88d8ed6ef20', 430, 1, null, null, null, null, 3, null, 4, null, null, null, null, -1, 'Reud,ener', null, 't', 't', null, null, 1, null, 2, null, null, null, 2, null, 4, null, null, null, null, null, null, null, null, 8394, '0101000020e6100000010078f6dfbc22409eb9e5db214b4840', '2025-09-12T11:05:07', 'Hans-Thomas Bosch', 184,
+// 	'4ad6bf17-9b48-4db9-a299-3b1818bc03b0', 'testnotallowed'
+// )
+// 			";
+// 			echo '<br>INSERT:<br><textarea cols="160" rows="14">' . $row->sql . '</textarea>';
+// 			$adjusted_sql = $synchro->adjust_sql($row);
+// 			echo '<br><textarea cols="160" rows="10">' . $adjusted_sql . '</textarea>';
+
+// 			$row->sql = "
+// UPDATE
+// 	kob.baum
+// SET
+// 	standort_uuid
+// 		=
+// 		'bf204e5c-1568-4d36-8a78-d88d8ed6ef20',
+// 	id_nr = 430,
+// 	baumart_id = 1,
+// 	entwicklungsphase_id = 3,
+// 	sorte_id = -1,
+// 	test_not_alllowed_colunn = 'testnotallowed'
+// WHERE
+// 	uuid = '4ad6bf17-9b48-4db9-a299-3b1818bc03b0'
+// 			";
+// 			echo '<br>UPDATE:<br><textarea cols="160" rows="14">' . $row->sql . '</textarea>';
+// 			$adjusted_sql = $synchro->adjust_sql($row);
+// 			echo '<br><textarea cols="160" rows="10">' . $adjusted_sql . '</textarea>';
+
+// 			$row->sql = "
+// DELETE FROM
+// 	kob.baum
+// WHERE
+// 	uuid = '4ad6bf17-9b48-4db9-a299-3b1818bc03b0'
+// 			";
+// 			echo '<br>DELETE:<br><textarea cols="160" rows="14">' . $row->sql . '</textarea>';
+// 			$adjusted_sql = $synchro->adjust_sql($row);
+// 			echo '<br><textarea cols="160" rows="10">' . $adjusted_sql . '</textarea>';
+
+// 			echo '<br><br>mobile test successful';
+// 		}
+// 		break;
+
 		case 'mobile_set_sync_reset_needed': {
 			$GUI->checkCaseAllowed('Administratorfunktionen');
 			$GUI->sanitize(['log_name' => 'text']);

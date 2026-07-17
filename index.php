@@ -385,7 +385,7 @@ function go_switch($go, $exit = false) {
 					'selected_layer_id' => 'int',
 					'zoom_to_layer_extent' => 'boolean'
 				]);
-				$GUI->activate_layer_only($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
+				$GUI->activate_layer($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
 				$GUI->saveMap('');
 				// $currenttime = date('Y-m-d H:i:s',time());
 				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
@@ -539,9 +539,6 @@ function go_switch($go, $exit = false) {
 			case 'reset_layers' : {
 				$GUI->reset_layers(value_of($GUI->formvars, 'layer_id'));
 				$GUI->loadMap('DataBase');
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
@@ -549,9 +546,6 @@ function go_switch($go, $exit = false) {
 			case 'show_all_layers' : {
 				$GUI->user->rolle->update_layer_status(NULL, '1');
 				$GUI->loadMap('DataBase');
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
@@ -560,10 +554,12 @@ function go_switch($go, $exit = false) {
 				$GUI->reset_querys();
 				$GUI->loadMap('DataBase');
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
+			} break;
+
+			case 'hide_deactivated_layers' : {
+				$GUI->user->rolle->hide_deactivated_layers();
 			} break;
 
 			case 'zoom2coord' : {
@@ -603,9 +599,6 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['reloadmap']){
 					$GUI->loadMap('DataBase');
 					$GUI->scaleMap($GUI->formvars['nScale']);
-					// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-					// $GUI->drawMap();
-					// $GUI->saveMap('');
 					$GUI->legende = $GUI->create_dynamic_legend();
 					$GUI->output();
 				}
@@ -1021,6 +1014,10 @@ function go_switch($go, $exit = false) {
 			case 'Layerauswahl_Laden' : {
 				$GUI->sanitize(['id' => 'int']);
 				$GUI->layerCommentLoad();
+				$GUI->loadMap('DataBase');
+				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$GUI->drawMap();
+				$GUI->output();
 			}break;
 
 			case 'Layerauswahl_loeschen' : {
@@ -1372,6 +1369,10 @@ function go_switch($go, $exit = false) {
 				$GUI->GenerischeSuche_Suchen();
 			} break;
 
+			case 'schnellsprung' : {
+				$GUI->schnellsprung();
+			} break;
+
 			case 'Layer-Suche' : {
 				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
@@ -1442,6 +1443,11 @@ function go_switch($go, $exit = false) {
 				$GUI->get_document();
 			} break;
 
+			case 'get_document_hash' : {
+				$GUI->check_csrf_token();
+				$GUI->get_document_hash();
+			} break;
+
 			case 'Dokument_Loeschen' : {
 				$GUI->check_csrf_token();
 				$GUI->sachdaten_speichern();
@@ -1483,7 +1489,8 @@ function go_switch($go, $exit = false) {
 					'value_attribute_name' => 'text',
 					'label_attribute_name' => 'text',
 					'beschreibung' => 'text',
-					'breite' => 'text'
+					'breite' => 'text',
+					'color' => 'text'
 				]);
 				include_once(CLASSPATH . 'LayerChart.php');
 				if ($GUI->formvars['id'] != '') {
@@ -1900,18 +1907,21 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->stelle_bearbeiten_allowed($GUI->formvars['selected_stelle_id'], $GUI->user->id);
 				$GUI->Stelleneditor();
+				$GUI->output();
 			} break;
 
 			case 'Dienstmetadaten' : {
 				$GUI->checkCaseAllowed('Dienstmetadaten');
 				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
 				$GUI->Stelleneditor();
+				$GUI->output();
 			} break;
 
 			case 'Dienstmetadaten_Ändern' : {
 				$GUI->checkCaseAllowed('Dienstmetadaten');
 				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
 				$GUI->dienstmetadaten_aendern();
+				$GUI->output();
 			} break;
 
 			case 'Stelle_Löschen' : {
@@ -1923,11 +1933,13 @@ function go_switch($go, $exit = false) {
 			case 'Stelleneditor_Als neue Stelle eintragen' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->StelleAnlegen();
+				$GUI->output();
 			} break;
 
 			case 'Stelleneditor_Ändern' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->stelle_aendern();
+				$GUI->output();
 			} break;
 
 			case 'Stellen_Anzeigen' : {
@@ -2227,7 +2239,14 @@ function go_switch($go, $exit = false) {
 
 			case 'Einladung_Speichern' : {
 				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
-				$GUI->invitation_save();
+				$result = $GUI->invitation_save();
+				if ($result['success']) {
+					$GUI->invitations_list();
+				}
+				else {
+					$GUI->add_message('array', $result['msg']);
+					$GUI->invitation_formular();
+				}
 			} break;
 
 			case 'Einladung_Ändern' : {
@@ -2331,6 +2350,10 @@ function go_switch($go, $exit = false) {
 
 			case 'show_background_jobs_log' : {
 				readfile(LOGPATH . 'background_jobs_log.htm');
+			} break;
+
+			case 'get_attribute_options_doc' : {
+				$GUI->get_attribute_options_doc();
 			} break;
 
 			case "neu Laden" : {

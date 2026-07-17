@@ -398,7 +398,6 @@ if ($gast_export === false) {
 								$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 								session_start();
 								$GUI->new_session = set_session_vars($GUI->formvars);
-								unset($_SESSION['login_new_password']);
 								$go = '';
 								$_SESSION['stelle_angemeldet'] = true;
 								$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
@@ -497,7 +496,7 @@ if ($gast_export === false) {
 					$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
 					if (strpos(strtolower($GUI->formvars['format']), 'json') !== false) {
 						$response = array(
-							'error' => 'agreement missing',
+							'error' => 'AGREEMENT_MISSING',
 							'error_msg' => 'Der Datenschutzerklärung wurde noch nicht zugestimmt.',
 							'agreement_url' => URL,
 							'agree_param' => 'agreement=1',
@@ -620,7 +619,7 @@ else {
 	}
 
 	# Anpassen der Kartengröße an das Browserfenster
-	if ($GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
+	if ($GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '' AND $GUI->formvars['go'] != 'navMap_ajax') {
 		$GUI->resizeMap2Window();
 	}
 
@@ -962,6 +961,7 @@ function update_password($GUI) {
 }
 
 function set_session_vars($formvars) {
+	session_regenerate_id();
 	$_SESSION['angemeldet'] = true;
 	$_SESSION['login_name'] = $formvars['login_name'];
 	$_SESSION['login_routines'] = true;

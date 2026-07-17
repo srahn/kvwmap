@@ -560,7 +560,7 @@ class GUI {
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
 				if ($this->user->rolle->oGeorefExt->minx==='') {
-				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
+				  echo "Richten Sie in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
 				  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
 				  exit;
@@ -680,7 +680,7 @@ class GUI {
 				}
 
 				# Filter für read_Layer
-				$mapDB->nurAktiveLayer = value_of($this->formvars, 'nurAktiveLayer');
+				$mapDB->nurAktiveLayer = $this->user->rolle->hide_deactivated_layers ?? value_of($this->formvars, 'nurAktiveLayer');
 				$mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
 				$mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
 				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
@@ -2066,7 +2066,7 @@ class user {
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
-		$this->funktion = $rs['Funktion'];
+		$this->funktion = $rs['funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'] === 't';
@@ -2411,6 +2411,7 @@ class rolle {
 			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
+			$this->hide_deactivated_layers = ($rs['hide_deactivated_layers'] == 't');
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];

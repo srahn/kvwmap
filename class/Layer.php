@@ -128,7 +128,7 @@ class Layer extends PgObject {
 	function has_fk_constraint($constraint) {
 		$has_fk_constraint = (
 			$this->fk_attribute = $this->get_fk_attribute() AND
-			$this->fk_options = $this->fk_attribute->get_SubFormFK_options($this->fk_attribute->get('options')) AND
+			$this->fk_options = $this->fk_attribute->get_SubFormFK_options(json_decode($this->fk_attribute->get('options'))) AND
 			array_key_exists('ref_constraint', $this->fk_options) AND
 			strpos($this->fk_options['ref_constraint'], $constraint) !== false
 		);
@@ -147,7 +147,7 @@ class Layer extends PgObject {
 	}
 
 	function get_fk_feature($x, $y) {
-		$this->parent_layer = Layer::find_by_id($this->gui, $this->fk_options['parent_layer_id']);
+		$this->parent_layer = Layer::find_by_id($this->gui, $this->fk_options['ref_layer_id']);
 		$constraint_parts = explode('where', replace_params_rolle($this->fk_options['ref_constraint']));
 		$fk_feature = $this->parent_layer->get_feature_by_point("ST_SetSrid(ST_MakePoint(" . $x . ", " . $y . "), ". $this->gui->user->rolle->epsg_code . ")", trim($constraint_parts[1]));
 		return $fk_feature;
@@ -563,14 +563,14 @@ class Layer extends PgObject {
 		}
 	}
 
-	function get_parentform_layers() {
+	function get_parentform_layers($layer_id = '') {
 		include_once(CLASSPATH . 'LayerAttribute.php');
 		$parentform_layer_ids = array_unique(
 			array_map(
 				function($attribute) {
 					return $attribute->get('layer_id');
 				},
-				LayerAttribute::find($this->gui, "layer_id != " . $this->get('layer_id') . " AND options LIKE '" . $this->get('layer_id') . ",%' AND form_element_type LIKE 'SubForm%PK'")
+				LayerAttribute::find($this->gui, "layer_id != " . ($layer_id ? $layer_id : $this->get('layer_id')) . " AND options LIKE '" . ($layer_id ? $layer_id : $this->get('layer_id')) . ",%' AND form_element_type LIKE 'SubForm%PK'")
 			)
 		);
 		if (count($parentform_layer_ids) > 0) {
@@ -631,7 +631,7 @@ class Layer extends PgObject {
 			$legendgraphic = $this->get('icon');
 		}
 		elseif (count($classes) > 0) {
-			$legendgraphic = $classes[0]->get('legendgraphic');
+			$legendgraphic = CUSTOM_PATH . GRAPHICSPATH . $classes[0]->get('legendgraphic');
 		}
 		else {
 			$legendgraphic = 'graphics/leer.gif';
@@ -689,6 +689,24 @@ class Layer extends PgObject {
 		}
 
 		switch ($this->get('connectiontype')) {
+			case 1 : { # MS_SHAPEFILE 
+			}
+			case 4 : { # MS_OGR
+				if ($this->get('datentyp') == 3) { # MS_LAYER_RASTER
+					$type = 'WMS';
+					$url = URL . APPLVERSION . 'index.php?go=OWS&gast=' . (int)$stelle_id . '&Stelle_ID=' . (int)$stelle_id;
+					$params = '';
+					$options = (Object) array(
+						'crs' => 'EPSG4326',
+						'version' => ($this->get('wms_server_version') != '' ? $this->get('wms_server_version') : '1.0.0'),
+						'layers' => $this->get('name'),
+						'format' => 'image/png',
+						'transparent' => true,
+						'attribution' => $this->get('dataowner_name'),
+						'opacity' => $this->opacity / 100
+					);
+				}
+			} break;
 			case 6 : { # WFS-Layer werden exportiert wie PostGIS Layer
 				$type = 'GeoJSON';
 				$url = URL . APPLVERSION . 'index.php';
@@ -712,11 +730,19 @@ class Layer extends PgObject {
 			case 7 : { # WMS-Layer
 				$type = 'WMS';
 				$url = explode('?', $this->get('connection'))[0];
+				$url_params = array();
+				if (strpos($this->get('connection'), 'go=OWS') !== false) {
+					$url_params['go'] = 'OWS';
+				}
+				if (strpos($this->get('connection'), 'gast=') !== false) {
+					$url_params['gast'] = (int)$stelle_id;
+				}
+				$url .= '?' . http_build_query($url_params);
 				$params = '';
 				$options = (Object) array(
 					'crs' => 'EPSG4326',
 					'version' => get_first_word_after($this->get('connection'), 'version=', ' ', '&'),
-					'layers' => get_first_word_after($this->get('connection'), 'layers=', ' ', '&'),
+					'layers' => (strpos($this->get('connection'), 'go=OWS') !== false ? $this->get('name') : get_first_word_after($this->get('connection'), 'layers=', ' ', '&')),
 					'format' => 'image/png',
 					'transparent' => true,
 					'attribution' => $this->get('dataowner_name'),

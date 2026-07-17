@@ -20,6 +20,7 @@ class FormObject {
 	var $html;
 	var $selected;
 	var $select;
+	var $textarea;
 	var $hidden;
 	var $text;
 	var $anzValues;
@@ -157,11 +158,9 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	static function createCustomSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '', $option_onmouseenter = '') {
 		$id = ($id == '' ? $name : $id);
 		if ($multiple != '') $multiple = ' multiple';
-		if ($style != '') $style = 'style="' . $style . '"';
 		if ($onchange != '') $onchange = 'onchange="' . $onchange . '"';
 		if ($onclick != '') $onclick = 'onclick="' . $onclick . '"';
 		if ($class != '') $class = 'class="' . $class . '"';
-		if ($option_style != '') $option_style = 'style="' . $option_style . '"';
 		if ($onmouseenter != '') $onmouseenter = 'onmouseenter="' . $onmouseenter . '"';
 
 		$options_html = array();
@@ -179,16 +178,17 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 				$selected = ' selected';
 				$output = $option['output'];
 				$image = $option['image'];
+				$style = $option['style'] . ';' . $style;
 			}
 			else {
 				$selected = '';
 			}
 			$options_html[] = "
-				<li onclick=\"custom_select_click(this)\" onmouseenter=\"custom_select_hover(this);" . $option_onmouseenter . "\" " . $option_style . " class=\"" . $option_class . $selected . "\" 
+				<li onclick=\"custom_select_click(this)\" onmouseenter=\"custom_select_hover(this);" . $option_onmouseenter . "\" class=\"" . $option_class . $selected . "\" 
 					data-value=\"" . $option['value'] . "\"" .
 					(array_key_exists('attribute', $option) ? " " . $option['attribute'] . "=\"" . $option['attribute_value'] . "\"" : '') .
 					(array_key_exists('title', $option) ? " title=\"" . $option['title'] ."\"" : '') .
-					(array_key_exists('style', $option) ? " style=\"" . $option['style'] . "\"" : '') . "
+					" style=\"" . $option_style . ';' . $option['style'] . "\"
 				>
 					<img src=\"" . ($option['image']? 'data:image/' . pathinfo($option['image'])['extension'] . ';base64,' . base64_encode(@file_get_contents($option['image'])) : 'graphics/leer.gif') . "\">
 					<span>" . $option['output'] ."</span>
@@ -196,7 +196,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 		}
 
 		$html  = '
-			<div class="custom-select" id="custom_select_' . $id . '" ' . $style . '>
+			<div class="custom-select" id="custom_select_' . $id . '" style="' . $style . '">
 				<input type="hidden" ' . $onchange . ' ' . $class . ' id="' . $id . '" name="' . $name . '" value="' . $value . '">
 				<div class="placeholder editable" onclick="toggle_custom_select(\'' . $id . '\');" '.$onmouseenter.'>
 					<img src="' . ($image? 'data:image/' . pathinfo($image)['extension'] . ';base64,' . base64_encode(@file_get_contents($image)) : 'graphics/leer.gif') . '">
@@ -209,6 +209,45 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 				</div>
 			</div>';
 		return $html;
+	}
+
+	public static function createTextarea($name, $value = '', $rows = '', $cols = '', $maxlength = '', $class = '', $title = '', $id = '', $style = '', $tabindex = '', $onkeyup = '', $onchange = '', $readonly = false) {
+		$attributes = array('name' => $name);
+		if ($rows != '') {
+			$attributes['rows'] = $rows;
+		}
+		if ($cols != '') {
+			$attributes['cols'] = $cols;
+		}
+		if ($maxlength != '') {
+			$attributes['maxlength'] = $maxlength;
+		}
+		if ($class != '') {
+			$attributes['class'] = $class;
+		}
+		if ($title != '') {
+			$attributes['title'] = $title;
+		}
+		if ($id != '') {
+			$attributes['id'] = $id;
+		}
+		if ($style != '') {
+			$attributes['style'] = $style;
+		}
+		if ($tabindex != '') {
+			$attributes['tabindex'] = $tabindex;
+		}
+		if ($onkeyup != '') {
+			$attributes['onkeyup'] = $onkeyup;
+		}
+		if ($onchange != '') {
+			$attributes['onchange'] = $onchange;
+		}
+		$kvps = array();
+		foreach ($attributes AS $key => $val) {
+			$kvps[] = $key . '="' . $val . '"';
+		}
+		return '<textarea ' . implode(' ', $kvps) . ($readonly ? ' readonly' : '') . '>' . htmlspecialchars($value) . '</textarea>';
 	}
 
 	static function createCheckboxList($name, $options, $values = array(), $onchange = '') {
@@ -315,6 +354,9 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 			case "text" : {
 				$this->html ="<input type='text' name='".$this->text["name"]."' value='".$this->text["value"]."'";
 				$this->html.=" size='".$this->text["size"]."' maxlength='".$this->text["size"]."'>";
+			} break;
+			case "textarea" : {
+				$this->html = "<textarea name='" . $this->textarea["name"] . "' rows='" . $this->textarea["rows"] . "' cols='" . $this->textarea["cols"] . "' maxlength='" . $this->textarea["maxlength"] . "'>" . $this->textarea["value"] . "</textarea>";
 			} break;
 			case "hidden" : {
 				$this->html ="<input type='hidden' name='".$this->hidden["name"]."' value='".$this->hidden["value"]."'";

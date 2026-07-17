@@ -3,6 +3,7 @@
   $strAsteriskRequired = 'Werte mit * mussen eingetragen werden';
   $strDataBankID = 'Datenbank ID';
   $strDefaultUserID = 'Standardnutzer';
+  $strQuickJumpLayer = 'Schnellsprung-Layer';
   $strTask = 'Bezeichnung*';
   $strReferenceMap = 'Referenzkarte';
   $strMaxExtent = 'Max Ausdehnung';

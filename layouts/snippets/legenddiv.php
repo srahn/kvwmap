@@ -1,3 +1,9 @@
+<div 
+	style="position: absolute; top: 0px; left: -1px; height: 100%; width: 5px; cursor: e-resize;" 
+	onmousedown="resizestart(event, document.getElementById('map'), 'e');" 
+	onmouseup="resizemap2window();">
+</div>
+
 <? if(!$this->simple_legend){ ?>
 	<table width="100%" border="0" cellpadding="0" cellspacing="0" id="legend_switch">
 		<tr>
@@ -28,12 +34,21 @@
 } ?>
 <div id="legend_layer">
 	<div class="button_background" style="box-shadow: none; border-bottom: 1px solid #bbb">		<?	
-		if (!$this->simple_legend AND defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != '') {
+		if (
+				!$this->simple_legend AND 
+				(
+					(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != '') OR 
+					$this->Stelle->quick_jump_layer_id != ''
+				)
+			) {
 			include(SNIPPETS.'schnellsprung.php');
 		}
 		if ($this->user->rolle->layer_selection_mode == 1) {
 			include_once(CLASSPATH.'FormObject.php');
-			$ret = $this->user->rolle->getLayerComments(NULL, $this->user->id);
+			if (!$this->Stelle->is_admin_stelle()) {
+				$stelle_id = $this->Stelle->id;
+			}
+			$ret = $this->user->rolle->getLayerComments(NULL, $stelle_id, $this->user->id);
       $layer_selections = $ret[1];
 			echo '<div id="layer_selection_div">' . $this->strLayerSelection . ':';
 			echo FormObject::createSelectField(
@@ -71,6 +86,11 @@
 		<a href="index.php?go=reset_layers">
 			<div>
 				<div class="button layer" title="<? echo $strDeactivateAllLayer; ?>"></div>
+			</div>
+		</a>
+		<a href="javascript: void(0)" onclick="hide_deactivated_layers();">
+			<div>
+				<div class="button" title="<? echo $strHideDeactivatedLayers; ?>"><i id="hide_deactivated_layers_icon" style="font-size: 24px; margin: 6px; color: #5c88a8" class="fa fa-eye<? if ($this->user->rolle->hide_deactivated_layers)echo '-slash'; ?>" aria-hidden="true"></i></div>
 			</div>
 		</a>
 		<? } ?>
@@ -137,7 +157,7 @@
 		<input type="text" autocomplete="off" id="layer_search" onkeyup="jumpToLayer(this.value);" value="">
 	</div>
 	</div>
-	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();">
+	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();" <? echo ($this->user->rolle->hideLegend != 1 ? 'style="max-width: ' . $legend_width . 'px"' : ''); ?>>
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 		<div onmousedown="document.GUI.legendtouched.value = 1;" id="legend">
 			<? echo $this->legende; ?>

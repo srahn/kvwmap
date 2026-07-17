@@ -1,8 +1,0 @@
-BEGIN;
-
-	UPDATE `config`
-		SET `editable` = 3
-	WHERE
-		name LIKE 'OWS_SERVICE_ONLINERESOURCE';
-
-COMMIT;

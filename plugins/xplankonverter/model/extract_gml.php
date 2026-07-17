@@ -670,7 +670,8 @@ class Gml_extractor {
 				to_char(gmlas.versionbaugbdatum, 'DD.MM.YYYY') AS versionbaugbdatum,
 				gmlas.versionbaugbtext AS versionbaugbtext,
 				to_char(gmlas.versionsonstrechtsgrundlagedatum, 'DD.MM.YYYY') AS versionsonstrechtsgrundlagedatum,
-				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
+				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
+				array_to_json(generattr_sub.hatgenerattribut) AS hatgenerattribut
 			FROM
 				" . $this->gmlas_schema . ".bp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
@@ -709,7 +710,41 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".bp_plan_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id
+				" . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
+				(
+					SELECT
+					res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut FROM (
+						SELECT
+							hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".bp_plan gap_1
+						LEFT JOIN " . $this->gmlas_schema . ".bp_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
+						UNION
+						SELECT
+							hga_2.parent_id,(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".bp_plan gap_2
+						LEFT JOIN " . $this->gmlas_schema . ".bp_plan_hatgenerattribut hga_2 ON hga_2.parent_id = gap_2.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_datumattribut xpda ON xpda.ogr_pkid = hga_2.xp_generattribut_xp_datumattribut_pkid
+						UNION
+						SELECT
+							hga_3.parent_id,(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".bp_plan gap_3
+						LEFT JOIN " . $this->gmlas_schema . ".bp_plan_hatgenerattribut hga_3 ON hga_3.parent_id = gap_3.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_integerattribut xpin ON xpin.ogr_pkid = hga_3.xp_generattribut_xp_integerattribut_pkid
+						UNION
+						SELECT
+							hga_4.parent_id,(xpur.name,xpur.wert,'XP_URLAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".bp_plan gap_4
+						LEFT JOIN " . $this->gmlas_schema . ".bp_plan_hatgenerattribut hga_4 ON hga_4.parent_id = gap_4.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_urlattribut xpur ON xpur.ogr_pkid = hga_4.xp_generattribut_xp_urlattribut_pkid
+						UNION
+						SELECT
+							hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".bp_plan gap_5
+						LEFT JOIN " . $this->gmlas_schema . ".bp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+					) res GROUP BY parent_id 
+				) generattr_sub ON generattr_sub.parent_id = gmlas.id
 			WHERE
 				gmlas.id = '" . $gml_id . "'
 			;";
@@ -777,7 +812,8 @@ class Gml_extractor {
 				to_char(gmlas.versionbaugbdatum, 'DD.MM.YYYY') AS versionbaugbdatum,
 				gmlas.versionbaugbtext AS versionbaugbtext,
 				to_char(gmlas.versionsonstrechtsgrundlagedatum, 'DD.MM.YYYY') AS versionsonstrechtsgrundlagedatum,
-				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
+				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
+				array_to_json(generattr_sub.hatgenerattribut) AS hatgenerattribut
 			FROM
 				" . $this->gmlas_schema . ".fp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
@@ -816,7 +852,41 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".fp_plan_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id
+				" . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
+				(
+					SELECT
+					res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut FROM (
+						SELECT
+							hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".fp_plan gap_1
+						LEFT JOIN " . $this->gmlas_schema . ".fp_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
+						UNION
+						SELECT
+							hga_2.parent_id,(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".fp_plan gap_2
+						LEFT JOIN " . $this->gmlas_schema . ".fp_plan_hatgenerattribut hga_2 ON hga_2.parent_id = gap_2.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_datumattribut xpda ON xpda.ogr_pkid = hga_2.xp_generattribut_xp_datumattribut_pkid
+						UNION
+						SELECT
+							hga_3.parent_id,(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".fp_plan gap_3
+						LEFT JOIN " . $this->gmlas_schema . ".fp_plan_hatgenerattribut hga_3 ON hga_3.parent_id = gap_3.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_integerattribut xpin ON xpin.ogr_pkid = hga_3.xp_generattribut_xp_integerattribut_pkid
+						UNION
+						SELECT
+							hga_4.parent_id,(xpur.name,xpur.wert,'XP_URLAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".fp_plan gap_4
+						LEFT JOIN " . $this->gmlas_schema . ".fp_plan_hatgenerattribut hga_4 ON hga_4.parent_id = gap_4.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_urlattribut xpur ON xpur.ogr_pkid = hga_4.xp_generattribut_xp_urlattribut_pkid
+						UNION
+						SELECT
+							hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".fp_plan gap_5
+						LEFT JOIN " . $this->gmlas_schema . ".fp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+					) res GROUP BY parent_id 
+				) generattr_sub ON generattr_sub.parent_id = gmlas.id
 			WHERE
 				gmlas.id = '" . $gml_id . "'
 			;";
@@ -867,7 +937,8 @@ class Gml_extractor {
 				to_char(gmlas.versionbaugbdatum, 'DD.MM.YYYY') AS versionbaugbdatum,
 				gmlas.versionbaugbtext AS versionbaugbtext,
 				to_char(gmlas.versionsonstrechtsgrundlagedatum, 'DD.MM.YYYY') AS versionsonstrechtsgrundlagedatum,
-				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
+				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
+				array_to_json(generattr_sub.hatgenerattribut) AS hatgenerattribut
 				/*ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde*/
 			FROM
 				" . $this->gmlas_schema . ".so_plan gmlas LEFT JOIN
@@ -903,7 +974,41 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".so_plan_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid
+				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
+				(
+					SELECT
+					res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut FROM (
+						SELECT
+							hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".so_plan gap_1
+						LEFT JOIN " . $this->gmlas_schema . ".so_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
+						UNION
+						SELECT
+							hga_2.parent_id,(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".so_plan gap_2
+						LEFT JOIN " . $this->gmlas_schema . ".so_plan_hatgenerattribut hga_2 ON hga_2.parent_id = gap_2.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_datumattribut xpda ON xpda.ogr_pkid = hga_2.xp_generattribut_xp_datumattribut_pkid
+						UNION
+						SELECT
+							hga_3.parent_id,(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".so_plan gap_3
+						LEFT JOIN " . $this->gmlas_schema . ".so_plan_hatgenerattribut hga_3 ON hga_3.parent_id = gap_3.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_integerattribut xpin ON xpin.ogr_pkid = hga_3.xp_generattribut_xp_integerattribut_pkid
+						UNION
+						SELECT
+							hga_4.parent_id,(xpur.name,xpur.wert,'XP_URLAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".so_plan gap_4
+						LEFT JOIN " . $this->gmlas_schema . ".so_plan_hatgenerattribut hga_4 ON hga_4.parent_id = gap_4.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_urlattribut xpur ON xpur.ogr_pkid = hga_4.xp_generattribut_xp_urlattribut_pkid
+						UNION
+						SELECT
+							hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".so_plan gap_5
+						LEFT JOIN " . $this->gmlas_schema . ".so_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+					) res GROUP BY parent_id 
+				) generattr_sub ON generattr_sub.parent_id = gmlas.id
 			WHERE
 				gmlas.id = '" . $gml_id . "'
 			;";
@@ -1001,7 +1106,41 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".rp_plan_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".rp_plan_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id
+				" . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id  LEFT JOIN
+				(
+					SELECT
+					res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut FROM (
+						SELECT
+							hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".rp_plan gap_1
+						LEFT JOIN " . $this->gmlas_schema . ".rp_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
+						UNION
+						SELECT
+							hga_2.parent_id,(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".rp_plan gap_2
+						LEFT JOIN " . $this->gmlas_schema . ".rp_plan_hatgenerattribut hga_2 ON hga_2.parent_id = gap_2.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_datumattribut xpda ON xpda.ogr_pkid = hga_2.xp_generattribut_xp_datumattribut_pkid
+						UNION
+						SELECT
+							hga_3.parent_id,(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".rp_plan gap_3
+						LEFT JOIN " . $this->gmlas_schema . ".rp_plan_hatgenerattribut hga_3 ON hga_3.parent_id = gap_3.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_integerattribut xpin ON xpin.ogr_pkid = hga_3.xp_generattribut_xp_integerattribut_pkid
+						UNION
+						SELECT
+							hga_4.parent_id,(xpur.name,xpur.wert,'XP_URLAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".rp_plan gap_4
+						LEFT JOIN " . $this->gmlas_schema . ".rp_plan_hatgenerattribut hga_4 ON hga_4.parent_id = gap_4.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_urlattribut xpur ON xpur.ogr_pkid = hga_4.xp_generattribut_xp_urlattribut_pkid
+						UNION
+						SELECT
+							hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+						FROM " . $this->gmlas_schema . ".rp_plan gap_5
+						LEFT JOIN " . $this->gmlas_schema . ".rp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
+						INNER JOIN " . $this->gmlas_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+					) res GROUP BY parent_id 
+				) generattr_sub ON generattr_sub.parent_id = gmlas.id
 			WHERE
 				gmlas.id = '" . $gml_id . "'
 			;";
@@ -1865,8 +2004,7 @@ class Gml_extractor {
 				gehoertzuplan_pkid character varying,
 				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT rp_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_bereich
 			(
@@ -1879,8 +2017,7 @@ class Gml_extractor {
 				nilreason character varying,
 				bereich_pkid character varying,
 				CONSTRAINT bp_plan_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_bereich
 			(
@@ -1893,8 +2030,7 @@ class Gml_extractor {
 				nilreason character varying,
 				bereich_pkid character varying,
 				CONSTRAINT fp_plan_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_bereich
 			(
@@ -1907,8 +2043,7 @@ class Gml_extractor {
 				nilreason character varying,
 				bereich_pkid character varying,
 				CONSTRAINT rp_plan_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_bereich
 			(
@@ -1921,8 +2056,7 @@ class Gml_extractor {
 				nilreason character varying,
 				bereich_pkid character varying,
 				CONSTRAINT so_plan_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_verbundenerplan
 			(
@@ -1936,8 +2070,7 @@ class Gml_extractor {
 				verbundenerplan_title character varying,
 				verbundenerplan_nilreason character varying,
 				CONSTRAINT xp_verbundenerplan_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".aendert
 			(
@@ -1945,8 +2078,7 @@ class Gml_extractor {
 				ogr_pkid character varying NOT NULL,
 				xp_verbundenerplan_pkid character varying,
 				CONSTRAINT aendert_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_aendert_aendert
 			(
@@ -1955,8 +2087,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT bp_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_aendert_aendert
@@ -1966,8 +2097,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT fp_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_aendert_aendert
 			(
@@ -1976,8 +2106,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT rp_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_aendert_aendert
 			(
@@ -1986,8 +2115,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT so_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".wurdegeaendertvon
 			(
@@ -1995,8 +2123,7 @@ class Gml_extractor {
 				ogr_pkid character varying NOT NULL,
 				xp_verbundenerplan_pkid character varying,
 				CONSTRAINT wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -2005,8 +2132,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT bp_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -2015,8 +2141,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT fp_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -2025,8 +2150,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT rp_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -2035,8 +2159,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT so_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".verfahrensmerkmale
 			(
@@ -2047,8 +2170,7 @@ class Gml_extractor {
 				xp_verfahrensmerkmal_signatur character varying,
 				xp_verfahrensmerkmal_signiert boolean,
 				CONSTRAINT verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -2057,8 +2179,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT bp_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -2067,8 +2188,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT fp_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -2077,8 +2197,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT rp_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -2087,8 +2206,7 @@ class Gml_extractor {
 				parent_pkid character varying NOT NULL,
 				child_pkid character varying NOT NULL,
 				CONSTRAINT so_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_spezexternereferenz
 			(
@@ -2107,8 +2225,7 @@ class Gml_extractor {
 				datum date,
 				typ character varying NOT NULL,
 				CONSTRAINT xp_spezexternereferenz_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_spezexternereferenzauslegung
 			(
@@ -2128,8 +2245,7 @@ class Gml_extractor {
 				typ character varying NOT NULL,
 				nurzurauslegung boolean,
 				CONSTRAINT xp_spezexternereferenzauslegung_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_externereferenz
 			(
@@ -2138,8 +2254,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT bp_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_externereferenz
 			(
@@ -2148,8 +2263,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT fp_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_externereferenz
 			(
@@ -2158,8 +2272,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT rp_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_externereferenz
 			(
@@ -2168,8 +2281,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT so_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_plangeber
 			(
@@ -2178,8 +2290,7 @@ class Gml_extractor {
 				name character varying NOT NULL,
 				kennziffer character varying,
 				CONSTRAINT xp_plangeber_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_gemeinde
 			(
@@ -2190,8 +2301,7 @@ class Gml_extractor {
 				gemeindename character varying,
 				ortsteilname character varying,
 				CONSTRAINT xp_gemeinde_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_gemeinde
 			(
@@ -2200,8 +2310,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				xp_gemeinde_pkid character varying,
 				CONSTRAINT bp_plan_gemeinde_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_gemeinde
 			(
@@ -2210,8 +2319,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				xp_gemeinde_pkid character varying,
 				CONSTRAINT fp_plan_gemeinde_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_auslegungsenddatum
 			(
@@ -2220,8 +2328,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT bp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_auslegungsstartdatum
 			(
@@ -2230,8 +2337,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT bp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsenddatum
 			(
@@ -2240,8 +2346,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT bp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsstartdatum
 			(
@@ -2250,8 +2355,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT bp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_auslegungsenddatum
 			(
@@ -2260,8 +2364,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT fp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_auslegungsstartdatum
 			(
@@ -2270,8 +2373,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT fp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsenddatum
 			(
@@ -2280,8 +2382,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT fp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsstartdatum
 			(
@@ -2290,8 +2391,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT fp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_auslegungsenddatum
 			(
@@ -2300,8 +2400,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT rp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_auslegungsstartdatum
 			(
@@ -2310,8 +2409,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT rp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsenddatum
 			(
@@ -2320,8 +2418,7 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT rp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;
+			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsstartdatum
 			(
@@ -2330,8 +2427,105 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				value date,
 				CONSTRAINT rp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
-			)
-			;";
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_hatgenerattribut
+			(
+					ogc_fid serial NOT NULL,
+					ogr_pkid character varying NOT NULL,
+					parent_id character varying NOT NULL,
+					xp_generattribut_xp_datumattribut_pkid character varying,
+					xp_generattribut_xp_doubleattribut_pkid character varying,
+					xp_generattribut_xp_integerattribut_pkid character varying,
+					xp_generattribut_xp_stringattribut_pkid character varying,
+					xp_generattribut_xp_urlattribut_pkid character varying,
+					CONSTRAINT bp_plan_hatgenerattribut_pkey PRIMARY KEY (ogc_fid)
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_hatgenerattribut
+			(
+					ogc_fid serial NOT NULL,
+					ogr_pkid character varying NOT NULL,
+					parent_id character varying NOT NULL,
+					xp_generattribut_xp_datumattribut_pkid character varying,
+					xp_generattribut_xp_doubleattribut_pkid character varying,
+					xp_generattribut_xp_integerattribut_pkid character varying,
+					xp_generattribut_xp_stringattribut_pkid character varying,
+					xp_generattribut_xp_urlattribut_pkid character varying,
+					CONSTRAINT fp_plan_hatgenerattribut_pkey PRIMARY KEY (ogc_fid)
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".so_plan_hatgenerattribut
+			(
+					ogc_fid serial NOT NULL,
+					ogr_pkid character varying NOT NULL,
+					parent_id character varying NOT NULL,
+					xp_generattribut_xp_datumattribut_pkid character varying,
+					xp_generattribut_xp_doubleattribut_pkid character varying,
+					xp_generattribut_xp_integerattribut_pkid character varying,
+					xp_generattribut_xp_stringattribut_pkid character varying,
+					xp_generattribut_xp_urlattribut_pkid character varying,
+					CONSTRAINT so_plan_hatgenerattribut_pkey PRIMARY KEY (ogc_fid)
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_hatgenerattribut
+			(
+					ogc_fid serial NOT NULL,
+					ogr_pkid character varying NOT NULL,
+					parent_id character varying NOT NULL,
+					xp_generattribut_xp_datumattribut_pkid character varying,
+					xp_generattribut_xp_doubleattribut_pkid character varying,
+					xp_generattribut_xp_integerattribut_pkid character varying,
+					xp_generattribut_xp_stringattribut_pkid character varying,
+					xp_generattribut_xp_urlattribut_pkid character varying,
+					CONSTRAINT rp_plan_hatgenerattribut_pkey PRIMARY KEY (ogc_fid)
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".xp_stringattribut
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				name character varying NOT NULL,
+				wert character varying NOT NULL,
+				CONSTRAINT xp_stringattribut_pkey PRIMARY KEY (ogc_fid)
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".xp_datumattribut
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				name character varying NOT NULL,
+				wert date NOT NULL,
+				CONSTRAINT xp_datumattribut_pkey PRIMARY KEY (ogc_fid)
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".xp_integerattribut
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				name character varying NOT NULL,
+				wert integer NOT NULL,
+				CONSTRAINT xp_integerattribut_pkey PRIMARY KEY (ogc_fid)
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".xp_doubleattribut
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				name character varying NOT NULL,
+				wert double precision NOT NULL,
+				CONSTRAINT xp_doubleattribut_pkey PRIMARY KEY (ogc_fid)
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".xp_urlattribut
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				name character varying NOT NULL,
+				wert character varying NOT NULL,
+				CONSTRAINT xp_urlattribut_pkey PRIMARY KEY (ogc_fid)
+			);
+			";
 		$ret = $this->pgdatabase->execSQL($sql, 4,0);
 	}
 

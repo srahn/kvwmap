@@ -532,6 +532,7 @@ class rolle {
 			rolle::$language = $rs['language'];
 			$this->hideMenue = ($rs['hidemenue'] == 'f'? false : true);
 			$this->hideLegend = ($rs['hidelegend'] == 'f'? false : true);
+			$this->legendwidth = $rs['legendwidth'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -547,6 +548,7 @@ class rolle {
 			$this->layer_selection=$rs['layer_selection'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
+			$this->hide_deactivated_layers = ($rs['hide_deactivated_layers'] == 't');
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
@@ -1788,6 +1790,20 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
+	function setLegendWidth($width) {
+		$sql = "
+			UPDATE
+				kvwmap.rolle
+			SET
+				legendwidth = " . $width . "
+			WHERE
+				user_id= " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " 
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->setLegendWidth:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+
 	function setSize($mapsize) {
 		# setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
 		$teil = explode('x',$mapsize);
@@ -2379,6 +2395,21 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle function:set_last_query_layer - :",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
+	}
+
+	function hide_deactivated_layers(){
+		$sql = '
+			UPDATE 
+				kvwmap.rolle 
+			SET 
+				hide_deactivated_layers = NOT hide_deactivated_layers
+			WHERE 
+				user_id = ' . $this->user_id . ' AND 
+				stelle_id = ' . $this->stelle_id;
+		#echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:hide_deactivated_layers - :",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		return 1;
 	}	
 
 	function getMapComments($consumetime, $public = false, $order) {
@@ -2407,25 +2438,32 @@ class rolle {
 		return $ret;
 	}
 	
-	function getLayerComments($id, $user_id) {
-		$where_id = ($id != '' ? " AND id = " . $id : "");
+	function getLayerComments($id, $stelle_id, $user_id) {
+		global $admin_stellen;
+		$conditions = array();
+		$conditions[] = "(user_id = " . $user_id . " OR user_id IS NULL)";
+		if ($stelle_id != '') {
+			$conditions[] = "stelle_id = " . $stelle_id;
+		}
+		if ($id != '') {
+			$conditions[] = "id = " . $id;
+		}
 		$sql = "
 			SELECT
 				id,
+				user_id,
+				stelle_id,
 				name,
 				array_to_string(layers, ',') as layers,
 				query
 			FROM
 				kvwmap.rolle_saved_layers
 			WHERE
-				user_id = " . $user_id . " AND
-				stelle_id = " . $this->stelle_id .
-				$where_id . "
+				" . implode(" AND\n				", $conditions) . "
 			ORDER BY
 				name
 		";
-		#echo '<br>Sql: ' . $sql;
-
+		// echo '<br>Sql: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$this->database->success) {
 			# Fehler bei Datenbankanfrage
@@ -2442,7 +2480,7 @@ class rolle {
 		return $ret;
 	}
 
-	function insertMapComment($consumetime,$comment,$public) {
+	function insertMapComment($consumetime, $comment, $public) {
 		if($public == '')$public = 0;
 		$rows = [
 			'user_id' => $this->user_id, 
@@ -2474,40 +2512,47 @@ class rolle {
 		return $ret;
 	}
 	
-	function insertLayerComment($layerset,$comment) {
+	function insertLayerComment($layerset, $comment, $stelle_id, $user_id) {
 		$layers = array();
 		$query = array();
-		for($i=0; $i < count($layerset['list']); $i++){
-			if($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivstatus'] == 1){
+		for ($i=0; $i < count($layerset['list']); $i++) {
+			if ($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivstatus'] == 1) {
 				$layers[] = $layerset['list'][$i]['layer_id'];
-				if($layerset['list'][$i]['querystatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
+				if ($layerset['list'][$i]['querystatus'] == 1) {
+					$query[] = $layerset['list'][$i]['layer_id'];
+				}
 			}
 		}
-		$rows = [
-			'user_id' => $this->user_id,
-			'stelle_id' => $this->stelle_id,
+		$record = array(
+			'user_id' => $user_id ?: 'NULL',
+			'stelle_id' => $stelle_id ?: 'NULL',
 			'name' => "'" . $comment . "'",
 			'layers' => "'{" . implode(',', $layers) . "}'",
 			'query' => "'" . implode(',', $query) . "'"
-		];
+		);
 		$sql = "
 			INSERT INTO
 				kvwmap.rolle_saved_layers
-				(" . implode(', ', array_keys($rows)) . ")
-			VALUES	
-				(" . implode(', ', $rows) . ")";
-		#echo '<br>'.$sql;
-		$queryret=$this->database->execSQL($sql,4, 1);
-		if ($queryret[0]) {
+				(" . implode(', ', array_keys($record)) . ")
+			VALUES
+				(" . implode(', ', array_values($record)) . ")
+			RETURNING
+				(id)
+		";
+		// echo '<br>' . $sql;
+		$ret = $this->database->execSQL($sql,4, 1);
+		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
-			$ret[0]=1;
-			$ret[1]='<br>Fehler beim Speichern des Kommentares zur Layerauswahl.<br>'.$ret[1];
+			return array(
+				'success' => false,
+				'msg' => '<br>Fehler beim Speichern des Kommentares zur Layerauswahl.<br>' . $ret[1]
+			);
 		}
-		else {
-			$ret[0]=0;
-			$ret[1]=1;
-		}
-		return $ret;
+		$rs = pg_fetch_assoc($ret['query']);
+		return array(
+			'success' => true,
+			'id' => $rs['id']
+		);
 	}
 
 	function deleteMapComment($storetime){
@@ -2527,15 +2572,15 @@ class rolle {
 		}
 	}
 		
-	function deleteLayerComment($id){
+	function deleteLayerComment($id, $stelle_id, $user_id) {
 		$sql = "
 			DELETE FROM 
 				kvwmap.rolle_saved_layers 
-			WHERE 
-				user_id = " . $this->user_id . " AND 
-				stelle_id = " . $this->stelle_id . " AND 
-				id = " . $id;
-		#echo '<br>'.$sql;
+			WHERE
+				id = " . $id
+				. ($stelle_id ? " AND stelle_id = " . $stelle_id : '')
+				. ($user_id ? " AND user_id = " . $user_id : '') . "
+		";
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
 			# Fehler bei Datenbankanfrage

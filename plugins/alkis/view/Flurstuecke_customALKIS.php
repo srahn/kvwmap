@@ -149,6 +149,11 @@ hide_versions = function(flst){
 		$ret = $this->Stelle->getFlurstueckeAllowed($FlurstKennzListe, $this->pgdatabase, '_eigentuemer');
 		$eigentuemer_allowed = array_flip($ret[1] ?? []); // zur schnelleren Suche mit isset() anstatt in_array()
 
+		$some_eigentuemer_not_allowed = false;
+		if (count($eigentuemer_allowed) < count($FlurstKennzListe)) {
+			$some_eigentuemer_not_allowed = true;
+		}
+
     for ($a=0;$a<$anzObj;$a++){
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
@@ -962,13 +967,13 @@ hide_versions = function(flst){
 													<option>-- Auswahl --</option>
 													<? if($flst->Nachfolger == '' AND $flst->hist_alb != 1){ ?>
 													<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis</option><? } ?>
-													<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
+													<? if($this->Stelle->funktionen['MV0550']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
 													<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0520&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
-													<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
+													<? if($this->Stelle->funktionen['MV0560']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
 													<? } ?>
 													<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=30&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten</option><? } ?>
-													<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
-													<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
+													<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
+													<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
 													
 													<?
 														if(!empty($generische_auszuege)){
@@ -1088,13 +1093,13 @@ hide_versions = function(flst){
 				<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();this.selectedIndex=0">
 					<option>-- Auswahl --</option>
 					<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onchange="send_selected_flurst('ALKIS_Auszug', 'MV0510', 1, '_blank');">Flurstücksnachweis</option><? } ?>
-					<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onchange="send_selected_flurst('ALKIS_Auszug', 'MV0550', 1, '_blank');">Flurstücks- und Eigentumsnachweis</option><? } ?>
+					<? if($this->Stelle->funktionen['MV0550']['erlaubt'] AND !$some_eigentuemer_not_allowed){ ?><option onchange="send_selected_flurst('ALKIS_Auszug', 'MV0550', 1, '_blank');">Flurstücks- und Eigentumsnachweis</option><? } ?>
 					<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onchange="send_selected_flurst('ALKIS_Auszug', 'MV0520', 1, '_blank');">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
-					<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onchange="send_selected_flurst('ALKIS_Auszug', 'MV0560', 1, '_blank');">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
+					<? if($this->Stelle->funktionen['MV0560']['erlaubt'] AND !$some_eigentuemer_not_allowed){ ?><option onchange="send_selected_flurst('ALKIS_Auszug', 'MV0560', 1, '_blank');">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
 
 					<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onchange="send_selected_flurst('ALB_Anzeige', '30', 1, '_blank');">Flurst&uuml;cksdaten</option><? } ?>
-					<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onchange="send_selected_flurst('ALB_Anzeige', '35', 1, '_blank');">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
-					<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onchange="send_selected_flurst('ALB_Anzeige', '40', 1, '_blank');">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
+					<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND !$some_eigentuemer_not_allowed){ ?><option onchange="send_selected_flurst('ALB_Anzeige', '35', 1, '_blank');">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
+					<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt'] AND !$some_eigentuemer_not_allowed){ ?><option onchange="send_selected_flurst('ALB_Anzeige', '40', 1, '_blank');">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
 					
 					<?
 						if(!empty($generische_auszuege)){

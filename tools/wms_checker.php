@@ -2,7 +2,7 @@
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 
-if (getenv('HOSTNAME') != 'kvwmap_prod_web'){
+if (!in_array(getenv('NETWORK_NAME'), ['', 'kvwmap_prod_web'])){
 	exit;
 }
 
