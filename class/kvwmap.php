@@ -1795,13 +1795,15 @@ echo '			</table>
 		if (strpos(strtolower($url), 'version') === false) {
 			$url .= '&version=' . $layer['wms_server_version'];
 		}
-		$pos = strpos(strtolower($layer['connection']), 'layers');
-		if ($pos !== false) {
-			$layersection = substr($layer['connection'], $pos + 7);
-			$pos = strpos($layersection, '&');
-			if ($pos !== false) {
-				$layersection = substr($layersection, 0, $pos);
+		$pos_layers = strpos(strtolower($layer['connection']), 'layers');
+		if ($pos_layers !== false) {
+			$layersection = substr($layer['connection'], $pos_layers + 7);
+			$pos_und = strpos($layersection, '&');
+			if ($pos_und !== false) {
+				$layersection = substr($layersection, 0, $pos_und);
+				$url = substr_replace($url, '', $pos_layers, $pos_und);		# layers rausschneiden
 			}
+			$url = substr_replace($url, '', $pos_layers);		# layers rausschneiden
 		}
 		else {
 			$layersection = $layer['wms_name'];
