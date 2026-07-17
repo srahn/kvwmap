@@ -1,5 +1,17 @@
 BEGIN;
 
+  INSERT INTO kvwmap.config ("name", "prefix", "value", "description", "type", "plugin", "group", "saved", "editable") VALUES (
+    'GRSTSICH_RECHTE_LAYER_ID',
+    '',
+    '',
+    'ID des Layers, der die Rechte enthält.',
+    'string',
+    'grundstueckssicherung',
+    'Plugins/grundstueckssicherung',
+    0,
+    2
+  );
+
   CREATE SCHEMA IF NOT EXISTS grstsich;
 
   CREATE TABLE grstsich.bundeslaender (
@@ -49,7 +61,58 @@ BEGIN;
     CONSTRAINT mandanten_pk PRIMARY KEY (id)
   );
 
+  CREATE TABLE grstsich.vorhabensgebiete (
+    id serial NOT NULL,
+    bezeichnung varchar NOT NULL,
+    kategorie_id int4 NULL,
+    projekt_id int4 NULL,
+    geom public.geometry(polygon, 25833) NULL,
+    CONSTRAINT vorhabensgebiete_pk PRIMARY KEY (id)
+  );
+  CREATE INDEX vorhabensgebiete_geom_gist ON grstsich.vorhabensgebiete USING gist (geom);
+
+  CREATE TABLE grstsich.cl_vorhabenskategorien (
+    id serial4 NOT NULL,
+    bezeichnung varchar NOT NULL,
+    CONSTRAINT cl_vorhabenskategorien_pkey PRIMARY KEY (id)
+  );
+
+  ALTER TABLE grstsich.vorhabensgebiete ADD CONSTRAINT vorhabensgebiete_projekt_id_fk FOREIGN KEY (projekt_id) REFERENCES grstsich.projekte(id);
+  ALTER TABLE grstsich.vorhabensgebiete ADD CONSTRAINT vorhabensgebiete_cl_vorhabenskategorien_fk FOREIGN KEY (kategorie_id) REFERENCES grstsich.cl_vorhabenskategorien(id);
+
+  CREATE TABLE grstsich.vorhabensrechtearten (
+    vorhabensgebiet_id int4 NOT NULL,
+    rechteart_id int4 NOT NULL,
+    id serial4 NOT NULL,
+    CONSTRAINT vorhabensrechtearten_pk PRIMARY KEY (id)
+  );
+  ALTER TABLE grstsich.vorhabensrechtearten ADD CONSTRAINT vorhabensrechtearten_vorhabensgebiete_fk FOREIGN KEY (vorhabensgebiet_id) REFERENCES grstsich.vorhabensgebiete(id);
+  ALTER TABLE grstsich.vorhabensrechtearten ADD CONSTRAINT vorhabensrechtearten_cl_rechtearten_fk FOREIGN KEY (rechteart_id) REFERENCES grstsich.cl_rechtearten(id);
+
+  CREATE TABLE grstsich.flurstuecksrechte (
+    id serial NOT NULL,
+    rechteart_id integer NOT NULL,
+    flurstueckskennzeichen varchar NOT NULL,
+    sicherungsstand_id integer DEFAULT 0 NOT NULL,
+    CONSTRAINT flurstuecksrechte_pk PRIMARY KEY (id)
+  );
+
+  ALTER TABLE grstsich.flurstuecksrechte ADD CONSTRAINT flurstuecksrechte_cl_rechtearten_fk FOREIGN KEY (rechte_art_id) REFERENCES grstsich.cl_rechtearten(id);
+  ALTER TABLE grstsich.flurstuecksrechte ADD CONSTRAINT flurstuecksrechte_sicherungsstand_fk FOREIGN KEY (sicherungsstand_id) REFERENCES grstsich.cl_sicherungsstaende(id);
+
   CREATE TABLE grstsich.teilprojekte (
+    id integer NOT NULL,
+    bezeichnung varchar NOT NULL,
+    vorhabensgebiet_id integer NULL,
+    mandant_id integer NULL,
+    geom public.geometry(multipolygon, 25833) NULL,
+    CONSTRAINT teilprojekte_pk PRIMARY KEY (id)
+  );
+  CREATE INDEX teilprojekte_geom_gist ON grstsich.teilprojekte USING gist (geom);
+  ALTER TABLE grstsich.teilprojekte ADD CONSTRAINT teilprojekte_mandanten_fk FOREIGN KEY (mandant_id) REFERENCES grstsich.mandanten(id);
+  ALTER TABLE grstsich.teilprojekte ADD CONSTRAINT teilprojekte_vorhabensgebiete_fk FOREIGN KEY (vorhabensgebiet_id) REFERENCES grstsich.vorhabensgebiete(id);
+
+  CREATE TABLE grstsich.teilprojekte_ (
     id serial NOT NULL,
     point public.geometry(point, 25833) NULL,
     weissflaeche public.geometry(multipolygon, 25833) NULL,
@@ -75,14 +138,14 @@ BEGIN;
     geom public.geometry(Polygon, 25833) NULL,
     CONSTRAINT planungsgebiete_pk PRIMARY KEY (id)
   );
-  CREATE INDEX planungsgebiete_geom_gist ON grstsich.teilprojekte USING gist (geom);
-  CREATE INDEX planungsgebiete_weissflaeche_gist ON grstsich.teilprojekte USING gist (weissflaeche);
+  CREATE INDEX planungsgebiete_geom_gist ON grstsich.teilprojekte_ USING gist (geom);
+  CREATE INDEX planungsgebiete_weissflaeche_gist ON grstsich.teilprojekte_ USING gist (weissflaeche);
 
-  ALTER TABLE grstsich.teilprojekte ADD CONSTRAINT planungsgebiete_projekt_id_fk FOREIGN KEY (projekt_id) REFERENCES grstsich.projekte(id);
-  ALTER TABLE grstsich.teilprojekte ADD CONSTRAINT teilprojekte_cl_projektkategorien_fk FOREIGN KEY (projektkategorie_id) REFERENCES grstsich.cl_projektkategorien(id);
-  ALTER TABLE grstsich.teilprojekte ADD CONSTRAINT teilprojekte_cl_projektstati_fk FOREIGN KEY (status_id) REFERENCES grstsich.cl_projektstati(id);
-  ALTER TABLE grstsich.teilprojekte ADD CONSTRAINT teilprojekte_cl_quellen_fk FOREIGN KEY (quelle_id) REFERENCES grstsich.cl_quellen(id);
-  ALTER TABLE grstsich.teilprojekte ADD CONSTRAINT teilprojekte_mandanten_fk FOREIGN KEY (mandant_id) REFERENCES grstsich.mandanten(id);
+  ALTER TABLE grstsich.teilprojekte_ ADD CONSTRAINT planungsgebiete_projekt_id_fk FOREIGN KEY (projekt_id) REFERENCES grstsich.projekte(id);
+  ALTER TABLE grstsich.teilprojekte_ ADD CONSTRAINT teilprojekte__cl_projektkategorien_fk FOREIGN KEY (projektkategorie_id) REFERENCES grstsich.cl_projektkategorien(id);
+  ALTER TABLE grstsich.teilprojekte_ ADD CONSTRAINT teilprojekte__cl_projektstati_fk FOREIGN KEY (status_id) REFERENCES grstsich.cl_projektstati(id);
+  ALTER TABLE grstsich.teilprojekte_ ADD CONSTRAINT teilprojekte__cl_quellen_fk FOREIGN KEY (quelle_id) REFERENCES grstsich.cl_quellen(id);
+  ALTER TABLE grstsich.teilprojekte_ ADD CONSTRAINT teilprojekte__mandanten_fk FOREIGN KEY (mandant_id) REFERENCES grstsich.mandanten(id);
 
   CREATE OR REPLACE FUNCTION grstsich.set_bundesland_id()
   RETURNS trigger
@@ -108,7 +171,7 @@ BEGIN;
       OR
   UPDATE
       ON
-      grstsich.teilprojekte FOR EACH ROW EXECUTE FUNCTION grstsich.set_bundesland_id();
+      grstsich.teilprojekte_ FOR EACH ROW EXECUTE FUNCTION grstsich.set_bundesland_id();
 
   CREATE TABLE grstsich.landkreise (
     gid serial NOT NULL PRIMARY KEY,
@@ -157,7 +220,7 @@ BEGIN;
       OR
   UPDATE
       ON
-      grstsich.teilprojekte FOR EACH ROW EXECUTE FUNCTION grstsich.attributberechnungen();
+      grstsich.teilprojekte_ FOR EACH ROW EXECUTE FUNCTION grstsich.attributberechnungen();
 
   CREATE OR REPLACE FUNCTION grstsich.update_weissflaeche()
   RETURNS trigger
@@ -191,7 +254,7 @@ BEGIN;
   CREATE TRIGGER tr_10_update_weissflaeche BEFORE
   UPDATE
       OF weissflaeche ON
-      grstsich.teilprojekte FOR EACH ROW EXECUTE FUNCTION grstsich.update_weissflaeche();
+      grstsich.teilprojekte_ FOR EACH ROW EXECUTE FUNCTION grstsich.update_weissflaeche();
 
   CREATE TABLE grstsich.cl_sicherungsstaende (
     id serial NOT NULL,
@@ -200,7 +263,7 @@ BEGIN;
     CONSTRAINT cl_sicherungsstaende_unique UNIQUE (bezeichnung)
   );
 
-  CREATE TABLE grstsich.rechte (
+  CREATE TABLE grstsich.nutzungsrechte (
     id serial NOT NULL,
     bezeichnung varchar NOT NULL,
     art_id int4 NULL,
@@ -215,9 +278,9 @@ BEGIN;
     layer_id int4 NULL,
     teilprojekt_id integer,
     sicherungsstand_id integer NOT NULL DEFAULT 0,
-    CONSTRAINT rechte_pkey PRIMARY KEY (id)
+    CONSTRAINT nutzungsrechte_pkey PRIMARY KEY (id)
   );
-  CREATE INDEX fki_rechte_vertraege_fkey ON grstsich.rechte USING btree (vertrag_id);
+  CREATE INDEX fki_nutzungsrechte_vertraege_fkey ON grstsich.nutzungsrechte USING btree (vertrag_id);
 
   CREATE TABLE grstsich.cl_rechtearten (
     id serial NOT NULL,
@@ -339,24 +402,104 @@ BEGIN;
   CREATE TRIGGER tr_10_flurstueckszuordnung BEFORE
   INSERT OR UPDATE
     OF flurstueckszuordnung
-    ON grstsich.rechte
+    ON grstsich.nutzungsrechte
     FOR EACH ROW EXECUTE FUNCTION grstsich.flurstueckszuordnung_recht();
 
-  ALTER TABLE grstsich.rechte ADD CONSTRAINT rechte_art_fkey FOREIGN KEY (art_id) REFERENCES grstsich.cl_rechtearten(id) ON UPDATE CASCADE;
-  ALTER TABLE grstsich.rechte ADD CONSTRAINT rechte_vertraege_fk FOREIGN KEY (vertrag_id) REFERENCES grstsich.vertraege(id);
-  ALTER TABLE grstsich.rechte ADD CONSTRAINT rechte_teilprojekt_fk FOREIGN KEY (teilprojekt_id) REFERENCES grstsich.teilprojekte(id) ON UPDATE CASCADE;
-  ALTER TABLE grstsich.rechte ADD CONSTRAINT rechte_sicherungsstand_fkey FOREIGN KEY (sicherungsstand_id) REFERENCES grstsich.cl_sicherungsstaende(id) ON UPDATE CASCADE;
+  ALTER TABLE grstsich.nutzungsrechte ADD CONSTRAINT nutzungsrechte_art_fkey FOREIGN KEY (art_id) REFERENCES grstsich.cl_rechtearten(id) ON UPDATE CASCADE;
+  ALTER TABLE grstsich.nutzungsrechte ADD CONSTRAINT nutzungsrechte_vertraege_fk FOREIGN KEY (vertrag_id) REFERENCES grstsich.vertraege(id);
+  ALTER TABLE grstsich.nutzungsrechte ADD CONSTRAINT nutzungsrechte_teilprojekt_fk FOREIGN KEY (teilprojekt_id) REFERENCES grstsich.teilprojekte_(id) ON UPDATE CASCADE;
+  ALTER TABLE grstsich.nutzungsrechte ADD CONSTRAINT nutzungsrechte_sicherungsstand_fkey FOREIGN KEY (sicherungsstand_id) REFERENCES grstsich.cl_sicherungsstaende(id) ON UPDATE CASCADE;
 
-  INSERT INTO kvwmap.config ("name", "prefix", "value", "description", "type", "plugin", "group", "saved", "editable") VALUES (
-    'GRSTSICH_RECHTE_LAYER_ID',
-    '',
-    '',
-    'ID des Layers, der die Rechte enthält.',
-    'string',
-    'grundstueckssicherung',
-    'Plugins/grundstueckssicherung',
-    0,
-    2
-  );
+  CREATE OR REPLACE FUNCTION grstsich.find_bundesland(_geom geometry)
+  RETURNS character
+  LANGUAGE plpgsql
+  STABLE STRICT
+  AS $function$
+
+  DECLARE
+    _result character(2);
+  BEGIN
+    SELECT ST_Transform(_geom, 25832) INTO _geom;
+    SELECT
+      b.abk INTO _result
+    FROM
+      (
+        SELECT
+          ST_Area(ST_Intersection(_geom, the_geom)) AS area,    
+          abk
+        FROM
+          grstsich.bundeslaender
+        WHERE
+          st_intersects(_geom, the_geom)
+        ORDER BY
+          area DESC
+        LIMIT 1
+      ) b;
+
+    -- if _result NULL suche die abk des dichtesten Bundeslandes
+    IF _result IS NULL THEN
+      SELECT
+        b.abk INTO _result
+      FROM
+        (
+          SELECT
+            abk
+          FROM
+            grstsich.bundeslaender
+          ORDER BY
+            _geom <-> the_geom -- KNN search, faster than ST_Distance
+          LIMIT 1
+        ) b;
+    END IF;
+
+    return _result;
+  END;
+  $function$;
+
+  CREATE OR REPLACE FUNCTION grstsich.find_gemeinde(_geom geometry)
+  RETURNS character varying
+  LANGUAGE plpgsql
+  STABLE STRICT
+  AS $function$
+
+  DECLARE
+    _result character varying;
+  BEGIN
+    SELECT ST_Transform(_geom, 25832) INTO _geom;
+    SELECT
+      b.bezeichnung INTO _result
+    FROM
+      (
+        SELECT
+          ST_Area(ST_Intersection(_geom, the_geom)) AS area,    
+          bezeichnung
+        FROM
+          grstsich.gemeinden
+        WHERE
+          st_intersects(_geom, the_geom)
+        ORDER BY
+          area DESC
+        LIMIT 1
+      ) b;
+
+    -- if _result NULL suche die bezeichnung des dichtesten Bundeslandes
+    IF _result IS NULL THEN
+      SELECT
+        b.bezeichnung INTO _result
+      FROM
+        (
+          SELECT
+            bezeichnung
+          FROM
+            grstsich.gemeinden
+          ORDER BY
+            _geom <-> the_geom -- KNN search, faster than ST_Distance
+          LIMIT 1
+        ) b;
+    END IF;
+
+    return _result;
+  END;
+  $function$;
 
 COMMIT;

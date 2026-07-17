@@ -32,7 +32,7 @@ Angelegt mit Parametern:<br>
 layer_id: <? echo $this->formvars['layer_id']; ?><br>
 feature_id: <? echo $this->formvars['feature_id']; ?><br>
 rechteart_id: <? echo $this->formvars['rechteart_id']; ?><br>
-Buffer: <? echo $this->formvars['buffer']; ?><br><br><?
+Buffer: <? echo ($this->formvars['buffer'] ? $this->formvars['buffer'] : '0'); ?> m<br><br><?
 
 if ($this->layer !== null) {
 	echo 'Layer mit id ' . $this->formvars['layer_id'] . ' gefunden.';
