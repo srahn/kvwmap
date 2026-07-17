@@ -1070,7 +1070,7 @@ function open_group_options(event, group_id){
 <? 
 
 foreach($this->attributes['groups'] as $group_id => $group) {
-	echo '<textarea id="group_options_' . $group_id . '" name="group_options_' . $group_id . '" style="position: absolute; display: none; z-index: 100000; height: 100px">' . ($group['options']? json_encode($group['options'], JSON_PRETTY_PRINT) : '') . '</textarea>';
+	echo '<textarea id="group_options_' . $group_id . '" name="group_options_' . $group_id . '" style="position: absolute; display: none; z-index: 100000; height: 100px">' . ($group['options']? json_encode($group['options'], JSON_UNESCAPED_SLASHES |	JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : '') . '</textarea>';
 }
 
 

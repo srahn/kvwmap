@@ -209,6 +209,11 @@ if ($doit == true) {
 						if ($layer['attributes']['group_id'][0] != '') {
 							echo '<tr><td>';
 						}
+
+						if (empty($layer['attributes']['tabs']) AND !empty($layer['attributes']['groups'])) {
+							# wenn es keine Tabs gibt, Tab-div beginnen
+							echo '<div style="display: grid; gap: 7px;">';
+						}
 						
 						for($j = 0; $j < count_or_0($layer['attributes']['name']); $j++) {
 							$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
@@ -232,6 +237,7 @@ if ($doit == true) {
 								$groupname = $group['name'];
 								$groupname_short = $group['groupname_short'];
 								$collapsed = $group['options']['collapsed'];
+								$css = $group['options']['css'];
 
 								if ($layer['attributes']['tab'][$j] != '') {
 									$visibility = '';
@@ -240,7 +246,7 @@ if ($doit == true) {
 										$visibility = 'collapsed';
 									}
 								}
-								echo '<div class="'.$layer['layer_id'].'_group_'.$groupname_short.' tab tab_' . $layer['layer_id'] . '_' . $k . '_' . $tabname . ' ' . $visibility . '">
+								echo '<div class="'.$layer['layer_id'].'_group_'.$groupname_short.' tab tab_' . $layer['layer_id'] . '_' . $k . '_' . $tabname . ' ' . $visibility . '" style="' . $css . '">
 												<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
 													<tr>
 														<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['layer_id'].'_'.$j.'_'.$k.'\',\'' . $layer['gle_view'] . '\')">
@@ -369,6 +375,11 @@ if ($doit == true) {
 							if ($layer['attributes']['group_id'][0] == '') {
 								echo '</tbody></table></td></tr>';
 							}
+						}
+
+						if (empty($layer['attributes']['tabs']) AND !empty($layer['attributes']['groups'])){
+							# wenn es keine Tabs gibt, Tab-div schliessen
+							echo '</div>';
 						}
 
 						if ($layer['attributes']['group_id'][0] != '') {

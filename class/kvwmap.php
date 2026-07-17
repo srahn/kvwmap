@@ -21792,7 +21792,7 @@ DO $$
 						$formvars['selected_layer_id'],
 						$group_id,
 						pg_escape_string($group['name']),
-						($formvars['group_options_' . $group_id] ? "'" . pg_escape_string($formvars['group_options_' . $group_id]) . "'::jsonb" : 'NULL')
+						($formvars['group_options_' . $group_id] ? "'" . $formvars['group_options_' . $group_id] . "'::jsonb" : 'NULL')
 				);
 			}
 			$sql = "
