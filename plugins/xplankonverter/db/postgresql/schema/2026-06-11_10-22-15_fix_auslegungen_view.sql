@@ -52,7 +52,7 @@ BEGIN;
     WHERE v.id = d.protokoll_id
   );
   ALTER TABLE xplankonverter.veroeffentlichungsprotokoll_dokumente DROP CONSTRAINT IF EXISTS protokoll_id_fk;
-  ALTER TABLE xplankonverter.veroeffentlichungsprotokoll_dokumente ADD CONSTRAINT protokoll_id_fk FOREIGN KEY (protokoll_id) REFERENCES xplankonverter.veroeffentlichungsprotokolle(id) ON UPDATE CASCADE ON DELETE CASCADE
+  ALTER TABLE xplankonverter.veroeffentlichungsprotokoll_dokumente ADD CONSTRAINT protokoll_id_fk FOREIGN KEY (protokoll_id) REFERENCES xplankonverter.veroeffentlichungsprotokolle(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
   ALTER TABLE xplankonverter.veroeffentlichungsprotokolle DROP COLUMN pruefungen_seit_observationstart;
 COMMIT;
