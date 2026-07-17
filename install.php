@@ -375,7 +375,7 @@ function init_config() {
 	define('DBWRITE', 1);
 	define('POSTGRES_HOST', ($formvars['POSTGRES_HOST'] != '' ? $formvars['POSTGRES_HOST'] : 'pgsql'));
 	define('POSTGRES_USER', ($formvars['POSTGRES_USER'] != '' ? $formvars['POSTGRES_USER'] : 'kvwmap'));
-	define('POSTGRES_PASSWORD', ($formvars['POSTGRES_PASSWORD'] != '' ? $formvars['POSTGRES_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
+	define('POSTGRES_PASSWORD', $formvars['POSTGRES_PASSWORD']);
 	define('POSTGRES_POSTGRES_PASSWORD', ($formvars['POSTGRES_POSTGRES_PASSWORD'] != '' ? $formvars['POSTGRES_POSTGRES_PASSWORD'] : getenv('POSTGRES_POSTGRES_PASSWORD')));
 	define('POSTGRES_DBNAME', ($formvars['POSTGRES_DBNAME'] != '' ? $formvars['POSTGRES_DBNAME'] : 'kvwmapsp'));
 	define('POSTGRES_CONNECTION_ID', 1);

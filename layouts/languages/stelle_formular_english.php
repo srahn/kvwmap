@@ -3,6 +3,7 @@
   $strAsteriskRequired = 'Fields marked with an asterisk * are required';
   $strDataBankID = 'Database ID';
 	$strDefaultUserID = 'Standard user';
+  $strQuickJumpLayer = 'Quick Jump Layer';
   $strTask = 'Task';
   $strReferenceMap = 'Reference map*';
   $strMaxExtent = 'Max Extent';

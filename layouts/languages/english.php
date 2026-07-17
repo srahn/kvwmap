@@ -2,7 +2,9 @@
 	$this->activateAllClasses = 'activate classes';
 	$this->activatelayer = 'Activate layer';
 	$this->activatequery = 'Activate query';
-	$this->attributeditor = 'attribut editor';
+	$this->attributeditor = 'Attribut editor';
+	$this->klassen = 'Classes';
+	$this->stellenzuweisung = 'Usergroups';
 	$this->deactivateAllClasses = 'deactivate classes';
 	$this->deactivatelayer = 'Deactivate layer';
 	$this->deactivatequery = 'Deactivate query';

@@ -50,7 +50,7 @@ class Layer2Stelle extends PgObject {
 			'select' => 'l.layer_id, ul.minscale, ul.maxscale, ul.transparency, ul.group_id',
 			'from' => 'kvwmap.used_layer ul JOIN kvwmap.layer l ON ul.layer_id = l.layer_id JOIN kvwmap.u_groups g ON COALESCE(ul.group_id, l.gruppe) = g.id',
 			'where' => 'ul.stelle_id = ' . $stelle_id . " AND l.selectiontype != 'radio'",
-			'order' => 'g."order", l.legendorder'
+			'order' => 'g."order", coalesce(ul.legendorder, l.legendorder)'
 		));
 	}
 }

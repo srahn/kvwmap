@@ -1930,6 +1930,7 @@ $GUI->nachweis_columns = [
 			
     # erzeugen des Formularobjektes für die VermessungsStellen
     $GUI->FormObjVermStelle=$GUI->getFormObjVermStelle('sVermStelle', $GUI->formvars['sVermStelle']);
+		$GUI->FormObjVermStelle->addJavaScript('onchange', "document.getElementById('abfrageart_attr').checked = true;");
     $GUI->FormObjVermStelle->insertOption('', NULL, '--- Auswahl ---', 0);    
     # aktuellen Kartenausschnitt laden + zeichnen!
     $saved_scale = $GUI->reduce_mapwidth(207);
@@ -1954,9 +1955,9 @@ $GUI->nachweis_columns = [
 			$GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, $GUI->formvars['selected_group_id'], NULL, NULL, true, true);
 		}
 
-  	if(!$GUI->formvars['geom_from_layer']){
-      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $GUI->formvars['geom_from_layer'] = $layerset[0]['layer_id'];
+		if(!$GUI->formvars['geom_from_layer']){
+      $layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
+	    $GUI->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
     }
     $GUI->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -2529,6 +2530,7 @@ $GUI->nachweis_columns = [
     if ($back[0]=='') {
       # Fehlerfreie Datenabfrage
       $FormObjAntr_nr=new FormObject('suchantrnr','select',$back[1]['antr_nr_stelle_id'],array($antr_nr),$back[1]['antr_nr'],$size,0,0,NULL);
+			$FormObjAntr_nr->addJavaScript('onchange', "document.getElementById('abfrageart_antr').checked = true;");
     }
     else {
       $FormObjAntr_nr=new FormObject('suchantrnr','text',array($back[0]),'','',25,255,0,NULL);

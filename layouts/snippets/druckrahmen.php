@@ -310,10 +310,20 @@ function art_hide(){
         <tr>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="lageposy" value="<? echo $this->Document->selectedframe[0]['lageposy'] ?>" size="5"></td>
-					<td style="border-right:2px solid #C3C7C3" colspan="2" align="center"><input type="text" name="lagesize" value="<? echo $this->Document->selectedframe[0]['lagesize'] ?>" size="5">&nbsp;pt</td>
+					<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="lagesize" value="<? echo $this->Document->selectedframe[0]['lagesize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('lagecolor', $this->Document->selectedframe[0]['lagecolor']);	?>
+						</div>	
+					</td>
 					<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="gemeindeposy" value="<? echo $this->Document->selectedframe[0]['gemeindeposy'] ?>" size="5"></td>
-        	<td colspan="2" align="center"><input type="text" name="gemeindesize" value="<? echo $this->Document->selectedframe[0]['gemeindesize'] ?>" size="5">&nbsp;pt</td>
+        	<td colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="gemeindesize" value="<? echo $this->Document->selectedframe[0]['gemeindesize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('gemeindecolor', $this->Document->selectedframe[0]['gemeindecolor']);	?>
+						</div>
+					</td>
         </tr>
 
         <tr>
@@ -335,10 +345,20 @@ function art_hide(){
         <tr>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="gemarkungposy" value="<? echo $this->Document->selectedframe[0]['gemarkungposy'] ?>" size="5"></td>
-					<td style="border-right:2px solid #C3C7C3" colspan="2" align="center"><input type="text" name="gemarkungsize" value="<? echo $this->Document->selectedframe[0]['gemarkungsize'] ?>" size="5">&nbsp;pt</td>
+					<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="gemarkungsize" value="<? echo $this->Document->selectedframe[0]['gemarkungsize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('gemarkungcolor', $this->Document->selectedframe[0]['gemarkungcolor']);	?>
+						</div>
+					</td>
 					<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="flurposy" value="<? echo $this->Document->selectedframe[0]['flurposy'] ?>" size="5"></td>
-        	<td colspan="2" align="center"><input type="text" name="flursize" value="<? echo $this->Document->selectedframe[0]['flursize'] ?>" size="5">&nbsp;pt</td>
+        	<td colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="flursize" value="<? echo $this->Document->selectedframe[0]['flursize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('flurcolor', $this->Document->selectedframe[0]['flurcolor']);	?>
+						</div>
+					</td>
         </tr>
         <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Flurstück&nbsp;($flurstueck)</td>
@@ -359,10 +379,20 @@ function art_hide(){
         <tr>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="flurstposy" value="<? echo $this->Document->selectedframe[0]['flurstposy'] ?>" size="5"></td>
-        	<td style="border-right:2px solid #C3C7C3" align="center" colspan="2"><input type="text" name="flurstsize" value="<? echo $this->Document->selectedframe[0]['flurstsize'] ?>" size="5">&nbsp;pt</td>
+        	<td style="border-right:2px solid #C3C7C3" align="center" colspan="2">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="flurstsize" value="<? echo $this->Document->selectedframe[0]['flurstsize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('flurstcolor', $this->Document->selectedframe[0]['flurstcolor']);	?>
+						</div>
+					</td>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="dateposy" value="<? echo $this->Document->selectedframe[0]['dateposy'] ?>" size="5"></td>
-        	<td align="center" colspan="2"><input type="text" name="datesize" value="<? echo $this->Document->selectedframe[0]['datesize'] ?>" size="5">&nbsp;pt</td>
+        	<td align="center" colspan="2">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="datesize" value="<? echo $this->Document->selectedframe[0]['datesize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('datecolor', $this->Document->selectedframe[0]['datecolor']);	?>
+						</div>
+					</td>
         </tr>
         <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Legende&nbsp;</td>
@@ -386,7 +416,12 @@ function art_hide(){
         	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center"><input type="text" name="legendsize" value="<? echo $this->Document->selectedframe[0]['legendsize'] ?>" size="5">&nbsp;pt</td>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="userposy" value="<? echo $this->Document->selectedframe[0]['userposy'] ?>" size="5"></td>
-        	<td colspan="2" align="center"><input type="text" name="usersize" value="<? echo $this->Document->selectedframe[0]['usersize'] ?>" size="5">&nbsp;pt</td>
+        	<td colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="usersize" value="<? echo $this->Document->selectedframe[0]['usersize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('usercolor', $this->Document->selectedframe[0]['usercolor']); ?>
+						</div>
+					</td>
         </tr>
 
         <tr>
@@ -409,7 +444,12 @@ function art_hide(){
         	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">&nbsp;</td>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="scaleposy" value="<? echo $this->Document->selectedframe[0]['scaleposy'] ?>" size="5"></td>
-        	<td colspan="2" align="center"><input type="text" name="scalesize" value="<? echo $this->Document->selectedframe[0]['scalesize'] ?>" size="5">&nbsp;pt</td>
+        	<td colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="scalesize" value="<? echo $this->Document->selectedframe[0]['scalesize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('scalecolor', $this->Document->selectedframe[0]['scalecolor']); ?>
+						</div>
+					</td>
         </tr>
 
 				 <tr>
@@ -450,7 +490,12 @@ function art_hide(){
 	        <tr>
 	        	<td>&nbsp;x:</td>
 	        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="textposx<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['posx'] ?>" size="5"></td>
-	        	<td colspan="2"><input type="text" name="textsize<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['size'] ?>" size="5">&nbsp;pt</td>
+	        	<td colspan="2">
+							<div style="display: flex; justify-content: center">
+								<input type="text" name="textsize<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['size'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+								<? echo $this->Document->output_color_select('textcolor' . $i, $this->Document->selectedframe[0]['texts'][$i]['color']); ?>
+						</div>
+					</td>
 	        </tr>
 	       	<tr>
 	       		<td>&nbsp;y:</td>
@@ -482,9 +527,38 @@ function art_hide(){
         <tr>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="watermarkposy" value="<? echo $this->Document->selectedframe[0]['watermarkposy'] ?>" size="5"></td>
-        	<td colspan="1">Drehwinkel:&nbsp;<input type="text" name="watermarkangle" value="<? echo $this->Document->selectedframe[0]['watermarkangle'] ?>" size="3">°</td>
-        	<td colspan="3" style="border-right:1px solid #C3C7C3">Transparenz:&nbsp;<input type="text" name="watermarktransparency" value="<? echo $this->Document->selectedframe[0]['watermarktransparency'] ?>" size="1"></td>
-        	<td colspan="2" align="center"><input type="text" name="watermarksize" value="<? echo $this->Document->selectedframe[0]['watermarksize'] ?>" size="5">&nbsp;pt</td>
+        	<td colspan="1">Transparenz:&nbsp;<input type="text" name="watermarktransparency" value="<? echo $this->Document->selectedframe[0]['watermarktransparency'] ?>" size="2"></td>
+        	<td colspan="3" style="border-right:1px solid #C3C7C3">Drehwinkel:&nbsp;<input type="text" name="watermarkangle" value="<? echo $this->Document->selectedframe[0]['watermarkangle'] ?>" size="3">°</td>
+        	<td colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="watermarksize" value="<? echo $this->Document->selectedframe[0]['watermarksize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('watermarkcolor', $this->Document->selectedframe[0]['watermarkcolor']); ?>
+						</div>
+					</td>
+        </tr>
+
+				<tr>
+          <td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">Urheberrechte</td>
+        </tr>
+        <tr>
+        	<td style="border-top:1px solid #C3C7C3;">&nbsp;x:</td>
+        	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="copyrightposx" value="<? echo $this->Document->selectedframe[0]['copyrightposx'] ?>" size="5"></td>
+        	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=4></td>
+        	<td style="border-top:1px solid #C3C7C3;" colspan=2 align="center">
+						<?php echo output_select('font_copyright', $this->Document->fonts, $this->Document->selectedframe[0]['font_copyright']); ?>
+        	</td>
+        </tr>
+        <tr>
+        	<td>&nbsp;y:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="copyrightposy" value="<? echo $this->Document->selectedframe[0]['copyrightposy'] ?>" size="5"></td>
+        	<td colspan="1">Transparenz:&nbsp;<input type="text" name="copyrighttransparency" value="<? echo $this->Document->selectedframe[0]['copyrighttransparency'] ?>" size="2"></td>
+					<td colspan="3" style="border-right:1px solid #C3C7C3">Breite: <input type="text" name="copyrightwidth" value="<? echo $this->Document->selectedframe[0]['copyrightwidth'] ?>" size="5"></td>
+        	<td colspan="2" align="center">
+						<div style="display: flex; justify-content: center">
+							<input type="text" name="copyrightsize" value="<? echo $this->Document->selectedframe[0]['copyrightsize'] ?>" size="5">&nbsp;pt&nbsp;&nbsp;
+							<? echo $this->Document->output_color_select('copyrightcolor', $this->Document->selectedframe[0]['copyrightcolor']); ?>
+						</div>
+					</td>
         </tr>
 
         <tr>

@@ -972,25 +972,7 @@
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposy'] ?>" size="5"></td>
 										<td colspan="2">
 											Füllfarbe:
-											<?											
-												$selected_color = $this->ddl->colors[$this->ddl->selectedlayout[0]['rectangles'][$i]['color']];
-												$bgcolor = $selected_color['red'].', '.$selected_color['green'].', '.$selected_color['blue'];
-											?>
-											<select name="rectcolor<? echo $i ?>" style="background-color: rgb(<? echo $bgcolor; ?>)" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'));">
-												<option value=""> - keine - </option>
-												<?
-												foreach($this->ddl->colors as $color){
-													echo '<option ';
-													if($selected_color['id'] == $color['id']){
-														echo ' selected';
-													}
-													echo ' style="background-color: rgb('.$color['red'].', '.$color['green'].', '.$color['blue'].')"';
-													echo ' value="'.$color['id'].'">';
-													echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-													echo "</option>\n";
-												}
-												?>
-											</select>
+											<? echo $this->ddl->output_color_select('rectcolor' . $i, $this->ddl->selectedlayout[0]['rectangles'][$i]['color']);	?>
 										</td>
 									</tr>
 									<tr>

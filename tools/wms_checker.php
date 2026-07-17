@@ -2,6 +2,10 @@
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 
+if (!in_array(getenv('NETWORK_NAME'), ['', 'kvwmap_prod_web'])){
+	exit;
+}
+
 ########################################################################################################################################################################
 #																																																																																			 #
 #	Dieses Skript kann in einem Web-Verzeichnis wie z.B. .../kvwmap/tools plaziert werden.																																							 #
@@ -121,10 +125,11 @@ function getExceptionCode($data){
 }
 
 include($config);
-#include($credentials);
+include($credentials);
 include(CLASSPATH.'log.php');
 include(CLASSPATH.'postgresql.php');
 $debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
+$log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
 $userDb = new pgdatabase();
 $userDb->open();
 
@@ -136,7 +141,7 @@ $sql = "
 	FROM
 		kvwmap.layer_parameter
 ";
-$ret = $userDb->execSQL($sql);
+$ret = $userDb->execSQL($sql, 4, 0);
 while ($line = pg_fetch_assoc($ret[1])) {
 	$params[$line['key']] = $line['default_value'];
 }
@@ -155,7 +160,7 @@ if ($without_layer_id != '') {
 	$query .= '	AND layer_id NOT IN (' . $without_layer_id . ')';
 }
 #echo '<br>get layer with sql: ' . $query;
-$ret = $userDb->execSQL($query);
+$ret = $userDb->execSQL($query, 4, 0);
 
 while ($line = pg_fetch_assoc($ret[1])){
 	$extent = rectObj($bbox['left'], $bbox['bottom'], $bbox['right'], $bbox['top']);
@@ -208,7 +213,7 @@ while ($line = pg_fetch_assoc($ret[1])){
 				layer_id = " . $line["layer_id"] . "
 		";
 	}
-	$result2 = $userDb->execSQL($query);
+	$result2 = $userDb->execSQL($query, 4, 0);
 	echo '</div>';
 }
 ?>

@@ -11,7 +11,7 @@ class PgAttribute {
 		$this->validations = $validations;
 		$this->is_identifier = $identifier == $name;
 		$this->relation = $relation;
-		$this->debug->show('<p>New MyAttribut: '. $this->name, PgAttribute::$write_debug);
+		$this->debug->show('<p>New PgAttribut: '. $this->name, PgAttribute::$write_debug);
 	}
 
 	function is_mandatory() {
@@ -79,7 +79,7 @@ class PgAttribute {
 				}
 				else {
 					switch ($this->type) {
-						case 'b' : {
+						case 'boolean' : {
 							$true_array = array('t', 'true', '1');
 							$false_array = array('f', 'false', '0');
 							$class = $is_valid['success'] ? 'valid' : 'alerts-border';

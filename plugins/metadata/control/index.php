@@ -220,7 +220,7 @@ function go_switch_metadata($go){
 			);
 			// header('Content-Type: application/json; charset=utf-8');
 			// echo json_encode($result);
-			echo $result['msg'];
+			echo '<br>' . $result['msg'];
 		} break;
 
 		case 'metadata_test' : {

@@ -254,7 +254,8 @@ class stelle {
 				show_shared_layers,
 				reset_password_text,
 				invitation_text,
-				start_page_params
+				start_page_params,
+				quick_jump_layer_id
 			FROM
 				kvwmap.stelle s
 			WHERE
@@ -262,10 +263,30 @@ class stelle {
 		";
 		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
-		$ret = $this->database->execSQL($sql, 4, 0, true);
+		$ret = $this->database->execSQL($sql, 4, 0, false);
 		if(!$ret[0]) {
       $rs = pg_fetch_assoc($ret[1]);
     }
+		else {		# fallback
+			$sql = "
+				SELECT
+					id," .
+					$name_column . ",
+					start,
+					stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, Authentifizierung, wappen, wappen_link, 
+					check_client_ip, check_password_age, allowed_password_age, use_layer_aliases, hist_timestamp
+				FROM
+					kvwmap.stelle s
+				WHERE
+					id = " . $this->id . "
+			";
+			#echo 'SQL zum Abfragen der Stelle: ' . $sql;
+			$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
+			$ret = $this->database->execSQL($sql, 4, 0, false);
+			if(!$ret[0]) {
+				$rs = pg_fetch_assoc($ret[1]);
+			}
+		}
 		$this->data = $rs;
 		$this->Bezeichnung = $rs['bezeichnung'];
 		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
@@ -326,6 +347,7 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = ($rs['hist_timestamp'] == 't');
 		$this->default_user_id = $rs['default_user_id'];
+		$this->quick_jump_layer_id = $rs['quick_jump_layer_id'];
 		$this->show_shared_layers = ($rs['show_shared_layers'] == 't');
 		$this->style = $rs['style'];
 		$this->reset_password_text = $rs['reset_password_text'];
@@ -481,6 +503,7 @@ class stelle {
 		$rs['totp_authentication'] = ($rs['totp_authentication'] == 't');
 		$rs['check_password_age'] = ($rs['check_password_age'] == 't');
 		$rs['show_shared_layers'] = ($rs['show_shared_layers'] == 't');
+		$rs['use_layer_aliases'] = ($rs['use_layer_aliases'] == 't');
 		$this->data = $rs;
 		return $rs;
 	}
@@ -713,6 +736,7 @@ class stelle {
 				hist_timestamp = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				allowed_password_age = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
 				default_user_id = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
+				quick_jump_layer_id = " . ($stellendaten['quick_jump_layer_id'] != '' ? $stellendaten['quick_jump_layer_id'] : 'NULL') . ",
 				show_shared_layers = " . ($stellendaten['show_shared_layers'] ? 'true' : 'false') . ",
 				version = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				reset_password_text = '" . $stellendaten['reset_password_text'] . "',
@@ -1100,15 +1124,15 @@ class stelle {
 		}
 	}
 
-	function getFlurstueckeAllowed($FlurstKennz, $database) {
+	function getFlurstueckeAllowed($FlurstKennz, $database, $eigentuemer = '') {
 		include_once(PLUGINS.'alkis/model/alkis.php');
-		$GemeindenStelle = $this->getGemeindeIDs();
+		$GemeindenStelle = $this->getGemeindeIDs($eigentuemer);
 		if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])) {   // Stelle ist auf Gemeinden eingeschränkt
 			$alkis = new alkis($database);
 			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
 				$anzFlurstKennz = count_or_0($ret[1]);
-				if ($anzFlurstKennz==0) {
+				if ($eigentuemer == ''AND $anzFlurstKennz==0) {
 					$ret[0]=1;
 					$ret[1]="Sie haben keine Berechtigung zur Ansicht diese(s)r Flurstücke(s)";
 				}
@@ -1136,9 +1160,10 @@ class stelle {
 		&$layer
 	) {
 		include_once(CLASSPATH . 'datendrucklayout.php');
+		include_once(CLASSPATH . 'kartendrucklayout.php');
 		$results = array();
 		$old_parents = $this->getParents('ORDER BY ID', 'only_ids');
-		$document = new Document($this->database);
+		$kdl = new kdl($this->database);
 		$ddl = new ddl($this->database);
 				
 		# immer alle Elternstellen und deren Zuordnungen entfernen und wieder neu hinzufügen
@@ -1147,7 +1172,7 @@ class stelle {
 			$menues = array_values(array_diff($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_diff($functions, $parent_stelle->getFunktionen('only_ids')));
 			$layouts = array_values(array_diff($layouts, $ddl->load_layouts($drop_parent_id, '', '', '', 'only_ids')));
-			$frames = array_values(array_diff($frames, $document->load_frames($drop_parent_id, false, 'only_ids')));
+			$frames = array_values(array_diff($frames, $kdl->load_frames($drop_parent_id, false, 'only_ids')));
 			$parent_layer = $parent_stelle->getLayer('', 'only_ids');
 			$layer = array_values(array_diff($layer, $parent_layer));
 			$this->dropParent($drop_parent_id);
@@ -1159,7 +1184,7 @@ class stelle {
 			$menues = $this->sort_menues(array_merge($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
 			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
-			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
+			$frames = array_values(array_unique(array_merge($frames, $kdl->load_frames($new_parent_id, false, 'only_ids'))));
 			$layer = array_values(array_unique(array_merge($layer, $parent_stelle->getLayer('', 'only_ids'))));
 			$results[] = $this->addParent($new_parent_id);
 		}
@@ -2165,6 +2190,7 @@ class stelle {
 				l.name,
 				l.gruppe,
 				l.document_path,
+				l.maintable,
 				ul.use_parent_privileges,
 				ul.privileg,
 				ul.export_privileg,
@@ -2184,7 +2210,6 @@ class stelle {
 				ul.start_aktiv, 
 				ul.use_geom,
 				ul.group_id,
-				parent_id,
 				string_agg(ul2.stelle_id::text, ',') as used_layer_parent_id,
 				string_agg(s.bezeichnung, ',') as used_layer_parent_bezeichnung
 			FROM
@@ -2215,8 +2240,7 @@ class stelle {
 				ul.start_aktiv, 
 				ul.use_geom,
 				ul.requires,
-				ul.group_id,
-				stellen_hierarchie.parent_id
+				ul.group_id
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
@@ -2423,7 +2447,7 @@ class stelle {
 		}
 	}
 
-	function getGemeindeIDs() {
+	function getGemeindeIDs($eigentuemer = '') {
 		$liste = [];
 		$liste['ganze_gemeinde'] = Array();
 		$liste['eingeschr_gemeinde'] = Array();
@@ -2431,7 +2455,7 @@ class stelle {
 		$liste['eingeschr_gemarkung'] = Array();
 		$liste['ganze_flur'] = Array();
 		$liste['eingeschr_flur'] = Array();
-		$sql = 'SELECT gemeinde_id, gemarkung, flur, flurstueck FROM kvwmap.stelle_gemeinden WHERE stelle_id = '.$this->id;
+		$sql = 'SELECT gemeinde_id, gemarkung, flur, flurstueck FROM kvwmap.stelle_gemeinden' . ($eigentuemer) . ' WHERE stelle_id = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
@@ -2488,6 +2512,7 @@ class stelle {
 				$user['Bezeichnung'][] = $rs['name'].', '.$rs['vorname'];
 				$user['position'][] = $rs['position'];
 				$user['email'][] = $rs['email'];
+				$user['funktion'][] = $rs['funktion'];
 			}
 		}
 		if ($result == 'only_ids') {

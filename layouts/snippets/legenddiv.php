@@ -1,3 +1,9 @@
+<div 
+	style="position: absolute; top: 0px; left: -1px; height: 100%; width: 5px; cursor: e-resize;" 
+	onmousedown="resizestart(event, document.getElementById('map'), 'e');" 
+	onmouseup="resizemap2window();">
+</div>
+
 <? if(!$this->simple_legend){ ?>
 	<table width="100%" border="0" cellpadding="0" cellspacing="0" id="legend_switch">
 		<tr>
@@ -28,7 +34,13 @@
 } ?>
 <div id="legend_layer">
 	<div class="button_background" style="box-shadow: none; border-bottom: 1px solid #bbb">		<?	
-		if (!$this->simple_legend AND defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != '') {
+		if (
+				!$this->simple_legend AND 
+				(
+					(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != '') OR 
+					$this->Stelle->quick_jump_layer_id != ''
+				)
+			) {
 			include(SNIPPETS.'schnellsprung.php');
 		}
 		if ($this->user->rolle->layer_selection_mode == 1) {
@@ -48,7 +60,7 @@
 							'output' => $layer_selection['name']
 						);
 					},
-					$layer_selections
+					$layer_selections ?? []
 				),
 				$this->user->rolle->layer_selection,
 				1,
@@ -145,7 +157,7 @@
 		<input type="text" autocomplete="off" id="layer_search" onkeyup="jumpToLayer(this.value);" value="">
 	</div>
 	</div>
-	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();">
+	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();" <? echo ($this->user->rolle->hideLegend != 1 ? 'style="max-width: ' . $legend_width . 'px"' : ''); ?>>
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 		<div onmousedown="document.GUI.legendtouched.value = 1;" id="legend">
 			<? echo $this->legende; ?>

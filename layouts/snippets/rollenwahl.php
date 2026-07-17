@@ -414,6 +414,7 @@ if ($this->Fehlermeldung!='') {
 									</td>
 									<td class="rollenwahl-option-data">
 										<input name="layer_selection_mode" type="checkbox" value="1" <? if ($this->user->rolle->layer_selection_mode == '1'){echo 'checked="true"';} ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintLayerSelection; ?>"></span>
 									</td>
 								</tr>
 							</table>

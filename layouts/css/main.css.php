@@ -378,6 +378,10 @@ ul{
 	list-style: square outside none;
 }
 
+.ul_table {
+	width: max-content;
+}
+
 .ul_table td:first-of-type{
 	display: inline list-item;
 	color: lightsteelblue;
@@ -688,9 +692,12 @@ span[data-tooltip]:hover::after {
 }
 
 select {
-
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
+}
+
+select:not([multiple]) {
+	padding-right: 16px;
 }
 
 select option{
@@ -1426,8 +1433,8 @@ a.menuered:hover {
 	position: absolute;
 	height: calc(100% - 2px);
 	width: calc(100% - 2px);
-	left: 1;
-	top: 2;
+	left: 1px;
+	top: 2px;
 }
 
 .button:active{
@@ -1584,6 +1591,7 @@ a.menuered:hover {
 }
 
 #legenddiv {
+	position: relative;
 	border-left: 1px solid #ccc;
 	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
@@ -1645,8 +1653,8 @@ a.menuered:hover {
 	background-color: #f6f6f6;
 	box-shadow: 1px 1px 4px #aaa;
 	z-index: 100;
-	margin: 3 0 0 15;
-	padding: 2 2 2 3;
+	margin: 3px 0 0 15px;
+	padding: 2px 2px 2px 3px;
 	height: 23px;
 	min-width: 177px;
 	border: 1px solid grey;
@@ -1680,7 +1688,6 @@ a.menuered:hover {
 }
 
 #scrolldiv{
-	width: <?php echo ($size['legend']['width'] - 3); ?>px;
 	margin-right: 2px;
 	flex: 1 1 0; 
 	overflow:auto; 
@@ -1694,13 +1701,13 @@ a.menuered:hover {
 
 .normallegend {
 	float: right;
-	width: <?php echo ($size['legend']['width'] - 1); ?>px;
+	width: 100%;
 	vertical-align: top;
 }
 
 .slidinglegend_slideout {
+	width: <?php echo $this->user->rolle->legendwidth; ?>px;
 	cursor: pointer;
-	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
 	transform: translate3d(-<? echo ($size['legend']['hide_width'] + 2); ?>px,0px,0px);
 	transition: all 0.3s ease;
@@ -1713,9 +1720,9 @@ a.menuered:hover {
 }
 
 .slidinglegend_slidein {
-	right: -<?php echo $size['legend']['width']; ?>px;
+	width: <?php echo $this->user->rolle->legendwidth; ?>px;
 	position: absolute;
-	transform: translate3d(-<?php echo $size['legend']['width']; ?>px,0px,0px);
+	transform: translate3d(-<?php echo ($this->user->rolle->legendwidth - $size['legend']['hide_width']); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
 
@@ -2113,7 +2120,6 @@ thead.gle th {
 	color: #aaa;
 	white-space: nowrap;
 	border-radius: 0 5px 0 0;
-	height: 21px;
 }
 
 .gle_tabs > div.active_tab{
@@ -2560,7 +2566,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .rollenwahl-option-data {
 	width: 560px;
 	padding : 4px;
-	display: flex;
 }
 
 .button_selection{
@@ -2951,8 +2956,20 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	color: green;
 }
 
+.darkgreen {
+	color: darkgreen;
+}
+
+.darkgreen > a {
+	color: darkgreen !important;
+}
+
 .orange {
 	color: orange;
+}
+
+.orange > a {
+	color: orange !important;
 }
 
 .blue {
@@ -2969,6 +2986,30 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .red {
 	color: red;
+}
+
+.red > a {
+	color: red !important;
+}
+
+.darkred {
+	color: darkred;
+}
+
+.darkred > a {
+	color: darkred !important;
+}
+
+.firebrick {
+	color: 	firebrick;
+}
+
+.gray {
+	color: gray;
+}
+
+.gray > a {
+	color: gray !important;
 }
 
 .inactive_class {
@@ -3243,4 +3284,35 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	border:1px solid #C3C7C3;
 	padding: 4px;
 	margin-left: 7px;
+}
+
+.hashtag-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  background: white;
+  transition: background 0.2s ease;
+	font-size: 60%;
+	margin-bottom: 5px;
+}
+
+.hashtag-icon .fa {
+  color: firebrick;
+}
+
+.hashtag-icon .fa-hashtag {
+	margin-top: 5px
+}
+
+.hashtag-icon:hover .fa {
+  color: black;
+}
+
+.new-gle-dataset-button {
+	display: none;
+  position: sticky;
+	right: 0px;
+	height: 18px;
 }

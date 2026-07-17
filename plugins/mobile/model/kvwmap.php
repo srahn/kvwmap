@@ -627,7 +627,7 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"title" => $layerset['name'],
 		"alias" => $layerset['alias'],
 		"id_attribute" => $layerset['oid'],
-		"name_attribute" => $layerset['labelitem'],
+		"name_attribute" => $layerset['original_labelitem'],
 		"classitem" => $layerset['classitem'],
 		"transparency" => $layerset['transparency'],
 		"geometry_attribute" => $attributes['the_geom'],
@@ -684,6 +684,8 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 		} else {
 			$attr['enums'][$key] = array();
 		}
+		// Solange es noch kvmobile Versionen <= 1.20.10 genutzt werden, muss der workaround gemacht werden, dass die vcheck attribute aus der ersten visibility_rules extrahiert werden. Wenn das erledigt ist, kann die nächste Zeile und die drei vcheck Attriubte unten im attributes Array aus dem Code raus.
+		$vcheck = ($attr['visibility_rules'][$key] ? json_decode($attr['visibility_rules'][$key], true) : null);
 
 		$attributes[$key] = array(
 			"index" => $attr['indizes'][$value],
@@ -703,7 +705,10 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 			"privilege" => $attr['privileg'][$key],
 			"default" => $attr['default'][$key],
 			'visible' => $attr['visible'][$key],
-			'visibility_rules' => $attr['visibility_rules'][$key]
+			'visibility_rules' => $attr['visibility_rules'][$key],
+			'vcheck_attribute' => ($vcheck ? $vcheck['rules'][0]['attribute'] : ''),
+			'vcheck_operator' => ($vcheck ? $vcheck['rules'][0]['operator'] : ''),
+			'vcheck_value' => ($vcheck ? $vcheck['rules'][0]['value'] : '')
 		);
 		if ($GUI->formvars['kvmobile_version'] >= '1.13.0') {
 			$attributes[$key]['options'] = $attr['options'][$key];
@@ -726,15 +731,16 @@ $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 $GUI->mobile_reformat_fk_attributes = function ($attributes) use ($GUI) {
 	include_once(CLASSPATH . 'LayerAttribute.php');
 	$new_attributes = $attributes;
+	$attr_obj = new LayerAttribute($GUI);
 	foreach ($attributes AS $key => $attribute) {
 		if ($attribute['form_element_type'] === 'SubFormFK') {
-			$attribute_obj = new LayerAttribute($GUI);
-			$attribute_options = $attribute_obj->get_options($attribute['options'], 'SubFormFK');
-			$attribute_options_old_version = $attribute_options['parent_layer_id'] . ',' . $attribute_options['fk_name'] . ':' . $attribute_options['pk_name'] . ';' . $attribute_options['window_option'];
+			$attribute['options_json'] = json_decode($attribute['options'], true);
+			$attribute_options = $attr_obj->get_options($attribute['options_json'] ?: $attribute['options'], 'SubFormFK');
+			$attribute_options_old_version = $attribute_options['ref_layer_id'] . ',' . $attribute_options['ref_keys'][0]['fkey'] . ':' . $attribute_options['ref_keys'][0]['pkey'] . ';' . $attribute_options['window_type'];
 			$fk_attribute = array_filter(
 				$attributes,
 				function ($attr) use ($attribute_options) {
-					return $attr["name"] === $attribute_options['fk_name'];
+					return $attr["name"] === $attribute_options['ref_keys'][0]['fkey'];
 				}
 			);
 			foreach (array_keys($fk_attribute) as $fk_attr_key) {
@@ -885,7 +891,7 @@ $GUI->mobile_show_log = function($log_name) use ($GUI) {
 				$GUI->mobile_logs[] = array(
 					'timestamp' => $teil_vor_h1,
 					'client_deltas' => $client_deltas->rows,
-					'error' => (count($fehler_parts) > 1 ? 'Fehler bei der Ausführung' . $fehler_parts[1] : '')
+					'error' => (count($fehler_parts) > 1 ? 'Fehler bei der Ausführung' . $fehler_parts[2] : '')
 				);
 			}
 		}
@@ -1350,7 +1356,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 
 	if ($files['image'] == '') {
 
-		$msg = 'Es wurde keine Datei hochgeladen!';
+		$msg = 'Es wurde keine Datei hochgeladen! ' . print_r($files, true);
 		$GUI->mobile_log->write($msg);
 		return array(
 			"success" => false,

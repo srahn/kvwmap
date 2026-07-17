@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gdi-service.de/public/schemas/kvwmap/options/Dokument.json",
+  "title": "Dokument Optionen",
+  "description": "Optionen für kvwmap Formularelementtyp Dokument.",
+  "type": "object",
+  "example": {
+    "dynamic_path" : "my_documents/$STELLE_ID/$name",
+    "show_hash_button": true
+  },
+  "properties": {
+    "dynamic_path": {
+      "description": "Damit lassen sich die Dateinamen und Verzeichnisstrukturen unterhalb des Dokumentenordners bzw. der Dokumenten-URL frei definieren. Es besteht die Möglichkeit eine beliebige SQL-Abfrage zu definieren, die mit SELECT beginnt. Die Abfrage kann eine Ordnerstruktur und Variablen mit $ beinhalten sowie mit einem Dateinamen ohne Dateierweiterung oder mit '/' enden.",
+      "type": "string"
+    },
+    "show_hash_button": {
+      "description": "Wird hier true angegeben erscheint neben der Größe der Datei ein Button zum Erzeugen und Anzeigen eines Hash vom Dokument. Damit läßt sich die Integrität des Dokumentes prüfen.",
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": []
+}

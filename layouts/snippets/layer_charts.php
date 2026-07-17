@@ -4,11 +4,27 @@
 	 * Dargestellt werden die LayerCharts-Objekte aus dem Array $layer['charts']
 	 */
 	include_once(CLASSPATH . 'FormObject.php');
+	// ToDo: Versuchen die Farben der Klassenstyles für die Charts zu versuchen
+	// Es besteht die Schwierigkeit die Klassen an Hand der Werte zu finden
+	// Man müsste die Expressions parsen und zur Klassifizierung verwenden und dann die richtigen
+	// Farben setezen, möglicherweise einfach COLORS in der richtigen Reihenfolge der vorkommenden Klassen setzen.
+	// $this->mapDB->nurLayerID = $layer['layer_id'];
+  // $layer_with_classes = $this->mapDB->read_layer(true);
+	// $class_colors = array();
+	// foreach ($layer_with_classes['list'] AS $key => $layer_with_class) {
+	//  	foreach($layer_with_class['Class'] AS $class) {
+	// 		echo '<br>Expression' . $class['expression'];
+	//  		foreach($class['Style'] AS $style) {
+	//  			$class_colors[$class['name']] = $style['color'];
+	//  		}
+	//  	}
+	// }
+	// echo '<br>colors: ' . print_r($class_colors, true);
 ?>
 <script type="text/javascript" src="<? echo THIRDPARTY_PATH; ?>Chart/chart.js"></script>
 <script>
 	const COLORS = [
-		'#4dc9f6',
+		'rgb(77, 83, 246)',
 		'#f67019',
 		'#f53794',
 		'#537bc4',
@@ -27,7 +43,7 @@
 	function change_chart_type(chart, chart_type) {
 		chart.config.type = chart_type;
 		if (['bar', 'line'].indexOf(chart_type) != -1) {
-			chart.config.data.datasets[0].backgroundColor = 'lightblue';
+			chart.config.data.datasets[0].backgroundColor = chart.config.data.datasets[0].orig_color;
 			chart.config.options.plugins.legend.display = false;
 		}
 		else {
@@ -173,7 +189,7 @@
 							<select id="chart_type_selector_<? echo $id; ?>" onchange="change_chart_type(chart_<? echo $id; ?>, this.value)">
 								<option value="bar"<? echo ($chart->get('type') == 'bar' ? ' selected' : ''); ?>>Balken</option>
 								<option value="pie"<? echo ($chart->get('type') == 'pie' ? ' selected' : ''); ?>>Torten</option>
-								<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
+								<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Ring</option>
 								<option value="line"<? echo ($chart->get('type') == 'line' ? ' selected' : ''); ?>>Linien</option>
 							</select><?
 							if (
@@ -186,6 +202,7 @@
 					<script>
 						let chart_type_<? echo $id; ?> = '<? echo $chart->get('type'); ?>';
 						let values_<? echo $id; ?> = $('.attr_<? echo $layer['layer_id']; ?>_<? echo $chart->get('value_attribute_name'); ?>').map((k, v) => { return v.value });
+						// Die Bezeichnungen, die im Attribut label_attribute_name vorkommen.
 						let names_<? echo $id; ?> = $('.attr_<? echo $layer['layer_id']; ?>_<? echo $chart->get('label_attribute_name'); ?>').map((k, v) => { return (v.options?.[v.selectedIndex].text) ?? v.value});
 						let labels_<? echo $id; ?> = [];
 						let data_<? echo $id; ?> = [];
@@ -202,42 +219,49 @@
 						}
 						let chart_<? echo $id; ?> = new Chart(
 							document.getElementById('chart_<? echo $id; ?>'), {
-							type: chart_type_<? echo $id; ?>,
-							data: {
-								labels: labels_<? echo $id; ?>,
-								datasets: [{
-									label: '',
-									data: data_<? echo $id; ?>,
-									backgroundColor: (['bar', 'line'].indexOf(chart_type_<? echo $id; ?>) != -1 ? 'lightblue' : COLORS),
-								//backgroundColor: COLORS,
-									borderWidth: 1
-								}]
-							},
-							options: {
-								plugins : {
-									title: {
-										display: true,
-										font: {
-											weight: 'bold',
-											size: '20px'
-										},
-										text: '<? echo $chart->get('title'); ?>'
-									},
-            			legend: {
-                		display: (['bar', 'line'].indexOf(chart_type_<? echo $id; ?>) != -1 ? false : true),
-									}
+								type: chart_type_<? echo $id; ?>,
+								data: {
+									labels: labels_<? echo $id; ?>,
+									datasets: [{
+										label: '',
+										data: data_<? echo $id; ?>,
+										//orig_color: '<? echo $chart->get('color'); ?>',
+										//backgroundColor: (['bar', 'line'].indexOf(chart_type_<? echo $id; ?>) != -1 ? '<? echo $chart->get('color'); ?>' : COLORS),
+										backgroundColor: COLORS,
+										borderWidth: 1
+									}]
 								},
-								scales: {
-									x: {
-										display: 'auto'
+								options: {
+									// animation: {
+									// 	onComplete() {
+									// 		console.log(this.toBase64Image('image/jpeg', 1.0));
+									// 	}
+									// },
+									plugins : {
+										title: {
+											display: true,
+											font: {
+												weight: 'bold',
+												size: '20px'
+											},
+											text: '<? echo $chart->get('title'); ?>'
+										},
+										legend: {
+											display: (['bar', 'line'].indexOf(chart_type_<? echo $id; ?>) != -1 ? false : true),
+										}
 									},
-									y: {
-										beginAtZero: true,
-										display: 'auto'
+									scales: {
+										x: {
+											display: 'auto'
+										},
+										y: {
+											beginAtZero: true,
+											display: 'auto'
+										}
 									}
 								}
 							}
-						});
+						);
 					</script><?
 				} ?>
 			</div>

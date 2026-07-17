@@ -25,6 +25,8 @@ $uri = sprintf(
 );
 $qr_image = $username . '.png';
 QRcode::png($uri, IMAGEPATH . $qr_image);
+$image_url = base64_encode(file_get_contents(IMAGEPATH . $qr_image));
+unlink(IMAGEPATH . $qr_image);
 
 ?>
 
@@ -51,7 +53,7 @@ QRcode::png($uri, IMAGEPATH . $qr_image);
 		<div>
 			<h2>2FA aktivieren</h2>
 			<p>Scannen Sie den QR-Code mit Google Authenticator, Aegis oder Authy:</p>
-			<img src="<? echo TEMPPATH_REL . $qr_image; ?>">
+			<img src="data:image/png;base64,<? echo $image_url; ?>">
 			<p>Oder Schlüssel manuell eingeben: <b><?=$secret?></b></p>
 
 			<form method="post">

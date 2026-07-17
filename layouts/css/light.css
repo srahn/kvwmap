@@ -17,6 +17,7 @@
 }
 
 #legenddiv {
+  position: unset;
   display: none;
 }
 

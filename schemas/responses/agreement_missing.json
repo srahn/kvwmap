@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/srahn/kvwmap/refs/heads/dev/schemas/responses/agreement_missing.json",
+  "title": "agreement missing response",
+  "description": "Schema of json object returned as response when agreement is missing.",
+  "type": "object",
+  "example": {
+		"error" : "AGREEMENT_MISSING",
+		"error_msg" : "Der Datenschutzerklärung wurde noch nicht zugestimmt.",
+		"agreement_url" : "URL",
+		"agree_param" : "agreement=1",
+		"agreement_html" : ""
+  },
+  "properties": {
+    "error": {
+      "description": "Indicates the type of error that occurred.",
+      "type": "string"
+    },
+    "error_msg": {
+      "description": "A human-readable message describing the error.",
+      "type" : "string"
+    },
+    "agreement_url": {
+      "description": "The URL to call to agree to the terms.",
+      "type" : "string"
+    },
+    "agree_param": {
+      "description": "The query parameter for agreeing to the terms.",
+      "type" : "string"
+    },
+    "agreement_html": {
+      "description": "The html content of the agreement that is missing.",
+      "type" : "string"
+    }
+  },
+  "required": [ "error", "agreement_url", "agree_param" ]
+}

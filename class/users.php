@@ -214,10 +214,10 @@ class account {
 			$sql.=' AND ' . $era . 'c.time_id)=' . $date . " AND date_part('year', c.time_id) = " . $year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'c.time_id))="'.$date.'"';
+			$sql.= " AND (" . $era . "c.time_id)) = '" . $date . "'";
 		}
 		if ($zeitraum=='era') {
-			$sql.=' AND ((DATE(c.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
+			$sql.= " AND ((DATE(c.time_id)) BETWEEN '" . $date1 . "'  AND '" . $date2 . "')";
 		}
 
 		if ($case=='c.stelle_id'){
@@ -226,12 +226,12 @@ class account {
 		}
 		if ($case=='c.user_id') {
 			$sql.=' AND c.user_id=u.ID AND u.ID='.$id;
-			$sql.=' GROUP BY c2l.layer_id, c.user_id ORDER BY Name';
+			$sql.=' GROUP BY c2l.layer_id, c.user_id, l.name, u.name ORDER BY Name';
 		}
 		if ($case=='c.stelle_id, c.user_id'){
 			$sql.=' AND c.stelle_id=s.ID AND s.ID='.$id;
 			$sql.=' AND c.user_id=u.ID AND u.ID='.$id_2;
-			$sql.=' GROUP BY c2l.layer_id, c.stelle_id, c.user_id ORDER BY Bezeichnung,lName,Name';
+			$sql.=' GROUP BY c2l.layer_id, c.stelle_id, c.user_id, l.name, u.name, s.bezeichnung ORDER BY Bezeichnung,lName,Name';
 		}
 		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
@@ -268,13 +268,13 @@ class account {
 		$sql.=' WHERE (1=1)';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
-			$sql.=' AND '.$era.'u_consumeCSV.time_id)='.$date." AND date_part('year', u_consumeCSV.time_id) = ".$year;
+			$sql.= " AND " . $era . "u_consumeCSV.time_id) = '" . $date . "' AND date_part('year', u_consumeCSV.time_id) = " . $year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'u_consumeCSV.time_id))="'.$date.'"';
+			$sql.= " AND (" . $era . "u_consumeCSV.time_id)) = '" . $date . "'";
 		}
 		if ($zeitraum=='era') {
-			$sql.=' AND ((DATE(u_consumeCSV.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
+			$sql.= " AND ((DATE(u_consumeCSV.time_id)) BETWEEN '" . $date1 . "'  AND '" . $date2 . "')";
 		}
 
 		if ($case=='u_consumeCSV.stelle_id'){
@@ -312,10 +312,10 @@ class account {
 				$sql.=' AND '.$era.'u_consumeCSV.time_id)='.$date." AND date_part('year', u_consumeCSV.time_id) = " . $year;
 			}
 			if ($zeitraum=='day'){
-				$sql.=' AND ('.$era.'u_consumeCSV.time_id))="'.$date.'"';
+				$sql.= " AND (" . $era . "u_consumeCSV.time_id)) = '" . $date . "'";
 			}
 			if ($zeitraum=='era') {
-				$sql.=' AND ((DATE(u_consumeCSV.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
+				$sql.= " AND ((DATE(u_consumeCSV.time_id)) BETWEEN '" . $date1 . "'  AND '" . $date2 . "')";
 			}
 			$sql.=' AND u_consumeCSV.stelle_id = s.ID';
 			$sql.=' AND u_consumeCSV.user_id = u.ID';
@@ -365,13 +365,13 @@ class account {
 		$sql.=' WHERE (1=1)';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
-			$sql.=' AND '.$era.'u_consumeShape.time_id)='.$date . " AND date_part('year', u_consumeShape.time_id) = " .$year;
+			$sql.= " AND " . $era . "u_consumeShape.time_id) = '" . $date . "' AND date_part('year', u_consumeShape.time_id) = " . $year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'u_consumeShape.time_id))="'.$date.'"';
+			$sql.= " AND (" . $era ."u_consumeShape.time_id)) = '" . $date . "'";
 		}
 		if ($zeitraum=='era') {
-			$sql.=' AND ((DATE(u_consumeShape.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
+			$sql.= " AND ((DATE(u_consumeShape.time_id)) BETWEEN '" . $date1 . "'  AND '" . $date2 . "')";
 		}
 
 		if ($case=='u_consumeShape.stelle_id'){
@@ -406,13 +406,13 @@ class account {
 			$sql.=' FROM kvwmap.user AS u, kvwmap.stelle AS s, kvwmap.u_consumeShape';
 			$sql.=' WHERE 1=1';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
-				$sql.=' AND '.$era.'u_consumeShape.time_id)='.$date . " AND date_part('year', u_consumeShape.time_id) = " .$year;
+				$sql.= " AND " . $era . "u_consumeShape.time_id) = '" . $date . "' AND date_part('year', u_consumeShape.time_id) = " .$year;
 			}
 			if ($zeitraum=='day'){
-				$sql.=' AND ('.$era.'u_consumeShape.time_id))="'.$date.'"';
+				$sql.= " AND (" . $era . "u_consumeShape.time_id)) = '" . $date . "'";
 			}
 			if ($zeitraum=='era') {
-				$sql.=' AND ((DATE(u_consumeShape.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
+				$sql.= " AND ((DATE(u_consumeShape.time_id)) BETWEEN '" . $date1 . "'  AND '" . $date2 . "')";
 			}
 			$sql.=' AND u_consumeShape.stelle_id = s.ID';
 			$sql.=' AND u_consumeShape.user_id = u.ID';
@@ -462,13 +462,13 @@ class account {
 		$sql.=' WHERE (1=1)';
 
 		if ($zeitraum=='month' OR $zeitraum=='week')  {
-			$sql.=' AND '.$era.'u_consumeALB.time_id)='.$date . " AND date_part('year', u_consumeALB.time_id) = " .$year;
+			$sql.= " AND " . $era . "u_consumeALB.time_id) = '" . $date . "' AND date_part('year', u_consumeALB.time_id) = " . $year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'u_consumeALB.time_id))="'.$date.'"';
+			$sql.= " AND (" . $era . "u_consumeALB.time_id)) = '" . $date . "'";
 		}
 		if ($zeitraum=='era') {
-			$sql.=' AND ((DATE(u_consumeALB.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
+			$sql.= " AND ((DATE(u_consumeALB.time_id)) BETWEEN '" . $date1 . "'  AND '" . $date2 . "')";
 		}
 
 		if ($case=='u_consumeALB.stelle_id'){
@@ -505,13 +505,13 @@ class account {
 			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN kvwmap.u_consume2layer c2l LEFT JOIN kvwmap.layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALB.time_id AND c2l.user_id = u_consumeALB.user_id AND c2l.stelle_id = u_consumeALB.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
 			$sql.=' WHERE 1=1';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
-				$sql.=' AND '.$era.'u_consumeALB.time_id)='.$date . " AND date_part('year', u_consumeALB.time_id) = " .$year;
+				$sql.= " AND " . $era . "u_consumeALB.time_id) = '" . $date . "' AND date_part('year', u_consumeALB.time_id) = " . $year;
 			}
 			if ($zeitraum=='day'){
-				$sql.=' AND ('.$era.'u_consumeALB.time_id))="'.$date.'"';
+				$sql.= " AND (" . $era . "u_consumeALB.time_id)) = '" . $date . "'";
 			}
 			if ($zeitraum=='era') {
-				$sql.=' AND ((DATE(u_consumeALB.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
+				$sql.= " AND ((DATE(u_consumeALB.time_id)) BETWEEN '" . $date1 . "'  AND '" . $date2 . "')";
 			}
 			$sql.=' AND u_consumeALB.stelle_id = s.ID';
 			$sql.=' AND u_consumeALB.user_id = u.ID';
@@ -576,10 +576,10 @@ class account {
 			$sql.=' AND '.$era.'u_consumeALK.time_id)='.$date . " AND date_part('year', u_consumeALK.time_id) = " .$year;
 		}
 		if ($zeitraum=='day'){
-			$sql.=' AND ('.$era.'u_consumeALK.time_id))="'.$date.'"';
+			$sql.= " AND (" . $era . "u_consumeALK.time_id)) = '" . $date . "'";
 		}
 		if ($zeitraum=='era') {
-			$sql.=' AND ((DATE(u_consumeALK.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
+			$sql.= " AND ((DATE(u_consumeALK.time_id)) BETWEEN '" . $date1 . "'  AND '" . $date2 . "')";
 		}
 		if(LAYER_IDS_DOP) $groupby = 'c2l.layer_id, ';
 		if ($case=='u_consumeALK.stelle_id'){
@@ -588,12 +588,12 @@ class account {
 		}
 		if ($case=='u_consumeALK.user_id') {
 			$sql.=' AND u_consumeALK.user_id = u.ID AND u.ID='.$id;
-			$sql.=' GROUP BY ' . $groupby . 'u_consumeALK.druckrahmen_id,u_consumeALK.user_id, druckrahmen.Name, l.name, druckrahmen.format, druckrahmen.preis, s.bezeichnung ORDER BY druckrahmen.Name';
+			$sql.=' GROUP BY ' . $groupby . 'u_consumeALK.druckrahmen_id,u_consumeALK.user_id, druckrahmen.Name, l.name, u.name, druckrahmen.format, druckrahmen.preis ORDER BY druckrahmen.Name';
 		}
 		if ($case=='u_consumeALK.stelle_id, u_consumeALK.user_id'){
 			$sql.=' AND u_consumeALK.stelle_id = s.ID AND s.ID='.$id;
 			$sql.=' AND u_consumeALK.user_id = u.ID AND u.ID='.$id_2;
-			$sql.=' GROUP BY ' . $groupby . 'u_consumeALK.druckrahmen_id,u_consumeALK.stelle_id,u_consumeALK.user_id, druckrahmen.Name, l.name, druckrahmen.format, druckrahmen.preis, s.bezeichnung  ORDER BY Bezeichnung,druckrahmen.Name,u.Name';
+			$sql.=' GROUP BY ' . $groupby . 'u_consumeALK.druckrahmen_id,u_consumeALK.stelle_id,u_consumeALK.user_id, druckrahmen.Name, l.name, u.name, druckrahmen.format, druckrahmen.preis, s.bezeichnung  ORDER BY Bezeichnung,druckrahmen.Name,u.Name';
 		}
 		#echo $sql.'<br><br>';
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
@@ -606,13 +606,13 @@ class account {
 			if(LAYER_IDS_DOP) $sql.=' LEFT JOIN kvwmap.u_consume2layer c2l LEFT JOIN kvwmap.layer l ON l.layer_id = c2l.layer_id ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
 			$sql.=' WHERE u_consumeALK.druckrahmen_id = druckrahmen.id';
 			if ($zeitraum=='month' OR $zeitraum=='week')  {
-				$sql.=' AND '.$era.'u_consumeALK.time_id)='.$date . " AND date_part('year', u_consumeALK.time_id) = " .$year;
+				$sql.= " AND " . $era . "u_consumeALK.time_id) = '" . $date . "' AND date_part('year', u_consumeALK.time_id) = " . $year;
 			}
 			if ($zeitraum=='day'){
-				$sql.=' AND ('.$era.'u_consumeALK.time_id))="'.$date.'"';
+				$sql.= " AND (" . $era . "u_consumeALK.time_id)) = '" . $date . "'";
 			}
 			if ($zeitraum=='era') {
-				$sql.=' AND ((DATE(u_consumeALK.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';
+				$sql.= " AND ((DATE(u_consumeALK.time_id)) BETWEEN '" . $date1 . "'  AND '" . $date2 . "')";
 			}
 			$sql.=' AND u_consumeALK.stelle_id = s.ID';
 			$sql.=' AND u_consumeALK.user_id = u.ID';
@@ -722,9 +722,9 @@ class user {
 		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
 	}
 
-	public static	function find($gui, $where, $order = '', $sort_direction = '') {
+	public static	function find($gui, $where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
 		$user = new PgObject($gui, 'kvwmap' ,'user');
-		return $user->find_where($where, $order, $sort_direction);
+		return $user->find_where($where, $order, $select, $limit, $from);
 	}
 
 	/*
@@ -1505,6 +1505,9 @@ class user {
 		if ($userdaten['comment']!='') {
 			$columns['comment'] = "'" . $userdaten['comment'] . "'";
 		}
+		if ($userdaten['funktion']!='') {
+			$columns['funktion'] = "'" . $userdaten['funktion'] . "'";
+		}
 		if ($userdaten['start'] != '') {
 			$columns['start'] = ($userdaten['start'] ? "'" . $userdaten['start'] . "'" : 'NULL');
 		}
@@ -1521,13 +1524,19 @@ class user {
 			$columns['stelle_id'] = $stellen[0];
 		}
 		$sql = "
-			INSERT INTO 
-				kvwmap.user
-			(" . implode(', ', array_keys($columns)) . ")
-			VALUES	
+			SELECT setval(
+				'kvwmap.user_id_seq',
+				GREATEST(
+					(SELECT MAX(id) FROM kvwmap.user),
+					(SELECT last_value FROM kvwmap.user_id_seq)
+				)
+			);
+			INSERT INTO kvwmap.user (" . implode(', ', array_keys($columns)) . ")
+			VALUES
 				(" . implode(', ', $columns) . ")
-			RETURNING id";
-		
+			RETURNING id
+		";
+
 		// echo '<p>SQL zum Eintragen eines neuen Nutzers: ' . $sql;
 		# Abfrage starten
 		$ret = $this->database->execSQL($sql,4, 0);
@@ -1570,6 +1579,7 @@ class user {
 				organisation = '" . $userdaten['organisation']."',
 				position = '" . $userdaten['position']."',
 				comment = '" . $userdaten['comment']."',
+				funktion = '" . $userdaten['funktion'] . "',
 				ips = '" . $userdaten['ips'] . "',
 				totp_secret = '" . $userdaten['totp_secret'] . "',
 				agreement_accepted = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
@@ -1609,7 +1619,7 @@ class user {
 			UPDATE
 				kvwmap.user
 			SET
-				userdata_checking_time = CURRENT_TIMESTAMP
+				userdata_checking_time = CURRENT_TIMESTAMP(0)
 			WHERE
 				id = " . $this->id . "
 		";

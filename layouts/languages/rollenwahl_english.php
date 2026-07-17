@@ -12,6 +12,7 @@
 	$strButtons="Interface";
 	$strMenueButtons="Menus as Buttons";
 	$strLayerSelectionMode='hide inactive layers in layer selection';
+	$strHintLayerSelection='When this option is enabled and a saved layer selection is loaded, only the layers of the layer selection will be displayed in the layer tree.';
 	$strMapExtent="Map Extent";
 	$strMapProjection="1.Map Projection (EPSG-Code)";
 	$strSecondMapProjection="2.Map Projection (EPSG-Code)";

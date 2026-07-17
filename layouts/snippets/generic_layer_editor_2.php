@@ -109,18 +109,21 @@ if ($doit == true) {
 		
 		if ($this->new_entry != true) {	?>
 			<div style="display: flex; justify-content: space-between;">
-				<div style="position: sticky; left: calc(50% - 225px); min-width: 450px"> 
+				<div style="flex: 1; position: sticky; left: calc(50% - 225px); min-width: 450px"> 
 					<h2 id="layername"><? echo $layer_name; ?></h2><?
 					echo value_of($layer, 'paging'); ?>
-				</div>
-				<? if ($layer['records_status'] !== '0') { ?>
-				<div class="gle-view">	<?
-					$s = ($layer['template'] == ''? 0 : 1);
-					for ($g = $s; $g < 3; $g++) {
-						echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
-					}	?>
-				</div>
-				<? } ?>
+				</div><?
+				if ($layer['records_status'] !== '0') { ?>
+					<div class="gle-view">	<?
+						$s = ($layer['template'] == ''? 0 : 1);
+						for ($g = $s; $g < 3; $g++) {
+							echo '<img onclick="checkForUnsavedChanges(event);switch_gle_view1(' . $layer['layer_id'] . ', ' . $layer['gle_view'] . ', ' . $g . ', this);" title="' . ${'strSwitchGLEView' . $g} . '" class="hover-border pointer gle-view-button ' . ($layer['gle_view'] == $g? 'active':'') . '" src="' . GRAPHICSPATH . 'gle' . $g . '.png">';
+						}	?>
+					</div><?
+					if ($this->qlayerset[$i]['privileg'] > 0) {
+						include(SNIPPETS . 'new_gle_dataset_button.php');
+					}
+				} ?>
 			</div> <?
 		}
 
@@ -220,7 +223,7 @@ if ($doit == true) {
 								if(value_of($explosion, 1) != '')$collapsed = true;else $collapsed = false;
 								$groupname = $explosion[0];
 								$groupname_short = explode('<br>', $groupname);
-								$groupname_short = str_replace([' ', '"'], '_', $groupname_short[0]);
+								$groupname_short = sonderzeichen_umwandeln($groupname_short[0]);
 								if ($layer['attributes']['tab'][$j] != '') {
 									$visibility = '';
 									$tabname = sonderzeichen_umwandeln($layer['attributes']['tab'][$j]);
@@ -290,7 +293,10 @@ if ($doit == true) {
 										######### Attributwert #########
 										$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 										$cell['id'] = 'value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k;
-										$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style_attribute'][$j]], 'gle_attribute_value value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j]));
+										$cell['properties'] = get_td_class_or_style(array(
+											$layer['shape'][$k][$layer['attributes']['style_attribute'][$j]],
+											'gle_attribute_value value_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j],
+										));
 										if ($nl){
 											$next_row['cells'][] = $cell;
 										}
@@ -440,12 +446,14 @@ if ($doit == true) {
 				}
 				?>
 			<div style="display: none">
+				<table><tr><td>		<!-- notwendig wegen der closest table bei check_visibility -->
 				<?
 					if (value_of($invisible_attributes, $layer['layer_id'])){
 						for ($l = 0; $l < count($invisible_attributes[$layer['layer_id']]); $l++){
 							echo $invisible_attributes[$layer['layer_id']][$l]."\n";
 						}
 					} ?>
+				</td></tr></table>
 			</div>
 		</div><?
 		if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {

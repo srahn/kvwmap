@@ -987,7 +987,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-formatter="konvertierungEditFunctionsFormatter"
 					data-switchable="false"
 					class="col-md-2 text-center"
-				>Edit</th>
+				></th>
 			</tr>
 		</thead>
 	</table>

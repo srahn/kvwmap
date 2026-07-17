@@ -368,42 +368,6 @@ class GUI {
 		global $kvwmap_plugins;
 		return in_array($plugin, $kvwmap_plugins);
 	}
-
-	function resizeMap2Window() {
-		global $sizes;
-		$size = $sizes[$this->user->rolle->gui];
-		$gui_light = ($this->user->rolle->gui == 'layouts/gui_light.php');
-
-		if (array_key_exists('legenddisplay', $this->formvars) AND $this->formvars['legenddisplay'] !== NULL) {
-			$hideLegend = $this->formvars['legenddisplay'];		// falls die Legende gerade ein/ausgeblendet wurde
-		}
-		else {
-			$hideLegend = $this->user->rolle->hideLegend;
-		}
-
-		$width = $this->formvars['browserwidth'] -
-			$size['margin']['width']
-			- ($this->user->rolle->hideMenue == 1 ? $size['menue']['hide_width'] : $size['menue']['width'])
-			- ($gui_light? 0 : ($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']))
-			- ($gui_light ? 0 : 18);	# Breite für möglichen Scrollbalken
-
-		$height = $this->formvars['browserheight'] -
-			$size['margin']['height'] -
-			$size['header']['height'] -
-			$size['scale_bar']['height'] -
-			((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0) -
-			($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0) -
-			$size['footer']['height'];
-
-		if($width  < 0) $width = 1000;
-		if($height < 0) $height = 800;
-		if($height % 2 != 0)$height = $height - 1;		# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
-		if($width  % 2 != 0)$width = $width - 1;				# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
-
-		// $this->debug->write('<br>resizeMap2Window for gui: ' . $this->user->rolle->gui . ' to: ' . $width . 'x' . $height, 4, false);
-		$this->user->rolle->setSize($width.'x'.$height);
-		$this->user->rolle->readSettings();
-	}
 		
 	/**
 	 * Function zoom to maximum extent of Layer with $layer_id in current map object $this->map
@@ -869,10 +833,6 @@ class GUI {
   function neuLaden() {
 		$this->save_legend_role_parameters();
 		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->set_selected_button($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
-		if($this->formvars['delete_rollenlayer'] != ''){
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
-		}
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
@@ -1143,7 +1103,7 @@ class GUI {
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
 				if ($this->user->rolle->oGeorefExt->minx==='') {
-				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
+				  echo "Richten Sie in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
 				  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
 				  exit;
@@ -2421,7 +2381,7 @@ class user {
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
-		$this->funktion = $rs['Funktion'];
+		$this->funktion = $rs['funktion'];
 		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'] === 't';
@@ -2935,19 +2895,25 @@ class rolle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		foreach ($formvars['thema'] as $layer_id => $aktiv_status) {
 			$layer = $this->layerset['layer_ids'][$layer_id];
-			$requires_status = value_of($formvars, 'thema[' . value_of($layer, 'requires') . '');
-			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
+			if ($aktiv_status !== '') {
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
 				if ($layer['layer_id'] > 0) {
 					$sql ="
 						UPDATE
-							kvwmap.u_rolle2used_layer
+							kvwmap.u_rolle2used_layer r
 						SET
 							aktivstatus = " . $aktiv_status . "
+						FROM
+							kvwmap.used_layer ul
 						WHERE
-							user_id = " . $this->user_id . " AND
-							stelle_id = " . $this->stelle_id . " AND
-							layer_id = " . $layer['layer_id'] . "
+							r.user_id = " . $this->user_id . " AND
+							r.stelle_id = " . $this->stelle_id . " AND
+							ul.stelle_id = " . $this->stelle_id . " AND
+							ul.layer_id = r.layer_id and 
+							(
+								r.layer_id = " . $layer['layer_id'] . " OR
+								ul.requires = " . $layer['layer_id'] . "
+							)
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
@@ -3900,8 +3866,11 @@ class db_mapObj{
     return $filter;
   }	
 	
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
+	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'visibility_rules'), $attribute_values = []) {
 		global $language;
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$attr_obj = new LayerAttribute($this);
+
 		$attributes = array(
 			'name' => array(),
 			'tab' => array()
@@ -3952,6 +3921,7 @@ class db_mapObj{
 				arrangement,
 				labeling,
 				raster_visibility,
+				statistic_visibility,
 				dont_use_for_new,
 				mandatory,
 				quicksearch,
@@ -4011,7 +3981,13 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$i] = $rs['options'];
+			if ($rs['options']) {
+				$options_json = json_decode($rs['options'], true);
+				$attributes['options_struct'][$i] = $attr_obj->get_options($options_json ?: $rs['options'], $rs['form_element_type']);
+			}
 			$attributes['style_attribute'][$i] = $rs['style_attribute'];
 			
 			$attributes['visibility_rules'][$i] = $rs['visibility_rules'];
@@ -4054,14 +4030,20 @@ class db_mapObj{
 
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$default = (substr($attributes['type'][$i], 0, 1) == '_' ? 'to_json(' . $attributes['default'][$i] . ')' : $attributes['default'][$i]); # to_json für Array-Datentyp
+				if (substr($attributes['type'][$i], 0, 1) == '_') {
+					# Array-Datentyp
+					$type = substr($attributes['type'][$i], 1) . '[]';
+					$default = 'to_json((' . $attributes['default'][$i] . ')::' . $type . ')';
+				}
+				else {
+					$type = $attributes['type'][$i];
+					$default = '(' . $attributes['default'][$i] . ')::' . $type;
+				}
 				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			$attributes['form_element_type'][$i] = $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
@@ -4074,6 +4056,7 @@ class db_mapObj{
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['statistic_visibility'][$i] = $rs['statistic_visibility'];
 			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
@@ -4294,7 +4277,7 @@ class db_mapObj{
 				rolle::$layer_params,
 				$rs['layer_id']
 			);
-			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data') AS $key) {
+			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data', 'wms_name') AS $key) {
 				$rs[$key] = replace_params_rolle(
 					$rs[$key],
 					['duplicate_criterion' => $rs['duplicate_criterion']]

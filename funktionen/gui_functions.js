@@ -149,7 +149,11 @@ function ahahDone(url, targets, req, actions, successCallback) {
 						case "setouterhtml":
 							targets[i].outerHTML = responsevalues[i];
 						break;
-						
+
+						case "showMessage":
+							message(JSON.parse(responsevalues[i]), 1000, 2000, top, null, null, 'OK', null, '600px');
+						break;
+
 						case "prependhtml":
 							targets[i].insertAdjacentHTML('beforebegin', responsevalues[i]);
 						break;
@@ -471,7 +475,12 @@ function getBrowserSize(){
 
 function resizemap2window(){
 	getBrowserSize();
-	params = 'go=ResizeMap2Window&browserwidth='+document.GUI.browserwidth.value+'&browserheight='+document.GUI.browserheight.value;
+	new_legendwidth = document.getElementById('container_paint').clientWidth - 
+								document.getElementById('map').clientWidth;
+	if (new_legendwidth < 230) {
+		new_legendwidth = legendwidth;
+	}
+	params = 'go=ResizeMap2Window&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value + '&legendwidth=' + new_legendwidth;
 	if(document.getElementById('map_frame') != undefined){
 		startwaiting();
 		document.location.href='index.php?'+params+'&nScale='+document.GUI.nScale.value+'&reloadmap=true';			// in der Hauptkarte neuladen
@@ -644,8 +653,11 @@ function dragstart(element){
 	}
 }
 
-function resizestart(element, type){
+function resizestart(event, element, type){
+	preventDefault(event);
 	if(document.fullyLoaded){
+		posx =  event.screenX;
+  	posy = event.screenY;
 		resizeobjekt = element;
 		resizetype = type;
 		dragx = posx - resizeobjekt.parentNode.offsetLeft;
@@ -1124,7 +1136,7 @@ function getlegend(groupid, status) {
 	}	
 }
 
-function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
+function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload, save_legend_role_params = true){
 	var status = query.checked;
 	var reload = false;
 	document.GUI.legendtouched.value = 1;
@@ -1193,10 +1205,15 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
   }
 	add_to_formdata(thema);
 	add_to_formdata(query);
-	if(reload)neuLaden();
+	if (reload) {
+		neuLaden();
+	}
+	else if (save_legend_role_params) {
+		save_legend_role_parameters();
+	}
 }
 
-function updateQuery(event, thema, query, radiolayers, instantreload){
+function updateQuery(event, thema, query, radiolayers, instantreload, save_legend_role_params = true){
 	document.GUI.legendtouched.value = 1;
   if(query){
     if(thema.checked == false){
@@ -1229,14 +1246,24 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   	}
   }
 	add_to_formdata(thema);
-	if(instantreload)neuLaden();
+	if (instantreload) {
+		neuLaden();
+	}
+	else if (save_legend_role_params) {
+		save_legend_role_parameters();
+	}
 }
 
 function deleteRollenlayer(type){
 	document.GUI.delete_rollenlayer.value = 'true';
 	document.GUI.delete_rollenlayer_type.value = type;
-	document.GUI.go.value='neu Laden';
+	document.GUI.go.value='delete_rollenlayer';
 	document.GUI.submit();
+}
+
+function save_legend_role_parameters(){
+	ahah("index.php?go=save_legend_role_parameters", formdata, [], []);
+	formdata = new FormData();
 }
 
 function neuLaden(){
@@ -1289,10 +1316,15 @@ function selectgroupquery(group, instantreload){
 			if(query){
 				query.checked = check;
 				thema = document.getElementById("thema"+layers[i]);
-				updateThema('', thema, query, '', '', 0);
+				updateThema('', thema, query, '', '', false, false);
 			}
 		}
-		if(instantreload)neuLaden();
+			if (instantreload) {
+				neuLaden();
+			}
+			else {
+				save_legend_role_parameters();
+			}
 	}
 }
 
@@ -1321,15 +1353,25 @@ function selectgroupthema(group, instantreload){
     if(thema && (!check || thema.type == 'checkbox')){		// entweder alle Layer sollen ausgeschaltet werden oder es ist ein checkbox-Layer
       thema.checked = check;
       query = document.getElementById("qLayer"+layers[i]);
-      updateQuery('', thema, query, '', 0);
+      updateQuery('', thema, query, '', false, false);
     }
   }
-	if(instantreload)neuLaden();
+	if (instantreload) {
+		neuLaden();
+	}
+	else {
+		save_legend_role_parameters();
+	}
 }
 
 function selectgroupthemaAll(group_checkbox, instantreload){
 	add_to_formdata(group_checkbox);
-	if(instantreload)neuLaden();
+	if (instantreload) {
+		neuLaden();
+	}
+	else {
+		save_legend_role_parameters();
+	}
 }
 
 function zoomToMaxLayerExtent(zoom_layer_id){
@@ -1575,7 +1617,6 @@ function activateAllClasses(class_ids){
 		selClass = document.getElementsByName("class[" + classids[i] + "]")[0];
 		if (selClass != undefined) {
 			selClass.value = 1;
-			add_to_formdata(selClass);
 		}
 	}
 	overlay_submit(currentform);
@@ -1587,7 +1628,6 @@ function deactivateAllClasses(class_ids){
 		selClass = document.getElementsByName("class[" + classids[i] + "]")[0];
 		if (selClass != undefined) {
 			selClass.value = 0;
-			add_to_formdata(selClass);
 		}
 	}
 	overlay_submit(currentform);
