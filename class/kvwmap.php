@@ -19694,8 +19694,11 @@ class db_mapObj{
 								}
 								# --------- weitere Optionen -----------
 								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
-									 # auch die oid abfragen
-									 $attributes['options'][$i] = str_ireplace(' from ', ', ' . $layer['oid'] . ' as oid from ', $optionen[0]);
+									# auch die oid abfragen
+									if (preg_match('/(\w+)\.\w+\s+as\s+value\b/i', $optionen[0], $matches)) {
+    								$alias = $matches[1];
+									}
+									$attributes['options'][$i] = str_ireplace(' from ', ', ' . $layer['oid'] . ' as oid from ', $optionen[0]);
 								}
 								# ------------ SQL ---------------------
 								else {
