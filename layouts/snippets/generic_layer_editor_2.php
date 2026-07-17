@@ -162,9 +162,13 @@ if ($doit == true) {
 							<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
 							<tbody <? if(!$show_geom_editor AND $layer['attributes']['group_id'][0] == '')echo 'class="gle gledata"'; ?>><?
 						$visibility = '';
-						if (empty($layer['attributes']['tabs']) AND $show_geom_editor) {
-							$layer['attributes']['tabs'] = ['Sachdaten'];
-							$sachdaten_tab = true;
+						$layer_has_tabs = true;
+						if (empty($layer['attributes']['tabs'])) {
+							$layer_has_tabs = false;
+							if ($show_geom_editor) {
+								$layer['attributes']['tabs'] = ['Sachdaten'];
+								$sachdaten_tab = true;
+							}
 						}
 
 						if (!empty($layer['attributes']['tabs'])) {
@@ -210,7 +214,7 @@ if ($doit == true) {
 							echo '<tr><td>';
 						}
 
-						if (empty($layer['attributes']['tabs']) AND !empty($layer['attributes']['groups'])) {
+						if (!$layer_has_tabs AND !empty($layer['attributes']['groups'])) {
 							# wenn es keine Tabs gibt, Tab-div beginnen
 							echo '<div style="display: grid; gap: 7px;">';
 						}
@@ -377,7 +381,7 @@ if ($doit == true) {
 							}
 						}
 
-						if (empty($layer['attributes']['tabs']) AND !empty($layer['attributes']['groups'])){
+						if (!$layer_has_tabs AND !empty($layer['attributes']['groups'])){
 							# wenn es keine Tabs gibt, Tab-div schliessen
 							echo '</div>';
 						}
