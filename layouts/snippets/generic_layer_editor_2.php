@@ -199,6 +199,19 @@ if ($doit == true) {
 							</tr>';
 						}
 						
+						if ($show_geom_editor) {
+							echo '
+							<tr class="tab tab_' . $layer['layer_id'] . '_-1_Geometrie ' . $visibility_geom . '">
+								<td colspan="2" align="center">';
+									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
+							echo '
+								</td>
+							</tr>';
+							if ($this->user->rolle->geom_edit_first) {
+								$first_tab = false;
+							}
+						}
+
 						$visibility = '';
 						if ($sachdaten_tab) {
 							$tabname = 'Sachdaten';
@@ -390,18 +403,6 @@ if ($doit == true) {
 							echo '</td></tr>';
 						}
 
-						if ($show_geom_editor) {
-							echo '
-							<tr class="tab tab_' . $layer['layer_id'] . '_-1_Geometrie ' . $visibility_geom . '">
-								<td colspan="2" align="center">';
-									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
-							echo '
-								</td>
-							</tr>';
-							if ($this->user->rolle->geom_edit_first) {
-								$first_tab = false;
-							}
-						}
 							
 							if (($columnname != '' OR $layer['shape'][$k]['wfs_geom'] != '') AND $this->new_entry != true AND value_of($this->formvars, 'printversion') == '') {
 								if ($layer['attributes']['group_id'][0] != '') { ?>
