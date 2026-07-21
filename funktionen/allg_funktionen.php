@@ -1429,6 +1429,15 @@ function umlaute_javascript($text){
 	return $text;
 }
 
+function normalizeUtf8($text) {
+	$text = preg_replace('/u\x{0308}/u', 'ü', $text);
+	$text = preg_replace('/a\x{0308}/u', 'ä', $text);
+	$text = preg_replace('/o\x{0308}/u', 'ö', $text);
+	$text = preg_replace('/A\x{0308}/u', 'Ä', $text);
+	$text = preg_replace('/O\x{0308}/u', 'Ö', $text);
+
+return $text;
+}
 
 function stringrpos($haystack,$needle){   # findet das letzte Vorkommen eines Strings (gibs erst ab php 5)
    return strlen($haystack)- strpos( strrev($haystack) , strrev($needle) , NULL)- strlen($needle);
@@ -2308,7 +2317,7 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 	switch ($mode) {
 		case 'sendEmail async': {
 			# Erstelle Befehl für sendEmail und schreibe in mail queue Verzeichnis.
-			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'from_name' => $from_name, 'cc_email' => $cc_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+			$str = array('to_email' => trim($to_email), 'from_email' => trim($from_email), 'from_name' => $from_name, 'cc_email' => trim($cc_email), 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
 				chmod(MAILQUEUEPATH, 'g+w');

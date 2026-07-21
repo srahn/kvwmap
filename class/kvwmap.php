@@ -1795,13 +1795,15 @@ echo '			</table>
 		if (strpos(strtolower($url), 'version') === false) {
 			$url .= '&version=' . $layer['wms_server_version'];
 		}
-		$pos = strpos(strtolower($layer['connection']), 'layers');
-		if ($pos !== false) {
-			$layersection = substr($layer['connection'], $pos + 7);
-			$pos = strpos($layersection, '&');
-			if ($pos !== false) {
-				$layersection = substr($layersection, 0, $pos);
+		$pos_layers = strpos(strtolower($layer['connection']), 'layers');
+		if ($pos_layers !== false) {
+			$layersection = substr($layer['connection'], $pos_layers + 7);
+			$pos_und = strpos($layersection, '&');
+			if ($pos_und !== false) {
+				$layersection = substr($layersection, 0, $pos_und);
+				$url = substr_replace($url, '', $pos_layers, $pos_und);		# layers rausschneiden
 			}
+			$url = substr_replace($url, '', $pos_layers);		# layers rausschneiden
 		}
 		else {
 			$layersection = $layer['wms_name'];
@@ -11399,7 +11401,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				for ($i = 0; $i < count($table['attributname']); $i++) {
 					if (array_key_exists($table['attributname'][$i], $attributes['constraints'])) { 	# Rechte
 						$this->sanitize([$table['formfield'][$i] => $table['datatype'][$i]], true);
-						$attribute_options = $attributes['options'][$i];
+						$attribute_options = $attributes['options'][$table['attributname'][$i]];
 						switch (true) {
 							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
 								if (in_array($attribute_options, array('', 'insert'))){
@@ -13402,6 +13404,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$from_layer_id = $this->formvars['selected_layer_id'];
 		$to_layer_id = $this->formvars['for_attributes_selected_layer_id'];
 		$this->formvars['selected_layer_id'] = $to_layer_id;
+		foreach($this->formvars as $key => $value) {
+			if (substr($key, 0, 8) == 'default_' AND strpos($value, 'nextval') !== false) {
+				$this->formvars[$key] = '';
+			}
+		}
 		$this->add_message('info', 'Einstellungen der Attribute von Layer ID: ' . $from_layer_id . ' für die Attribute des Layers ID: ' . $to_layer_id . ' übernommen.<br>Ordne Attribute ohne Einstellungen neu ein!');
 		$this->save_layer_attributes($this->formvars);
 		$this->Attributeditor();
@@ -16706,6 +16713,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			$_files = $_FILES;
 		}
+		$_files[$input_name]['name'] = normalizeUtf8($_files[$input_name]['name']);
 		if ($_files[$input_name]['name'] != '' OR $this->formvars[$input_name] == 'delete') {
 			$pathinfo = pathinfo($_files[$input_name]['name']);
 			if ($datatype != 'bytea') {
@@ -19895,8 +19903,11 @@ class db_mapObj{
 								}
 								# --------- weitere Optionen -----------
 								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
-									 # auch die oid abfragen
-									 $attributes['options'][$i] = str_ireplace('output', 'output, ' . $layer['oid'] . ' as oid ', $optionen[0]);
+									# auch die oid abfragen
+									if (preg_match('/(\w+)\.\w+\s+as\s+value\b/i', $optionen[0], $matches)) {
+    								$alias = $matches[1];
+									}
+									$attributes['options'][$i] = str_ireplace('output', 'output, ' . ($alias ? $alias . '.' : '') . $layer['oid'] . ' as oid ', $optionen[0]);
 								}
 								# ------------ SQL ---------------------
 								else {
