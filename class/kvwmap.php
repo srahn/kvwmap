@@ -16713,6 +16713,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			$_files = $_FILES;
 		}
+		$_files[$input_name]['name'] = normalizeUtf8($_files[$input_name]['name']);
 		if ($_files[$input_name]['name'] != '' OR $this->formvars[$input_name] == 'delete') {
 			$pathinfo = pathinfo($_files[$input_name]['name']);
 			if ($datatype != 'bytea') {
