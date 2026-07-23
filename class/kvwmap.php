@@ -5646,6 +5646,7 @@ echo '			</table>
 					$contenttype = 'application/xml';
 				}
 			}
+			header('Access-Control-Allow-Origin: *');
 			header('Content-type: ' . $contenttype);
 			if (MAPSERVERVERSION < 800) {
 				ms_iogetStdoutBufferBytes();
