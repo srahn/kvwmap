@@ -639,7 +639,7 @@ function render(i){
 									) {
 										$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
 									} ?>
-									<textarea class="select_option_link" name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
+									<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
 									<?
 									if (in_array($this->attributes['form_element_type'][$i], ['SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'])) {
 										if ($sublayer_id = explode(',', $this->attributes['options'][$i])[0]) {
