@@ -582,6 +582,9 @@ span[data-tooltip]:hover::after {
   right: <? echo $font_size_factor * 15; ?>px;
 }
 
+.schnellsprung-select-field {
+	width: 100%;
+}
 
 .select_option_link:hover{
 	background-image: url(<? echo GRAPHICSPATH; ?>pfeil_rechts.gif);
