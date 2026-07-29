@@ -2612,10 +2612,15 @@ function go_switch_xplankonverter($go) {
 					);
 				}
 				else {
-					$result = $GUI->konvertierung->xplanvalidator('zusammenzeichnung-neu_gml');
-					$status = '';
-					if ($result['success']) {
-						$GUI->konvertierung->set_status($result['valid'] ? Konvertierung::$STATUS['GML_VALIDIERUNG_OK'] : Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']);
+					if(XPLANKONVERTER_XPLANVALIDATOR_VALIDATE) {
+						$result = $GUI->konvertierung->xplanvalidator('zusammenzeichnung-neu_gml');
+						$status = '';
+						if ($result['success']) {
+							$GUI->konvertierung->set_status($result['valid'] ? Konvertierung::$STATUS['GML_VALIDIERUNG_OK'] : Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']);
+						}
+					}
+					else {
+						$GUI->konvertierung->set_status(Konvertierung::$STATUS['GML_VALIDIERUNG_OK']);
 					}
 				}
 			}
@@ -2637,10 +2642,15 @@ function go_switch_xplankonverter($go) {
 						Melden Sie sich mit einem anderen Benutzer an.";
 				}
 				else {
-					$result = $GUI->konvertierung->xplanvalidator('xplan_gml');
-					$status = '';
-					if ($result['success']) {
-						$GUI->konvertierung->set_status($result['valid'] ? Konvertierung::$STATUS['GML_VALIDIERUNG_OK'] : Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']);
+					if(XPLANKONVERTER_XPLANVALIDATOR_VALIDATE) {
+						$result = $GUI->konvertierung->xplanvalidator('xplan_gml');
+						$status = '';
+						if ($result['success']) {
+							$GUI->konvertierung->set_status($result['valid'] ? Konvertierung::$STATUS['GML_VALIDIERUNG_OK'] : Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']);
+						}
+					}
+					else {
+						$GUI->konvertierung->set_status(Konvertierung::$STATUS['GML_VALIDIERUNG_OK']);
 					}
 				}
 			}

@@ -411,28 +411,30 @@
 			return $upload_validation_result;
 		}
 
-		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . $upload_validation_result['plan_file_name']);
+		if(XPLANKONVERTER_XPLANVALIDATOR_VALIDATE) {
+			$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . $upload_validation_result['plan_file_name']);
 
-		if (!$result_zusammenzeichnung['success']) {
-			return $result_zusammenzeichnung;
-		}
-
-		$msg = $konvertierung->config['title'];
-
-		if ($konvertierung->get('planart') == 'FP-Plan') {
-			if (file_exists($tmp_dir . $zip_dir . 'Einzelfassungen.gml')) {
-				rename($tmp_dir . $zip_dir . 'Einzelfassungen.gml', $tmp_dir . 'Geltungsbereiche.gml');
+			if (!$result_zusammenzeichnung['success']) {
+				return $result_zusammenzeichnung;
 			}
 
-			if (file_exists($tmp_dir . 'Geltungsbereiche.gml')) {
-				$result_geltungsbereiche = $konvertierung->xplanvalidator($tmp_dir . 'Geltungsbereiche.gml');
-				if (!$result_geltungsbereiche['success']) {
-					return $result_geltungsbereiche;
+			$msg = $konvertierung->config['title'];
+
+			if ($konvertierung->get('planart') == 'FP-Plan') {
+				if (file_exists($tmp_dir . $zip_dir . 'Einzelfassungen.gml')) {
+					rename($tmp_dir . $zip_dir . 'Einzelfassungen.gml', $tmp_dir . 'Geltungsbereiche.gml');
 				}
-				$msg .= ' und Geltungsbereiche';
+
+				if (file_exists($tmp_dir . 'Geltungsbereiche.gml')) {
+					$result_geltungsbereiche = $konvertierung->xplanvalidator($tmp_dir . 'Geltungsbereiche.gml');
+					if (!$result_geltungsbereiche['success']) {
+						return $result_geltungsbereiche;
+					}
+					$msg .= ' und Geltungsbereiche';
+				}
 			}
+			$msg .= ' valide.';
 		}
-		$msg .= ' valide.';
 
 		# Hochgeladene Zusammenzeichnung hat Prüfung im XPlanValidator bestanden
 		# Create Konvertierung and get konvertierung_id
@@ -458,7 +460,10 @@
 		rename($tmp_dir, $konvertierung->get_file_path('uploaded_xplan_gml'));
 		$msg .= '<br>Temporäre Dateien von ' . $tmp_dir . ' nach ' .  $konvertierung->get_file_path('uploaded_xplan_gml') . ' kopiert.';
 
-		$result = $konvertierung->save_validation_report('Zusammenzeichnung', $result_zusammenzeichnung['report']);
+		#toggleable in admin, in case api is temporary down but files should be added to system
+		if(XPLANKONVERTER_XPLANVALIDATOR_VALIDATE) {
+			$result = $konvertierung->save_validation_report('Zusammenzeichnung', $result_zusammenzeichnung['report']);
+		}
 		# Der Validierungsreport der Geltungsbereiche wird nicht gespeichert, weil es nur einen Report pro Konvertierung geben kann und für die Geltungsbereiche
 		# auch nichts weiter interessantes drin stehen dürfte, weil ja keine Fachdaten drin sind.
 		#$result = $konvertierung->save_validation_report('Geltungsbereiche', $result_geltungsbereiche['report']);

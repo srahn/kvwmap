@@ -2441,7 +2441,8 @@ class Konvertierung extends PgObject {
 		}
 
 		# ToDo pk: Hier vielleicht noch einen anderen sprechenderen Namen finden, ggf. der Planname aus der GML-Datei
-		$url =	'https://www.xplanungsplattform.de/xplan-api-validator/xvalidator/api/v1/validate' . '?' .
+		//$url =	'https://www.xplanungsplattform.de/xplan-api-validator/xvalidator/api/v1/validate' . '?' .
+		$url =	'https://xleitstelle.xplan.diplanung.de/xplan-validator-api/xvalidator/api/v1/validate' . '?' .
 						'name=' . $pathinfo['basename'] . '&' .
 						'skipSemantisch=false' . '&' .
 						'skipGeometrisch=false' . '&' .
