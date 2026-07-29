@@ -146,6 +146,7 @@ class LogFile {
 			fwrite($this->fp, "\n<br>" . $msg);
 		}
 		if ($this->format == "text") {
+			$msg = str_replace('<br>', "\n", $msg);
 			fwrite($this->fp, "\n" . $msg);
 		}
 	}

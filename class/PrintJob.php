@@ -22,10 +22,15 @@ class PrintJob extends PgObject {
 		return $print_job;
 	}
 
-	public static function find_next($gui) {
+	/**
+	 * Function find $num_jobs with status beauftragt and block it
+	 * with status running for next calls.
+	 * @return array(PrintJob) or empty Array if no found.
+	 */
+	public static function find_next($gui, $num_jobs = 1) {
 		$print_job = new PrintJob($gui);
 		$running_print_jobs = $print_job->find_where("status = 'running'");
-		if (count($running_print_jobs) > 10) {
+		if (count($running_print_jobs) > 150) {
 			return null;
 		}
 		$sql = "
@@ -38,7 +43,7 @@ class PrintJob extends PgObject {
 					status = 'beauftragt'
 				ORDER BY
 					created_at
-				LIMIT 1
+				LIMIT " . $num_jobs . "
 			)
 			UPDATE
 				public.print_jobs p
@@ -51,23 +56,22 @@ class PrintJob extends PgObject {
 			  p.id = next.id
 			RETURNING p.*
 		";
-		// echo "\nSQL zur Abfrage des nächsten print_jobs: " . $sql;
+		#echo "\nSQL zur Abfrage des nächsten print_jobs: " . $sql;
 		$query = $print_job->execSQL($sql);
-		$print_job->data = pg_fetch_assoc($query);
-
-		if ($print_job->data !== false) {
-			return $print_job;
+		$results = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$results[] = PrintJob::find_by_id($gui, $rs['id']);
 		}
-		return null;
+		return $results;
 	}
 
 	function print() {
-		$this->gui->debug->write("\nDruckjob mit ID " . $this->get_id() . " wird ausgeführt.");
 		// get layer for bogen
 		$this->gui->formvars['aktivesLayout'] = $this->get('ddl_id');
 		$this->gui->formvars['chosen_layer_id'] = $this->get('layer_id');
 		$this->gui->formvars['checkbox_names_' . $this->get('layer_id')] = 'check;' . $this->get('table_alias') . ';' . $this->get('table_name') . ';' . $this->get('feature_id') . ';' . $this->get('layer_id');
 		$this->gui->formvars['check;' . $this->get('table_alias') . ';' . $this->get('table_name') . ';' . $this->get('feature_id') . ';' . $this->get('layer_id')] = 'on';
+		$this->gui->qlayerset[0]['shape'] = null;
 		$result = $this->gui->generischer_sachdaten_druck_createPDF();
 		$dest_path = pathinfo($this->get('pdf_path'),  PATHINFO_DIRNAME);
 		if (!is_dir($dest_path)) {

@@ -533,7 +533,7 @@ class PgObject {
 		$query = pg_query($this->database->dbConn, $sql);
 	}
 
-	function update_attr($attributes, $set = false) {
+	function update_attr($attributes, $set = false, $where = '') {
 		$quote = ($this->identifier_type == 'text' ? "'" : "");
 		$sql = "
 			UPDATE
@@ -541,7 +541,7 @@ class PgObject {
 			SET
 				" . implode(', ', $attributes) . "
 			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+				" . ($where != '' ? $where : $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}") . "
 		";
 		#echo $sql;
 		$this->debug->show('update sql: ' . $sql, $this->show);
@@ -555,7 +555,8 @@ class PgObject {
 			}
 			return array(
 				'success' => true,
-				'msg' => 'Attributes erfolgreich geupdated'
+				'msg' => 'Attributes erfolgreich geupdated',
+				'sql' => $sql
 			);
 		}
 		catch (Exception $e) {
