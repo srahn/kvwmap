@@ -5,7 +5,6 @@
 
 class PrintJob extends PgObject {
 
-	public $write_debug = false;
 	static $schema = 'public';
 	static $tableName = 'print_jobs';
 
@@ -27,7 +26,7 @@ class PrintJob extends PgObject {
 	 * with status running for next calls.
 	 * @return array(PrintJob) or empty Array if no found.
 	 */
-	public static function find_next($gui) {
+	public static function find_next($gui, $num_jobs) {
 		$print_job = new PrintJob($gui);
 		$running_print_jobs = $print_job->find_where("status = 'running'");
 		if (count($running_print_jobs) > 150) {
