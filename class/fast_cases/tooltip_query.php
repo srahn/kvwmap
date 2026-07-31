@@ -2310,7 +2310,10 @@ class db_mapObj{
 								# --------- weitere Optionen -----------
 								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
 									 # auch die oid abfragen
-									 $attributes['options'][$i] = str_ireplace('output', 'output, ' . $layer['oid'] . ' as oid ', $optionen[0]);
+									if (preg_match('/(\w+)\.\w+\s+as\s+value\b/i', $optionen[0], $matches)) {
+    								$alias = $matches[1];
+									}
+									$attributes['options'][$i] = str_ireplace('output', 'output, ' . ($alias ? $alias . '.' : '') . $layer['oid'] . ' as oid ', $optionen[0]);
 								}
 								# ------------ SQL ---------------------
 								else {
