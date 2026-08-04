@@ -126,7 +126,7 @@ class PgObject {
 	/**
 	 * @return PgObject $this->data is false if nothing found.
 	 */
-	function find_by($attribute, $value, $comp_operator = '=') {
+	function find_by($attribute, $value, $comp_operator = '=', $return_array = false) {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, $this->show);
 		$sql = '
 			SELECT
@@ -138,12 +138,22 @@ class PgObject {
 		// echo '<br>sql: ' . $sql;
 		$this->debug->show('find_by sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
+		$last_error = pg_last_error($this->database->dbConn);
 		if (!$query) {
-			echo 'Fehler beim Ausführen von SQL: ' . $sql . pg_last_error($this->database->dbConn);
-			exit;
+			$msg = 'Fehler beim Ausführen von SQL: ' . $sql . ' ' . $last_error;
+			if ($return_array) {
+				return array(
+					'success' => false,
+					'msg' => $msg
+				);
+			}
+			else {
+				echo $msg;
+				exit;
+			}
 		}
 		$this->data = pg_fetch_assoc($query);
-		return $this;
+		return ($return_array ? array('success' => true, 'feature' => $this) : $this);
 	}
 
 	function get_id_condition($ids = array()) {
@@ -907,7 +917,7 @@ class PgObject {
 		";
 		$this->debug->show('delete sql: ' . $sql, $this->show);
 		$result = pg_query($this->database->dbConn, $sql);
-		$err_msg = $this->database->errormessage;
+		$err_msg = pg_last_error();
 		return array(
 			'success' => ($err_msg == ''),
 			'msg' => ($err_msg == '' ? 'Abfrage zum Löschen erfolgreich' : 'Fehler bei Ausführung der Löschanfrage!'),

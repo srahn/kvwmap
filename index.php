@@ -6,7 +6,7 @@ if (isset($argv)) {
 	array_shift($argv);
 	$_REQUEST = array();
 	foreach ($argv AS $arg) {
-		list($key, $val) = explode('=', $arg);
+		list($key, $val) = explode('=', $arg, 2);
 		$_REQUEST[$key] = $val;
 	}
 }

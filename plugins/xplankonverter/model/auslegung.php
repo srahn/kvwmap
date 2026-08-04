@@ -197,4 +197,8 @@ class Auslegung extends PgObject {
   function veroeffentlichung_zu_spaet() {
     return $this->veroeffentlicht_in_auslegungszeitraum() && (strtotime($this->get('veroeffentlichungsdatum')) - strtotime($this->get('startdatum')) >= 5 * 3600);
   }
+
+  function ueberwachung_zu_spaet($pruefzeit) {
+    return $this->veroeffentlicht_in_auslegungszeitraum() && (volle_stunden(date('Y-m-d'), date('Y-m-d H:i:s', $pruefzeit)) >= 5);
+  }
 }

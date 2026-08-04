@@ -206,18 +206,28 @@ class Veroeffentlichungsprotokoll extends PgObject {
   function create_ueberwachungsbeginn_alert_mail($auslegung, $contact_name, $pruefzeit) {
     $stelle = stelle::find($this->gui, "id = " . $auslegung->plan->get('stelle_id'))[0];
     $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get_plan_type()) . '&id=' . $auslegung->plan->get('gml_id'); 
+    $veroeffentlichung_zu_spaet = $auslegung->veroeffentlichung_zu_spaet();
+    $ueberwachung_zu_spaet = $auslegung->ueberwachung_zu_spaet($pruefzeit);
     $subject = 'Beginn der Überwachung';
-    if ($auslegung->veroeffentlichung_zu_spaet()) {
+    if ($veroeffentlichung_zu_spaet OR $ueberwachung_zu_spaet) {
       $subject .= ' mit Fehler bei';
     }
     $subject .= ' der Auslegung ' . $auslegung->plan->get('anzeigename') . ' ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
     $body = "Mitteilung für: " . $contact_name . "\n\nDie Überwachung der Auslegung des Plans " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") in Stelle " . $stelle->get('bezeichnung') . " mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " hat am " . date('d.m.Y H:i', $pruefzeit) . " Uhr begonnen.";
-    if ($auslegung->veroeffentlichung_zu_spaet()) {
-      $body .= "\n\nDas Veröffentlichungsdatum " . $auslegung->get('veroeffentlichungsdatum') . " des Plans " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") in Stelle " . $stelle->get('bezeichnung') . " mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " scheint aber fehlerhaft zu sein, weil es zwischen dem aktuellen Auslegungsstart- und enddatum des Plans liegt. Das führte dazu, dass der Plan erst zum angegebenen Veröffentlichungsdatum (" . $auslegung->get('veroeffentlichungsdatum') . ") verfügbar sein kann, denn nur veröffentlichte Pläne werden an das Bau- und Planungsportal ausgegeben. Bis dahin wird es alle 5 Stunden Fehlermeldungen geben.";
+    if ($veroeffentlichung_zu_spaet) {
+      $body .= "\n\nDas Veröffentlichungsdatum " . $auslegung->get('veroeffentlichungsdatum') . " des Plans " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") in Stelle " . $stelle->get('bezeichnung') . " mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " scheint aber fehlerhaft zu sein, weil es zwischen dem aktuellen Auslegungsstart- und enddatum des Plans liegt. Das führte dazu, dass der Plan erst zum angegebenen Veröffentlichungsdatum (" . $auslegung->get('veroeffentlichungsdatum') . ") verfügbar sein kann, denn nur veröffentlichte Pläne werden an das Bau- und Planungsportal ausgegeben und zwar regulär immer nur kurz vor Mitternacht.";
+    }
+    elseif ($ueberwachung_zu_spaet) {
+      $body .= "\n\nDie Überwachung hätte jedoch schon um 00:00 Uhr beginnen müssen. Der Grund dafür kann sein, dass die Auslegung erst jetzt gefunden wurde, weil das Auslegungsstart- oder Veröffentlichungsdatum erst innerhalb der letzten Stunde angepasst wurden. Normalerweise beginnen die Überwachungen nach Mitternacht, weil die Auslegungen kurz vor Mitternacht an das Bau- und Planungsportal übermittelt werden. Wenn das Auslegungsstart- oder Veröffentlichungsdatum erst am Tag der Veröffentlichung eingestellt werden, ist der Plan erst am folgenden Tag auf dem Bau- und Planungsportal verfügbar.";
     }
     else {
       $body .= "\n\nSie können die Auslegung im Bau- und Planungsportal unter: " . $url . " prüfen und ggf. Angaben zur Veröffentlichung des Plans auf " . URL . " prüfen und ändern.";
     }
+
+    if ($veroeffentlichung_zu_spaet OR $ueberwachung_zu_spaet) {
+      $body .= "\n\nBis dahin wird es alle 5 Stunden Fehlermeldungen geben. Sie können den Plan aber auch sofort dem Bau- und Planungsportal zur Veröffentlichung übergeben, indem Sie den Plan im Bauleitplanserver aufrufen und den Link Update neben dem Anzeigename aufrufen. Danach wird der Plan automatisch und sofort an das Bau- und Planungsportal übergeben und die Überwachung der Auslegung läuft regulär weiter. Sie müssen also nicht bis zum nächsten Tag warten wenn Sie den Plan sofort veröffentlichen wollen.";
+    }
+
     $body .= "\n\n\nDies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an die oben angegebenen Kontakte.";
     return array(
       'subject' => $subject,
@@ -335,7 +345,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
     $ausfall_dauer = $ausfall_dauer / 3600;
     $ueberwachbarkeit_p = round(100 - ($ausfall_dauer / $auslegung_dauer * 100), 2);
 
-    $body .= "\nStart der Überwachung war am " . date('d.m.Y H:m', $auslegung->veroeffentlichungsprotokoll->get('observationstart')) . " Uhr.";
+    $body .= "\nStart der Überwachung war am " . date('d.m.Y H:i', strtotime($auslegung->veroeffentlichungsprotokoll->get('observationstart'))) . " Uhr.";
 
     $body .= "\n\nDie Auslegung konnte in einem Zeitraum von " . $ausfall_dauer . ' Stunden nicht überwacht werden konnte. Das entspricht einer Überwachungszeit von ' . $ueberwachbarkeit_p . "% im gesamten Auslegungszeitraum.";
 
@@ -362,6 +372,13 @@ class Veroeffentlichungsprotokoll extends PgObject {
   }
 
   function create_and_send_nachweis_luecke_alert($auslegung, $pruef_result) {
+    // Nur an Nutzer schicken, dessen E-Mail-Adresse in OWS_CONTACTELECTRONICMAILADDRESS eingetragen ist
+    $result = array_filter(
+      $this->zustaendige_user,
+      function ($user) {
+        return $user->get('contact_email') === OWS_CONTACTELECTRONICMAILADDRESS;
+      }
+    );
     echo_log('E-Mail zur Nachweislücke gesendet an Nutzer: ' . implode(', ', array_map(function($user) { return $user->get('contact_name'); }, $this->zustaendige_user)), 2);
     foreach ($this->zustaendige_user AS $user) {
       $this->send_email(
