@@ -356,7 +356,9 @@
 				); ?> <span data-tooltip="Wenn ein Wert zwischen 2cm und 2m ausgewählt wird, wird die PostGIS-Funktion ST_SimplifyPreserveTopology mit der ausgewählten Toleranz auf alle Polygone und Linien der Fachdatengeometrien angewendet. Wird „-- Bitte Wählen --“ ausgewählt findet keine Vereinfachung statt. Der Default-Wert für Regionale Raumordnungsprogramme ist auf 1 m eingestellt." style="--left: -400px"><?
 			} ?>
 
-			<p style="margin-bottom: 8px;"><input id="digital_mv" type="checkbox" name="digital_mv" value="1" onchange="toggle_digital_mv_bedingungen(this);"/>&nbsp;Es handelt sich um einen Plan aus dem Digitalisierungsprojekt-MV:</p>
+			<p style="margin-bottom: 8px;"><input id="skip_geometrisch" type="checkbox" name="skip_geometrisch" value="1"/>&nbsp;Die Geometrische Prüfung beim XPlanValidator überspringen</p>
+
+			<p style="margin-bottom: 8px;"><input id="digital_mv" type="checkbox" name="digital_mv" value="1" onchange="toggle_digital_mv_bedingungen(this);"/>&nbsp;Es handelt sich um einen Plan aus dem Digitalisierungsprojekt-MV</p>
 
 			<p style="margin-bottom: 8px;">Die hoch zu ladenden Daten müssen folgende Eigenschaften aufweisen:</p>
 			<div style="
@@ -373,7 +375,16 @@
 					echo $this->konvertierung->config['upload_bedingungen']; ?>
 					<li>Die XPlan-GML Datei muss eine Version 5.x haben.</li>
 					<li class="digital_mv_bedingung">Die XPlan-GML Datei muss der Namenskonvention DE__[8-stelliger AGS]__BP__[Plannummer]__[Dokumentenart] z.B. DE__13072006__BP__033__GP.gml entsprechen.</li>
-					<li class="digital_mv_bedingung">Es muss eine Excel-Datei zur Dokumentation der Erfassungsqualität enthalten sein mit gleichem Namen wie die GML-Datei nur statt GP Dokumentation_Erfassungsqualität und der Dateierweiterung .xlsx.</li>
+					<!-- <li class="digital_mv_bedingung">Es muss eine Excel-Datei zur Dokumentation der Erfassungsqualität enthalten sein mit gleichem Namen wie die GML-Datei nur statt GP Dokumentation_Erfassungsqualität und der Dateierweiterung .xlsx.</li> -->
+					<li class="digital_mv_bedingung">Die XPlan-GML Datei muss ein generisches Attribut fassungsbezeichnung mit einem der folgenden Werte enthalten:
+						<ul>
+							<li>Ursprungsplan</li>
+							<li>Änderung</li>
+							<li>Ergänzung</li>
+							<li>Neuaufstellung</li>
+							<li>Erweiterung</li>
+						</ul>
+					</li>
 					<li class="digital_mv_bedingung">Externe Referenzen müssen einer Namenskonvention entsprechen:
 						<ul>
 							<li>DE</li>

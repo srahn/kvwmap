@@ -136,6 +136,7 @@ class Zusammenzeichnung {
       form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
       form_data.append('digital_mv', $('#digital_mv').is(':checked'));
+      form_data.append('skip_geometrisch', $('#skip_geometrisch').is(':checked'));
       form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
 			form_data.append('suppress_gvbtable_letzteaktualisierung_update', $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'));
       var xhttp = new XMLHttpRequest();
@@ -208,11 +209,12 @@ class Zusammenzeichnung {
         xplan_gml_path: 'uploaded_xplan_gml',
         mime_type: 'json',
         format: 'json_result',
+        digital_mv: $('#digital_mv').is(':checked'),
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
-        // console.log('Response import_zusammenzeichnung: %o', result);
+        console.log('Response import_zusammenzeichnung: %o', result);
         if (result.success) {
           this.nextStep('import_zusammenzeichnung', 'ok');
         }
@@ -248,9 +250,11 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        digital_mv: $('#digital_mv').is(':checked'),
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked'),
-        simplify_fachdaten_geom: $('#simplify_fachdaten_geom').val()
+        simplify_fachdaten_geom: $('#simplify_fachdaten_geom').val(),
+        digital_mv: $('#digital_mv').is(':checked')
       },
       success: (result) => {
         console.log('Response create_plaene: %o', result);
@@ -321,6 +325,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         xplan_gml_path: 'reindexed_xplan_gml',
         mime_type: 'json',
+        digital_mv: $('#digital_mv').is(':checked'),
         format: 'json_result',
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
@@ -354,6 +359,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        digital_mv: $('#digital_mv').is(':checked'),
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
@@ -385,6 +391,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        digital_mv: $('#digital_mv').is(':checked'),
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
@@ -545,7 +552,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
-        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
+        digital_mv: $('#digital_mv').is(':checked'),        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },
       success: (result) => {
@@ -577,6 +584,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        digital_mv: $('#digital_mv').is(':checked'),
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val(),
 				suppress_gvbtable_letzteaktualisierung_update: $('#suppress_gvbtable_letzteaktualisierung_update').is(':checked')
       },

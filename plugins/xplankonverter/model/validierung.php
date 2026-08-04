@@ -33,6 +33,7 @@ class Validierung extends PgObject {
 	static $schema = 'xplankonverter';
 	static $tableName = 'validierungen';
 	static $write_debug = false;
+	public int $konvertierung_id;
 
 	function __construct($gui) {
 		#echo '<br>Create new Object Validierung';
@@ -94,6 +95,62 @@ class Validierung extends PgObject {
 		#echo '<br>Test ob Attribute Werte hat mit SQL: ' . $sql;
 
 		$this->debug->write('plan_attribute_has_value sql: ' . $sql, false);
+		$result = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
+		$has_value = $result['has_value'] == 't';
+		$validierungsergebnis = new Validierungsergebnis($this->gui);
+		$validierungsergebnis->create(
+			array(
+				'konvertierung_id' => $this->konvertierung_id,
+				'validierung_id' => $this->get('id'),
+				'status' => ($has_value ? 'Erfolg' : 'Fehler'),
+				'msg' => $this->get('msg_' . ($has_value ? 'success' : 'error'))
+			)
+		);
+		return $has_value;
+	}
+
+	function generisches_stringattribute_has_value($schema_name) {
+		$has_value = true;
+		$sql = "
+			SELECT
+				count(*) = 1 AS has_value
+			FROM
+				" . $schema_name . ".bp_plan_hatgenerattribut g JOIN
+				" . $schema_name . ".xp_stringattribut s ON g.xp_generattribut_xp_stringattribut_pkid = s.ogr_pkid
+			WHERE
+				" . implode(' AND ', json_decode($this->get('functionsargumente_json'))) . "
+		";
+		echo '<br>Test ob Generisches Attribut mit richtigem Wert vorkommt: ' . $sql;
+
+		$this->debug->write('generisches_stringattribute_has_value sql: ' . $sql, $this->show);
+		$result = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
+		$has_value = $result['has_value'] == 't';
+		$validierungsergebnis = new Validierungsergebnis($this->gui);
+		$validierungsergebnis->create(
+			array(
+				'konvertierung_id' => $this->konvertierung_id,
+				'validierung_id' => $this->get('id'),
+				'status' => ($has_value ? 'Erfolg' : 'Fehler'),
+				'msg' => $this->get('msg_' . ($has_value ? 'success' : 'error'))
+			)
+		);
+		return $has_value;
+	}
+
+	function generisches_datumattribute_has_value($schema_name) {
+		$has_value = true;
+		$sql = "
+			SELECT
+				count(*) = 1 AS has_value
+			FROM
+				" . $schema_name . ".bp_plan_hatgenerattribut g JOIN
+				" . $schema_name . ".xp_datumattribut s ON g.xp_generattribut_xp_datumattribut_pkid = s.ogr_pkid
+			WHERE
+				" . implode(' AND ', json_decode($this->get('functionsargumente_json'))) . "
+		";
+		// echo '<br>Test ob Generisches Attribut mit richtigem Wert vorkommt: ' . $sql;
+
+		$this->debug->write('generisches_datumattribute_has_value sql: ' . $sql, $this->show);
 		$result = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
 		$has_value = $result['has_value'] == 't';
 		$validierungsergebnis = new Validierungsergebnis($this->gui);

@@ -1,8 +1,9 @@
 <?php
 // Script zur Erstellung von Nachweisen der Veröffentlichung von Plänen auf dem Bau- und Planungsportal des Landes MV
 // Running this script with a cron job like this:
-// cd /var/www/apps/kvwmap/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan
+// cd /var/www/apps/konverter/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan stelle_id=1
 // plan_gml_id= für einzelne Pläne
+// cd /var/www/apps/konverter/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan stelle_id=1 plan_gml_id=946a1aac-8f12-11f1-8f3b-0242ac001407
 // gelogged wird in /var/www/logs/cron/veroeffentlichungsnachweis.log
 // /var/www/logs/cron/veroeffentlichungsnachweis.log 2>&1
 // ToDos:
@@ -129,8 +130,7 @@ try {
         }
         $auslegung->veroeffentlichungsprotokoll = $result['protokoll'];
         echo_log('Veröffentlichungsprotokoll angelegt', 2);
-        // $auslegung->veroeffentlichungsprotokoll->send_emails = $config->send_emails;
-        $auslegung->veroeffentlichungsprotokoll->send_emails = ($auslegung->get('startdatum') == '29.06.2026');
+        $auslegung->veroeffentlichungsprotokoll->send_emails = $config->send_emails;
         $auslegung->veroeffentlichungsprotokoll->create_and_send_ueberwachungsbeginn_alert($auslegung, $pruefzeit);
       }
       else {
@@ -210,6 +210,7 @@ try {
     }
     foreach($result['completed_auslegungen'] AS $auslegung) {
       $auslegung->veroeffentlichungsprotokoll->send_emails = $config->send_emails;
+
       $result = $auslegung->veroeffentlichungsprotokoll->create_and_send_protokoll($auslegung);
       if (!$result['success']) {
         echo_log('Fehler beim Erzeugen und Senden des Veröffentlichungsprotokolls: ' . $result['msg'], 1);
@@ -373,5 +374,163 @@ function find_nachweisfehler($nachweis_obj, $auslegung, $pruefstunde) {
     'num_nachweisfehler' => count($nachweisfehler)
   );
 }
+/*
+--
+-- Test-Veröffentlichungsnachweis
+--
 
+-- Fremdschlüssel setzen
+DELETE FROM xplan_gml.bp_plan p
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM xplankonverter.konvertierungen k
+    WHERE p.konvertierung_id = k.id
+);
+ALTER TABLE xplan_gml.bp_plan ADD CONSTRAINT fk_konvertierung_id FOREIGN KEY (konvertierung_id) REFERENCES xplankonverter.konvertierungen(id) ON DELETE CASCADE;
+
+-- Konvertierung anlegen
+WITH konvertierung AS (
+  INSERT INTO xplankonverter.konvertierungen(
+    bezeichnung,
+    status,
+    stelle_id,
+    beschreibung,
+    user_id,
+    planart,
+    veroeffentlichungsdatum
+  )
+  VALUES (
+    'Testkonvertierung',
+    'Angaben vollständig',
+    130735351,
+    'Konvertierung zum testen des Veröffentlichungsnachweises 946a1aac-8f12-11f1-8f3b-0242ac001407',
+    56,
+    'BP-Plan',
+    current_date - INTERVAL '1 day'
+  )
+  RETURNING id
+)
+-- Plan anlegen
+INSERT INTO xplan_gml.bp_plan (
+  gml_id,
+  name,
+  nummer,
+  fassungsbezeichnung,
+  kommentar,
+  planart,
+  gemeinde,
+  internalid,
+  auslegungsstartdatum,
+  auslegungsenddatum,
+  raeumlichergeltungsbereich,
+  konvertierung_id
+)
+SELECT
+  '946a1aac-8f12-11f1-8f3b-0242ac001407'::uuid,
+  'Testplan' AS name,
+  '1' AS nummer,
+  'Ursprungsplan' AS fassungsbezeichnung,
+  'Plan zum Testen des Veröffentlichungsnachsweises' AS kommentar,
+  ARRAY[1000::text::xplan_gml.bp_planart] AS planart,
+  ARRAY[ROW('13073005', '130735351005', 'Altenpleen', 'Prohn')::xplan_gml.xp_gemeinde],
+  '946a1aac-8f12-11f1-8f3b-0242ac001407',
+  ARRAY[current_date] AS auslegungsstartdatum,
+  ARRAY[current_date + INTERVAL '1 month'] AS auslegungsenddatum,
+  ST_GeomFromText('MULTIPOLYGON(((373033.96 6026761.94,373009.31 6026755.54,373015.92 6026737.49,372999.82 6026733.5,373006.56 6026711.49,373008.42 6026705.24,373016.39 6026679.06,373018.84 6026671.11,373030.05 6026673.38,373036.76 6026674.69,373054.64 6026678.32,373056.1 6026670.19,373058.69 6026655.66,373059.19 6026652.8,373102.56 6026662.03,373095.88 6026713.49,373094.43 6026725.22,373112.1 6026727.27,373119.26 6026734.28,373118.88 6026737.49,373117.84 6026749.61,373117.04 6026759.67,373116.64 6026765.6,373079.56 6026761.99,373077.6 6026769.9,373077.03 6026772.33,373064.95 6026769.51,373047.14 6026765.33,373039.07 6026763.24,373033.96 6026761.94)))', 25833),
+  konvertierung.id
+FROM
+  konvertierung;
+
+-- Auslegung abfragen
+SELECT
+  a.*,
+  k.id,
+  k.beschreibung,
+  p.internalid
+FROM
+  xplankonverter.auslegungen a JOIN
+  xplan_gml.bp_plan p ON a.plan_gml_id = p.gml_id JOIN
+  xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+WHERE
+  a.startdatum <= current_date AND
+  a.enddatum >= current_date AND
+  p.gml_id = '946a1aac-8f12-11f1-8f3b-0242ac001407'::uuid;
+
+--
+-- Diesen Befehl aufrufen um die E-Mails für den Begin der Auslegung zu erzeugen.
+-- cd /var/www/apps/konverter/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan stelle_id=1 plan_gml_id=946a1aac-8f12-11f1-8f3b-0242ac001407
+--
+
+-- Veröffentlichungsprotokoll anbfragen
+SELECT
+  *
+FROM
+  xplankonverter.veroeffentlichungsprotokolle v
+WHERE
+  plan_gml_id = '946a1aac-8f12-11f1-8f3b-0242ac001407'
+
+-- Nachweislücken abfragen
+SELECT
+  *
+FROM
+  xplankonverter.veroeffentlichungsnachweis_luecken l JOIN
+  xplankonverter.veroeffentlichungsprotokolle v ON l.protokoll_id = v.id
+WHERE
+  v.plan_gml_id = '946a1aac-8f12-11f1-8f3b-0242ac001407'
+
+-- Veröffentlichungsnachweise abfragen
+SELECT
+  *
+FROM
+  xplankonverter.veroeffentlichungsnachweise
+WHERE
+  plan_gml_id = '946a1aac-8f12-11f1-8f3b-0242ac001407'
+  
+-- Werte anpassen auf die Zeit nach Ablauf der Auslegung
+DELETE FROM xplankonverter.veroeffentlichungsnachweise
+WHERE plan_gml_id = '946a1aac-8f12-11f1-8f3b-0242ac001407';
+
+-- Werte anpassen auf die Zeit nach Ablauf der Auslegung im Plan
+UPDATE xplan_gml.bp_plan
+SET
+  auslegungsstartdatum = ARRAY[CURRENT_DATE - INTERVAL '1 month'],
+  auslegungsenddatum = ARRAY[CURRENT_DATE - INTERVAL ' 1 day']
+WHERE
+  gml_id = '946a1aac-8f12-11f1-8f3b-0242ac001407'::uuid;
+
+-- Werte anpassen auf die Zeit nach Ablauf der Auslegung im Veröffentlichungsprotokoll
+UPDATE xplankonverter.veroeffentlichungsprotokolle v 
+SET
+  observationstart = CURRENT_DATE - INTERVAL '1 month',
+  observationend = NULL,
+  datei = NULL,
+  auslegungsstartdatum = CURRENT_DATE - INTERVAL '1 month',
+  auslegungsenddatum = CURRENT_DATE - INTERVAL ' 1 day',
+  last_pruefung = CURRENT_TIMESTAMP - INTERVAL '1 hour'
+WHERE
+  plan_gml_id = '946a1aac-8f12-11f1-8f3b-0242ac001407'::uuid;
+
+--
+-- Diesen Befehl aufrufen um die E-Mails für das Ende der Auslegung zu erzeugen.
+-- cd /var/www/apps/konverter/plugins/xplankonverter/tools; php -f veroeffentlichungsnachweis.php login_name=pkorduan stelle_id=1 plan_gml_id=946a1aac-8f12-11f1-8f3b-0242ac001407
+--
+
+--
+-- Alles wieder löschen
+--
+DELETE FROM xplankonverter.veroeffentlichungsprotokolle
+WHERE plan_gml_id = '946a1aac-8f12-11f1-8f3b-0242ac001407';
+
+DELETE FROM xplankonverter.konvertierungen
+WHERE
+  beschreibung = 'Konvertierung zum testen des Veröffentlichungsnachweises 946a1aac-8f12-11f1-8f3b-0242ac001407';
+
+ALTER TABLE xplan_gml.bp_plan DROP CONSTRAINT IF EXISTS fk_konvertierung_id;
+
+SELECT setval(
+  'xplankonverter.konvertierungen_id_seq',
+  COALESCE((SELECT MAX(id) FROM xplankonverter.konvertierungen), 1),
+  true
+);
+*/
 ?>
