@@ -415,6 +415,7 @@ class Regel extends PgObject {
 
 	function gml_layer_exists() {
 		$this->debug->show("Prüfe ob Layer: " . $this->get_layername() . " mit Typ: " . $this->get_layertyp() . " in Gruppe: " . $this->konvertierung->get('gml_layer_group_id') . " existiert", Regel::$write_debug);
+		include_once(CLASSPATH . 'Layer.php');
 		$layers = Layer::find($this->gui, "
 			name = '{$this->get_layername()}' AND
 			datentyp= {$this->get_layertyp()}
@@ -463,6 +464,7 @@ class Regel extends PgObject {
 	function get_konvertierung() {
 		if (!empty($this->get('konvertierung_id'))) {
 			$this->debug->show('Regel gehört direkt zur Konvertierung: ' . $this->get('konvertierung_id'), false);
+			include_once(PLUGINS . 'xplankonverter/model/konvertierung.php');
 			$konvertierung = Konvertierung::find_by_id($this->gui, 'id', $this->get('konvertierung_id'));
 		}
 		else {

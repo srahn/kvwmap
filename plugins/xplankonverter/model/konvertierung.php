@@ -235,6 +235,19 @@ class Konvertierung extends PgObject {
 		return $config;
 	}
 
+	function get_stelle_id_from_ags($ags) {
+		$pg_obj = new PgObject($this->gui, 'gebietseinheiten', 'gemeinden');
+		$result = $pg_obj->find_by('ags', $ags, '=', true);
+		if (!$result['success']) {
+			return $result;
+		}
+		$this->stelle_id = $result['feature']->get('stelle_id');
+		return array(
+			'success' => true,
+			'stelle_id' => $result['feature']->get('stelle_id')
+		);
+	}
+
 	function planart_to_planclass($planart) {
 		return strtolower(str_replace('-', '_', $planart));
 	}
@@ -502,6 +515,104 @@ class Konvertierung extends PgObject {
 		return $konvertierungen;
 	}
 
+	/**
+	 * Funktion sucht nach der Konvertierung, die ersetzt werden soll.
+	 * Je nach dem wie die Konvertierung entsteht gibt es dafür verschiedene Varianten.
+	 * @param string $variante plankennzeichnung, dateiname_digital_mv, manuell, default
+	 * @param integer $ersetzt_konvertierung_id
+	 */
+	function bestimme_ersetzt_konvertierung($variante = 'default', $dateiname = '') {
+		include_once(PLUGINS . 'xplankonverter/model/XP_Plan.php');
+		$ersetzt_konvertierung_id = null;
+		switch ($variante) {
+			case 'plankennzeichnung' : {
+				$pg_obj = new PgObject($this->gui, 'plandigitalisierung', 'plankennzeichnung');
+				$kennzeichnung = $pg_obj->find_by("konvertierung_id_new", $this->get('id'));
+				$ersetzt_konvertierung_id = $kennzeichnung->get('konvertierung_id_origin');
+			} break;
+			case 'xplan_gml_internalid' : {
+				$pg_obj = new PgObject($this->gui, 'plandigitalisierung', 'plankennzeichnung');
+				$kennzeichnung = $pg_obj->find_by("internalid", $this->plan->get('internalid'));
+				$ersetzt_konvertierung_id = $kennzeichnung->get('konvertierung_id_origin');
+			} break;
+			case 'gmlas_internalid' : {
+				$pg_obj = new PgObject($this->gui, 'xplan_gmlas_tmp_' . $this->gui->user->id, strtolower($this->plan_class));
+				$results = $pg_obj->find_where("", NULL, '*', 1);
+				if (count($results) > 0) {
+					$internalid = $results[0]->get('internalid');
+					$pg_obj = new PgObject($this->gui, 'plandigitalisierung', 'plankennzeichnung');
+					$kennzeichnung = $pg_obj->find_by("internalid", $internalid);
+					$ersetzt_konvertierung_id = $kennzeichnung->get('konvertierung_id_origin');
+				}
+			} break;
+			case 'dateiname_digital_mv' : {
+				if ($dateiname) {
+					$parts = explode('__', $dateiname);
+					$planart = $parts[2] . '-Plan';
+					$ags = $parts[1];
+					$num_items = array_map(
+						function ($item) {
+							return str_replace('Ae', '%Änderung', (ctype_digit($item) ? (string)(int)$item : $item));
+						},
+						explode('_', trim(',', str_replace('Ae', '_Änderung', $parts[3])))
+					);
+					$num_expr = '%' . implode('%', $num_items);
+					// Abfragen des zum Nummernausdruck passenden Originalplans
+					$plaene = XP_Plan::find_where_by_planart(
+						$this->gui,
+						$planart,
+						"(gemeinde[1]).ags = '" . pg_escape_string($ags) . "' AND nummer LIKE '" . pg_escape_string($num_expr) . "'"
+					);
+					if (count($plaene) > 0) {
+						$ersetzt_konvertierung_id = $plaene[0]->get('konvertierung_id');
+					}
+				}
+			} break;
+			case 'manuell' : {
+				// In der Variante manuell wird die Zurdnung aus übergebenen Variablen entnommen. 
+				$ersetzt_konvertierung_id = $this->gui->formvars['ersetzt_konvertierung_id'];
+			} break;
+			default : {
+				// In der Variante default wird die Konvertierung eines Plans gesucht, der den gleichen Namen, Nummer und erste Gemeinde hat wie der Plan dieser Konvertierung.
+					// function find_where($where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
+				$table_name =	strtolower($this->plan_class);
+				$plaene = $this->find_where(
+					"
+						ersetzt.gml_id != neu.gml_id AND
+						neu.konvertierung_id = " . $this->get('id') . "
+					",
+					"COALESCE(" . implode(', ', array_map(
+						function($attr) {
+							return 'ersetzt.' . trim($attr);
+						},
+						explode(',', $this->config['plan_attribut_aktualitaet'])
+					)) . ") DESC",
+					"ersetzt.konvertierung_id",
+					1,
+					"
+						xplan_gml." . $table_name . " ersetzt JOIN
+						xplan_gml." . $table_name . " neu ON ersetzt.name = neu.name AND ersetzt.nummer = neu.nummer AND (ersetzt.gemeinde[1]).gemeindename = (neu.gemeinde[1]).gemeindename
+					"
+				);
+				$last_error = pg_last_error();
+				if ($last_error) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler bei der Abfrage der Konvertierung die ersetzt werden kann. Meldung: ' . $last_error
+					);
+				}
+				if (count($plaene) > 0) {
+				  $ersetzt_konvertierung_id = $plaene[0]->get('konvertierung_id');
+				}
+			}
+		}
+		return array(
+			'success' => true,
+			'ersetzt_konvertierung_id' => $ersetzt_konvertierung_id,
+			'msg' => 'Konvertierung' . ($ersetzt_konvertierung_id === null ? ' nicht' : '') . ' gefunden.'
+		);
+	}
+
 	// function archiv_old_zusammenzeichnung() {
 	// 	# Zippe Zusammenzeichnung und Geltungsbereiche aus Verzeichnis $GUI->konvertierung->get_file_path('uploaded_xplan_gml'); (XPLANKONVERTER_FILE_PATH/<konvertierung_id>/uploaded_xplan_gml/)
 	// 	$zip_path = XPLANKONVERTER_FILE_PATH . 'archiv/' . $this->gui->Stelle->id . '/' . $konvertierung->config['plan_abk_plural'] . '/';
@@ -739,7 +850,7 @@ class Konvertierung extends PgObject {
 			)
 			RETURNING " . $this->identifier . "
 		";
-		$this->debug->show('Create new konvertierung with sql: ' . $sql, Konvertierung::$write_debug);
+		$this->debug->show('Create new konvertierung with sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		if ($query === false) {
 			return -1;
@@ -1205,6 +1316,7 @@ class Konvertierung extends PgObject {
 		#echo 'Frage Plan für Konvertierung ' . $this->get($this->identifier) . ' ab.';
 		if (!$this->plan) {
 			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get($this->identifier), Konvertierung::$write_debug);
+			include_once(PLUGINS . 'xplankonverter/model/XP_Plan.php');
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
 			$plan = $plan->find_where('konvertierung_id = ' . $this->get($this->identifier), NULL, '*, to_json(externereferenz) AS externereferenz_json');
 			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
@@ -1307,6 +1419,19 @@ class Konvertierung extends PgObject {
 			'success' => true,
 			'num_plaene' => $result['num_plaene']
 		);
+	}
+
+	function get_gml_id_from_gmlas_tmp($table_schema) {
+		$plan_table = $this->planart_to_planclass($this->get('planart'));
+		$sql = "
+			SELECT
+				trim(replace(lower(id), 'gml_', ''))::text::uuid AS gml_id
+			FROM
+				" . $table_schema . "." . strtolower($this->gui->plan_class) . "
+		";
+		// echo 'SQL zur Abfrage der in gmlas_tmp Schema existierenden gml_id: ' . $sql;
+		$rs = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
+		return $rs['gml_id'];
 	}
 
 	/**
@@ -1459,10 +1584,10 @@ class Konvertierung extends PgObject {
 							SELECT
 								array_agg((vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)::xplan_gml.xp_verbundenerplan)::xplan_gml.xp_verbundenerplan[]
 							FROM
-								xplan_gmlas_tmp_56.bp_plan gmlas LEFT JOIN
-								xplan_gmlas_tmp_56.bp_plan_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
-								xplan_gmlas_tmp_56.wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
-								xplan_gmlas_tmp_56.xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid  
+								" . $table_schema . ".bp_plan gmlas LEFT JOIN
+								" . $table_schema . ".bp_plan_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
+								" . $table_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
+								" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid  
 							WHERE
 								id = gmlas.id
 						) AS wurdegeaendertvon,
@@ -1517,7 +1642,10 @@ class Konvertierung extends PgObject {
 						gmlas.hoehenbezug AS hoehenbezug,
 						gmlas.gruenordnungsplan AS gruenordnungsplan,
 						generattr_sub.hatgenerattribut AS hatgenerattribut,
-						xplankonverter.get_generattr_value(generattr_sub.hatgenerattribut, 'fassungsbezeichnung') AS fassungsbezeichnung
+						xplankonverter.get_generattr_value(generattr_sub.hatgenerattribut,"
+						. "'fassungsbezeichnung'"
+						// . "'IP_PlanFassungBez'"
+						. ") AS fassungsbezeichnung
 					FROM
 						" . $table_schema . "." . strtolower($plan_class) . " gmlas JOIN
 						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
@@ -2482,7 +2610,7 @@ class Konvertierung extends PgObject {
 
 	/*
 	* Diese Funktion prüft die Konformitätsbedingungen für Plan und Bereichsobjekte und
-	* führt das Mapping zwischen den Shape Dateien
+	* führt das Mapping zwischen den Tabellen aus den Shape-Dateien oder dem gmlas import
 	* und den in den Regeln definierten XPlan GML Features durch.
 	* Jedes im Mapping erzeugte Feature bekommt eine eindeutige gml_id.
 	* Darüber hinaus muss die Zuordnung zum überordneten Objekt
@@ -2566,6 +2694,49 @@ class Konvertierung extends PgObject {
 		}
 	}
 
+	function validate_imported_plan($profil, $schema_name) {
+		// Konformitätsbedingungen mit $profil für plan Objekt abfragen
+		$validierung = new Validierung($this->gui);
+		$planvalidierungen = $validierung->find_where(
+			"
+				b.profil = 'MV' AND
+				v.functionsname LIKE 'generisches_%attribute_has_value'
+			",
+			NULL,
+			"
+				v.*,
+				to_json(v.functionsargumente) AS functionsargumente_json,
+				b.*
+			",
+			NULL,
+			"
+				xplankonverter.validierungen v JOIN
+				xplankonverter.konformitaetsbedingungen b ON v.konformitaet_nummer = b.nummer
+			"
+		);
+		$validation_errors = array();
+		foreach($planvalidierungen AS $planvalidierung) {
+			$planvalidierung->konvertierung_id = $this->get($this->identifier);
+			$functionname = $planvalidierung->get('functionsname');
+			$result = $planvalidierung->$functionname($schema_name);
+			if (!$result) {
+				$validation_errors[] = $planvalidierung->get('msg_error');
+			}
+		}
+		// Validierungsobjekte davon erzeugen
+		// Validierungen durchführen
+		if (count($validation_errors) > 0) {
+			return array(
+				'success' => false,
+				'msg' => implode('<br>', $validation_errors)
+			);
+		}
+		return array(
+			'success' =>  true,
+			'msg' => 'Validierung des importierten Plans war erfolgreich.'
+		);
+	}
+
 	/**
 	 * Function validiert ob die hochgeladenen Dateien in Ordnung sind,
 	 * sucht die Plandatei, benennt sie ggf. um und liefert den Plandateinamen zurück.
@@ -2577,19 +2748,19 @@ class Konvertierung extends PgObject {
 	 * ]
 	 */
 	function validate_uploaded_files($upload_path, $upload_files, $profil = null) {
+		$gml_file_name = $this->get_uploaded_gml_file_name($upload_files);
 		$validation_steps = array(
 			fn() => $this->validate_files_exists($upload_path, $upload_files),
-			fn() => $this->validate_gml_file_exists($upload_files)
+			fn() => $this->validate_gml_file_exists($gml_file_name)
 		);
-
-		$gml_file_name = $this->get_uploaded_gml_file_name($upload_files);
 
 		if ($profil === 'MV') {
 			$validation_steps = array_merge(
 				$validation_steps,
 				array(
-					fn() => $this->validate_gml_name_konvention($upload_path, $gml_file_name),
-					fn() => $this->validate_qualitaet_datei($upload_path, $gml_file_name),
+					fn() => $this->validate_gml_name_konvention($gml_file_name),
+					fn() => $this->validate_ags_in_name($gml_file_name),
+					// fn() => $this->validate_qualitaet_datei($upload_path, $gml_file_name),
 					// fn() => $this->validate_textzuweisungen($upload_path, $gml_file_name),
 					fn() => $this->validate_externe_referenz_konvention($upload_path, $upload_files)
 				)
@@ -2619,15 +2790,8 @@ class Konvertierung extends PgObject {
 		return array('success' => true);
 	}
 
-	function validate_gml_file_exists($upload_files) {
-		if (empty(
-			array_filter(
-				$upload_files,
-				function ($file) {
-    			return strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'gml';
-				}
-			)
-		)) {
+	function validate_gml_file_exists($gml_file_name) {
+		if (!strtolower(pathinfo($gml_file_name, PATHINFO_EXTENSION)) === 'gml') {
 			return array(
 				'success' => false,
 				'msg' => 'Die hochgeladene ZIP-Datei enthält keine Datei mit der Dateieindung .gml'
@@ -2639,11 +2803,10 @@ class Konvertierung extends PgObject {
 	/**
 	 * Validates the naming convention of the GML file.
 	 * DE__[8-stelliger AGS]__BP__[Plannummer]__[Dokumentenart].gml
-	 * @param String $path
 	 * @param String $gml_file_name
 	 * @return array
 	 */
-	function validate_gml_name_konvention($path, $gml_file_name) {
+	function validate_gml_name_konvention($gml_file_name) {
 		if (strpos($gml_file_name, '.gml') === false) {
 			return array(
 				'success' => false,
@@ -2659,7 +2822,7 @@ class Konvertierung extends PgObject {
 		}
 
 		$parts = explode('__', pathinfo($gml_file_name, PATHINFO_FILENAME));
-		if (count($parts) < 5) {
+		if (count($parts) < 4) {
 			return array(
 				'success' => false,
 				'msg' => 'Der Name der GML-Datei ' . $gml_file_name . ' enthält nicht genügend Bestandteile, die durch doppelte Unterstriche "__" getrennt sind. Es werden mindestens 5 Bestandteile erwartet: DE__Gemeindeschlüssel__Planart__Plannummer__Dokumentenart.gml'
@@ -2681,10 +2844,10 @@ class Konvertierung extends PgObject {
 			);
 		}
 
-		if ($parts[2] !== 'BP') {
+		if (!in_array($parts[2], array('BP', 'FP', 'SO'))) {
 			return array(
 				'success' => false,
-				'msg' => 'Der dritte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP.'
+				'msg' => 'Der dritte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP, FP, SO.'
 			);
 		}
 
@@ -2699,7 +2862,28 @@ class Konvertierung extends PgObject {
 		if (!in_array($parts[4], array('GP', 'SO', 'IS', 'KS', 'EnS', 'ErS', 'KES', 'AS'))) {
 			return array(
 				'success' => false,
-				'msg' => 'Der fünfte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Dokumentenart. Es sind nur folgende Kürzel erlaubt: GP, SO, IS, KS, EnS, ErS, KES, AS.'
+				'msg' => 'Der fünfte Bestandteil ' . $parts[4] . ' des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Dokumentenart. Es sind nur folgende Kürzel erlaubt: GP, SO, IS, KS, EnS, ErS, KES, AS.'
+			);
+		}
+
+		return array('success' => true);
+	}
+
+	function validate_ags_in_name($gml_file_name) {
+		$parts = explode('__', $gml_file_name);
+		$ags = $parts[1];
+		$result = $this->get_stelle_id_from_ags($ags);
+		if (!$result['success']) {
+			return array(
+				'success' => false,
+				'msg' => 'Zum zweiten Bestandteil ' . $ags . ' des GML-Dateinamens ' . $gml_file_name . ' konnte keine Gebietseinheit gefunden werden. Es handelt sich scheinbar um einen ungültigen oder unaktuallen AGS-Schlüssel, der im System nicht hinterlegt ist.'
+			);
+		}
+		$result = stelle::find($this->gui, "id = " . $result['stelle_id']);
+		if (count($result) === 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Für die zum AGS-Schlüssel passende Stellen-ID: ' . $result['stelle_id'] . ' konnte keine Stelle im System gefunden werden. Entweder ist die Zuordnung der stelle_id in der Tabelle der Gebietseinheiten falsch oder für den Gemeindverband wurde noch keine Stelle angelegt.'
 			);
 		}
 
@@ -2791,6 +2975,7 @@ class Konvertierung extends PgObject {
 	function xplanvalidator($gml_file) {
 		$pathinfo = pathinfo($gml_file);
 		$msg = array();
+
 		if (!is_file($gml_file)) {
 			return array(
 				'success' => false,
@@ -2799,15 +2984,17 @@ class Konvertierung extends PgObject {
 		}
 
 		# ToDo pk: Hier vielleicht noch einen anderen sprechenderen Namen finden, ggf. der Planname aus der GML-Datei
-		$url =	'https://www.xplanungsplattform.de/xplan-api-validator/xvalidator/api/v1/validate' . '?' .
+		// $url =	'https://www.xplanungsplattform.de/xplan-api-validator/xvalidator/api/v1/validate' . '?' .
+		$url =	'https://xleitstelle.xplan.diplanung.de/xplan-validator-api/xvalidator/api/v1/validate' . '?' .
 						'name=' . $pathinfo['basename'] . '&' .
 						'skipSemantisch=false' . '&' .
-						'skipGeometrisch=false' . '&' .
+						'skipGeometrisch=' . ($this->gui->formvars['skip_geometrisch'] === 'true' ? 'true' : 'false') . '&' .
 						'skipFlaechenschluss=true' . '&' .
 						'skipGeltungsbereich=false';
 
 		$cmd = "curl -X 'POST' '" . $url	. "'-H 'accept: application/json' -H 'X-Filename: " . $pathinfo['basename'] . "' -H 'Content-Type: application/gml+xml' --data-binary @" . $gml_file;
 		$this->debug->write("<br><b>Validierung der Datei : {$pathinfo['basename']} mit folgendem Befehl</b><br>{$cmd}", $debuglevel);
+		// echo "\nValidiere gegen den Validator der XLeitstelle: " . $cmd;
 		exec($cmd, $output, $result_code);
 
     // $ch = curl_init($url);
@@ -2836,8 +3023,9 @@ class Konvertierung extends PgObject {
 		$msg = array();
 		$result = $output[0];
 		$report = json_decode($result, false);
+		$json_last_error = json_last_error();
 
-		if (json_last_error() !== JSON_ERROR_NONE) {
+		if ($json_last_error !== JSON_ERROR_NONE) {
 			if (strpos($result, 'Http/1.1 Service Unavailable') !== false) {
 				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>Http/1.1 Service Unavailable<br>Der Validator ist zur Zeit nicht erreichbar. Prüfen Sie die Verfügbarkeit unter <a href="https://www.xplanungsplattform.de/xplan-validator/">https://www.xplanungsplattform.de/xplan-validator/</a> und versuchen Sie es wieder wenn der Validator wieder läuft.';
 			}
@@ -2845,7 +3033,7 @@ class Konvertierung extends PgObject {
 				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>HTTP Status 406 – Not Acceptable<br>Überprüfen Sie Ihre XPlanGML-Datei auf Wohlgeformtheit und Validität.';
 			}
 			else {
-				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>Der XPlanValidator ist wahrscheinlich derzeit nicht online. Bitte versuchen Sie den Upload zu einem späteren Zeitpunkt erneut.<br>Fehler: ' . print_r($output, true);
+				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>Der XPlanValidator ist wahrscheinlich derzeit nicht online. Bitte versuchen Sie den Upload zu einem späteren Zeitpunkt erneut. ' . '<br>' . $json_last_error . '<br>' . $cmd . (count($output) > 0 ? '<br>Fehler: ' . implode(', ', $output) : '');
 			}
 			return array(
 				'success' => false,
@@ -2943,7 +3131,7 @@ class Konvertierung extends PgObject {
 			) RETURNING id
 		";
 		#echo '<br>SQL to create a validation report: ' . $sql;
-		$msg[] = 'SQL to create a validation report: ' . $sql;
+		// $msg[] = 'SQL to create a validation report: ' . $sql;
 		$ret = $this->database->execSQL($sql);
 		if (!$ret['success']) {
 			return array(
@@ -2975,7 +3163,7 @@ class Konvertierung extends PgObject {
 					" . implode(', ', $values) . "
 			";
 			#echo '<br>SQL to create the semantic results: ' . $sql; exit;
-			$msg[] = 'SQL to create the semantic results: ' . $sql; 
+			// $msg[] = 'SQL to create the semantic results: ' . $sql; 
 			$ret = $this->database->execSQL($sql);
 			if (!$ret['success']) {
 				return array(
@@ -3270,17 +3458,23 @@ class Konvertierung extends PgObject {
 		return $ret;
 	}
 
-	function plan_exists($table_schema) {
+	function plan_exists($gml_id) {
+		if ($gml_id == '') {
+			return false;
+		}
 		$sql = "
-			SELECT
-				p.gml_id
-			FROM
-				xplan_gml." . strtolower($this->gui->plan_class) . " p JOIN
-				" . $table_schema . "." . strtolower($this->gui->plan_class) . " gmlas ON
-					p.gml_id = trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid
+			SELECT EXISTS (
+    		SELECT
+					1
+    		FROM
+					xplan_gml." . strtolower($this->gui->plan_class) . "
+    		WHERE
+					gml_id::text = '" . $gml_id . "'
+			) AS found
 		";
-		#echo 'SQL zur Abfrage ob der Plan schon existiert: ' . $sql;
-		return (pg_num_rows(pg_query($this->database->dbConn, $sql)) > 0);
+		// echo 'SQL zur Abfrage ob der Plan in xplan_gml schon existiert: ' . $sql;
+		$rs = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
+		return $rs['found'] === 't';
 	}
 
 	/**
@@ -3511,6 +3705,87 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
 		return $ret;
 	}
+
+	/**
+	 * Funktion aktualisiert die plankennzeichnung und upload tabelle
+	 * Falls die Konvertierung die ersetzt werden soll noch nicht bekannt ist wird versucht diese
+	 * über die plankennzeichnung oder den Namen, Nummer und Gemeinde zu ermitteln.
+	 */
+	function update_plankennzeichnung_and_uploads_table($status, $msg) {
+		$ersetzt_konvertierung_id = null;
+		$pk_obj = new PgObject($this->gui, 'plandigitalisierung', 'plankennzeichnung');
+		$ul_obj = new PgObject($this->gui, 'plandigitalisierung', 'uploads');
+
+		// Finde den Upload-Datensatz upload_file name
+		$results = $ul_obj->find_where("dateiname = '" . pg_escape_string($this->gui->upload_file) . "'");
+		if (count($results) == 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Upload-Datei ' . ($this->gui->upload_file == '' ? ' ist leer und ' : $this->gui->upload_file) . ' konnte in upload-Tabelle nicht gefunden werden.'
+			);
+		}
+		$upload = $results[0];
+		if ($this->get_id() == '') {
+			// echo "\nKonvertierung id ist leer.";
+			$upload->set('konvertierung_id_new', '');
+			$upload->set('konvertierung_id_origin', '');
+		}
+		else {
+			if ($upload->get('konvertierung_id_new') != $this->get_id()) {
+				$upload->set('konvertierung_id_new', $this->get_id());
+			}
+			if ($upload->get('konvertierung_id_origin') == '') {
+				switch ($status) {
+					case 'Plan hochgeladen' : {
+						$result = $this->bestimme_ersetzt_konvertierung('dateiname_digital_mv');
+					} break;
+					case 'Plan importiert' : {
+						$result = $this->bestimme_ersetzt_konvertierung('gmlas_internalid');
+					} break;
+					case 'Plan angelegt' : {
+						$result = $this->bestimme_ersetzt_konvertierung('xplan_gml_internalid');
+					} break;
+				}
+				if (!$result['success']) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler bei der Abfrage des Plans der ersetzt werden soll. ' . $result['msg']
+					);
+				}
+				if ($result['ersetzt_konvertierung_id'] == '') {
+					$msg = 'Der Plan, der ersetzt werden soll konnte nicht gefunden werden.';
+				}
+				else {
+					$upload->set('konvertierung_id_origin', $result['ersetzt_konvertierung_id']);
+					$result = $pk_obj->update_attr("konvertierung_id_new = " . $this->get('id'), true, "konvertierung_id_origin = " . $result['ersetzt_konvertierung_id']);
+					if (!$result['success']) {
+						$result['msg'] = 'Fehler beim Eintragen der konvertierung_id_origin in die Tabelle plankennzeichnung. ' . $result['msg'];
+						return $result;
+					}
+				}
+			}
+
+		}
+
+		if ($upload) {
+			if ($status != '') {
+				$upload->set('status', $status);
+			}
+			$upload->set('message', $msg);
+			// echo "\nUpdate upload mit: " . print_r($upload->data, true);
+			$result = $upload->update();
+			if (!$result['success']) {
+				$result['msg'] = 'Fehler beim aktualisierene der Tabelle uploads. ' . $result['msg'];
+				return $result;
+			}
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Tabelle plankennzeichnung und uploads erfolgreich aktualisiert.'
+		);
+	}
+
 
 	/*
 	* Checks if the geometry of the plan-geltungsbereich is similar to the geometry (95% area equality)

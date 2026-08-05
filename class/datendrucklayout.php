@@ -1425,7 +1425,7 @@ class ddl extends drucklayout{
 		$this->pdf=new Cezpdf();
 		$y = $maxy - $formvars['margin_top'] - $fontsize;
 		$x = $formvars['margin_left'];
-		if($attributes['group'][0] != ''){
+		if($attributes['group_id'][0] != ''){
 			$x = $x + 7;
 			$y = $y - 30;
 		}
@@ -1435,7 +1435,7 @@ class ddl extends drucklayout{
 				$attribute_offset_x = 0;
 				$attribute_offset_y = 0;
 				# Gruppe
-				if($attributes['group'][$i] != $attributes['group'][$i-1]){
+				if($attributes['group_id'][$i] != $attributes['group_id'][$i-1]){
 					$gap = 35;
 					# Rechteck um die Gruppe
 					$rects[$rc]['breite'] = 0.5;
@@ -1449,7 +1449,8 @@ class ddl extends drucklayout{
 					}
 					$rc++;
 					# Gruppenname als Freitext
-					$text['text'] = $attributes['group'][$i];
+					$group = $attributes['groups'][$attributes['group_id'][$i]];
+					$text['text'] = $group['name'];
 					$text['posx'] = $x;
 					$text['posy'] = 33;
 					$text['offset_attribute'] = $attributes['name'][$last_attribute_index];

@@ -21733,7 +21733,9 @@ DO $$
 	*/
 	function save_layer_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
-
+		$last_group = '';
+		$group_id = 0;
+		$groups = [];
 		for ($i = 0; $i < count($attributes['name']); $i++) {
 			if ($formvars['attribute_' . $attributes['name'][$i]] != '') {
 				$alias_rows = ["alias" => "'" . $formvars['alias_' . $attributes['name'][$i]] . "'"];
@@ -21749,7 +21751,12 @@ DO $$
 				if ($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
 					$formvars['group_' . $attributes['name'][$i]] = $last_group;
 				}
+				if ($last_group != $formvars['group_' . $attributes['name'][$i]]) {
+					$group_id++;
+					$groups[$group_id]['name'] = $formvars['group_' . $attributes['name'][$i]];
+				}
 				$last_group = $formvars['group_' . $attributes['name'][$i]];
+
 				if ($formvars['tab_' . $attributes['name'][$i]] == '' AND $last_tab != ''){
 					$formvars['tab_' . $attributes['name'][$i]] = $last_tab;
 				}
@@ -21762,7 +21769,7 @@ DO $$
 					'options' => "'" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "'",
 					'"default"' => "'" . pg_escape_string($formvars['default_' . $attributes['name'][$i]]) . "'",
 					'tooltip' => "'" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "'",
-					'"group"' => "'" . $formvars['group_' . $attributes['name'][$i]] . "'",
+					'group_id' => ($group_id ?: 'NULL'),
 					'tab' => "'" . $formvars['tab_' . $attributes['name'][$i]] . "'",
 					'arrangement' => ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]),
 					'labeling' => ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]),
@@ -21788,6 +21795,30 @@ DO $$
 				$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
 				$database->execSQL($sql, 4, 1);
 			}
+		}
+		if (!empty($groups)) {
+			$values = [];
+			foreach ($groups as $group_id => $group) {
+				$values[] = sprintf(
+						"(%d, %d, '%s', %s)",
+						$formvars['selected_layer_id'],
+						$group_id,
+						pg_escape_string($group['name']),
+						($formvars['group_options_' . $group_id] ? "'" . $formvars['group_options_' . $group_id] . "'::jsonb" : 'NULL')
+				);
+			}
+			$sql = "
+				DELETE FROM	kvwmap.layer_attributes_groups
+				WHERE
+					layer_id = " . $formvars['selected_layer_id'] . ";
+
+				INSERT INTO	kvwmap.layer_attributes_groups
+					(layer_id, group_id, name, options)
+				VALUES
+					" . implode(",\n", $values);
+			#echo '<br>Sql: ' . $sql;
+			$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
+			$database->execSQL($sql, 4, 1);
 		}
 	}
 
@@ -22011,8 +22042,9 @@ DO $$
 		$attr_obj = new LayerAttribute($this);
 
 		$attributes = array(
-			'name' => array(),
-			'tab' => array()
+			'name' => [],
+			'tab' => [],
+			'tabs' => []
 		);
 		$einschr = '';
 
@@ -22055,7 +22087,7 @@ DO $$
 				form_element_type,
 				options,
 				tooltip,
-				\"group\",
+				group_id,
 				tab,
 				arrangement,
 				labeling,
@@ -22190,8 +22222,10 @@ DO $$
 			$attributes['alias_polish'][$i] = $rs['alias_polish'];
 			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
 			$attributes['tooltip'][$i] = $rs['tooltip'];
-			$attributes['group'][$i] = $rs['group'];
-			$attributes['tab'][$i] = $rs['tab'];
+			$attributes['group_id'][$i] = $rs['group_id'];
+			if ($attributes['tab'][$i] = $rs['tab']) {
+				$attributes['tabs'][$rs['tab']] = true;
+			}
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
@@ -22217,8 +22251,34 @@ DO $$
 		else {
 			$attributes['all_table_names'] = array();
 		}
-		$attributes['tabs'] = array_values(array_filter(array_unique($attributes['tab']), 'strlen'));
+		$attributes['groups'] = $this->get_layer_attributes_groups($layer_id);
+		$attributes['tabs'] = array_keys($attributes['tabs']);
 		return $attributes;
+	}
+
+	function get_layer_attributes_groups($layer_id) {
+		$groups = array();
+		$sql = "
+			SELECT  
+				*
+			FROM
+				kvwmap.layer_attributes_groups 
+			WHERE
+				layer_id = " . $layer_id . "
+			ORDER BY
+				group_id";
+		$ret = $this->db->execSQL($sql);
+		if (!$ret['success']) {
+			$this->GUI->add_message('error', err_msg($this->script_name, __LINE__, $sql));
+			return $groups;
+		}
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['options'] = json_decode($rs['options'], true);
+			$groupname_short = explode('<br>', $rs['name']);
+			$rs['groupname_short'] = sonderzeichen_umwandeln($groupname_short[0]);
+			$groups[$rs['group_id']] = $rs;
+		}
+		return $groups;
 	}
 
 	/*

@@ -45,14 +45,9 @@
 	<tr>
 		<td>
 			<input type="hidden" value="" onchange="root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['layer_id'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
-			<table class="tgle" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
-			  <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gledata"'; else echo 'class="nogle"'; ?>>
-<?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
-			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$layer['maintable'].'_oid'] == $trans_oid[1]){
-				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits übertragen und kann nicht bearbeitet werden.</span></td></tr>';
-				$lock[$k] = true;
-			}
-			for($j = 0; $j < count($layer['attributes']['name']); $j++){
+			<table class="tgle" <? if($layer['attributes']['group_id'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
+			  <tbody <? if($layer['attributes']['group_id'][0] == '')echo 'class="gledata"'; else echo 'class="nogle"'; ?>>
+<?		for($j = 0; $j < count($layer['attributes']['name']); $j++){
 				$datapart = '';
 				if($layer['shape'][$k][$layer['attributes']['name'][$j]] == ''){
 					$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['layer_id'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j]];
@@ -61,10 +56,12 @@
 					// $layer['attributes']['form_element_type'][$j] .= '_not_saveable';
 				// }
 				
-				if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
-					$explosion = explode(';', $layer['attributes']['group'][$j]);
-					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-					$groupname = $explosion[0];
+				if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
+					$group = $layer['attributes']['groups'][$layer['attributes']['group_id'][$j]];
+					$groupname = $group['name'];
+					$groupname_short = $group['groupname_short'];
+					$collapsed = $group['options']['collapsed'];
+
 					$datapart .= '<tr>
 									<td colspan="2" width="100%">
 										<div style="border-bottom: 1px solid grey">
@@ -86,7 +83,7 @@
 							
 							if($layer['attributes']['arrangement'][$j] != 1)$datapart .= '<tr id="tr_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'">';							# wenn Attribut nicht daneben -> neue Zeile beginnen
 							if($layer['attributes']['labeling'][$j] != 2){
-								$td = '	<td class="gle-attribute-name" id="'.'name_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'"'; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
+								$td = '	<td class="gle-attribute-name" id="'.'name_'.$layer['layer_id'].'_'.$layer['attributes']['name'][$j].'_'.$k.'"'; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group_id'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
 								$td.= 			attribute_name($layer['layer_id'], $layer['attributes'], $j, $k, false);
 								$td.= '	</td>';
 								if($nl AND $layer['attributes']['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
@@ -124,7 +121,7 @@
 					}
 					$invisible_attributes[$layer['layer_id']][] = '<input type="hidden" id="' . $layer['layer_id'] . '_' . $layer['attributes']['name'][$j] . '_' . $k . '" onchange="'.$onchange.'" class="'.$this->subform_classname.$vc_class.'" name="'.$layer['layer_id'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 				}				
-				if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+				if($layer['attributes']['group_id'][$j] != $layer['attributes']['group_id'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 					$datapart .= '</table></div></td></tr>';
 				}
 				echo $datapart;
@@ -148,14 +145,14 @@
 					}
 				}
 				if($this->new_entry != true AND $this->formvars['printversion'] == '' AND $layer['shape'][$k][$columnname]){
- 					if($layer['attributes']['group'][0] != ''){ ?>
+ 					if($layer['attributes']['group_id'][0] != ''){ ?>
 						<tr><td colspan="2"><table width="100%" class="tgle" border="2" cellpadding="0" cellspacing="0"><tbody class="gledata">
 					<? } ?>
 					<tr>
 						<? if($layer['querymaps'][$k] != ''){ ?>
-						<td <? if($layer['attributes']['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
+						<td <? if($layer['attributes']['group_id'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
 						<? } else { ?>
-			    	    <td <? if($layer['attributes']['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
+			    	    <td <? if($layer['attributes']['group_id'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle" colspan="19">
 <?						

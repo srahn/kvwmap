@@ -71,10 +71,11 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 				$this->attributes['saveable'][$i] == 0)
 				) 
 			{
-				if ($this->attributes['group'][$i] != value_of($this->attributes['group'], $last_attribute_index)) { # wenn die vorige Gruppe anders ist, dann ...
-					$explosion = explode(';', $this->attributes['group'][$i]);
-					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-					$groupname = $explosion[0];
+				if ($this->attributes['group_id'][$i] != value_of($this->attributes['group_id'], $last_attribute_index)) { # wenn die vorige Gruppe anders ist, dann ...
+					$group = $this->attributes['groups'][$this->attributes['group_id'][$j]];
+					$groupname = $group['name'];
+					$collapsed = $group['options']['collapsed'];
+
 					if($last_attribute_index !== NULL){		# ... Tabelle schliessen, wenn es nicht die erste Gruppe ist
 						echo '</div> <!-- Ende Gruppe -->';
 					}
