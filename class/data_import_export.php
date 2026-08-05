@@ -1348,15 +1348,16 @@ class data_import_export {
 				$t_epsg = '4326';
 			}
 			$contenttype = 'application/vnd.geo+json';
-			$command = 'ogr2ogr -f GeoJSON ' . $exportfile . ' -t_srs "epsg:' . $t_epsg . '" "WFS:' . $layerset[0]['connection'] . 'Service=WFS&Request=GetFeature&Version=2.0.0&TypeName=' . $layerset[0]['wms_name'] . '"';
-			$errorfile = rand(0, 1000000);
-			$command .= ' 2> ' . IMAGEPATH . $errorfile . '.err';
-			$output = array();
-			#echo '<br>' . $command; exit;
-			exec($command, $output, $ret);
-			if ($ret != 0) {
-				$ret = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
-			}
+			$command = '-f GeoJSON "' . $exportfile . '" -t_srs "epsg:' . $t_epsg . '" "WFS:' . $layerset[0]['connection'] . '&Service=WFS&Request=GetFeature&Version=2.0.0&TypeName=' . $layerset[0]['wms_name'] . '"';
+			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
+			$url = $gdal_container_connect . urlencode(trim($command));
+			#echo 'url:   ' . $url . '<br><br>';
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			$output = curl_exec($ch);
+			curl_close($ch);
 		}
 		else {
 			#echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];

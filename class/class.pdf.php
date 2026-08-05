@@ -2062,6 +2062,9 @@ class Cpdf
      */
     public function selectFont($fontName, $encoding = '', $set = 1, $subsetFont = false)
     {
+
+        $fontName = $fontName ?: 'Helvetica.afm';
+
         if ($subsetFont && !class_exists('TTFsubset')) {
             $this->debug('TTFsubset class not found. Falling back to complete font program', E_USER_WARNING);
             $subsetFont = false;

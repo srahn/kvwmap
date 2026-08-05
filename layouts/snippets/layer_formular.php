@@ -695,7 +695,7 @@ from
 								<input name="schema" type="text" value="<?php echo $this->formvars['schema']; ?>" size="50" maxlength="100">
 						</td>
 					</tr><?php
-						if (count($this->layerdata['parent_layers'])) { ?>
+						if (count($this->layerdata['parent_layers'] ?: [])) { ?>
 							<tr>
 								<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 	$strParentLayer; ?></th>
 								<td colspan=2 style="border-bottom:1px solid #C3C7C3">

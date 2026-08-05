@@ -160,7 +160,7 @@ if ($gast_export === false) {
 		if (is_gast_login($GUI->formvars, $gast_stellen)) {
 			$GUI->formvars['gast'] = intval($GUI->formvars['gast']);
 			$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);
-			if (has_width_and_height($GUI->formvars)) {
+			if (has_width_and_height($GUI->formvars) OR is_ows_request($GUI->formvars)) {
 				if (width_or_height_empty($GUI->formvars)) {
 					$GUI->formvars = set_width_or_height_default($GUI->formvars);
 				}

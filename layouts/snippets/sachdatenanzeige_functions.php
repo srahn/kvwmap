@@ -1354,7 +1354,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		return scope.querySelectorAll('#\\3' + id1 + ' ' + id2 + '_' + attributename + '_' + k);
 	}
 
-	get_attribute_values = function(object, k, layer_id, attributenamesarray){
+	get_attribute_values = function(object, k, layer_id, attributenamesarray = []){
 		// object ist das Objekt welches diese Funktion ausgeloest hat
 		// k die Nummer des Datensatzes
 		// attributenamesarray ein Array der Attribute, deren Werte geholt werden sollen

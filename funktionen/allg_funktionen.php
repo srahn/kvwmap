@@ -1398,6 +1398,7 @@ function sonderzeichen_umwandeln($name) {
 	$name = str_replace('$', '', $name);
 	$name = str_replace('&', '_', $name);
 	$name = str_replace('#', '_', $name);
+	$name = str_replace('"', '_', $name);
 	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
 	return $name;
 }
@@ -1428,6 +1429,15 @@ function umlaute_javascript($text){
 	return $text;
 }
 
+function normalizeUtf8($text) {
+	$text = preg_replace('/u\x{0308}/u', 'ü', $text);
+	$text = preg_replace('/a\x{0308}/u', 'ä', $text);
+	$text = preg_replace('/o\x{0308}/u', 'ö', $text);
+	$text = preg_replace('/A\x{0308}/u', 'Ä', $text);
+	$text = preg_replace('/O\x{0308}/u', 'Ö', $text);
+
+return $text;
+}
 
 function stringrpos($haystack,$needle){   # findet das letzte Vorkommen eines Strings (gibs erst ab php 5)
    return strlen($haystack)- strpos( strrev($haystack) , strrev($needle) , NULL)- strlen($needle);
