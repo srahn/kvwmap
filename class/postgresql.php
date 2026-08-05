@@ -2678,7 +2678,7 @@ FROM
     if($n1 != '%%' AND $n1 != '')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
 		if($n2 != '%%' AND $n2 != '')$sql.=" AND lower(p.vorname) LIKE lower('".$n2."') ";
 		if($n3 != '%%')$sql.=" AND lower(geburtsname) LIKE lower('".$n3."') ";
-		if($n4 != '%%')$sql.=" AND geburtsdatum = '".$n4."' ";
+		if($n4 != '%%')$sql.=" AND p.geburtsdatum = '".$n4."' ";
 		if($n5 != '%%')$sql.=" AND lower(strasse) LIKE lower('".$n5."') ";
 		if($n6 != '%%')$sql.=" AND lower(replace(hausnummer, ' ', '')) LIKE lower(replace('".$n6."', ' ', '')) ";
 		if($n7 != '%%')$sql.=" AND lower(postleitzahlpostzustellung) LIKE lower('".$n7."') ";
