@@ -2859,7 +2859,7 @@ class Konvertierung extends PgObject {
 		// 	);
 		// }
 
-		if (!in_array($parts[4], array('GP', 'SO', 'IS', 'KS', 'EnS', 'ErS', 'KES', 'AS'))) {
+		if (!in_array($parts[4], array('AS', 'B', 'EnS', 'ErS', 'GP', 'IS', 'KS', 'KES', 'PK', 'PZ', 'SO', 'TEXT', 'UB', 'VB', 'VE', 'ZE'))) {
 			return array(
 				'success' => false,
 				'msg' => 'Der fünfte Bestandteil ' . $parts[4] . ' des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Dokumentenart. Es sind nur folgende Kürzel erlaubt: GP, SO, IS, KS, EnS, ErS, KES, AS.'

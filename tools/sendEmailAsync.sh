@@ -77,9 +77,7 @@ else
         -o message-content-type=text/plain\;charset=UTF-8 \
         -a $attachment \
         > $logfile 2>&1
-      echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=UTF-8-o message-content-type=text/plain;charset=UTF-8 -u \"${subject}\" -m \"${message}\" -a $attachment" >> $job_log_file
-
-
+      echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -o message-charset=UTF-8-o message-content-type=text/plain\;charset=UTF-8 -u \"${subject}\" -m \"${message}\" -a $attachment" >> $job_log_file
 
       if [[ -z $mail_copy_attachment ]]; then
           mv $attachment $mail_archiv_path
