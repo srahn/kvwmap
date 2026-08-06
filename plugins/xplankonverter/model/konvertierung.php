@@ -554,17 +554,19 @@ class Konvertierung extends PgObject {
 						function ($item) {
 							return str_replace('Ae', '%Änderung', (ctype_digit($item) ? (string)(int)$item : $item));
 						},
-						explode('_', trim(',', str_replace('Ae', '_Änderung', $parts[3])))
+						explode('_', trim(str_replace('Ae', '_Änderung', $parts[3]), ','))
 					);
-					$num_expr = '%' . implode('%', $num_items);
-					// Abfragen des zum Nummernausdruck passenden Originalplans
-					$plaene = XP_Plan::find_where_by_planart(
-						$this->gui,
-						$planart,
-						"(gemeinde[1]).ags = '" . pg_escape_string($ags) . "' AND nummer LIKE '" . pg_escape_string($num_expr) . "'"
-					);
-					if (count($plaene) > 0) {
-						$ersetzt_konvertierung_id = $plaene[0]->get('konvertierung_id');
+					if (count($num_items) > 0) {
+						$num_expr = '%' . implode('%', $num_items);
+						// Abfragen des zum Nummernausdruck passenden Originalplans
+						$plaene = XP_Plan::find_where_by_planart(
+							$this->gui,
+							$planart,
+							"(gemeinde[1]).ags = '" . pg_escape_string($ags) . "' AND trim(BOTH ',' FROM nummer) LIKE '" . pg_escape_string($num_expr) . "'"
+						);
+						if (count($plaene) > 0) {
+							$ersetzt_konvertierung_id = $plaene[0]->get('konvertierung_id');
+						}
 					}
 				}
 			} break;
