@@ -12,6 +12,8 @@ BEGIN;
     CONSTRAINT uploads_pk PRIMARY KEY (id)
   );
 
+  ALTER TABLE xplankonverter.import_jobs ADD COLUMN IF NOT EXISTS upload_file varchar NULL;
+
   ALTER TABLE xplankonverter.konvertierungen ADD COLUMN IF NOT EXISTS ersetzt_konvertierung_id integer;
 
   ALTER TABLE xplankonverter.konvertierungen_log
