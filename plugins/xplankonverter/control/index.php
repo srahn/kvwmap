@@ -412,15 +412,14 @@ function go_switch_xplankonverter($go) {
 			$GUI->error_options['output'] = true;
 			$GUI->formvars['suppress_ticket_and_notification'] = 'true';
 			$GUI->formvars['digital_mv'] = 'true';
-			$GUI->formvars['skip_geometrisch'] = 'true';
-			$GUI->formvars['skip_xplanvalidator'] = 'true';
+			$GUI->formvars['skip_geometrisch'] = 'false';
+			$GUI->formvars['skip_xplanvalidator'] = 'false';
 
 			// Abfragen der auszuführenden Jobs zum importierenden der Pläne
 			$pg_obj = new PgObject($GUI, 'xplankonverter', 'import_jobs');
 			$jobs = $pg_obj->find_where("
-				--started_at IS NULL AND
-				import_type = 'gml' AND
-				id IN (221)
+				started_at IS NULL AND
+				import_type = 'gml'
 			");
 			foreach ($jobs AS $job) {
 				echo "\n" . date('Y-m-d H:m:s', time()) . " Start Job " . $job->get_id() . " " . $job->get('upload_file');

@@ -50,4 +50,40 @@ BEGIN;
   DELETE
     ON xplan_gml.bp_plan FOR EACH ROW EXECUTE FUNCTION plandigitalisierung.update_plankennzeichnung();
 
+  CREATE OR REPLACE FUNCTION plandigitalisierung.update_import_job()
+  RETURNS trigger
+  LANGUAGE plpgsql
+  AS $function$
+  BEGIN
+    IF (NEW.status != OLD.status AND NEW.status = 'Importjob angelegt') THEN
+      INSERT INTO xplankonverter.import_jobs (import_service_id, import_type, upload_file)
+      SELECT
+        id AS import_service_id,
+        'gml' AS import_type,
+        'digitalisierte_plaene/' || stelle_id || '/' || dateiname || '.zip' AS upload_file
+      FROM
+        plandigitalisierung.uploads f
+      WHERE
+        dateiname = NEW.dateiname AND
+        NOT EXISTS (
+          SELECT 1
+          FROM 
+            xplankonverter.import_jobs i
+          WHERE
+            i.upload_file LIKE 'digitalisierte_plaene/%/' || NEW.dateiname || '.zip'
+        );
+    END IF;
+    RETURN NEW;
+  END;
+  $function$;
+
+  DROP TRIGGER IF EXISTS update_import_job ON plandigitalisierung.uploads;
+  CREATE TRIGGER update_import_job AFTER
+  UPDATE OF status
+  ON plandigitalisierung.uploads FOR EACH ROW
+  EXECUTE FUNCTION plandigitalisierung.update_import_job();
+
+  ALTER TABLE plandigitalisierung.uploads ALTER COLUMN status SET DEFAULT 'Plan hochgeladen'::character varying;
+  ALTER TYPE xplankonverter.enum_konvertierungsstatus ADD VALUE 'Originalplan zugeordnet' AFTER 'Plan hochgeladen';
+  ALTER TYPE xplankonverter.enum_konvertierungsstatus ADD VALUE 'Importjob angelegt' AFTER 'Originalplan zugeordnet';
 COMMIT;
