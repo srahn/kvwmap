@@ -128,7 +128,7 @@ class Layer extends PgObject {
 	function has_fk_constraint($constraint) {
 		$has_fk_constraint = (
 			$this->fk_attribute = $this->get_fk_attribute() AND
-			$this->fk_options = $this->fk_attribute->get_SubFormFK_options(json_decode($this->fk_attribute->get('options'))) AND
+			$this->fk_options = $this->fk_attribute->get_SubFormFK_options(json_decode($this->fk_attribute->get('options'), JSON_OBJECT_AS_ARRAY)) AND
 			array_key_exists('ref_constraint', $this->fk_options) AND
 			strpos($this->fk_options['ref_constraint'], $constraint) !== false
 		);
