@@ -1887,7 +1887,7 @@ $GUI->nachweis_columns = [
 			if($GUI->formvars['FlurstKennz'] != ''){		# über die Flurstückssuche gefundene Flurstücke -> Geometrie als Suchpolygon übernehmen
 				$GUI->formvars['suchpolygon'] = $GUI->pgdatabase->getGeomfromFlurstuecke($GUI->formvars['FlurstKennz'], $GUI->user->rolle->epsg_code);
 			}
-			if($GUI->formvars['abfrageart'] == 'poly' OR $GUI->formvars['FlurstKennz'] != ''){
+			if($GUI->formvars['FlurstKennz'] != ''){
 				$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['firstpoly'] = 'true';
