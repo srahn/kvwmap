@@ -1126,10 +1126,12 @@ class data_import_export {
 				$ret = $database->execSQL($sql,4, 0);
 				if (!$ret[0]) {
 					$rs = pg_fetch_row($ret[1]);
-					$sql = "
-						ALTER TABLE " . $schema . "." . $table . " ALTER the_geom TYPE geometry(" . $rs[0] . ", " . $epsg . ") USING ST_GeometryN(the_geom, 1)
-					";
-					$ret = $database->execSQL($sql,4, 0);
+					if ($rs[0] != '') {
+						$sql = "
+							ALTER TABLE " . $schema . "." . $table . " ALTER the_geom TYPE geometry(" . $rs[0] . ", " . $epsg . ") USING ST_GeometryN(the_geom, 1)
+						";
+						$ret = $database->execSQL($sql,4, 0);
+					}
 				}
 			}
 		}
