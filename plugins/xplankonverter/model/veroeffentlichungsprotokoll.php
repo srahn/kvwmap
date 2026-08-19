@@ -351,7 +351,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
 
     $body .= "\n\nIm Überwachungszeitraum gab es " . count($this->nachweise) . " Fehlermeldungen. Damit war der Plan in " . $verfuegbarkeit_p . "% der Überwachungszeit verfügbar.\n";
 
-    $body .= "\n\n" . "Dies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an GDI-Servive robert.kraetschmer@gdi-service.de oder die Koordinierungsstelle im Landkreis LUP geodatenmanagement@kreis-lup.de oder Ihren jeweilgen Ansprechpartner im zuständigen Landkreis.";
+    $body .= "\n\n" . "Dies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an GDI-Service robert.kraetschmer@gdi-service.de oder die Koordinierungsstelle im Landkreis LUP geodatenmanagement@kreis-lup.de oder Ihren jeweilgen Ansprechpartner im zuständigen Landkreis.";
     echo_log('class Veroeffentlichungsprotokoll func create_veroeffentlichungsprotokoll_mail ' . __LINE__ . ': Erstelle Mail mit Betreff: ' . $subject . ' und Body: ' . $body, 3);
     return array(
       'subject' => $subject,
