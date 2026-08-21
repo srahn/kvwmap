@@ -11,6 +11,8 @@ BEGIN;
     message varchar NULL,
     CONSTRAINT uploads_pk PRIMARY KEY (id)
   );
+  ALTER TABLE plandigitalisierung.uploads ADD CONSTRAINT uploads_konvertierung_new_fk FOREIGN KEY (konvertierung_id_new) REFERENCES xplankonverter.konvertierungen(id) ON UPDATE CASCADE ON DELETE SET NULL;
+  ALTER TABLE plandigitalisierung.uploads ADD CONSTRAINT uploads_konvertierung_origin_fk FOREIGN KEY (konvertierung_id_origin) REFERENCES xplankonverter.konvertierungen(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
   ALTER TABLE xplankonverter.konvertierungen ADD COLUMN IF NOT EXISTS ersetzt_konvertierung_id integer;
 
@@ -31,7 +33,7 @@ BEGIN;
 	 ('0.2','5.4',NULL,'Es muss ein generisches Attribut ALKIS_Stand geben und es darf nicht leer sein.','Es muss ein generisches Attribut ALKIS_Stand geben und es darf nicht leer sein.','MV');
 
   INSERT INTO xplankonverter.validierungen ("name",beschreibung,functionsname,msg_success,msg_warning,msg_error,msg_correcture,konformitaet_nummer,konformitaet_version_von,functionsargumente) VALUES
-	 ('Fassungsbezeichnung vorhanden und gültig','Generisches Attribut fassungsbezeichnzung muss vorhanden sein und darf nur bestimmte Werte haben.','generisches_stringattribute_has_value','Der Plan hat eine gültige Fassungsbezeichnung.',NULL,'Das generische Attribut fassungsbezeichnung fehlt oder hat einen ungültigen Wert.','Es muss eine der folgenden Fassungsbezeichnungbezeichnungen angegeben worden sein: Ursprungsplan, Änderung, Ergänzung, Neuaufstellung, Erweiterung','0.1','5.4','{"name=''fassungsbezeichnung''","wert ~* ''\m(Ursprungsplan|Neuaufstellung|([0-9]+\.)?\s*(Änderung|Ergänzung|Erweiterung))\M''"}'),
+	 ('Fassungsbezeichnung vorhanden und gültig','Generisches Attribut fassungsbezeichnzung muss vorhanden sein und darf nur bestimmte Werte haben.','generisches_stringattribute_has_value','Der Plan hat eine gültige Fassungsbezeichnung.',NULL,'Das generische Attribut fassungsbezeichnung fehlt oder hat einen ungültigen Wert.','Es muss eine der folgenden Fassungsbezeichnungbezeichnungen angegeben worden sein: Ursprungsplan, Änderung, Ergänzung, Neuaufstellung, Erweiterung','0.1','5.4','{"name=''fassungsbezeichnung''","wert ~* ''\\m(Ursprungsplan|Neuaufstellung|([0-9]+\\.)?\\s*(Änderung|Ergänzung|Erweiterung))\\M''"}'),
 	 ('ALKIS_Stand vorhanden','Generisches Attribut ALKIS_Stand muss belegt sein und darf nicht leer sein.','generisches_datumattribute_has_value','Der Plan hat einen ALKIS-Stand',NULL,'Das generische Attribut ALKIS_Stand fehlt oder ist leer.','Es muss ein generisches Attribut mit dem Namen ALKIS_Stand geben und darf nicht leer sein.','0.1','5.4', '{"name=''ALKIS_Stand''","wert IS NOT NULL"}');
 
   CREATE OR REPLACE FUNCTION xplankonverter.check_fassungsbezeichnung()

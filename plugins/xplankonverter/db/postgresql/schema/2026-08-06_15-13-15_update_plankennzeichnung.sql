@@ -54,6 +54,8 @@ BEGIN;
   RETURNS trigger
   LANGUAGE plpgsql
   AS $function$
+  DECLARE
+    new_import_job_id integer;
   BEGIN
     IF (NEW.status != OLD.status AND NEW.status = 'Importjob angelegt') THEN
       INSERT INTO xplankonverter.import_jobs (import_service_id, import_type, upload_file)
@@ -71,7 +73,11 @@ BEGIN;
             xplankonverter.import_jobs i
           WHERE
             i.upload_file LIKE 'digitalisierte_plaene/%/' || NEW.dateiname || '.zip'
-        );
+        )
+      RETURNING id INTO new_import_job_id;
+      IF FOUND THEN
+        RAISE NOTICE 'Import-Job id: % für Datei % angelegt', new_import_job_id, NEW.dateiname;
+      END IF;
     END IF;
     RETURN NEW;
   END;
