@@ -303,11 +303,15 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			}
 		}
 		else {
-			if (operator == 'IN') {
-				return Array.isArray(value) && value.includes(field_value);
-			}
-			else {
-				return eval("'" + field_value + "' " + operator + " '" + value + "'");
+			switch (operator) {
+				case 'IN' :
+					return Array.isArray(value) && value.includes(field_value);
+				break;
+				case 'NOT IN' :
+					return Array.isArray(value) && !value.includes(field_value);
+				break;
+				default :
+					return eval("'" + field_value + "' " + operator + " '" + value + "'");
 			}
 		}
 	}

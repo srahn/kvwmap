@@ -260,7 +260,7 @@ let visibilityRules = [];
 <?		}
 		} ?>
 
-const operators = ['=', '!=', '<', '>', 'IN'];
+const operators = ['=', '!=', '<', '>', 'IN', 'NOT IN'];
 
 function syncHiddenField(i) {
   const input = document.getElementById('visibilityRulesInput_' + i);
@@ -344,14 +344,18 @@ function renderRule(rule, i, parent=null, index=null){
 
   // Value
   const valueInput = document.createElement('input');
-  if(rule.operator==='IN'){
+  if (['IN', 'NOT IN'].includes(rule.operator)){
     valueInput.value = Array.isArray(rule.value)?rule.value.join('|'):'';
   } else {
     valueInput.value = rule.value || '';
   }
   valueInput.oninput = () => {
-    if(rule.operator==='IN') rule.value=valueInput.value.split('|').map(s=>s.trim());
-    else rule.value=valueInput.value;
+    if (['IN', 'NOT IN'].includes(rule.operator)){
+			rule.value = valueInput.value.split('|').map(s=>s.trim());
+		}
+    else {
+			rule.value = valueInput.value;
+		}
     syncHiddenField(i);
   };
 
