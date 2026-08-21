@@ -2423,7 +2423,11 @@ class ALKIS {
       } # ende Ausgabe Formular 20
       break;
     } # end of switch for Bestandsnachweis
-    $pdf->pagecount[] = $pdf->numPages;
+		try {
+			$pdf->pagecount[] = $pdf->numPages;
+		} catch (Error $e) {
+			$pdf->pagecount[] = $pdf->ezGetCurrentPageNumber();
+		}		
     return $pdf;
   }
 		
