@@ -186,12 +186,14 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				field = scope.querySelector('.attr_' + layer_id + '_' + rule.attribute);
 			}
 			else {
-				field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
-				if (!field) {
-					field = document.getElementById(layer_id + '_' + rule.attribute + '_' + '0_' + k);		// Radiobuttons haben noch einen Zähler zusätzlich
+				field = document.querySelector('#value_' + layer_id + '_' + rule.attribute + '_' + k + ' ' + '.attr_' + layer_id + '_' + rule.attribute);
+				// field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+			if (!field) {
+					field = document.querySelector('#value_' + layer_id + '_' + rule.attribute + '_' + k + ' ' + '.attr_' + layer_id + '_' + rule.attribute);
+					// field = document.getElementById(layer_id + '_' + rule.attribute + '_' + '0_' + k);		// Radiobuttons haben noch einen Zähler zusätzlich
 				}
 			}
-			return field_has_value(field, rule.operator, rule.value);
+			return field === null ? false : field_has_value(field, rule.operator, rule.value);
 		}
 		// Logische Gruppe (AND / OR)
 		if (rule.logic && Array.isArray(rule.rules)) {

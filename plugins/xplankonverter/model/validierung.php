@@ -120,7 +120,7 @@ class Validierung extends PgObject {
 			WHERE
 				" . implode(' AND ', json_decode($this->get('functionsargumente_json'))) . "
 		";
-		echo '<br>Test ob Generisches Attribut mit richtigem Wert vorkommt: ' . $sql;
+		// echo '<br>Test ob Generisches Attribut mit richtigem Wert vorkommt: ' . $sql;
 
 		$this->debug->write('generisches_stringattribute_has_value sql: ' . $sql, $this->show);
 		$result = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));

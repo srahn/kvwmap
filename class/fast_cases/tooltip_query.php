@@ -1427,12 +1427,18 @@ class rolle {
 		}
 	}
 
+	/**
+	 * Function query layers in this rolle,
+	 * if $LayerName != '' only this layer,
+	 * only the aktive layer if the optional parameter $only_active is true,
+	 * replace Constants and layer_params if $replace_params is true in the following attributes of found layers
+	 * 'name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data', 'metalink'
+	 */
 	function getLayer($LayerName, $only_active = false, $replace_params = true) {
 		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
 
-		# Abfragen der Layer in der Rolle
 		if (rolle::$language != 'german') {
 			$name_column = "
 			CASE
@@ -1473,8 +1479,8 @@ class rolle {
 		}
 
 		$sql = "
-			SELECT " .
-			$name_column . ",
+			SELECT
+				" . $name_column . ",
 				l.layer_id,
 				l.alias, datentyp, COALESCE(ul.group_id, gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, tileindex, l.schema, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
@@ -1524,17 +1530,18 @@ class rolle {
 			WHERE
 				ul.stelle_id = " . $this->stelle_id . " AND
 				r2ul.user_id = " . $this->user_id .
-			$layer_name_filter . 
-			$active_filter . "
+				$layer_name_filter . 
+				$active_filter . "
 			ORDER BY
 				l.drawingorder desc
 		";
-		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
+		#echo '<br>SQL zur Abfrage der Layer der Rolle: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql);
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['queryable'] = ($rs['queryable'] === 't');
+			$rs['querymap'] = ($rs['querymap'] === 't');
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
 					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
@@ -1543,7 +1550,7 @@ class rolle {
 				}
 			}
 			if ($replace_params) {
-				foreach (array('name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data') as $key) {
+				foreach (array('name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data', 'metalink') as $key) {
 					$rs[$key] = replace_params_rolle(
 						$rs[$key],
 						['duplicate_criterion' => $rs['duplicate_criterion']]
@@ -1631,6 +1638,7 @@ class pgdatabase {
 	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 	var $version = POSTGRESVERSION;
 	var $connection_id;
+	public array $prepared_params;
 
 	function __construct() {
 		global $debug;
@@ -1834,6 +1842,13 @@ class pgdatabase {
 
     return $ret;
   }
+
+	function get_prepared_sql($sql, $params) {
+		foreach ($params as $i => $param) {
+			$sql = str_replace('$' . ($i + 1), $param, $sql);
+		}
+		return $sql;
+	}
 
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;

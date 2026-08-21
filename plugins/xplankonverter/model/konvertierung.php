@@ -554,17 +554,19 @@ class Konvertierung extends PgObject {
 						function ($item) {
 							return str_replace('Ae', '%Änderung', (ctype_digit($item) ? (string)(int)$item : $item));
 						},
-						explode('_', trim(',', str_replace('Ae', '_Änderung', $parts[3])))
+						explode('_', trim(str_replace('Ae', '_Änderung', $parts[3]), ','))
 					);
-					$num_expr = '%' . implode('%', $num_items);
-					// Abfragen des zum Nummernausdruck passenden Originalplans
-					$plaene = XP_Plan::find_where_by_planart(
-						$this->gui,
-						$planart,
-						"(gemeinde[1]).ags = '" . pg_escape_string($ags) . "' AND nummer LIKE '" . pg_escape_string($num_expr) . "'"
-					);
-					if (count($plaene) > 0) {
-						$ersetzt_konvertierung_id = $plaene[0]->get('konvertierung_id');
+					if (count($num_items) > 0) {
+						$num_expr = '%' . implode('%', $num_items);
+						// Abfragen des zum Nummernausdruck passenden Originalplans
+						$plaene = XP_Plan::find_where_by_planart(
+							$this->gui,
+							$planart,
+							"(gemeinde[1]).ags = '" . pg_escape_string($ags) . "' AND trim(BOTH ',' FROM nummer) LIKE '" . pg_escape_string($num_expr) . "'"
+						);
+						if (count($plaene) > 0) {
+							$ersetzt_konvertierung_id = $plaene[0]->get('konvertierung_id');
+						}
 					}
 				}
 			} break;
@@ -903,8 +905,10 @@ class Konvertierung extends PgObject {
 	}
 
 	function create_themenauswahl($xplan_layers) {
+		// echo "\ncreate_themenauswahl with " . count($xplan_layers) . " xplan_layers von Plan " . $this->plan->get('gml_id') . " für Konvertierung id: " . $this->get($this->identifier);
 		include_once(CLASSPATH . 'RolleSavedLayers.php');
 		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
+		// echo "\ngml_id nach get_layers_with_content: " . $this->plan->get('gml_id');
 		if (! $result['success']) {
 			return $result;
 		}
@@ -913,20 +917,67 @@ class Konvertierung extends PgObject {
 		$layers_with_content[] = array('id' => $this->plan->get_bereich_layer_id());
 		$layerset = array('list' => array());
 		foreach ($layers_with_content AS $layer) {
+			// echo "\nLayer with content: " . $layer['id'] . ' ' . $layer['name'] . ' ' . $layer['alias'];
 			$layerset['list'][] = array(
 				'layer_id' => $layer['id'],
 				'aktivstatus' => 1,
 				'querystatus' => 0
 			);
 		}
-		if ($rolle_saved_layer = RolleSavedLayers::find_by_name($this->gui, $this->plan->get_anzeige_name())) {
+		if ($rolle_saved_layer = RolleSavedLayers::find_by_name($this->gui, $this->plan->get('anzeigename'))) {
 			$rolle_saved_layer->delete(); // Drop LayerComment if already exists and overwrite in next step.
 		}
-		$result = $this->gui->user->rolle->insertLayerComment($layerset, $this->plan->get_anzeige_name() . ' (' . $this->plan->get('gml_id') . ')', $this->gui->Stelle->id, NULL);
-		if ($result['success']) {
-			$this->update_attr(array('layer_selection_id = ' . $result['id']), true);
-		}
+		$result = $this->gui->user->rolle->insertLayerComment($layerset, $this->plan->get('anzeigename') . ' (' . $this->plan->get('gml_id') . ')', $this->get('stelle_id'), NULL);
+		$this->update_attr(array('layer_selection_id = ' . $result['id']), true);
 		return $result;
+	}
+
+	function create_layer_collection($xplan_layers) {
+		// echo "\ncreate_layer_collection " . $this->plan->get('anzeigename') . " from " . count($xplan_layers) . " xplan_layers für Plan " . $this->plan->get('gml_id') . " Nutzer in Stelle " . $this->get('stelle_id');
+		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
+		if (! $result['success']) {
+			return $result;
+		}
+		$layers_with_content = $result['layers_with_content'];
+		if (count($layers_with_content) > 0) {
+			// echo "\nCreate collection with " . count($layers_with_content) . " collection_layers with content from Plan " . $this->plan->get('gml_id');
+			include_once(CLASSPATH . 'Collection.php');
+			$result = Collection::generate(
+				$this->gui,
+				$this->plan->get('anzeigename'),
+				59,
+				"p.gml_id = '" . $this->plan->get('gml_id') . "'::uuid",
+				implode(',', $this->plan->extent)
+			);
+			if (! $result['success']) {
+				return $result;
+			}
+			$collection = $result['collection'];
+			$result = $collection->add_to_rollen($this->get('stelle_id'));
+			if (! $result['success']) {
+				return $result;
+			}
+
+			include_once(CLASSPATH . 'CollectionLayer.php');
+			foreach ($layers_with_content AS $layer) {
+				// echo "\nLayer with content: " . $layer['id'] . ' ' . $layer['name'] . ' ' . $layer['alias'];
+				$result = CollectionLayer::generate($this->gui, $collection->get_id(), $layer['id']);
+				if (! $result['success']) {
+					return $result;
+				}
+				$collection_layer = $result['collection_layer'];
+				$collection_layer->add_to_rollen($this->get('stelle_id'));
+				if (! $result['success']) {
+					return $result;
+				}
+			}
+			$msg = 'Plan ' . $this->plan->get_anzeige_name() . ' hat keine Layer mit Content.';
+		}
+		$msg = 'Collection ' . $collection->get_id() . ' und ' . count($layers_with_content) . ' Collection Layer angelegt und Stelle ' . $this->get('stelle_id') . ' zugeordnet';
+		return array(
+			'success' => true,
+			'msg' => $msg
+		);
 	}
 
 	/**
@@ -1318,7 +1369,17 @@ class Konvertierung extends PgObject {
 			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get($this->identifier), Konvertierung::$write_debug);
 			include_once(PLUGINS . 'xplankonverter/model/XP_Plan.php');
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
-			$plan = $plan->find_where('konvertierung_id = ' . $this->get($this->identifier), NULL, '*, to_json(externereferenz) AS externereferenz_json');
+			$plan = $plan->find_where(
+				'p.konvertierung_id = ' . $this->get($this->identifier),
+				NULL,
+				"
+					p.*,
+					to_json(p.externereferenz) AS externereferenz_json,
+					" . $plan->get_anzeige_name_function() . " AS anzeigename
+				",
+				null,
+				$plan->schema . "." . $plan->tableName . " AS p"
+			);
 			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
 			if (count($plan) > 0) {
 				$this->plan = $plan[0];
@@ -3728,10 +3789,11 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 		if ($this->get_id() == '') {
 			// echo "\nKonvertierung id ist leer.";
 			$upload->set('konvertierung_id_new', '');
-			$upload->set('konvertierung_id_origin', '');
+			// $upload->set('konvertierung_id_origin', '');
 		}
 		else {
-			if ($upload->get('konvertierung_id_new') != $this->get_id()) {
+			if ($upload->get('konvertierung_id_new') === null or $upload->get('konvertierung_id_new') != $this->get_id()) {
+				// echo "\nSetze konvertierung_id_new auf " . $this->get_id();
 				$upload->set('konvertierung_id_new', $this->get_id());
 			}
 			if ($upload->get('konvertierung_id_origin') == '') {
@@ -3764,7 +3826,6 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 					}
 				}
 			}
-
 		}
 
 		if ($upload) {
@@ -3777,6 +3838,14 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 			if (!$result['success']) {
 				$result['msg'] = 'Fehler beim aktualisierene der Tabelle uploads. ' . $result['msg'];
 				return $result;
+			}
+			if ($upload->get('konvertierung_id_origin') !== null) {
+				$results = $pk_obj->find_where("konvertierung_id_origin = " . $upload->get('konvertierung_id_origin'));
+				if (count($results) > 0) {
+					$plankennzeichnung = $results[0];
+					$plankennzeichnung->set('konvertierung_id_new', $this->get('id'));
+					$plankennzeichnung->update();
+				}
 			}
 		}
 

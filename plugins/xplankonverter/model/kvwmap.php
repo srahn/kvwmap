@@ -579,7 +579,7 @@
 			if (!empty($item['referenzurl'])) {
 				$referenzfile = pathinfo($item['referenzurl'], PATHINFO_BASENAME);
 				$srcfile = $GUI->konvertierung->get_file_path('uploaded_xplan_gml') . $referenzfile;
-				$dstfile = XPLANKONVERTER_FILE_PATH . 'plaene/' . $referenzfile;
+				$dstfile = SHAPEPATH . 'xplankonverter/plaene/' . $referenzfile;
 				if (!file_exists($srcfile)) {
 					send_error('Die in der externen Referenz bezeichnete Datei ' . $referenzfile . ' befand sich nicht in der hochgeladenen ZIP-Datei.', 'Planerzeugung abgebrochen');
 					exit;
@@ -898,26 +898,37 @@
 	};
 
 	$GUI->xplankonverter_konvertierung = function($konvertierung_id, $output) use ($GUI) {
+		global $admin_stellen;
 		$GUI->sanitize([
 			'konvertierung_id' => 'int'
 		]);
 		$GUI->title = str_replace('an', 'äne', $GUI->title);
 		$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
+
 		if ($konvertierung_id == '') {
-			$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-			$GUI->main = 'Hinweis.php';
-			$GUI->data = array(
-				'success' => false,
-				'msg' => $GUI->Hinweis
-			);
 			if ($output) {
-				$GUI->output();
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+				$GUI->main = 'Hinweis.php';
+				$GUI->data = array(
+					'success' => false,
+					'msg' => $GUI->Hinweis
+				);
+				if ($output) {
+					$GUI->output();
+				}
+				return true;
 			}
-			return true;
+			else {
+				return array(
+					'success' => false,
+					'msg' => 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.'
+				);
+			}
 		}
-		else {
-			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
-			if ($GUI->konvertierung->data === false) {
+
+		$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+		if ($GUI->konvertierung->data === false) {
+			if ($output) {
 				$GUI->Fehlermeldung = "Die Konvertierung mit der ID={$konvertierung_id} wurde nicht gefunden.";
 				$GUI->data = array(
 					'success' => false,
@@ -928,49 +939,111 @@
 				}
 				return true;
 			}
-			if ($GUI->konvertierung->plan === false) {
+			else {
+				return array(
+					'success' => false,
+					'msg' => "Die Konvertierung mit der ID={$konvertierung_id} wurde nicht gefunden."
+				);
+			}
+		}
+
+		if ($GUI->konvertierung->plan === false) {
+			if ($output) {
 				$GUI->Fehlermeldung = "Zur Konvertierung mit der ID={$konvertierung_id} wurde keinen Plan der Planart {$GUI->konvertierung->get('planart')} gefunden!";
 				$GUI->data = array(
 					'success' => false,
 					'msg' => $GUI->Fehlermeldung
 				);
-				if ($output) {
-					$GUI->output();
-				}
+				$GUI->output();
 				return true;
 			}
-			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
-				$GUI->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+			else {
+				return array(
+					'success' => false,
+					'msg' => "Zur Konvertierung mit der ID={$konvertierung_id} wurde keinen Plan der Planart {$GUI->konvertierung->get('planart')} gefunden!"
+				);
+			}
+		}
+
+		if (!in_array($GUI->Stelle->id, $admin_stellen) AND !isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+			$GUI->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
 					Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
 					Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
 					Melden Sie sich mit einem anderen Benutzer an.";
+			if ($output) {
 				$GUI->data = array(
 					'success' => false,
 					'msg' => $GUI->Fehlermeldung
 				);
-				if ($output) {
-					$GUI->output();
-				}
+				$GUI->output();
 				return true;
 			}
 			else {
-				try {
-					$GUI->konvertierung->reset_mapping();
-					$GUI->konvertierung->mapping();
-					#$GUI->konvertierung->set_historie();
-					$GUI->konvertierung->set_status(
-						($GUI->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
-					);
-					$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);
-					$GUI->konvertierung->create_themenauswahl($GUI->xplan_layers);
+				return array(
+					'success' => false,
+					'msg' => $GUI->Fehlermeldung
+				);
+			}
+		}
+
+		try {
+			$GUI->konvertierung->reset_mapping();
+			$GUI->konvertierung->mapping();
+			#$GUI->konvertierung->set_historie();
+			$GUI->konvertierung->set_status(
+				($GUI->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
+			);
+			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);
+			echo "\nplan in konvertierung: " . print_r($GUI->konvertierung->plan->data, true);
+			$result = $GUI->konvertierung->create_themenauswahl($GUI->xplan_layers);
+			echo "\ngml_id nach create_themenauswahl: " . $GUI->konvertierung->plan->get('gml_id');
+			if (!$result['success']) {
+				if ($output) {
 					# Validierungsergebnisse anzeigen.
 					$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
-				}
-				catch (Exception $e) {
-					send_error($e->getMessage());
+					$GUI->Fehlermeldung = $result['msg'];
+					$GUI->data = array(
+						'success' => false,
+						'msg' => $GUI->Fehlermeldung
+					);
+					$GUI->output();
 					return false;
 				}
+				return $result;
 			}
+			echo "\ngml_id vor create_layer_colletion: " . $GUI->konvertierung->plan->get('gml_id');
+			$result = $GUI->konvertierung->create_layer_collection($GUI->xplan_layers);
+			if (!$result['success']) {
+				if ($output) {
+					# Validierungsergebnisse anzeigen.
+					$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+					$GUI->Fehlermeldung = $result['msg'];
+					$GUI->data = array(
+						'success' => false,
+						'msg' => $GUI->Fehlermeldung
+					);
+					$GUI->output();
+					return false;
+				}
+				return $result;
+			}
+		}
+		catch (Exception $e) {
+			if ($output) {
+				# Validierungsergebnisse anzeigen.
+				$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+				$GUI->Fehlermeldung = $e->getMessage();
+				$GUI->data = array(
+					'success' => false,
+					'msg' => $GUI->Fehlermeldung
+				);
+				$GUI->output();
+				return false;
+			}
+			return array(
+				'success' => false,
+				$GUI->Fehlermeldung
+			);
 		}
 		if ($GUI->formvars['format'] === 'json_result') {
 			header('Content-Type: application/json');
@@ -991,6 +1064,12 @@
 		else {
 			if ($output) {
 				$GUI->output();
+			}
+			else {
+				return array(
+					'success' => true,
+					'msg' => $GUI->konvertierung->config['akkusativ'] . ' erfolgreich in Ziel-Version konvertiert.'
+				);
 			}
 		}
 		return true;

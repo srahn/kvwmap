@@ -161,7 +161,7 @@ BEGIN;
   LANGUAGE sql
   AS $function$
     SELECT
-      EXTRACT(epoch FROM sum(gap_end - gap_start)) / 3600
+      COALESCE(EXTRACT(epoch FROM sum(gap_end - gap_start)), 0) / 3600
     FROM
       xplankonverter.veroeffentlichungsnachweis_luecken
     WHERE
