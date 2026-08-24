@@ -519,6 +519,7 @@ $legendheight = $this->map->height + 20;
 				<tr>
 					<td valign="top">
 						<div id="legenddiv" onclick="slide_legend_in(event)" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
+						<div id="legenddiv" onclick="slide_legend_in(event)"  class="slidinglegend_slideout">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left">
@@ -530,21 +531,13 @@ $legendheight = $this->map->height + 20;
 								<tr align="left">
 									<td>
 										<div id="legend_layer" style="display: inline-block">
-											<div id="legendcontrol">
-											<? if ($this->user->rolle->singlequery < 2) { ?>
-												<a href="index.php?go=reset_querys">
-													<div class="button_background" style="width: 26px; height: 26px">
-														<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
-													</div>
+										<div id="legendcontrol">
+											<div title="<?php echo $strLoadNew; ?>" style="flex-grow: 3; text-align: -webkit-center;">
+												<a href="javascript:void(0)" name="neuladen_button" onclick="neuLaden();">
+													<div class="button"><i class="fa fa-refresh" style="font-size: 28px; margin: 5px; color: #5c88a8;" aria-hidden="true"></i></div>
 												</a>
-											<? } ?>
-												<a href="index.php?go=reset_layers" style="padding: 0 0 0 6">
-													<div class="button_background" style="width: 26px; height: 26px">
-														<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
-													</div>
-												</a>
-												<input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin-left: 30px">
-											</div>
+											</div>	
+										</div>
 											<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 												<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 												<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
