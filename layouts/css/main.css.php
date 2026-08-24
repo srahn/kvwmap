@@ -1603,6 +1603,7 @@ a.menuered:hover {
 }
 
 #legend_layer{
+	width: 100%;
 	flex: 1; 
 	display: flex; 
 	flex-direction: column;
@@ -1711,8 +1712,8 @@ a.menuered:hover {
 .slidinglegend_slideout {
 	width: <?php echo $this->user->rolle->legendwidth; ?>px;
 	cursor: pointer;
-	position:absolute;
-	transform: translate3d(-<? echo ($size['legend']['hide_width'] + 2); ?>px,0px,0px);
+	position:absolute !important;
+	transform: translate3d(-<? echo ($size['legend']['hide_width'] - 12); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
 
@@ -1724,7 +1725,7 @@ a.menuered:hover {
 
 .slidinglegend_slidein {
 	width: <?php echo $this->user->rolle->legendwidth; ?>px;
-	position: absolute;
+	position: absolute !important;
 	transform: translate3d(-<?php echo ($this->user->rolle->legendwidth - $size['legend']['hide_width']); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
