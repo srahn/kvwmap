@@ -978,9 +978,11 @@ hide_versions = function(flst){
 													<?
 														if(!empty($generische_auszuege)){
 															foreach($generische_auszuege as $layer_id => $layouts){
-																foreach($layouts as $layout){ ?>
-																	<option onchange="window.open('index.php?go=generischer_Flurstuecksauszug&selected_layer_id=<? echo $layer_id; ?>&formnummer=<? echo $layout['id']; ?>&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')"><? echo $layout['name']; ?></option>
-													<?		}
+																foreach($layouts as $layout){
+																	if (stripos($layout['name'], 'eigent') === false OR isset($eigentuemer_allowed[$flst->FlurstKennz])) { ?>
+																		<option onchange="window.open('index.php?go=generischer_Flurstuecksauszug&selected_layer_id=<? echo $layer_id; ?>&formnummer=<? echo $layout['id']; ?>&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')"><? echo $layout['name']; ?></option>
+													<?			}
+																}
 															}
 														}
 													?>
