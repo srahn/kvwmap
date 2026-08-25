@@ -1049,6 +1049,10 @@ $GUI->nachweis_columns = [
 					select{
 						height: 1.5em;
 					}
+					textarea{
+						width: 250px;
+						height: 60px;
+					}
 					a{
 						border: medium none;
 						color: firebrick;
@@ -1126,6 +1130,9 @@ $GUI->nachweis_columns = [
 						border: 1px solid #aaa;
 						color: black;
 					}
+					.bigger {
+						font-size: 1.5em;
+					}
 					#filterform{
 						padding: 0px;
 						background-color: white;
@@ -1186,6 +1193,7 @@ $GUI->nachweis_columns = [
 			columns['geprueft'] = 'geprüft';
 			columns['format'] = 'Format';
 			columns['dokument_path'] = 'Dokument';
+			columns['bemerkungen'] = 'Bemerkungen';
 			columns['bearbeitungshinweis'] = 'Bearbeitungshinweis';
 			
 			var filters = new Array();
@@ -1201,7 +1209,7 @@ $GUI->nachweis_columns = [
 				var tr = _tr_.cloneNode(false);
 				for(var key in columns){		// Ueberschriften
 					var th = _th_.cloneNode(false);
-					if(key != 'bearbeitungshinweis'){
+					if (!['bearbeitungshinweis', 'bemerkungen'].includes(key)){
 						a = document.createElement('a');
 						a.href = 'javascript:changeOrder(\''+key+'\');';
 						if (order_columns && order_columns.includes(key)) {
@@ -1240,6 +1248,15 @@ $GUI->nachweis_columns = [
 								a.onmouseout = function(){hidePreview()};
 								a.innerHTML = filename;
 								cellcontent = a;
+							}
+							else if(key == 'bemerkungen') {
+								cellcontent = document.createTextNode('');
+								if (value != '') {
+									options = document.createElement('div');
+									options.className='bigger';
+									options.setAttribute('onmouseenter', \"showTextbox(this.parentNode, '\"+key+\"', '\"+value+\"')\");
+									options.innerHTML= '\u26A0';	// 2630
+								}
 							}
 							else if(key == 'bearbeitungshinweis' && value != null) {
 								a = document.createElement('a');
@@ -1352,6 +1369,14 @@ $GUI->nachweis_columns = [
 					}
 					return 0;
 				}
+			}
+
+			function showTextbox(td, key, value){
+				hideFilterForm();			
+				div = document.createElement('div');
+				div.id = 'filterform';
+				div.innerHTML = '<div class=\"headline\"><div>Bemerkungen:</div><div><a class=\"close\" onclick=\"hideFilterForm();\">\u274C</a></div></div><div class=\"content\"><div><textarea>'+ value +'</textarea></div></div>';
+				td.appendChild(div);
 			}
 								
 			function showFilterForm(td, key, value){
