@@ -117,24 +117,6 @@ hide_versions = function(flst){
 			}
 		}
 		$flst_array = array();
-
-		# abhängige Sichtbarkeit Eigentümer
-		$j = $this->qlayerset[$i]['attributes']['indizes']['eigentuemer'];
-    if ($this->qlayerset[$i]['attributes']['visibility_rules'][$j]) {
-			$rules = json_decode($this->qlayerset[$i]['attributes']['visibility_rules'][$j], true);
-			$vcheck_attribute = $rules['rules'][0]['attribute'];
-			$vcheck_value = $rules['rules'][0]['value'];
-			$j = $this->qlayerset[$i]['attributes']['indizes'][$vcheck_attribute];
-      $parts = get_select_parts(extract_select_clause($this->qlayerset[$i]['pfad']));
-			foreach ($parts as $part) {
-				if (strpos($part, $vcheck_attribute) !== false) {
-					$eigentuemer_vcheck = [
-						'attribute' => $vcheck_attribute,
-						'expression' => $part
-					];
-				}
-			}
-		}
 		
     for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
       if($this->qlayerset[$i]['attributes']['privileg'][$this->qlayerset[$i]['attributes']['name'][$j]] != ''){
@@ -157,18 +139,12 @@ hide_versions = function(flst){
     for ($a=0;$a<$anzObj;$a++){
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
-      $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter'], $this->qlayerset[$i]['oid'], $eigentuemer_vcheck);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
+      $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter'], $this->qlayerset[$i]['oid']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 
 			if (isset($eigentuemer_allowed[$flurstkennz_a])) {
 				$flst->Grundbuecher=$flst->getGrundbuecher();
 				$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
-
-				$flst->eigentuemer_visible = true;
-				if ($vcheck_attribute) {
-					$flst->eigentuemer_visible = $flst->eigentuemer_vcheck_value == $vcheck_value;
-				}
-
-				if ($privileg_['bestandsnr'] and $privileg_['eigentuemer'] and $flst->eigentuemer_visible) {
+				if ($privileg_['bestandsnr'] and $privileg_['eigentuemer']) {
 					for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
 						$flst->Buchungen[$b]['eigentuemerliste'] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 					}
@@ -829,7 +805,7 @@ hide_versions = function(flst){
 									</td>
 								</tr>
 								<? } ?>
-								<? if($privileg_['bestandsnr'] AND $flst->eigentuemer_visible){
+								<? if($privileg_['bestandsnr']){
 										$currenttime=date('Y-m-d H:i:s',time());
 										$this->user->rolle->setConsumeALB($currenttime, 'Flurstücksanzeige', array($flst->FlurstKennz), 0, 'NULL');		# das Flurstückskennzeichen wird geloggt
 								?>
