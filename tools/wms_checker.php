@@ -193,10 +193,9 @@ while ($line = pg_fetch_assoc($ret[1])){
 	else {
 		$color = '#36908a';
 	}
-	echo '<div style="border: 1px solid black;width: 100%;padding: 10px;background-color: ' . $color . '">';
-	echo '<a href="' . $url . '"target="_blank">' . $line["name"] . "</a><br/>";
 	if (!$status[0]) {
-		echo 'nicht ok<br>' . $status[1] . $status[2];
+		$show_layer = true;
+		$output = 'nicht ok<br>' . $status[1] . $status[2];
 		$query = "
 			UPDATE
 				kvwmap.layer
@@ -207,7 +206,8 @@ while ($line = pg_fetch_assoc($ret[1])){
 		";
 	}
 	else {
-		echo 'ok<br>';
+		$show_layer = $_REQUEST['only_errors'] != 1;
+		$output = 'ok<br>';
 		$query = "
 			UPDATE
 				kvwmap.layer
@@ -217,7 +217,12 @@ while ($line = pg_fetch_assoc($ret[1])){
 				layer_id = " . $line["layer_id"] . "
 		";
 	}
-	$result2 = $userDb->execSQL($query, 4, 0);
-	echo '</div>';
+	$result2 = $userDb->execSQL($query, 4, 0);	
+	if ($show_layer) {
+		echo '<div style="border: 1px solid black;width: 100%;padding: 10px;background-color: ' . $color . '">';
+		echo '<a href="' . $url . '"target="_blank">' . $line["name"] . "</a><br/>";
+		echo $output;
+		echo '</div>';
+	}
 }
 ?>
