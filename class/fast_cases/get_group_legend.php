@@ -3296,6 +3296,8 @@ class db_mapObj {
 				($id != NULL ? " AND l.id = " . $id : '') .
 				($typ != NULL ? " AND l.typ = '" . $typ . "'" : '') . 
 				($autodelete != NULL ? " AND l.autodelete = '" . $autodelete . "'" : '') . "
+			ORDER BY
+				id DESC
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
 		#echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;

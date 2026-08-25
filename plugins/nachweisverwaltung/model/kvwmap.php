@@ -9,6 +9,10 @@ $GUI->nachweis_columns = [
 		'alias' => 'Gemkg',
 		'width' => 45
 	],
+	'gemarkungsname' => [
+		'alias' => 'Gemkgname',
+		'width' => 80
+	],
 	'flur' => [
 		'alias' => 'Flur',
 		'width' => 25
