@@ -9,7 +9,6 @@ class RolleSavedLayers extends PgObject {
 
 	public static	function find_by_name($gui, $name) {
 		$rolle_saved_layers = new RolleSavedLayers($gui);
-    $rolle_saved_layers->show = true;
 		$result = $rolle_saved_layers->find_by('name', '%' . $name . '%', 'LIKE');
     return ($result->data ? $result : false);
 	}

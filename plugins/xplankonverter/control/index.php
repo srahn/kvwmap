@@ -400,8 +400,7 @@ function go_switch_xplankonverter($go) {
 		 * und durchläuft den kompletten Import und Konvertierungsprozesse pro Plan
 		 */
 		case 'xplankonverter_batch_import' : {
-			// cd /var/www/apps/konverter
-			// php -f index.php login_name=pkorduan passwort='********' Stelle_ID=1 go=xplankonverter_batch_import > /var/www/logs/kvwmap/xplankonverter_import_plaene.log
+			// cd /var/www/apps/konverter; php -f index.php login_name=pkorduan passwort='********' Stelle_ID=1 go=xplankonverter_batch_import >> /var/www/logs/kvwmap/xplankonverter_import_plaene.log 2>&1
 			// cat /var/www/logs/kvwmap/xplankonverter_import_plaene.log
 			if (!in_array($GUI->Stelle->id, $admin_stellen)) {
 				send_error('Der Batch-Import darf nur innerhalb einer Admin-Stelle ausgeführt werden. Dies ist Stelle_id: ' . $GUI->Stelle->id);
@@ -412,15 +411,14 @@ function go_switch_xplankonverter($go) {
 			$GUI->error_options['output'] = true;
 			$GUI->formvars['suppress_ticket_and_notification'] = 'true';
 			$GUI->formvars['digital_mv'] = 'true';
-			$GUI->formvars['skip_geometrisch'] = 'true';
 			$GUI->formvars['skip_xplanvalidator'] = 'true';
+			$GUI->formvars['skip_geometrisch'] = 'true';
 
 			// Abfragen der auszuführenden Jobs zum importierenden der Pläne
 			$pg_obj = new PgObject($GUI, 'xplankonverter', 'import_jobs');
 			$jobs = $pg_obj->find_where("
-				--started_at IS NULL AND
-				import_type = 'gml' AND
-				id IN (221)
+				started_at IS NULL AND
+				import_type = 'gml'
 			");
 			foreach ($jobs AS $job) {
 				echo "\n" . date('Y-m-d H:m:s', time()) . " Start Job " . $job->get_id() . " " . $job->get('upload_file');
@@ -475,7 +473,7 @@ function go_switch_xplankonverter($go) {
 				$GUI->konvertierung->update_plankennzeichnung_and_uploads_table('Plan importiert', 'Plan erfolgreich importiert.');
 
 				$tmp_gml_id = $GUI->konvertierung->get_gml_id_from_gmlas_tmp('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class);
-				echo "\nDie gml_id des eingelesenen Planes ist: " . $tmp_gml_id;
+				// echo "\nDie gml_id des eingelesenen Planes ist: " . $tmp_gml_id;
 				if ($GUI->konvertierung->plan_exists($tmp_gml_id)) {
 					echo "\nEin Plan mit gml_id: " . $tmp_gml_id . ' existiert schon im xplan_gml Schema.';
 					$GUI->konvertierung->set('error_id', 2);
@@ -538,12 +536,16 @@ function go_switch_xplankonverter($go) {
 				// 4. xplankonverter_konvertierung
 				echo "\n4. konvertierung";
 				$result = $GUI->xplankonverter_konvertierung($GUI->konvertierung->get_id(), false);
+				if (! $result['success']) {
+					send_error('Fehler bei der Konvertierung des angelegten Plans. ' . $result['msg'], 'Konvertierung abgebrochen');
+					exit;
+				}
 				$GUI->konvertierung->update_plankennzeichnung_and_uploads_table('Konvertierung abgeschlossen', 'Angelegter Plan konvertiert.');
 
 				// 5. gml_generieren
 				echo "\n5. gml_generieren";
-				include(PLUGINS . 'xplankonverter/model/build_gml.php');
-				include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
+				include_once(PLUGINS . 'xplankonverter/model/build_gml.php');
+				include_once(PLUGINS . 'xplankonverter/model/TypeInfo.php');
 				$result = $GUI->xplankonverter_gml_generieren($GUI->konvertierung);
 				$GUI->konvertierung->update_plankennzeichnung_and_uploads_table('GML-Erstellung abgeschlossen', 'GML vom angelegten Plan erzeugt.');
 
@@ -2427,12 +2429,12 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_test' : {
-			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
-			$plan_file = $GUI->konvertierung->get_file_path($GUI->formvars['xplan_gml_path'] == 'reindexed_xplan_gml' ? 'reindexed_xplan_gml' : 'uploaded_xplan_gml') . $GUI->konvertierung->get_plan_file_name();
-			echo '<br>plan_file: ' . $plan_file;
-			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $plan_file, 'xplan_gmlas_tmp_' . $GUI->user->id);
-			$import_result = $gml_extractor->import_gml_to_db();
-			echo 'Fertig';
+			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers('BP-Plan');
+			$result = $GUI->konvertierung->create_layer_collection($GUI->xplan_layers);
+			if (! $result['success']) {
+				send_error('Fehler bei der Konvertierung des angelegten Plans. ' . $result['msg'], 'Konvertierung abgebrochen');
+				exit;
+			}
 		} break;
 
 		case 'xplankonverter_create_plaene' : {

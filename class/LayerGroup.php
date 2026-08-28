@@ -142,5 +142,23 @@ class LayerGroup extends PgObject {
 		}
 		return $layerdef;
 	}
+
+	public static function merge_groups(...$arrays) {
+		$result = [];
+		foreach ($arrays as $array) {
+			foreach ($array as $id => $data) {
+				if (!isset($result[$id])) {
+					$result[$id] = $data;
+					continue;
+				}
+
+				$result[$id]['untergruppen'] = array_merge(
+					$result[$id]['untergruppen'] ?? [],
+					$data['untergruppen'] ?? []
+				);
+			}
+		}
+		return $result;
+	}
 }
 ?>

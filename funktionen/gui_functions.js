@@ -1132,7 +1132,7 @@ function getlegend(groupid, status) {
 		groupimg = document.getElementById('groupimg_' + groupid);
 		layergroupdiv.style.display = 'none';
 		groupimg.src = 'graphics/plus.gif';
-		ahah('index.php', 'go=close_group_legend&' + group.name + '=' + group.value, '', '');
+		ahah('index.php', 'go=close_group_legend&' + group.name + '=' + group.value + '&group=' + groupid, '', '');
 	}	
 }
 
@@ -1266,7 +1266,7 @@ function save_legend_role_parameters(){
 	formdata = new FormData();
 }
 
-function neuLaden(){
+function neuLaden() {
 	startwaiting(true);
 	clearLegendRequests();
 	if (currentform.neuladen) {
@@ -1364,7 +1364,7 @@ function selectgroupthema(group, instantreload){
 	}
 }
 
-function selectgroupthemaAll(group_checkbox, instantreload){
+function selectgroupthemaAll(group_checkbox, instantreload) {
 	add_to_formdata(group_checkbox);
 	if (instantreload) {
 		neuLaden();

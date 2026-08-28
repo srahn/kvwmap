@@ -1408,6 +1408,7 @@ class pgdatabase {
 	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 	var $version = POSTGRESVERSION;
 	var $connection_id;
+	public array $prepared_params;
 
 	function __construct() {
 		global $debug;
@@ -1707,6 +1708,13 @@ class pgdatabase {
 		}
 		$this->success = $ret['success'];
 		return $ret;
+	}
+
+	function get_prepared_sql($sql, $params) {
+		foreach ($params as $i => $param) {
+			$sql = str_replace('$' . ($i + 1), $param, $sql);
+		}
+		return $sql;
 	}
 
 }
