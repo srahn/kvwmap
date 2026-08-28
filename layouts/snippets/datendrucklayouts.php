@@ -785,14 +785,19 @@
 												</label>
 											</td>
 											<td>
-												<input
-													id="border_<? echo $this->ddl->attributes['the_geom']; ?>"
-													type="checkbox"
-													name="border_<? echo $this->ddl->attributes['the_geom']; ?>"
-													value="1"
-													style="margin-left: 0px;"<?
-													echo ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['border'] == '1' ? ' checked="true"' : ''); ?>
-												>
+												<? echo output_select(
+													'border_' . $this->ddl->attributes['the_geom'],
+													[
+														['value' => 0, 'output' => 'nein'],
+														['value' => 1, 'output' => 'ja'],
+														['value' => 2, 'output' => 'andere Objekte ausblenden'],
+													],
+													$this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['border'],
+													null,
+													null,
+													null,
+													'width: 190px'
+												); ?>
 											</td>
 											<td></td>
 										</tr>
@@ -819,7 +824,7 @@
 												>
 											</td>
 											<td width="60px">&nbsp;Rand:</td>
-											<td><input	type="text" name="fontsize_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['fontsize']; ?>" size="5">m</td>
+											<td><input	type="text" name="fontsize_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['fontsize']; ?>" size="5"> m</td>
 											<td colspan="3"></td>
 										</tr><?
 									}
