@@ -4831,6 +4831,65 @@ class db_mapObj{
 		return $layer;
 	}
 
+		function read_Groups($all = false, $order = '', $where = 'true') {
+		global $language;
+		if ($language != 'german') {
+			$language = str_replace('-', '_', $language);
+			$gruppenname_column = "
+			CASE
+				WHEN g.gruppenname_" . $language . " != \"\" THEN g.gruppenname_" . $language . "
+				ELSE g.gruppenname
+			END";
+		}
+		else {
+			$gruppenname_column = "g.gruppenname";
+		}
+
+		$sql = "
+			SELECT
+				g.id,
+				" . $gruppenname_column . " AS gruppenname,
+				g.obergruppe,
+				g.selectable_for_shared_layers,
+				g.checkbox" .
+				(!$all ? ", g2r.status" : "") . "
+			FROM
+				kvwmap.u_groups AS g" . ($all ? "" : "
+				JOIN kvwmap.u_groups2rolle AS g2r ON g.id = g2r.id") . "
+			WHERE
+				" . $where . ($all ? "" : " AND
+				g2r.stelle_id = " . $this->Stelle_ID . " AND
+				g2r.user_id = " . $this->User_ID) . "
+			ORDER BY " .
+				($order != '' ? replace_semicolon($order) : "g.order") . "
+		";
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+		$groups = array();
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$groups[$rs['id']]['status'] = value_of($rs, 'status');
+			$groups[$rs['id']]['gruppenname'] = $rs['gruppenname'];
+			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
+			$groups[$rs['id']]['id'] = $rs['id'];
+			$groups[$rs['id']]['selectable_for_shared_layers'] = ($rs['selectable_for_shared_layers'] == 't');
+			$groups[$rs['id']]['checkbox'] = ($rs['checkbox'] == 't');
+			if ($rs['obergruppe']) {
+				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
+			}
+		}
+		$this->anzGroups = count($groups);
+		return $groups;
+	}
+
+	function read_all_groups($all = false, $order = '', $where = 'true') {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		$groups = $this->read_Groups($all, $order, $where);
+		$collections = $this->read_Collections($all, $order, $where);
+		$collectiongroups = $this->read_CollectionGroups($all, $order, $where);
+		$all_groups = LayerGroup::merge_groups($groups, $collections, $collectiongroups);
+		$this->anzGroups = count($all_groups);
+		return $all_groups;
+	}
+
 	function read_disabled_classes() {
 		$sql = "
 			SELECT

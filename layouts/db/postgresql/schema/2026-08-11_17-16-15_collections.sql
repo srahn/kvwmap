@@ -1,9 +1,33 @@
 BEGIN;
-  ALTER TABLE kvwmap.layer ADD CONSTRAINT layer_group_fk FOREIGN KEY (gruppe) REFERENCES kvwmap.u_groups(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-  
+  ALTER TABLE kvwmap.layer DROP CONSTRAINT IF EXISTS layer_group_fk;
+  ALTER TABLE kvwmap.layer ADD CONSTRAINT layer_group_fk FOREIGN KEY (gruppe) REFERENCES kvwmap.u_groups(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
   ALTER TABLE kvwmap.rolle_saved_layers ALTER COLUMN user_id DROP NOT NULL;
   ALTER TABLE kvwmap.rolle_saved_layers ALTER COLUMN stelle_id DROP NOT NULL;
- 
+
+  ALTER TABLE kvwmap.collection_groups2rolle DROP CONSTRAINT IF EXISTS collection_groups2rolle_pk;
+  ALTER TABLE kvwmap.collection_groups2rolle DROP CONSTRAINT IF EXISTS collection_groups2rolle_rolle_fk;
+  ALTER TABLE kvwmap.collection_groups2rolle DROP CONSTRAINT IF EXISTS collection_groups2rolle_collection_group_fk;
+
+  ALTER TABLE kvwmap.collection_groups DROP CONSTRAINT IF EXISTS collection_groups_pk;
+  ALTER TABLE kvwmap.collection_groups DROP CONSTRAINT IF EXISTS collection_groups_collection_fk;
+  ALTER TABLE kvwmap.collection_groups DROP CONSTRAINT IF EXISTS collection_groups_group_fk;
+
+  ALTER TABLE kvwmap.collection_layer2rolle DROP CONSTRAINT IF EXISTS collection_layer2rolle_pk;
+  ALTER TABLE kvwmap.collection_layer2rolle DROP CONSTRAINT IF EXISTS collection_layer2rolle_rolle_fk;
+  ALTER TABLE kvwmap.collection_layer2rolle DROP CONSTRAINT IF EXISTS collection_layer2rolle_collection_layer_fk;
+
+  ALTER TABLE kvwmap.collection_layer DROP CONSTRAINT IF EXISTS collection_layer_pk;
+  ALTER TABLE kvwmap.collection_layer DROP CONSTRAINT IF EXISTS collection_layer_collection_fk;
+  ALTER TABLE kvwmap.collection_layer DROP CONSTRAINT IF EXISTS collection_layer_layer_fk;
+
+  ALTER TABLE kvwmap.collections2rolle DROP CONSTRAINT IF EXISTS collections2rolle_pk;
+  ALTER TABLE kvwmap.collections2rolle DROP CONSTRAINT IF EXISTS collections2rolle_collection_fk;
+  ALTER TABLE kvwmap.collections2rolle DROP CONSTRAINT IF EXISTS collections2rolle_rolle_fk;
+
+  ALTER TABLE kvwmap.collections DROP CONSTRAINT IF EXISTS collections_pk;
+  ALTER TABLE kvwmap.collections DROP CONSTRAINT IF EXISTS collections_group_fk;
+
   CREATE TABLE IF NOT EXISTS kvwmap.collections (
     id serial NOT NULL,
     bezeichnung varchar,
@@ -12,8 +36,8 @@ BEGIN;
     extent varchar
   );
   ALTER TABLE kvwmap.collections ADD CONSTRAINT collections_pk PRIMARY KEY (id);
-  ALTER TABLE kvwmap.collections ADD CONSTRAINT collections_group_fk FOREIGN KEY (group_id) REFERENCES kvwmap.u_groups(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-  
+  ALTER TABLE kvwmap.collections ADD CONSTRAINT collections_group_fk FOREIGN KEY (group_id) REFERENCES kvwmap.u_groups(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
   CREATE TABLE IF NOT EXISTS kvwmap.collection_layer (
     id serial NOT NULL,
     collection_id integer NOT NULL,
@@ -75,4 +99,5 @@ BEGIN;
   DROP TABLE IF EXISTS kvwmap.collection_groups;
   DROP TABLE IF EXISTS kvwmap.collection_groups2rolle;
   */
+
 COMMIT;

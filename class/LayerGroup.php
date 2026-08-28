@@ -69,6 +69,117 @@ class LayerGroup extends PgObject {
 		return $layers;
 	}
 
+	function get_layers_recursive($group_id = null) {
+		$group_id = $group_id ?: $this->get_id();
+		$sql = "
+			WITH RECURSIVE cte (group_id) AS (
+				SELECT
+					" . $this->get_id() . "
+				UNION ALL
+				SELECT 
+					u_groups.id
+				FROM 
+					cte,
+					kvwmap.u_groups
+				WHERE 
+					cte.group_id = u_groups.obergruppe AND 
+					obergruppe IS NOT NULL
+			)
+			SELECT DISTINCT 
+				layer.*
+			FROM
+				cte,
+				kvwmap.layer
+			WHERE
+				gruppe = cte.group_id
+		";
+		$query = $this->execSQL($sql);
+		$pg_last_error = pg_last_error();
+		if ($pg_last_error != '') {
+			return array(
+				'success' => false,
+				'msg' => $pg_last_error
+			);
+		}
+		return array(
+			'success' => true,
+			'layers' => pg_fetch_all($query, PGSQL_ASSOC)
+		);
+	}
+
+	/**
+	 * Function determine the layers that have features when the filter is applied on pfad or data query pending on its datatype.
+	 */
+	function get_layers_with_content($layers, $filter = '') {
+		$filter = $filter ?: 'true';
+		$layers_with_content = array();
+		foreach ($layers AS $layer) {
+			$sql = "";
+			if ($layer['data'] != '' AND in_array($layer['datentyp'], array(0, 1, 2))) {
+				if ($layer['geom_column'] != '') {
+					return array(
+						'success' => false,
+						'msg' => 'In der Layerdefinition des Geometrie-Layers ' . $layer['name'] . ' (id: ' . $layer['layer_id'] . ') ist keine geom_column angegeben.'
+					);
+				}
+				$data_query = replace_params_rolle(
+					$layer['data'],
+					['duplicate_criterion' => $layer['duplicate_criterion']]
+				);
+				$sql = "
+					SELECT
+						count(*) AS num_total,
+						sum(CASE WHEN LOWER(ST_GeometryType(" . $layer['geom_column'] . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
+						sum(CASE WHEN LOWER(ST_GeometryType(" . $layer['geom_column'] . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
+						sum(CASE WHEN LOWER(ST_GeometryType(" . $layer['geom_column'] . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
+					FROM
+						(" . $data_query . ") AS layer_data_query
+					WHERE
+						" . ($filter ?: 'true') . "
+				";
+			}
+			if ($layer['datentyp'] == 5) {
+				// Query-Layer
+				$pfad_query = replace_params_rolle(
+					$layer['pfad'],
+					['duplicate_criterion' => $layer['duplicate_criterion']]
+				);
+				$sql = "
+					SELECT
+						count(*) AS num_total,
+						0 AS num_points,
+						0 AS num_lines,
+						0 AS num_polygons
+					FROM
+						(" . $pfad_query . ") AS layer_data_query
+					WHERE
+						" . ($filter ?: 'true') . "
+				";
+			}
+			if ($sql != '') {
+				// echo '<br>' . $sql;
+				$result = $this->database->execSQL($sql, 4, 0, true);
+				if (! $result['success']) {
+					return $result;
+				}
+				$content = pg_fetch_assoc($result[1]);
+				if (
+					($layer['datentyp'] == 0 AND $content['num_points'] > 0) OR
+					($layer['datentyp'] == 1 AND $content['num_lines'] > 0) OR
+					($layer['datentyp'] == 2 AND $content['num_polygons'] > 0) OR
+					($layer['datentyp'] == 5 AND $content['num_total'] > 0)
+				) {
+					$layers_with_content[$layer['name']] = $layer;
+				}
+			}
+		}
+
+		return array(
+			'success' => true,
+			'layers_with_content' => $layers_with_content
+		);
+	}
+
 	function get_next_order($obergruppe) {
 		return ($this->find_by_sql(array(
 			'select' => 'max(order) AS max_order',

@@ -1,0 +1,3 @@
+<?php
+  $strTitel = "Kolekcja warstw";
+?>

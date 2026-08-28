@@ -941,42 +941,44 @@ class Konvertierung extends PgObject {
 		$layers_with_content = $result['layers_with_content'];
 		if (count($layers_with_content) > 0) {
 			// echo "\nCreate collection with " . count($layers_with_content) . " collection_layers with content from Plan " . $this->plan->get('gml_id');
-			include_once(CLASSPATH . 'Collection.php');
-			$result = Collection::generate(
-				$this->gui,
+			$result = $this->gui->create_collection(
 				$this->plan->get('anzeigename'),
 				59,
-				"p.gml_id = '" . $this->plan->get('gml_id') . "'::uuid",
+				"plan_gml_id = '" . $this->plan->get('gml_id') . "'::uuid",
+				$layers_with_content,
+				$this->get('stelle_id'),
 				implode(',', $this->plan->extent)
 			);
-			if (! $result['success']) {
+			if (!$result['success']) {
 				return $result;
 			}
-			$collection = $result['collection'];
-			$result = $collection->add_to_rollen($this->get('stelle_id'));
-			if (! $result['success']) {
-				return $result;
-			}
-
-			include_once(CLASSPATH . 'CollectionLayer.php');
-			foreach ($layers_with_content AS $layer) {
-				// echo "\nLayer with content: " . $layer['id'] . ' ' . $layer['name'] . ' ' . $layer['alias'];
-				$result = CollectionLayer::generate($this->gui, $collection->get_id(), $layer['id']);
-				if (! $result['success']) {
-					return $result;
-				}
-				$collection_layer = $result['collection_layer'];
-				$collection_layer->add_to_rollen($this->get('stelle_id'));
-				if (! $result['success']) {
-					return $result;
-				}
-			}
-			$msg = 'Plan ' . $this->plan->get_anzeige_name() . ' hat keine Layer mit Content.';
+			$this->update_attr(array("layer_collection_id = " . $result['collection']->get_id()));
+			return array(
+				'success' => true,
+				'msg' => 'Collection id: ' . $result['collection']->get_id() . ' mit ' . count($layers_with_content) . ' Collection Layer angelegt und Stelle ' . $this->get('stelle_id') . ' zugeordnet'
+			);
 		}
-		$msg = 'Collection ' . $collection->get_id() . ' und ' . count($layers_with_content) . ' Collection Layer angelegt und Stelle ' . $this->get('stelle_id') . ' zugeordnet';
+		else {
+			return array(
+				'success' => false,
+				'msg' => 'Plan ' . $this->plan->get_anzeige_name() . ' hat keine Layer mit Content.'
+			);
+		}
+	}
+
+	function delete_layer_collection($layer_collection_id = null) {
+		$layer_collection_id = $layer_collection_id ?: $this->get('layer_collection_id');
+		if ($layer_collection_id == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Die Konvertierung hat keine layer_collection_id und es wurde keine id zum löschen übergeben.'
+			);
+		}
+
+		// ToDo pk: Funktion implementieren
 		return array(
-			'success' => true,
-			'msg' => $msg
+			'success' => false,
+			'msg' => 'Funktion delete_layer_collection noch nicht vollständig implementiert'
 		);
 	}
 

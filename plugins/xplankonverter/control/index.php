@@ -2,10 +2,12 @@
 // Anwendungsfälle
 // xplankonverter_batch_import
 // xplankonverter_check_class_completenesses
+// xplankonverter_create_collection
 // xplankonverter_create_geoweb_service
 // xplankonverter_create_metadata
 // xplankonverter_create_plaene
 // xplankonverter_create_plaene_from_gmlas
+// xplankonverter_delete_collection
 // xplankonverter_download_alte_zusammenzeichnung
 // xplankonverter_download_edited_shapes
 // xplankonverter_download_inspire_gml
@@ -15,8 +17,8 @@
 // xplankonverter_download_xplan_gml
 // xplankonverter_download_xplan_shapes
 // xplankonverter_download_files_query
-// xplankonverter_extract_gml_to_form
 // xplankonverter_download_xlog
+// xplankonverter_extract_gml_to_form
 // xplankonverter_extract_standardshapes_to_regeln
 // xplankonverter_gml_generieren
 // xplankonverter_go_to_plan
@@ -86,7 +88,6 @@ if (
 	include_once(PLUGINS . 'metadata/model/MetaDataCreator.php');
 	include_once(PLUGINS . 'metadata/model/metadaten.php');
 }
-
 function isInStelleAllowed($stelle, $requestStelleId) {
 	global $GUI;
 	if ($stelle->id == $requestStelleId) {
@@ -102,35 +103,46 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	$GUI->sanitize([
 		'konvertierung_id' => 'int'
 	]);
-	$GUI->formvars['konvertierung_id'] = trim($GUI->formvars['konvertierung_id']);
-	$xplankonverter_file_path = XPLANKONVERTER_FILE_PATH . ($GUI->formvars['konvertierung_id'] != '' ? $GUI->formvars['konvertierung_id'] . '/' : '');
-	$konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
-	if ($konvertierung->data == NULL) {
-		$GUI->konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']);
+	if (in_array($go, array(
+		'xplankonverter_create_collection',
+		'xplankonverter_delete_collection'
+	))) {
+		// Die konvertierung_id wird individuell im Anwendungsfall behandelt.
 	}
 	else {
-		if ($konvertierung->get('stelle_id') != Rolle::$stelle_ID) {
-			$GUI->add_message('warning', 'Die Konvertierung mit der id ' . $GUI->formvars['konvertierung_id'] . ' gehört nicht zu dieser Stelle!');
-			// some functions can also be run from administration, e.g. updating multiple services or metadata
-			if (stripos($GUI->go, 'xplankonverter_create_geoweb_service') !== 0 && stripos($GUI->go, 'xplankonverter_create_metadata')  !== 0) {
-				$GUI->formvars['konvertierung_id'] = '';
+		$GUI->formvars['konvertierung_id'] = trim($GUI->formvars['konvertierung_id']);
+		$xplankonverter_file_path = XPLANKONVERTER_FILE_PATH . ($GUI->formvars['konvertierung_id'] != '' ? $GUI->formvars['konvertierung_id'] . '/' : '');
+		$konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+		if ($konvertierung->data == NULL) {
+			$GUI->konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']);
+		}
+		else {
+			if ($konvertierung->get('stelle_id') != Rolle::$stelle_ID) {
+				$GUI->add_message('warning', 'Die Konvertierung mit der id ' . $GUI->formvars['konvertierung_id'] . ' gehört nicht zu dieser Stelle!');
+				// some functions can also be run from administration, e.g. updating multiple services or metadata
+				if (
+					stripos($GUI->go, 'xplankonverter_create_geoweb_service') !== 0 && 
+					stripos($GUI->go, 'xplankonverter_create_metadata')  !== 0
+				) {
+					$GUI->formvars['konvertierung_id'] = '';
+				}
 			}
+			if (!file_exists($xplankonverter_file_path)) {
+				mkdir($xplankonverter_file_path, 0777);
+				$GUI->add_message('warning', 'Der Dateipfad ' . $xplankonverter_file_path . ' für die Konvertierung ' . $GUI->formvars['konvertierung_id'] . ' fehlte und musste neu angelegt werden.');
+				// return false;
+			}
+			$GUI->konvertierung = $konvertierung;
 		}
-		if (!file_exists($xplankonverter_file_path)) {
-			mkdir($xplankonverter_file_path, 0777);
-			$GUI->add_message('warning', 'Der Dateipfad ' . $xplankonverter_file_path . ' für die Konvertierung ' . $GUI->formvars['konvertierung_id'] . ' fehlte und musste neu angelegt werden.');
-			// return false;
-		}
-		$GUI->konvertierung = $konvertierung;
+		$xplankonverter_logfile = $xplankonverter_file_path . 'xplankonverter.log';
+		$GUI->xlog = new LogFile(
+			$xplankonverter_logfile,
+			'text',
+			'xplankonverter',
+			'',
+			true
+		);
 	}
-	$xplankonverter_logfile = $xplankonverter_file_path . 'xplankonverter.log';
-	$GUI->xlog = new LogFile(
-		$xplankonverter_logfile,
-		'text',
-		'xplankonverter',
-		'',
-		true
-	);
 
 	/**
 	* extract zip files if necessary, check completeness and copy files to upload folder
@@ -416,10 +428,13 @@ function go_switch_xplankonverter($go) {
 
 			// Abfragen der auszuführenden Jobs zum importierenden der Pläne
 			$pg_obj = new PgObject($GUI, 'xplankonverter', 'import_jobs');
-			$jobs = $pg_obj->find_where("
-				started_at IS NULL AND
-				import_type = 'gml'
-			");
+			$jobs = $pg_obj->find_where(
+				"
+					started_at IS NULL AND
+					import_type = 'gml'
+				",
+				"upload_file"
+			);
 			foreach ($jobs AS $job) {
 				echo "\n" . date('Y-m-d H:m:s', time()) . " Start Job " . $job->get_id() . " " . $job->get('upload_file');
 				$job->update_attr("started_at = now()");
@@ -551,6 +566,30 @@ function go_switch_xplankonverter($go) {
 
 				echo "\nImport und Konvertierung erfolgreich mit id: " . $GUI->konvertierung->get_id() . ' abgeschlossen.';
 			}
+		} break;
+
+		case 'xplankonverter_create_collection' : {
+			$GUI->main = '../../plugins/xplankonverter/view/plan_layer_collection.php';
+
+			$result = $GUI->xplankonverter_create_collection();
+			if (!$result['success']) {
+				$GUI->Fehlermeldung = 'Fehler beim Anlegen der Layer Collection!<br>' . $result['msg'];
+	    }
+
+			$GUI->result = $result;
+			$GUI->output();
+		} break;
+
+		case 'xplankonverter_delete_collection' : {
+			$GUI->main = '../../plugins/xplankonverter/view/plan_layer_collection.php';
+
+			$result = $GUI->xplankonverter_delete_collection();
+			if (!$result['success']) {
+				$GUI->Fehlermeldung = 'Fehler beim Löschen der Layer Collection!<br>' . $result['msg'];
+	    }
+
+			$GUI->result = $result;
+			$GUI->output();
 		} break;
 
 		/**
@@ -2431,7 +2470,7 @@ function go_switch_xplankonverter($go) {
 		case 'xplankonverter_test' : {
 			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers('BP-Plan');
 			$result = $GUI->konvertierung->create_layer_collection($GUI->xplan_layers);
-			if (! $result['success']) {
+			if (!$result['success']) {
 				send_error('Fehler bei der Konvertierung des angelegten Plans. ' . $result['msg'], 'Konvertierung abgebrochen');
 				exit;
 			}
