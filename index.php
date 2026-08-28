@@ -193,6 +193,7 @@ define('CASE_COMPRESS', false);
 $non_spatial_cases = array('get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'getMap', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
+// $fast_loading_cases = array();
 $fast_loading_case = array();
 
 define('FAST_CASE', in_array($formvars['go'], $fast_loading_cases));
@@ -1799,7 +1800,67 @@ function go_switch($go, $exit = false) {
 			case 'Layergruppe_Löschen' : {
 				$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
 				$GUI->Layergruppe_Loeschen();
+			} break;
+
+			case 'Collection_Neu' : {
+				$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+				$GUI->collection_neu();
 			}
+			break;
+
+			case 'Collection_Anlegen' : {
+				$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+				include_once(CLASSPATH . 'LayerGroup.php');
+
+				if ($GUI->formvars['group_id'] == '') {
+					$GUI->add_message('Error', 'Es wurde keine Gruppe angegeben unter der die Collection eingebunden werden soll.');
+					$GUI->Layergruppe_Editor(); break;
+				}
+
+				if ($GUI->formvars['collection_layer_group_id'] == '') {
+					$GUI->add_message('Error', 'Es wurde keine Gruppe angegeben dessen Layer zur Collection gehören sollen.');
+					$GUI->Layergruppe_Editor(); break;
+				}
+
+				if ($GUI->formvars['filter'] == '') {
+					$GUI->add_message('Error', 'Es wurde kein Filterausdruck angegeben.');
+					$GUI->Layergruppe_Editor(); break;
+				}
+
+				$collection_group = LayerGroup::find_by_id($GUI, $GUI->formvars['group_id']);
+				$collection_layer_group = LayerGroup::find_by_id($GUI, $GUI->formvars['collection_layer_group_id']);
+
+				$result = $collection_layer_group->get_layers_recursive($collection_layer_group->get_id());
+				if (!$result['success']) {
+					$GUI->add_message('Error', 'Fehler beim Abfragen der Layer, die zur Collection gehören sollen. ' . $result['msg']);
+					$GUI->Layergruppe_Editor(); break;
+				}
+				$layer = $result['layers'];
+
+				if ($GUI->formvars['only_with_content'] != '' AND $GUI->formvars['only_with_content'] == 'true') {
+					$result = $collection_layer_group->get_layers_with_content($layer, $GUI->formvars['filter']);
+					if (!$result['success']) {
+						$GUI->add_message('Error', 'Fehler beim Abfragen der Layer der Collection die Content haben. ' . $result['msg']);
+						$GUI->Layergruppe_Editor(); break;
+					}
+					$layer = $result['layers_with_content'];
+				}
+
+				$result = $GUI->create_collection(
+					$GUI->formvars['bezeichnung'] ?: $collection_group->get('gruppenname'), // name
+					$collection_group->get_id(), // collection_group_id,
+					$GUI->formvars['filter'], // filter
+					array_map(function($layer) { return array('id' => $layer['layer_id']); }, $layer), // layers
+					$GUI->formvars['stelle_id'] ?: $GUI->Stelle->id // stelle
+				);
+				if (!$result['success']) {
+					$GUI->add_message('Error', 'Fehler beim Anlegen der Collection.<br>Meldung: ' . $result['msg']);
+					$GUI->Layergruppe_Editor(); break;
+				}
+
+				$GUI->add_message('Notice', $result['msg']);
+				$GUI->Layergruppe_Editor();
+			} break;
 
 			case 'Layer_Uebersicht' : {
 				$GUI->LayerUebersicht();

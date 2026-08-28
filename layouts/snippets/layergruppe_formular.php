@@ -6,6 +6,9 @@
 	function gotoLayerEditor(layerId) {
 		location.href = 'index.php?go=Layereditor&selected_layer_id=' + layerId + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 	}
+	function gotoCollectionNew(layerGroupId) {
+		location.href = `index.php?go=Collection_Neu&selected_group_id=${layerGroupId}&csrf_token=<? echo $_SESSION['csrf_token']; ?>`;
+	}
 </script>
 <style>
 	.layergruppe-button {
@@ -43,6 +46,7 @@
 			</table>
 			<input type="hidden" name="go" value="Layergruppe">
 			<input type="hidden" name="selected_group_id" value="<? echo  $this->layergruppe->get('id'); ?>">
+			<input value="Layer Collection anlegen" title="Layer Collection anlegen" type="button" class="layergruppe-button" onclick="gotoCollectionNew(<?php echo  $this->layergruppe->get('id'); ?>)">
 		</div>
 	</div>
 </div>

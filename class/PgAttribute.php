@@ -3,14 +3,17 @@ class PgAttribute {
 
 	static $write_debug = false;
 
-	function __construct($debug, $name, $type, $value, $validations = array(), $identifier = '', $relation = array()) {
+	function __construct($debug, $name, $type, $value, $validations = array(), $identifier = '', $relation = array(), $tooltip = '', $auswahloptions = array(), $alias = null) {
 		$this->debug = $debug;
 		$this->name = $name;
+		$this->alias = $alias;
 		$this->type = $type;
 		$this->value = $value;
 		$this->validations = $validations;
 		$this->is_identifier = $identifier == $name;
 		$this->relation = $relation;
+		$this->tooltip = $tooltip;
+		$this->auswahloptions = $auswahloptions;
 		$this->debug->show('<p>New PgAttribut: '. $this->name, PgAttribute::$write_debug);
 	}
 
@@ -73,7 +76,7 @@ class PgAttribute {
 		else {
 			$is_valid = $this->is_valid();
 			if (!($this->is_identifier and $this->value == '')) {
-				$html .= "<label class=\"fetter\" for=\"" . $this->name . "\">" . ucfirst($this->name) . ($this->is_mandatory() ? ' *' : '' ) . "</label>";
+				$html .= "<label class=\"fetter\" for=\"" . $this->name . "\">" . ucfirst($this->alias ?: $this->name) . ($this->is_mandatory() ? ' *' : '' ) . "</label>";
 				if ($this->name == 'id') {
 					$html .= "<span style=\"padding-top: 2px; float: left\">" . $this->value . "</span>";
 				}
@@ -98,12 +101,21 @@ class PgAttribute {
 							}
 						} break;
 						default : {
-							$html .= "<input name=\"" . $this->name . "\" type=\"" . $this->get_input_type() . "\" value=\"" . (($this->get_input_type() == 'checkbox' AND $this->value == '') ? 1 : htmlentities($this->value)) . "\" class=\"" . ($is_valid['success'] ? 'valid' : 'alerts-border') . "\" oninput=\"$(this).removeClass('alerts-border'); $(this).addClass('valid'); if ($(this).next().hasClass('validation-error-msg-div')) { $(this).next().hide(); }\">";
+							if (count($this->auswahloptions) > 0) {
+								include_once(CLASSPATH . 'FormObject.php');
+								$html .= FormObject::createSelectField( $this->name, $this->auswahloptions, $this->value);
+							}
+							else {
+								$html .= "<input name=\"" . $this->name . "\" type=\"" . $this->get_input_type() . "\" value=\"" . (($this->get_input_type() == 'checkbox' AND $this->value == '') ? 1 : htmlentities($this->value)) . "\" class=\"" . ($is_valid['success'] ? 'valid' : 'alerts-border') . "\" oninput=\"$(this).removeClass('alerts-border'); $(this).addClass('valid'); if ($(this).next().hasClass('validation-error-msg-div')) { $(this).next().hide(); }\">";
+							}
 							if (!$is_valid['success']) {
 								$html .= "<div class=\"validation-error-msg-div\">" . implode('<br>', $is_valid['results']) . "</div>";
 							}
 						}
 					}
+				}
+				if ($this->tooltip != '') {
+					$html .= "<span data-tooltip=\"" . $this->tooltip . "\"></span>";
 				}
 			}
 		}

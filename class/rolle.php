@@ -1599,7 +1599,8 @@ class rolle {
 							clr.collection_layer_id = $4
 					";
 					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, ($layer_id - 1000000));
-					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collectionlayer zur Rolle:",4);
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collectionlayer zur Rolle:", 4);
+					$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
 				}
 				elseif ($layer['layer_id'] > 0) {
 					$sql ="
@@ -1657,6 +1658,7 @@ class rolle {
 				";
 				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $group_id);
 				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collection Groups und Layer zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
 			}
 			elseif ($group_id > 2000000) {
 				$sql = "
@@ -1684,15 +1686,15 @@ class rolle {
 					UPDATE
 						kvwmap.u_rolle2used_layer
 					SET
-						aktivstatus = $1
+						aktivstatus = " .$aktiv_status . "
 						" . ($aktiv_status == 0 ? ',querystatus = 0' : '') . "
 					WHERE
-						user_id = $2 AND
-						stelle_id = $3 AND
+						user_id = " . $this->user_id . " AND
+						stelle_id = " . $this->stelle_id . " AND
 						layer_id IN (
 							WITH RECURSIVE cte (group_id) AS (
-								SELECT 
-									$4
+								SELECT
+									" . $group_id . "
 								UNION ALL
 								SELECT 
 									u_groups.id
@@ -1712,10 +1714,13 @@ class rolle {
 								gruppe = cte.group_id
 						)
 				";
-				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $group_id);
 				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel);
 			}
-			$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
+		}
+		$error = pg_last_error();
+		if ($error != '') {
+			echo $error; exit;
 		}
 		foreach ($formvars['class'] as $class_id => $class_status) {
 			if ($class_status == '0' OR $class_status == '2'){

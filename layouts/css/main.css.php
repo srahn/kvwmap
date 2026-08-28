@@ -644,6 +644,11 @@ span[data-tooltip]:hover::after {
 	margin-right: 10px;
 }
 
+.input-form span {
+	float: left;
+	margin-left: 5px;
+}
+
 .input-form select {
 	float: left;
 	text-align: left;
