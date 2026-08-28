@@ -3,7 +3,7 @@ class PgAttribute {
 
 	static $write_debug = false;
 
-	function __construct($debug, $name, $type, $value, $validations = array(), $identifier = '', $relation = array(), $tooltip = '', $auswahloptions = array(), $alias = null) {
+	function __construct($debug, $name, $type, $value, $validations = array(), $identifier = '', $relation = null, $tooltip = '', $auswahloptions = array(), $alias = null) {
 		$this->debug = $debug;
 		$this->name = $name;
 		$this->alias = $alias;
@@ -13,7 +13,7 @@ class PgAttribute {
 		$this->is_identifier = $identifier == $name;
 		$this->relation = $relation;
 		$this->tooltip = $tooltip;
-		$this->auswahloptions = $auswahloptions;
+		$this->auswahloptions = $auswahloptions ?: [];
 		$this->debug->show('<p>New PgAttribut: '. $this->name, PgAttribute::$write_debug);
 	}
 
