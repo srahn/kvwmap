@@ -3,7 +3,7 @@ class PgAttribute {
 
 	static $write_debug = false;
 
-	function __construct($debug, $name, $type, $value, $validations = array(), $identifier = '', $relation = null, $tooltip = '', $auswahloptions = array(), $alias = null) {
+	function __construct($debug, $name, $type, $value, $validations = array(), $identifier = '', $relation = array(), $tooltip = '', $auswahloptions = null, $alias = null) {
 		$this->debug = $debug;
 		$this->name = $name;
 		$this->alias = $alias;

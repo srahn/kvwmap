@@ -2,6 +2,9 @@ BEGIN;
   ALTER TABLE kvwmap.layer DROP CONSTRAINT IF EXISTS layer_group_fk;
   ALTER TABLE kvwmap.layer ADD CONSTRAINT layer_group_fk FOREIGN KEY (gruppe) REFERENCES kvwmap.u_groups(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
+  ALTER TABLE kvwmap.rolle_saved_layers ALTER COLUMN user_id DROP NOT NULL;
+  ALTER TABLE kvwmap.rolle_saved_layers ALTER COLUMN stelle_id DROP NOT NULL;
+
   CREATE TABLE IF NOT EXISTS kvwmap.collections (
     id serial NOT NULL,
     bezeichnung varchar,
