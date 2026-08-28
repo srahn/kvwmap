@@ -5,29 +5,6 @@ BEGIN;
   ALTER TABLE kvwmap.rolle_saved_layers ALTER COLUMN user_id DROP NOT NULL;
   ALTER TABLE kvwmap.rolle_saved_layers ALTER COLUMN stelle_id DROP NOT NULL;
 
-  ALTER TABLE kvwmap.collection_groups2rolle DROP CONSTRAINT IF EXISTS collection_groups2rolle_pk;
-  ALTER TABLE kvwmap.collection_groups2rolle DROP CONSTRAINT IF EXISTS collection_groups2rolle_rolle_fk;
-  ALTER TABLE kvwmap.collection_groups2rolle DROP CONSTRAINT IF EXISTS collection_groups2rolle_collection_group_fk;
-
-  ALTER TABLE kvwmap.collection_groups DROP CONSTRAINT IF EXISTS collection_groups_pk;
-  ALTER TABLE kvwmap.collection_groups DROP CONSTRAINT IF EXISTS collection_groups_collection_fk;
-  ALTER TABLE kvwmap.collection_groups DROP CONSTRAINT IF EXISTS collection_groups_group_fk;
-
-  ALTER TABLE kvwmap.collection_layer2rolle DROP CONSTRAINT IF EXISTS collection_layer2rolle_pk;
-  ALTER TABLE kvwmap.collection_layer2rolle DROP CONSTRAINT IF EXISTS collection_layer2rolle_rolle_fk;
-  ALTER TABLE kvwmap.collection_layer2rolle DROP CONSTRAINT IF EXISTS collection_layer2rolle_collection_layer_fk;
-
-  ALTER TABLE kvwmap.collection_layer DROP CONSTRAINT IF EXISTS collection_layer_pk;
-  ALTER TABLE kvwmap.collection_layer DROP CONSTRAINT IF EXISTS collection_layer_collection_fk;
-  ALTER TABLE kvwmap.collection_layer DROP CONSTRAINT IF EXISTS collection_layer_layer_fk;
-
-  ALTER TABLE kvwmap.collections2rolle DROP CONSTRAINT IF EXISTS collections2rolle_pk;
-  ALTER TABLE kvwmap.collections2rolle DROP CONSTRAINT IF EXISTS collections2rolle_collection_fk;
-  ALTER TABLE kvwmap.collections2rolle DROP CONSTRAINT IF EXISTS collections2rolle_rolle_fk;
-
-  ALTER TABLE kvwmap.collections DROP CONSTRAINT IF EXISTS collections_pk;
-  ALTER TABLE kvwmap.collections DROP CONSTRAINT IF EXISTS collections_group_fk;
-
   CREATE TABLE IF NOT EXISTS kvwmap.collections (
     id serial NOT NULL,
     bezeichnung varchar,

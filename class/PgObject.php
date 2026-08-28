@@ -92,6 +92,7 @@ class PgObject {
 		$this->fkeys = array();
 		$this->pkey = array();
 		$this->columns = array();
+		$this->auswahloptions = array();
 		$gui->debug->show('Create new Object PgObject with schema ' . $this->schema . ' table ' . $this->tableName, $this->show);
 	}
 
