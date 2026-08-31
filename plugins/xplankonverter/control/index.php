@@ -589,7 +589,10 @@ function go_switch_xplankonverter($go) {
 	    }
 
 			$GUI->result = $result;
-			$GUI->output();
+			$GUI->formvars['selected_layer_id'] = XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID;
+			$GUI->formvars['value_konvertierung_id'] = $result['konvertierung_id'];
+			$GUI->formvars['operator_konvertierung_id'] = '=';
+			$GUI->GenerischeSuche_Suchen();
 		} break;
 
 		/**

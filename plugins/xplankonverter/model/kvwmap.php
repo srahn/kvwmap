@@ -1118,7 +1118,9 @@
 
 	$GUI->xplankonverter_delete_collection = function() use ($GUI) {
 		global $admin_stellen;
-
+		$GUI->sanitize([
+			'konvertierung_id' => 'int'
+		]);
 		$konvertierung_id = $GUI->formvars['konvertierung_id'];
 		if ($konvertierung_id == '') {
 			return array(
@@ -1152,6 +1154,7 @@
 		}
 
 		$result = $GUI->konvertierung->delete_layer_collection();
+		$result['konvertierung_id'] = $konvertierung_id;
 		return $result;
 	};
 
