@@ -1035,7 +1035,7 @@
 		$mode = 'sendEmail async';
 		$smtp_server = 'smtp.ionos.de';
 		$smtp_port = '587';
-		if (mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port)) {
+		if (mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachment, $mode, $smtp_server, $smtp_port)) {
 			return array(
 				'success' => true,
 				'msg' => 'Benachrichtigung versendet.'

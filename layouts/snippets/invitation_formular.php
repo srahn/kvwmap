@@ -15,7 +15,7 @@
 		<input name="email" type="text" value="<? echo $this->formvars['email']; ?>">
 		<div class="clear"></div>
 		<label class="fetter" for="anrede"><? echo $this->strSalutation; ?></label>
-		<? echo FormObject::createSelectField('anrede', [$this->strMister, $this->strMisses], $this->formvars['anrede']); ?>
+		<? echo FormObject::createSelectField('anrede', [$this->strMister, $this->strMisses, $this->strDivers], $this->formvars['anrede']); ?>
 		<div class="clear"></div>
 		<label class="fetter" for="name"><? echo $this->strSurName; ?> *</label>
 		<input name="name" type="text" value="<? echo $this->formvars['name']; ?>">
