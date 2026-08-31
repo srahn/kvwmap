@@ -79,6 +79,11 @@
 						<div style="width: 150px;text-align: center">
 							<a href="' . $GUI->layers['metalink'][$i] . '" target="_blank">' . ($GUI->layers['metalink'][$i]? 'Metadaten' : '') . '</a>
 						</div>
+					</td>	
+					<td valign="top" class="terms_of_use_link-column">
+						<div style="width: 150px;text-align: center">
+							<a href="' . $GUI->layers['terms_of_use_link'][$i] . '" target="_blank">' . ($GUI->layers['terms_of_use_link'][$i]? 'Nutzungsbedingungen' : '') . '</a>
+						</div>
 					</td>					
 					<td class="dataowner_name-column">
 						<div style="width: 200px" valign="top">
@@ -149,7 +154,7 @@
 	}
 <? } ?>
 
-	.drawingorder-column {
+	.drawingorder-column, .terms_of_use_link-column {
 		display: none;
 	}
 	
@@ -209,6 +214,7 @@
 				<input type="checkbox" onclick="$('.wms_keywordlist-column').toggle();" checked> Stichworte<br>
 				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle();" checked> Kurzbeschreibung<br>
 				<input type="checkbox" onclick="$('.metadatenlink-column').toggle();" checked> Metadatenlink<br>
+				<input type="checkbox" onclick="$('.terms_of_use_link-column').toggle();"> Nutzungsbedingungen<br>
 				<input type="checkbox" onclick="$('.dataowner_name-column').toggle();" checked> <? echo $strDataOwnerName; ?>
 			</div>
 		</td>
@@ -233,6 +239,7 @@
 					</th>
 					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="kurzbeschreibung-column">Kurzbeschreibung</th>
 					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="metadatenlink-column">Metadatenlink</th>
+					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="terms_of_use_link-column">Nutzungsbedingungen</th>
 					<th class="dataowner_name-column"><? echo $strDataOwnerName; ?></th>
 				</tr><?
 				if ($this->formvars['order'] == 'layer_id') {

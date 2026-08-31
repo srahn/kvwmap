@@ -6965,6 +6965,9 @@ class GUI {
 						break;
 					}
 				}
+				if ($this->formvars['printscale'] == '') {	# ansonsten den kleinsten nehmen
+					$this->formvars['printscale'] = $scale;
+				}
 			}
 	
 			# alle Druckausschnitte der Rolle laden
@@ -22919,6 +22922,7 @@ DO $$
 				l.datentyp,
 				l.connectiontype,
 				l.metalink,
+				l.terms_of_use_link,
 				l.kurzbeschreibung,
 				l.wms_keywordlist,
 				l.dataowner_name,
@@ -22952,6 +22956,7 @@ DO $$
 			'GruppeID' => array(),
 			'Kurzbeschreibung' => array(),
 			'metalink' => array(),
+			'terms_of_use_link' => array(),
 			'wms_keywordlist' => array(),
 			'datasources' => array(),
 			'datasource_ids' => array(),
@@ -22986,6 +22991,7 @@ DO $$
 			$layer['connectiontype'][] = $rs['connectiontype'];
 			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
 			$layer['metalink'][] = $rs['metalink'];
+			$layer['terms_of_use_link'][] = $rs['terms_of_use_link'];
 			$layer['wms_keywordlist'][] = $rs['wms_keywordlist'];
 			$layer['dataowner_name'][] = $rs['dataowner_name'];
 			$layer['dataowner_email'][] = $rs['dataowner_email'];

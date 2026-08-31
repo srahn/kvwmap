@@ -547,6 +547,7 @@ class Nachweis {
   
   function pruefeEingabedaten($id, $datum, $VermStelle, $hauptart, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr, $pok_pflicht){
 		global $nachweis_unique_attributes;
+    global $nachweis_unset_attributes;
 		# Test ob schon ein Nachweis mit dieser Kombination existiert
 		if($pok_pflicht AND $nachweis_unique_attributes != NULL){
 			if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$test_fortfuehrung = $fortfuehrung;
@@ -568,47 +569,54 @@ class Nachweis {
     if ($umring == ''){
       $errmsg.='Bitte legen Sie das Polygon für den einzuarbeitenden Nachweis fest! <br>';
     }
-            
-    # test auf korrekte Vermessungstelle 
-    $sql='SELECT * FROM nachweisverwaltung.n_vermstelle WHERE id='.$VermStelle;
-    $queryret=$this->database->execSQL($sql,4, 0);
-    if ($queryret[0]) {
-      $errmsg.='Fehler bei der Vermessungstellenauswahl! <br>';
-    }
-    else {
-      if (pg_num_rows($queryret[1])==0) {
-        $errmsg.='Die Vermessungsstelle ist nicht bekannt. <br>';
+    
+    if (!in_array('vermstelle', $nachweis_unset_attributes)) {
+      # test auf korrekte Vermessungstelle 
+      $sql='SELECT * FROM nachweisverwaltung.n_vermstelle WHERE id='.$VermStelle;
+      $queryret=$this->database->execSQL($sql,4, 0);
+      if ($queryret[0]) {
+        $errmsg.='Fehler bei der Vermessungstellenauswahl! <br>';
+      }
+      else {
+        if (pg_num_rows($queryret[1])==0) {
+          $errmsg.='Die Vermessungsstelle ist nicht bekannt. <br>';
+        }
       }
     }
     
-    # test des Datum
-    if ($datum=='') {
-      $errmsg.='Bitte geben Sie ein Datum an!<br>';
-    }
-    else{
-			# richtigkeit des Datums checken
-			$explosion = explode('.', $datum);
-			if (checkdate($explosion[1], $explosion[0], $explosion[2])==false) {
-				$errmsg.= 'Datum ist nicht korrekt angegeben! <br<' ;
-			}
-			# prüfen ob Datum in Zukunft
-			$realtime=time();
-			$Zeit=mktime(0, 0, 0, $explosion[1], $explosion[0], $explosion[2]);
-			if ($realtime < $Zeit) {
-				$errmsg.='Das angegebene Datum liegt in der Zukunft! <br>' ;
-			} 
-    }    
-    
-    #Test des Blattformat
-    if ($Blattformat==''){
-      $errmsg.='Bitte das Blattformat des Dokuments angeben! <br>';
-   }
-    else{
-      $nums= array ("A4","A3","SF");
-      if(!in_array($Blattformat, $nums)){
-        $errmsg.='Die Auswahl des Blattformat ist nicht korrekt! <br>';
+    if (!in_array('datum', $nachweis_unset_attributes)) {
+      # test des Datum
+      if ($datum=='') {
+        $errmsg.='Bitte geben Sie ein Datum an!<br>';
+      }
+      else{
+        # richtigkeit des Datums checken
+        $explosion = explode('.', $datum);
+        if (checkdate($explosion[1], $explosion[0], $explosion[2])==false) {
+          $errmsg.= 'Datum ist nicht korrekt angegeben! <br<' ;
+        }
+        # prüfen ob Datum in Zukunft
+        $realtime=time();
+        $Zeit=mktime(0, 0, 0, $explosion[1], $explosion[0], $explosion[2]);
+        if ($realtime < $Zeit) {
+          $errmsg.='Das angegebene Datum liegt in der Zukunft! <br>' ;
+        } 
       }
     }
+    
+    if (!in_array('datum', $nachweis_unset_attributes)) {
+      #Test des Blattformat
+      if ($Blattformat==''){
+        $errmsg.='Bitte das Blattformat des Dokuments angeben! <br>';
+      }
+      else{
+        $nums= array ("A4","A3","SF");
+        if(!in_array($Blattformat, $nums)){
+          $errmsg.='Die Auswahl des Blattformat ist nicht korrekt! <br>';
+        }
+      }
+    }
+    
     # Test der Dokumentenart  
     if ($hauptart==''){
         $errmsg.='Bitte wählen Sie die Art des einzugebenden Dokuments aus! <br>';

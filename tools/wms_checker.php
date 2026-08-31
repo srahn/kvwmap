@@ -168,8 +168,13 @@ while ($line = pg_fetch_assoc($ret[1])){
 		$line["connection"] = str_replace('$' . $key, $value, $line["connection"]);
 	}
 	$wgsProjection = new projectionObj("init=epsg:4326");
-  $userProjection = new projectionObj("init=epsg:".$line["epsg_code"]);
-	$extent->project($wgsProjection, $userProjection);
+	if ($line["epsg_code"] != '') {
+		$userProjection = new projectionObj("init=epsg:".$line["epsg_code"]);
+		$extent->project($wgsProjection, $userProjection);
+	}
+	else {
+		echo 'EPSG-Code fehlt in Layer: ';
+	}
 	$bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
 	$exceptions = 'application/vnd.ogc.se_xml';
 	$url = $line["connection"] . "&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=" . $exceptions .  "&SRS=EPSG:" . $line["epsg_code"] . "&WIDTH=400&HEIGHT=400&BBOX=" . $bounding;
@@ -188,22 +193,21 @@ while ($line = pg_fetch_assoc($ret[1])){
 	else {
 		$color = '#36908a';
 	}
-	echo '<div style="border: 1px solid black;width: 100%;padding: 10px;background-color: ' . $color . '">';
-	echo '<a href="' . $url . '"target="_blank">' . $line["Name"] . "</a><br/>";
 	if (!$status[0]) {
-		echo 'nicht ok<br>' . $status[1] . $status[2];
+		$show_layer = true;
+		$output = 'nicht ok<br>' . $status[1] . $status[2];
 		$query = "
 			UPDATE
 				kvwmap.layer
 			SET
-				errorstatus = '" . addslashes($status[1]) . "'
+				errorstatus = '" . pg_escape_string(substr($status[1], 0, 255)) . "'
 			WHERE
 				layer_id = " . $line["layer_id"] . "
 		";
 	}
 	else {
-		echo ($status[0] != '' ? 'info: ' . $status[1] : '');
-		echo 'ok<br>';
+		$show_layer = $_REQUEST['only_errors'] != 1;
+		$output = 'ok<br>';
 		$query = "
 			UPDATE
 				kvwmap.layer
@@ -213,7 +217,12 @@ while ($line = pg_fetch_assoc($ret[1])){
 				layer_id = " . $line["layer_id"] . "
 		";
 	}
-	$result2 = $userDb->execSQL($query, 4, 0);
-	echo '</div>';
+	$result2 = $userDb->execSQL($query, 4, 0);	
+	if ($show_layer) {
+		echo '<div style="border: 1px solid black;width: 100%;padding: 10px;background-color: ' . $color . '">';
+		echo '<a href="' . $url . '"target="_blank">' . $line["name"] . "</a><br/>";
+		echo $output;
+		echo '</div>';
+	}
 }
 ?>
