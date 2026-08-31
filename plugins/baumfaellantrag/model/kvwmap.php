@@ -122,7 +122,7 @@
 			$mail_bearbeiter['reply_email'],
 			$mail_bearbeiter['subject'],
 			$mail_bearbeiter['message'],
-			$mail_bearbeiter['attachement'],
+			$mail_bearbeiter['attachment'],
 			MAILMETHOD,
 			MAILSMTPSERVER,
 			MAILSMTPPORT
@@ -140,7 +140,7 @@
 				$mail_absender['reply_email'],
 				$mail_absender['subject'],
 				$mail_absender['message'],
-				$mail_absender['attachement'],
+				$mail_absender['attachment'],
 				MAILMETHOD,
 				MAILSMTPSERVER,
 				MAILSMTPPORT

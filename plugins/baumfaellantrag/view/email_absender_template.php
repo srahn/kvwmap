@@ -16,5 +16,5 @@
   $mail_absender['message'] .= "Sie werden über den Bescheid per E-Mail oder per Post informiert\n\n\n";
 	$mail_absender['message'] .= "Für technische Rückfragen senden Sie bitte eine E-Mail an die Adresse geoportal@lk-seenplatte.de\n";
 
-	$mail_absender['attachement'] = BAUMFAELLANTRAG_UPLOAD_PATH . $file_name . '.pdf';
+	$mail_absender['attachment'] = BAUMFAELLANTRAG_UPLOAD_PATH . $file_name . '.pdf';
 ?>

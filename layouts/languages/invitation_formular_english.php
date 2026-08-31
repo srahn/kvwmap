@@ -8,4 +8,6 @@
 	$this->strSalutation="Salutation";
 	$this->strMister="Mr.";
 	$this->strMisses="Mrs.";
+	$this->strDivers="X";
+	$strStop="valid until";
 ?>
