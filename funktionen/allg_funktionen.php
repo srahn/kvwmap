@@ -2308,16 +2308,19 @@ function replace_params_link($str, $params, $layer_id) {
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe [http://www.php-einfach.de/codeschnipsel_1114.php](http://www.php-einfach.de/codeschnipsel_1114.php)
 *
-* @param $attachement String Pfad zur Datei, die als Anhang an die E-Mail angehängt werden soll.
+* @param $attachment String Pfad zur Datei, die als Anhang an die E-Mail angehängt werden soll.
 * mail_att("from name", "from@domain", "empf@domain", "ccempf@dmain", "reply@domain", "Email mit Anhang", "Im Anhang sind mehrere Datei", '/var/www/logs/kvwmap/mail_queue/anhang.txt', 'to name');
 *	Wenn eine E-Mail ohne Attachment gesendet werden soll, muss der Parameter einen leeren String enthalten.
 */
-function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
+function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachment, $mode, $smtp_server, $smtp_port, $to_name = 'Empfänger', $reply_name = 'WebGIS-Server', $bcc = null) {
 	$success = false;
 	switch ($mode) {
 		case 'sendEmail async': {
 			# Erstelle Befehl für sendEmail und schreibe in mail queue Verzeichnis.
-			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'from_name' => $from_name, 'cc_email' => $cc_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'from_name' => $from_name, 'cc_email' => $cc_email, 'subject' => $subject, 'message' => $message);
+			if ($attachment) {
+				$str['attachment'] = $attachment;
+			}
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
 				chmod(MAILQUEUEPATH, 'g+w');
@@ -2376,16 +2379,16 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 			$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
 			$botschaft.= $message;
 
-			if ($attachement) {
+			if ($attachment) {
 				$botschaft.="\n\n";
 				$botschaft.="\n--$grenze\n";
 
-				$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
+				$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachment) . "\n";
 				$botschaft.="Content-Transfer-Encoding: base64\n";
-				$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
+				$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachment) . "\n\n";
 
-				$zeiger_auf_datei=fopen($attachement,"rb");
-				$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
+				$zeiger_auf_datei=fopen($attachment,"rb");
+				$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachment));
 				fclose($zeiger_auf_datei);
 
 				$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));

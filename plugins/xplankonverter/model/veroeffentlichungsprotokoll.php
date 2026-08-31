@@ -407,7 +407,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
         'peter.korduan@gdi-service.de', // reply_email
         $email['subject'],
         $email['body'], // message
-        $email['anhang'], // attachement
+        $email['anhang'], // attachment
         MAILMETHOD, // mode
         MAILSMTPSERVER,
         MAILSMTPPORT,
