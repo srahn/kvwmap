@@ -91,6 +91,8 @@ class PgObject {
 		$this->attribute_names = array();
 		$this->fkeys = array();
 		$this->pkey = array();
+		$this->columns = array();
+		$this->auswahloptions = array();
 		$gui->debug->show('Create new Object PgObject with schema ' . $this->schema . ' table ' . $this->tableName, $this->show);
 	}
 
@@ -426,7 +428,8 @@ class PgObject {
 
 	function getAttributes() {
 		$attributes = [];
-		$this->columns = $this->get_attribute_types();
+		$this->columns = array_merge($this->get_attribute_types(), $this->columns);
+
 		foreach ($this->data AS $key => $value) {
 			$attribute_validations  = array_filter(
 				$this->validations,
@@ -434,7 +437,7 @@ class PgObject {
 					return $validation['attribute'] == $key;
 				}
 			);
-			$attributes[] = new PgAttribute($this->debug, $key, $this->columns[$key], $value, $attribute_validations, $this->identifier);
+			$attributes[] = new PgAttribute($this->debug, $key, $this->columns[$key], $value, $attribute_validations, $this->identifier, array(), $this->tooltips[$key], $this->auswahloptions[$key], $this->aliases[$key]);
 		}
 		return $attributes;
 	}
@@ -623,7 +626,7 @@ class PgObject {
 			return array(
 				'success' => false,
 				'type' => 'error',
-				'msg' => 'Fehler in Create-Statement: ' . pg_last_error($this->database->dbConn)
+				'msg' => 'Fehler in Create-Statement: ' . $sql . ' ' . pg_last_error($this->database->dbConn)
 			);
 		}
 		$oid = pg_last_oid($query);

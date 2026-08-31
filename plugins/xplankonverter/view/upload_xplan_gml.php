@@ -5,7 +5,7 @@
 			Sie können entweder nur eine XPlanGML-Datei hochladen oder eine ZIP-Datei, die neben der GML-Datei auch die Dokumente enthält auf die in den externen Referenzen der GML-Datei verwiesen wird.<p>
 			Wenn Sie eine ZIP-Datei hochladen beachten Sie folgende Konventionen:
 			<ol>
-				<!--li>Die Dateien dürfen nicht größer als 500 MB sein.</li//-->
+				<!--li>Die Dateien dürfen nicht größer als 300 MB sein.</li//-->
 				<li>Die GML-Datei muss die Dateiendung <i>.gml</i> oder <i>.xml</i> haben.
 					<li>Die Dateien der Plandokumente müssen die Namen haben, der auch in der externen Referenz des GML-Dokumentes im Attribut <i>referenzurl</i> angegeben ist.</li>
 				<li>Die Dateien liegen in der Wurzel der ZIP-Datei, nicht in Unterverzeichnissen.</li>

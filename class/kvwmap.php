@@ -941,7 +941,7 @@ class GUI {
 									</td>
 								</tr>';
 						}
-echo '			</table>
+	echo '		</table>
 					</td>
 				</tr>
 				<tr>
@@ -2289,9 +2289,11 @@ echo '			</table>
 				$map->scalebar->label->size = 10.5;
 
 				# Groups
+				include_once(CLASSPATH . 'LayerGroup.php');
 				if (value_of($this->formvars, 'nurAufgeklappteLayer') == '') {
-					$this->groupset = $mapDB->read_Groups();
+					$this->groupset = $mapDB->read_all_groups();
 				}
+				// echo '<p>Alle Gruppen: ' . print_r($this->groupset, true);
 
 				# Filter für read_Layer
 				$mapDB->nurAktiveLayer = $this->user->rolle->hide_deactivated_layers ?? value_of($this->formvars, 'nurAktiveLayer');
@@ -2310,23 +2312,24 @@ echo '			</table>
 
 				if (count($layerset) == 0) {
 					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')), $this->user->rolle->layer_selection);
+					$collectionlayer = $mapDB->read_CollectionLayer(count($layerset['list']));
+					$layerset['list'] = array_merge($layerset['list'], $collectionlayer['list']);
 					$rollenlayer = $mapDB->read_RollenLayer();
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
 				}
-        unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
+				unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
 				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['gruppe']][] = $i;
-					if(value_of($layerset['list'][$i], 'legendorder') != ''){
+					if (value_of($layerset['list'][$i], 'legendorder') != ''){
 						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['gruppe']] = true;
 					}
-					if(value_of($layerset['list'][$i], 'requires') == ''){
+					if (value_of($layerset['list'][$i], 'requires') == ''){
 						$this->layer_ids_of_group[$layerset['list'][$i]['gruppe']][] = $layerset['list'][$i]['layer_id'];				# die Layer-IDs in einer Gruppe
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['layer_id'].'|';							# alle Layer-IDs hintereinander in einem String
-
 					if ($group = value_of($this->groupset, $layerset['list'][$i]['gruppe'])){			# die Gruppe des Layers
 						if ($this->group_has_layers[$layerset['list'][$i]['gruppe']] != 1) {				# wenn group_has_layers noch nicht gesetzt
 							$this->group_has_layers[$layerset['list'][$i]['gruppe']] = 1;  						# die Gruppe hat Layer
@@ -2615,24 +2618,35 @@ echo '			</table>
 			}
 			# Setzen des Filters
 			if ($layerset['filter'] != '') {
-				$layerset['filter'] = replace_params_rolle($layerset['filter']);
-				if (substr($layerset['filter'], 0, 1) == '(') {
-					switch (true) {
-						case MAPSERVERVERSION >= 800 : {
-							$layer->setProcessingKey('NATIVE_FILTER', $layerset['filter']);
-						}break;
-						case MAPSERVERVERSION >= 700 : {
-							$layer->setProcessing('NATIVE_FILTER=' . $layerset['filter']);
-						} break;
-						default : {
-							$layer->setFilter($layerset['filter']);
-						}
+			 	$layerset['filter'] = replace_params_rolle($layerset['filter']);
+				// if (substr($layerset['filter'], 0, 1) == '(') {
+				// 	switch (true) {
+				// 		case MAPSERVERVERSION >= 800 : {
+				// 			$layer->setProcessingKey('NATIVE_FILTER', $layerset['filter']);
+				// 		} break;
+				// 		case MAPSERVERVERSION >= 700 : {
+				// 			$layer->setProcessing('NATIVE_FILTER=' . $layerset['filter']);
+				// 		} break;
+				// 		default : {
+				// 			$layer->setFilter($layerset['filter']);
+				// 		}
+				// 	}
+				// }
+			 	// else {
+				// 	$expr=buildExpressionString($layerset['filter']);
+				// 	$layer->setFilter($expr);
+				// }
+				switch (true) {
+					case MAPSERVERVERSION >= 800 : {
+						$layer->setProcessingKey('NATIVE_FILTER', $layerset['filter']);
+					} break;
+					case MAPSERVERVERSION >= 700 : {
+						$layer->setProcessing('NATIVE_FILTER=' . $layerset['filter']);
+					} break;
+					default : {
+						$layer->setFilter($layerset['filter']);
 					}
-			 }
-			 else {
-				 $expr=buildExpressionString($layerset['filter']);
-				 $layer->setFilter($expr);
-			 }
+				}
 			}
 			if ($layerset['styleitem']!='') {
 				$layer->styleitem = $layerset['styleitem'];
@@ -2682,7 +2696,7 @@ echo '			</table>
 				}
 			}
 		} # ende of Vektorlayer
-		$classset=$layerset['Class'];		
+		$classset=$layerset['Class'];
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
@@ -3134,11 +3148,11 @@ echo '			</table>
   function navMap($cmd) {
     switch ($cmd) {
       case "previous" : {
-#        $this->user->rolle->set_selected_button('previous');
+ #        $this->user->rolle->set_selected_button('previous');
         $this->setPrevMapExtent($this->user->rolle->last_time_id);
       } break;
       case "next" : {
-#        $this->user->rolle->set_selected_button('next');
+	#        $this->user->rolle->set_selected_button('next');
         $this->setNextMapExtent($this->user->rolle->last_time_id);
       } break;
       case "zoomin" : {
@@ -3406,19 +3420,19 @@ echo '			</table>
 
 	function get_web_header_template($title) {
 		$html = "<!-- MapServer Template -->
-<html lang=\"de\">
+	<html lang=\"de\">
   <head>
     <title>" . $title . "</title>
     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">
   </head>
-";
+	";
 		return $html;
 	}
 
 	function get_web_footer_template() {
 		$html = "<!-- MapServer Template -->
-</html>
-";
+	</html>
+	";
 		return $html;
 	}
 
@@ -3691,7 +3705,7 @@ echo '			</table>
   			$result[] = $data;
   		}
     }
-#		if (count($result) == 1) $result = $result[0];
+	#		if (count($result) == 1) $result = $result[0];
 		return $result;
 	}
 
@@ -4043,6 +4057,38 @@ echo '			</table>
 			$this->goNotExecutedInPlugins = true;
 			go_switch('', true);
 		}
+	}
+
+	function isCaseAllowed($case, $check_csrf_token = true) {
+		if ($check_csrf_token) {
+			if (!(
+				$case == 'show_snippet' AND
+				strpos(file_get_contents(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $this->formvars['snippet'] . '.php'), '$check_csrf_token = false;') !== false
+			)) {
+				// Nicht prüfen wenn im snippet der csrf_token_check explizit ausgeschaltet ist.
+				$csrf_token = $this->formvars['csrf_token'];
+				#echo '<br>csrf_token: ' . $csrf_token;
+				if (
+					!$this->user->has_logged_in AND (
+						!$csrf_token OR
+						(
+							$csrf_token !== $_SESSION['csrf_token'] AND 
+							!in_array($csrf_token, explode(',', $this->user->tokens))
+						)
+					)
+				) {
+					return false;
+				}
+			}
+		}
+		if (!(
+			$this->Stelle->isMenueAllowed($case) OR
+			$this->Stelle->isFunctionAllowed($case) OR
+			$this->user->is_case_allowed($case)
+		)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -4863,12 +4909,12 @@ echo '			</table>
   	$jpgfile = $randomnumber.'.jpg';
   	$fpsvg = fopen(IMAGEPATH . $svgfile, 'w');
   	$svg = '<?xml version="1.0"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+	<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg id="svgmap" zoomAndPan="disable" width="' . $this->map->width . '" height="' . $this->map->height . '"
+	<svg id="svgmap" zoomAndPan="disable" width="' . $this->map->width . '" height="' . $this->map->height . '"
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
-<title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
+	<title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
 		$this->formvars['svg_string'] = preg_replace('/href="data:image[^ ]*"/', '', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = preg_replace('/xlink:href="[^ ]*"/', 'xlink:href="'.$this->img['hauptkarte'].'" ', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
@@ -5739,7 +5785,7 @@ echo '			</table>
 			} break;
 			case "create_inserts_from_dataset" : {
 				$inserts_file = LOGPATH . 'inserts_from_dataset.sql';
-#				echo $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']);
+	#				echo $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']);
 
 				file_put_contents($inserts_file, $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']));
 				header("Content-type:application/pdf");
@@ -8631,7 +8677,7 @@ echo '			</table>
 		$this->main = 'layer_legendenreihenfolge.php';
 		$this->titel = 'Themenbaum bearbeiten';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$this->groups = $mapDB->read_Groups(true);
+		$this->groups = $mapDB->read_all_groups(true);
 		$this->layers = $mapDB->getall_Layer('legendorder');
 		$this->output();
 	}
@@ -8727,8 +8773,8 @@ echo '			</table>
 		$selected_schema = $this->formvars['selected_schema'];
 		$selected_tables = $this->formvars['selected_tables'];
 		$this->sql = "
--- Generated by kvwmap " . date('d.m.Y H:i:s') . "
-DO $$
+	-- Generated by kvwmap " . date('d.m.Y H:i:s') . "
+	DO $$
 	DECLARE 
 		vars_connection_id integer;
 		vars_group_id integer;
@@ -8758,7 +8804,7 @@ DO $$
 		}
 	  $this->debug->write($msg, 4);
 		$this->sql .= "
-END $$;
+	END $$;
 		";
 	}
 
@@ -9422,8 +9468,8 @@ END $$;
 			}
 			if (!file_exists($wrapperpath . $wrapperfile)) {
 				file_put_contents($wrapperpath . $wrapperfile, '#!/bin/sh
-MAPSERV="/usr/lib/cgi-bin/mapserv"
-MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
+	MAPSERV="/usr/lib/cgi-bin/mapserv"
+	MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->write_xlog('MapFile-Wrapper ' . $wrapperpath . $wrapperfile . ' geschrieben.');
 				chmod($wrapperpath . $wrapperfile, 0660);
 			}
@@ -9858,6 +9904,107 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 		$this->layergruppe->delete();
 		$this->add_message('notice', 'Layergruppe erfolgreich gelöscht.');
+	}
+
+	function collections_anzeigen() {
+		include_once(CLASSPATH . 'Collection.php');
+		$this->collections = Collection::find($this);
+		$this->main = 'collections.php';
+		$this->output();
+	}
+
+	function collection_editor() {
+		include_once(CLASSPATH . 'Collection.php');
+		$this->sanitize([
+			'selected_collection_id' => 'int'
+		]);
+		$result = Collection::find_by_id($this, $this->formvars['selected_collection_id']);
+		if (!$result['success']) {
+			$this->add_message('error', $result['msg']);
+		}
+		$this->collection = $result['collection'];
+		$this->main = 'collection_editor.php';
+		$this->output();
+	}
+
+	function collection_save($collection) {
+		$collection->data = formvars_strip($this->formvars, array('id', 'bezeichnung', 'group_id', 'filter', 'extent'), 'keep');
+		$results = $collection->validate();
+		if (empty($results)) {
+			if ($collection->get_id() == '') {
+				$results = $collection->create();
+				if ($results['success']) {
+					$results['msg'] = $strCollectionSaveSuccessMsg;
+				}
+			}
+			else {
+				$results = $collection->update();
+				if ($results['success']) {
+					$results['msg'] = $strCollectionUpdateSuccessMsg;
+				}
+			}
+		}
+		else {
+			$results = array_map(
+				function ($a) {
+					return array(
+						'type' => $a['type'],
+						'err_msg' => $a['msg']
+					);
+				},
+				$results
+			);
+		}
+
+		return $results;
+	}
+
+	function collection_delete() {
+		include_once(CLASSPATH . 'Collection.php');
+		$this->sanitize([
+			'selected_collection_id' => 'int'
+		]);
+		$result = Collection::find_by_id($this, $this->formvars['selected_collection_id']);
+		if (!$result['success']) {
+			$this->add_message('error', $result['msg']);
+		}
+		$this->collection = $result['collection'];
+		$this->collection->delete();
+		$this->collections_anzeigen();
+	}
+
+	function collection_neu() {
+		include_once(CLASSPATH . 'Collection.php');
+		if ($this->formvars['selected_collection_id'] != '') {
+			$result = $this->collection = Collection::find_by_id($this, $this->formvars['selected_collection_id']);
+			if (!$result['success']) {
+				return $result;
+			}
+			$this->collection = $result['collection'];
+		}
+		else {
+			$this->collection = new Collection($this);
+			$this->collection->setKeysFromTable();
+			if ($this->formvars['selected_group_id'] != '') {
+				include_once(CLASSPATH . 'LayerGroup.php');
+				$this->layer_group = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
+				$this->collection->set('bezeichnung', $this->layer_group->get('gruppenname'));
+				$this->collection->set('group_id', $this->layer_group->get('obergruppe'));
+				$this->collection->set('collection_layer_group_id', $this->layer_group->get_id());
+				$this->collection->set('only_with_content', 'false');
+				$this->collection->set('stelle_id', $this->Stelle->id);
+				}
+			else {
+				$this->collection->set('bezeichnung', $this->formvars['bezeichnung']);
+				$this->collection->set('group_id', $this->formvars['group_id']);
+				$this->collection->set('collection_layer_group_id', $this->formvars['collection_layer_group_id']);
+				$this->collection->set('only_with_content', $this->formvars['only_with_content'] === 'true');
+				$this->collection->set('stelle_id', $this->formvars['stelle_id']);
+			}
+			$this->collection->columns['only_with_content'] = 'boolean';
+		}
+		$this->main = 'collection_neu.php';
+		$this->output();
 	}
 
 	function invitations_list() {
@@ -14511,7 +14658,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->main = 'role_formular.php';
 		$this->output();
 	}
-//----------------
+	//----------------
 	/**
 	 * Function shows all menues in a list
 	 */
@@ -15482,10 +15629,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 
 		# crontab starten
-#		exec('crontab -u www-data ' . $crontab_file);
+	#		exec('crontab -u www-data ' . $crontab_file);
 
 		# crontab datei löschen
-#		unlink($crontab_file);
+	#		unlink($crontab_file);
 
 		# crontab Zeilen anzeigen
 		$this->main = 'crontab.php';
@@ -15545,15 +15692,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     # Abfragen aller Layer
     $this->layers = $mapDB->getall_Layer($this->formvars['order'] ?: 'name', true);
 		$this->layers_in_stelle = $mapDB->read_Layer(0);
-		$this->groups = $mapDB->read_Groups(true, 'gruppenname');
+		$this->groups = $mapDB->read_groups(true, 'gruppenname');
     $this->output();
   }
 
-	function save_legend_role_parameters(){
+	function save_legend_role_parameters() {
 		# Scrollposition der Legende wird gespeichert
   	$this->user->rolle->setScrollPosition(value_of($this->formvars, 'scrollposition'));
     # Änderungen in den Gruppen werden gesetzt
-    $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
+		if (array_key_exists('group', $this->formvars)) {
+	    $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
+		}
     # Wenn ein Button im Kartenfenster gewählt wurde,
     # werden auch die Einstellungen aus der Legende übernommen
     $this->user->rolle->setAktivLayer($this->formvars, $this->Stelle->id, $this->user->id, false);
@@ -15615,7 +15764,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 
-# 2006-03-20 pk
+	# 2006-03-20 pk
   function zoomToStoredMapExtent($storetime, $user_id){
     # Karteninformationen lesen
     $this->loadMap('DataBase');
@@ -16848,10 +16997,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function SachdatenAnzeige($rect) {
 		$this->qlayerset = array();
-		$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
+		$queryfield = ($this->user->rolle->singlequery == 2 ? 'thema' : 'qLayer');
 		$last_query_deleted = false;
 		if ($this->last_query != '') {
-			foreach($this->last_query['layer_ids'] as $layer_id) {
+			foreach ($this->last_query['layer_ids'] as $layer_id) {
 				$this->formvars[$queryfield][$layer_id] = 1;
 			}
 		}
@@ -16863,6 +17012,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$layer = $this->user->rolle->getLayer('', true);
 		$rollenlayer = $this->user->rolle->getRollenLayer('');
 		$layerset = array_merge($layer, $rollenlayer);
+		$anzLayer = count($layerset);
+		$layerset = $this->user->rolle->get_collection_layer($layerset);
 		$anzLayer = count($layerset);
 		$disabled_class_expressions = $this->user->rolle->read_disabled_class_expressions($layerset);
 		$map = new mapObj('');
@@ -16882,6 +17033,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				)
 			) {
 				# Dieser Layer soll abgefragt werden
+				if ($layerset[$i]['layer_id'] > 1000000) {
+					$layer_id = $layerset[$i]['collection_layer_layer_id'];
+				}
+				else {
+					$layer_id = $layerset[$i]['layer_id'];
+				}
 				if (value_of($this->formvars, 'anzahl') == '') {
 					$this->formvars['anzahl'] = $layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
 				}
@@ -16894,7 +17051,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				else {
 					include_once(CLASSPATH . 'LayerChart.php');
-					$layerset[$i]['charts'] = LayerChart::find($this, 'layer_id = ' . $layerset[$i]['layer_id']);
+					$layerset[$i]['charts'] = LayerChart::find($this, 'layer_id = ' . $layer_id);
 				}
 				switch ($layerset[$i]['connectiontype']) {
 					case MS_SHAPEFILE : { # Shape File Layer (1)
@@ -17023,10 +17180,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							# Attribute aus Path laden
 							# Rechte den Attributen zuweisen
 							$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-							$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['layer_id'], $this->Stelle->pgdbhost);
-							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['layer_id']);
-							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['layer_id'], $layerdb, $privileges['attributenames'], false, true);
-							
+							$layerdb = $this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+							$privileges = $this->Stelle->get_attributes_privileges($layer_id);
+							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layer_id, $layerdb, $privileges['attributenames'], false, true);
+
 							if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 								$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 							}
@@ -17042,12 +17199,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 							}
 
-							if ($layerset[$i]['layer_id'] > 0 AND empty($privileges)) {
+							if ($layer_id > 0 AND empty($privileges)) {
 								$pfad = 'NULL::geometry as ' . $layerset[$i]['attributes']['the_geom'] . ' ' . $pfad;
 							}
 
 							if ($layerset[$i]['attributes']['the_geom'] == '') {					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
-								$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layerset[$i]['layer_id']);
+								$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layer_id);
 								$layerset[$i]['attributes']['the_geom'] = $data_attributes['the_geom'];
 							}
 							$the_geom = $layerset[$i]['attributes']['the_geom'];
@@ -17270,7 +17427,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								# Datendrucklayouts abfragen
 								include_(CLASSPATH.'datendrucklayout.php');
 								$this->ddl = new ddl($this->pgdatabase);
-								$layerset[$i]['layouts'] = $this->ddl->load_layouts($this->Stelle->id, NULL, $layerset[$i]['layer_id'], array(0,1));
+								$layerset[$i]['layouts'] = $this->ddl->load_layouts($this->Stelle->id, NULL, $layer_id, array(0,1));
 							}
 							$this->qlayerset[]=$layerset[$i];
 						}
@@ -17423,8 +17580,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$password = $layerset[$i]['wms_auth_password'];
 						$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
 						$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-						$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['layer_id']);
-						$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['layer_id'], NULL, $privileges['attributenames']);
+						$privileges = $this->Stelle->get_attributes_privileges($layer_id);
+						$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layer_id, NULL, $privileges['attributenames']);
 						$request = '';
 						if($this->last_query != '' AND $this->last_query[$layerset[$i]['layer_id']]['sql'] != ''){
 							$request = $this->last_query[$layerset[$i]['layer_id']]['sql'];
@@ -17469,7 +17626,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 
-/*		if ($this->formvars['printversion'] == '' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
+	/*		if ($this->formvars['printversion'] == '' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
 			# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
@@ -18881,6 +19038,99 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		return $filterstring;
 	}
+
+	/**
+	 * Function create a collection based on given layer and filter
+	 * @param String $name The name of the collection
+	 * @param Integer $collection_group_id 	The id of the group where the collection shall be included below in the legend tree
+	 * @param String $filter 								The filter for the collection.
+	 * @param list<Array{
+	 * 		id: int // ID of the layer
+	 * 	}> $layers 													The layer_ids that shall belong to the collection. Array kann have optionally more assoziative Ellements.
+	 * @param Integer $stelle_id						The stelle_id the collection shall belong to. (optional default null) If null $this->Stelle->id will be used
+	 * @param String $extent 								The maximum spatial extent of that collection as bounding box with minx, miny, maxx, maxy separated by comma. (optional default null)
+	 */
+	function create_collection($name, $group_id, $filter, $layers, $stelle_id, $extent = null) {
+		// echo "\nCreate collection " . $name . " with " . count($layers_with_content) . " collection_layers and filter: " . $filter;
+		include_once(CLASSPATH . 'Collection.php');
+		include_once(CLASSPATH . 'CollectionLayer.php');
+		$stelle_id = $stelle_id ?: $this->Stelle->id;
+		$result = Collection::generate(
+			$this,
+			$name,
+			$group_id,
+			$filter,
+			$extent
+		);
+		if (! $result['success']) {
+			return $result;
+		}
+		$collection = $result['collection'];
+		$result = $collection->add_to_rollen($stelle_id);
+		if (! $result['success']) {
+			return $result;
+		}
+
+		foreach ($layers AS $layer) {
+			$result = CollectionLayer::generate($this, $collection->get_id(), $layer['id']);
+			if (! $result['success']) {
+				return $result;
+			}
+			$collection_layer = $result['collection_layer'];
+			$result = $collection_layer->add_to_rollen($stelle_id);
+			if (! $result['success']) {
+				return $result;
+			}
+		}
+
+		$sql = "
+			INSERT INTO kvwmap.collection_groups (collection_id, group_id, \"order\")
+			SELECT DISTINCT
+				c.id,
+				g.id,
+				g.\"order\"
+			FROM
+				kvwmap.layer l JOIN
+				kvwmap.u_groups g ON g.id = l.gruppe JOIN
+				kvwmap.collection_layer cl ON cl.layer_id = l.layer_id JOIN
+				kvwmap.collection_layer2rolle clr ON clr.collection_layer_id = cl.id JOIN
+				kvwmap.used_layer ul ON ul.layer_id = l.layer_id AND ul.stelle_id = clr.stelle_id JOIN
+				kvwmap.collections c ON c.id = cl.collection_id JOIN
+				kvwmap.collections2rolle cr ON cr.collection_id = c.id AND cr.stelle_id = clr.stelle_id AND cr.user_id = clr.user_id 
+			WHERE
+				c.id = $1
+		";
+		$result = $this->pgdatabase->execSQL($sql, 4, 1, false, array($collection->get_id()));
+		if (!$result['success']) {
+			return $result;
+		}
+		$sql = "
+			INSERT INTO kvwmap.collection_groups2rolle (collection_group_id, stelle_id, user_id, status)
+			SELECT
+				cg.id AS collection_group_id,
+				cr.stelle_id,
+				cr.user_id,
+				1 AS status
+			FROM
+				kvwmap.collection_groups cg JOIN
+				kvwmap.collections2rolle cr ON cr.collection_id = cg.collection_id
+			WHERE
+				cg.collection_id = $1
+			ORDER BY
+				cr.stelle_id,
+				cr.user_id,
+				cg.id 
+		";
+		$result = $this->pgdatabase->execSQL($sql, 4, 1, false, array($collection->get_id()));
+		if (!$result['success']) {
+			return $result;
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Collection mit id: ' . $collection->get_id() . ' mit ' . count($layers) . ' Collection Layern angelegt und der Stelle ' . $stelle_id . ' zugeordnet.',
+			'collection' => $collection
+		);
+	}
 } # end of class GUI
 
 class db_mapObj{
@@ -18929,6 +19179,244 @@ class db_mapObj{
 #		echo '<br>ref: ' . print_r($this->referenceMap, true);
     return $rs;
   }
+
+	function read_CollectionLayer($i) {
+		global $language;
+
+		if ($language != 'german') {
+			$language = str_replace('-', '_', $language);
+			$name_column = "
+			CASE
+				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "
+				ELSE l.name
+			END AS name";
+			$group_column = '
+			CASE
+				WHEN gruppenname_' . $language . ' IS NOT NULL THEN gruppenname_' . $language . '
+				ELSE gruppenname
+			END AS gruppenname';
+		}
+		else {
+			$name_column = "l.name";
+			$group_column = 'gruppenname';
+		}
+
+		$sql = "
+			SELECT
+				1000000 + cl.id AS layer_id,
+				" . $name_column . ",
+				2000000 + cg.id AS id,
+				" . $group_column . ",
+				2000000 + cg.id AS group_id,
+				2000000 + cg.id AS gruppe,
+				3000000 + c.id AS obergruppe,
+				g.order,
+				l.oid,
+				coalesce(ul.transparency, 100) AS transparency,
+				clr.aktivstatus,
+				clr.querystatus,
+				clr.gle_view,
+				clr.showclasses,
+				'' rollenfilter,
+				ul.queryable,
+				l.drawingorder,
+				l.legendorder,
+				ul.minscale,
+				ul.maxscale,
+				ul.offsite,
+				ul.postlabelcache,
+				concat_ws(' AND ', CASE WHEN trim(ul.filter) = '' THEN NULL ELSE trim(ul.filter) END, c.filter) AS filter,
+				ul.template,
+				ul.header,
+				ul.footer,
+				ul.symbolscale,
+				ul.requires,
+				ul.privileg,
+				ul.export_privileg,
+				l.alias,
+				l.datentyp,
+				l.pfad,
+				l.Data,
+				l.tileindex,
+				l.tileitem,
+				l.labelangleitem,
+				coalesce(clr.labelitem, l.labelitem) as labelitem,
+				clr.labelitem as user_labelitem,
+				l.labelmaxscale,
+				l.labelminscale,
+				l.labelrequires,
+				l.connection_id, 
+				CASE
+					WHEN connectiontype = 6 THEN concat('host=', cn.host, ' port=', cn.port, ' dbname=', cn.dbname, ' user=', cn.user, ' password=', cn.password, ' application_name=kvwmap_user_', clr.user_id)
+					ELSE l.connection
+				END as connection,
+				l.printconnection,
+				l.connectiontype,
+				l.classitem, l.styleitem, l.classification,
+				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.errorstatus, l.trigger_function,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
+				l.shared_from,
+				l.kurzbeschreibung,
+				l.dataowner_name,
+				l.dataowner_email,
+				l.dataowner_tel,
+				l.uptodateness,
+				l.updatecycle
+			FROM
+				kvwmap.layer l JOIN
+				kvwmap.connections as cn ON l.connection_id = cn.id JOIN
+				kvwmap.u_groups g ON g.id = l.gruppe JOIN
+				kvwmap.collection_layer cl ON cl.layer_id = l.layer_id JOIN
+				kvwmap.collection_layer2rolle clr ON clr.collection_layer_id = cl.id JOIN
+				kvwmap.used_layer ul ON ul.layer_id = l.layer_id AND ul.stelle_id = clr.stelle_id JOIN
+				kvwmap.collections c ON c.id = cl.collection_id JOIN
+				kvwmap.collections2rolle cr ON cr.collection_id = c.id AND cr.stelle_id = clr.stelle_id AND cr.user_id = clr.user_id JOIN
+				kvwmap.collection_groups cg ON c.id = cg.collection_id AND cg.group_id = g.id
+			WHERE
+				clr.stelle_id = " . $this->Stelle_ID . " AND
+				clr.user_id = " . $this->User_ID . "
+			ORDER BY
+				c.id,
+				l.drawingorder
+		";
+		// echo '<br>SQL zur Abfrage der CollectionLayer: ' . $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_CollectionLayer - Lesen der CollectionLayer der Rolle:<br>", 4);
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+		$collection_layer = array();
+		$collection_layer['list'] = array();
+		$this->disabled_classes = array();
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
+				if ($rs['filter'] == '') {
+					$rs['filter'] = '('.$rs['rollenfilter'].')';
+				}
+				else {
+					$rs['filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['filter']);
+				}
+			}
+
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'name' : 'alias'];
+			$rs['id'] = $i;
+			$rs['alias_link'] = replace_params_rolle(
+				replace_params_link(
+					$rs['Name_or_alias'],
+					rolle::$layer_params,
+					$rs['layer_id']
+				)
+			);
+			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data', 'wms_name') AS $key) {
+				$rs[$key] = replace_params_rolle(
+					$rs[$key],
+					['duplicate_criterion' => $rs['duplicate_criterion']]
+				);
+			}
+			$rs['Class'] = $this->read_Classes($rs['layer_id'], $this->disabled_classes, false, $rs['classification']);
+			if ($rs['maxscale'] > 0) {
+				$rs['maxscale'] = $rs['maxscale'] + 0.3;
+			}
+			if ($rs['minscale'] > 0) {
+				$rs['minscale'] = $rs['minscale'] - 0.3;
+			}
+			$rs['queryable'] = ($rs['queryable'] == 't');
+			$collection_layer['list'][$i] = $rs;
+			# Pointer auf requires-Array
+			$collection_layer['list'][$i]['required'] =& $requires_layer[$rs['layer_id']];
+			$collection_layer['layer_ids'][$rs['layer_id']] =& $collection_layer['list'][$i]; # damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$i++;
+		}
+		return $collection_layer;
+	}
+
+	function read_Collections($all = false, $order = '', $where = 'true') {
+		$gruppenname_column = "replace(c.bezeichnung, 'BPlan ', '')";
+		$sql ="
+			SELECT
+				3000000 + c.id AS id,
+				" . $gruppenname_column . " AS gruppenname,
+					c.group_id AS obergruppe,
+				false AS selectable_for_shared_layers,
+				true AS checkbox" .
+				(!$all ? ", cr.status" : "") . "
+			FROM
+				kvwmap.collections c". ($all ? "" : " JOIN
+				kvwmap.collections2rolle AS cr ON cr.collection_id = c.id") . "
+			WHERE
+				" . $where . ($all ? "" : " AND
+				cr.stelle_id = " . $this->Stelle_ID . " AND
+				cr.user_id = " . $this->User_ID) . "
+			ORDER BY " .
+				($order != '' ? replace_semicolon($order) : "c.bezeichnung") . "
+		";
+		// echo "SQL zur Abfrage der Collections: " . $sql;
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+		$groups = array();
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$groups[$rs['id']]['status'] = value_of($rs, 'status');
+			$groups[$rs['id']]['gruppenname'] = $rs['gruppenname'];
+			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
+			$groups[$rs['id']]['id'] = $rs['id'];
+			$groups[$rs['id']]['selectable_for_shared_layers'] = ($rs['selectable_for_shared_layers'] == 't');
+			$groups[$rs['id']]['checkbox'] = ($rs['checkbox'] == 't');
+			if ($rs['obergruppe']) {
+				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
+			}
+		}
+		$this->anzGroups = count($groups);
+		return $groups;
+	}
+
+	function read_CollectionGroups($all = false, $order = '', $where = 'true') {
+		global $language;
+		if ($language != 'german') {
+			$language = str_replace('-', '_', $language);
+			$gruppenname_column = "
+			CASE
+				WHEN g.gruppenname_" . $language . " != \"\" THEN g.gruppenname_" . $language . "
+				ELSE g.gruppenname
+			END";
+		}
+		else {
+			$gruppenname_column = "g.gruppenname";
+		}
+		$sql = "
+			SELECT
+				2000000 + cg.id AS id,
+				" . $gruppenname_column . " AS gruppenname,
+				3000000 + c.id AS obergruppe,
+				false AS selectable_for_shared_layers,
+				true AS checkbox" .
+				(!$all ? ", cgr.status" : "") . "
+			FROM
+				kvwmap.collection_groups AS cg JOIN
+				kvwmap.collections AS c ON c.id = cg.collection_id JOIN
+				kvwmap.u_groups g ON g.id = cg.group_id" . ($all ? "" : " JOIN
+				kvwmap.collection_groups2rolle AS cgr ON cg.id = cgr.collection_group_id") . "
+			WHERE
+				" . $where . ($all ? "" : " AND
+				cgr.stelle_id = " . $this->Stelle_ID . " AND
+				cgr.user_id = " . $this->User_ID) . "
+			ORDER BY " .
+				($order != '' ? replace_semicolon($order) : 'cg."order"') . "
+		";
+		// echo "<br>SQL zur Abfrage der Collection Groups: " . $sql;
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+		$groups = array();
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$groups[$rs['id']]['status'] = value_of($rs, 'status');
+			$groups[$rs['id']]['gruppenname'] = $rs['gruppenname'];
+			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
+			$groups[$rs['id']]['id'] = $rs['id'];
+			$groups[$rs['id']]['selectable_for_shared_layers'] = ($rs['selectable_for_shared_layers'] == 't');
+			$groups[$rs['id']]['checkbox'] = ($rs['checkbox'] == 't');
+			if ($rs['obergruppe']) {
+				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
+			}
+		}
+		$this->anzGroups = count($groups);
+		return $groups;
+	}
 
 	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
@@ -19024,7 +19512,15 @@ class db_mapObj{
 		}
 
 		$sql = "
-			SELECT 
+			SELECT
+				l.layer_id," .
+				$name_column . ",
+				g.id,
+				" . $group_column . ",
+				ul.group_id,
+				COALESCE(ul.group_id, l.Gruppe) AS gruppe,
+				g.obergruppe,
+				g.order,
 				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency,
 				rl.aktivstatus,
@@ -19046,11 +19542,11 @@ class db_mapObj{
 				ul.requires,
 				ul.privileg,
 				ul.export_privileg,
-				ul.group_id,
-				l.layer_id," .
-				$name_column . ",
 				l.alias,
-				l.datentyp, COALESCE(ul.group_id, l.Gruppe) AS Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
+				l.datentyp,
+				l.pfad,
+				l.Data,
+				l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires,
 				l.connection_id,
 				CASE
@@ -19070,11 +19566,7 @@ class db_mapObj{
 				l.dataowner_email,
 				l.dataowner_tel,
 				l.uptodateness,
-				l.updatecycle,
-				g.id,
-				" . $group_column . ",
-				g.obergruppe,
-				g.order
+				l.updatecycle
 				" . ($this->GUI->plugin_loaded('mobile') ? ', l.sync' : '') . "
 				" . ($this->GUI->plugin_loaded('mobile') ? ', l.vector_tile_url' : '') . "
 				" . ($this->GUI->plugin_loaded('portal') ? ', l.cluster_option' : '') . "
@@ -19085,7 +19577,7 @@ class db_mapObj{
 				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.gruppe) = g.id LEFT JOIN
 				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				kvwmap.connections as c ON l.connection_id = c.id
-				" . ($layer_selection? "join kvwmap.rolle_saved_layers rsl on l.layer_id = any(rsl.layers) and rsl.id = " . $layer_selection : "") . "
+				" . ($layer_selection ? "join kvwmap.rolle_saved_layers rsl on l.layer_id = any(rsl.layers) and rsl.id = " . $layer_selection : "") . "
 			WHERE
 				rl.stelle_id = ul.stelle_id AND
 				rl.layer_id = ul.layer_id AND
@@ -19201,6 +19693,7 @@ class db_mapObj{
 			ORDER BY " .
 				($order != '' ? replace_semicolon($order) : "g.order") . "
 		";
+		// echo "<br>read_Groups : " . $sql;
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$groups = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
@@ -19216,6 +19709,16 @@ class db_mapObj{
 		}
 		$this->anzGroups = count($groups);
 		return $groups;
+	}
+
+	function read_all_groups($all = false, $order = '', $where = 'true') {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		$groups = $this->read_Groups($all, $order, $where);
+		$collections = $this->read_Collections($all, $order, $where);
+		$collectiongroups = $this->read_CollectionGroups($all, $order, $where);
+		$all_groups = LayerGroup::merge_groups($groups, $collections, $collectiongroups);
+		$this->anzGroups = count($all_groups);
+		return $all_groups;
 	}
 
 	function read_ClassesbyClassid($class_id) {
@@ -19246,7 +19749,6 @@ class db_mapObj{
 				drawingorder,
 				class_id
 		";
-
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
 		$ret = $this->db->execSQL($sql);
@@ -19263,47 +19765,59 @@ class db_mapObj{
 		global $language;
 		$Classes = array();
 
+		if ($layer_id > 1000000) {
+			$from .= "
+				kvwmap.classes AS c JOIN
+				kvwmap.collection_layer cl ON c.layer_id = cl.layer_id
+			";
+			$where = "cl.id = " . ($layer_id - 1000000);
+		}
+		else {
+			$from = "kvwmap.classes AS c";
+			$where = "c.layer_id = " . $layer_id;
+		}
+
 		$sql = "
 			SELECT " .
 				((!$all_languages AND $language != 'german') ? "
 					CASE
-						WHEN name_" . $language . "IS NOT NULL THEN name_" . $language . "
-						ELSE name
+						WHEN c.name_" . $language . "IS NOT NULL THEN c.name_" . $language . "
+						ELSE c.name
 					END" : "
-					name"
+					c.name"
 				) . " AS name,
-				name_low_german,
-				name_english,
-				name_polish,
-				name_vietnamese,
-				class_id,
-				layer_id,
-				expression,
-				classification,
-				legendgraphic,
-				legendimagewidth,
-				legendimageheight,
-				drawingorder,
-				legendorder,
-				text
+				c.name_low_german,
+				c.name_english,
+				c.name_polish,
+				c.name_vietnamese,
+				c.class_id,
+				c.expression,
+				c.classification,
+				c.legendgraphic,
+				c.legendimagewidth,
+				c.legendimageheight,
+				c.drawingorder,
+				c.legendorder,
+				c.text,
+				c.layer_id
 			FROM
-				kvwmap.classes
+				" . $from . "
 			WHERE
-				layer_id = " . $layer_id .
-				(
+				" . $where
+				. (
 					(!empty($classification)) ? " AND
 						(
-							classification IS NULL OR classification IN ('', '" . $classification . "')
+							c.classification IS NULL OR c.classification IN ('', '" . $classification . "')
 						)
 					" : ""
 				) . "
 			ORDER BY
-				NULLIF(classification, '') IS NULL,
-				classification,
-				drawingorder,
-				class_id
+				NULLIF(c.classification, '') IS NULL,
+				c.classification,
+				c.drawingorder,
+				c.class_id
 		";
-		#echo $sql.'<br>';
+		// echo '<br>SQL zur Abfrage der KLassen von Layer-id ' . $layer_id . ': ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>", 4);
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$index = 0;
@@ -19311,9 +19825,8 @@ class db_mapObj{
 			$rs['Style'] = $this->read_Styles($rs['class_id']);
 			$rs['Label'] = $this->read_Label($rs['class_id']);
 			$rs['index'] = $index;
-			#Anne
-			if($disabled_classes){
-				if($disabled_classes['status'][$rs['class_id']] == 2) {
+			if ($disabled_classes) {
+				if ($disabled_classes['status'][$rs['class_id']] == 2) {
 					$rs['status'] = 1;
 					for($i = 0; $i < count($rs['Style']); $i++) {
 						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
@@ -22849,7 +23362,8 @@ DO $$
   }
 
   function get_Groups($layergruppen = NULL) {
-		$this->groupset = $this->read_Groups(true, 'gruppenname');
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->groupset = $mapDB->read_Groups(true, 'gruppenname');
 		if ($layergruppen == NULL) {	# alle abfragen
 			$layergruppen['ID'] = array_unique(array_keys($this->groupset));
 		}

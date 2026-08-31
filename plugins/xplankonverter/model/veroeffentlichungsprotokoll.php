@@ -239,7 +239,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
   function create_nachweis_luecke_alert_mail($auslegung, $contact_name, $pruef_result) {
     $stelle = stelle::find($this->gui, "id = " . $auslegung->plan->get('stelle_id'))[0];
     $url = AUSLEGUNG_URL . '?type=' . urlencode($auslegung->get_plan_type()) . '&id=' . $auslegung->plan->get('gml_id');
-    $subject = 'Warung zur Auslegung ' . $auslegung->plan->get('anzeigename') . ' ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
+    $subject = 'Warnung zur Auslegung ' . $auslegung->plan->get('anzeigename') . ' ' . $auslegung->get('startdatum') . ' bis ' . $auslegung->get('enddatum');
     $body = "Mitteilung für: " . $contact_name . "\n\nFür den " . $auslegung->plan->get('anzeigename') . " (gml_id: " . $auslegung->plan->get('gml_id') . ") in Stelle " . $stelle->get('bezeichnung') . " mit Auslegungszeitraum von " . $auslegung->get('startdatum') . " bis " . $auslegung->get('enddatum') . " gibt es vom " . date('d.m.Y H:i:s', $pruef_result['gap_start']) . " bis " . date('d.m.Y H:i:s', $pruef_result['gap_end']) . " eine Lücke in der Überwachung der Auslegung!\n\nIm genannten Zeitraum konnte nicht automatisch geprüft werden ob der Plan im Bau- und Planungsportal unter: " . $url . " verfügbar war.\n\nDas Problem ist behoben und die Überwachung der Auslegung läuft wieder regulär.\n\nSollte das Problem wiederholt auftreten, wenden Sie sich an die GDI-Service GmbH unter der Adresse robert.kraetschmer@gdi-service.de oder per Telefon unter 0381 40344446 oder an die Koordinierungsstelle beim Landkreis LUP.\n\n\nDies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an die oben angegebenen Kontakte.";
     return array(
       'subject' => $subject,
@@ -351,7 +351,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
 
     $body .= "\n\nIm Überwachungszeitraum gab es " . count($this->nachweise) . " Fehlermeldungen. Damit war der Plan in " . $verfuegbarkeit_p . "% der Überwachungszeit verfügbar.\n";
 
-    $body .= "\n\n" . "Dies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an GDI-Servive robert.kraetschmer@gdi-service.de oder die Koordinierungsstelle im Landkreis LUP geodatenmanagement@kreis-lup.de oder Ihren jeweilgen Ansprechpartner im zuständigen Landkreis.";
+    $body .= "\n\n" . "Dies ist eine automatisch erstellte Nachricht vom Bauleitplanserver.\nSie können auf diese E-Mail nicht antworten. Wenden Sie sich bei Bedarf an GDI-Service robert.kraetschmer@gdi-service.de oder die Koordinierungsstelle im Landkreis LUP geodatenmanagement@kreis-lup.de oder Ihren jeweilgen Ansprechpartner im zuständigen Landkreis.";
     echo_log('class Veroeffentlichungsprotokoll func create_veroeffentlichungsprotokoll_mail ' . __LINE__ . ': Erstelle Mail mit Betreff: ' . $subject . ' und Body: ' . $body, 3);
     return array(
       'subject' => $subject,

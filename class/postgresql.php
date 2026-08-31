@@ -46,6 +46,7 @@ class pgdatabase {
 	var $connection_id;
 	var $error;
 	var $dbName;
+	public array $prepared_params;
 
 	function __construct() {
 		global $debug;
@@ -1185,6 +1186,13 @@ FROM
 		}
 		$this->success = $ret['success'];
 		return $ret;
+	}
+
+	function get_prepared_sql($sql, $params) {
+		foreach ($params as $i => $param) {
+			$sql = str_replace('$' . ($i + 1), $param, $sql);
+		}
+		return $sql;
 	}
 
 	function build_temporal_filter($tablenames){

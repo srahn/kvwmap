@@ -200,14 +200,25 @@ class XP_Plan extends PgObject {
 	}
 
 	function get_anzeige_name() {
-		return ($this->get_first_planart_name() ? $this->get_first_planart_name() . ' ' : '') . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
+		$results = $this->find_where(
+      "gml_id = '" . $this->get('gml_id') . "'::uuid",
+      NULL,
+      $this->get_anzeige_name_function() . " AS anzeigename",
+      NULL,
+      "xplan_gml." . $this->tableName . " AS p"
+    );
+		$fehler = pg_last_error();
+		if ($fehler != '') {
+			return 'Class XP_Plan Func get_anzeige_name: Fehler bei der Abfrage des Anzeigenamens des Plan mit gml_id: ' . $this->get('gml_id') . ' Fehler: ' . $fehler;
+		}
+		return $results[0]->get('anzeigename');
 	}
 
 	function get_anzeige_name_function() {
 		switch ($this->planart) {
-			case 'BP-Plan' : return "xplankonverter.bplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename)";
-			case 'FP-Plan' : return "xplankonverter.fplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename)";
-			case 'SO-Plan' : return "xplankonverter.soplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename)";
+			case 'BP-Plan' : return "xplankonverter.bplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename, p.fassungsbezeichnung)";
+			case 'FP-Plan' : return "xplankonverter.fplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename, p.fassungsbezeichnung)";
+			case 'SO-Plan' : return "xplankonverter.soplan_anzeigename(p.name, p.planart, p.nummer, (p.gemeinde[1]).gemeindename, p.fassungsbezeichnung)";
 			default : return "p.name";
 		}
 	}
@@ -258,6 +269,7 @@ class XP_Plan extends PgObject {
 	 * @param array $xplan_layers Array mit GUI->xplankonverter_get_xplan_layers() abgefragt wurden
 	 */
 	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
+		$konvertierung_id = ($konvertierung_id !== '' ? $konvertierung_id : $this->get('konvertierueng_id'));
 		$layers_with_content = array();
 		foreach ($xplan_layers AS $xplan_layer) {
 			if ($xplan_layer['geom_column'] == '') {
@@ -268,6 +280,7 @@ class XP_Plan extends PgObject {
 				$ret['msg'] = $msg;
 				return $ret;
 			}
+			// echo "\nFrage die Anzahl der Objekte in Tabelle " . $xplan_layer['maintable'] . ' ab.';
 			$sql = "
 				SELECT
 					'" . $xplan_layer['name'] . "',
@@ -277,7 +290,7 @@ class XP_Plan extends PgObject {
 				FROM
 					" . $xplan_layer['schema'] . '.' . $xplan_layer['maintable'] . "
 				WHERE
-					" . ($konvertierung_id == '' ? "true" : "konvertierung_id = " . $this->get('konvertierung_id')) . "
+					" . ($konvertierung_id == '' ? "true" : "konvertierung_id = " . $konvertierung_id) . "
 			";
 
 			#echo '<p>' . $sql;
@@ -545,6 +558,7 @@ class XP_Plan extends PgObject {
 		}
 		$this->destroy_associated_textabschnitte();
 		$this->destroy_externereferenz_dokumente();
+		$this->destroy_layer_collections();
 		$sql = "
 			DELETE FROM
 				xplan_gml." . $this->planartAbk . "_plan
@@ -563,6 +577,12 @@ class XP_Plan extends PgObject {
 			$layer->get('document_url'),
 			NULL, NULL, NULL, NULL, '', true
 		);
+	}
+
+	function destroy_layer_collections() {
+		include_once(CLASSPATH . 'Collection.php');
+		$collection = new Collection($this->gui);
+		$collection->delete("filter like '%" . $this->get('gml_id') . "%'");
 	}
 }
 ?>

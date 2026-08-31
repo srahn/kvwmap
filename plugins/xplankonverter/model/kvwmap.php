@@ -283,7 +283,9 @@
 		# ToDo pk: Hier prüfen ob die richtigen layer abgefragt werden, weil die Namen geändert wurden.
 		# zusammenzeichnungen/fp_plan should check for layers named xp,bp_,fp,rp,so and the zusammenzeichnung layer.
 		# An alternative filter could be built e.g. over a defined list of elements for each service-type
-		$layers = Layer::find($GUI, "
+		$layers = Layer::find(
+			$GUI,
+			"
 				(
 					(
 						schema LIKE 'xplan_gml' AND
@@ -310,7 +312,9 @@
 				) AND
 				datentyp IN (0, 1, 2) AND
 				connectiontype = 6
-		", 'drawingorder');
+			", // where
+			'drawingorder' // order
+		);
 		$xplan_layers = array_map(
 			function ($layer) {
 				return array(
@@ -579,7 +583,7 @@
 			if (!empty($item['referenzurl'])) {
 				$referenzfile = pathinfo($item['referenzurl'], PATHINFO_BASENAME);
 				$srcfile = $GUI->konvertierung->get_file_path('uploaded_xplan_gml') . $referenzfile;
-				$dstfile = XPLANKONVERTER_FILE_PATH . 'plaene/' . $referenzfile;
+				$dstfile = SHAPEPATH . 'xplankonverter/plaene/' . $referenzfile;
 				if (!file_exists($srcfile)) {
 					send_error('Die in der externen Referenz bezeichnete Datei ' . $referenzfile . ' befand sich nicht in der hochgeladenen ZIP-Datei.', 'Planerzeugung abgebrochen');
 					exit;
@@ -898,26 +902,37 @@
 	};
 
 	$GUI->xplankonverter_konvertierung = function($konvertierung_id, $output) use ($GUI) {
+		global $admin_stellen;
 		$GUI->sanitize([
 			'konvertierung_id' => 'int'
 		]);
 		$GUI->title = str_replace('an', 'äne', $GUI->title);
 		$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
+
 		if ($konvertierung_id == '') {
-			$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-			$GUI->main = 'Hinweis.php';
-			$GUI->data = array(
-				'success' => false,
-				'msg' => $GUI->Hinweis
-			);
 			if ($output) {
-				$GUI->output();
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+				$GUI->main = 'Hinweis.php';
+				$GUI->data = array(
+					'success' => false,
+					'msg' => $GUI->Hinweis
+				);
+				if ($output) {
+					$GUI->output();
+				}
+				return true;
 			}
-			return true;
+			else {
+				return array(
+					'success' => false,
+					'msg' => 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.'
+				);
+			}
 		}
-		else {
-			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
-			if ($GUI->konvertierung->data === false) {
+
+		$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+		if ($GUI->konvertierung->data === false) {
+			if ($output) {
 				$GUI->Fehlermeldung = "Die Konvertierung mit der ID={$konvertierung_id} wurde nicht gefunden.";
 				$GUI->data = array(
 					'success' => false,
@@ -928,49 +943,108 @@
 				}
 				return true;
 			}
-			if ($GUI->konvertierung->plan === false) {
+			else {
+				return array(
+					'success' => false,
+					'msg' => "Die Konvertierung mit der ID={$konvertierung_id} wurde nicht gefunden."
+				);
+			}
+		}
+
+		if ($GUI->konvertierung->plan === false) {
+			if ($output) {
 				$GUI->Fehlermeldung = "Zur Konvertierung mit der ID={$konvertierung_id} wurde keinen Plan der Planart {$GUI->konvertierung->get('planart')} gefunden!";
 				$GUI->data = array(
 					'success' => false,
 					'msg' => $GUI->Fehlermeldung
 				);
-				if ($output) {
-					$GUI->output();
-				}
+				$GUI->output();
 				return true;
 			}
-			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
-				$GUI->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+			else {
+				return array(
+					'success' => false,
+					'msg' => "Zur Konvertierung mit der ID={$konvertierung_id} wurde keinen Plan der Planart {$GUI->konvertierung->get('planart')} gefunden!"
+				);
+			}
+		}
+
+		if (!in_array($GUI->Stelle->id, $admin_stellen) AND !isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+			$GUI->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
 					Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
 					Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
 					Melden Sie sich mit einem anderen Benutzer an.";
+			if ($output) {
 				$GUI->data = array(
 					'success' => false,
 					'msg' => $GUI->Fehlermeldung
 				);
-				if ($output) {
-					$GUI->output();
-				}
+				$GUI->output();
 				return true;
 			}
 			else {
-				try {
-					$GUI->konvertierung->reset_mapping();
-					$GUI->konvertierung->mapping();
-					#$GUI->konvertierung->set_historie();
-					$GUI->konvertierung->set_status(
-						($GUI->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
-					);
-					$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);
-					$GUI->konvertierung->create_themenauswahl($GUI->xplan_layers);
+				return array(
+					'success' => false,
+					'msg' => $GUI->Fehlermeldung
+				);
+			}
+		}
+
+		try {
+			$GUI->konvertierung->reset_mapping();
+			$GUI->konvertierung->mapping();
+			#$GUI->konvertierung->set_historie();
+			$GUI->konvertierung->set_status(
+				($GUI->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
+			);
+			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);
+			// $result = $GUI->konvertierung->create_themenauswahl($GUI->xplan_layers);
+			// if (!$result['success']) {
+			// 	if ($output) {
+			// 		# Validierungsergebnisse anzeigen.
+			// 		$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+			// 		$GUI->Fehlermeldung = $result['msg'];
+			// 		$GUI->data = array(
+			// 			'success' => false,
+			// 			'msg' => $GUI->Fehlermeldung
+			// 		);
+			// 		$GUI->output();
+			// 		return false;
+			// 	}
+			// 	return $result;
+			// }
+			$result = $GUI->konvertierung->create_layer_collection($GUI->xplan_layers);
+			if (!$result['success']) {
+				if ($output) {
 					# Validierungsergebnisse anzeigen.
 					$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
-				}
-				catch (Exception $e) {
-					send_error($e->getMessage());
+					$GUI->Fehlermeldung = $result['msg'];
+					$GUI->data = array(
+						'success' => false,
+						'msg' => $GUI->Fehlermeldung
+					);
+					$GUI->output();
 					return false;
 				}
+				return $result;
 			}
+		}
+		catch (Exception $e) {
+			if ($output) {
+				# Validierungsergebnisse anzeigen.
+				$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+				$GUI->Fehlermeldung = $e->getMessage();
+				$GUI->data = array(
+					'success' => false,
+					'msg' => $GUI->Fehlermeldung
+				);
+				$GUI->output();
+				return false;
+			}
+			return array(
+				'success' => false,
+				$GUI->Fehlermeldung
+			);
 		}
 		if ($GUI->formvars['format'] === 'json_result') {
 			header('Content-Type: application/json');
@@ -992,8 +1066,96 @@
 			if ($output) {
 				$GUI->output();
 			}
+			else {
+				return array(
+					'success' => true,
+					'msg' => $GUI->konvertierung->config['akkusativ'] . ' erfolgreich in Ziel-Version konvertiert.'
+				);
+			}
 		}
 		return true;
+	};
+
+	$GUI->xplankonverter_create_collection = function() use ($GUI) {
+		global $admin_stellen;
+
+		$konvertierung_id = $GUI->formvars['konvertierung_id'];
+		if ($konvertierung_id == '') {
+			return array(
+				'success' => false,
+				'mgs' => 'Es wurde keine Konvertierung_id angegeben!'
+			);
+		}
+		$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+		if ($GUI->konvertierung->data === false) {
+			return array(
+				'success' => false,
+				'mgs' => "Die Konvertierung mit der ID={$konvertierung_id} wurde nicht gefunden."
+			);
+		}
+
+		if ($GUI->konvertierung->plan === false) {
+			return array(
+				'success' => false,
+				'mgs' => "Zur Konvertierung mit der ID={$konvertierung_id} wurde keinen Plan der Planart {$GUI->konvertierung->get('planart')} gefunden!"
+			);
+		}
+
+		if (!in_array($GUI->Stelle->id, $admin_stellen) AND !isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+			return array(
+				'success' => false,
+				'mgs' => "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+				Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+				Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+				Melden Sie sich mit einem anderen Benutzer an."
+			);
+		}
+
+		$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);
+		$result = $GUI->konvertierung->create_layer_collection($GUI->xplan_layers);
+		return $result;
+	};
+
+	$GUI->xplankonverter_delete_collection = function() use ($GUI) {
+		global $admin_stellen;
+		$GUI->sanitize([
+			'konvertierung_id' => 'int'
+		]);
+		$konvertierung_id = $GUI->formvars['konvertierung_id'];
+		if ($konvertierung_id == '') {
+			return array(
+				'success' => false,
+				'mgs' => 'Es wurde keine Konvertierung_id angegeben!'
+			);
+		}
+		$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+		if ($GUI->konvertierung->data === false) {
+			return array(
+				'success' => false,
+				'mgs' => "Die Konvertierung mit der ID={$konvertierung_id} wurde nicht gefunden."
+			);
+		}
+
+		if ($GUI->konvertierung->plan === false) {
+			return array(
+				'success' => false,
+				'mgs' => "Zur Konvertierung mit der ID={$konvertierung_id} wurde keinen Plan der Planart {$GUI->konvertierung->get('planart')} gefunden!"
+			);
+		}
+
+		if (!in_array($GUI->Stelle->id, $admin_stellen) AND !isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+			return array(
+				'success' => false,
+				'mgs' => "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+				Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+				Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+				Melden Sie sich mit einem anderen Benutzer an."
+			);
+		}
+
+		$result = $GUI->konvertierung->delete_layer_collection();
+		$result['konvertierung_id'] = $konvertierung_id;
+		return $result;
 	};
 
 	$GUI->xplankonverter_remove_failed_konvertierungen = function() use ($GUI) {

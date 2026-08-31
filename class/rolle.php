@@ -99,26 +99,37 @@ class rolle {
 	* @param $formvars array mit key group_<group_id> welcher den Status der Gruppe enthält 
 	*/
 	function setGroupStatus($formvars) {
-		$this->groupset = $this->getGroups('');
-		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
-		for ($i = 0; $i < count($this->groupset); $i++) {
-			if(value_of($formvars, 'group_'.$this->groupset[$i]['id']) !== '') {
-				$group_status = (value_of($formvars, 'group_'.$this->groupset[$i]['id']) == 1 ? 1 : 0);
-				$sql = "
-					UPDATE
-						kvwmap.u_groups2rolle
-					SET
-						status = '" . $group_status . "'
-					WHERE
-						user_id = " . $this->user_id . " AND
-						stelle_id = " . $this->stelle_id . " AND
-						id = " . $this->groupset[$i]['id'] . "
-				";
-				#echo '<br>Sql: ' . $sql;
-				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:", 4);
-				$this->database->execSQL($sql, 4, $this->loglevel);
-			}
+		$group_id = $formvars['group'];
+		if ($group_id > 3000000) {
+			$table_name = 'collections2rolle';
+			$id_column = '3000000 + collection_id';
 		}
+		elseif ($group_id > 2000000) {
+			$table_name = 'collection_groups2rolle';
+			$id_column = '2000000 + collection_group_id';
+		}
+		else {
+			$table_name = 'u_groups2rolle';
+			$id_column = 'id';
+		}
+		$sql = "
+			UPDATE
+				kvwmap." . $table_name . "
+			SET
+				status = $1
+			WHERE
+				user_id = $2 AND
+				stelle_id = $3 AND
+				" . $id_column . " = $4
+		";
+		$params = array(
+			(value_of($formvars, 'group_' . $formvars['group']) == 1 ? 1 : 0),
+			$this->user_id,
+			$this->stelle_id,
+			$formvars['group']
+		);
+		// echo "<br>SQL zum Update des Status in Tabelle " . $table_name . ": " . $this->database->get_prepared_sql($sql, $params); exit;
+		$this->database->execSQL($sql, 4, $this->loglevel, false, $params);
 		return $formvars;
 	}
 
@@ -152,12 +163,18 @@ class rolle {
     return 1;
   }
 
+	/**
+	 * Function query layers in this rolle,
+	 * if $LayerName != '' only this layer,
+	 * only the aktive layer if the optional parameter $only_active is true,
+	 * replace Constants and layer_params if $replace_params is true in the following attributes of found layers
+	 * 'name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data', 'metalink'
+	 */
 	function getLayer($LayerName, $only_active = false, $replace_params = true) {
 		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
 
-		# Abfragen der Layer in der Rolle
 		if (rolle::$language != 'german') {
 			$name_column = "
 			CASE
@@ -198,8 +215,8 @@ class rolle {
 		}
 
 		$sql = "
-			SELECT " .
-			$name_column . ",
+			SELECT
+				" . $name_column . ",
 				l.layer_id,
 				l.alias, datentyp, COALESCE(ul.group_id, gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, tileindex, l.schema, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
@@ -254,7 +271,7 @@ class rolle {
 			ORDER BY
 				l.drawingorder desc
 		";
-		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
+		#echo '<br>SQL zur Abfrage der Layer der Rolle: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql);
 		$i = 0;
@@ -351,29 +368,193 @@ class rolle {
 		return $result ?: [];
   }	
 
-  function getGroups($GroupName) {
-    # Abfragen der Gruppen in der Rolle
-    $sql = '
+	function getAllGroups($gruppenname) {
+		$groups = $this->getGroups($gruppenname);
+		$collections = $this->get_collections($gruppenname);
+		$collection_groups = $this->get_collection_groups($gruppenname);
+		return $groups + $collections + $collection_groups;
+	}
+
+	function getGroups($gruppenname) {
+		# Abfragen der Gruppen in der Rolle
+		$sql = "
 			SELECT 
-				g2r.*, ' .
-				(rolle::$language != 'german'? 'CASE WHEN gruppenname_' . rolle::$language . ' != "" THEN gruppenname_' . rolle::$language . ' ELSE gruppenname END AS ' : '') . '
-				gruppenname 
-			FROM 
-				kvwmap.u_groups AS g, 
-				kvwmap.u_groups2rolle AS g2r 
+				g2r.*,
+				" . (rolle::$language != 'german' ? "CASE WHEN gruppenname_" . rolle::$language . " != '' THEN gruppenname_" . rolle::$language . " ELSE gruppenname END AS " : "") . "gruppenname 
+			FROM
+				kvwmap.u_groups AS g JOIN 
+				kvwmap.u_groups2rolle AS g2r ON g2r.id = g.id
 			WHERE 
-				g2r.stelle_id = ' . $this->stelle_id . ' AND 
-				g2r.user_id = '.$this->user_id . ' AND 
-				g2r.id = g.id';
-    if ($GroupName != '') {
-      $sql.=' AND gruppenname = "' . $GroupName . '"';
-    }
-    $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
-    $ret = $this->database->execSQL($sql);
-    while ($rs = pg_fetch_assoc($ret[1])) {
-      $groups[]=$rs;
-    }
-    return $groups;
+				g2r.stelle_id = " . $this->stelle_id . " AND 
+				g2r.user_id = " . $this->user_id
+				. ($gruppenname != '' ? " AND gruppenname = '" . $gruppenname . "'" : "") . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
+		$ret = $this->database->execSQL($sql);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$groups[] = $rs;
+		}
+		return $groups;
+	}
+
+	/**
+	 * Abfragen der Collections in der Rolle
+	 */
+	function get_collections($bezeichnung = '') {
+		$sql = "
+			SELECT
+				cr.user_id,
+				cr.stelle_id,
+				3000000 + cr.collection_id AS id,
+				cr.status,
+				c.bezeichnung AS gruppenname
+			FROM 
+				kvwmap.collections AS c JOIN
+				kvwmap.collections2rolle AS cr ON cr.collection_id = c.id
+			WHERE
+				cr.stelle_id = " . $this->stelle_id . " AND 
+				cr.user_id = " . $this->user_id
+				. ($bezeichnungn !== '' ? " AND c.bezeichnung = '" . $bezeichnungn . "'" : "") . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->get_collections - Abfragen der Collections zur Rolle:<br>".$sql,4);
+		$ret = $this->database->execSQL($sql);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$collections[]=$rs;
+		}
+		return $collections;
+	}
+
+	/**
+	 * Abfrage der LayerGroups der Collection
+	 */
+	function get_collection_groups($gruppenname = '') {
+		$gruppenname_column = (rolle::$language === 'german' ? "g.gruppenname" : "CASE WHEN g.gruppenname_" . rolle::$language . " != '' THEN g.gruppenname_" . rolle::$language . " ELSE g.gruppenname END");
+		$sql = "
+			SELECT DISTINCT
+				clr.user_id,
+				clr.stelle_id,
+				2000000 + g.id aS id,
+				cr.status,
+				" . $gruppenname_column . " AS gruppenname
+			FROM
+				kvwmap.layer l JOIN
+				kvwmap.u_groups g ON g.id = l.gruppe JOIN
+				kvwmap.collection_layer cl ON cl.layer_id = l.layer_id JOIN
+				kvwmap.collection_layer2rolle clr ON clr.collection_layer_id = cl.id JOIN
+				kvwmap.used_layer ul ON ul.layer_id = l.layer_id AND ul.stelle_id = clr.stelle_id JOIN
+				kvwmap.collections c ON c.id = cl.collection_id JOIN
+				kvwmap.collections2rolle cr ON cr.collection_id = c.id AND cr.stelle_id = clr.stelle_id AND cr.user_id = clr.user_id 
+			WHERE
+				clr.stelle_id = " . $this->stelle_id . " AND 
+				clr.user_id = " . $this->user_id
+				. ($gruppenname !== '' ? " AND " . $gruppenname_column . " = '" . $gruppenname . "'" : "") . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->get_collection_groups - Abfragen der Collection Gruppen zur Rolle:<br>".$sql,4);
+		$ret = $this->database->execSQL($sql);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$collection_groups[]=$rs;
+		}
+		return $collection_groups;
+	}
+
+	function get_collection_layer($layerset, $replace_params = true) {
+			if (rolle::$language != 'german') {
+			$name_column = "
+			CASE
+				WHEN l.name_" . rolle::$language . " != \"\" THEN l.name_" . rolle::$language . "
+				ELSE l.name
+			END AS name";
+		} else {
+			$name_column = "l.name";
+		}
+
+		$sql = "
+			SELECT
+				" . $name_column . ",
+				cl.id + 1000000 AS layer_id,
+				l.layer_id AS collection_layer_layer_id,
+				l.alias, datentyp, COALESCE(ul.group_id, gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, tileindex, l.schema, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				CASE 
+					WHEN connectiontype = 6 THEN concat('host=', conn.host, ' port=', conn.port, ' dbname=', conn.dbname, ' user=', conn.user, ' password=', conn.password, ' application_name=kvwmap_user_', clr.user_id)
+					ELSE l.connection 
+				END as connection, 
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom,
+				write_mapserver_templates,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, errorstatus, trigger_function, version,
+				ul.queryable,
+				l.drawingorder,
+				l.legendorder,
+				ul.minscale,
+				ul.maxscale,
+				ul.offsite,
+				coalesce(ul.transparency, 100) as transparency,
+				coalesce(clr.labelitem, l.labelitem) as labelitem,
+				l.labelitem as original_labelitem,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
+				l.shared_from,
+				l.geom_column,
+				ul.postlabelcache,
+				c.filter,
+				clr.gle_view,
+				ul.template,
+				header,
+				footer,
+				ul.symbolscale,
+				ul.requires,
+				ul.privileg,
+				ul.export_privileg,
+				start_aktiv,
+				clr.showclasses,
+				false AS geom_from_layer
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.sync' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.vector_tile_url' : '') . "
+				" . ($this->gui_object->plugin_loaded('portal') ? ', l.cluster_option' : '') . "
+			FROM
+				kvwmap.layer AS l JOIN
+				kvwmap.used_layer AS ul ON l.layer_id = ul.layer_id JOIN
+				kvwmap.collection_layer cl ON cl.layer_id = l.layer_id JOIN
+				kvwmap.collection_layer2rolle clr ON clr.collection_layer_id = cl.id AND ul.stelle_id = clr.stelle_id JOIN
+				kvwmap.collections c ON c.id = cl.collection_id	LEFT JOIN
+				kvwmap.connections as conn ON l.connection_id = conn.id
+			WHERE
+				clr.stelle_id = " . $this->stelle_id . " AND
+				clr.user_id = " . $this->user_id . " AND
+				clr.aktivstatus = 1
+			ORDER BY
+				l.drawingorder desc
+		";
+		// echo "SQL zur Abfrage der aktiven collection_layer: " . $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle->get_collection_layer - Abfragen der Collection Layer zur Rolle:<br>" . $sql, 4);
+		$ret = $this->database->execSQL($sql);
+		$i = (!array_key_exists('layer_ids', $layerset) ? 0 : count($layerset) - 1); // -1 weil das Element layer_ids nicht dazu zählen soll. Es geht mit dem nächsten $i weiter ohne Lücke.
+		// hier auch noch die collection layer abfragen und mit layerset abgleichen
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['queryable'] = ($rs['queryable'] === 't');
+			$rs['querymap'] = ($rs['querymap'] === 't');
+			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
+				if ($rs['filter'] == '') {
+					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
+				} else {
+					$rs['filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['filter']);
+				}
+			}
+			if ($replace_params) {
+				foreach (array('name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data', 'metalink') as $key) {
+					$rs[$key] = replace_params_rolle(
+						$rs[$key],
+						['duplicate_criterion' => $rs['duplicate_criterion']]
+					);
+				}
+			}
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'name' : 'alias'];
+			$layerset[$i] = $rs;
+			$layerset['layer_ids'][$rs['layer_id']] = &$collection_layer[$i];
+			$layerset['layer_ids'][$collection_layer[$i]['requires']]['required'] = $rs['layer_id'];
+			$i++;
+		}
+		return $layerset;
   }
 
 	function set_print_legend_separate($separate){
@@ -1239,16 +1420,6 @@ class rolle {
 		return $settings;
 	}
 
-	function read_Group($id) {
-		$sql ='SELECT g2r.*, g.gruppenname FROM kvwmap.u_groups AS g, u_groups2rolle AS g2r';
-		$sql.=' WHERE g2r.stelle_id='.$this->stelle_id.' AND g2r.user_id='.$this->user_id.' AND g2r.id = g.id AND g.id='.$id;
-		$this->debug->write("<p>file:kvwmap class:rolle->read_Group - Lesen einer Gruppe der Rolle:<br>".$sql,4);
-		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) { echo "<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		$rs = pg_fetch_assoc($ret[1]);
-		return $rs;
-	}
-
 	function setOneLayer($layer_id, $status){
 		$sql ='UPDATE kvwmap.u_rolle2used_layer SET aktivstatus='.$status;
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
@@ -1416,78 +1587,140 @@ class rolle {
 			$layer = $this->layerset['layer_ids'][$layer_id];
 			if ($aktiv_status !== '') {
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
-				if ($layer['layer_id'] > 0) {
+				if ($layer_id > 1000000) {
+					$sql = "
+						UPDATE
+							kvwmap.collection_layer2rolle clr
+						SET
+							aktivstatus = $1
+						WHERE
+							clr.user_id = $2 AND
+							clr.stelle_id = $3 AND
+							clr.collection_layer_id = $4
+					";
+					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, ($layer_id - 1000000));
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collectionlayer zur Rolle:", 4);
+					$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
+				}
+				elseif ($layer['layer_id'] > 0) {
 					$sql ="
 						UPDATE
 							kvwmap.u_rolle2used_layer r
 						SET
-							aktivstatus = " . $aktiv_status . "
+							aktivstatus = $1
 						FROM
 							kvwmap.used_layer ul
 						WHERE
-							r.user_id = " . $this->user_id . " AND
-							r.stelle_id = " . $this->stelle_id . " AND
-							ul.stelle_id = " . $this->stelle_id . " AND
+							r.user_id = $2 AND
+							r.stelle_id = $3 AND
+							ul.stelle_id = $3 AND
 							ul.layer_id = r.layer_id and 
 							(
-								r.layer_id = " . $layer['layer_id'] . " OR
-								ul.requires = " . $layer['layer_id'] . "
+								r.layer_id = $4 OR
+								ul.requires = $4
 							)
 					";
-					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
-					$this->database->execSQL($sql,4, $this->loglevel);
+					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $layer['layer_id']);
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:", 4);
 				}
 				else { # Rollenlayer
 					$sql  = "
 						UPDATE
 							kvwmap.rollenlayer
 						SET
-							aktivstatus = '" . $aktiv_status . "'
+							aktivstatus = $1
 						WHERE
-							user_id = " . $this->user_id . " AND
-							stelle_id = " . $this->stelle_id . " AND
-							id = " . abs($layer['layer_id']) . "
+							user_id = $2 AND
+							stelle_id = $3 AND
+							id = $4
 					";
-					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
-					$this->database->execSQL($sql,4, $this->loglevel);
+					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, abs($layer['layer_id']));
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Rollenlayer zur Rolle:",4);
 				}
+				$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
 			}
 		}
 		foreach ($formvars['group_checkbox'] as $group_id => $aktiv_status) {
-			$sql = "
-				UPDATE
-					kvwmap.u_rolle2used_layer
-				SET
-					aktivstatus = " . $aktiv_status . "
-					" . ($aktiv_status == 0 ? ',querystatus = 0' : '') . "
-				WHERE
-					user_id = " . $this->user_id . " AND
-					stelle_id = " . $this->stelle_id . " AND
-					layer_id IN (
-						WITH RECURSIVE cte (group_id) AS (
-							SELECT 
-								" .  $group_id . "
-							UNION ALL
-							SELECT 
-								u_groups.id
+			if ($group_id > 3000000) {
+				$sql = "
+					UPDATE
+						kvwmap.collection_layer2rolle clr
+					SET
+						aktivstatus = $1
+						" . ($aktiv_status == 0 ? ', querystatus = 0' : '') . "
+					FROM
+						kvwmap.collection_layer cl
+					WHERE
+						clr.collection_layer_id = cl.id AND
+						clr.user_id = $2 AND
+						clr.stelle_id = $3 AND
+						cl.collection_id + 3000000 = $4
+				";
+				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $group_id);
+				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collection Groups und Layer zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
+			}
+			elseif ($group_id > 2000000) {
+				$sql = "
+					UPDATE
+						kvwmap.collection_layer2rolle clr
+					SET
+						aktivstatus = $1
+						" . ($aktiv_status == 0 ? ', querystatus = 0' : '') . "
+					FROM
+						kvwmap.collection_groups cg JOIN
+						kvwmap.u_groups g ON g.id = cg.group_id JOIN
+						kvwmap.layer l ON l.gruppe = g.id JOIN
+						kvwmap.collection_layer cl ON cl.layer_id = l.layer_id AND cl.collection_id = cg.collection_id
+					WHERE
+						clr.collection_layer_id = cl.id AND
+						clr.user_id = $2 AND
+						clr.stelle_id = $3 AND
+						cg.id + 2000000 = $4
+				";
+				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $group_id);
+				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collection Layer zur Rolle:", 4);
+			}
+			else {
+				$sql = "
+					UPDATE
+						kvwmap.u_rolle2used_layer
+					SET
+						aktivstatus = " .$aktiv_status . "
+						" . ($aktiv_status == 0 ? ',querystatus = 0' : '') . "
+					WHERE
+						user_id = " . $this->user_id . " AND
+						stelle_id = " . $this->stelle_id . " AND
+						layer_id IN (
+							WITH RECURSIVE cte (group_id) AS (
+								SELECT
+									" . $group_id . "
+								UNION ALL
+								SELECT 
+									u_groups.id
+								FROM 
+									cte,
+									kvwmap.u_groups
+								WHERE 
+									cte.group_id = u_groups.obergruppe AND 
+									obergruppe IS NOT NULL
+							)
+							SELECT DISTINCT 
+								layer.layer_id
 							FROM 
 								cte,
-								kvwmap.u_groups
-							WHERE 
-								cte.group_id = u_groups.obergruppe AND 
-								obergruppe IS NOT NULL
+								kvwmap.layer
+							WHERE
+								gruppe = cte.group_id
 						)
-						SELECT DISTINCT 
-							layer.layer_id
-						FROM 
-							cte,
-							kvwmap.layer
-						WHERE
-							gruppe = cte.group_id
-					)
-			";
-			$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
-			$this->database->execSQL($sql,4, $this->loglevel);
+				";
+				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel);
+			}
+		}
+		$error = pg_last_error();
+		if ($error != '') {
+			echo $error; exit;
 		}
 		foreach ($formvars['class'] as $class_id => $class_status) {
 			if ($class_status == '0' OR $class_status == '2'){
@@ -1520,20 +1753,49 @@ class rolle {
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		foreach ($formvars['qLayer'] as $layer_id => $query_status) {
-			if ($layer_id != '' AND $query_status !== '') {	
-				$table = ($layer_id > 0 ? 'u_rolle2used_layer' : 'rollenlayer');
-				$id = ($layer_id > 0 ? 'layer_id' : 'id');
-				$sql ='
-					UPDATE 
-						kvwmap.' . $table . ' 
-					SET 
-						querystatus=' . $query_status . '
-					WHERE 
-						user_id = ' . $this->user_id . ' AND 
-						stelle_id = ' . $this->stelle_id . ' AND 
-						' . $id . ' = ' . abs($layer_id);
-				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
+			if ($layer_id != '' AND $query_status !== '') {
+				if ($layer_id > 1000000) {
+					$sql = "
+						UPDATE
+							kvwmap.collection_layer2rolle clr
+						SET
+							querystatus = $1
+						WHERE
+							clr.user_id = $2 AND
+							clr.stelle_id = $3 AND
+							clr.collection_layer_id = $4
+					";
+					$this->database->prepared_params = array($query_status, $this->user_id, $this->stelle_id, ($layer_id - 1000000));
+				}
+				elseif ($layer['layer_id'] > 0) {
+					$sql = "
+						UPDATE 
+							kvwmap.u_rolle2used_layer
+						SET 
+							querystatus = $1
+						WHERE 
+							user_id = $2 AND 
+							stelle_id = $3 AND 
+							layer_id = $4
+					";
+					$this->database->prepared_params = array($query_status, $this->user_id, $this->stelle_id, $layer_id);
+				}
+				else {
+					$sql = "
+						UPDATE 
+							kvwmap.rollenlayer
+						SET 
+							querystatus = $1
+						WHERE 
+							user_id = $2 AND 
+							stelle_id = $3 AND 
+							id = $4
+					";
+					$this->database->prepared_params = array($query_status, $this->user_id, $this->stelle_id, abs($layer_id));
+				}
+				// echo 'SQL zum Aktualisieren der query_status: ' . $this->database->get_prepared_sql($sql, $this->database->prepared_params); exit;
+				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
 			}
 		}
 		return 1;
