@@ -2,7 +2,7 @@
 
 # Test der Verbindung zur PostgreSQL-DB
 $GUI->pgdatabase = new pgdatabase();
-$check['postgres_connection'] = $GUI->pgdatabase->open(POSTGRES_CONNECTION_ID);
+$check['postgres_connection'] = $GUI->pgdatabase->open();
 $output[] = 'Verbindung zur PostgreSQL-DB: ' . ($check['postgres_connection']? 'ok' : 'fehlgeschlagen');
 
 # Test ob Mapserver Karte rendern kann

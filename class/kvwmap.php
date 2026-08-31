@@ -6933,6 +6933,9 @@ class GUI {
 						break;
 					}
 				}
+				if ($this->formvars['printscale'] == '') {	# ansonsten den kleinsten nehmen
+					$this->formvars['printscale'] = $scale;
+				}
 			}
 	
 			# alle Druckausschnitte der Rolle laden
