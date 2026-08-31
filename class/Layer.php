@@ -50,7 +50,7 @@ class Layer extends PgObject {
 	}
 
 	/**
-	 * Function find layer with $id in MariaDb database
+	 * Function find layer with $id in database
 	 * and return the layer object with beloning attributes and charts
 	 * If no layer has been found, it returns false
 	 * @param GUI $gui

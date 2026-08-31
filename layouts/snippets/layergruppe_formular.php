@@ -14,11 +14,17 @@
 	.layergruppe-button {
 		margin-left: 5px;
 	}
+	.full-width-centered {
+		margin: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+	}
 </style>
 <div class="center-outerdiv">
 	<div class="input-form">
 		<h2><?php echo $strTitel; ?></h2>
-		<em><span class="px13">Werte mit * mussen eingetragen werden</span></em><p><?php
+		<div class="full-width-centered"><em>Werte mit * mussen eingetragen werden</em></div><?
 		echo $this->layergruppe->as_form_html(); ?>
 		<div class="clear"></div>
 		<div style="text-align: -webkit-center">
@@ -45,8 +51,10 @@
 			  </tr>
 			</table>
 			<input type="hidden" name="go" value="Layergruppe">
-			<input type="hidden" name="selected_group_id" value="<? echo  $this->layergruppe->get('id'); ?>">
-			<input value="Layer Collection anlegen" title="Layer Collection anlegen" type="button" class="layergruppe-button" onclick="gotoCollectionNew(<?php echo  $this->layergruppe->get('id'); ?>)">
+			<input type="hidden" name="selected_group_id" value="<? echo  $this->layergruppe->get('id'); ?>"><?php
+				if ($this->isCaseAllowed('collections_anzeigen')) { ?>
+					<input value="Layer Collection anlegen" title="Layer Collection anlegen" type="button" class="layergruppe-button" onclick="gotoCollectionNew(<?php echo  $this->layergruppe->get('id'); ?>)"><?
+				} ?>
 		</div>
 	</div>
 </div>

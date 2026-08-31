@@ -4059,6 +4059,38 @@ class GUI {
 		}
 	}
 
+	function isCaseAllowed($case, $check_csrf_token = true) {
+		if ($check_csrf_token) {
+			if (!(
+				$case == 'show_snippet' AND
+				strpos(file_get_contents(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $this->formvars['snippet'] . '.php'), '$check_csrf_token = false;') !== false
+			)) {
+				// Nicht prüfen wenn im snippet der csrf_token_check explizit ausgeschaltet ist.
+				$csrf_token = $this->formvars['csrf_token'];
+				#echo '<br>csrf_token: ' . $csrf_token;
+				if (
+					!$this->user->has_logged_in AND (
+						!$csrf_token OR
+						(
+							$csrf_token !== $_SESSION['csrf_token'] AND 
+							!in_array($csrf_token, explode(',', $this->user->tokens))
+						)
+					)
+				) {
+					return false;
+				}
+			}
+		}
+		if (!(
+			$this->Stelle->isMenueAllowed($case) OR
+			$this->Stelle->isFunctionAllowed($case) OR
+			$this->user->is_case_allowed($case)
+		)) {
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * This functino check if the $constraint to allow a tool script is fullfilled or not
 	 * If the constraint does not fit it or is unknown to the cases in the function it returns false. 
@@ -9871,6 +9903,73 @@ class GUI {
 		$this->add_message('notice', 'Layergruppe erfolgreich gelöscht.');
 	}
 
+	function collections_anzeigen() {
+		include_once(CLASSPATH . 'Collection.php');
+		$this->collections = Collection::find($this);
+		$this->main = 'collections.php';
+		$this->output();
+	}
+
+	function collection_editor() {
+		include_once(CLASSPATH . 'Collection.php');
+		$this->sanitize([
+			'selected_collection_id' => 'int'
+		]);
+		$result = Collection::find_by_id($this, $this->formvars['selected_collection_id']);
+		if (!$result['success']) {
+			$this->add_message('error', $result['msg']);
+		}
+		$this->collection = $result['collection'];
+		$this->main = 'collection_editor.php';
+		$this->output();
+	}
+
+	function collection_save($collection) {
+		$collection->data = formvars_strip($this->formvars, array('id', 'bezeichnung', 'group_id', 'filter', 'extent'), 'keep');
+		$results = $collection->validate();
+		if (empty($results)) {
+			if ($collection->get_id() == '') {
+				$results = $collection->create();
+				if ($results['success']) {
+					$results['msg'] = $strCollectionSaveSuccessMsg;
+				}
+			}
+			else {
+				$results = $collection->update();
+				if ($results['success']) {
+					$results['msg'] = $strCollectionUpdateSuccessMsg;
+				}
+			}
+		}
+		else {
+			$results = array_map(
+				function ($a) {
+					return array(
+						'type' => $a['type'],
+						'err_msg' => $a['msg']
+					);
+				},
+				$results
+			);
+		}
+
+		return $results;
+	}
+
+	function collection_delete() {
+		include_once(CLASSPATH . 'Collection.php');
+		$this->sanitize([
+			'selected_collection_id' => 'int'
+		]);
+		$result = Collection::find_by_id($this, $this->formvars['selected_collection_id']);
+		if (!$result['success']) {
+			$this->add_message('error', $result['msg']);
+		}
+		$this->collection = $result['collection'];
+		$this->collection->delete();
+		$this->collections_anzeigen();
+	}
+
 	function collection_neu() {
 		include_once(CLASSPATH . 'Collection.php');
 		if ($this->formvars['selected_collection_id'] != '') {
@@ -9890,9 +9989,16 @@ class GUI {
 				$this->collection->set('group_id', $this->layer_group->get('obergruppe'));
 				$this->collection->set('collection_layer_group_id', $this->layer_group->get_id());
 				$this->collection->set('only_with_content', 'false');
-				$this->collection->columns['only_with_content'] = 'boolean';
 				$this->collection->set('stelle_id', $this->Stelle->id);
+				}
+			else {
+				$this->collection->set('bezeichnung', $this->formvars['bezeichnung']);
+				$this->collection->set('group_id', $this->formvars['group_id']);
+				$this->collection->set('collection_layer_group_id', $this->formvars['collection_layer_group_id']);
+				$this->collection->set('only_with_content', $this->formvars['only_with_content'] === 'true');
+				$this->collection->set('stelle_id', $this->formvars['stelle_id']);
 			}
+			$this->collection->columns['only_with_content'] = 'boolean';
 		}
 		$this->main = 'collection_neu.php';
 		$this->output();
@@ -18956,7 +19062,6 @@ class GUI {
 			}
 		}
 
-		// ToDo pk: collection_groups und collection_groups2rolle anlegen.
 		$sql = "
 			INSERT INTO kvwmap.collection_groups (collection_id, group_id, \"order\")
 			SELECT DISTINCT

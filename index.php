@@ -1802,29 +1802,79 @@ function go_switch($go, $exit = false) {
 				$GUI->Layergruppe_Loeschen();
 			} break;
 
+			case 'collections_anzeigen' : {
+				$GUI->checkCaseAllowed('collections_anzeigen');
+				$GUI->collections_anzeigen();
+			} break;
+
+			case 'collection_editor' : {
+				$GUI->checkCaseAllowed('collections_anzeigen');
+				$GUI->collection_editor();
+			} break;
+
+			case 'collection_save' : {
+				$GUI->checkCaseAllowed('collections_anzeigen');
+				$GUI->sanitize([
+					'id' => 'int',
+					'group_id' => 'int',
+					'extent' => 'text'
+				]);
+				include_once(CLASSPATH . 'Collection.php');
+				if ($GUI->formvars['id'] != '') {
+					$result = Collection::find_by_id($GUI, $GUI->formvars['id']);
+					if (!$result['success']) {
+						$GUI->add_message('error', $result['msg']);
+					}
+					$collection = $result['collection'];
+					if ($collection->get_id() == '') {
+						$result = array(
+							'success' => false,
+							'err_msg' => 'Die Layer-Collection mit der ID: ' . $GUI->formvars['id'] . ' konnte nicht gefunden werden!'
+						);
+					}
+				}
+				else {
+					$collection = new Collection($GUI);
+				}
+				$result = $GUI->collection_save($collection);
+				if ($result['success']) {
+					$GUI->add_message('notice', $result['msg']);
+					$GUI->collections_anzeigen();
+				}
+				else {
+					$GUI->add_message('error', $result['err_msg']);
+					$GUI->collection_editor();
+				}
+			} break;
+
+			case 'collection_delete' : {
+				$GUI->checkCaseAllowed('collections_anzeigen');
+				$GUI->collection_delete();
+			} break;
+
 			case 'Collection_Neu' : {
-				$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+				$GUI->checkCaseAllowed('collections_anzeigen');
 				$GUI->collection_neu();
 			}
 			break;
 
 			case 'Collection_Anlegen' : {
-				$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+				$GUI->checkCaseAllowed('collections_anzeigen');
 				include_once(CLASSPATH . 'LayerGroup.php');
 
 				if ($GUI->formvars['group_id'] == '') {
 					$GUI->add_message('Error', 'Es wurde keine Gruppe angegeben unter der die Collection eingebunden werden soll.');
-					$GUI->Layergruppe_Editor(); break;
+					$GUI->Collection_Neu(); break;
 				}
 
 				if ($GUI->formvars['collection_layer_group_id'] == '') {
 					$GUI->add_message('Error', 'Es wurde keine Gruppe angegeben dessen Layer zur Collection gehören sollen.');
-					$GUI->Layergruppe_Editor(); break;
+					$GUI->Collection_Neu(); break;
 				}
 
 				if ($GUI->formvars['filter'] == '') {
 					$GUI->add_message('Error', 'Es wurde kein Filterausdruck angegeben.');
-					$GUI->Layergruppe_Editor(); break;
+					$GUI->Collection_Neu(); break;
 				}
 
 				$collection_group = LayerGroup::find_by_id($GUI, $GUI->formvars['group_id']);
@@ -1833,7 +1883,7 @@ function go_switch($go, $exit = false) {
 				$result = $collection_layer_group->get_layers_recursive($collection_layer_group->get_id());
 				if (!$result['success']) {
 					$GUI->add_message('Error', 'Fehler beim Abfragen der Layer, die zur Collection gehören sollen. ' . $result['msg']);
-					$GUI->Layergruppe_Editor(); break;
+					$GUI->Collection_Neu(); break;
 				}
 				$layer = $result['layers'];
 
@@ -1841,7 +1891,7 @@ function go_switch($go, $exit = false) {
 					$result = $collection_layer_group->get_layers_with_content($layer, $GUI->formvars['filter']);
 					if (!$result['success']) {
 						$GUI->add_message('Error', 'Fehler beim Abfragen der Layer der Collection die Content haben. ' . $result['msg']);
-						$GUI->Layergruppe_Editor(); break;
+						$GUI->Collection_Neu(); break;
 					}
 					$layer = $result['layers_with_content'];
 				}
@@ -1855,10 +1905,11 @@ function go_switch($go, $exit = false) {
 				);
 				if (!$result['success']) {
 					$GUI->add_message('Error', 'Fehler beim Anlegen der Collection.<br>Meldung: ' . $result['msg']);
-					$GUI->Layergruppe_Editor(); break;
+					$GUI->Collection_Neu(); break;
 				}
 
 				$GUI->add_message('Notice', $result['msg']);
+				$GUI->formvars['selected_group_id'] = $collection_layer_group->get_id();
 				$GUI->Layergruppe_Editor();
 			} break;
 

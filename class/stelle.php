@@ -1106,7 +1106,7 @@ class stelle {
 				b.menue_id = a.id AND
 				b.stelle_id = " . $this->id . "
 		";
-		#echo $sql;
+		// echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);
 		if ($ret[0]) {

@@ -1,5 +1,9 @@
 <?php
+	$strCollectionSaveSuccessMsg = "Collection erfolgreich gespeichert";
+	$strCollectionUpdateSuccessMsg = "Collection erforgreich geändert";
+	$strListTitel = "Collections";
 	$strTitel = "Neue Layer Collection";
+	$strTitelEditor = "Collection bearbeiten";
 	$strToolTipBezeichnung = "Wird verwendet für die Anzeige in der Kartenlegende.";
 	$strToolTipCollectionLayerGroupId = "Alle Layer recursiv unterhalb dieser Gruppe werden der Layersammlung zugeordnet. Wird keine Gruppe ausgewählt, werden der Collection auch keine Collection-Layer zugeordnet.";
 	$strToolTipExtent = "Die Ausdehnung wird verwendt wenn die Option auf maximale Ausdehnung zoomen ausgewählt wird. Die Ausdehnung ist kommasepariert mit xmin, ymin, xmax, ymax im Referenzsystem der Layer der Collection anzugeben. Wird hier der Begriff CreateFromContent gewählt, wird die maximale Ausdehnung der Feature berechnet, die zur Collection mit dem angegebenen Filter gehören. Wird nichts eingetragen steht die Option zoom zur maximalen Ausdehnung für die Collection nicht zur Verfügung.";

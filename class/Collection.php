@@ -68,13 +68,32 @@ class Collection extends PgObject {
     return $result;
   }
 
+	public static	function find($gui, $where = '', $order = '') {
+		$collection = new Collection($gui);
+		return $collection->find_where($where, $order);
+	}
+
+	/**
+	 * Function find collection with $id in database
+	 * If no layer has been found, it returns false
+	 * @param GUI $gui
+	 * @param int $id
+	 * @return Collection|false
+	 */
   public static	function find_by_id($gui, $id) {
 		$collection = new Collection($gui);
-		$result = $collection->find_by($obj->identifier, $id, '=', true);
+		$result = $collection->find_by('id', $id, '=', true);
     if (!result['success']) {
       return $result;
     }
-		$collection->layers = $collection->get_collection_layer();
+		$collection = $result['feature'];
+		if ($collection->get_id() == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Collection mit id ' . $id . ' nicht gefunden.'
+			);
+		}
+		$collection->layers = $collection->get_collection_layers();
 		return array(
       'success' => true,
       'collection' => $collection
@@ -82,7 +101,8 @@ class Collection extends PgObject {
 	}
 
   function get_collection_layers() {
-    $obj = CollectionLayer($this->gui);
+		include_once(CLASSPATH . 'CollectionLayer.php');
+    $obj = new CollectionLayer($this->gui);
     $collection_layers = $obj->find_where("collection_id = " . $this->get_id());
 		return $collection_layers;
   }
