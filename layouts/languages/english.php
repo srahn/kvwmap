@@ -10,7 +10,8 @@
 	$this->deactivatequery = 'Deactivate query';
 	$this->DisplayClasses = 'Display Classes';
 	$this->entries = 'Entries';
-	$this->FullLayerExtent = 'zoom to Layer-Exent';
+	$this->FullCollectionExtent = 'zoom to Collection Extent';
+	$this->FullLayerExtent = 'zoom to Layer Exent';
 	$this->HideClasses = 'Hide Classes';
 	$this->histTimestamp = 'Timestamp for historical data';
 	$this->label = 'Label';

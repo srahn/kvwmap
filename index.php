@@ -410,8 +410,12 @@ function go_switch($go, $exit = false) {
 				$GUI->getLayerOptions();
 			} break;
 
-			case 'getGroupOptions' : {
-				$GUI->getGroupOptions();
+			// case 'getGroupOptions' : {
+			// 	$GUI->getGroupOptions();
+			// } break;
+
+			case 'getCollectionOptions' : {
+				$GUI->getCollectionOptions();
 			} break;
 
 			case 'saveGeomFromLayer' : {

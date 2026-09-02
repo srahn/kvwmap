@@ -1,4 +1,25 @@
 <?
+function split_id($id): array {
+	if (strpos($id, '_') === false) {
+		if ($id > 0) {
+			return [$id, 'layer'];
+		}
+		else {
+			return [abs($id), 'rollenlayer'];
+		}
+	}
+	$parts = explode('_', $id, 2);
+	if ($parts[0] === 'cl') {
+		return [$parts[1], 'collection_layer'];
+	}
+	if ($parts[0] === 'cg') {
+		return [$parts[1], 'collection_group'];
+	}
+	if ($parts[0] === 'c') {
+		return [$parts[1], 'collection'];
+	}
+	return [$parts[1], $parts[0]];
+}
 
 function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
@@ -414,7 +435,7 @@ class GUI {
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     $this->loadMap('DataBase');
 		for($i = 0; $i < count_or_0($this->layers_replace_scale ?: []); $i++){
-			$this->layers_replace_scale[$i]->data = str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data);
+			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
     echo $this->create_group_legend($this->formvars['group']);
   }
@@ -1574,6 +1595,7 @@ class GUI {
 		if (!$this->group_has_layers[$group_id] ) {		# wenns keine Layer in der Gruppe oder in Untergruppen gibt, Gruppe weglassen
 			return;
 		}
+		[$id_value, $id_type] = split_id($group_id);
 		$import_types = [
 			'eigene Abfragen' => 'search',
 			'Eigene Importe' => 'import',
@@ -1591,24 +1613,28 @@ class GUI {
 						<a href="javascript:getlegend(\'' . $group_id . '\')">
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>';
-				if ($this->groupset[$group_id]['checkbox']) {
-					$legend .= '
-						<input id="group_checkbox[' . $group_id . ']" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="1" onclick="selectgroupthemaAll(this, ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
-					';
-				}
-				$legend .= '
-						<span class="legend_group' . (value_of($this->group_has_active_layers, $group_id) != '' ? '_active_layers' : '') . '">
-							<!--a
-								href="javascript:getGroupOptions(' . $group_id . ')"
-								onmouseover="$(\'#test_' . $group_id . '\').show()"
-								onmouseout="$(\'#test_' . $group_id . '\').hide()"
-							>' . html_umlaute($groupname) . '
-								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
-							</a-->' .
-							html_umlaute($groupname) . '
-							' . ($import_types[$groupname] != NULL ? '<a href="javascript:deleteRollenlayer(\'' . $import_types[$groupname] . '\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '') . '
-							<div style="position:static;" id="group_options_' . $group_id . '"></div>
-						</span>
+						if ($this->groupset[$group_id]['checkbox']) {
+							$legend .= '
+								<input id="group_checkbox[' . $group_id . ']" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="1" onclick="selectgroupthemaAll(this, ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
+							';
+						}
+						$legend .= '
+							<span class="legend_group' . (value_of($this->group_has_active_layers, $group_id) != '' ? '_active_layers' : '') . '">
+								<!--a
+									href="javascript:getGroupOptions(' . $group_id . ')"
+									onmouseover="$(\'#test_' . $group_id . '\').show()"
+									onmouseout="$(\'#test_' . $group_id . '\').hide()"
+								>' . html_umlaute($groupname) . '
+									<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
+								</a-->' . html_umlaute($groupname) . ' ' . ($import_types[$groupname] != NULL ? '<a href="javascript:deleteRollenlayer(\'' . $import_types[$groupname] . '\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '');
+						if ($id_type === 'collection') {
+							$collection_id = $id_value;
+							$legend .= '
+								<a href="javascript:getCollectionOptions(' . $collection_id . ')"><i id="collection_options_button_' . $collection_id . '" class="fa fa-bars"></i></a>
+								<div style="position:static; float:right" id="collection_options_' . $collection_id . '"><div class="layerOptions" id="collection_options_content_' . $collection_id . '"></div></div>';
+						}
+						$legend .= '
+								</span>
 					</td>
 				</tr>
 				<tr>
@@ -2538,21 +2564,19 @@ class rolle {
 		}
 	}
 
-	/*
-	* Speichert den Status der Layergruppen
-	* @param $formvars array mit key group_<group_id> welcher den Status der Gruppe enthält 
-	*/
 	function setGroupStatus($formvars) {
 		$group_id = $formvars['group'];
-		if ($group_id > 3000000) {
+		[$id_value, $id_type] = split_id($group_id);
+		if ($id_type === 'collection') {
 			$table_name = 'collections2rolle';
-			$id_column = '3000000 + collection_id';
+			$id_column = 'collection_id';
 		}
-		elseif ($group_id > 2000000) {
+		elseif ($id_type === 'collection_group') {
 			$table_name = 'collection_groups2rolle';
-			$id_column = '2000000 + collection_group_id';
+			$id_column = 'collection_group_id';
 		}
 		else {
+			// normale Layergruppen
 			$table_name = 'u_groups2rolle';
 			$id_column = 'id';
 		}
@@ -2570,7 +2594,7 @@ class rolle {
 			(value_of($formvars, 'group_' . $formvars['group']) == 1 ? 1 : 0),
 			$this->user_id,
 			$this->stelle_id,
-			$formvars['group']
+			$id_value
 		);
 		// echo "<br>SQL zum Update des Status in Tabelle " . $table_name . ": " . $this->database->get_prepared_sql($sql, $params); exit;
 		$this->database->execSQL($sql, 4, $this->loglevel, false, $params);
@@ -2606,15 +2630,12 @@ class rolle {
 		return $groups;
 	}
 
-	/**
-	 * Abfragen der Collections in der Rolle
-	 */
 	function get_collections($bezeichnung = '') {
 		$sql = "
 			SELECT
 				cr.user_id,
 				cr.stelle_id,
-				3000000 + cr.collection_id AS id,
+				'c_' || cr.collection_id::text AS id,
 				cr.status,
 				c.bezeichnung AS gruppenname
 			FROM 
@@ -2633,16 +2654,13 @@ class rolle {
 		return $collections;
 	}
 
-	/**
-	 * Abfrage der LayerGroups der Collection
-	 */
 	function get_collection_groups($gruppenname = '') {
 		$gruppenname_column = (rolle::$language === 'german' ? "g.gruppenname" : "CASE WHEN g.gruppenname_" . rolle::$language . " != '' THEN g.gruppenname_" . rolle::$language . " ELSE g.gruppenname END");
 		$sql = "
 			SELECT DISTINCT
 				clr.user_id,
 				clr.stelle_id,
-				2000000 + g.id aS id,
+				'cg_' || g.id::text AS id,
 				cr.status,
 				" . $gruppenname_column . " AS gruppenname
 			FROM
@@ -3074,13 +3092,13 @@ class db_mapObj {
 
 		$sql = "
 			SELECT
-				1000000 + cl.id AS layer_id,
+				'cl_' || cl.id::text AS layer_id,
 				" . $name_column . ",
-				2000000 + cg.id AS id,
+				'cg_' || cg.id::text AS id,
 				" . $group_column . ",
-				2000000 + cg.id AS group_id,
-				2000000 + cg.id AS gruppe,
-				3000000 + c.id AS obergruppe,
+				'cg_' || cg.id::text AS group_id,
+				'cg_' || cg.id::text AS gruppe,
+				'c_' || c.id::text AS obergruppe,
 				g.order,
 				l.oid,
 				coalesce(ul.transparency, 100) AS transparency,
@@ -3152,7 +3170,7 @@ class db_mapObj {
 				c.id,
 				l.drawingorder
 		";
-		#echo '<br>SQL zur Abfrage der CollectionLayer: ' . $sql;
+		// echo '<br>SQL zur Abfrage der CollectionLayer: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_CollectionLayer - Lesen der CollectionLayer der Rolle:<br>", 4);
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$collection_layer = array();
@@ -3204,7 +3222,7 @@ class db_mapObj {
 		$gruppenname_column = "replace(c.bezeichnung, 'BPlan ', '')";
 		$sql ="
 			SELECT
-				3000000 + c.id AS id,
+				'c_' || c.id::text AS id,
 				" . $gruppenname_column . " AS gruppenname,
 					c.group_id AS obergruppe,
 				false AS selectable_for_shared_layers,
@@ -3253,9 +3271,9 @@ class db_mapObj {
 		}
 		$sql = "
 			SELECT
-				2000000 + cg.id AS id,
+				'cg_' || cg.id::text AS id,
 				" . $gruppenname_column . " AS gruppenname,
-				3000000 + c.id AS obergruppe,
+				'c_' || c.id::text AS obergruppe,
 				false AS selectable_for_shared_layers,
 				true AS checkbox" .
 				(!$all ? ", cgr.status" : "") . "
@@ -3271,7 +3289,7 @@ class db_mapObj {
 			ORDER BY " .
 				($order != '' ? replace_semicolon($order) : 'cg."order"') . "
 		";
-		// echo "SQL zur Abfrage der Collection Groups: " . $sql;
+		// echo "<br>SQL zur Abfrage der Collection Groups: " . $sql;
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$groups = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
@@ -3543,17 +3561,18 @@ class db_mapObj {
 	function read_Classes($layer_id, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
 		$Classes = array();
+		[$id_value, $id_type] = split_id($layer_id);
 
-		if ($layer_id > 1000000) {
+		if ($id_type === 'collection_layer') {
 			$from .= "
 				kvwmap.classes AS c JOIN
 				kvwmap.collection_layer cl ON c.layer_id = cl.layer_id
 			";
-			$where = "cl.id = " . ($layer_id - 1000000);
+			$where = "cl.id = " . $id_value;
 		}
 		else {
 			$from = "kvwmap.classes AS c";
-			$where = "c.layer_id = " . $layer_id;
+			$where = "c.layer_id = " . $id_value;
 		}
 
 		$sql = "

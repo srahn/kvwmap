@@ -2141,44 +2141,6 @@ class stelle {
 		return 1;
 	}
 
-	function setAktivLayer($formvars) {
-		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
-		$layerset=$this->getLayer('');
-		for ($i=0;$i<count($layerset);$i++) {
-			if ($formvars['thema'][$layerset[$i]['layer_id']] == 1) {
-				$aktiv_status=1;
-			}
-			else {
-				$aktiv_status=0;
-			}
-			$sql ='UPDATE kvwmap.used_layer SET aktivStatus="'.$aktiv_status.'"';
-			$sql.=' WHERE stelle_id='.$this->id.' AND layer_id='.$layerset[$i]['layer_id'];
-			$this->debug->write("<p>file:stelle.php class:stelle->setAktivLayer - Speichern der aktiven Layer zur Stelle:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		}
-		return 1;
-	}
-
-	function setQueryStatus($formvars) {
-		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
-		$layerset=$this->getLayer('');
-		for ($i=0;$i<count($layerset);$i++) {
-			if ($formvars['qLayer'][$layerset[$i]['layer_id']]) {
-				$query_status=1;
-			}
-			else {
-				$query_status=0;
-			}
-			$sql ='UPDATE kvwmap.used_layer set queryStatus="'.$query_status.'"';
-			$sql.=' WHERE layer_id='.$layerset[$i]['layer_id'];
-			$this->debug->write("<p>file:stelle.php class:stelle->setQueryStatus - Speichern des Abfragestatus der Layer zur Stelle:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-		}
-		return 1;
-	}
-
 	/*
 	* Abfragen der Layer der Stelle
 	*/

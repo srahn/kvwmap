@@ -431,10 +431,15 @@ $GUI->nachweis_columns = [
 				$GUI->loadMap('DataBase');
 			}
 			if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-      # zoom_to_max_layer_extent
-			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);
+      // zoom_to_max_layer_extent
+			if ($GUI->formvars['zoom_layer_id'] != '') {
+				$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);
+			}
+			// zoom_to_max_collection_extent
+			if (value_of($this->formvars, 'zoom_collection_id') != '') {
+				$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
+			}
       $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
-
 			if ($GUI->queryable_vector_layers['gruppe']) {
 				$GUI->layergruppen['ID'] = array_values(array_unique($GUI->queryable_vector_layers['gruppe']));
 			}
@@ -1693,7 +1698,12 @@ $GUI->nachweis_columns = [
       $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
       $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
     }
-		elseif($GUI->formvars['zoom_layer_id'] != '')$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);	# zoom_to_max_layer_extent
+		elseif ($GUI->formvars['zoom_layer_id'] != '') {
+			$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);
+		}
+		elseif ($GUI->formvars['zoom_collection_id'] != '') {
+			$GUI->zoom_to_max_collection_extent($GUI->formvars['zoom_collection_id']);
+		}
 		
 		if($GUI->formvars['FlurstKennz'] != ''){		# über die Flurstückssuche gefundene Flurstücke -> Geometrie als Suchpolygon übernehmen
 			$GUI->formvars['suchpolygon'] = $GUI->pgdatabase->getGeomfromFlurstuecke($GUI->formvars['FlurstKennz'], $GUI->user->rolle->epsg_code);

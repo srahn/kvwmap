@@ -1688,6 +1688,36 @@ function str_space($string, $split_length = 1) {
 }
 
 /**
+ * Splittet eine ID in ihre Bestandteil
+ * Wenn die id kein Unterstrich enthält, wird sie als layer oder rollenlayer interpretiert
+ * Wenn die id negativ ist liefere sie positiv zurück und setze den Typ auf rollenlayer
+ * Wenn die id einen Unterstrich enthält, wird der erste Teil als Typ und der zweite Teil als ID interpretiert
+ * @param string $id Die zu splittende ID
+ * @return array Das Array mit den aufgeteilten Bestandteilen
+ */
+function split_id($id): array {
+	if (strpos($id, '_') === false) {
+		if ($id > 0) {
+			return [$id, 'layer'];
+		}
+		else {
+			return [abs($id), 'rollenlayer'];
+		}
+	}
+	$parts = explode('_', $id, 2);
+	if ($parts[0] === 'cl') {
+		return [$parts[1], 'collection_layer'];
+	}
+	if ($parts[0] === 'cg') {
+		return [$parts[1], 'collection_group'];
+	}
+	if ($parts[0] === 'c') {
+		return [$parts[1], 'collection'];
+	}
+	return [$parts[1], $parts[0]];
+}
+
+/**
  * Zeigt Text in einem Java-Script Alarmfenster an
  */
 function showAlert($text) {

@@ -10,7 +10,8 @@
 	$this->deactivatequery = 'Die Abfrage dieses Themas ausschalten';
 	$this->DisplayClasses = 'Klassen einblenden';
 	$this->entries = 'Einträge';
-	$this->FullLayerExtent = 'volle Layerausdehnung';
+	$this->FullCollectionExtent = 'zoom zu voller Planausdehnung';
+	$this->FullLayerExtent = 'zoom zu voller Layerausdehnung';
 	$this->HideClasses = 'Klassen ausblenden';
 	$this->histTimestamp = 'Zeitpunkt für historische Daten';
 	$this->label = 'Beschriftung';

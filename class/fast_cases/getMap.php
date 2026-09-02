@@ -1,4 +1,25 @@
 <?
+function split_id($id): array {
+	if (strpos($id, '_') === false) {
+		if ($id > 0) {
+			return [$id, 'layer'];
+		}
+		else {
+			return [abs($id), 'rollenlayer'];
+		}
+	}
+	$parts = explode('_', $id, 2);
+	if ($parts[0] === 'cl') {
+		return [$parts[1], 'collection_layer'];
+	}
+	if ($parts[0] === 'cg') {
+		return [$parts[1], 'collection_group'];
+	}
+	if ($parts[0] === 'c') {
+		return [$parts[1], 'collection'];
+	}
+	return [$parts[1], $parts[0]];
+}
 
 function before_last($txt, $delimiter) {
 	#echo '<br>Return the part of ' . $txt . ' before the last occurence of ' . $delimiter;
@@ -2409,13 +2430,13 @@ class db_mapObj {
 
 		$sql = "
 			SELECT
-				1000000 + cl.id AS layer_id,
+				'cl_' || cl.id::text AS layer_id,
 				" . $name_column . ",
-				2000000 + cg.id AS id,
+				'cg_' || cg.id::text AS id,
 				" . $group_column . ",
-				2000000 + cg.id AS group_id,
-				2000000 + cg.id AS gruppe,
-				3000000 + c.id AS obergruppe,
+				'cg_' || cg.id::text AS group_id,
+				'cg_' || cg.id::text AS gruppe,
+				'c_' || c.id::text AS obergruppe,
 				g.order,
 				l.oid,
 				coalesce(ul.transparency, 100) AS transparency,
@@ -2488,6 +2509,7 @@ class db_mapObj {
 				l.drawingorder
 		";
 		// echo '<br>SQL zur Abfrage der CollectionLayer: ' . $sql;
+		// echo '<br>SQL zur Abfrage der CollectionLayer: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_CollectionLayer - Lesen der CollectionLayer der Rolle:<br>", 4);
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$collection_layer = array();
@@ -2539,7 +2561,7 @@ class db_mapObj {
 		$gruppenname_column = "replace(c.bezeichnung, 'BPlan ', '')";
 		$sql ="
 			SELECT
-				3000000 + c.id AS id,
+				'c_' || c.id::text AS id,
 				" . $gruppenname_column . " AS gruppenname,
 					c.group_id AS obergruppe,
 				false AS selectable_for_shared_layers,
@@ -2588,9 +2610,9 @@ class db_mapObj {
 		}
 		$sql = "
 			SELECT
-				2000000 + cg.id AS id,
+				'cg_' || cg.id::text AS id,
 				" . $gruppenname_column . " AS gruppenname,
-				3000000 + c.id AS obergruppe,
+				'c_' || c.id::text AS obergruppe,
 				false AS selectable_for_shared_layers,
 				true AS checkbox" .
 				(!$all ? ", cgr.status" : "") . "
@@ -2970,17 +2992,18 @@ class db_mapObj {
 	function read_Classes($layer_id, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
 		$Classes = array();
+		[$id_value, $id_type] = split_id($layer_id);
 
-		if ($layer_id > 1000000) {
+		if ($id_type === 'collection_layer') {
 			$from .= "
 				kvwmap.classes AS c JOIN
 				kvwmap.collection_layer cl ON c.layer_id = cl.layer_id
 			";
-			$where = "cl.id = " . ($layer_id - 1000000);
+			$where = "cl.id = " . $id_value;
 		}
 		else {
 			$from = "kvwmap.classes AS c";
-			$where = "c.layer_id = " . $layer_id;
+			$where = "c.layer_id = " . $id_value;
 		}
 
 		$sql = "

@@ -32,6 +32,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php'); ?>
 	<input type="hidden" name="activated_vertex" value="0">
 	<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">
 	<input type="hidden" name="layer_options_open" value="">
+<input type="hidden" name="collection_options_open" value="">
 	<input type="hidden" name="group_options_open" value="">
 	<input type="hidden" name="free_polygons" value="">
 	<input type="hidden" name="free_texts" value="">
