@@ -16,5 +16,5 @@
 	$mail_bearbeiter['message'] .= "\n";
 	$mail_bearbeiter['message'] .= "\n";
 	$mail_bearbeiter['message'] .= "Für technische Rückfragen senden Sie bitte eine E-Mail an die Adresse geoportal@lk-seenplatte.de\n";
-	$mail_bearbeiter['attachement'] = BAUMFAELLANTRAG_UPLOAD_PATH . $zip_file_name;
+	$mail_bearbeiter['attachment'] = BAUMFAELLANTRAG_UPLOAD_PATH . $zip_file_name;
 ?>
