@@ -975,10 +975,17 @@ class Konvertierung extends PgObject {
 			);
 		}
 
-		// ToDo pk: Funktion implementieren
+		include_once(CLASSPATH . 'Collection.php');
+		$result = Collection::find_by_id($this->gui, $layer_collection_id);
+		if (!$result['success']) {
+			return $result;
+		}
+		$this->collection = $result['collection'];
+		$this->collection->delete();
+
 		return array(
-			'success' => false,
-			'msg' => 'Funktion delete_layer_collection noch nicht vollständig implementiert'
+			'success' => true,
+			'msg' => 'Collection mit id: ' . $layercollection_id . ' erfolgreich gelöscht.'
 		);
 	}
 
