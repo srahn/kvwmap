@@ -586,6 +586,9 @@ class GUI {
 				#$map->set('interlace', MS_ON);
 				$map->status = MS_ON;
 				$map->name = MAPFILENAME;
+				if ($this->user->rolle->epsg_code == 4326) {
+					$map->units = MS_DD;
+				}
 
 				if (MS_DEBUG_LEVEL !== NULL) {
 					$map->setConfigOption('MS_ERRORFILE', dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');

@@ -2149,6 +2149,9 @@ class GUI {
 				#$map->set('interlace', MS_ON);
 				$map->status = MS_ON;
 				$map->name = MAPFILENAME;
+				if ($this->user->rolle->epsg_code == 4326) {
+					$map->units = MS_DD;
+				}
 
 				if (MS_DEBUG_LEVEL !== NULL) {
 					$map->setConfigOption('MS_ERRORFILE', dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
@@ -3577,10 +3580,6 @@ class GUI {
 
 		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
-		if ($this->user->rolle->epsg_code == 4326) {
-			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-			$this->map_scaledenom = degree2meter($center_y) * $this->map_scaledenom;
-		}
     $this->switchScaleUnitIfNecessary();
 		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
@@ -10049,7 +10048,7 @@ class GUI {
 
 	function invitation_send_email($invitation) {
 		if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
-			$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $invitation->get('email'), null, MAILREPLYADDRESS, $invitation->get_subject(), $invitation->get_body(), null, 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $invitation->get('vorname') . ' ' . $invitation->get('name'), PUBLISHERNAME);
+			$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $invitation->get('email'), null, MAILREPLYADDRESS, $invitation->get_subject(), $invitation->get_body(), '', 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $invitation->get('vorname') . ' ' . $invitation->get('name'), PUBLISHERNAME);
 			if (!$mail) {
 				$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
 			}
@@ -10058,10 +10057,28 @@ class GUI {
 			}
 		}
 		else {
-			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
-				Zum Einladen per E-Mail<br>
-				klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>
-				Die E-Mail enthält den Link zur Einladung.');
+     $result = mail_att(
+        PUBLISHERNAME, // from_name
+        MAILREPLYADDRESS, // from_email
+        $invitation->get('email'),
+        NULL, // cc_email
+        MAILREPLYADDRESS, // reply_email
+        $invitation->get_subject(),
+        $invitation->get_body(), // message
+        '', // attachment
+        MAILMETHOD, // mode
+        MAILSMTPSERVER,
+        MAILSMTPPORT,
+        $invitation->get('vorname') . ' ' . $invitation->get('name'),
+				PUBLISHERNAME
+    	);
+
+			if ($result === 1) {
+				$this->add_message('notice', 'E-Mail erfolgreich in der Queue im Ordner: ' . MAILQUEUEPATH . ' abgelegt.');
+			}
+			else {
+				$this->add_message('info','Neuer Nutzer ist vorgemerkt.<br>Zum Einladen per E-Mail<br>klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>Die E-Mail enthält den Link zur Einladung.');
+			}
 		}
 	}
 
