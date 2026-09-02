@@ -1803,7 +1803,6 @@ echo '			</table>
 				$layersection = substr($layersection, 0, $pos_und);
 				$url = substr_replace($url, '', $pos_layers, $pos_und);		# layers rausschneiden
 			}
-			$url = substr_replace($url, '', $pos_layers);		# layers rausschneiden
 		}
 		else {
 			$layersection = $layer['wms_name'];
