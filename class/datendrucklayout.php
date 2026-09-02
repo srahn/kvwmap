@@ -1422,6 +1422,9 @@ class ddl extends drucklayout{
 		$formvars['margin_bottom'] = 50;
 		$formvars['margin_left'] = 50;
 		$formvars['margin_right'] = 50;
+		$groupnames = [];
+		$rects = [];
+		$groupname_rects = [];
 		$this->pdf=new Cezpdf();
 		$y = $maxy - $formvars['margin_top'] - $fontsize;
 		$x = $formvars['margin_left'];
@@ -1509,17 +1512,19 @@ class ddl extends drucklayout{
 		$formvars['posy_'.$attributes['name'][0]] = $y;
 		$attributenames[0]['posy'] = $y;
 		$attributenames[0]['offset_attribute'] = '';
-		$groupnames[0]['posy'] = $maxy - $formvars['margin_top'] - $fontsize - 3;
-		$groupnames[0]['offset_attribute'] = '';
-		$rects[0]['posy'] = $maxy - $formvars['margin_top'];
-		$groupname_rects[0]['posy'] = $maxy - $formvars['margin_top'];
-		$groupname_rects[0]['endposy'] = $groupname_rects[0]['posy'] - 19;
-		$rects[$rc-1]['endposx'] = $maxx - $formvars['margin_right'];
-		$rects[$rc-1]['endposy'] = 10;
-		$rects[$rc-1]['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
+		if (!empty($groupnames)) {
+			$groupnames[0]['posy'] = $maxy - $formvars['margin_top'] - $fontsize - 3;
+			$groupnames[0]['offset_attribute'] = '';
+			$groupname_rects[0]['posy'] = $maxy - $formvars['margin_top'];
+			$groupname_rects[0]['endposy'] = $groupname_rects[0]['posy'] - 19;
+			$rects[0]['posy'] = $maxy - $formvars['margin_top'];		
+			$rects[$rc-1]['endposx'] = $maxx - $formvars['margin_right'];
+			$rects[$rc-1]['endposy'] = 10;
+			$rects[$rc-1]['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
+		}
 		
 		$ddl_id = $this->save_layout($formvars, $attributes, NULL, $stelle_id);
-		
+
 		$texts = array_merge($attributenames, $groupnames);
 		
 		$rects = array_merge($rects, $groupname_rects);
