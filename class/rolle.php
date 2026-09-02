@@ -100,15 +100,17 @@ class rolle {
 	*/
 	function setGroupStatus($formvars) {
 		$group_id = $formvars['group'];
-		if ($group_id > 3000000) {
+		[$id_value, $id_type] = split_id($group_id);
+		if ($id_type === 'collection') {
 			$table_name = 'collections2rolle';
-			$id_column = '3000000 + collection_id';
+			$id_column = 'collection_id';
 		}
-		elseif ($group_id > 2000000) {
+		elseif ($id_type === 'collection_group') {
 			$table_name = 'collection_groups2rolle';
-			$id_column = '2000000 + collection_group_id';
+			$id_column = 'collection_group_id';
 		}
 		else {
+			// normale Layergruppen
 			$table_name = 'u_groups2rolle';
 			$id_column = 'id';
 		}
@@ -126,7 +128,7 @@ class rolle {
 			(value_of($formvars, 'group_' . $formvars['group']) == 1 ? 1 : 0),
 			$this->user_id,
 			$this->stelle_id,
-			$formvars['group']
+			$id_value
 		);
 		// echo "<br>SQL zum Update des Status in Tabelle " . $table_name . ": " . $this->database->get_prepared_sql($sql, $params); exit;
 		$this->database->execSQL($sql, 4, $this->loglevel, false, $params);
@@ -405,7 +407,7 @@ class rolle {
 			SELECT
 				cr.user_id,
 				cr.stelle_id,
-				3000000 + cr.collection_id AS id,
+				'c_' || cr.collection_id::text AS id,
 				cr.status,
 				c.bezeichnung AS gruppenname
 			FROM 
@@ -433,7 +435,7 @@ class rolle {
 			SELECT DISTINCT
 				clr.user_id,
 				clr.stelle_id,
-				2000000 + g.id aS id,
+				'cg_' || g.id::text AS id,
 				cr.status,
 				" . $gruppenname_column . " AS gruppenname
 			FROM
@@ -471,7 +473,7 @@ class rolle {
 		$sql = "
 			SELECT
 				" . $name_column . ",
-				cl.id + 1000000 AS layer_id,
+				'cl_' || cl.id::text AS layer_id,
 				l.layer_id AS collection_layer_layer_id,
 				l.alias, datentyp, COALESCE(ul.group_id, gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, tileindex, l.schema, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
@@ -1585,9 +1587,10 @@ class rolle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		foreach ($formvars['thema'] as $layer_id => $aktiv_status) {
 			$layer = $this->layerset['layer_ids'][$layer_id];
+			[$id_value, $id_type] = split_id($layer_id);
 			if ($aktiv_status !== '') {
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
-				if ($layer_id > 1000000) {
+				if ($id_type === 'collection_layer') {
 					$sql = "
 						UPDATE
 							kvwmap.collection_layer2rolle clr
@@ -1598,11 +1601,11 @@ class rolle {
 							clr.stelle_id = $3 AND
 							clr.collection_layer_id = $4
 					";
-					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, ($layer_id - 1000000));
+					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $id_value);
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collectionlayer zur Rolle:", 4);
 					$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
 				}
-				elseif ($layer['layer_id'] > 0) {
+				elseif ($id_type === 'layer') {
 					$sql ="
 						UPDATE
 							kvwmap.u_rolle2used_layer r
@@ -1620,10 +1623,10 @@ class rolle {
 								ul.requires = $4
 							)
 					";
-					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $layer['layer_id']);
+					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $id_value);
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:", 4);
 				}
-				else { # Rollenlayer
+				else {
 					$sql  = "
 						UPDATE
 							kvwmap.rollenlayer
@@ -1634,14 +1637,15 @@ class rolle {
 							stelle_id = $3 AND
 							id = $4
 					";
-					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, abs($layer['layer_id']));
+					$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $id_value);
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Rollenlayer zur Rolle:",4);
 				}
 				$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
 			}
 		}
 		foreach ($formvars['group_checkbox'] as $group_id => $aktiv_status) {
-			if ($group_id > 3000000) {
+			[$id_value, $id_type] = split_id($group_id);
+			if ($id_type === 'collection') {
 				$sql = "
 					UPDATE
 						kvwmap.collection_layer2rolle clr
@@ -1654,13 +1658,13 @@ class rolle {
 						clr.collection_layer_id = cl.id AND
 						clr.user_id = $2 AND
 						clr.stelle_id = $3 AND
-						cl.collection_id + 3000000 = $4
+						cl.collection_id = $4
 				";
-				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $group_id);
+				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $id_value);
 				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collection Groups und Layer zur Rolle:", 4);
 				$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
 			}
-			elseif ($group_id > 2000000) {
+			elseif ($id_type === 'collection_group') {
 				$sql = "
 					UPDATE
 						kvwmap.collection_layer2rolle clr
@@ -1676,12 +1680,13 @@ class rolle {
 						clr.collection_layer_id = cl.id AND
 						clr.user_id = $2 AND
 						clr.stelle_id = $3 AND
-						cg.id + 2000000 = $4
+						cg.id = $4
 				";
-				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $group_id);
+				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $id_value);
 				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collection Layer zur Rolle:", 4);
 			}
 			else {
+				// normale Layergruppe
 				$sql = "
 					UPDATE
 						kvwmap.u_rolle2used_layer
@@ -1753,8 +1758,9 @@ class rolle {
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		foreach ($formvars['qLayer'] as $layer_id => $query_status) {
-			if ($layer_id != '' AND $query_status !== '') {
-				if ($layer_id > 1000000) {
+			[$id_value, $id_type] = split_id($layer_id);
+			if ($id_value != '' AND $query_status !== '') {
+				if ($id_type === 'collection_layer') {
 					$sql = "
 						UPDATE
 							kvwmap.collection_layer2rolle clr
@@ -1765,9 +1771,9 @@ class rolle {
 							clr.stelle_id = $3 AND
 							clr.collection_layer_id = $4
 					";
-					$this->database->prepared_params = array($query_status, $this->user_id, $this->stelle_id, ($layer_id - 1000000));
+					$this->database->prepared_params = array($query_status, $this->user_id, $this->stelle_id, $id_value);
 				}
-				elseif ($layer['layer_id'] > 0) {
+				elseif ($id_type === 'layer') {
 					$sql = "
 						UPDATE 
 							kvwmap.u_rolle2used_layer
@@ -1778,9 +1784,10 @@ class rolle {
 							stelle_id = $3 AND 
 							layer_id = $4
 					";
-					$this->database->prepared_params = array($query_status, $this->user_id, $this->stelle_id, $layer_id);
+					$this->database->prepared_params = array($query_status, $this->user_id, $this->stelle_id, $id_value);
 				}
 				else {
+					// rollenlayer
 					$sql = "
 						UPDATE 
 							kvwmap.rollenlayer
@@ -1791,7 +1798,7 @@ class rolle {
 							stelle_id = $3 AND 
 							id = $4
 					";
-					$this->database->prepared_params = array($query_status, $this->user_id, $this->stelle_id, abs($layer_id));
+					$this->database->prepared_params = array($query_status, $this->user_id, $this->stelle_id, $id_value);
 				}
 				// echo 'SQL zum Aktualisieren der query_status: ' . $this->database->get_prepared_sql($sql, $this->database->prepared_params); exit;
 				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:", 4);

@@ -941,7 +941,7 @@ class GUI {
 									</td>
 								</tr>';
 						}
-	echo '		</table>
+		echo '		</table>
 					</td>
 				</tr>
 				<tr>
@@ -982,22 +982,65 @@ class GUI {
 		';
 	}
 
+	// function getGroupOptions() {
+	// 	$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+	// 	echo '
+	// 	<div class="groupOptions" id="group_options_content_' . $this->formvars['group_id'].'">
+	// 		<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeGroupOptions(' . $this->formvars['group_id'] . ');" title="Schlie&szlig;en"><img style="border:none" src="' . GRAPHICSPATH . 'exit2.png"></img></a></div>
+	// 		<table width="100%" cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
+	// 			<tr>
+	// 				<td class="groupOptionsHeader">
+	// 					<span class="fett">Gruppenoptionen</span>
+	// 				</td>
+	// 			</tr>
+	// 			<tr>
+	// 				<td>
+	// 					<ul>
+	// 						<li><a href="javascript:selectgroupthema(document.GUI.layers_of_group_' . $this->formvars['group_id'] . ', 0)" style="margin-left: -15px">alle Layer ein/ausschalten</a></li>
+	// 					</ul>
+	// 				</td>
+	// 			</tr>
+	// 			<tr>
+	// 				<td align="center">
+	// 					<table cellspacing="0" cellpadding="0">
+	// 						<tr>
+	// 							<td>
+	// 							</td>
+	// 							<td>
+	// 							</td>
+	// 						</tr>
+	// 					</table>
+	// 				</td>
+	// 			</tr>
+	// 		</table>
+	// 	</div>
+	// 	█
+	// 	legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
+	// 	legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
+	// 	posy = document.getElementById(\'group_options_' . $this->formvars['group_id'] . '\').getBoundingClientRect().top;
+	// 	if(posy > legend_bottom - 150) posy = legend_bottom - 150;
+	// 	document.getElementById(\'group_options_content_' . $this->formvars['group_id'] . '\').style.top = posy - (13 + legend_top);
+	// 	$(\'#group_options_' . $this->formvars['group_id'] . '\').show()
+	// 	';
+	// }
 
-	function getGroupOptions() {
+	function getCollectionOptions() {
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		echo '
-		<div class="groupOptions" id="group_options_content_' . $this->formvars['group_id'].'">
-			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeGroupOptions(' . $this->formvars['group_id'] . ');" title="Schlie&szlig;en"><img style="border:none" src="' . GRAPHICSPATH . 'exit2.png"></img></a></div>
+		<div class="layerOptions" id="collection_options_content_' . $this->formvars['collection_id']. '">
+			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeCollectionOptions(' . $this->formvars['collection_id'] . ');" title="Schlie&szlig;en"><img style="border:none" src="' . GRAPHICSPATH . 'exit2.png"></img></a></div>
 			<table width="100%" cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
 				<tr>
-					<td class="groupOptionsHeader">
-						<span class="fett">Gruppenoptionen</span>
+					<td class="layerOptionsHeader">
+						<span class="fett">Optionen</span>
 					</td>
 				</tr>
 				<tr>
 					<td>
 						<ul>
-							<li><a href="javascript:selectgroupthema(document.GUI.layers_of_group_' . $this->formvars['group_id'] . ', 0)" style="margin-left: -15px">alle Layer ein/ausschalten</a></li>
+							<li>
+								<a href="javascript:void(0);" onclick="zoomToMaxCollectionExtent(' . $this->formvars['collection_id'] . ')">' . ucfirst($this->FullCollectionExtent) . '</a>
+							</li>
 						</ul>
 					</td>
 				</tr>
@@ -1018,10 +1061,10 @@ class GUI {
 		█
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
-		posy = document.getElementById(\'group_options_' . $this->formvars['group_id'] . '\').getBoundingClientRect().top;
+		posy = document.getElementById(\'collection_options_' . $this->formvars['collection_id'] . '\').getBoundingClientRect().top;
 		if(posy > legend_bottom - 150) posy = legend_bottom - 150;
-		document.getElementById(\'group_options_content_' . $this->formvars['group_id'] . '\').style.top = posy - (13 + legend_top);
-		$(\'#group_options_' . $this->formvars['group_id'] . '\').show()
+		document.getElementById(\'collection_options_content_' . $this->formvars['collection_id'] . '\').style.top = posy - (13 + legend_top);
+		$(\'#collection_options_' . $this->formvars['collection_id'] . '\').show()
 		';
 	}
 
@@ -1338,6 +1381,7 @@ class GUI {
 		}
 		$legend .= '<input type="hidden" name="layers" value="'.$this->layer_id_string.'">';
 		$legend .= '<input type="hidden" name="zoom_layer_id" value="">';
+		$legend .= '<input type="hidden" name="zoom_collection_id" value="">';
 		return $legend;
   }
 
@@ -1345,6 +1389,7 @@ class GUI {
 		if (!$this->group_has_layers[$group_id] ) {		# wenns keine Layer in der Gruppe oder in Untergruppen gibt, Gruppe weglassen
 			return;
 		}
+		[$id_value, $id_type] = split_id($group_id);
 		$import_types = [
 			'eigene Abfragen' => 'search',
 			'Eigene Importe' => 'import',
@@ -1362,24 +1407,28 @@ class GUI {
 						<a href="javascript:getlegend(\'' . $group_id . '\')">
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>';
-				if ($this->groupset[$group_id]['checkbox']) {
-					$legend .= '
-						<input id="group_checkbox[' . $group_id . ']" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="1" onclick="selectgroupthemaAll(this, ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
-					';
-				}
-				$legend .= '
-						<span class="legend_group' . (value_of($this->group_has_active_layers, $group_id) != '' ? '_active_layers' : '') . '">
-							<!--a
-								href="javascript:getGroupOptions(' . $group_id . ')"
-								onmouseover="$(\'#test_' . $group_id . '\').show()"
-								onmouseout="$(\'#test_' . $group_id . '\').hide()"
-							>' . html_umlaute($groupname) . '
-								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
-							</a-->' .
-							html_umlaute($groupname) . '
-							' . ($import_types[$groupname] != NULL ? '<a href="javascript:deleteRollenlayer(\'' . $import_types[$groupname] . '\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '') . '
-							<div style="position:static;" id="group_options_' . $group_id . '"></div>
-						</span>
+						if ($this->groupset[$group_id]['checkbox']) {
+							$legend .= '
+								<input id="group_checkbox[' . $group_id . ']" name="group_checkbox[' . $group_id . ']" type="checkbox" class="legend-group-checkbox" value="1" onclick="selectgroupthemaAll(this, ' . $this->user->rolle->instant_reload.')"' . (value_of($this->group_has_active_layers, $group_id) != '' ? ' checked' : '') . '/>
+							';
+						}
+						$legend .= '
+							<span class="legend_group' . (value_of($this->group_has_active_layers, $group_id) != '' ? '_active_layers' : '') . '">
+								<!--a
+									href="javascript:getGroupOptions(' . $group_id . ')"
+									onmouseover="$(\'#test_' . $group_id . '\').show()"
+									onmouseout="$(\'#test_' . $group_id . '\').hide()"
+								>' . html_umlaute($groupname) . '
+									<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
+								</a-->' . html_umlaute($groupname) . ' ' . ($import_types[$groupname] != NULL ? '<a href="javascript:deleteRollenlayer(\'' . $import_types[$groupname] . '\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '');
+						if ($id_type === 'collection') {
+							$collection_id = $id_value;
+							$legend .= '
+								<a href="javascript:getCollectionOptions(' . $collection_id . ')"><i id="collection_options_button_' . $collection_id . '" class="fa fa-bars" title="Optionen"></i></a>
+								<div style="position:static; float:right" id="collection_options_' . $collection_id . '"><div class="layerOptions" id="collection_options_content_' . $collection_id . '"></div></div>';
+						}
+						$legend .= '
+								</span>
 					</td>
 				</tr>
 				<tr>
@@ -5923,9 +5972,13 @@ class GUI {
 				}
 			}
 		}
-		# zoom_to_max_layer_extent
+		// zoom_to_max_layer_extent
 		if ($this->formvars['zoom_layer_id'] != '') {
 			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
+		}
+		// zoom_to_max_collection_extent
+		if (value_of($this->formvars, 'zoom_collection_id') != '') {
+			$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
 		}
 		$this->saveMap('');
 		if ($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next') {
@@ -6057,8 +6110,14 @@ class GUI {
 			$rect = rectObj($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
 			$this->map_scaledenom = $this->map->scaledenom;
 		}
-		# zoom_to_max_layer_extent
-		if($this->formvars['zoom_layer_id'] != '')$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
+		// zoom_to_max_layer_extent
+		if($this->formvars['zoom_layer_id'] != '') {
+			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
+		}
+		// zoom_to_max_collection_extent
+		if (value_of($this->formvars, 'zoom_collection_id') != '') {
+			$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
+		}
 		if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
 			$currenttime=date('Y-m-d H:i:s',time());
 			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -6923,12 +6982,15 @@ class GUI {
 			# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 			$this->scaleMap($saved_scale);
 		}
-		# zoom_to_max_layer_extent
+		// zoom_to_max_layer_extent
 		if ($this->formvars['zoom_layer_id'] != '') {
-			# Kartendrucklayouts laden
 			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 		}
-    $this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
+		// zoom_to_max_collection_extent
+		if (value_of($this->formvars, 'zoom_collection_id') != '') {
+			$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
+		}
+		$this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
 		if (count($this->Document->frames) == 0) {
 			$this->main = 'map.php';
 			$this->add_message('warning', $this->strNoMapPrintFrame);
@@ -12085,9 +12147,13 @@ class GUI {
 						# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 						$this->scaleMap($saved_scale);
 					}
-					# zoom_to_max_layer_extent
+					// zoom_to_max_layer_extent
 					if (value_of($this->formvars, 'zoom_layer_id') != '') {
 						$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
+					}
+					// zoom_to_max_collection_extent
+					if (value_of($this->formvars, 'zoom_collection_id') != '') {
+						$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
 					}
 					# Zoom auf Geometrie-Fehler-Position
 					if ($this->error_position != '') {
@@ -15721,9 +15787,13 @@ class GUI {
 		$this->loadMap('DataBase', array(), ($this->formvars['strict_layer_name'] ? true : false));
 		# zwischenspeichern des vorherigen Maßstabs
 		$oldscale=round($this->map_scaledenom);
-		# zoom_to_max_layer_extent
+		// zoom_to_max_layer_extent
 		if (value_of($this->formvars, 'zoom_layer_id') != '') {
 			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
+		}
+		// zoom_to_max_collection_extent
+		if (value_of($this->formvars, 'zoom_collection_id') != '') {
+			$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
 		}
 		if (value_of($this->formvars, 'nScale') != '' AND $this->formvars['nScale'] != $oldscale) {
 			# Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
@@ -18374,6 +18444,32 @@ class GUI {
 		}
 	}
 
+	function zoom_to_max_collection_extent($collection_id) {
+		include_once(CLASSPATH . 'collection.php');
+		$result = Collection::find_by_id($this, $collection_id);
+		if ($result['success']) {
+			$collection = $result['collection'];
+			if ($collection->get('extent') == '') {
+				$this->add_message('info', 'Die maximale Ausdehnung der Kollektion ist nicht definiert. Bitte wenden Sie sich an den Administrator.');
+				return false;
+			}
+			$extent = explode(',', $collection->get('extent'));
+			$this->map->setextent($extent[0], $extent[1], $extent[2], $extent[3]);
+			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
+			$oPixelPos = new PointObj();
+			$oPixelPos->setXY($this->map->width / 2, $this->map->height / 2);
+			if ($layer['maxscale'] > 0 AND $layer['maxscale'] < $this->map->scaledenom) {
+				$nScale = $layer['maxscale'] - 1;
+			}
+			else {
+				$nScale = $this->map->scaledenom;
+			}
+			$this->map->zoomscale($nScale, $oPixelPos, $this->map->width, $this->map->height, $this->map->extent, $this->Stelle->MaxGeorefExt);
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		return true;
+	}
+
 	/**
 	* Function erzeugt eine MapServer Query Map vom $k-ten Feature im layerset
 	* und liefert den Pfad der Datei zurück
@@ -19203,13 +19299,13 @@ class db_mapObj{
 
 		$sql = "
 			SELECT
-				1000000 + cl.id AS layer_id,
+				'cl_' || cl.id::text AS layer_id,
 				" . $name_column . ",
-				2000000 + cg.id AS id,
+				'cg_' || cg.id::text AS id,
 				" . $group_column . ",
-				2000000 + cg.id AS group_id,
-				2000000 + cg.id AS gruppe,
-				3000000 + c.id AS obergruppe,
+				'cg_' || cg.id::text AS group_id,
+				'cg_' || cg.id::text AS gruppe,
+				'c_' || c.id::text AS obergruppe,
 				g.order,
 				l.oid,
 				coalesce(ul.transparency, 100) AS transparency,
@@ -19333,7 +19429,7 @@ class db_mapObj{
 		$gruppenname_column = "replace(c.bezeichnung, 'BPlan ', '')";
 		$sql ="
 			SELECT
-				3000000 + c.id AS id,
+				'c_' || c.id::text AS id,
 				" . $gruppenname_column . " AS gruppenname,
 					c.group_id AS obergruppe,
 				false AS selectable_for_shared_layers,
@@ -19382,9 +19478,9 @@ class db_mapObj{
 		}
 		$sql = "
 			SELECT
-				2000000 + cg.id AS id,
+				'cg_' || cg.id::text AS id,
 				" . $gruppenname_column . " AS gruppenname,
-				3000000 + c.id AS obergruppe,
+				'c_' || c.id::text AS obergruppe,
 				false AS selectable_for_shared_layers,
 				true AS checkbox" .
 				(!$all ? ", cgr.status" : "") . "
@@ -19764,17 +19860,18 @@ class db_mapObj{
 	function read_Classes($layer_id, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
 		$Classes = array();
+		[$id_value, $id_type] = split_id($layer_id);
 
-		if ($layer_id > 1000000) {
+		if ($id_type === 'collection_layer') {
 			$from .= "
 				kvwmap.classes AS c JOIN
 				kvwmap.collection_layer cl ON c.layer_id = cl.layer_id
 			";
-			$where = "cl.id = " . ($layer_id - 1000000);
+			$where = "cl.id = " . $id_value;
 		}
 		else {
 			$from = "kvwmap.classes AS c";
-			$where = "c.layer_id = " . $layer_id;
+			$where = "c.layer_id = " . $id_value;
 		}
 
 		$sql = "

@@ -572,4 +572,5 @@ $legendheight = $this->map->height + 20;
 <input type="hidden" name="suchgeprueft" value="<? echo $this->formvars['suchgeprueft']; ?>">
 <INPUT TYPE="hidden" NAME="reset_layers" VALUE="">
 <input type="hidden" name="layer_options_open" value="">
+<input type="hidden" name="collection_options_open" value="">
 <input type="hidden" name="neuladen" value="">

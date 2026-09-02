@@ -1,4 +1,25 @@
 <?
+function split_id($id): array {
+	if (strpos($id, '_') === false) {
+		if ($id > 0) {
+			return [$id, 'layer'];
+		}
+		else {
+			return [abs($id), 'rollenlayer'];
+		}
+	}
+	$parts = explode('_', $id, 2);
+	if ($parts[0] === 'cl') {
+		return [$parts[1], 'collection_layer'];
+	}
+	if ($parts[0] === 'cg') {
+		return [$parts[1], 'collection_group'];
+	}
+	if ($parts[0] === 'c') {
+		return [$parts[1], 'collection'];
+	}
+	return [$parts[1], $parts[0]];
+}
 
 function before_last($txt, $delimiter) {
 	#echo '<br>Return the part of ' . $txt . ' before the last occurence of ' . $delimiter;
@@ -2406,13 +2427,13 @@ class db_mapObj {
 
 		$sql = "
 			SELECT
-				1000000 + cl.id AS layer_id,
+				'cl_' || cl.id::text AS layer_id,
 				" . $name_column . ",
-				2000000 + cg.id AS id,
+				'cg_' || cg.id::text AS id,
 				" . $group_column . ",
-				2000000 + cg.id AS group_id,
-				2000000 + cg.id AS gruppe,
-				3000000 + c.id AS obergruppe,
+				'cg_' || cg.id::text AS group_id,
+				'cg_' || cg.id::text AS gruppe,
+				'c_' || c.id::text AS obergruppe,
 				g.order,
 				l.oid,
 				coalesce(ul.transparency, 100) AS transparency,
@@ -2484,7 +2505,7 @@ class db_mapObj {
 				c.id,
 				l.drawingorder
 		";
-		#echo '<br>SQL zur Abfrage der CollectionLayer: ' . $sql;
+		// echo '<br>SQL zur Abfrage der CollectionLayer: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_CollectionLayer - Lesen der CollectionLayer der Rolle:<br>", 4);
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$collection_layer = array();
@@ -2536,7 +2557,7 @@ class db_mapObj {
 		$gruppenname_column = "replace(c.bezeichnung, 'BPlan ', '')";
 		$sql ="
 			SELECT
-				3000000 + c.id AS id,
+				'c_' || c.id::text AS id,
 				" . $gruppenname_column . " AS gruppenname,
 					c.group_id AS obergruppe,
 				false AS selectable_for_shared_layers,
@@ -2585,9 +2606,9 @@ class db_mapObj {
 		}
 		$sql = "
 			SELECT
-				2000000 + cg.id AS id,
+				'cg_' || cg.id::text AS id,
 				" . $gruppenname_column . " AS gruppenname,
-				3000000 + c.id AS obergruppe,
+				'c_' || c.id::text AS obergruppe,
 				false AS selectable_for_shared_layers,
 				true AS checkbox" .
 				(!$all ? ", cgr.status" : "") . "
@@ -2603,7 +2624,7 @@ class db_mapObj {
 			ORDER BY " .
 				($order != '' ? replace_semicolon($order) : 'cg."order"') . "
 		";
-		// echo "SQL zur Abfrage der Collection Groups: " . $sql;
+		// echo "<br>SQL zur Abfrage der Collection Groups: " . $sql;
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$groups = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
@@ -2967,17 +2988,18 @@ class db_mapObj {
 	function read_Classes($layer_id, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
 		$Classes = array();
+		[$id_value, $id_type] = split_id($layer_id);
 
-		if ($layer_id > 1000000) {
+		if ($id_type === 'collection_layer') {
 			$from .= "
 				kvwmap.classes AS c JOIN
 				kvwmap.collection_layer cl ON c.layer_id = cl.layer_id
 			";
-			$where = "cl.id = " . ($layer_id - 1000000);
+			$where = "cl.id = " . $id_value;
 		}
 		else {
 			$from = "kvwmap.classes AS c";
-			$where = "c.layer_id = " . $layer_id;
+			$where = "c.layer_id = " . $id_value;
 		}
 
 		$sql = "
@@ -3114,321 +3136,6 @@ class db_mapObj {
 			$Labels[]=$rs;
 		}
 		return $Labels;
-	}
-
-		function read_CollectionLayer($withClasses, $i) {
-		global $language;
-
-		if ($language != 'german') {
-			$language = str_replace('-', '_', $language);
-			$name_column = "
-			CASE
-				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "
-				ELSE l.name
-			END AS name";
-			$group_column = '
-			CASE
-				WHEN gruppenname_' . $language . ' IS NOT NULL THEN gruppenname_' . $language . '
-				ELSE gruppenname
-			END AS gruppenname';
-		}
-		else {
-			$name_column = "l.name";
-			$group_column = 'gruppenname';
-		}
-
-		$sql = "
-			SELECT
-				1000000 + cl.id AS layer_id,
-				" . $name_column . ",
-				2000000 + g.id AS id,
-				" . $group_column . ",
-				2000000 + ul.group_id AS group_id,
-				2000000 + COALESCE(ul.group_id, l.Gruppe) AS gruppe,
-				3000000 + c.id AS obergruppe,
-				g.order,
-				l.oid,
-				coalesce(ul.transparency, 100) AS transparency,
-				clr.aktivstatus,
-				clr.querystatus,
-				clr.gle_view,
-				clr.showclasses,
-				'' rollenfilter,
-				ul.queryable,
-				l.drawingorder,
-				l.legendorder,
-				ul.minscale,
-				ul.maxscale,
-				ul.offsite,
-				ul.postlabelcache,
-				concat_ws(' AND ', ul.FILTER, c.FILTER) AS FILTER,
-				ul.template,
-				ul.header,
-				ul.footer,
-				ul.symbolscale,
-				ul.requires,
-				ul.privileg,
-				ul.export_privileg,
-				l.alias,
-				l.datentyp,
-				l.pfad,
-				l.Data,
-				l.tileindex,
-				l.tileitem,
-				l.labelangleitem,
-				coalesce(clr.labelitem, l.labelitem) as labelitem,
-				clr.labelitem as user_labelitem,
-				l.labelmaxscale,
-				l.labelminscale,
-				l.labelrequires,
-				l.connection_id, 
-				CASE
-					WHEN connectiontype = 6 THEN concat('host=', cn.host, ' port=', cn.port, ' dbname=', cn.dbname, ' user=', cn.user, ' password=', cn.password, ' application_name=kvwmap_user_', clr.user_id)
-					ELSE l.connection
-				END as connection,
-				l.printconnection,
-				l.connectiontype,
-				l.classitem, l.styleitem, l.classification,
-				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.errorstatus, l.trigger_function,
-				l.duplicate_from_layer_id,
-				l.duplicate_criterion,
-				l.shared_from,
-				l.kurzbeschreibung,
-				l.dataowner_name,
-				l.dataowner_email,
-				l.dataowner_tel,
-				l.uptodateness,
-				l.updatecycle
-			FROM
-				kvwmap.layer l JOIN
-				kvwmap.connections as cn ON l.connection_id = cn.id JOIN
-				kvwmap.u_groups g ON g.id = l.gruppe JOIN
-				kvwmap.collection_layer cl ON cl.layer_id = l.layer_id JOIN
-				kvwmap.collection_layer2rolle clr ON clr.collection_layer_id = cl.id JOIN
-				kvwmap.used_layer ul ON ul.layer_id = l.layer_id AND ul.stelle_id = clr.stelle_id JOIN
-				kvwmap.collections c ON c.id = cl.collection_id JOIN
-				kvwmap.collections2rolle cr ON cr.collection_id = c.id AND cr.stelle_id = clr.stelle_id AND cr.user_id = clr.user_id
-			WHERE
-				clr.stelle_id = " . $this->Stelle_ID . " AND
-				clr.user_id = " . $this->User_ID . "
-			ORDER BY
-				c.id,
-				l.drawingorder
-		";
-
-		// echo '<br>SQL zur Abfrage der CollectionLayer: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_CollectionLayer - Lesen der CollectionLayer der Rolle:<br>", 4);
-		$ret = $this->db->execSQL($sql, 4, 0, true);
-		$collection_layer = array();
-		$collection_layer['list'] = array();
-		$this->disabled_classes = array();
-		while ($rs = pg_fetch_assoc($ret[1])) {
-			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
-				if ($rs['filter'] == '') {
-					$rs['filter'] = '('.$rs['rollenfilter'].')';
-				}
-				else {
-					$rs['filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['filter']);
-				}
-			}
-
-			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'name' : 'alias'];
-			$rs['id'] = $i;
-			$rs['alias_link'] = replace_params_rolle(
-				replace_params_link(
-					$rs['Name_or_alias'],
-					rolle::$layer_params,
-					$rs['layer_id']
-				)
-			);
-			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data', 'wms_name') AS $key) {
-				$rs[$key] = replace_params_rolle(
-					$rs[$key],
-					['duplicate_criterion' => $rs['duplicate_criterion']]
-				);
-			}
-			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivstatus'] != '0')) {
-				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
-				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
-				$rs['Class'] = $this->read_Classes($rs['layer_id'], $this->disabled_classes, false, $rs['classification']);
-			}
-			if ($rs['maxscale'] > 0) {
-				$rs['maxscale'] = $rs['maxscale'] + 0.3;
-			}
-			if ($rs['minscale'] > 0) {
-				$rs['minscale'] = $rs['minscale'] - 0.3;
-			}
-			$rs['queryable'] = ($rs['queryable'] == 't');
-			$collection_layer['list'][$i] = $rs;
-			# Pointer auf requires-Array
-			$collection_layer['list'][$i]['required'] =& $requires_layer[$rs['layer_id']];
-			$collection_layer['layer_ids'][$rs['layer_id']] =& $collection_layer['list'][$i]; # damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
-			$i++;
-		}
-		return $collection_layer;
-	}
-
-	function read_Collections($all = false, $order = '', $where = 'true') {
-		$gruppenname_column = 'c.bezeichnung';
-
-		$sql ="
-			SELECT
-				3000000 + c.id AS id,
-				" . $gruppenname_column . " AS gruppenname,
-					c.group_id AS obergruppe,
-				false AS selectable_for_shared_layers,
-				true AS checkbox" .
-				(!$all ? ", cr.status" : "") . "
-			FROM
-				kvwmap.collections c". ($all ? "" : " JOIN
-				kvwmap.collections2rolle AS cr ON cr.collection_id = c.id") . "
-			WHERE
-				" . $where . ($all ? "" : " AND
-				cr.stelle_id = " . $this->Stelle_ID . " AND
-				cr.user_id = " . $this->User_ID) . "
-			ORDER BY " .
-				($order != '' ? replace_semicolon($order) : "c.bezeichnung") . "
-		";
-		// echo "SQL zur Abfrage der Collections: " . $sql;
-		$ret = $this->db->execSQL($sql, 4, 0, true);
-		$groups = array();
-		while ($rs = pg_fetch_assoc($ret[1])) {
-			$groups[$rs['id']]['status'] = value_of($rs, 'status');
-			$groups[$rs['id']]['gruppenname'] = $rs['gruppenname'];
-			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
-			$groups[$rs['id']]['id'] = $rs['id'];
-			$groups[$rs['id']]['selectable_for_shared_layers'] = ($rs['selectable_for_shared_layers'] == 't');
-			$groups[$rs['id']]['checkbox'] = ($rs['checkbox'] == 't');
-			if ($rs['obergruppe']) {
-				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
-			}
-		}
-		$this->anzGroups = count($groups);
-		return $groups;
-	}
-
-	function read_CollectionGroups($all = false, $order = '', $where = 'true') {
-		global $language;
-		if ($language != 'german') {
-			$language = str_replace('-', '_', $language);
-			$gruppenname_column = "
-			CASE
-				WHEN g.gruppenname_" . $language . " != \"\" THEN g.gruppenname_" . $language . "
-				ELSE g.gruppenname
-			END";
-		}
-		else {
-			$gruppenname_column = "g.gruppenname";
-		}
-		$sql = "
-			SELECT
-				2000000 + g.id AS id,
-				" . $gruppenname_column . " AS gruppenname,
-				3000000 + c.id AS obergruppe,
-				false AS selectable_for_shared_layers,
-				true AS checkbox" .
-				(!$all ? ", cgr.status" : "") . "
-			FROM
-				kvwmap.collection_groups AS cg JOIN
-				kvwmap.collections AS c ON c.id = cg.collection_id JOIN
-				kvwmap.u_groups g ON g.id = cg.group_id" . ($all ? "" : " JOIN
-				kvwmap.collection_groups2rolle AS cgr ON cg.id = cgr.collection_group_id") . "
-			WHERE
-				" . $where . ($all ? "" : " AND
-				cgr.stelle_id = " . $this->Stelle_ID . " AND
-				cgr.user_id = " . $this->User_ID) . "
-			ORDER BY " .
-				($order != '' ? replace_semicolon($order) : 'cg."order"') . "
-		";
-		// echo "SQL zur Abfrage der Collection Groups: " . $sql;
-		$ret = $this->db->execSQL($sql, 4, 0, true);
-		$groups = array();
-		while ($rs = pg_fetch_assoc($ret[1])) {
-			$groups[$rs['id']]['status'] = value_of($rs, 'status');
-			$groups[$rs['id']]['gruppenname'] = $rs['gruppenname'];
-			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
-			$groups[$rs['id']]['id'] = $rs['id'];
-			$groups[$rs['id']]['selectable_for_shared_layers'] = ($rs['selectable_for_shared_layers'] == 't');
-			$groups[$rs['id']]['checkbox'] = ($rs['checkbox'] == 't');
-			if ($rs['obergruppe']) {
-				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
-			}
-		}
-		$this->anzGroups = count($groups);
-		return $groups;
-	}
-
-	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
-		$sql = "
-			SELECT DISTINCT
-				l.id,
-				l.user_id,
-				l.stelle_id,
-				l.aktivstatus,
-				l.querystatus,
-				l.name,
-				l.name as alias,
-				l.gruppe,
-				l.typ,
-				l.datentyp,
-				l.data,
-				l.query,
-				l.connectiontype,
-				l.connection_id,
-				l.wms_auth_username,
-				l.wms_auth_password,
-				CASE
-					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', l.user_id)
-					ELSE l.connection
-				END as connection,
-				l.epsg_code,
-				l.transparency,
-				l.buffer,
-				l.labelitem,
-				l.classitem,
-				l.gle_view,
-				l.rollenfilter,
-				l.duplicate_from_layer_id,
-				l.duplicate_criterion,
-				g.gruppenname,
-				-l.id AS layer_id,
-				1 as showclasses,
-				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
-				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter,
-				'' as wms_name,
-				'' as wms_format,
-				'' as wms_server_version,
-				'' as wms_connectiontimeout,
-				'' as oid
-			FROM
-				kvwmap.rollenlayer AS l JOIN
-				kvwmap.u_groups AS g ON l.Gruppe = g.id LEFT JOIN
-				kvwmap.connections AS c ON l.connection_id = c.id
-			WHERE
-				l.stelle_id=" . $this->Stelle_ID . " AND
-				l.user_id = " . $this->User_ID .
-				($id != NULL ? " AND l.id = " . $id : '') .
-				($typ != NULL ? " AND l.typ = '" . $typ . "'" : '') . 
-				($autodelete != NULL ? " AND l.autodelete = '" . $autodelete . "'" : '') . "
-		";
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
-		#echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
-		$ret = $this->db->execSQL($sql, 4, 0, true);
-		$Layer = array();
-		while ($rs = pg_fetch_assoc($ret[1])) {
-			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
-			foreach (array('name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'data') AS $key) {
-				$rs[$key] = replace_params_rolle(
-					$rs[$key],
-					['duplicate_criterion' => $rs['duplicate_criterion']]
-				);
-			}
-			$rs['alias_link'] = $rs['alias'];
-			$rs['Name_or_alias'] = $rs['alias'];
-			$Layer[] = $rs;
-		}
-		return $Layer;
 	}
 }
 ?>

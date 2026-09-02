@@ -545,6 +545,7 @@ function navigate(params) {
 <input type="hidden" name="go" value="Style_Label_Editor">
 <input type="hidden" name="neuladen" value="">
 <input type="hidden" name="layer_options_open" value="">
+<input type="hidden" name="collection_options_open" value="">
 <script type="text/javascript">
 <!--
 

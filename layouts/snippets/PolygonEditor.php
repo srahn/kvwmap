@@ -199,6 +199,7 @@ function send(zoom){
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 <INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>">    
 <input type="hidden" name="layer_options_open" value="">
+<input type="hidden" name="collection_options_open" value="">
 <input type="hidden" name="neuladen" value="">
 <input type="hidden" name="scrollposition" value="">
 <? if($this->formvars['go'] == 'PolygonEditor'){ ?>

@@ -900,12 +900,18 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	var browserheight = '';
 	var legendtouched = '';
 	var zoom_layer_id = '';
+	var zoom_collection_id = '';
 	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
 	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
 	if(document.GUI.browserwidth)browserwidth = document.GUI.browserwidth.value;
 	if(document.GUI.browserheight)browserheight = document.GUI.browserheight.value;
 	if(document.GUI.legendtouched)legendtouched = document.GUI.legendtouched.value;
-	if(document.GUI.zoom_layer_id)zoom_layer_id = document.GUI.zoom_layer_id.value;
+	if (document.GUI.zoom_layer_id) {
+		zoom_layer_id = document.GUI.zoom_layer_id.value;
+	}
+	if (document.GUI.zoom_collection_id) {
+		zoom_collection_id = document.GUI.zoom_collection_id.value;
+	}
 	
 	if(browser == 'ie'){
 		code2execute_after += 'moveback();';
@@ -913,7 +919,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
-	postdata = postdata+"&mime_type=map_ajax&legendtouched="+legendtouched+"&zoom_layer_id="+zoom_layer_id+"&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
+	postdata = postdata+"&mime_type=map_ajax&legendtouched="+legendtouched+"&zoom_layer_id="+zoom_layer_id+"&zoom_collection_id="+zoom_collection_id+"&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
 	postdata.split("&")
 		.forEach(function (item) {
@@ -1374,17 +1380,57 @@ function selectgroupthemaAll(group_checkbox, instantreload) {
 	}
 }
 
-function zoomToMaxLayerExtent(zoom_layer_id){
+function zoomToMaxLayerExtent(zoom_layer_id) {
 	currentform.zoom_layer_id.value = zoom_layer_id;
 	currentform.legendtouched.value = 1;
 	neuLaden();
 	currentform.zoom_layer_id.value = '';
 }
 
+function zoomToMaxCollectionExtent(collection_id) {
+	currentform.zoom_collection_id.value = collection_id;
+	currentform.legendtouched.value = 1;
+	neuLaden();
+	currentform.zoom_collection_id.value = '';
+}
+
 function getLayerOptions(layer_id){
-	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
+	if (document.GUI.layer_options_open.value != '') {
+		closeLayerOptions(document.GUI.layer_options_open.value);
+	}
 	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_content_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
 	document.GUI.layer_options_open.value = layer_id;
+}
+
+// function getGroupOptions(group_id) {
+// 	if (document.GUI.group_options_open.value != '') {
+// 		closeGroupOptions(document.GUI.group_options_open.value);
+// 	}
+// 	ahah('index.php', 'go=getGroupOptions&group_id=' + group_id, new Array(document.getElementById('group_options_' + group_id), ''), new Array('sethtml', 'execute_function'));
+// 	document.GUI.group_options_open.value = group_id;
+// }
+
+function getCollectionOptions(collection_id) {
+	if (document.GUI.collection_options_open.value != '') {
+		closeCollectionOptions(document.GUI.collection_options_open.value);
+	}
+	ahah('index.php', 'go=getCollectionOptions&collection_id=' + collection_id, new Array(document.getElementById('collection_options_' + collection_id), ''), new Array('sethtml', 'execute_function'));
+	document.GUI.group_options_open.value = collection_id;
+}
+
+function closeLayerOptions(layer_id){
+	document.GUI.layer_options_open.value = '';
+	document.getElementById('options_content_'+layer_id).innerHTML=' ';
+}
+
+// function closeGroupOptions(group_id) {
+// 	document.GUI.group_options_open.value = '';
+// 	document.getElementById('group_options_' + group_id).innerHTML = ' ';
+// }
+
+function closeCollectionOptions(collection_id) {
+	document.GUI.collection_options_open.value = '';
+	document.getElementById('collection_options_' + collection_id).innerHTML = ' ';
 }
 
 function getLayerParamsForm(layer_id){
@@ -1418,22 +1464,6 @@ function sendDeleteSharedLayer(layer_id) {
 function deleteSharedLayer(layer_id) {
   //console.log('shareRollenLayer layer_id: %s', layer_id);
 	message([{ type: "confirm", msg: "Soll der freigegebene Layer wirklich gelöscht werden?"}], 1000, 2000, undefined, layer_id, 'sendDeleteSharedLayer');
-}
-
-function getGroupOptions(group_id) {
-	if (document.GUI.group_options_open.value != '') closeGroupOptions(document.GUI.group_options_open.value);
-	ahah('index.php', 'go=getGroupOptions&group_id=' + group_id, new Array(document.getElementById('group_options_' + group_id), ''), new Array('sethtml', 'execute_function'));
-	document.GUI.group_options_open.value = group_id;
-}
-
-function closeLayerOptions(layer_id){
-	document.GUI.layer_options_open.value = '';
-	document.getElementById('options_content_'+layer_id).innerHTML=' ';
-}
-
-function closeGroupOptions(group_id) {
-	document.GUI.group_options_open.value = '';
-	document.getElementById('group_options_' + group_id).innerHTML = ' ';
 }
 
 function saveLayerOptions(){	

@@ -4,10 +4,12 @@
 $layerset = $this->layerset['list'];
 
 $SVGvars_querytooltipscript = '
-		var layernumber = new Array();';
-for($i = 0; $i < count_or_0($layerset); $i++){
-	if($layerset[$i]['layer_id'] != ''){
-		$SVGvars_querytooltipscript.= 'layernumber['.$i.'] = '.$layerset[$i]['layer_id'].';
+	var layernumber = new Array();';
+
+for ($i = 0; $i < count_or_0($layerset); $i++) {
+	[$id_value, $id_type] = split_id($layerset[$i]['layer_id']);
+	if ($id_type === 'layer' AND $id_value != '') {
+		$SVGvars_querytooltipscript .= 'layernumber.push(' . $layerset[$i]['layer_id'] . ');
 		';
 	}
 }
