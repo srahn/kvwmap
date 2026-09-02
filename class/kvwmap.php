@@ -2149,6 +2149,9 @@ echo '			</table>
 				#$map->set('interlace', MS_ON);
 				$map->status = MS_ON;
 				$map->name = MAPFILENAME;
+				if ($this->user->rolle->epsg_code == 4326) {
+					$map->units = MS_DD;
+				}
 
 				if (MS_DEBUG_LEVEL !== NULL) {
 					$map->setConfigOption('MS_ERRORFILE', dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
@@ -3563,10 +3566,6 @@ echo '			</table>
 
 		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
-		if ($this->user->rolle->epsg_code == 4326) {
-			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-			$this->map_scaledenom = degree2meter($center_y) * $this->map_scaledenom;
-		}
     $this->switchScaleUnitIfNecessary();
 		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
