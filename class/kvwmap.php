@@ -9046,6 +9046,8 @@ class GUI {
 			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
 			$layer_labelitems = new PgObject($this, 'kvwmap', 'layer_labelitems');
 			$this->layerdata['labelitems'] = $layer_labelitems->find_where('layer_id = ' . $this->formvars['selected_layer_id'], '"order"');
+			$layer_updatecycles = new PgObject($this, 'kvwmap', 'layer_updatecycles');
+			$this->layerdata['updatecycles'] = $layer_updatecycles->find_where('', 'id');
 			$this->layerdata['charts'] = LayerChart::find($this, 'layer_id = ' . $this->formvars['selected_layer_id']);
 			$this->layerdata['datasources'] = DataSource::find_by_layer_id($this, $this->formvars['selected_layer_id']);
 			$this->layerdata['datasource_ids'] = array_map(function($datasource) { return $datasource->get('id'); }, $this->layerdata['datasources']);
