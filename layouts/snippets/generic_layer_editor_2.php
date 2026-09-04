@@ -422,17 +422,17 @@ if ($doit == true) {
 													<table cellspacing="0" cellpadding="0">
 														<tr><?
 															if ($privileg == 1) { ?>
-																<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strEditGeom; ?>" target="root" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&selected_layer_id=<? echo $layer['layer_id'];?>&dimension=<? echo $dimension; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div class="button edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
+																<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strEditGeom; ?>" target="root" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&selected_layer_id=<? echo ($layer['collection_layer_layer_id'] ?: $layer['layer_id']);?>&dimension=<? echo $dimension; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div class="button edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 															} 
 															if ($layer['shape'][$k][$layer['attributes']['the_geom']] AND $layer['maintable'] != ''){ ?>
 																<td>
-																	<a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['layer_id'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer		['maintable'].'_oid']; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+																	<a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo ($layer['collection_layer_layer_id'] ?: $layer['layer_id']);?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer		['maintable'].'_oid']; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 																</td><?
 																if ($layer['layer_id'] > 0){ ?>
 																	<td>
-																		<a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo $layer['layer_id'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'false');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+																		<a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo ($layer['collection_layer_layer_id'] ?: $layer['layer_id']);?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'false');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 																	<td>
-																		<a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo $layer['layer_id'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+																		<a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo ($layer['collection_layer_layer_id'] ?: $layer['layer_id']);?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 																	</td>
 																	<td style="position: relative">
 																		<a 

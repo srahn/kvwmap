@@ -92,7 +92,7 @@ for($i=0;$i<$anzLayer;$i++){
 			$layer_visibility = '';
 			$active_tab = 'active_tab';
 		}
-		$layer_tabs .= '<div class="gle_layer_tab ' . $active_tab . '" style="z-index: ' . $zindex . '" onclick="toggle_layer(this, ' . $this->qlayerset[$i]['layer_id'] . ')">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
+		$layer_tabs .= '<div id="tab_' . $this->qlayerset[$i]['layer_id'] . '" class="gle_layer_tab ' . $active_tab . '" style="z-index: ' . $zindex . '" onclick="toggle_layer(this, \\\'' . $this->qlayerset[$i]['layer_id'] . '\\\', ' . $this->qlayerset[$i]['collection_layer_layer_id'] . ')">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
 		$zindex--;
 	}
 

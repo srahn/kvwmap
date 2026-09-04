@@ -1299,7 +1299,19 @@ class rolle {
 		$this->loglevel = 0;
 	}
 
-	function read_disabled_class_expressions($layerset) {
+  function read_disabled_class_expressions($layerset) {
+		$layer_with_collection_layers = array();
+		foreach ($layerset as $layer) {
+			$layer_id = $layer['layer_id'];
+			$real_layer_id = $layer['collection_layer_layer_id'] ?? null;
+			if ($real_layer_id === null) {
+				$layer_with_collection_layers[$layer_id] ??= [$layer_id];
+			}
+			else {
+				$layer_with_collection_layers[$real_layer_id] ??= [];
+				$layer_with_collection_layers[$real_layer_id][] = $layer_id;
+			}
+		}
 		$sql = "
 			SELECT 
 				cl.layer_id,
@@ -1307,18 +1319,19 @@ class rolle {
 				cl.expression,
 				cl.classification
 			FROM 
-				kvwmap.classes as cl
-				JOIN kvwmap.u_rolle2used_class as r2uc ON r2uc.class_id = cl.class_id
-			WHERE 
+				kvwmap.classes as cl JOIN
+				kvwmap.u_rolle2used_class as r2uc ON r2uc.class_id = cl.class_id
+			WHERE
 				r2uc.status = 0 AND 
 				r2uc.user_id = " . $this->user_id . "	AND 
 				r2uc.stelle_id = " . $this->stelle_id . "
 		";
-		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
 		$ret = $this->database->execSQL($sql);
-    while ($row = pg_fetch_assoc($ret[1])) {
-			if ($layerset['layer_ids'][$row['layer_id']]['classification'] == $row['classification']) {
-  			$result[$row['layer_id']][] = $row;
+		while ($row = pg_fetch_assoc($ret[1])) {
+			foreach ($layer_with_collection_layers[$row['layer_id']] AS $layer_or_collection_layer_id) {
+				if ($layerset['layer_ids'][$layer_or_collection_layer_id]['classification'] == $row['classification']) {
+					$result[$row['layer_id']][] = $row;
+				}
 			}
 		}
 		return $result ?: [];
