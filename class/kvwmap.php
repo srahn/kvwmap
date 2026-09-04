@@ -13443,6 +13443,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($this->formvars['selected_layer_id'] != '') {
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true, $this->Stelle->id);
 			$this->stellen = $mapdb->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
 		}
