@@ -1693,7 +1693,7 @@ function str_space($string, $split_length = 1) {
  * Wenn die id negativ ist liefere sie positiv zurück und setze den Typ auf rollenlayer
  * Wenn die id einen Unterstrich enthält, wird der erste Teil als Typ und der zweite Teil als ID interpretiert
  * @param string $id Die zu splittende ID
- * @return array Das Array mit den aufgeteilten Bestandteilen
+ * @return array Das Array mit den aufgeteilten Bestandteilen, erstes Element ist die ID, zweites Element ist der Typ
  */
 function split_id($id): array {
 	if (strpos($id, '_') === false) {
