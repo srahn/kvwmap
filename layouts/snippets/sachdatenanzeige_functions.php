@@ -163,7 +163,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		});
 	}
 
-	toggle_layer = function(tab, layer_id){
+	toggle_layer = function(tab, layer_id, collection_layer_layer_id = null) {
 		enclosingForm.active_layer_id.value = layer_id;
 		var active_tab = document.querySelector('.gle_layer_tab.active_tab');
 		active_tab.classList.remove("active_tab");
@@ -175,7 +175,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		var layer_to_open = document.querySelector('#result_' + layer_id);
 		layer_to_open.classList.remove('collapsedfull');
 		scrollto_saved_position();
-		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
+		ahah('index.php?go=set_last_query_layer', `layer_id=${collection_layer_layer_id ? collection_layer_layer_id : layer_id}`, [], []);
 	}
 
 	check_visibility_rule = function(layer_id, rule, scope, k) {

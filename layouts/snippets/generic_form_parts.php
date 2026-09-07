@@ -871,9 +871,14 @@
 				$show_link = false;
 				$one_param_is_null = false;
 				$options = $attributes['options'][$j];
+				$link_type = explode(':', $options)[0];
 				for ($a = 0; $a < count($attributes['name']); $a++) {
 					if(strpos($options, '$'.$attributes['name'][$a]) !== false){
-						$options = str_replace('$'.$attributes['name'][$a], rawurlencode($dataset[$attributes['name'][$a]]), $options);
+						$options = str_replace(
+							'$'.$attributes['name'][$a],
+							($link_type == 'mailto' ? rawurlencode($dataset[$attributes['name'][$a]]) : $dataset[$attributes['name'][$a]]),
+							$options
+						);
 						if ($dataset[$attributes['name'][$a]] == '') {
 							$one_param_is_null = true;
 						}
@@ -919,8 +924,6 @@
 						if ($explosion[2] == 'no_new_window' AND substr($href, 0, 10) != 'javascript') {
 							$onclick = 'checkForUnsavedChanges(event);adjustHref(this);';
 						}
-						# link_parts: link_type:link_url
-						$link_type = explode(':', $href)[0];
 						$link_url = explode(':', $href)[1];
 						switch ($link_type) {
 							case 'mailto' : {

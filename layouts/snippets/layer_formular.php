@@ -1219,7 +1219,26 @@ from
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strUpdateCycle; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="updatecycle" type="text" value="<?php echo $this->formvars['updatecycle']; ?>" size="50" maxlength="100">
+							<? echo FormObject::createSelectField(
+									'updatecycle',
+									array_map(
+										function($updatecycle) {
+											return array(
+												'value' => $updatecycle->get('id'),
+												'output' => $updatecycle->get('updatecycle')
+											);
+										},
+										$this->layerdata['updatecycles']
+									),
+									$this->formvars['updatecycle'],
+									1,
+									'',
+									'',
+									'updatecycle',
+									'',
+									'',
+									'-- Auswahl --'
+								); ?>
 						</td>
 					</tr>
 

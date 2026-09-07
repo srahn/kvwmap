@@ -75,7 +75,7 @@ class Collection extends PgObject {
 
 	/**
 	 * Function find collection with $id in database
-	 * If no layer has been found, it returns false
+	 * If no collection has been found, it returns false
 	 * @param GUI $gui
 	 * @param int $id
 	 * @return Collection|false
