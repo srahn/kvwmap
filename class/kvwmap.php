@@ -12408,7 +12408,7 @@ class GUI {
 		if($this->formvars['rectposy'.$i] != '')$posy = $this->formvars['rectposy'.$i]-20; else $posy = 50;
 		if($this->formvars['rectendposx'.$i] != '')$endposx = $this->formvars['rectendposx'.$i]; else $endposx = 520;
 		if($this->formvars['rectendposy'.$i] != '')$endposy = $this->formvars['rectendposy'.$i]-20; else $endposy = 150;
-    $this->ddl->addrectangle($this->formvars['aktivesLayout'], $posx, $posy, $endposx, $endposy, $breite, $this->formvars['rectoffset_attribute_start'.$i], $this->formvars['rectoffset_attribute_end'.$i], NULL);
+    $this->ddl->addrectangle($this->formvars['aktivesLayout'], $posx, $posy, $endposx, $endposy, $breite, $this->formvars['rectoffset_attribute_start'.$i], $this->formvars['rectoffset_attribute_end'.$i], null, null);
 		$this->scrolldown = true;
 		$this->sachdaten_druck_editor();
 	}
@@ -16672,7 +16672,12 @@ class GUI {
 				}
 				else {
 					# normales Dokument-Attribut
-					$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options['dynamic_path'], $attribute_names, $attribute_values, $layer_db, $document_attributes[$i]['datatype']);
+					if ($_FILES[$form_fields[$i]]['error'] === UPLOAD_ERR_INI_SIZE) {
+						$this->add_message('error', 'Die hochgeladene Datei ' . $_FILES[$form_fields[$i]]['name'] . ' überschreitet die festgelegte maximale Dateigröße von: ' . ini_get('upload_max_filesize'));
+					}
+					else {
+						$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options['dynamic_path'], $attribute_names, $attribute_values, $layer_db, $document_attributes[$i]['datatype']);
+					}
 					if ($this->user->rolle->upload_only_file_metadata == 1) {
 						$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
 					}

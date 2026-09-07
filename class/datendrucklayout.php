@@ -164,91 +164,123 @@ class ddl extends drucklayout{
 			return array();
 		}
 		$remaining_lines = array();
-    for($j = 0; $j < count($this->layout['lines']); $j++){
+		for ($j = 0; $j < count($this->layout['lines']); $j++) {
 			$overflow = false;
-			if($type != 'everypage' AND $this->page_overflow){
-				$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+
+			$linecolor_id = $this->layout['lines'][$j]['linecolor'];
+			$linecolor = array(
+				'r' => $this->colors[$linecolor_id]['red'] / 255,
+				'g' => $this->colors[$linecolor_id]['green'] / 255,
+				'b' => $this->colors[$linecolor_id]['blue'] / 255
+			);
+			if ($type != 'everypage' AND $this->page_overflow) {
+				$this->pdf->reopenObject($this->record_startpage);
+				// es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
 			}
-			# die Linie wurde noch nicht geschrieben und ist entweder eine feste Linie oder eine fortlaufende oder eine, der auf jeder Seite erscheinen soll
-			if(in_array($this->layout['lines'][$j]['id'], $this->remaining_lines) AND $this->layout['lines'][$j]['posy'] != ''){	# nur Linien mit einem y-Wert werden geschrieben
+			// die Linie wurde noch nicht geschrieben und ist entweder eine feste Linie oder eine fortlaufende oder eine, der auf jeder Seite erscheinen soll
+			if (in_array($this->layout['lines'][$j]['id'], $this->remaining_lines) AND $this->layout['lines'][$j]['posy'] != '') {
+				// nur Linien mit einem y-Wert werden geschrieben
 				if (
-					($type == 'fixed' AND !in_array($this->layout['lines'][$j]['type'], [2, 3]) AND ($this->layout['type'] == 0 OR $this->layout['lines'][$j]['type'] == 1)) OR 
-					($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['lines'][$j]['type'] == 0)	OR 
-					($type == 'everypage' AND (
-																			$this->layout['lines'][$j]['type'] == 2 OR 
-																			($this->layout['lines'][$j]['type'] == 3 AND $this->pdf->getFirstPageId() != $this->pdf->currentContents)
-																		)
+					(
+						$type == 'fixed' AND
+						!in_array($this->layout['lines'][$j]['type'], [2, 3]) AND
+						(
+							$this->layout['type'] == 0 OR
+							$this->layout['lines'][$j]['type'] == 1
+						)
+					) OR 
+					(
+						$type == 'running' AND
+						$this->layout['type'] != 0 AND
+						$this->layout['lines'][$j]['type'] == 0
+					)	OR 
+					(
+						$type == 'everypage' AND
+						(
+							$this->layout['lines'][$j]['type'] == 2 OR 
+							(
+								$this->layout['lines'][$j]['type'] == 3 AND
+								$this->pdf->getFirstPageId() != $this->pdf->currentContents
+							)
+						)
 					)
-				) {							
+				) {
 					$x = $this->layout['lines'][$j]['posx'] + $offsetx;
 					$y_orig = $y = $this->layout['lines'][$j]['posy'];
 					$endx = $this->layout['lines'][$j]['endposx'] + $offsetx;
 					$endy = $this->layout['lines'][$j]['endposy'];
 					$offset_attribute_start = $this->layout['lines'][$j]['offset_attribute_start'];
 					$offset_attribute_end = $this->layout['lines'][$j]['offset_attribute_end'];
-					if($offset_attribute_start != ''){			# ist ein offset_attribute gesetzt
+					if ($offset_attribute_start != '') {
+						// ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_start];
-						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
-							$y = $this->handlePageOverflow($offset_attribute_start, $offset_value, $y);		# Seitenüberläufe berücksichtigen
+						if ($offset_value != '') {
+							// dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
+							$y = $this->handlePageOverflow($offset_attribute_start, $offset_value, $y); // Seitenüberläufe berücksichtigen
 						}
-						else{
+						else {
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
-							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
+							continue; // die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
 					$page_id_start = $this->pdf->currentContents;
-					if($offset_attribute_end != ''){			# ist ein offset_attribute gesetzt
+					if ($offset_attribute_end != '') {
+						// ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_end];
-						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
-							$endy = $this->handlePageOverflow($offset_attribute_end, $offset_value, $endy);		# Seitenüberläufe berücksichtigen
+						if ($offset_value != '') {
+							// dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
+							$endy = $this->handlePageOverflow($offset_attribute_end, $offset_value, $endy); // Seitenüberläufe berücksichtigen
 						}
-						else{
+						else {
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
-							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
+							continue; // die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
-					if($page_id_start != $this->pdf->currentContents){
+					if ($page_id_start != $this->pdf->currentContents) {
 						$overflow = true;
 					}
-					if($offset_attribute_start == ''){
+					if ($offset_attribute_start == '') {
 						$y = $y - $this->offsety;
-						if($offset_attribute_end == ''){
-							$endy = $endy - ($y_orig - $y);		# y-Endposition auch anpassen
+						if ($offset_attribute_end == '') {
+							$endy = $endy - ($y_orig - $y); // y-Endposition auch anpassen
 						}
 					}
-					if($type == 'running'){	# fortlaufende Linien
+					if ($type == 'running') {
+						// fortlaufende Linien
 						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
-						if($this->layout['type'] == 1 AND $offset_attribute_start == '' AND $pagecount > 1){
-							$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
-							$endy = $endy + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
+						if ($this->layout['type'] == 1 AND $offset_attribute_start == '' AND $pagecount > 1) {
+							$y = $y + $this->initial_yoffset; // ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
+							$endy = $endy + $this->initial_yoffset; // ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 						}
-						if($this->i_on_page == 0){
+						if ($this->i_on_page == 0) {
 							#if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 							#if($this->maxy < $endy)$this->maxy = $endy;		# beim ersten Datensatz das maxy ermitteln							
 						}						
-						if($offset_attribute_start == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
+						if ($offset_attribute_start == '' AND $this->i_on_page > 0) {
+							// bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 							$y = $y - $this->yoffset_onpage;
 							$endy = $endy - $this->yoffset_onpage;
 							$x = $x + $this->xoffset_onpage;
 						}
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
-					if($overflow){		# Seitenumbruch dazwischen
+					if ($overflow) {
+						// Seitenumbruch dazwischen
 						$this->pdf->reopenObject($page_id_start);
-						$this->pdf->line($x, $y, $endx, $this->layout['margin_bottom']);
+						$this->pdf->line($x, $y, $endx, $this->layout['margin_bottom'], $linecolor);
 						$this->pdf->closeObject();
 						$in_between_page_id = $this->getNextPage($page_id_start);
 						while ($in_between_page_id != $this->pdf->currentContents) {
 							$this->pdf->reopenObject($in_between_page_id);
-							$this->pdf->line($x, $this->layout['height'] - $this->layout['margin_top'] + 10, $endx, $this->layout['margin_bottom']);
+							$this->pdf->line($x, $this->layout['height'] - $this->layout['margin_top'] + 10, $endx, $this->layout['margin_bottom'], $linecolor);
 							$this->pdf->closeObject();
 							$in_between_page_id = $this->getNextPage($in_between_page_id);
 						}
-						$this->pdf->line($x, $this->layout['height'] - $this->layout['margin_top'] + 10, $endx, $endy);
+						$this->pdf->line($x, $this->layout['height'] - $this->layout['margin_top'] + 10, $endx, $endy, $linecolor);
 					}
 					else{
-						$this->pdf->line($x, $y, $endx, $endy);
+						$this->pdf->line($x, $y, $endx, $endy, $linecolor);
 					}
 					$line['x1'] = $x;
 					$line['y1'] = $y;
@@ -276,97 +308,177 @@ class ddl extends drucklayout{
 			return array();
 		}
 		$remaining_rectangles = array();
-    for($j = 0; $j < count($this->layout['rectangles']); $j++){
+    for ($j = 0; $j < count($this->layout['rectangles']); $j++){
 			$overflow = false;
-			if($type != 'everypage' AND $this->page_overflow){
-				$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+			if ($type != 'everypage' AND $this->page_overflow){
+				$this->pdf->reopenObject($this->record_startpage);
+				// es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
 			}
 			# das Rechteck wurde noch nicht geschrieben und ist entweder ein festes Rechteck oder ein fortlaufendes oder eins, welches auf jeder Seite erscheinen soll
-    	if(in_array($this->layout['rectangles'][$j]['id'], $this->remaining_rectangles) AND $this->layout['rectangles'][$j]['posy'] != ''){	# nur Linien mit einem y-Wert werden geschrieben
-				if(($type == 'fixed' AND $this->layout['rectangles'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['rectangles'][$j]['type'] == 1)) 
-				OR ($type == 'running' AND $this->layout['type'] != 0 AND in_array($this->layout['rectangles'][$j]['type'], [0,3]))
-				OR ($type == 'everypage' AND $this->layout['rectangles'][$j]['type'] == 2)){			
+    	if (
+				in_array($this->layout['rectangles'][$j]['id'], $this->remaining_rectangles) AND
+				$this->layout['rectangles'][$j]['posy'] != ''
+			) {
+				// nur Linien mit einem y-Wert werden geschrieben
+				if (
+					(
+						$type == 'fixed' AND
+						$this->layout['rectangles'][$j]['type'] != 2 AND
+						(
+							$this->layout['type'] == 0 OR
+							$this->layout['rectangles'][$j]['type'] == 1
+						)
+					) OR
+					(
+						$type == 'running' AND
+						$this->layout['type'] != 0 AND
+						in_array($this->layout['rectangles'][$j]['type'], [0,3])
+					) OR
+					(
+						$type == 'everypage' AND
+						$this->layout['rectangles'][$j]['type'] == 2
+					)
+				) {
 					$x = $this->layout['rectangles'][$j]['posx'] + $offsetx;
 					$y_orig = $y = $this->layout['rectangles'][$j]['posy'];
 					$endx = $this->layout['rectangles'][$j]['endposx'] + $offsetx;
 					$endy = $this->layout['rectangles'][$j]['endposy'];
 					$offset_attribute_start = $this->layout['rectangles'][$j]['offset_attribute_start'];
 					$offset_attribute_end = $this->layout['rectangles'][$j]['offset_attribute_end'];
-					if($offset_attribute_start != ''){			# ist ein offset_attribute gesetzt
+					if ($offset_attribute_start != '') {
+						// ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_start];
-						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
+						if ($offset_value != '') {
+							// dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
 							$y = $this->handlePageOverflow($offset_attribute_start, $offset_value, $y);		# Seitenüberläufe berücksichtigen
 						}
-						else{
+						else {
 							$remaining_rectangles[] = $this->layout['rectangles'][$j]['id'];
-							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
+							continue; // die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
 					$page_id_start = $this->pdf->currentContents;
-					if($offset_attribute_end != ''){			# ist ein offset_attribute gesetzt
+					if ($offset_attribute_end != '') {
+						// ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_end];
-						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
+						if ($offset_value != '') {
+							// dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
 							$endy = $this->handlePageOverflow($offset_attribute_end, $offset_value, $endy);		# Seitenüberläufe berücksichtigen
 						}
-						else{
+						else {
 							$remaining_rectangles[] = $this->layout['rectangles'][$j]['id'];
-							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
+							continue; // die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
-					if($page_id_start != $this->pdf->currentContents){
+					if ($page_id_start != $this->pdf->currentContents) {
 						$overflow = true;
 					}
-					if($offset_attribute_start == ''){
+					if ($offset_attribute_start == '') {
 						$y = $y - $this->offsety;
-						if($offset_attribute_end == ''){
-							$endy = $endy - ($y_orig - $y);		# y-Endposition auch anpassen
+						if ($offset_attribute_end == '') {
+							// y-Endposition auch anpassen
+							$endy = $endy - ($y_orig - $y);
 						}
 					}
-					if($type == 'running'){	# fortlaufende Linien
+					if ($type == 'running') {
+						// fortlaufende Linien
 						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
-						if($this->layout['type'] == 1 AND $offset_attribute_start == '' AND $pagecount > 1){
-							$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
-							$endy = $endy + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
+						if ($this->layout['type'] == 1 AND $offset_attribute_start == '' AND $pagecount > 1) {
+							$y = $y + $this->initial_yoffset; // ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
+							$endy = $endy + $this->initial_yoffset; // ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 						}
-						if($this->i_on_page == 0){
-							#if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
-							#if($this->maxy < $endy)$this->maxy = $endy;		# beim ersten Datensatz das maxy ermitteln							
-						}						
-						if($offset_attribute_start == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
+						if ($this->i_on_page == 0) {
+							// if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
+							// if($this->maxy < $endy)$this->maxy = $endy;		# beim ersten Datensatz das maxy ermitteln							
+						}
+						if ($offset_attribute_start == '' AND $this->i_on_page > 0) {
+							// bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 							$y = $y - $this->yoffset_onpage;
 							$endy = $endy - $this->yoffset_onpage;
 							$x = $x + $this->xoffset_onpage;
 						}
 					}
-					$color_id = $this->layout['rectangles'][$j]['color'];
-					if($color_id != ''){
-						if($this->layout['rectangles'][$j]['type'] != 3 OR !$this->layout['rectangles'][$j]['printed']){		# bei type = 3 (alternierend) gibt 'printed' an ob das letzte Rechteck gefüllt war oder nicht
+					$linecolor_id = $this->layout['rectangles'][$j]['linecolor'];
+					$bgrcolor_id = $this->layout['rectangles'][$j]['bgrcolor'];
+					if ($linecolor_id != '' OR $bgrcolor_id != '') {
+						if ($this->layout['rectangles'][$j]['type'] != 3 OR !$this->layout['rectangles'][$j]['printed']) {
+							// bei type = 3 (alternierend) gibt 'printed' an ob das letzte Rechteck gefüllt war oder nicht
 							$this->layout['rectangles'][$j]['printed'] = true;
-							if($overflow){		# Seitenumbruch dazwischen
+							if ($overflow) {
+								// Seitenumbruch dazwischen
 								$this->pdf->reopenObject($page_id_start);
-								$this->pdf->filledRectangleBelow($x, $this->layout['margin_bottom'], $endx-$x, $y - $this->layout['margin_bottom'], $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+								$this->pdf->filledRectangleBelow(
+									$x,
+									$this->layout['margin_bottom'],
+									$endx - $x,
+									$y - $this->layout['margin_bottom'],
+									array(
+										'r' => $this->colors[$linecolor_id]['red'] / 255,
+										'g' => $this->colors[$linecolor_id]['green'] / 255,
+										'b' => $this->colors[$linecolor_id]['blue'] / 255
+									),
+									array(
+										'r' => $this->colors[$bgrcolor_id]['red'] / 255,
+										'g' => $this->colors[$bgrcolor_id]['green'] / 255,
+										'b' => $this->colors[$bgrcolor_id]['blue'] / 255
+									)
+								);
 								$this->pdf->closeObject();
-								$this->pdf->filledRectangleBelow($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top'] - $endy, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+								$this->pdf->filledRectangleBelow(
+									$x,
+									$endy,
+									$endx - $x,
+									$this->layout['height'] - $this->layout['margin_top'] - $endy,
+									array(
+										'r' => $this->colors[$linecolor_id]['red'] / 255,
+										'g' => $this->colors[$linecolor_id]['green'] / 255,
+										'b' => $this->colors[$linecolor_id]['blue'] / 255
+									),
+									array(
+										'r' => $this->colors[$bgrcolor_id]['red'] / 255,
+										'g' => $this->colors[$bgrcolor_id]['green'] / 255,
+										'b' => $this->colors[$bgrcolor_id]['blue'] / 255
+									)
+								);
 							}
-							else{
-								$this->pdf->filledRectangleBelow($x, $y, $endx-$x, $endy-$y, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
-							}							
+							else {
+								$this->pdf->filledRectangleBelow(
+									$x,
+									$y,
+									$endx - $x,
+									$endy - $y,
+									array(
+										'r' => $this->colors[$linecolor_id]['red'] / 255,
+										'g' => $this->colors[$linecolor_id]['green'] / 255,
+										'b' => $this->colors[$linecolor_id]['blue'] / 255
+									),
+									array(
+										'r' => $this->colors[$bgrcolor_id]['red'] / 255,
+										'g' => $this->colors[$bgrcolor_id]['green'] / 255,
+										'b' => $this->colors[$bgrcolor_id]['blue'] / 255
+									)
+								);
+							}
 						}
 						else{
 							$this->layout['rectangles'][$j]['printed'] = false;
 						}
 					}
-					if($this->layout['rectangles'][$j]['breite'] > 0){
+					else {
+						$this->pdf->setStrokeColor(0, 0, 0, 1);
+					}
+					if ($this->layout['rectangles'][$j]['breite'] > 0){
 						$this->pdf->setLineStyle($this->layout['rectangles'][$j]['breite'], 'square');
-						if($overflow){		# Seitenumbruch dazwischen
+						if ($overflow) {
+							// Seitenumbruch dazwischen
 							$this->pdf->reopenObject($page_id_start);
 							$this->pdf->rectangle($x, $this->layout['margin_bottom'], $endx-$x, $y - $this->layout['margin_bottom']);
 							$this->pdf->closeObject();
 							$this->pdf->rectangle($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top']  - $endy);
 						}
-						else{
-							$this->pdf->rectangle($x, $y, $endx-$x, $endy-$y);
+						else {
+							$this->pdf->rectangle($x, $y, $endx - $x, $endy - $y);
 						}
 					}
 					$rectangle['x1'] = $x;
@@ -376,12 +488,12 @@ class ddl extends drucklayout{
 					$rectangle['id'] = $this->layout['rectangles'][$j]['id'];
 					$this->gui->rectangles[$this->pdf->currentContents][] = $rectangle;
 					#echo 'zeichne Rechteck: '.$x.' '.$y.' '.$endx.' '.$endy.'<br>';
-					if($this->layout['rectangles'][$j]['type'] === 0){
+					if ($this->layout['rectangles'][$j]['type'] === 0) {
 						#if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 						#if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $endy)$this->miny[$this->pdf->currentContents] = $endy;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 					}
 				}
-				else{
+				else {
 					$remaining_rectangles[] = $this->layout['rectangles'][$j]['id'];
 				}
 			}
@@ -1401,12 +1513,18 @@ class ddl extends drucklayout{
 			}
 			$this->add_lines(0, 'everypage');
 			$this->add_rectangles(0, 'everypage');			# feste Rechtecke hinzufügen
-			if($preview){
+			if ($preview) {
+				$linecolor_id = $this->layout['linecolor'];
+				$linecolor = array(
+					'r' => $this->colors[$linecolor_id]['red'] / 255,
+					'g' => $this->colors[$linecolor_id]['green'] / 255,
+					'b' => $this->colors[$linecolor_id]['blue'] / 255
+				);
 				$this->pdf->setLineStyle(0.1,'','',array(9,10));
-				$this->pdf->line(0, $this->layout['margin_bottom'], $this->layout['width'], $this->layout['margin_bottom']);
-				$this->pdf->line(0, $this->layout['height'] - $this->layout['margin_top'], $this->layout['width'], $this->layout['height'] - $this->layout['margin_top']);
-				$this->pdf->line($this->layout['margin_left'], $this->layout['height'], $this->layout['margin_left'], 0);
-				$this->pdf->line($this->layout['width'] - $this->layout['margin_right'], $this->layout['height'], $this->layout['width'] - $this->layout['margin_right'], 0);
+				$this->pdf->line(0, $this->layout['margin_bottom'], $this->layout['width'], $this->layout['margin_bottom'], $linecolor);
+				$this->pdf->line(0, $this->layout['height'] - $this->layout['margin_top'], $this->layout['width'], $this->layout['height'] - $this->layout['margin_top'], $linecolor);
+				$this->pdf->line($this->layout['margin_left'], $this->layout['height'], $this->layout['margin_left'], 0, $linecolor);
+				$this->pdf->line($this->layout['width'] - $this->layout['margin_right'], $this->layout['height'], $this->layout['width'] - $this->layout['margin_right'], 0, $linecolor);
 				$this->pdf->setLineStyle(1, 'square', '', []);
 			}
 			$this->pdf->closeObject();
@@ -1539,7 +1657,7 @@ class ddl extends drucklayout{
 		}
 		
 		for($r = 0; $r < count($rects); $r++){
-			$this->addrectangle($ddl_id, $rects[$r]['posx'], $rects[$r]['posy'], $rects[$r]['endposx'], $rects[$r]['endposy'], $rects[$r]['breite'], $rects[$r]['offset_attribute_start'], $rects[$r]['offset_attribute_end'], NULL);
+			$this->addrectangle($ddl_id, $rects[$r]['posx'], $rects[$r]['posy'], $rects[$r]['endposx'], $rects[$r]['endposy'], $rects[$r]['breite'], $rects[$r]['offset_attribute_start'], $rects[$r]['offset_attribute_end'], null, null);
 		}
 
 		return $ddl_id;
@@ -1689,7 +1807,7 @@ class ddl extends drucklayout{
       }
 			
 			for ($i = 0; $i < $formvars['rectcount']; $i++) {
-				$this->addrectangle($lastddl_id, $formvars['rectposx' . $i], $formvars['rectposy' . $i], $formvars['rectendposx' . $i], $formvars['rectendposy' . $i], $formvars['rectbreite' . $i], $formvars['rectoffset_attribute_start' . $i], $formvars['rectoffset_attribute_end' . $i], $formvars['rectcolor' . $i]);
+				$this->addrectangle($lastddl_id, $formvars['rectposx' . $i], $formvars['rectposy' . $i], $formvars['rectendposx' . $i], $formvars['rectendposy' . $i], $formvars['rectbreite' . $i], $formvars['rectoffset_attribute_start' . $i], $formvars['rectoffset_attribute_end' . $i], $formvars['rectlinecolor' . $i], $formvars['rectbgrcolor' . $i]);
       }			
     }
     return $lastddl_id;
@@ -1815,54 +1933,76 @@ class ddl extends drucklayout{
         $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
         $this->database->execSQL($sql,4, 1);
       }
-			
-      for($i = 0; $i < $formvars['linecount']; $i++){
-        $sql = "UPDATE kvwmap.druckfreilinien SET breite = '".$formvars['breite'.$i]."'";
-        if($formvars['lineposx'.$i] != '')$sql .= ", posx = ".(int)$formvars['lineposx'.$i];
-        else $sql .= ", posx = NULL";
-        if($formvars['lineposy'.$i] != '')$sql .= ", posy = ".(int)$formvars['lineposy'.$i];
-        else $sql .= ", posy = NULL";
-				if($formvars['lineendposx'.$i] != '')$sql .= ", endposx = ".(int)$formvars['lineendposx'.$i];
-        else $sql .= ", endposx = NULL";
-        if($formvars['lineendposy'.$i] != '')$sql .= ", endposy = ".(int)$formvars['lineendposy'.$i];
-        else $sql .= ", endposy = NULL";
-				if($formvars['lineoffset_attribute_start'.$i] != '')$sql .= ", offset_attribute_start = '".$formvars['lineoffset_attribute_start'.$i]."'";
-        else $sql .= ", offset_attribute_start = NULL";
-				if($formvars['lineoffset_attribute_end'.$i] != '')$sql .= ", offset_attribute_end = '".$formvars['lineoffset_attribute_end'.$i]."'";
-        else $sql .= ", offset_attribute_end = NULL";
-        if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
-        $sql .= ", type = '".$formvars['linetype'.$i]."'";
-        $sql .= " WHERE id = ".(int)$formvars['line_id'.$i];
-        #echo $sql;
-        $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
-        $this->database->execSQL($sql,4, 1);
-      }
-			
-      for($i = 0; $i < $formvars['rectcount']; $i++){
-        $sql = "UPDATE kvwmap.druckfreirechtecke SET breite = '".$formvars['rectbreite'.$i]."'";
-        if($formvars['rectposx'.$i] != '')$sql .= ", posx = ".(int)$formvars['rectposx'.$i];
-        else $sql .= ", posx = NULL";
-        if($formvars['rectposy'.$i] != '')$sql .= ", posy = ".(int)$formvars['rectposy'.$i];
-        else $sql .= ", posy = NULL";
-				if($formvars['rectendposx'.$i] != '')$sql .= ", endposx = ".(int)$formvars['rectendposx'.$i];
-        else $sql .= ", endposx = NULL";
-        if($formvars['rectendposy'.$i] != '')$sql .= ", endposy = ".(int)$formvars['rectendposy'.$i];
-        else $sql .= ", endposy = NULL";
-				if($formvars['rectoffset_attribute_start'.$i] != '')$sql .= ", offset_attribute_start = '".$formvars['rectoffset_attribute_start'.$i]."'";
-        else $sql .= ", offset_attribute_start = NULL";
-				if($formvars['rectoffset_attribute_end'.$i] != '')$sql .= ", offset_attribute_end = '".$formvars['rectoffset_attribute_end'.$i]."'";
-        else $sql .= ", offset_attribute_end = NULL";
-        if($formvars['recttype'.$i] == '')$formvars['recttype'.$i] = 0;
-				if($formvars['rectcolor'.$i] != '')$sql .= ", color = '".$formvars['rectcolor'.$i]."'";
-				else $sql .= ", color = NULL";
-        $sql .= ", type = '".$formvars['recttype'.$i]."'";
-        $sql .= " WHERE id = ".(int)$formvars['rect_id'.$i];
-        #echo $sql;
-        $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
-        $this->database->execSQL($sql,4, 1);
-      }			
-    }
-  }
+
+			$sql = "
+				UPDATE
+					kvwmap.druckfreilinien
+				SET
+					breite = $1,
+					posx = $2,
+					posy = $3,
+					endposx = $4,
+					endposy = $5,
+					offset_attribute_start = $6,
+					offset_attribute_end = $7,
+					type = $8,
+					linecolor = $9
+				WHERE
+					id = $10
+			";
+			for ($i = 0; $i < $formvars['linecount']; $i++) {
+				$prepared_params = array(
+					$formvars['breite' . $i], // Breite
+					($formvars['lineposx' . $i] != '' ? (int)$formvars['lineposx' . $i] : null), // posx
+					($formvars['lineposy' . $i] != '' ? (int)$formvars['lineposy' . $i] : null), // posy
+					($formvars['lineendposx' . $i] != '' ? (int)$formvars['lineendposx' . $i] : null), // endposx
+					($formvars['lineendposy' . $i] != '' ? (int)$formvars['lineendposy' . $i] : null), // endposy
+					($formvars['lineoffset_attribute_start' . $i] != '' ? $formvars['lineoffset_attribute_start' . $i] : null), // offset_attribute_start
+					($formvars['lineoffset_attribute_end' . $i] != '' ? $formvars['lineoffset_attribute_end' . $i] : null), // offset_attribute_end
+					($formvars['linetype' . $i] == '' ? 0 : $formvars['linetype' . $i]), // type
+					($formvars['linecolor' . $i] != '' ? $formvars['linecolor' . $i] : null), // linecolor
+					(int)$formvars['line_id' . $i] // id
+				);
+				// echo '<br>SQL zum Aktualisieren der Linie: ' . $this->database->get_prepared_sql($sql, $prepared_params);
+				$this->database->execSQL($sql, 4, 1, false, $prepared_params);
+			}
+
+			$sql = "
+				UPDATE
+					kvwmap.druckfreirechtecke
+				SET
+					breite = $1,
+					posx = $2,
+					posy = $3,
+					endposx = $4,
+					endposy = $5,
+					offset_attribute_start = $6,
+					offset_attribute_end = $7,
+					bgrcolor = $8,
+					linecolor = $9,
+					type = $10
+				WHERE
+					id = $11
+			";
+			for ($i = 0; $i < $formvars['rectcount']; $i++) {
+				$prepared_params = array(
+					(float)$formvars['rectbreite' . $i], // Breite
+					($formvars['rectposx' . $i] != '' ? (int)$formvars['rectposx' . $i] : null), // posx
+					($formvars['rectposy' . $i] != '' ? (int)$formvars['rectposy' . $i] : null), // posy
+					($formvars['rectendposx' . $i] != '' ? (int)$formvars['rectendposx' . $i] : null), // endposx
+					($formvars['rectendposy' . $i] != '' ? (int)$formvars['rectendposy' . $i] : null), // endposy
+					($formvars['rectoffset_attribute_start' . $i] != '' ? $formvars['rectoffset_attribute_start' . $i] : null), // offset_attribute_start
+					($formvars['rectoffset_attribute_end' . $i] != '' ? $formvars['rectoffset_attribute_end' . $i] : null), // offset_attribute_end
+					($formvars['rectbgrcolor' . $i] != '' ? $formvars['rectbgrcolor' . $i] : null), // bgrcolor
+					($formvars['rectlinecolor' . $i] != '' ? $formvars['rectlinecolor' . $i] : null), // linecolor
+					($formvars['recttype' . $i] == '' ? '0' : $formvars['recttype' . $i]), // type
+					(int)$formvars['rect_id' . $i] // id
+				);
+				// echo '<br>SQL zum Aktualisieren des Rechtecks: ' . $this->database->get_prepared_sql($sql, $prepared_params);
+				$this->database->execSQL($sql, 4, 1, false, $prepared_params);
+			}
+		}
+	}
 
 	function load_layouts($stelle_id, $ddl_id, $layer_id, $types = array(), $return = '') {
 		#echo '<br>load_layouts with stelle_id ' . $stelle_id. ', ddl_id: ' . $ddl_id . ', layer_id: ' . $layer_id . ', types: ' . implode(', ', $types) . ', return: ' . $return;
@@ -2235,10 +2375,10 @@ class ddl extends drucklayout{
     $this->database->execSQL($sql,4, 1);
   }
 	
-  function addrectangle($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end, $color){
+  function addrectangle($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end, $linecolor, $bgrcolor){
     $sql = "
 			INSERT INTO kvwmap.druckfreirechtecke 
-				(posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end, color)
+				(posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end, linecolor, bgrcolor)
 			VALUES (
     		" . $posx . ",
     		" . $posy . ",
@@ -2247,7 +2387,8 @@ class ddl extends drucklayout{
     		" . $breite . ",
 				" . ($offset_attribute_start ? "'" . $offset_attribute_start . "'" : 'NULL') . ",
 				" . ($offset_attribute_end ? "'" . $offset_attribute_end . "'" : 'NULL') . ",
-				" . ($color ?: 'NULL') . "
+				" . ($linecolor ?: 'NULL') . ",
+				" . ($bgrcolor ?: 'NULL') . "
 			)
 			RETURNING id";
 		#echo $sql.'<br>';
