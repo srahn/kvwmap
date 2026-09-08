@@ -2602,13 +2602,15 @@ class Cpdf
     /**
      * dieses gefüllte Rechteck wird in der Zeichenreihenfolge immer ganz unten erscheinen
     */
-    function filledRectangleBelow($x1, $y1, $width, $height, $linecolor = array('r' => 0, 'g' => 0, 'b' => 0), $bgrcolor = array('r' => 0, 'g' => 0, 'b' => 0)) {
-        $this->setStrokeColor($linecolor['r'], $linecolor['g'], $linecolor['b'], 1);
-        $this->objects[$this->currentContents]['c'] = 
-            sprintf('%.3f', $bgrcolor['r']) . ' ' . sprintf('%.3f', $bgrcolor['g']) . ' ' . sprintf('%.3f', $bgrcolor['b']) . " rg\n" .
-            sprintf('%.3f', $x1) . ' ' . sprintf('%.3f', $y1) . ' ' . sprintf('%.3f', $width) . ' ' . sprintf('%.3f', $height) . " re f\n" .
-            sprintf('%.3f', $this->currentColour['r']) . ' ' . sprintf('%.3f', $this->currentColour['g']) . ' ' . sprintf('%.3f', $this->currentColour['b']) ." rg\n" .
-            $this->objects[$this->currentContents]['c'];
+    function filledRectangleBelow($x1, $y1, $width, $height, $linecolor, $bgrcolor) {
+      #$this->setStrokeColor($linecolor['r'], $linecolor['g'], $linecolor['b'], 1);
+      $this->objects[$this->currentContents]['c'] = 
+          sprintf('%.3f', $bgrcolor['r']) . ' ' . sprintf('%.3f', $bgrcolor['g']) . ' ' . sprintf('%.3f', $bgrcolor['b']) . " rg\n" .
+          ($bgrcolor ? sprintf('%.3f', $x1) . ' ' . sprintf('%.3f', $y1) . ' ' . sprintf('%.3f', $width) . ' ' . sprintf('%.3f', $height) . " re f\n" : '') .
+          sprintf('%.3f', $linecolor['r']) . ' ' . sprintf('%.3f', $linecolor['g']) . ' ' . sprintf('%.3f', $linecolor['b']) . " RG\n" .
+          ($linecolor ? sprintf('%.3f', $x1) . ' ' . sprintf('%.3f', $y1) . ' ' . sprintf('%.3f', $width) . ' ' . sprintf('%.3f', $height) . " re S\n" : '') .
+          sprintf('%.3f', $this->currentColour['r']) . ' ' . sprintf('%.3f', $this->currentColour['g']) . ' ' . sprintf('%.3f', $this->currentColour['b']) ." rg\n" .
+          $this->objects[$this->currentContents]['c'];
      }
 
     /**

@@ -413,16 +413,16 @@ class ddl extends drucklayout{
 									$this->layout['margin_bottom'],
 									$endx - $x,
 									$y - $this->layout['margin_bottom'],
-									array(
+									($linecolor_id ? array(
 										'r' => $this->colors[$linecolor_id]['red'] / 255,
 										'g' => $this->colors[$linecolor_id]['green'] / 255,
 										'b' => $this->colors[$linecolor_id]['blue'] / 255
-									),
-									array(
+									) : null),
+									($bgrcolor_id? array(
 										'r' => $this->colors[$bgrcolor_id]['red'] / 255,
 										'g' => $this->colors[$bgrcolor_id]['green'] / 255,
 										'b' => $this->colors[$bgrcolor_id]['blue'] / 255
-									)
+									) : null)
 								);
 								$this->pdf->closeObject();
 								$this->pdf->filledRectangleBelow(
@@ -430,16 +430,16 @@ class ddl extends drucklayout{
 									$endy,
 									$endx - $x,
 									$this->layout['height'] - $this->layout['margin_top'] - $endy,
-									array(
+									($linecolor_id ? array(
 										'r' => $this->colors[$linecolor_id]['red'] / 255,
 										'g' => $this->colors[$linecolor_id]['green'] / 255,
 										'b' => $this->colors[$linecolor_id]['blue'] / 255
-									),
-									array(
+									) : null),
+									($bgrcolor_id? array(
 										'r' => $this->colors[$bgrcolor_id]['red'] / 255,
 										'g' => $this->colors[$bgrcolor_id]['green'] / 255,
 										'b' => $this->colors[$bgrcolor_id]['blue'] / 255
-									)
+									) : null)
 								);
 							}
 							else {
@@ -448,16 +448,16 @@ class ddl extends drucklayout{
 									$y,
 									$endx - $x,
 									$endy - $y,
-									array(
+									($linecolor_id ? array(
 										'r' => $this->colors[$linecolor_id]['red'] / 255,
 										'g' => $this->colors[$linecolor_id]['green'] / 255,
 										'b' => $this->colors[$linecolor_id]['blue'] / 255
-									),
-									array(
+									) : null),
+									($bgrcolor_id? array(
 										'r' => $this->colors[$bgrcolor_id]['red'] / 255,
 										'g' => $this->colors[$bgrcolor_id]['green'] / 255,
 										'b' => $this->colors[$bgrcolor_id]['blue'] / 255
-									)
+									) : null)
 								);
 							}
 						}
@@ -467,19 +467,6 @@ class ddl extends drucklayout{
 					}
 					else {
 						$this->pdf->setStrokeColor(0, 0, 0, 1);
-					}
-					if ($this->layout['rectangles'][$j]['breite'] > 0){
-						$this->pdf->setLineStyle($this->layout['rectangles'][$j]['breite'], 'square');
-						if ($overflow) {
-							// Seitenumbruch dazwischen
-							$this->pdf->reopenObject($page_id_start);
-							$this->pdf->rectangle($x, $this->layout['margin_bottom'], $endx-$x, $y - $this->layout['margin_bottom']);
-							$this->pdf->closeObject();
-							$this->pdf->rectangle($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top']  - $endy);
-						}
-						else {
-							$this->pdf->rectangle($x, $y, $endx - $x, $endy - $y);
-						}
 					}
 					$rectangle['x1'] = $x;
 					$rectangle['y1'] = min($y, $endy);
