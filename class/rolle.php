@@ -2858,20 +2858,21 @@ class rolle {
 		}
 	}
 
-	function setConsumeALB($time,$format,$log_number,$wz,$pagecount) {
+	function setConsumeALB($time,$format,$log_number,$wz,$pagecount, $vorgangsnr = NULL) {
 		if (LOG_CONSUME_ACTIVITY==1) {
 			for($i = 0; $i < count($log_number); $i++){
 				# function setzt eine ALB-PDF-EXportaktivität
 				$sql = "
 					INSERT INTO 
-						kvwmap.u_consumeALB 
+						kvwmap.u_consumeALB (user_id, stelle_id, time_id, format, log_number, wz, vorgang)
 					VALUES (
 						" . $this->user_id . ",
 						" . $this->stelle_id . ",
 						'" . $time . "',
 						'" . $format . "',
 						'" . $log_number[$i] . "',
-						'" . $wz . "'
+						'" . $wz . "',
+						" . quote_or_null($vorgangsnr) . "
 					)
 					ON CONFLICT (user_id, stelle_id, time_id, log_number) DO NOTHING";
 				#echo $sql.'<br>';

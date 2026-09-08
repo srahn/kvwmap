@@ -22177,7 +22177,7 @@ DO $$
 					" . quote($formvars['dataowner_email']) . ",
 					" . quote($formvars['dataowner_tel']) . ",
 					" . quote($formvars['uptodateness']) . ",
-					" . quote($formvars['updatecycle']) . ",
+					" . quote_or_null($formvars['updatecycle']) . ",
 					" . quote(pg_escape_string($formvars['metalink'])) . ",
 					" . quote(pg_escape_string($formvars['terms_of_use_link'])) . ",
 					" . quote($formvars['status']) . ",

@@ -2,6 +2,7 @@
 	include_once(PLUGINS.'alkis/model/kataster.php');
 	include_once(SNIPPETS.'sachdatenanzeige_functions.php');
 	global $layer_ids_flst_auszuege;
+	global $stellen_eigentuemer_separat;
 	if(!empty($layer_ids_flst_auszuege)){
 		include_once(CLASSPATH.'datendrucklayout.php');
 		$ddl = new ddl($this->pgdatabase);
@@ -9,7 +10,18 @@
 			$generische_auszuege[$layer_id] = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, array(0,1));
 		}
 	}
+	$stellen_eigentuemer_separat = array_flip($stellen_eigentuemer_separat);
 ?>
+
+<style>
+
+	.eigentuemer_auszug {
+		<? if (isset($stellen_eigentuemer_separat[$this->Stelle->id])) { echo 'display: none;'; } ?>
+	}
+
+</style>
+
+
 <script language="JavaScript" type="text/javascript">
 
 send_selected_flurst = function(go, formnummer, wz, target){
@@ -42,6 +54,27 @@ send_selected_flurst = function(go, formnummer, wz, target){
 		overlay_submit(currentform, false, 'root');
 		stopwaiting();
 	}
+}
+
+vorgangsnummer_input = function(flst){
+	message([{ type: 'confirm', msg : '\
+		Bitte geben Sie eine gültige Vorgangsnummer an:<br><br>\
+		<input id="vorgangsnr" type="text">'
+	}],
+	0, 
+	0, 
+	null, 
+	flst, 
+	'request_eigentuemer', 
+	'ok');
+}
+
+request_eigentuemer = function(flst){
+	var eigentuemer_auszuege = document.querySelectorAll('.auszug_' + flst);
+	[].forEach.call(eigentuemer_auszuege, function (a){
+		a.style.display = 'inline';
+  });
+	ahah('index.php', 'go=Flurstueck_GetEigentuemer&flurstkennz=' + flst + '&vorgangsnr=' + document.getElementById('vorgangsnr').value, new Array(document.getElementById('eigentuemer_' + flst)), new Array('sethtml'));
 }
 
 backto = function(go){
@@ -141,7 +174,7 @@ hide_versions = function(flst){
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter'], $this->qlayerset[$i]['oid']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 
-			if (isset($eigentuemer_allowed[$flurstkennz_a])) {
+			if (isset($eigentuemer_allowed[$flurstkennz_a]) AND !isset($stellen_eigentuemer_separat[$this->Stelle->id])) {
 				$flst->Grundbuecher=$flst->getGrundbuecher();
 				$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
 				if ($privileg_['bestandsnr'] and $privileg_['eigentuemer']) {
@@ -805,76 +838,20 @@ hide_versions = function(flst){
 									</td>
 								</tr>
 								<? } ?>
-								<? if($privileg_['bestandsnr']){
+								<? if ($privileg_['bestandsnr'] AND $privileg_['eigentuemer']){
 										$currenttime=date('Y-m-d H:i:s',time());
 										$this->user->rolle->setConsumeALB($currenttime, 'Flurstücksanzeige', array($flst->FlurstKennz), 0, 'NULL');		# das Flurstückskennzeichen wird geloggt
 								?>
 								<tr>
-								<td colspan="2">
-										<table border="0" cellspacing="0" cellpadding="2">
-										<? 
-										for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
-											$BestandStr = $flst->Buchungen[$b]['bezeichnung'].' ';
-											if ($flst->Buchungen[$b]['anteil'] != '') {
-												if ($flst->Buchungen[$both]['anteil'] == '99999/99999') {
-													$BestandStr.= '<br>Anteil nicht ermittelbar an Miteigentumsanteil am Grundstück';
-												}
-												else {
-													$BestandStr.= 'zu '.$flst->Buchungen[$b]['anteil'] . ', ';
-												}
+								<td colspan="2" id="eigentuemer_<? echo $flst->FlurstKennz; ?>">
+									<? if (isset($eigentuemer_allowed[$flst->FlurstKennz])){
+											if (!isset($stellen_eigentuemer_separat[$this->Stelle->id])) {
+												echo $flst->outputAlleEigentuemer($this->Stelle);
 											}
-											$BestandStr.='<a target="root" href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'&csrf_token=' . $_SESSION['csrf_token'] . '">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
-											$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-											$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-											if($flst->Buchungen[$b]['sondereigentum'] != ''){
-												$BestandStr.='<br><br>verbunden mit Sondereigentum an '.$flst->Buchungen[$b]['sondereigentum'].'. Nr. '.$flst->Buchungen[$b]['auftplannr'].' laut Aufteilungsplan.';
-											} ?>
-											<tr>
-												<td class="fett">Buchung:</td>
-											</tr>
-											<tr>
-												<td colspan="2" style="padding-left: 20px"><? echo $BestandStr; ?></td>
-											</tr>
-											<? if($flst->Buchungen[$b]['buchungstext'] != ''){ ?>
-											<tr>
-												<td class="fett">Buchungstext:</td>
-											</tr>
-											<tr>
-												<td colspan="2" style="padding-left: 20px">
-													<? echo nl2br($flst->Buchungen[$b]['buchungstext']); ?>
-												</td>
-											</tr>
-										<?	} 
-											if($flst->Buchungen[$b]['blattart'] == 3000){ ?>
-											<tr>
-												<td></td>
-												<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
-											</tr>
-										<? }
-										if ($privileg_['eigentuemer']) {
-											?>
-											<tr>
-												<td class="fett">
-												<? 	if($flst->Buchungen[$b]['buchungsart'] >= 2101){
-															echo 'Berechtigter';
-														}
-														else{
-															echo 'Eigentümer';
-														}
-												?>:
-												</td>
-											</tr>
-											<tr>
-												<td colspan="3">
-													<table>				<?
-													if ($flst->Buchungen[$b]['eigentuemerliste']) {
-														echo $flst->outputEigentuemer(key($flst->Buchungen[$b]['eigentuemerliste']), $flst->Buchungen[$b]['eigentuemerliste'], 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->pgdatabase);
-													}
-											?>	</table>
-												</td>
-											</tr>
-								<?	}} ?>
-									</table>
+											else {
+												echo '<a href="javascript:void(0);" onclick="vorgangsnummer_input(\'' . $flst->FlurstKennz . '\');">Eigentümer anzeigen</a>';
+											}
+									} ?>
 								</td>
 								</tr>
 								<?} ?>
@@ -943,13 +920,13 @@ hide_versions = function(flst){
 													<option>-- Auswahl --</option>
 													<? if($flst->Nachfolger == '' AND $flst->hist_alb != 1){ ?>
 													<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis</option><? } ?>
-													<? if($this->Stelle->funktionen['MV0550']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
+													<? if($this->Stelle->funktionen['MV0550']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option class="eigentuemer_auszug auszug_<? echo $flst->FlurstKennz; ?>" onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
 													<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0520&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
-													<? if($this->Stelle->funktionen['MV0560']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
+													<? if($this->Stelle->funktionen['MV0560']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option class="eigentuemer_auszug auszug_<? echo $flst->FlurstKennz; ?>" onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
 													<? } ?>
 													<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=30&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten</option><? } ?>
-													<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
-													<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
+													<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option class="eigentuemer_auszug auszug_<? echo $flst->FlurstKennz; ?>" onchange="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
+													<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt'] AND isset($eigentuemer_allowed[$flst->FlurstKennz])){ ?><option class="eigentuemer_auszug auszug_<? echo $flst->FlurstKennz; ?>" onchange="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
 													
 													<?
 														if(!empty($generische_auszuege)){

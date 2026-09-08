@@ -592,8 +592,8 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();stopwaiting();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
 		}
 		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
-			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="' + confirm_button_value + '" style="margin: 10px 0px 0px 0px;">');
-			msgBoxDiv.append('<input id="message_cancel_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancel_button_value + '" style="margin: 0px 0px -6px 8px;">');
+			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="$(\'#message_box\').hide();' + (callback ? callback + '(\'' + confirm_value + '\')' : '') + '" value="' + confirm_button_value + '" style="margin: 10px 0px 0px 0px;">');
+			msgBoxDiv.append('<input id="message_cancel_button" type="button" onclick="$(\'#message_box\').hide();" value="' + cancel_button_value + '" style="margin: 0px 0px -6px 8px;">');
 		}
 	});
 	
