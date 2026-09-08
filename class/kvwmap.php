@@ -12410,7 +12410,7 @@ class GUI {
 		if($this->formvars['rectposy'.$i] != '')$posy = $this->formvars['rectposy'.$i]-20; else $posy = 50;
 		if($this->formvars['rectendposx'.$i] != '')$endposx = $this->formvars['rectendposx'.$i]; else $endposx = 520;
 		if($this->formvars['rectendposy'.$i] != '')$endposy = $this->formvars['rectendposy'.$i]-20; else $endposy = 150;
-    $this->ddl->addrectangle($this->formvars['aktivesLayout'], $posx, $posy, $endposx, $endposy, $breite, $this->formvars['rectoffset_attribute_start'.$i], $this->formvars['rectoffset_attribute_end'.$i], NULL);
+    $this->ddl->addrectangle($this->formvars['aktivesLayout'], $posx, $posy, $endposx, $endposy, $breite, $this->formvars['rectoffset_attribute_start'.$i], $this->formvars['rectoffset_attribute_end'.$i], null, null);
 		$this->scrolldown = true;
 		$this->sachdaten_druck_editor();
 	}
@@ -13658,6 +13658,7 @@ class GUI {
 		if ($this->formvars['selected_layer_id'] != '') {
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true, $this->Stelle->id);
 			$this->stellen = $mapdb->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
 		}
@@ -16674,7 +16675,12 @@ class GUI {
 				}
 				else {
 					# normales Dokument-Attribut
-					$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options['dynamic_path'], $attribute_names, $attribute_values, $layer_db, $document_attributes[$i]['datatype']);
+					if ($_FILES[$form_fields[$i]]['error'] === UPLOAD_ERR_INI_SIZE) {
+						$this->add_message('error', 'Die hochgeladene Datei ' . $_FILES[$form_fields[$i]]['name'] . ' überschreitet die festgelegte maximale Dateigröße von: ' . ini_get('upload_max_filesize'));
+					}
+					else {
+						$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options['dynamic_path'], $attribute_names, $attribute_values, $layer_db, $document_attributes[$i]['datatype']);
+					}
 					if ($this->user->rolle->upload_only_file_metadata == 1) {
 						$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
 					}
@@ -17103,12 +17109,8 @@ class GUI {
 				)
 			) {
 				# Dieser Layer soll abgefragt werden
-				if ($layerset[$i]['layer_id'] > 1000000) {
-					$layer_id = $layerset[$i]['collection_layer_layer_id'];
-				}
-				else {
-					$layer_id = $layerset[$i]['layer_id'];
-				}
+				[$id_value, $id_type] = split_id($layerset[$i]['layer_id']);
+				$layer_id = $layerset[$i][$id_type === 'collection_layer' ? 'collection_layer_layer_id' : 'layer_id'];
 				if (value_of($this->formvars, 'anzahl') == '') {
 					$this->formvars['anzahl'] = $layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
 				}
@@ -17241,7 +17243,6 @@ class GUI {
 							# oder in einem Suchfenster gesucht wird
 							# Für die Bildung der searchbox wird entweder mit dem angegebenen Suchradius tolerance in der Einheit toleranceunit
 							# aus der Tabelle layers gerechnet oder mit dem im Formular eingegebenen Suchradius (searchradius)
-
 
 							# Datenbankobjekt aus Layerdefinition erzeugen
 							# Path laden
@@ -17383,7 +17384,8 @@ class GUI {
 									$sql .= "SELECT " . $pfad . $filter . " AND " . $the_geom." && ('" . $geoms[$g]."') AND (st_intersects(" . $the_geom.", ('" . $geoms[$g]."'::geometry)) OR " . $the_geom." = ('" . $geoms[$g]."'))";
 								}
 							}
-							else{
+							else {
+								$filter . '<br>sql_where: ' . $sql_where;
 								$sql = "SELECT " . $query_parts['select'] . " FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $filter . $sql_where;
 
 								# order by
@@ -17463,7 +17465,7 @@ class GUI {
 								# wenn nur ein Treffer und "anderes Objekt bearbeiten" eingestellt, in die Geometriebearbeitung gehen
 								if($num_rows == 1 AND value_of($this->formvars, 'edit_other_object') == 1 AND $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['the_geom']]){
 									$this->formvars['oid'] = $layerset[$i]['shape'][0][$layerset[$i]['maintable'].'_oid'];
-									$this->formvars['selected_layer_id'] = $layerset[$i]['layer_id'];
+									$this->formvars['selected_layer_id'] = $layer_id;
 									$geomtype = $layerset[$i]['attributes']['geomtype'][$layerset[$i]['attributes']['the_geom']];
 									if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
 									elseif($geomtype == 'POINT')$geomtype = 'Point';
@@ -17485,7 +17487,7 @@ class GUI {
 									$this->user->rolle->delete_last_query();
 									$last_query_deleted = true;
 								}
-								$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['layer_id'], $sql, $sql_order, $this->formvars['anzahl'], value_of($this->formvars, 'offset_'.$layerset[$i]['layer_id']));
+								$this->user->rolle->save_last_query('Sachdaten', $layer_id, $sql, $sql_order, $this->formvars['anzahl'], value_of($this->formvars, 'offset_'.$layerset[$i]['layer_id']));
 
 								# Querymaps erzeugen
 								if($layerset[$i]['querymap'] == 1 AND $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['the_geom']] >= '0' AND ($layerset[$i]['datentyp'] == 1 OR $layerset[$i]['datentyp'] == 2)){
@@ -18482,7 +18484,7 @@ class GUI {
 		global $language;
 		$geom = $layerset['shape'][$k][$layerset['attributes']['the_geom']];
 		if ($geom != '') {
-			$layer_id = $layerset['layer_id'];
+			$layer_id = $layerset['collection_layer_layer_id'] ?: $layerset['layer_id'];
 			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 			$map = new mapObj(NULL);
 			$map->debug = 5;
@@ -18518,7 +18520,7 @@ class GUI {
 				$layerset['data'] = str_replace('$SCALE', $this->map_scaledenom ?: 1000, $layerset['data']);
 				$layer->data = $layerset['data'];
 				if ($layerset['filter'] != '') {
-					if (substr($layerset['filter'], 0, 1) == '(') {
+					// if (substr($layerset['filter'], 0, 1) == '(') {
 						switch (true) {
 							case MAPSERVERVERSION >= 800 : {
 								$layer->setProcessingKey('NATIVE_FILTER', $layerset['filter']);
@@ -18530,11 +18532,11 @@ class GUI {
 								$layer->setFilter($layerset['filter']);
 							}
 						}
-					}
-					else {
-						$expr = buildExpressionString($layerset['filter']);
-						$layer->setFilter($expr);
-					}
+				// 	}
+				// 	else {
+				// 		$expr = buildExpressionString($layerset['filter']);
+				// 		$layer->setFilter($expr);
+				// 	}
 				}
 				$layer->status = MS_ON;
 				$layer->template = ' ';
@@ -18574,7 +18576,7 @@ class GUI {
 				$map->web->imageurl = IMAGEURL;
 				$map->width = 50;
 				$map->height = 50;
-				#$map->save('/var/www/logs/test.map');
+				// $map->save('/var/www/logs/test.map');
 				$image_map = $map->draw();
 				$filename = $this->map_saveWebImage($image_map, 'jpeg');
 				$newname = $this->user->id . basename($filename);

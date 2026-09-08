@@ -2421,9 +2421,15 @@ class Cpdf
     /**
      * draw a line from one set of coordinates to another.
      */
-    public function line($x1, $y1, $x2, $y2)
-    {
+    public function line($x1, $y1, $x2, $y2, $color = null) {
+        $lastStrokeColor = $this->currentStrokeColour;
+        if ($color !== null) {
+            $this->setStrokeColor($color['r'], $color['g'], $color['b'], 1);
+        }
         $this->objects[$this->currentContents]['c'] .= "\n".sprintf('%.3F', $x1).' '.sprintf('%.3F', $y1).' m '.sprintf('%.3F', $x2).' '.sprintf('%.3F', $y2).' l S';
+        if ($color !== null) {
+            $this->setStrokeColor($lastStrokeColor['r'], $lastStrokeColor['g'], $lastStrokeColor['b'], 1);
+        }
     }
 
     /**
@@ -2596,13 +2602,14 @@ class Cpdf
     /**
      * dieses gefüllte Rechteck wird in der Zeichenreihenfolge immer ganz unten erscheinen
     */
-    function filledRectangleBelow($x1,$y1,$width,$height,$r,$g,$b){
+    function filledRectangleBelow($x1, $y1, $width, $height, $linecolor = array('r' => 0, 'g' => 0, 'b' => 0), $bgrcolor = array('r' => 0, 'g' => 0, 'b' => 0)) {
+        $this->setStrokeColor($linecolor['r'], $linecolor['g'], $linecolor['b'], 1);
         $this->objects[$this->currentContents]['c'] = 
-        sprintf('%.3f',$r).' '.sprintf('%.3f',$g).' '.sprintf('%.3f',$b)." rg\n".
-        sprintf('%.3f',$x1).' '.sprintf('%.3f',$y1).' '.sprintf('%.3f',$width).' '.sprintf('%.3f',$height)." re f\n".
-        sprintf('%.3f',$this->currentColour['r']).' '.sprintf('%.3f',$this->currentColour['g']).' '.sprintf('%.3f',$this->currentColour['b'])." rg\n".
-        $this->objects[$this->currentContents]['c'];
-    }    
+            sprintf('%.3f', $bgrcolor['r']) . ' ' . sprintf('%.3f', $bgrcolor['g']) . ' ' . sprintf('%.3f', $bgrcolor['b']) . " rg\n" .
+            sprintf('%.3f', $x1) . ' ' . sprintf('%.3f', $y1) . ' ' . sprintf('%.3f', $width) . ' ' . sprintf('%.3f', $height) . " re f\n" .
+            sprintf('%.3f', $this->currentColour['r']) . ' ' . sprintf('%.3f', $this->currentColour['g']) . ' ' . sprintf('%.3f', $this->currentColour['b']) ." rg\n" .
+            $this->objects[$this->currentContents]['c'];
+     }
 
     /**
      * draw a rectangle, note that it is the width and height of the rectangle which are the secondary paramaters, not

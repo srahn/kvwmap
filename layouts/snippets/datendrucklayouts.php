@@ -502,7 +502,10 @@
 									<td><input type="text" name="bgwidth" value="<? echo $this->ddl->selectedlayout[0]['bgwidth'] ?>" size="5"></td>
 								</tr>
 								<tr>
-									<td width="50%" style="border-right:1px solid #C3C7C3" colspan=4><input type="file" name="bgsrc" size="10"></td>
+									<td width="50%" style="border-right:1px solid #C3C7C3" colspan=4>
+										<input type="file" name="bgsrc" size="10">
+										<span data-tooltip="Es werden nur Dateien im jpeg-Format unterstützt."></span>
+									</td>
 									<td>&nbsp;y:</td>
 									<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposy" value="<? echo $this->ddl->selectedlayout[0]['bgposy'] ?>" size="5"></td>
 									<td>&nbsp;Höhe:</td>
@@ -911,10 +914,19 @@
 											</tr>
 											<tr>
 												<td>&nbsp;y:</td>
-												<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5"></td>
-												<td>&nbsp;y:</td>
-												<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
-												<td colspan="2"></td>
+												<td style="border-right:1px solid #C3C7C3">
+													<input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5">
+												</td>
+												<td>
+													&nbsp;y:
+												</td>
+												<td style="border-right:1px solid #C3C7C3">
+													<input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5">
+												</td>
+												<td colspan="2">
+													Linienfarbe:<br><?
+													echo $this->ddl->output_color_select('linecolor' . $i, $this->ddl->selectedlayout[0]['lines'][$i]['linecolor']); ?>
+												</td>
 											</tr>
 											<tr>
 												<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
@@ -975,9 +987,13 @@
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['posy'] ?>" size="5"></td>
 										<td>&nbsp;y:</td>
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposy'] ?>" size="5"></td>
-										<td colspan="2">
+										<td>
+											Linienfarbe:
+											<? echo $this->ddl->output_color_select('rectlinecolor' . $i, $this->ddl->selectedlayout[0]['rectangles'][$i]['linecolor']);	?>
+										</td>
+										<td>
 											Füllfarbe:
-											<? echo $this->ddl->output_color_select('rectcolor' . $i, $this->ddl->selectedlayout[0]['rectangles'][$i]['color']);	?>
+											<? echo $this->ddl->output_color_select('rectbgrcolor' . $i, $this->ddl->selectedlayout[0]['rectangles'][$i]['bgrcolor']);	?>
 										</td>
 									</tr>
 									<tr>
