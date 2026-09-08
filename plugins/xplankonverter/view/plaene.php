@@ -747,7 +747,7 @@
 	}
 </script>
 <h2><?php echo htmlspecialchars($this->title); ?></h2><?php
-if ($this->Stelle->id > 200) { ?>
+if ($this->Stelle->id > 200 || $this->Stelle->id == 104) { ?>
 	<button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
 	<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">Neuer Plan aus XPlanGML</button><?
 }
