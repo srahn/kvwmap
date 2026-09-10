@@ -6738,6 +6738,9 @@ class GUI {
 
 			# Fonts auslesen
 			$this->Document->fonts = $this->Document->get_fonts();
+			$this->Document->ttffonts = array_values(array_filter($this->Document->fonts, function ($font) {
+				return strtolower(pathinfo($font['value'], PATHINFO_EXTENSION)) === 'ttf';
+			}));
 			$this->Document->din_formats = $this->Document->get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
