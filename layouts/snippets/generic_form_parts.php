@@ -750,7 +750,7 @@
 
 			case 'Dokument': {
 				if ($value != '') {
-					$options = $attributes['options_struct'][$i];
+					$options = $attributes['options_struct'][$j];
 					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url'], $attributes['type'][$j], $layer_id, $oid, $name);
 					if ($preview['doc_src'] != '') {
 						$datapart .= '<table border="0"><tr><td class="' . ($preview['doc_type'] == 'local_img'? 'td_preview_image' : '') . '">';
