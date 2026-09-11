@@ -70,11 +70,16 @@ vorgangsnummer_input = function(flst){
 }
 
 request_eigentuemer = function(flst){
-	var eigentuemer_auszuege = document.querySelectorAll('.auszug_' + flst);
-	[].forEach.call(eigentuemer_auszuege, function (a){
-		a.style.display = 'inline';
-  });
-	ahah('index.php', 'go=Flurstueck_GetEigentuemer&flurstkennz=' + flst + '&vorgangsnr=' + document.getElementById('vorgangsnr').value, new Array(document.getElementById('eigentuemer_' + flst)), new Array('sethtml'));
+	if (document.getElementById('vorgangsnr').value == '') {
+		alert('Bitte geben Sie eine gültige Vorgangsnummer an!');
+	}
+	else {
+		var eigentuemer_auszuege = document.querySelectorAll('.auszug_' + flst);
+		[].forEach.call(eigentuemer_auszuege, function (a){
+			a.style.display = 'inline';
+		});
+		ahah('index.php', 'go=Flurstueck_GetEigentuemer&flurstkennz=' + flst + '&vorgangsnr=' + document.getElementById('vorgangsnr').value, new Array(document.getElementById('eigentuemer_' + flst)), new Array('sethtml'));
+	}
 }
 
 backto = function(go){
