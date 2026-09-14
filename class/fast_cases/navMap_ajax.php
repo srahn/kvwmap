@@ -3709,7 +3709,8 @@ class rolle {
 								' . $this->stelle_id . ", 
 								'" . $time . "', 
 								" . $layer[$i] . '
-							)';
+							)
+							ON CONFLICT (user_id, stelle_id, time_id, layer_id) DO NOTHING';
 						#echo '<p>SQL zum Eintragen des consumierten Layers: ' . $sql;
             $ret=$this->database->execSQL($sql,4, 1);
             if ($ret[0]) {
