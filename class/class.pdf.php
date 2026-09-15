@@ -2603,7 +2603,6 @@ class Cpdf
      * dieses gefüllte Rechteck wird in der Zeichenreihenfolge immer ganz unten erscheinen
     */
     function filledRectangleBelow($x1, $y1, $width, $height, $linecolor, $bgrcolor) {
-      #$this->setStrokeColor($linecolor['r'], $linecolor['g'], $linecolor['b'], 1);
       $this->objects[$this->currentContents]['c'] = 
           sprintf('%.3f', $bgrcolor['r']) . ' ' . sprintf('%.3f', $bgrcolor['g']) . ' ' . sprintf('%.3f', $bgrcolor['b']) . " rg\n" .
           ($bgrcolor ? sprintf('%.3f', $x1) . ' ' . sprintf('%.3f', $y1) . ' ' . sprintf('%.3f', $width) . ' ' . sprintf('%.3f', $height) . " re f\n" : '') .
