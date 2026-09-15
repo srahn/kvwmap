@@ -194,7 +194,6 @@ $non_spatial_cases = array('get_select_list');		// für non-spatial cases wird i
 $spatial_cases = array('navMap_ajax', 'getMap', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 // $fast_loading_cases = array();
-$fast_loading_case = array();
 
 define('FAST_CASE', in_array($formvars['go'], $fast_loading_cases));
 
