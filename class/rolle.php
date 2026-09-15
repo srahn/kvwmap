@@ -1497,9 +1497,11 @@ class rolle {
 				l.query as pfad,
 				1 as queryable,
 				gle_view,
-				'(' || nullif(rollenfilter, '') || ')' as filter
+				'(' || nullif(rollenfilter, '') || ')' as filter,
+				coalesce(ul.export_privileg, 1) as export_privileg
 			FROM
 				kvwmap.rollenlayer AS l
+				LEFT JOIN kvwmap.used_layer ul ON l.original_layer_id = ul.layer_id AND ul.stelle_id = " . $this->stelle_id . "
 			WHERE
 				l.stelle_id = " . $this->stelle_id . " AND
 				l.user_id = " . $this->user_id . "

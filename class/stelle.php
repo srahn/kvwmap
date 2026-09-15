@@ -2086,20 +2086,21 @@ class stelle {
 					-id AS layer_id,
 					new_name AS name,
 					'' AS alias,
-					gruppe,
+					r.gruppe,
 					' ' AS gruppenname,
-					connection,
-					1 AS export_privileg, 
+					r.connection,
+					coalesce(ul.export_privileg, 1) as export_privileg, 
 					new_name as alias_or_name
 				FROM
-					kvwmap.rollenlayer,
-					concat(name, CASE WHEN typ = 'search' THEN ' -eigene Abfrage-' ELSE ' -eigener Import-' END) AS new_name
+					kvwmap.rollenlayer r
+					LEFT JOIN kvwmap.used_layer ul ON r.original_layer_id = ul.layer_id AND ul.stelle_id = " . $this->id . ",
+					concat(r.name, CASE WHEN typ = 'search' THEN ' -eigene Abfrage-' ELSE ' -eigener Import-' END) AS new_name
 				WHERE
-					stelle_id = " . $this->id . " AND
-					user_id = " . $user_id . " AND
-					connectiontype = 6"
-					. ($rollenlayer_type != NULL ? " AND typ = '" . $rollenlayer_type . "'" : "")
-					. ($group_id != NULL ? " AND gruppe = " . $group_id : "") . "
+					r.stelle_id = " . $this->id . " AND
+					r.user_id = " . $user_id . " AND
+					r.connectiontype = 6"
+					. ($rollenlayer_type != NULL ? " AND r.typ = '" . $rollenlayer_type . "'" : "")
+					. ($group_id != NULL ? " AND r.gruppe = " . $group_id : "") . "
 			";
 		}
 		if ($this->useLayerAliases) {
@@ -2108,7 +2109,7 @@ class stelle {
 		else {
 			$sql .= " ORDER BY name";
 		}
-		#echo $sql;
+		// echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
 		$ret = $this->database->execSQL($sql);		
 		if (!$this->database->success) {

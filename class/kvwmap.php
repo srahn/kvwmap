@@ -13493,7 +13493,8 @@ class GUI {
 			$this->user->rolle->deleteExportSettings($this->formvars);
 		}
 		if ($this->formvars['selected_layer_id'] != '') {
-			$this->layer = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$export_rollen_layer = ((int)$this->formvars['selected_layer_id'] < 0);
+			$this->layer = ($export_rollen_layer ? $this->user->rolle->getRollenLayer((int) $this->formvars['selected_layer_id'] * -1) : $this->user->rolle->getLayer($this->formvars['selected_layer_id']));
 			$this->formvars['selected_group_id'] = $this->layer[0]['gruppe'];
 			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
 			$layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -13562,6 +13563,7 @@ class GUI {
 			include_(CLASSPATH . 'Layer.php');
 			$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
 			if (
+				$this->formvars['selected_layer_id'] > 0 AND 
 				$layer->get('datentyp') == MS_LAYER_RASTER AND
 				preg_match('/\.(tif|tiff)$/i', $layer->get('data')) AND
 				$layer->get('export_privileg')
