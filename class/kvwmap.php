@@ -9137,7 +9137,12 @@ class GUI {
 
   function Klasseneditor_KlasseLoeschen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $mapDB->delete_Class($this->formvars['class_id']);
+		if (!is_array($this->formvars['class_id'])) {
+			$this->formvars['class_id'] = [$this->formvars['class_id']];
+		}
+		foreach ($this->formvars['class_id'] as $class_id) {
+    	$mapDB->delete_Class($class_id);
+		}
     $this->Klasseneditor();
   }
 
