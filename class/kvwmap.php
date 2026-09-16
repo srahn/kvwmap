@@ -10017,29 +10017,35 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $invitation->get('email'));
 			}
 		}
-		else {
-     $result = mail_att(
-        PUBLISHERNAME, // from_name
-        MAILREPLYADDRESS, // from_email
-        $invitation->get('email'),
-        NULL, // cc_email
-        MAILREPLYADDRESS, // reply_email
-        $invitation->get_subject(),
-        $invitation->get_body(), // message
-        '', // attachment
-        MAILMETHOD, // mode
-        MAILSMTPSERVER,
-        MAILSMTPPORT,
-        $invitation->get('vorname') . ' ' . $invitation->get('name'),
-				PUBLISHERNAME
-    	);
+		// else {
+    //  $result = mail_att(
+    //     PUBLISHERNAME, // from_name
+    //     MAILREPLYADDRESS, // from_email
+    //     $invitation->get('email'),
+    //     NULL, // cc_email
+    //     MAILREPLYADDRESS, // reply_email
+    //     $invitation->get_subject(),
+    //     $invitation->get_body(), // message
+    //     '', // attachment
+    //     MAILMETHOD, // mode
+    //     MAILSMTPSERVER,
+    //     MAILSMTPPORT,
+    //     $invitation->get('vorname') . ' ' . $invitation->get('name'),
+		// 		PUBLISHERNAME
+    // 	);
 
-			if ($result === 1) {
-				$this->add_message('notice', 'E-Mail erfolgreich in der Queue im Ordner: ' . MAILQUEUEPATH . ' abgelegt.');
-			}
-			else {
-				$this->add_message('info','Neuer Nutzer ist vorgemerkt.<br>Zum Einladen per E-Mail<br>klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>Die E-Mail enthält den Link zur Einladung.');
-			}
+		// 	if ($result === 1) {
+		// 		$this->add_message('notice', 'E-Mail erfolgreich in der Queue im Ordner: ' . MAILQUEUEPATH . ' abgelegt.');
+		// 	}
+		// 	else {
+		// 		$this->add_message('info','Neuer Nutzer ist vorgemerkt.<br>Zum Einladen per E-Mail<br>klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>Die E-Mail enthält den Link zur Einladung.');
+		// 	}
+		// }
+		else {
+			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+				Zum Einladen per E-Mail<br>
+				klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>
+				Die E-Mail enthält den Link zur Einladung.');
 		}
 	}
 
