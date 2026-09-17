@@ -2327,7 +2327,6 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 			}
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
-				chmod(MAILQUEUEPATH, 'g+w');
 			}
 			$file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
 			$success = file_put_contents(

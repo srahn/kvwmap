@@ -33,6 +33,9 @@
 		<div class="clear"></div>
 		<label class="fetter" for="stop "><? echo $strStop; ?></label>
 		<input name="stop" type="text" value="<? echo $this->formvars['stop']; ?>">
+		<div class="clear"></div>
+		<label class="fetter" for="send_email "><? echo $strSendEmail; ?></label>
+		<input name="send_email" type="checkbox" value="1">
 		<div class="clear"></div>		<?
 		if ($this->formvars['selected_invitation_id'] != '') { ?>
 			<label class="fetter" for="email"><? echo $strToken; ?>:</label>
