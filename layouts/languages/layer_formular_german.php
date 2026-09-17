@@ -131,6 +131,11 @@
 	$strTriggerFunctionHelp = "Hier kann der Name einer PHP-Triggerfunktion eingetragen werden, die bei Insert, Update oder Delete in diesem Layer ausgeführt werden soll. Die Triggerfunktion muss innerhalb eines Plugins oder unter custom/class/kvwmap.php definiert werden.";
 	$strUpdateCycle  =  'Aktualisierungszyklus';
 	$strUpToDateness  =  'Aktualität';
+	$strGeographicIdentifier = 'geografischer Bezeichner';
+	$strSourceDate = 'Datum der Ersterfassung';
+	$strSourceSystem = 'Erfassungssystem';
+	$strAccuracy = 'Genauigkeit';
+	$strBusinessCritical = 'geschäftskritisch';
 	$strWFS_geom = "WFS-Geometrieattribut";
 	$strWidth = "Breite";
 	$strWMSAuthPassword = "wms_auth_password";

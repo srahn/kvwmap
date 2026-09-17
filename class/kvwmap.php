@@ -9051,6 +9051,12 @@ class GUI {
 			$this->layerdata['labelitems'] = $layer_labelitems->find_where('layer_id = ' . $this->formvars['selected_layer_id'], '"order"');
 			$layer_updatecycles = new PgObject($this, 'kvwmap', 'layer_updatecycles');
 			$this->layerdata['updatecycles'] = $layer_updatecycles->find_where('', 'id');
+			$layer_geographic_identifiers = new PgObject($this, 'kvwmap', 'layer_geographic_identifiers');
+			$this->layerdata['geographic_identifiers'] = $layer_geographic_identifiers->find_where('', 'id');
+			$layer_source_systems = new PgObject($this, 'kvwmap', 'layer_source_systems');
+			$this->layerdata['source_systems'] = $layer_source_systems->find_where('', 'id');
+			$layer_accuracies = new PgObject($this, 'kvwmap', 'layer_accuracies');
+			$this->layerdata['accuracies'] = $layer_accuracies->find_where('', 'id');
 			$this->layerdata['charts'] = LayerChart::find($this, 'layer_id = ' . $this->formvars['selected_layer_id']);
 			$this->layerdata['datasources'] = DataSource::find_by_layer_id($this, $this->formvars['selected_layer_id']);
 			$this->layerdata['datasource_ids'] = array_map(function($datasource) { return $datasource->get('id'); }, $this->layerdata['datasources']);
@@ -21820,6 +21826,10 @@ DO $$
 					'dataowner_tel',
 					'uptodateness',
 					'updatecycle',
+					'geographic_identifier', 
+					'source_date', 
+					'source_system', 
+					'accuracy', 
 					'metalink',
 					'terms_of_use_link',
 					'comment',
@@ -21872,7 +21882,8 @@ DO $$
 		$zero_if_empty_attributes = array(
 			'drawingorder',
 			'listed',
-			'logconsume'
+			'logconsume',
+			'business_critical'
 		);
 
 		if ($this->GUI->plugin_loaded('mobile')) {
@@ -23354,6 +23365,7 @@ DO $$
 			$layer['queryable'] = ($layer['queryable'] == 't');
 			$layer['querymap'] = ($layer['querymap'] == 't');
 			$layer['logconsume'] = ($layer['logconsume'] == 't');
+			$layer['business_critical'] = ($layer['business_critical'] == 't');
 			if ($replace_params) {
 				foreach (array('classitem', 'classification', 'data', 'pfad') AS $key) {
 					$layer[$key] = replace_params_rolle(

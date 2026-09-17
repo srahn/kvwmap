@@ -1243,6 +1243,98 @@ from
 					</tr>
 
 					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGeographicIdentifier; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<? echo FormObject::createSelectField(
+									'geographic_identifier',
+									array_map(
+										function($geographic_identifier) {
+											return array(
+												'value' => $geographic_identifier->get('id'),
+												'output' => $geographic_identifier->get('geographic_identifier')
+											);
+										},
+										$this->layerdata['geographic_identifiers']
+									),
+									$this->formvars['geographic_identifier'],
+									1,
+									'',
+									'',
+									'geographic_identifier',
+									'',
+									'',
+									'-- Auswahl --'
+								); ?>
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSourceDate; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="source_date" type="text" value="<?php echo $this->formvars['source_date']; ?>" size="10" maxlength="10">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSourceSystem; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<? echo FormObject::createSelectField(
+									'source_system',
+									array_map(
+										function($source_system) {
+											return array(
+												'value' => $source_system->get('id'),
+												'output' => $source_system->get('source_system')
+											);
+										},
+										$this->layerdata['source_systems']
+									),
+									$this->formvars['source_system'],
+									1,
+									'',
+									'',
+									'source_system',
+									'',
+									'',
+									'-- Auswahl --'
+								); ?>
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strAccuracy; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<? echo FormObject::createSelectField(
+									'accuracy',
+									array_map(
+										function($accuracy) {
+											return array(
+												'value' => $accuracy->get('id'),
+												'output' => $accuracy->get('accuracy')
+											);
+										},
+										$this->layerdata['accuracies']
+									),
+									$this->formvars['accuracy'],
+									1,
+									'',
+									'',
+									'accuracy',
+									'',
+									'',
+									'-- Auswahl --'
+								); ?>
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strBusinessCritical; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="business_critical" type="checkbox" value="1"<?php if ($this->formvars['business_critical']) echo ' checked'; ?>>
+						</td>
+					</tr>					
+
+					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMetaLink; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="50" maxlength="255">
