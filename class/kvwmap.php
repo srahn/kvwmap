@@ -18993,6 +18993,7 @@ class db_mapObj{
 				kvwmap.u_groups AS g ON l.gruppe = g.id LEFT JOIN
 				kvwmap.connections AS c ON l.connection_id = c.id
 			WHERE
+				" . ($this->nurAktiveLayer ? " (l.aktivstatus != 0) AND " : '') . "
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
