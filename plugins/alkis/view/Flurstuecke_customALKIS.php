@@ -57,6 +57,7 @@ send_selected_flurst = function(go, formnummer, wz, target){
 }
 
 vorgangsnummer_input = function(flst){
+	clearMessageBox();
 	message([{ type: 'confirm', msg : '\
 		Bitte geben Sie eine gültige Vorgangsnummer an:<br><br>\
 		<input id="vorgangsnr" type="text">'
@@ -70,7 +71,11 @@ vorgangsnummer_input = function(flst){
 }
 
 request_eigentuemer = function(flst){
-	if (document.getElementById('vorgangsnr').value == '') {
+	var vnr = document.getElementById('vorgangsnr').value;
+	if (
+		vnr == '' || 
+		vnr.indexOf(' ') != -1
+	) {
 		alert('Bitte geben Sie eine gültige Vorgangsnummer an!');
 	}
 	else {
