@@ -8406,7 +8406,13 @@ echo '			</table>
 			$layer = $this->map->getLayer($i);
 			$layer->name = sonderzeichen_umwandeln($layer->name);
 			$layer->metadata->set("ows_title", $layer->name);
-			$layer->metadata->set("ows_extent", implode(', ', $bb));
+			$rect = rectObj($bb[0], $bb[1], $bb[2], $bb[3]);
+			if ($layer->metadata->get('ows_srs') != 'EPSG:' . $this->user->rolle->epsg_code){
+				$projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
+				$projTO = new projectionObj("init=" . $layer->metadata->get('ows_srs'));
+				$rect->project($projFROM, $projTO);
+			}
+			$layer->metadata->set("ows_extent", round($rect->minx) . ' ' . round($rect->miny) . ' ' . round($rect->maxx) . ' ' . round($rect->maxy));
 			$layer->metadata->set("ows_srs", OWS_SRS . ' EPSG:3857');
 			$this->exportierte_layer[] = $layer->name;
 		}
