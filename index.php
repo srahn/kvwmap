@@ -757,6 +757,10 @@ function go_switch($go, $exit = false) {
 				$GUI->getlayerfromgroup();
 			} break;
 
+			case 'get_all_labelitems' : {
+				$GUI->get_all_labelitems();
+			} break;
+
 			/**
 			 * Erzeugt für Layer mit selected_layer_id aus dessen maintable ein
 			 * Data-Statement, welches im Layereditor angezeigt wird.

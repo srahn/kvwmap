@@ -9579,6 +9579,29 @@ class GUI {
 		);
 	}
 
+	function get_all_labelitems() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$data_attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id']);
+		foreach ($data_attributes as $data_attribute) {
+			if (is_array($data_attribute) AND array_key_exists('name', $data_attribute) AND $data_attributes['the_geom'] != $data_attribute['name']) {
+				echo '
+				<tr>
+					<td>
+						<input name="labelitems_name[]" type="text" value="' . $data_attribute['name'] . '" size="25" maxlength="100">
+					</td>
+					<td>
+						<input name="labelitems_alias[]" type="text" value="' . $data_attribute['name'] . '" size="25" maxlength="100">
+					</td>
+					<td>
+						<i class="fa fa-times" style="color: gray; cursor: pointer" onclick="this.closest(\'tr\').remove();"></i>
+					</td>
+				</tr>
+				';
+			}
+		}
+	}
+
   /**
   * This function update layers settings of $formvars['selected_layer_id'] and
   * duplicate all layer that have the selected_layer_id in duplicate_from_layer_id

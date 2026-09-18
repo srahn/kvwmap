@@ -250,6 +250,11 @@ from
 		table.firstElementChild.appendChild(table.firstElementChild.firstElementChild.nextElementSibling.cloneNode(true));
 	}
 
+	function add_all_labelitems(){
+		var table = document.getElementById('labelitems_table');
+		ahah('index.php', 'go=get_all_labelitems&layer_id=' + document.GUI.selected_layer_id.value, new Array(table), new Array('appendhtml'));
+	}
+
 	function unselectItem(evt) {
 		console.log('click on ', evt.target);
 		const datasource_id = $(evt).attr('datasource_id');
@@ -754,7 +759,10 @@ from
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelItem; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+							<?php echo $strLabelItem; ?>
+							<a title="alle aus Data hinzufügen" href="javascript:void(0);" onclick="add_all_labelitems();"><img src="graphics/autogen.png"></a>
+						</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<div style="display:flex">
 								<table id="labelitems_table" style="width: 93%" cellpadding="1" cellspacing="0">
