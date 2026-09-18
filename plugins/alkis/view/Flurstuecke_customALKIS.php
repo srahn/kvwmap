@@ -74,7 +74,8 @@ request_eigentuemer = function(flst){
 	var vnr = document.getElementById('vorgangsnr').value;
 	if (
 		vnr == '' || 
-		vnr.indexOf(' ') != -1
+		vnr.indexOf(' ') != -1 || 
+		vnr.length < 7
 	) {
 		alert('Bitte geben Sie eine gültige Vorgangsnummer an!');
 	}
