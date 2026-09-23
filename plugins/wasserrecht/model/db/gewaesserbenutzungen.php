@@ -1,7 +1,7 @@
 <?php
 class Gewaesserbenutzungen extends WrPgObject {
 
-	protected $tableName = 'fiswrv_gewaesserbenutzungen';
+	public static $tableName = 'fiswrv_gewaesserbenutzungen';
 	
 	public $gewaesserbenutzungenUmfang;
 	public $gewaesserbenutzungArt;

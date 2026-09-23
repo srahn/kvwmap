@@ -2,9 +2,9 @@
 
 abstract class WrPgObject extends PgObject
 {
-    protected $schema = 'wasserrecht';
-    protected $tableName = null;
-    protected $write_debug = true;
+    public static $schema = 'wasserrecht';
+    public static $tableName = null;
+    public static $write_debug = true;
     
     function WrPgObject(&$gui) {
         $this->log = $gui->log;

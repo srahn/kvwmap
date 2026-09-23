@@ -1,7 +1,7 @@
 <?php
 class Festsetzung extends Bescheid {
 
-	protected $tableName = 'fiswrv_festsetzung';
+	public static $tableName = 'fiswrv_festsetzung';
 	
 	public $dokument_datum;
 	public $summe_nicht_zugelassene_entnahmemengen;

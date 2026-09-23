@@ -1,7 +1,7 @@
 <?php
 class AdresseKlasse extends WrPgObject {
 
-	protected $tableName = 'fiswrv_adresse';
+	public static $tableName = 'fiswrv_adresse';
 	
 	public function getStrasse() {
 	    return $this->data['strasse'];
