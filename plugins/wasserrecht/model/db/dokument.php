@@ -1,7 +1,7 @@
 <?php
 class Dokument extends WrPgObject {
 
-    protected $tableName = 'fiswrv_dokument';
+    public static $tableName = 'fiswrv_dokument';
     
     private $wrz_ids = array();
 	
