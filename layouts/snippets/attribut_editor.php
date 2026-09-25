@@ -594,7 +594,7 @@ function open_group_options(event, group_id){
 				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 162); ?>px">
 		<?	if ((count($this->attributes))!=0) { 
 					for ($i = 0; $i < count_or_0($this->attributes['type']); $i++){ ?>
-						<tr class="listen-tr dragObject" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)" title="<? echo $this->attributes['name'][$i]; ?>">
+						<tr class="listen-tr dragObject" title="<? echo $this->attributes['name'][$i]; ?>">
 							<td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
 						  	<input type="text"
@@ -603,7 +603,7 @@ function open_group_options(event, group_id){
 									style="width: 27px"
 								>
 						  </td>
-							<td align="left" valign="top"><?
+							<td align="left" valign="top" class="dragHandle" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)"><?
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $strAttributes .'</div>';
 								} ?>

@@ -1663,17 +1663,15 @@ div.dropZone.over{
 /* Dragging von trs */
 
 tr.DropZone {
-    height: 1px;
+    height: 0px;
     position: relative;
     z-index: 1000;
 }
 
 tr.DropZone td {
     position: relative;
-    height: 1px;
-    padding: 0;
-    border: 0;
-    line-height: 0;
+    height: 0px;
+    transition: height 0.1s ease;
 }
 
 tr.DropZone td::before {
@@ -1681,34 +1679,33 @@ tr.DropZone td::before {
     position: absolute;
     left: 15px;
     right: 0;
-    top: -12px;
-    height: 25px;
+    top: 0px;
+    height: 0px;
     z-index: 1000;
+		transition: height 0.1s ease;
 }
 
 tr.DropZone.ready td::before {
-    top: -12px;
-    height: 25px;
+    top: -13px;
+    height: 28px;
+		transition: height 0.1s ease;
+}
+
+tr.DropZone.over td {
+    height: 26px;
+		transition: height 0.1s ease;
 }
 
 tr.DropZone.over td::before {
     top: -13px;
-    height: 51px;
+    height: 52px;
+		transition: height 0.1s ease;
 }
 
 /* ------  */
 
-.DropZone td {
-    height: 4px;
-    padding: 0;
-}
-
-.DropZone.ready td {
-    height: 10px;
-}
-
-.DropZone.over td {
-    height: 40px;
+td.dragHandle, td.dragHandle input {
+	cursor: grab;
 }
 
 .dragObject{

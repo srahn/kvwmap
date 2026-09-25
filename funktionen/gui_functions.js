@@ -1520,7 +1520,12 @@ function toggleDrawingOrderForm(){
 var dragSrcEl, srcDropZone = null;
 
 function handleDragStart(e){
-	dragSrcEl = e.target;
+	if (e.currentTarget.matches('td.dragHandle')) {
+		dragSrcEl = e.currentTarget.closest('tr');
+	} 
+	else {
+		dragSrcEl = e.target;
+	}
 	if (!dragSrcEl.classList.contains('dragging')) {
 		var dropzones = document.querySelectorAll('.DropZone');
 		[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
