@@ -1638,7 +1638,9 @@ a.menuered:hover {
 	position: relative;
 }
 
-.dropZone{
+/* Dragging von divs */
+
+div.dropZone{
 	position: relative;
 	z-index: 1000;
 	margin: 0;
@@ -1646,16 +1648,67 @@ a.menuered:hover {
 	width: 100%;
 }
 
-.dropZone.ready{
+div.dropZone.ready{
 	margin: -12 0 -12 15;
 	height: 25px;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
-.dropZone.over{
+div.dropZone.over{
 	height: 51px;
 	margin: -13 0 -13 15;
 	transition: height 0.1s ease, margin 0.1s ease;
+}
+
+/* Dragging von trs */
+
+tr.DropZone {
+    height: 1px;
+    position: relative;
+    z-index: 1000;
+}
+
+tr.DropZone td {
+    position: relative;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    line-height: 0;
+}
+
+tr.DropZone td::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    right: 0;
+    top: -12px;
+    height: 25px;
+    z-index: 1000;
+}
+
+tr.DropZone.ready td::before {
+    top: -12px;
+    height: 25px;
+}
+
+tr.DropZone.over td::before {
+    top: -13px;
+    height: 51px;
+}
+
+/* ------  */
+
+.DropZone td {
+    height: 4px;
+    padding: 0;
+}
+
+.DropZone.ready td {
+    height: 10px;
+}
+
+.DropZone.over td {
+    height: 40px;
 }
 
 .dragObject{

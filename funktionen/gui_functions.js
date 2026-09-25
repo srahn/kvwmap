@@ -1541,16 +1541,16 @@ function handleDragOver(e){
 }
 
 function handleDragEnter(e){
-  e.target.classList.add('over');
+  e.currentTarget.classList.add('over');
 }
 
 function handleDragLeave(e){
-  e.target.classList.remove('over');
+  e.currentTarget.classList.remove('over');
 }
 
 function handleDrop(e){
   if (e.stopPropagation)e.stopPropagation();
-	dstDropZone = e.target;
+	dstDropZone = e.currentTarget;
 	dstDropZone.classList.remove('over');
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
