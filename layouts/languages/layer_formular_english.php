@@ -5,7 +5,7 @@
 	$strAlias = "Alias";
 	$strAssignDefaultValues = "Apply Default-Values to User-Groups";
 	$strAsteriskRequired = "Fields marked with an asterisk * are required";
-	$strAttributes = "Attributes";
+	$strAttributes = "Attribute";
 	$strBack = "Back";
 	$strBaseParameters = "Base-Parameter";
 	$strButtonSave = "Save";

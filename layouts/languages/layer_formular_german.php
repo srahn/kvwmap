@@ -5,7 +5,7 @@
 	$strAlias = "Aliasname";
 	$strAssignDefaultValues = "Default-Werte an Stellen übertragen";
 	$strAsteriskRequired = "Werte mit * mussen eingetragen werden";
-	$strAttributes = "Attribute";
+	$strAttributes = "Attribut";
 	$strBack = "Zurücksetzen";
 	$strBaseParameters = "Basis-Parameter";
 	$strButtonSave = "Speichern";

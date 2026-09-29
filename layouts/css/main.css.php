@@ -1708,7 +1708,7 @@ td.dragHandle, td.dragHandle input {
 	cursor: grab;
 }
 
-.dragObject{
+div.dragObject{
 	background-color: #f6f6f6;
 	box-shadow: 1px 1px 4px #aaa;
 	z-index: 100;
@@ -1721,7 +1721,7 @@ td.dragHandle, td.dragHandle input {
 	text-align: start;
 }
 
-.dragObject:hover{
+div.dragObject:hover{
 	background-color: #fcfcfc;
 }
 

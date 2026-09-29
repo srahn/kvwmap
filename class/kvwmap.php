@@ -22430,51 +22430,52 @@ DO $$
 		$last_group = '';
 		$group_id = 0;
 		$groups = [];
-		for ($i = 0; $i < count($attributes['name']); $i++) {
-			if ($formvars['attribute_' . $attributes['name'][$i]] != '') {
-				$alias_rows = ["alias" => "'" . $formvars['alias_' . $attributes['name'][$i]] . "'"];
+		for ($i = 0; $i < count($formvars['attributes']); $i++) {
+			$attribute_name = $formvars['attributes'][$i];
+			if ($attribute_name != '') {
+				$alias_rows = ["alias" => "'" . $formvars['alias_' . $attribute_name] . "'"];
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') {
 						$language = str_replace('-', '_', $language);
-						$alias_rows["alias_" . $language] = "'" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
+						$alias_rows["alias_" . $language] = "'" . $formvars['alias_' . $language . '_' . $attribute_name] . "'";
 					}
 				}
-				if ($formvars['visible_' . $attributes['name'][$i]] != 2){
-					$formvars['visibility_rules_'.$attributes['name'][$i]] = '';
+				if ($formvars['visible_' . $attribute_name] != 2){
+					$formvars['visibility_rules_'.$attribute_name] = '';
 				}
-				if ($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
-					$formvars['group_' . $attributes['name'][$i]] = $last_group;
+				if ($formvars['group_' . $attribute_name] == '' AND $last_group != ''){
+					$formvars['group_' . $attribute_name] = $last_group;
 				}
-				if ($last_group != $formvars['group_' . $attributes['name'][$i]]) {
+				if ($last_group != $formvars['group_' . $attribute_name]) {
 					$group_id++;
-					$groups[$group_id]['name'] = $formvars['group_' . $attributes['name'][$i]];
+					$groups[$group_id]['name'] = $formvars['group_' . $attribute_name];
 				}
-				$last_group = $formvars['group_' . $attributes['name'][$i]];
+				$last_group = $formvars['group_' . $attribute_name];
 
-				if ($formvars['tab_' . $attributes['name'][$i]] == '' AND $last_tab != ''){
-					$formvars['tab_' . $attributes['name'][$i]] = $last_tab;
+				if ($formvars['tab_' . $attribute_name] == '' AND $last_tab != ''){
+					$formvars['tab_' . $attribute_name] = $last_tab;
 				}
-				$last_tab = $formvars['tab_' . $attributes['name'][$i]];
+				$last_tab = $formvars['tab_' . $attribute_name];
 				$rows = [
 					'layer_id' => $formvars['selected_layer_id'],
-					'"order"' => ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]),
-					'name' => "'" . $attributes['name'][$i] . "'",
-					'form_element_type' => "'" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "'",
-					'options' => "'" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "'",
-					'"default"' => "'" . pg_escape_string($formvars['default_' . $attributes['name'][$i]]) . "'",
-					'tooltip' => "'" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "'",
+					'"order"' => $i + 1,
+					'name' => "'" . $attribute_name . "'",
+					'form_element_type' => "'" . ($formvars['form_element_' . $attribute_name] ?: 'Text'). "'",
+					'options' => "'" . pg_escape_string($formvars['options_' . $attribute_name]) . "'",
+					'"default"' => "'" . pg_escape_string($formvars['default_' . $attribute_name]) . "'",
+					'tooltip' => "'" . pg_escape_string($formvars['tooltip_' . $attribute_name]) . "'",
 					'group_id' => ($group_id ?: 'NULL'),
-					'tab' => "'" . $formvars['tab_' . $attributes['name'][$i]] . "'",
-					'arrangement' => ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]),
-					'labeling' => ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]),
-					'raster_visibility' => ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]),
-					'statistic_visibility' => ($formvars['statistic_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['statistic_visibility_' . $attributes['name'][$i]]),
-					'dont_use_for_new' => ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]),
-					'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
-					'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
-					'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
-					'visibility_rules' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]]),
-					'style_attribute' => "'" . $formvars['style_attribute_'.$attributes['name'][$i]] . "'"
+					'tab' => "'" . $formvars['tab_' . $attribute_name] . "'",
+					'arrangement' => ($formvars['arrangement_' . $attribute_name] == '' ? 0 : $formvars['arrangement_' . $attribute_name]),
+					'labeling' => ($formvars['labeling_' . $attribute_name] == '' ? 0 : $formvars['labeling_' . $attribute_name]),
+					'raster_visibility' => ($formvars['raster_visibility_' . $attribute_name] == '' ? "NULL" : $formvars['raster_visibility_' . $attribute_name]),
+					'statistic_visibility' => ($formvars['statistic_visibility_' . $attribute_name] == '' ? "NULL" : $formvars['statistic_visibility_' . $attribute_name]),
+					'dont_use_for_new' => ($formvars['dont_use_for_new_' . $attribute_name] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attribute_name]),
+					'mandatory' => ($formvars['mandatory_' . $attribute_name] == '' ? "NULL" : $formvars['mandatory_' . $attribute_name]),
+					'quicksearch' => ($formvars['quicksearch_' . $attribute_name] == '' ? "NULL" : $formvars['quicksearch_' . $attribute_name]),
+					'visible' => ($formvars['visible_'.$attribute_name] == '' ? "0" : $formvars['visible_'.$attribute_name]),
+					'visibility_rules' => quote_or_null($formvars['visibility_rules_'.$attribute_name]),
+					'style_attribute' => "'" . $formvars['style_attribute_'.$attribute_name] . "'"
 				] + $alias_rows;
 				$sql = "
 					INSERT INTO

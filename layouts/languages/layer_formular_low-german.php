@@ -1,7 +1,7 @@
 <?php
 	$strAddClass = "Klass tau fögen";
 	$strAsteriskRequired = "Weerte mit een * mööst du indragen";
-	$strAttributes = "Attribute";
+	$strAttributes = "Attribut";
 	$strBack = "Trüggsetten";
 	$strButtonSave = "Ännern";
 	$strButtonSaveAsNewLayer = "As niegen Layer indragen";
