@@ -3572,7 +3572,7 @@ class db_mapObj {
 		}
 		else {
 			$from = "kvwmap.classes AS c";
-			$where = "c.layer_id = " . $id_value;
+			$where = "c.layer_id = " . $layer_id;
 		}
 
 		$sql = "

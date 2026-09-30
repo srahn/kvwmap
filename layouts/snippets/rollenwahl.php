@@ -696,7 +696,7 @@ if ($this->Fehlermeldung!='') {
 									</td>
 								</tr>
 								<tr <? if(!$this->Stelle->hist_timestamp)echo 'style="display:none"'; ?> >		
-									<td class="rollenwahl-option-header">
+									<td class="rollenwahl-option-header" style="position: relative;">
 										<? echo $this->histTimestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp" class="calendar" style="bottom:40px"></div></td>
 									<td class="rollenwahl-option-data">
 										<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp_de; ?>" size="16">&nbsp;

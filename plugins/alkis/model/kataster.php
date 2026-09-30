@@ -593,6 +593,73 @@ class flurstueck {
 		}
 		return $Eigentuemer;
 	}
+
+	function outputAlleEigentuemer($stelle){	?>
+		<table border="0" cellspacing="0" cellpadding="2">
+			<? 
+			for ($b=0; $b < count_or_0($this->Buchungen);$b++) {
+				$BestandStr = $this->Buchungen[$b]['bezeichnung'].' ';
+				if ($this->Buchungen[$b]['anteil'] != '') {
+					if ($this->Buchungen[$both]['anteil'] == '99999/99999') {
+						$BestandStr.= '<br>Anteil nicht ermittelbar an Miteigentumsanteil am Grundstück';
+					}
+					else {
+						$BestandStr.= 'zu '.$this->Buchungen[$b]['anteil'] . ', ';
+					}
+				}
+				$BestandStr.='<a target="root" href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$this->Buchungen[$b]['bezirk'].'-'.$this->Buchungen[$b]['blatt'].'&csrf_token=' . $_SESSION['csrf_token'] . '">'.$this->Buchungen[$b]['bezirk'].'-'.ltrim($this->Buchungen[$b]['blatt'], '0').'</a>';
+				$BestandStr.=' '.str_pad($this->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+				$BestandStr.=', Laufende Nummer '.str_pad(intval($this->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+				if($this->Buchungen[$b]['sondereigentum'] != ''){
+					$BestandStr.='<br><br>verbunden mit Sondereigentum an '.$this->Buchungen[$b]['sondereigentum'].'. Nr. '.$this->Buchungen[$b]['auftplannr'].' laut Aufteilungsplan.';
+				} ?>
+				<tr>
+					<td class="fett">Buchung:</td>
+				</tr>
+				<tr>
+					<td colspan="2" style="padding-left: 20px"><? echo $BestandStr; ?></td>
+				</tr>
+				<? if($this->Buchungen[$b]['buchungstext'] != ''){ ?>
+				<tr>
+					<td class="fett">Buchungstext:</td>
+				</tr>
+				<tr>
+					<td colspan="2" style="padding-left: 20px">
+						<? echo nl2br($this->Buchungen[$b]['buchungstext']); ?>
+					</td>
+				</tr>
+			<?	} 
+				if($this->Buchungen[$b]['blattart'] == 3000){ ?>
+				<tr>
+					<td></td>
+					<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
+				</tr>
+			<? }
+				?>
+				<tr>
+					<td class="fett">
+					<? 	if($this->Buchungen[$b]['buchungsart'] >= 2101){
+								echo 'Berechtigter';
+							}
+							else{
+								echo 'Eigentümer';
+							}
+					?>:
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<table>				<?
+						if ($this->Buchungen[$b]['eigentuemerliste']) {
+							echo $this->outputEigentuemer(key($this->Buchungen[$b]['eigentuemerliste']), $this->Buchungen[$b]['eigentuemerliste'], 'Long', $stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
+						}
+				?>	</table>
+					</td>
+				</tr>
+	<?	} ?>
+		</table>
+	<?
+	}
 	
 	function orderEigentuemer($gml_id, &$Eigentuemerliste, $order){
 		# Diese funktion durchläuft den Rechtsverhältnisbaum und vergibt für jeden Eigentümer eine order, die sich fortlaufend erhöht.

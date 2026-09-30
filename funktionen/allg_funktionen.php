@@ -218,9 +218,13 @@ function replace_tags($text, $tags) {
 }
 
 function format_human_filesize($bytes, $precision = 2) {
-	$sz = 'BKMGTP';
-	$factor = floor((strlen($bytes) - 1) / 3);
-	return sprintf("%." . $precision. "f", $bytes / pow(1024, $factor)) . ' ' . @$sz[$factor] . 'B';
+	$units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+	$factor = 0;
+	while ($bytes >= 1024 && $factor < count($units) - 1) {
+		$bytes /= 1024;
+		$factor++;
+	}
+	return sprintf("%.{$precision}f %s", $bytes, $units[$factor]);
 }
 
 function human_filesize($file) {
@@ -2353,7 +2357,6 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 			}
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
-				chmod(MAILQUEUEPATH, 'g+w');
 			}
 			$file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
 			$success = file_put_contents(

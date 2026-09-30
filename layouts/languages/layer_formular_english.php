@@ -6,6 +6,7 @@
 	$strAssignDefaultValues = "Apply Default-Values to User-Groups";
 	$strAsteriskRequired = "Fields marked with an asterisk * are required";
 	$strAttributes = "Attributes";
+	$strAttribute = "Attribute";
 	$strBack = "Back";
 	$strBaseParameters = "Base-Parameter";
 	$strButtonSave = "Save";
@@ -114,6 +115,11 @@
 	$strTriggerFunctionHelp = "The name of a PHP-trigger function can be entered here, which is to be executed in this layer during insert, update or delete. The trigger function must be defined within a plugin or in custom/class/kvwmap.php.";
 	$strUpdateCycle = 'Update cylce';
 	$strUpToDateness = 'Up-to-dateness';
+	$strGeographicIdentifier = 'Geographic Identifier';
+	$strSourceDate = 'Source Date';
+	$strSourceSystem = 'Source System';
+	$strAccuracy = 'Accuracy';
+	$strBusinessCritical = 'Business Critical';
 	$strWFS_geom = "WFS-Geometry-Attribute";
 	$strWidth = "Width";
 	$strWMSAuthPassword = "wms_auth_password";

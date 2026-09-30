@@ -6508,7 +6508,7 @@ class GUI {
 		$this->formvars['data'] = $datastring;
 		$this->formvars['query'] = $select;
 		$this->formvars['datentyp'] = $layerset[0]['datentyp'];
-		$this->formvars['classitem'] = ($auto_class_attribute != ''? $layerset[0]['classitem'] : NULL);
+		$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$this->formvars['connectiontype'] = 6;
 		if ($layerset[0]['labelitem'] != 'Cluster_FeatureCount') {
 			$this->formvars['labelitem'] = $layerset[0]['labelitem'];
@@ -6738,6 +6738,9 @@ class GUI {
 
 			# Fonts auslesen
 			$this->Document->fonts = $this->Document->get_fonts();
+			$this->Document->ttffonts = array_values(array_filter($this->Document->fonts, function ($font) {
+				return strtolower(pathinfo($font['value'], PATHINFO_EXTENSION)) === 'ttf';
+			}));
 			$this->Document->din_formats = $this->Document->get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
@@ -8511,7 +8514,13 @@ class GUI {
 			$layer = $this->map->getLayer($i);
 			$layer->name = sonderzeichen_umwandeln($layer->name);
 			$layer->metadata->set("ows_title", $layer->name);
-			$layer->metadata->set("ows_extent", implode(', ', $bb));
+			$rect = rectObj($bb[0], $bb[1], $bb[2], $bb[3]);
+			if ($layer->metadata->get('ows_srs') != 'EPSG:' . $this->user->rolle->epsg_code){
+				$projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
+				$projTO = new projectionObj("init=" . $layer->metadata->get('ows_srs'));
+				$rect->project($projFROM, $projTO);
+			}
+			$layer->metadata->set("ows_extent", round($rect->minx) . ' ' . round($rect->miny) . ' ' . round($rect->maxx) . ' ' . round($rect->maxy));
 			$layer->metadata->set("ows_srs", OWS_SRS . ' EPSG:3857');
 			$this->exportierte_layer[] = $layer->name;
 		}
@@ -9048,6 +9057,12 @@ class GUI {
 			$this->layerdata['labelitems'] = $layer_labelitems->find_where('layer_id = ' . $this->formvars['selected_layer_id'], '"order"');
 			$layer_updatecycles = new PgObject($this, 'kvwmap', 'layer_updatecycles');
 			$this->layerdata['updatecycles'] = $layer_updatecycles->find_where('', 'id');
+			$layer_geographic_identifiers = new PgObject($this, 'kvwmap', 'layer_geographic_identifiers');
+			$this->layerdata['geographic_identifiers'] = $layer_geographic_identifiers->find_where('', 'id');
+			$layer_source_systems = new PgObject($this, 'kvwmap', 'layer_source_systems');
+			$this->layerdata['source_systems'] = $layer_source_systems->find_where('', 'id');
+			$layer_accuracies = new PgObject($this, 'kvwmap', 'layer_accuracies');
+			$this->layerdata['accuracies'] = $layer_accuracies->find_where('', 'id');
 			$this->layerdata['charts'] = LayerChart::find($this, 'layer_id = ' . $this->formvars['selected_layer_id']);
 			$this->layerdata['datasources'] = DataSource::find_by_layer_id($this, $this->formvars['selected_layer_id']);
 			$this->layerdata['datasource_ids'] = array_map(function($datasource) { return $datasource->get('id'); }, $this->layerdata['datasources']);
@@ -9134,7 +9149,12 @@ class GUI {
 
   function Klasseneditor_KlasseLoeschen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $mapDB->delete_Class($this->formvars['class_id']);
+		if (!is_array($this->formvars['class_id'])) {
+			$this->formvars['class_id'] = [$this->formvars['class_id']];
+		}
+		foreach ($this->formvars['class_id'] as $class_id) {
+    	$mapDB->delete_Class($class_id);
+		}
     $this->Klasseneditor();
   }
 
@@ -9563,6 +9583,29 @@ class GUI {
 			'success' => true,
 			'msg' => 'Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ' und Wrapper-Datei ' . $wrapperfile . ' gelöscht.'
 		);
+	}
+
+	function get_all_labelitems() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$data_attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id']);
+		foreach ($data_attributes as $data_attribute) {
+			if (is_array($data_attribute) AND array_key_exists('name', $data_attribute) AND $data_attributes['the_geom'] != $data_attribute['name']) {
+				echo '
+				<tr>
+					<td>
+						<input name="labelitems_name[]" type="text" value="' . $data_attribute['name'] . '" size="25" maxlength="100">
+					</td>
+					<td>
+						<input name="labelitems_alias[]" type="text" value="' . $data_attribute['name'] . '" size="25" maxlength="100">
+					</td>
+					<td>
+						<i class="fa fa-times" style="color: gray; cursor: pointer" onclick="this.closest(\'tr\').remove();"></i>
+					</td>
+				</tr>
+				';
+			}
+		}
 	}
 
   /**
@@ -10216,38 +10259,46 @@ class GUI {
 	}
 
 	function invitation_send_email($invitation) {
-		if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
-			$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $invitation->get('email'), null, MAILREPLYADDRESS, $invitation->get_subject(), $invitation->get_body(), '', 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $invitation->get('vorname') . ' ' . $invitation->get('name'), PUBLISHERNAME);
-			if (!$mail) {
-				$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
+		if ($this->formvars['send_email']) {
+			if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
+				$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $invitation->get('email'), null, MAILREPLYADDRESS, $invitation->get_subject(), $invitation->get_body(), '', 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $invitation->get('vorname') . ' ' . $invitation->get('name'), PUBLISHERNAME);
+				if (!$mail) {
+					$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
+				}
+				else {
+					$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $invitation->get('email'));
+				}
 			}
 			else {
-				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $invitation->get('email'));
+			$result = mail_att(
+					PUBLISHERNAME, // from_name
+					MAILREPLYADDRESS, // from_email
+					$invitation->get('email'),
+					NULL, // cc_email
+					MAILREPLYADDRESS, // reply_email
+					$invitation->get_subject(),
+					$invitation->get_body(), // message
+					'', // attachment
+					MAILMETHOD, // mode
+					MAILSMTPSERVER,
+					MAILSMTPPORT,
+					$invitation->get('vorname') . ' ' . $invitation->get('name'),
+					PUBLISHERNAME
+				);
+
+				if ($result === 1) {
+					$this->add_message('notice', 'E-Mail erfolgreich in der Queue im Ordner: ' . MAILQUEUEPATH . ' abgelegt.');
+				}
+				else {
+					$this->add_message('info','Neuer Nutzer ist vorgemerkt.<br>Zum Einladen per E-Mail<br>klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>Die E-Mail enthält den Link zur Einladung.');
+				}
 			}
 		}
 		else {
-     $result = mail_att(
-        PUBLISHERNAME, // from_name
-        MAILREPLYADDRESS, // from_email
-        $invitation->get('email'),
-        NULL, // cc_email
-        MAILREPLYADDRESS, // reply_email
-        $invitation->get_subject(),
-        $invitation->get_body(), // message
-        '', // attachment
-        MAILMETHOD, // mode
-        MAILSMTPSERVER,
-        MAILSMTPPORT,
-        $invitation->get('vorname') . ' ' . $invitation->get('name'),
-				PUBLISHERNAME
-    	);
-
-			if ($result === 1) {
-				$this->add_message('notice', 'E-Mail erfolgreich in der Queue im Ordner: ' . MAILQUEUEPATH . ' abgelegt.');
-			}
-			else {
-				$this->add_message('info','Neuer Nutzer ist vorgemerkt.<br>Zum Einladen per E-Mail<br>klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>Die E-Mail enthält den Link zur Einladung.');
-			}
+			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+				Zum Einladen per E-Mail<br>
+				klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>
+				Die E-Mail enthält den Link zur Einladung.');
 		}
 	}
 
@@ -10501,12 +10552,20 @@ class GUI {
 									case 'IN' : case 'NOT IN' : {
 										$parts = explode('|', $value);
 										for($j = 0; $j < count($parts); $j++){
-											if(substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
-											if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
+											if ($parts[$j] != '') {
+												if (substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
+												if (substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
+											}
+											else {
+												$parts[$j] = "''";
+												$is_null = ($operator == 'IN'? ' OR ' : ' AND ') . $attr . ' IS NULL';
+											}
 										}
 										$instring = implode(',', $parts);
-										if($layerset[0]['attributes']['type'][$i] != 'bool')$attr = 'CAST('.$attr.' AS TEXT)';
-										$sql_where .= ' AND ' . $attr . ' ' . $operator . ' (' . $instring . ')';
+										if ($layerset[0]['attributes']['type'][$i] != 'bool') {
+											$attr = 'CAST('.$attr.' AS TEXT)';
+										}
+										$sql_where .= ' AND ' . $attr . ' ' . $operator . ' (' . $instring . ')' . $is_null;
 										if($value_like != ''){			# Parameter wieder auf die der LIKE-Suche setzen
 											$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] = $operator_like;
 											$this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]] = $value_like;
@@ -11669,6 +11728,37 @@ class GUI {
 								$this->formvars[$table['formfield'][$i]] = ''; # leeren, for the case weiter_erfassen angehakt
 							} break;
 
+							case ($table['type'][$i] == 'ExifLatLng') : {
+								$document_attribute_name = $attribute_options;
+
+								if (!$exif_data[$document_attribute_name]) {
+									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+								}
+								if ($exif_data[$document_attribute_name]['success']) {
+									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['LatLng'] ? "'" . $exif_data[$document_attribute_name]['LatLng'] . "'" : "NULL");
+								}
+							} break;
+
+							case ($table['type'][$i] == 'ExifRichtung') : {
+								$document_attribute_name = $attribute_options;
+								if (!$exif_data[$document_attribute_name]) {
+									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+								}
+								if ($exif_data[$document_attribute_name]['success']) {
+									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Richtung'] ? $exif_data[$document_attribute_name]['Richtung'] : "NULL");
+								}
+							} break;
+
+							case ($table['type'][$i] == 'ExifErstellungszeit') : {
+								$document_attribute_name = $attribute_options;
+								if (!$exif_data[$document_attribute_name]) {
+									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+								}
+								if ($exif_data[$document_attribute_name]['success']) {
+									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Erstellungszeit']  ? "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'" : "NULL");
+								}
+							} break;							
+
 							case (
 								$table['saveable'][$i] AND
 								$table['type'][$i] != 'SubFormPK' AND
@@ -11707,37 +11797,6 @@ class GUI {
 									};
 
 									$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]] . "'"; # Typ "normal"
-								}
-							} break;
-
-							case ($table['type'][$i] == 'ExifLatLng') : {
-								$document_attribute_name = $attribute_options;
-
-								if (!$exif_data[$document_attribute_name]) {
-									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
-								}
-								if ($exif_data[$document_attribute_name]['success']) {
-									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['LatLng'] ? "'" . $exif_data[$document_attribute_name]['LatLng'] . "'" : "NULL");
-								}
-							} break;
-
-							case ($table['type'][$i] == 'ExifRichtung') : {
-								$document_attribute_name = $attribute_options;
-								if (!$exif_data[$document_attribute_name]) {
-									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
-								}
-								if ($exif_data[$document_attribute_name]['success']) {
-									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Richtung'] ? $exif_data[$document_attribute_name]['Richtung'] : "NULL");
-								}
-							} break;
-
-							case ($table['type'][$i] == 'ExifErstellungszeit') : {
-								$document_attribute_name = $attribute_options;
-								if (!$exif_data[$document_attribute_name]) {
-									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
-								}
-								if ($exif_data[$document_attribute_name]['success']) {
-									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Erstellungszeit']  ? "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'" : "NULL");
 								}
 							} break;
 
@@ -13485,7 +13544,8 @@ class GUI {
 			$this->user->rolle->deleteExportSettings($this->formvars);
 		}
 		if ($this->formvars['selected_layer_id'] != '') {
-			$this->layer = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$export_rollen_layer = ((int)$this->formvars['selected_layer_id'] < 0);
+			$this->layer = ($export_rollen_layer ? $this->user->rolle->getRollenLayer((int) $this->formvars['selected_layer_id'] * -1) : $this->user->rolle->getLayer($this->formvars['selected_layer_id']));
 			$this->formvars['selected_group_id'] = $this->layer[0]['gruppe'];
 			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
 			$layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -13554,6 +13614,7 @@ class GUI {
 			include_(CLASSPATH . 'Layer.php');
 			$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
 			if (
+				$this->formvars['selected_layer_id'] > 0 AND 
 				$layer->get('datentyp') == MS_LAYER_RASTER AND
 				preg_match('/\.(tif|tiff)$/i', $layer->get('data')) AND
 				$layer->get('export_privileg')
@@ -19562,6 +19623,7 @@ class db_mapObj{
 				kvwmap.u_groups AS g ON l.gruppe = g.id LEFT JOIN
 				kvwmap.connections AS c ON l.connection_id = c.id
 			WHERE
+				" . ($this->nurAktiveLayer ? " (l.aktivstatus != 0) AND " : '') . "
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
@@ -19874,7 +19936,7 @@ class db_mapObj{
 		}
 		else {
 			$from = "kvwmap.classes AS c";
-			$where = "c.layer_id = " . $id_value;
+			$where = "c.layer_id = " . $layer_id;
 		}
 
 		$sql = "
@@ -21809,6 +21871,10 @@ DO $$
 					'dataowner_tel',
 					'uptodateness',
 					'updatecycle',
+					'geographic_identifier', 
+					'source_date', 
+					'source_system', 
+					'accuracy', 
 					'metalink',
 					'terms_of_use_link',
 					'comment',
@@ -21861,7 +21927,8 @@ DO $$
 		$zero_if_empty_attributes = array(
 			'drawingorder',
 			'listed',
-			'logconsume'
+			'logconsume',
+			'business_critical'
 		);
 
 		if ($this->GUI->plugin_loaded('mobile')) {
@@ -22178,7 +22245,7 @@ DO $$
 					" . quote($formvars['dataowner_email']) . ",
 					" . quote($formvars['dataowner_tel']) . ",
 					" . quote($formvars['uptodateness']) . ",
-					" . quote($formvars['updatecycle']) . ",
+					" . quote_or_null($formvars['updatecycle']) . ",
 					" . quote(pg_escape_string($formvars['metalink'])) . ",
 					" . quote(pg_escape_string($formvars['terms_of_use_link'])) . ",
 					" . quote($formvars['status']) . ",
@@ -22370,51 +22437,52 @@ DO $$
 		$last_group = '';
 		$group_id = 0;
 		$groups = [];
-		for ($i = 0; $i < count($attributes['name']); $i++) {
-			if ($formvars['attribute_' . $attributes['name'][$i]] != '') {
-				$alias_rows = ["alias" => "'" . $formvars['alias_' . $attributes['name'][$i]] . "'"];
+		for ($i = 0; $i < count($formvars['attributes']); $i++) {
+			$attribute_name = $formvars['attributes'][$i];
+			if ($attribute_name != '') {
+				$alias_rows = ["alias" => "'" . $formvars['alias_' . $attribute_name] . "'"];
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') {
 						$language = str_replace('-', '_', $language);
-						$alias_rows["alias_" . $language] = "'" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
+						$alias_rows["alias_" . $language] = "'" . $formvars['alias_' . $language . '_' . $attribute_name] . "'";
 					}
 				}
-				if ($formvars['visible_' . $attributes['name'][$i]] != 2){
-					$formvars['visibility_rules_'.$attributes['name'][$i]] = '';
+				if ($formvars['visible_' . $attribute_name] != 2){
+					$formvars['visibility_rules_'.$attribute_name] = '';
 				}
-				if ($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
-					$formvars['group_' . $attributes['name'][$i]] = $last_group;
+				if ($formvars['group_' . $attribute_name] == '' AND $last_group != ''){
+					$formvars['group_' . $attribute_name] = $last_group;
 				}
-				if ($last_group != $formvars['group_' . $attributes['name'][$i]]) {
+				if ($last_group != $formvars['group_' . $attribute_name]) {
 					$group_id++;
-					$groups[$group_id]['name'] = $formvars['group_' . $attributes['name'][$i]];
+					$groups[$group_id]['name'] = $formvars['group_' . $attribute_name];
 				}
-				$last_group = $formvars['group_' . $attributes['name'][$i]];
+				$last_group = $formvars['group_' . $attribute_name];
 
-				if ($formvars['tab_' . $attributes['name'][$i]] == '' AND $last_tab != ''){
-					$formvars['tab_' . $attributes['name'][$i]] = $last_tab;
+				if ($formvars['tab_' . $attribute_name] == '' AND $last_tab != ''){
+					$formvars['tab_' . $attribute_name] = $last_tab;
 				}
-				$last_tab = $formvars['tab_' . $attributes['name'][$i]];
+				$last_tab = $formvars['tab_' . $attribute_name];
 				$rows = [
 					'layer_id' => $formvars['selected_layer_id'],
-					'"order"' => ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]),
-					'name' => "'" . $attributes['name'][$i] . "'",
-					'form_element_type' => "'" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "'",
-					'options' => "'" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "'",
-					'"default"' => "'" . pg_escape_string($formvars['default_' . $attributes['name'][$i]]) . "'",
-					'tooltip' => "'" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "'",
+					'"order"' => $i + 1,
+					'name' => "'" . $attribute_name . "'",
+					'form_element_type' => "'" . ($formvars['form_element_' . $attribute_name] ?: 'Text'). "'",
+					'options' => "'" . pg_escape_string($formvars['options_' . $attribute_name]) . "'",
+					'"default"' => "'" . pg_escape_string($formvars['default_' . $attribute_name]) . "'",
+					'tooltip' => "'" . pg_escape_string($formvars['tooltip_' . $attribute_name]) . "'",
 					'group_id' => ($group_id ?: 'NULL'),
-					'tab' => "'" . $formvars['tab_' . $attributes['name'][$i]] . "'",
-					'arrangement' => ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]),
-					'labeling' => ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]),
-					'raster_visibility' => ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]),
-					'statistic_visibility' => ($formvars['statistic_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['statistic_visibility_' . $attributes['name'][$i]]),
-					'dont_use_for_new' => ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]),
-					'mandatory' => ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]),
-					'quicksearch' => ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]),
-					'visible' => ($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]),
-					'visibility_rules' => quote_or_null($formvars['visibility_rules_'.$attributes['name'][$i]]),
-					'style_attribute' => "'" . $formvars['style_attribute_'.$attributes['name'][$i]] . "'"
+					'tab' => "'" . $formvars['tab_' . $attribute_name] . "'",
+					'arrangement' => ($formvars['arrangement_' . $attribute_name] == '' ? 0 : $formvars['arrangement_' . $attribute_name]),
+					'labeling' => ($formvars['labeling_' . $attribute_name] == '' ? 0 : $formvars['labeling_' . $attribute_name]),
+					'raster_visibility' => ($formvars['raster_visibility_' . $attribute_name] == '' ? "NULL" : $formvars['raster_visibility_' . $attribute_name]),
+					'statistic_visibility' => ($formvars['statistic_visibility_' . $attribute_name] == '' ? "NULL" : $formvars['statistic_visibility_' . $attribute_name]),
+					'dont_use_for_new' => ($formvars['dont_use_for_new_' . $attribute_name] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attribute_name]),
+					'mandatory' => ($formvars['mandatory_' . $attribute_name] == '' ? "NULL" : $formvars['mandatory_' . $attribute_name]),
+					'quicksearch' => ($formvars['quicksearch_' . $attribute_name] == '' ? "NULL" : $formvars['quicksearch_' . $attribute_name]),
+					'visible' => ($formvars['visible_'.$attribute_name] == '' ? "0" : $formvars['visible_'.$attribute_name]),
+					'visibility_rules' => quote_or_null($formvars['visibility_rules_'.$attribute_name]),
+					'style_attribute' => "'" . $formvars['style_attribute_'.$attribute_name] . "'"
 				] + $alias_rows;
 				$sql = "
 					INSERT INTO
@@ -22842,7 +22910,7 @@ DO $$
 				}
 				else {
 					$type = $attributes['type'][$i];
-					$default = '(' . $attributes['default'][$i] . ')::' . $type;
+					$default = '(select ' . $attributes['default'][$i] . ')::' . $type;
 				}
 				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {
@@ -23343,6 +23411,7 @@ DO $$
 			$layer['queryable'] = ($layer['queryable'] == 't');
 			$layer['querymap'] = ($layer['querymap'] == 't');
 			$layer['logconsume'] = ($layer['logconsume'] == 't');
+			$layer['business_critical'] = ($layer['business_critical'] == 't');
 			if ($replace_params) {
 				foreach (array('classitem', 'classification', 'data', 'pfad') AS $key) {
 					$layer[$key] = replace_params_rolle(

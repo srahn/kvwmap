@@ -1097,7 +1097,8 @@ class rolle {
 								' . $this->stelle_id . ", 
 								'" . $time . "', 
 								" . $layer[$i] . '
-							)';
+							)
+							ON CONFLICT (user_id, stelle_id, time_id, layer_id) DO NOTHING';
 						#echo '<p>SQL zum Eintragen des consumierten Layers: ' . $sql;
             $ret=$this->database->execSQL($sql,4, 1);
             if ($ret[0]) {
@@ -1496,9 +1497,11 @@ class rolle {
 				l.query as pfad,
 				1 as queryable,
 				gle_view,
-				'(' || nullif(rollenfilter, '') || ')' as filter
+				'(' || nullif(rollenfilter, '') || ')' as filter,
+				coalesce(ul.export_privileg, 1) as export_privileg
 			FROM
 				kvwmap.rollenlayer AS l
+				LEFT JOIN kvwmap.used_layer ul ON l.original_layer_id = ul.layer_id AND ul.stelle_id = " . $this->stelle_id . "
 			WHERE
 				l.stelle_id = " . $this->stelle_id . " AND
 				l.user_id = " . $this->user_id . "
@@ -2880,20 +2883,21 @@ class rolle {
 		}
 	}
 
-	function setConsumeALB($time,$format,$log_number,$wz,$pagecount) {
+	function setConsumeALB($time,$format,$log_number,$wz,$pagecount, $vorgangsnr = NULL) {
 		if (LOG_CONSUME_ACTIVITY==1) {
 			for($i = 0; $i < count($log_number); $i++){
 				# function setzt eine ALB-PDF-EXportaktivität
 				$sql = "
 					INSERT INTO 
-						kvwmap.u_consumeALB 
+						kvwmap.u_consumeALB (user_id, stelle_id, time_id, format, log_number, wz, vorgang)
 					VALUES (
 						" . $this->user_id . ",
 						" . $this->stelle_id . ",
 						'" . $time . "',
 						'" . $format . "',
 						'" . $log_number[$i] . "',
-						'" . $wz . "'
+						'" . $wz . "',
+						" . quote_or_null($vorgangsnr) . "
 					)
 					ON CONFLICT (user_id, stelle_id, time_id, log_number) DO NOTHING";
 				#echo $sql.'<br>';

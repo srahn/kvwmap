@@ -1,7 +1,7 @@
 <?php
 class Aufforderung extends Bescheid {
 
-	protected $tableName = 'fiswrv_aufforderung';
+	public static $tableName = 'fiswrv_aufforderung';
 	
 	public function createAufforderung($gewaesserbenutzungen, $erhebungsjahr, $dokumentId, $dateVale)
 	{

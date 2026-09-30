@@ -592,30 +592,256 @@ function open_group_options(event, group_id){
 
 			<table align="center" border="0" cellspacing="0" class="scrolltable attribute-editor-table">
 				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 162); ?>px">
+					<tr>
+						<td align="left" valign="top"><?
+							echo '<div class="fett scrolltable_header">' . $strAttribute .'</div>';
+							?>
+						</td>
+
+						<td align="left" valign="top">
+							<? 
+								echo '<div class="fett scrolltable_header">' . $strFormularElement . '</div>';
+							?>
+						</td>
+
+						<td align="left" valign="top"><?
+								echo '<div class="fett scrolltable_header">' . $this->layerOptions . '</div>';
+								?>
+								<div class="fett scrolltable_footer">
+									<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
+									<a href="javascript:show_attribute_options_doc();" title="Dokumentation zu Optionen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-question-circle-o"></i></a>
+								</div>
+								<?
+								?>
+						</td>
+						
+						<td align="left" valign="top"><?
+							echo '<div class="fett scrolltable_header">' . $strDefault . '</div>';
+							echo '<div class="fett scrolltable_footer">
+											<a href="javascript:clear_all(\'default\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
+										</div>';
+									?>
+						</td>							
+
+						<td align="left" valign="top"><? 	
+							echo '<div class="fett scrolltable_header">' . $strAlias . '</div>';
+							echo '<div class="fett scrolltable_footer">
+												<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="graphics/autogen.png"></a>
+												<a href="javascript:clear_all(\'alias\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
+											</div>';
+								?>
+						</td>
+						
+						<?php
+						foreach ($supportedLanguages as $language){
+							if($language != 'german') { ?>
+								<td align="left" valign="top"><?
+									echo '<div class="fett scrolltable_header">' . $strAlias . ' ' . $language . '</div>';
+										?>
+								</td><?php
+							}
+						} ?>
+
+						<td align="left" valign="top"><?
+							echo '<div class="fett scrolltable_header">' . $strAttributExplanations . '</div>';
+							echo '<div class="fett scrolltable_footer">
+											<a href="javascript:clear_all(\'tooltip\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
+										</div>';
+								?>
+						</td>
+
+						<td align="left" valign="top"><?
+							echo '<div class="fett scrolltable_header">' . $this->strGroup . '</div>';
+							echo '<div class="fett scrolltable_footer">
+											<a href="javascript:clear_all(\'group\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
+										</div>';
+								?>
+						</td>
+						
+						<td align="left" valign="top"><? 	
+							echo '<div class="fett scrolltable_header">Tab</div>';
+							echo '<div class="fett scrolltable_footer">
+												<a href="javascript:clear_all(\'tab\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
+											</div>';
+							?>
+						</td>							
+						
+						<td align="center" valign="top"><?
+							echo '<div class="fett scrolltable_header">' . $strArrangement . '</div>';
+							echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
+											FormObject::createSelectField(
+											'arrangement',
+											array(
+												array('value' => 0, 'output' => $strUnderPrevious),
+												array('value' => 1, 'output' => $strBesidePrevious, 'style' => 'background-color: #faef1e')
+											),
+											'',
+											1,
+											"outline: 1px solid lightgrey; border: none; width: 85px; background-color: white",
+											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 85px;' + this.options[this.selectedIndex].getAttribute('style'));
+												set_all('arrangement');",
+												'',
+												'',
+												'',
+												'- Auswahl -'
+										) .
+										'</div>';
+										?>
+						</td>
+
+						<td align="center" valign="top"><?
+							echo '<div class="fett scrolltable_header">' . $strAttributeLabeling . '</div>';
+							echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
+											FormObject::createSelectField(
+											'labeling',
+											array(
+												array('value' => 0, 'output' => $strLeftBesideAttribute, 'style' => 'background-color: white'),
+												array('value' => 1, 'output' => $strAboveAttribute, 'style' => 'background-color: #faef1e'),
+												array('value' => 2, 'output' => $strWithoutLabel, 'style' => 'background-color: #ff6600')
+											),
+											'',
+											1,
+											"outline: 1px solid lightgrey; border: none; width: 88px; background-color: white",
+											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 88px;' + this.options[this.selectedIndex].getAttribute('style'));
+												set_all('labeling');",
+												'',
+												'',
+												'',
+												'- Auswahl -'
+										) .
+										'</div>';
+											?>
+						</td>
+
+						<? if ($this->attributes['style'][0] != '') { ?>
+						<td>
+							<?	
+									echo '<div class="fett scrolltable_header">' . $strStyleAttribute . '</div>';
+									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
+													FormObject::createSelectField(
+													'style_attribute',
+													$this->attributes['style'],
+													$this->attributes['style_attribute'][$i],
+													1,
+													'',
+													"set_all('style_attribute');",
+													'',
+													'',
+													'',
+													'- Auswahl -'
+												) .
+												'</div>';
+												?>
+						</td>
+						<? } ?>
+						
+						<td align="center" valign="top"><?
+							echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strAttributeAtSearch . '</div>';
+							echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
+											FormObject::createSelectField(
+											'mandatory',
+											array(
+												array('value' => -1, 'output' => $strAttributeNotVisible),
+												array('value' => 0, 'output' => $strShowAttribute),
+												array('value' => 1, 'output' => $strMandatoryAtSearch)
+											),
+											'',
+											1,
+											'outline: 1px solid lightgrey; border: none; width: 75px; background-color: white;',
+											"set_all('mandatory');",
+												'',
+												'',
+												'',
+												'- Auswahl -'
+										) .
+										'</div>';
+										?>
+						</td>
+
+						<td align="center" valign="top"><?
+							echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strForNewDataset . '</div>';
+							echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
+											FormObject::createSelectField(
+											'dont_use_for_new',
+											array(
+												array('value' => -1, 'output' => $strAttributeNotVisible),
+												array('value' => 0, 'output' => $strShowAttribute),
+												array('value' => 1, 'output' => $strOmitAttributeValues)
+											),
+											'',
+											1,
+											'outline: 1px solid lightgrey; border: none; width: 75px; background-color: white;',
+											"set_all('dont_use_for_new');",
+												'',
+												'',
+												'',
+												'- Auswahl -'
+										) .
+										'</div>';
+							?>
+						</td>
+						
+						<td align="center" valign="top"><?
+							echo '<div class="fett scrolltable_header">' . $strAttributeVisible . '</div>';
+							echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
+											FormObject::createSelectField(
+										'visible',
+										array(
+											array('value' => 0, 'output' => $this->strNo),
+											array('value' => 1, 'output' => $this->strYes),
+											array('value' => 2, 'output' => $strYesWhen)
+										),
+										'',
+										1,
+										'outline: 1px solid lightgrey; border: none; width: 75px; background-color: white;',
+											"set_all('visible');",
+												'',
+												'',
+												'',
+												'- Auswahl -'
+										) .
+										'</div>';
+							?>
+						</td>	
+
+						<?php
+						if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
+							<td align="center" valign="top"><?
+									echo '<div class="fett scrolltable_header"><i class="fa fa-search" style="font-size:20px" title="' . $strUseForQuickSearchTitle .'"></i></div>';
+									?>
+							</td><?php
+						} ?>
+						
+						<td align="center" valign="top"><?
+							echo '<div class="fett scrolltable_header"><i class="fa fa-th" style="font-size:23px" title="' . $strUseInRasterTemplate . '"></i></div>';
+								?>
+						</td>
+						<td align="center" valign="top"><?
+							echo '<div class="fett scrolltable_header" style="margin-top: 2px; margin-left:5px"><span style="font-size:25px" title="' . $strUseForStatistics . '">&Sigma;</span></div>';
+								?>
+						</td>
+
+						<td>
+						</td>
+
+					</tr>
+					<tr class="DropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+						<td colspan="5"></td>
+					</tr>
+
+
 		<?	if ((count($this->attributes))!=0) { 
 					for ($i = 0; $i < count_or_0($this->attributes['type']); $i++){ ?>
-						<tr class="listen-tr" title="<? echo $this->attributes['name'][$i]; ?>">
-							<td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
-						  	<input type="text"
-								  name="order_<?php echo $this->attributes['name'][$i]; ?>"
-									value="<?php echo $this->attributes['order'][$i]; ?>"
-									style="width: 27px"
-								>
-						  </td>
-							<td align="left" valign="top"><?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">' . $strAttributes .'</div>';
-								} ?>
+						<tr class="dragObject listen-tr" title="<? echo $this->attributes['name'][$i]; ?>">							
+							<td align="left" valign="top" class="dragHandle" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
 								<input type="text"
-									name="attribute_<?php echo $this->attributes['name'][$i]; ?>"
+									name="attributes[]"
 									value="<?php echo $this->attributes['name'][$i]; ?>"
 									readonly
 								>
 						  </td>
 
-							<td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">' . $strFormularElement . '</div>';
+							<td align="left" valign="top"><?
 								$type = ltrim($this->attributes['type'][$i], '_');
 								if(is_numeric($type)){ ?>
 									<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_datatype_id=<?php echo $type; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->attributes['typename'][$i]; ?></a><?php
@@ -638,17 +864,7 @@ function open_group_options(event, group_id){
 								} ?>
 							</td>
 
-							<td align="left" valign="top"><?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">' . $this->layerOptions . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) { ?>
-									<div class="fett scrolltable_footer">
-										<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
-										<a href="javascript:show_attribute_options_doc();" title="Dokumentation zu Optionen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-question-circle-o"></i></a>
-									</div>
-									<?
-								} ?>
+							<td align="left" valign="top">
 								<div class="options_div"> <?
 									if (
 										$this->attributes['options'][$i] == '' AND
@@ -669,63 +885,27 @@ function open_group_options(event, group_id){
 						  </td>
 							
 						  <td align="left" valign="top">
-							<? 	if ($i == 0) {
-										echo '<div class="fett scrolltable_header">' . $strDefault . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer">
-														<a href="javascript:clear_all(\'default\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
-													</div>';
-									}	?>
 						  	<input name="default_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['default'][$i]); ?>">
 						  </td>							
 
 						  <td align="left" valign="top">
-						<? 	if ($i == 0) {
-										echo '<div class="fett scrolltable_header">' . $strAlias . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer">
-														<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="graphics/autogen.png"></a>
-														<a href="javascript:clear_all(\'alias\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
-													</div>';
-								} ?>
 						  	<input name="alias_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias'][$i]); ?>">
 						  </td>
 							
 							<?php
 							foreach ($supportedLanguages as $language){
 								if($language != 'german') { ?>
-									<td align="left" valign="top"><?
-										if ($i == 0) {
-											echo '<div class="fett scrolltable_header">' . $strAlias . ' ' . $language . '</div>';
-										} ?>
+									<td align="left" valign="top">
 										<input name="alias_<?php echo $language; ?>_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias_' . $language][$i]); ?>">
 									</td><?php
 								}
 							} ?>
 
-							<td align="left" valign="top"><?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">' . $strAttributExplanations . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer">
-													<a href="javascript:clear_all(\'tooltip\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
-												</div>';
-								} ?>
+							<td align="left" valign="top">
 								<textarea name="tooltip_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:120px"><?php echo htmlspecialchars($this->attributes['tooltip'][$i]); ?></textarea>
 							</td>
 
-							<td align="left" valign="top"><?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">' . $this->strGroup . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer">
-													<a href="javascript:clear_all(\'group\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
-												</div>';
-								} ?>
+							<td align="left" valign="top">
 								<div style="position: relative">
 									<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['groups'][$this->attributes['group_id'][$i]]['name']); ?>">
 									<div style="position: absolute; right: 2px; top: 1px; z-index: 1000; font-size: 14px;">
@@ -737,14 +917,6 @@ function open_group_options(event, group_id){
 							</td>
 							
 							<td align="left" valign="top">
-						<? 	if ($i == 0) {
-										echo '<div class="fett scrolltable_header">Tab</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer">
-														<a href="javascript:clear_all(\'tab\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
-													</div>';
-								}	?>
 								<input name="tab_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['tab'][$i]); ?>">
 							</td>							
 							
@@ -752,29 +924,6 @@ function open_group_options(event, group_id){
 							if ($this->attributes['arrangement'][$i] == 0) { $bgcolor = 'white'; }
 							if ($this->attributes['arrangement'][$i] == 1) { $bgcolor = '#faef1e'; } ?>
 							<td align="center" valign="top"><?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">' . $strArrangement . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
-													FormObject::createSelectField(
-													'arrangement',
-													array(
-														array('value' => 0, 'output' => $strUnderPrevious),
-														array('value' => 1, 'output' => $strBesidePrevious, 'style' => 'background-color: #faef1e')
-													),
-													'',
-													1,
-													"outline: 1px solid lightgrey; border: none; width: 85px; background-color: " . $bgcolor,
-													"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 85px;' + this.options[this.selectedIndex].getAttribute('style'));
-													 set_all('arrangement');",
-													 '',
-													 '',
-													 '',
-													 '- Auswahl -'
-												) .
-												'</div>';
-								}
 								echo FormObject::createSelectField(
 									'arrangement_' . $this->attributes['name'][$i],
 									array(
@@ -793,30 +942,6 @@ function open_group_options(event, group_id){
 							if($this->attributes['labeling'][$i] == 1) $bgcolor = '#faef1e';
 							if($this->attributes['labeling'][$i] == 2) $bgcolor = '#ff6600'; ?>
 							<td align="center" valign="top"><?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">' . $strAttributeLabeling . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
-													FormObject::createSelectField(
-													'labeling',
-													array(
-														array('value' => 0, 'output' => $strLeftBesideAttribute, 'style' => 'background-color: white'),
-														array('value' => 1, 'output' => $strAboveAttribute, 'style' => 'background-color: #faef1e'),
-														array('value' => 2, 'output' => $strWithoutLabel, 'style' => 'background-color: #ff6600')
-													),
-													'',
-													1,
-													"outline: 1px solid lightgrey; border: none; width: 88px; background-color: " . $bgcolor,
-													"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 88px;' + this.options[this.selectedIndex].getAttribute('style'));
-													 set_all('labeling');",
-													 '',
-													 '',
-													 '',
-													 '- Auswahl -'
-												) .
-												'</div>';
-								}
 								echo FormObject::createSelectField(
 									'labeling_' . $this->attributes['name'][$i],
 									array(
@@ -832,65 +957,23 @@ function open_group_options(event, group_id){
 							</td>
 
 							<? if ($this->attributes['style'][0] != '') { ?>
-							<td>
-								<?	if ($i == 0) {
-											echo '<div class="fett scrolltable_header">' . $strStyleAttribute . '</div>';
-										}
-										if ($i == count_or_0($this->attributes['type']) - 1) {
-											echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
-															FormObject::createSelectField(
-															'style_attribute',
-															$this->attributes['style'],
-															$this->attributes['style_attribute'][$i],
-															1,
-															'',
-															"set_all('style_attribute');",
-															'',
-															'',
-															'',
-															'- Auswahl -'
-														) .
-														'</div>';
-										}
-										echo FormObject::createSelectField(
-											'style_attribute_' . $this->attributes['name'][$i],
-											$this->attributes['style'],
-											$this->attributes['style_attribute'][$i],
-											1,
-											'',
-											'',
-											'',
-											'',
-											'',
-											'- Auswahl -'
-										); ?>
+							<td><?	
+									echo FormObject::createSelectField(
+										'style_attribute_' . $this->attributes['name'][$i],
+										$this->attributes['style'],
+										$this->attributes['style_attribute'][$i],
+										1,
+										'',
+										'',
+										'',
+										'',
+										'',
+										'- Auswahl -'
+									); ?>
 							</td>
 							<? } ?>
 							
 							<td align="center" valign="top"><?
-								if($i == 0) {
-									echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strAttributeAtSearch . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
-													FormObject::createSelectField(
-													'mandatory',
-													array(
-														array('value' => -1, 'output' => $strAttributeNotVisible),
-														array('value' => 0, 'output' => $strShowAttribute),
-														array('value' => 1, 'output' => $strMandatoryAtSearch)
-													),
-													'',
-													1,
-													'outline: 1px solid lightgrey; border: none; width: 75px; background-color: white;',
-													"set_all('mandatory');",
-													 '',
-													 '',
-													 '',
-													 '- Auswahl -'
-												) .
-												'</div>';
-								}
 								echo FormObject::createSelectField(
 									'mandatory_' . $this->attributes['name'][$i],
 									array(
@@ -905,29 +988,6 @@ function open_group_options(event, group_id){
 							</td>
 
 							<td align="center" valign="top"><?
-								if ($i == 0) {
-									echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strForNewDataset . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
-													FormObject::createSelectField(
-													'dont_use_for_new',
-													array(
-														array('value' => -1, 'output' => $strAttributeNotVisible),
-														array('value' => 0, 'output' => $strShowAttribute),
-														array('value' => 1, 'output' => $strOmitAttributeValues)
-													),
-													'',
-													1,
-													'outline: 1px solid lightgrey; border: none; width: 75px; background-color: white;',
-													"set_all('dont_use_for_new');",
-													 '',
-													 '',
-													 '',
-													 '- Auswahl -'
-												) .
-												'</div>';
-								}
 								echo FormObject::createSelectField(
 									'dont_use_for_new_' . $this->attributes['name'][$i],
 									array(
@@ -941,30 +1001,7 @@ function open_group_options(event, group_id){
 								); ?>
 							</td>
 							
-							<td align="center" valign="top"><?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header">' . $strAttributeVisible . '</div>';
-								}
-								if ($i == count_or_0($this->attributes['type']) - 1) {
-									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
-													FormObject::createSelectField(
-												'visible',
-												array(
-													array('value' => 0, 'output' => $this->strNo),
-													array('value' => 1, 'output' => $this->strYes),
-													array('value' => 2, 'output' => $strYesWhen)
-												),
-												'',
-												1,
-												'outline: 1px solid lightgrey; border: none; width: 75px; background-color: white;',
-													"set_all('visible');",
-													 '',
-													 '',
-													 '',
-													 '- Auswahl -'
-												) .
-												'</div>';
-								} ?>
+							<td align="center" valign="top">
 								<table style="width: 100%" cellspacing="0" cellpadding="0">
 									<tr>
 										<td align="left"><?
@@ -994,24 +1031,15 @@ function open_group_options(event, group_id){
 
 							<?php
 							if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
-								<td align="center" valign="top"><?
-									if ($i == 0) {
-										echo '<div class="fett scrolltable_header"><i class="fa fa-search" style="font-size:20px" title="' . $strUseForQuickSearchTitle .'"></i></div>';
-									} ?>
+								<td align="center" valign="top">
 						  		<input name="quicksearch_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['quicksearch'][$i] ? ' checked="true"' : ''); ?>>
 						  	</td><?php
 							} ?>
 							
-							<td align="center" valign="top"><?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header"><i class="fa fa-th" style="font-size:23px" title="' . $strUseInRasterTemplate . '"></i></div>';
-								} ?>
+							<td align="center" valign="top">
 								<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
-							<td align="center" valign="top"><?
-								if ($i == 0) {
-									echo '<div class="fett scrolltable_header" style="margin-top: 5px; margin-left:5px"><span style="font-size:25px" title="' . $strUseForStatistics . '">&Sigma;</span></div>';
-								} ?>
+							<td align="center" valign="top">
 								<input name="statistic_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['statistic_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
 
@@ -1019,7 +1047,11 @@ function open_group_options(event, group_id){
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							</td>
 
-						</tr><?php
+						</tr>
+						<tr class="DropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+    					<td colspan="5"></td>
+						</tr>
+						<?php
 					}
 				} ?>
 				</tbody>

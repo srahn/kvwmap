@@ -1638,7 +1638,9 @@ a.menuered:hover {
 	position: relative;
 }
 
-.dropZone{
+/* Dragging von divs */
+
+div.dropZone{
 	position: relative;
 	z-index: 1000;
 	margin: 0;
@@ -1646,19 +1648,67 @@ a.menuered:hover {
 	width: 100%;
 }
 
-.dropZone.ready{
+div.dropZone.ready{
 	margin: -12 0 -12 15;
 	height: 25px;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
-.dropZone.over{
+div.dropZone.over{
 	height: 51px;
 	margin: -13 0 -13 15;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
-.dragObject{
+/* Dragging von trs */
+
+tr.DropZone {
+    height: 0px;
+    position: relative;
+    z-index: 1000;
+}
+
+tr.DropZone td {
+    position: relative;
+    height: 0px;
+    transition: height 0.1s ease;
+}
+
+tr.DropZone td::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    right: 0;
+    top: 0px;
+    height: 0px;
+    z-index: 1000;
+		transition: height 0.1s ease;
+}
+
+tr.DropZone.ready td::before {
+    top: -13px;
+    height: 28px;
+		transition: height 0.1s ease;
+}
+
+tr.DropZone.over td {
+    height: 26px;
+		transition: height 0.1s ease;
+}
+
+tr.DropZone.over td::before {
+    top: -13px;
+    height: 52px;
+		transition: height 0.1s ease;
+}
+
+/* ------  */
+
+td.dragHandle, td.dragHandle input {
+	cursor: grab;
+}
+
+div.dragObject{
 	background-color: #f6f6f6;
 	box-shadow: 1px 1px 4px #aaa;
 	z-index: 100;
@@ -1671,7 +1721,7 @@ a.menuered:hover {
 	text-align: start;
 }
 
-.dragObject:hover{
+div.dragObject:hover{
 	background-color: #fcfcfc;
 }
 
@@ -2333,7 +2383,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position: absolute;
 	z-index: 1000000;
 	right: 0px;
-	left: 240px;
+	left: 60px;
 	bottom: 30px;
 	width: 220px;
 	height: fit-content;

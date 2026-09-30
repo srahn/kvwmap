@@ -262,7 +262,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 						group_display = '';
 					}
 				})
-				row.closest('div').closest('tr').style.display = group_display;
+				row.closest('div').style.display = group_display;
 			}
 		})
 		// visibility of tabs

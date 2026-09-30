@@ -3709,7 +3709,8 @@ class rolle {
 								' . $this->stelle_id . ", 
 								'" . $time . "', 
 								" . $layer[$i] . '
-							)';
+							)
+							ON CONFLICT (user_id, stelle_id, time_id, layer_id) DO NOTHING';
 						#echo '<p>SQL zum Eintragen des consumierten Layers: ' . $sql;
             $ret=$this->database->execSQL($sql,4, 1);
             if ($ret[0]) {
@@ -4369,7 +4370,7 @@ class db_mapObj{
 				}
 				else {
 					$type = $attributes['type'][$i];
-					$default = '(' . $attributes['default'][$i] . ')::' . $type;
+					$default = '(select ' . $attributes['default'][$i] . ')::' . $type;
 				}
 				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {
@@ -5011,7 +5012,7 @@ class db_mapObj{
 		}
 		else {
 			$from = "kvwmap.classes AS c";
-			$where = "c.layer_id = " . $id_value;
+			$where = "c.layer_id = " . $layer_id;
 		}
 
 		$sql = "

@@ -1,4 +1,4 @@
-<?
+<? 
 $parts = explode(' x ', $this->Document->din_formats[$this->Document->selectedframe[0]['format']]['size']);
 $formatx = ltrim($parts[0], '(');
 $formaty = rtrim($parts[1], ')');
@@ -521,7 +521,7 @@ function art_hide(){
         	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="watermarkposx" value="<? echo $this->Document->selectedframe[0]['watermarkposx'] ?>" size="5"></td>
         	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=4>Text:&nbsp;<input size="40" type="text" name="watermark" value="<? echo $this->Document->selectedframe[0]['watermark'] ?>"></td>
         	<td style="border-top:1px solid #C3C7C3;" colspan=2 align="center">
-						<?php echo output_select('font_watermark', $this->Document->fonts, $this->Document->selectedframe[0]['font_watermark']); ?>
+						<?php echo output_select('font_watermark', $this->Document->ttffonts, $this->Document->selectedframe[0]['font_watermark']); ?>
         	</td>
         </tr>
         <tr>
@@ -545,7 +545,7 @@ function art_hide(){
         	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="copyrightposx" value="<? echo $this->Document->selectedframe[0]['copyrightposx'] ?>" size="5"></td>
         	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=4></td>
         	<td style="border-top:1px solid #C3C7C3;" colspan=2 align="center">
-						<?php echo output_select('font_copyright', $this->Document->fonts, $this->Document->selectedframe[0]['font_copyright']); ?>
+						<?php echo output_select('font_copyright', $this->Document->ttffonts, $this->Document->selectedframe[0]['font_copyright']); ?>
         	</td>
         </tr>
         <tr>

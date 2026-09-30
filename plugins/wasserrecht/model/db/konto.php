@@ -1,7 +1,7 @@
 <?php
 class KontoKlasse extends WrPgObject {
 
-	protected $tableName = 'fiswrv_konto';
+	public static $tableName = 'fiswrv_konto';
 	
 	public function getIBAN() {
 	    return $this->data['iban'];

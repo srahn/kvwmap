@@ -3,6 +3,7 @@
 	$strAddClass = "Thêm lớp";
 	$strAsteriskRequired = "Cần điền đủ thông tin cho những trường có dấu *";  
 	$strAttributes = "Attributes";
+	$strAttribute = "Attribute";
 	$strButtonBack = "Quay lại";  
 	$strButtonSave = "Lưu sửa đổi";
 	$strButtonSaveAsNewLayer = "Lưu lại lớp với tên mới";

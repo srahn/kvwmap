@@ -820,6 +820,26 @@
 		}
 	};
 
+  $GUI->Flurstueck_GetEigentuemer = function() use ($GUI){
+    include_once(PLUGINS.'alkis/model/kataster.php');
+    $ret = $GUI->Stelle->getFlurstueckeAllowed(array($GUI->formvars['flurstkennz']), $GUI->pgdatabase, '_eigentuemer');
+	  if ($ret[0]) {
+      $GUI->Fehlermeldung=$ret[1];
+    }
+    else {
+      $flst = new flurstueck($GUI->formvars['flurstkennz'], $GUI->pgdatabase);
+      $flst->readALB_Data($flurstkennz_a, $GUI->formvars['without_temporal_filter'], 'ogc_fid');	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
+      $flst->Grundbuecher=$flst->getGrundbuecher();
+      $flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
+      for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
+        $flst->Buchungen[$b]['eigentuemerliste'] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+      }
+      echo $flst->outputAlleEigentuemer($GUI->Stelle);
+      $currenttime=date('Y-m-d H:i:s',time());
+      $GUI->user->rolle->setConsumeALB($currenttime, 'Eigentümeranzeige', array($flst->FlurstKennz), 0, 'NULL', $GUI->formvars['vorgangsnr']);		# das Flurstückskennzeichen wird geloggt
+    }
+  };
+
 	$GUI->Flurstueck_GetVersionen = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		$ret=$GUI->Stelle->getFlurstueckeAllowed(array($GUI->formvars['flurstkennz']), $GUI->pgdatabase);

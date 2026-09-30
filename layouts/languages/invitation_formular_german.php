@@ -10,4 +10,5 @@
 	$this->strMisses="Frau";
 	$this->strDivers="Divers";
 	$strStop="gültig bis";
+	$strSendEmail='Email direkt senden';
 ?>

@@ -1,7 +1,7 @@
 <?php
 class GewaesserbenutzungenUmfangName extends WrPgObject {
 
-	protected $tableName = 'fiswrv_gewaesserbenutzungen_umfang_name';
+	public static $tableName = 'fiswrv_gewaesserbenutzungen_umfang_name';
 
 	public function getAbkuerzung()
 	{
