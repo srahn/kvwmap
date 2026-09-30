@@ -594,7 +594,7 @@ function open_group_options(event, group_id){
 				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 162); ?>px">
 					<tr>
 						<td align="left" valign="top"><?
-							echo '<div class="fett scrolltable_header">' . $strAttributes .'</div>';
+							echo '<div class="fett scrolltable_header">' . $strAttribute .'</div>';
 							?>
 						</td>
 

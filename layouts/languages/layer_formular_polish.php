@@ -2,7 +2,8 @@
 	$strAddAutoClasses = "Dodaj klas";
 	$strAddClass = "dodaj klasę";
 	$strAsteriskRequired = "wartości oznaczone * muszą zostać wpisane";
-	$strAttributes = "Attribute";
+	$strAttributes = "Attributes";
+	$strAttribute = "Attribute";
 	$strBack = "cofnij";
 	$strButtonSave = "zmień";
 	$strButtonSaveAsNewLayer = "wstaw jako nową warstwę";
