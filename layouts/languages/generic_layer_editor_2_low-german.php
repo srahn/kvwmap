@@ -1,4 +1,5 @@
 <?php
+ $strEditDataset="An Datensatz marachen";
  $strEditGeom="Anner Geometrie marachen";
  $strMapZoom="Koortutsnitt";
  $strSelectAll="all utsöken";

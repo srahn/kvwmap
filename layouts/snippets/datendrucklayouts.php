@@ -802,7 +802,10 @@
 													'width: 190px'
 												); ?>
 											</td>
-											<td></td>
+											<td>
+												Themen-<br>
+												auswahl-<br>ID:&nbsp;<span data-tooltip="In der Karte, welche im Druck verwendet wird, werden alle Layer angezeigt, die in der ausgewählten Thmenauswahl enthalten sind und zur aktuellen Stelle gehören, unabhängig welcher Nutzer druckt. Ist keine ID angegeben, werden die Layer gedruckt, die gerade in der Karte für den aktiven Nutzer zum Zeitpunkt des Drucks eingeschaltet sind."></span>
+											</td>
 										</tr>
 										<tr id="tr2_<? echo $this->ddl->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
 											<td>&nbsp;&nbsp;&nbsp;y:</td>
@@ -828,7 +831,7 @@
 											</td>
 											<td width="60px">&nbsp;Rand:</td>
 											<td><input	type="text" name="fontsize_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['fontsize']; ?>" size="5"> m</td>
-											<td colspan="3"></td>
+											<td colspan="3"><input	type="text" name="saved_layers_id" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['saved_layer_id']]; ?>" size="3"></td>
 										</tr><?
 									}
 								} ?>

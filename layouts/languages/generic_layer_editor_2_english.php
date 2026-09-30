@@ -13,6 +13,7 @@
   $strDeselectAllShown = "Deselect all shown records";
   $strDontRememberDataset="bookmark record no longer";
   $strEditAll="edit multiple";
+  $strEditDataset="Edit Dataset";
   $strEditGeom="Edit Geometry";
   $strExport="export";
   $strExportThis="export record";

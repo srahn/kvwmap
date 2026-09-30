@@ -707,8 +707,10 @@ class PgObject {
 		if (!empty($data)) {
 			$this->data = $data;
 		}
-		if ($this->data[$this->identifier] == '' OR $this->data[$this->identifier] == 0) {
-			unset($this->data[$this->identifier]);
+		foreach ($this->identifiers AS $identifier) {
+			if ($this->data[$identifier['column']] == '' OR $this->data[$identifier['column']] == 0) { 
+				unset($this->data[$identifier['column']]);
+			}
 		}
 		$values = array_map(
 			function($value) {

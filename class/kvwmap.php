@@ -15992,8 +15992,7 @@ class GUI {
   }
 
 	/**
-	 * Löscht Themenauswahl mit übergebener id wenn
-	 * a) die 
+	 * Löscht Themenauswahl
 	 */
 	function DeleteStoredLayers() {
 		if (!$this->Stelle->is_admin_stelle()) {
