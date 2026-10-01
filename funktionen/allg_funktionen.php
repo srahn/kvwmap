@@ -2105,14 +2105,20 @@ function urlEncodeUrl($url) {
 function url_get_contents($url, $username = NULL, $password = NULL, $useragent = NULL) {
 	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
-		$ctx['http']['timeout'] = 20;
+		$headers = [];
 		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
 		if ($useragent) {
-			$ctx['http']['header'] = 'User-Agent: ' . $useragent;
+			$headers[] = 'User-Agent: ' . $useragent;
 		}
 		if ($username) {
-			$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username . ':' . $password);
+			$headers[] = 'Authorization: Basic ' . base64_encode($username . ':' . $password);
 		}
+		$ctx['http']['header'] = implode("\r\n", $headers);
+		$ctx['http']['method'] = 'GET';
+		$ctx['http']['protocol_version'] = 1.1;
+		$ctx['http']['timeout'] = 20;
+		$ctx['http']['ignore_errors'] = true;
+
 		$proxy = getenv('HTTP_PROXY');
 		if ($proxy != '' AND $hostname != 'localhost') {
 			$ctx['http']['proxy'] = $proxy;
