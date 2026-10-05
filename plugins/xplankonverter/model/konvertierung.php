@@ -2330,10 +2330,32 @@ class Konvertierung extends PgObject {
 						b.versionbaunvotext AS versionbaunvotext,
 						b.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
 						b.versionbaugbdatum AS versionbaugbdatum,
-						trim(replace(lower(b.gehoertzuplan_pkid), 'gml_', ''))::text::uuid	AS gehoertzuplan
+						trim(replace(lower(b.gehoertzuplan_pkid), 'gml_', ''))::text::uuid	AS gehoertzuplan,
+						CASE WHEN refscantab.count_refscan = 0 THEN NULL ELSE refscantab.refscan END AS refscan
 					FROM
 						" . $table_schema . ".bp_bereich AS b JOIN
-						xplankonverter.konvertierungen k ON b.gehoertzuplan_pkid = k.beschreibung;
+						xplankonverter.konvertierungen k ON b.gehoertzuplan_pkid = k.beschreibung LEFT JOIN
+						(
+							SELECT
+								count(*) AS count_refscan,
+								bs.parent_id,
+								array_agg((
+									er.referenzurl,
+									(er.georefmimetype_codespace, er.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+									er.art::xplan_gml.xp_externereferenzart,
+									er.informationssystemurl,
+									er.referenzname,
+									'download/' || er.referenzurl,
+									(er.referenzmimetype_codespace, er.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+									COALESCE(er.beschreibung, er.referenzname, er.art, 'Dokument'),
+									to_char(er.datum, 'DD.MM.YYYY')
+								)::xplan_gml.xp_externereferenz) AS refscan
+							FROM
+								" . $table_schema . ".bp_bereich_refscan bs LEFT JOIN
+								" . $table_schema . ".xp_externereferenz er ON bs.xp_externereferenz_xp_externereferenz_pkid = er.ogr_pkid
+							GROUP BY
+								bs.parent_id
+						) refscantab ON b.id = refscantab.parent_id;
 				";
 			} break;
 			case ('FP-Plan') : {
