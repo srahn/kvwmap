@@ -2747,7 +2747,7 @@ class rolle {
 			$conditions[] = "id = " . $id;
 		}
 
-		$where = (count($conditions) > 0 ? "WHERE\n				" . implode(" AND\n				", $conditions) : "");
+		$where = (count($conditions) > 0 ? "\n			WHERE\n				" . implode(" AND\n				", $conditions) : "");
 
 		$sql = "
 			SELECT

@@ -11,7 +11,6 @@
 	#echo 'rastervisibility: ' . print_r($layerset['attributes']['raster_visibility'], true) . '<p>';
 	#echo 'Daten: ' . print_r($this->qlayerset[0]['shape'], true) . '<p>';
 	if ($layerset['shape'] AND count($layerset['shape']) === 1) {
-		echo '<br>gle_view: ' . $layerset['gle_view'];
 		if ($layerset['gle_view'] > 0) {
 			include(SNIPPETS . 'generic_layer_editor_2.php');
 		}

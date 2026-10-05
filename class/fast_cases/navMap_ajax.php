@@ -1073,7 +1073,7 @@ class GUI {
 	 * @param Boolean $strict_layer_name Optional Parameter. Wenn true wird die Layervariable name immer mit dem Layerattribute Name gesetzt
 	 *  																 unabhängig ob in der Stelle die Verwendung von alias für Layer gesetzt ist.
 	 */
-  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false) {
+  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false, $saved_layer_ids = array()) {
 		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
@@ -1398,7 +1398,14 @@ class GUI {
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
 				}
-        unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
+
+				if (count($saved_layer_ids) > 0) {
+					foreach ($layerset['list'] as $key => $layer) {
+						$layerset['list'][$key]['aktivstatus'] = (in_array($layer['layer_id'], $saved_layer_ids) ? 1 : 0);
+					}
+				}
+
+				unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
 				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
@@ -1464,7 +1471,7 @@ class GUI {
 		return 1;
 	}
 
-		/**
+	/**
 	 * Return a drawing order with default layers to top
 	 */
 	function get_default_layers_top_drawing_order($num_layers, $num_default_layers) {
@@ -3806,6 +3813,57 @@ class rolle {
     }
     return $ret;
   }
+
+	function getLayerComments($id = '', $stelle_id = '', $user_id = '') {
+		global $admin_stellen;
+		$conditions = array();
+		$layerComments = array();
+
+		if ($user_id != '') {
+			$conditions[] = "(user_id = " . $user_id . " OR user_id IS NULL)";
+		}
+		if ($stelle_id != '') {
+			$conditions[] = "stelle_id = " . $stelle_id;
+		}
+		if ($id != '') {
+			$conditions[] = "id = " . $id;
+		}
+
+		$where = (count($conditions) > 0 ? "\n			WHERE\n				" . implode(" AND\n				", $conditions) : "");
+
+		$sql = "
+			SELECT
+				id,
+				user_id,
+				stelle_id,
+				name,
+				array_to_string(layers, ',') as layers,
+				query
+			FROM
+				kvwmap.rolle_saved_layers"
+			. $where . "
+			ORDER BY
+				name
+		";
+		// echo '<br>Sql: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if (!$this->database->success) {
+			# Fehler bei Datenbankanfrage
+			$ret[0] = 1;
+			$ret[1] = $ret['msg'] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
+			$ret['success'] = false;
+		}
+		else {
+			while ($rs = pg_fetch_assoc($ret[1])) {
+				$layerComments[] = $rs;
+			}
+			$ret[0] = 0;
+			$ret[1] = $layerComments;
+			$ret['success'] = true;
+			$ret['msg'] = 'Themenauswahl erfolgreich abgefragt.';
+		}
+		return $ret;
+	}
 }
 
 class pgdatabase {

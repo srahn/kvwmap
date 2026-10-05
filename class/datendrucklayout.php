@@ -791,7 +791,7 @@ class ddl extends drucklayout{
 					$this->gui->map->height = $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR;
 					$oid = $this->result[$i][$this->layerset['maintable'].'_oid'];
 					# Rollenlayer zum Highlighten erzeugen und auf Objekt zoomen
-					if ($oid != ''){
+					if ($oid != '') {
 						if ($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0) {
 							# bei Geometrie-Attributen wird in fontsize der Zoom-Rand gespeichert
 							$rand = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
@@ -1208,7 +1208,19 @@ class ddl extends drucklayout{
 		if ($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0) {
 			# wenn ein Geometriebild angezeigt werden soll -> loadmap()
 			$this->gui->map_factor = MAPFACTOR;
-			$this->gui->loadmap('DataBase');
+			$saved_layer_ids = array();
+			if ($this->layout['saved_layers_id'] != '') {
+				$layer_comments_result = $this->gui->user->rolle->getLayerComments($this->layout['saved_layers_id']);
+				if (!$layer_comments_result['success']) {
+					throw new Exception('Fehler beim Laden der Themenauswahl. ' . $layer_comments_result['msg']);
+				}
+				if (count($layer_comments_result[1]) == 0) {
+					throw new Exception('Fehler beim Laden der Themenauswahl. Keine Themenauswahl mit der ID ' . $this->layout['saved_layers_id'] . ' gefunden.');
+				}
+				$saved_layer_ids = explode(',', $layer_comments_result[1][0]['layers']);
+			}
+
+			$this->gui->loadmap('DataBase', array(), false, $saved_layer_ids);
 		}
 		$this->add_static_elements($offsetx);
 		$layout_with_sublayout = false;
