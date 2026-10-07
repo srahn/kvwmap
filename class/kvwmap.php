@@ -2044,7 +2044,7 @@ class GUI {
 	 * @param Boolean $strict_layer_name Optional Parameter. Wenn true wird die Layervariable name immer mit dem Layerattribute Name gesetzt
 	 *  																 unabhängig ob in der Stelle die Verwendung von alias für Layer gesetzt ist.
 	 */
-  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false) {
+  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false, $saved_layer_ids = array()) {
 		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
@@ -2369,6 +2369,13 @@ class GUI {
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
 				}
+
+				if (count($saved_layer_ids) > 0) {
+					foreach ($layerset['list'] as $key => $layer) {
+						$layerset['list'][$key]['aktivstatus'] = (in_array($layer['layer_id'], $saved_layer_ids) ? 1 : 0);
+					}
+				}
+
 				unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
 				$this->error_message = '';
@@ -2507,10 +2514,9 @@ class GUI {
 		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['gruppenname']);
 
-		if(value_of($layerset, 'errorstatus') != ''){
+		if (value_of($layerset, 'errorstatus') != '') {
 			$layerset['aktivstatus'] = 0;
 		}
-
 
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
@@ -2521,7 +2527,6 @@ class GUI {
 		else{
 			$layer->status = 1;
 		}
-
 		// # fremde Layer werden auf Verbindung getestet
 		// if ($layerset['aktivstatus'] != 0 AND $layerset['connectiontype'] == 6) {
 		// 	$credentials = $this->pgdatabase->get_credentials($layerset['connection_id']);
@@ -2547,25 +2552,26 @@ class GUI {
 			}
 		}
 
-		if(!$this->noMinMaxScaling AND value_of($layerset, 'minscale') >= '0') {
-			if($this->map_factor != ''){
-				$layer->minscaledenom = $layerset['minscale']/$this->map_factor*1.414;
+		if (!$this->noMinMaxScaling AND value_of($layerset, 'minscale') >= '0') {
+			if ($this->map_factor != '') {
+				$layer->minscaledenom = $layerset['minscale'] / $this->map_factor * 1.414;
 			}
-			else{
+			else {
 				$layer->minscaledenom = $layerset['minscale'];
 			}
 		}
-		if(!$this->noMinMaxScaling AND value_of($layerset, 'maxscale') > 0) {
-			if($this->map_factor != ''){
-				$layer->maxscaledenom = $layerset['maxscale']/$this->map_factor*1.414;
+		if (!$this->noMinMaxScaling AND value_of($layerset, 'maxscale') > 0) {
+			if ($this->map_factor != '') {
+				$layer->maxscaledenom = $layerset['maxscale'] / $this->map_factor * 1.414;
 			}
-			else{
+			else {
 				$layer->maxscaledenom = $layerset['maxscale'];
 			}
 		}
+
 		$layer->setProjection('+init=epsg:' . $layerset['epsg_code']); # recommended
-		if ($layerset['connection']!='') {
-			if($layerset['connectiontype'] == 7) { # WMS-Layer
+		if ($layerset['connection'] != '') {
+			if ($layerset['connectiontype'] == 7) { # WMS-Layer
 				# $layerset['connection'] .= '&SERVICE=WMS'; # Das kann zu Fehler führen. MapServer setzt selber SERVICE=WMS
 				if ($this->map_factor != '') {
 					if ($layerset['printconnection']!=''){
@@ -3511,7 +3517,7 @@ class GUI {
 
   # Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
   function saveMap($saveMapDestination) {
-		if ($saveMapDestination=='') {
+		if ($saveMapDestination == '') {
       $saveMapDestination = SAVEMAPFILE;
     }
     if ($saveMapDestination != '') {
@@ -12317,7 +12323,7 @@ class GUI {
 		}
 	}
 
-	function sachdaten_druck_editor_autogenerate(){
+	function sachdaten_druck_editor_autogenerate() {
 		include_(CLASSPATH.'datendrucklayout.php');
 		$ddl=new ddl($this->pgdatabase);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -12328,7 +12334,7 @@ class GUI {
 		$this->sachdaten_druck_editor();
 	}
 
-	function sachdaten_druck_editor(){
+	function sachdaten_druck_editor() {
 		global $admin_stellen;
 		include_once(CLASSPATH . 'datendrucklayout.php');
 		$ddl=new ddl($this->pgdatabase, $this);
@@ -12345,17 +12351,17 @@ class GUI {
 		}
     # Fonts auslesen
     $this->ddl->fonts = $this->ddl->get_fonts();
-    if($this->formvars['selected_layer_id']){
+    if ($this->formvars['selected_layer_id']) {
       $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
       $this->ddl->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 			# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 			$this->ddl->attributes = $mapdb->add_attribute_values($this->ddl->attributes, $layerdb, NULL, true, $this->Stelle->id);
       $this->ddl->layouts = $this->ddl->load_layouts(NULL, NULL, $this->formvars['selected_layer_id'], NULL);
     }
-    if($this->formvars['aktivesLayout']){
+    if ($this->formvars['aktivesLayout']) {
     	$this->ddl->selectedlayout = $this->ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);
     }
-    if($this->ddl->selectedlayout != NULL){
+    if ($this->ddl->selectedlayout != NULL) {
       $this->previewfile = $this->sachdaten_druck_editor_preview($this->ddl->selectedlayout[0]);
     }
     $this->main='datendrucklayouts.php';
@@ -12480,25 +12486,27 @@ class GUI {
 		$this->sachdaten_druck_editor();
 	}
 
-	function sachdaten_druck_editor_preview($selectedlayout, $pdfobject = NULL, $offsetx = NULL, $offsety = NULL){
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+	function sachdaten_druck_editor_preview($selectedlayout, $pdfobject = NULL, $offsetx = NULL, $offsety = NULL) {
+		$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		include_once (CLASSPATH.'datendrucklayout.php');
 		$ddl=new ddl($this->pgdatabase, $this);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+    $layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $attributes = $this->mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true, $this->Stelle->id);
+		$attributes = $this->mapDB->add_attribute_values($attributes, $layerdb, NULL, true, $this->Stelle->id);
     # Testdaten erzeugen
-		if($selectedlayout['type'] != 0)$count = 2;else $count = 1;		# nur beim Untereinandertyp oder eingebettet-Typ mehrere Datensätze erzeugen
-    for($i = 0; $i < $count; $i++){
-	    for($j = 0; $j < count($attributes['name']); $j++){
-	    	if($attributes['type'][$j] != 'geometry' ){
-	    		if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
-					if(substr($attributes['type'][$j], 0, 1) == '_'){		# Array
+		$count = ($selectedlayout['type'] != 0 ? 2 : 1);		# nur beim Untereinandertyp oder eingebettet-Typ mehrere Datensätze erzeugen
+    for ($i = 0; $i < $count; $i++) {
+	    for ($j = 0; $j < count($attributes['name']); $j++){
+	    	if ($attributes['type'][$j] != 'geometry' ) {
+	    		if ($attributes['alias'][$j] == '') {
+						$attributes['alias'][$j] = $attributes['name'][$j];
+					}
+					if (substr($attributes['type'][$j], 0, 1) == '_') {		# Array
 						$result[$i][$attributes['name'][$j]] = '["'.$attributes['alias'][$j].'","'.$attributes['alias'][$j].'","'.$attributes['alias'][$j].'"]';
 					}
-					else{
+					else {
 						$result[$i][$attributes['name'][$j]] = $attributes['alias'][$j];
 					}
 	    	}
@@ -12525,17 +12533,17 @@ class GUI {
 	function generischer_sachdaten_druck() {
 		include_(CLASSPATH . 'datendrucklayout.php');
 		$result = array();
-		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->ddl = new ddl($this->pgdatabase, $this);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
-		$layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-		$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL, false, true);
-		$path = $mapDB->getPath($this->formvars['chosen_layer_id']);
+		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+		$layerset[0]['attributes'] = $this->mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL, false, true);
+		$path = $this->mapDB->getPath($this->formvars['chosen_layer_id']);
 		$privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
 		# Attribute laden
-		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
+		$attributes = $this->mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
 
-		$query_parts = $mapDB->getQueryParts($layerset[0], $privileges);
+		$query_parts = $this->mapDB->getQueryParts($layerset[0], $privileges);
 		$newpath = $query_parts['query'];
 
 		$geometrie_tabelle = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
@@ -12566,7 +12574,7 @@ class GUI {
 			}
 		}
 		# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
+		$attributes = $this->mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
 		$this->attributes = $attributes;
 		# Layouts abfragen
 		$this->ddl->layouts = $this->ddl->load_layouts($this->Stelle->id, NULL, $this->formvars['chosen_layer_id'], array(0,1));
@@ -12665,15 +12673,15 @@ class GUI {
 	 */
 	function generischer_sachdaten_druck_createPDF($pdfobject = NULL, $offsetx = NULL, $offsety = NULL, $output = true, $append = false) {
 		include_(CLASSPATH . 'datendrucklayout.php');
-		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$ddl = new ddl($this->pgdatabase, $this);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
-		$layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-		$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL, false, true);
+		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+		$layerset[0]['attributes'] = $this->mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL, false, true);
 		$privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
 		# Attribute laden
-		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
-		$query_parts = $mapDB->getQueryParts($layerset[0], $privileges);
+		$attributes = $this->mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
+		$query_parts = $this->mapDB->getQueryParts($layerset[0], $privileges);
 		$return_values = array(
 			'pdf_file' => '',
 			'y' => 0
@@ -12718,7 +12726,7 @@ class GUI {
 			}
 		}
 		# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
+		$attributes = $this->mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
 		$this->attributes = $attributes;
 
 		if ($this->formvars['aktivesLayout'] == '') {
@@ -12743,16 +12751,16 @@ class GUI {
 		# Dateiname für Speicherung im Dokumentpfad ermitteln
 		$document_file = basename($pdf_file);
 		$pathinfo = pathinfo($document_file);
-		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerset = $this->user->rolle->getLayer($layer_id);
-		$layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-		$layerset[0]['attributes'] = $mapDB->read_layer_attributes($layer_id, $layerdb, NULL, false, true);
+		$layerdb = $this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+		$layerset[0]['attributes'] = $this->mapDB->read_layer_attributes($layer_id, $layerdb, NULL, false, true);
 		# Attributname ermitteln in dem der Attributwert eingetragen werden soll
 		for ($i = 0; $i < count($layerset[0]['attributes']['name']); $i++) {
 			if ($layerset[0]['attributes']['form_element_type'][$i] == 'Dokument') {
 				$dokument_attribute = $layerset[0]['attributes']['name'][$i];
 				$dokument_is_array = substr($layerset[0]['attributes']['type'][$i], 0, 1) == '_';
-				$doc_paths = $mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $layerset[0]['attributes']['options'][$i], [], [], $layerdb, $pathinfo['filename']);
+				$doc_paths = $this->mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $layerset[0]['attributes']['options'][$i], [], [], $layerdb, $pathinfo['filename']);
 				$document_path = dirname($doc_paths['doc_path'] . 'x') . '/';
 				break;
 			}
@@ -16053,8 +16061,7 @@ class GUI {
   }
 
 	/**
-	 * Löscht Themenauswahl mit übergebener id wenn
-	 * a) die 
+	 * Löscht Themenauswahl
 	 */
 	function DeleteStoredLayers() {
 		if (!$this->Stelle->is_admin_stelle()) {
@@ -19762,7 +19769,7 @@ class db_mapObj{
 			ORDER BY
 				drawingorder
 		";
-		# echo '<br>SQL zur Abfrage der Layer: ' . $sql;
+		// echo '<br>SQL zur Abfrage der Layer: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>", 4);
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$layer = array();

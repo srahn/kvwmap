@@ -1,4 +1,5 @@
 <?php
+ $strEditDataset="Edit Dataset";
  $strEditGeom="Edit Geometry";
  $strMapZoom="Zoom To";
  $strSelectAll="select all";

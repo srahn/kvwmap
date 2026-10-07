@@ -14,6 +14,7 @@
   $strDeselectAllShown = "alle angezeigten deselektieren";
   $strDontRememberDataset="Datensatz nicht mehr merken";
   $strEditAll="mehrere bearbeiten";
+  $strEditDataset="Datensatz bearbeiten";
   $strEditGeom="Geometrie&nbsp;bearbeiten";
   $strExport="exportieren";
   $strExportThis="Datensatz exportieren";

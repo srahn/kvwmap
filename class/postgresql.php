@@ -1172,7 +1172,7 @@ FROM
 					exit;
 				}
 				# gebe Fehlermeldung aus.
-				$err_msg = 'Fehler bei der Abfrage der PostgreSQL-Datenbank:' . $sql;
+				$err_msg = 'Fehler bei der Abfrage der PostgreSQL-Datenbank:' . (count($prepared_params) > 0 ? $this->get_prepared_sql($sql, $prepared_params) : $sql);
 				if ($this->gui) {
 					$ret[1] = $ret['msg'] = sql_err_msg($err_msg, $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 					$this->gui->add_message($ret['type'], $ret['msg']);
@@ -1189,10 +1189,25 @@ FROM
 	}
 
 	function get_prepared_sql($sql, $params) {
-		foreach ($params as $i => $param) {
-			$sql = str_replace('$' . ($i + 1), $param, $sql);
-		}
-		return $sql;
+    for ($i = count($params); $i >= 1; $i--) {
+        $value = $params[$i - 1];
+
+        if ($value === null) {
+            $replacement = 'NULL';
+        }
+        elseif (is_bool($value)) {
+            $replacement = $value ? 'TRUE' : 'FALSE';
+        }
+        elseif (is_int($value) || is_float($value)) {
+            $replacement = (string) $value;
+        }
+        else {
+            $replacement = "'" . pg_escape_string($this->dbConn, $value) . "'";
+        }
+
+        $sql = str_replace('$' . $i, $replacement, $sql);
+    }
+    return $sql;
 	}
 
 	function build_temporal_filter($tablenames){

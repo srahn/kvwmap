@@ -1,4 +1,5 @@
 <?php
+ $strEditDataset="Edit Dataset";
  $strEditGeom="edytuj geometri?";
  $strMapZoom="fragment mapy";
  $strSelectAll="wybierz wszystkie";

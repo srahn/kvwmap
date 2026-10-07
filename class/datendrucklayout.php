@@ -791,7 +791,7 @@ class ddl extends drucklayout{
 					$this->gui->map->height = $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR;
 					$oid = $this->result[$i][$this->layerset['maintable'].'_oid'];
 					# Rollenlayer zum Highlighten erzeugen und auf Objekt zoomen
-					if ($oid != ''){
+					if ($oid != '') {
 						if ($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0) {
 							# bei Geometrie-Attributen wird in fontsize der Zoom-Rand gespeichert
 							$rand = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
@@ -1208,7 +1208,19 @@ class ddl extends drucklayout{
 		if ($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0) {
 			# wenn ein Geometriebild angezeigt werden soll -> loadmap()
 			$this->gui->map_factor = MAPFACTOR;
-			$this->gui->loadmap('DataBase');
+			$saved_layer_ids = array();
+			if ($this->layout['saved_layers_id'] != '') {
+				$layer_comments_result = $this->gui->user->rolle->getLayerComments($this->layout['saved_layers_id']);
+				if (!$layer_comments_result['success']) {
+					throw new Exception('Fehler beim Laden der Themenauswahl. ' . $layer_comments_result['msg']);
+				}
+				if (count($layer_comments_result[1]) == 0) {
+					throw new Exception('Fehler beim Laden der Themenauswahl. Keine Themenauswahl mit der ID ' . $this->layout['saved_layers_id'] . ' gefunden.');
+				}
+				$saved_layer_ids = explode(',', $layer_comments_result[1][0]['layers']);
+			}
+
+			$this->gui->loadmap('DataBase', array(), false, $saved_layer_ids);
 		}
 		$this->add_static_elements($offsetx);
 		$layout_with_sublayout = false;
@@ -1802,65 +1814,98 @@ class ddl extends drucklayout{
   
   function update_layout($formvars, $attributes, $_files){
   	$_files = $_FILES;
-    if ($formvars['name']){
-    	if ($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
-				$sql = "
-					UPDATE
-						kvwmap.datendrucklayouts
-					SET
-						name = '".$formvars['name'] . "',
-						layer_id = " . (int)$formvars['selected_layer_id'] . ",
-						format = '" . $formvars['format'] . "'
-				";
-  		if($formvars['bgposx'] != '')$sql .= ", bgposx = ".(int)$formvars['bgposx'];
-  		else $sql .= ", bgposx = NULL";
-      if($formvars['bgposy'] != '')$sql .= ", bgposy = ".(int)$formvars['bgposy'];
-      else $sql .= ", bgposy = NULL";
-      if($formvars['bgwidth'] != '')$sql .= ", bgwidth = ".(int)$formvars['bgwidth'];
-      else $sql .= ", bgwidth = NULL";
-      if($formvars['bgheight'] != '')$sql .= ", bgheight = ".(int)$formvars['bgheight'];
-      else $sql .= ", bgheight = NULL";
-      if($formvars['dateposx'] != '')$sql .= ", dateposx = ".(int)$formvars['dateposx'];
-      else $sql .= ", dateposx = NULL";
-      if($formvars['dateposy'] != '')$sql .= ", dateposy = ".(int)$formvars['dateposy'];
-      else $sql .= ", dateposy = NULL";
-      if($formvars['datesize'] != '')$sql .= ", datesize = ".(int)$formvars['datesize'];
-      else $sql .= ", datesize = NULL";
-      if($formvars['userposx'] != '')$sql .= ", userposx = ".(int)$formvars['userposx'];
-      else $sql .= ", userposx = NULL";
-      if($formvars['userposy'] != '')$sql .= ", userposy = ".(int)$formvars['userposy'];
-      else $sql .= ", userposy = NULL";
-      if($formvars['usersize'] != '')$sql .= ", usersize = ".(int)$formvars['usersize'];
-      else $sql .= ", usersize = NULL";
-      $sql .= ", font_date = '".$formvars['font_date']."'";
-      $sql .= ", font_user = '".$formvars['font_user']."'";
-			$sql .= ", gap = ".(int)$formvars['gap'];
-      if($formvars['type'] != '')$sql .= ", type = ".(int)$formvars['type'];
-      else $sql .= ", type = NULL";
-			$sql .= ", margin_top = ".(int)$formvars['margin_top'];
-			$sql .= ", margin_bottom = ".(int)$formvars['margin_bottom'];
-			$sql .= ", margin_left = ".(int)$formvars['margin_left'];
-			$sql .= ", margin_right = ".(int)$formvars['margin_right'];
-			$sql .= ", dont_print_empty = " . (int)$formvars['dont_print_empty'];
-			$sql .= ", no_record_splitting = ".(int)$formvars['no_record_splitting'];
-			$sql .= ", use_previews = ".(int)$formvars['use_previews'];
-			$sql .= ", columns = ".(int)$formvars['columns'];
-			if($formvars['filename'])$sql .= ", filename = '".$formvars['filename']."'";
-      else $sql .= ", filename = NULL";			
-      if($_files['bgsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
-        if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
-          $sql .= ", bgsrc = '".$_files['bgsrc']['name']."'";
-        }
-      }
-      else{
-        $sql .= ", bgsrc = '".$formvars['bgsrc_save']."'";
-      }
-      $sql .= " WHERE id = ".(int)$formvars['aktivesLayout'];
-      $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
-      $this->database->execSQL($sql,4, 1);
 
-			for($i = 0; $i < count($attributes['name']); $i++){
+		if ($formvars['name']) {
+			if ($formvars['font_date'] == 'NULL') {
+				$formvars['font_date'] = NULL;
+			}
+
+			// nullable Integer-Helfer: leerer String -> NULL, sonst int
+			$nullableInt = function($val) {
+				return ($val !== '' && $val !== null) ? (int)$val : null;
+			};
+
+			$prepared_params = [
+				(int)$formvars['aktivesLayout'],
+				$formvars['name'],
+				(int)$formvars['selected_layer_id'],
+				$formvars['format'],
+				$nullableInt($formvars['bgposx']),
+				$nullableInt($formvars['bgposy']),
+				$nullableInt($formvars['bgwidth']),
+				$nullableInt($formvars['bgheight']),
+				$nullableInt($formvars['dateposx']),
+				$nullableInt($formvars['dateposy']),
+				$nullableInt($formvars['datesize']),
+				$nullableInt($formvars['userposx']),
+				$nullableInt($formvars['userposy']),
+				$nullableInt($formvars['usersize']),
+				$formvars['font_date'],
+				$formvars['font_user'],
+				(int)$formvars['gap'],
+				$nullableInt($formvars['type']),
+				(int)$formvars['margin_top'],
+				(int)$formvars['margin_bottom'],
+				(int)$formvars['margin_left'],
+				(int)$formvars['margin_right'],
+				(int)$formvars['dont_print_empty'],
+				(int)$formvars['no_record_splitting'],
+				(int)$formvars['use_previews'],
+				(int)$formvars['columns'],
+				!empty($formvars['filename']) ? $formvars['filename'] : null,
+				$nullableInt($formvars['saved_layers_id'])
+			];
+
+			// bgsrc: hochgeladene Datei bevorzugen, sonst gespeicherter Wert
+			if ($_files['bgsrc']['name']) {
+				$nachDatei = DRUCKRAHMEN_PATH . $_files['bgsrc']['name'];
+				if (move_uploaded_file($_files['bgsrc']['tmp_name'], $nachDatei)) {
+					$prepared_params[] = $_files['bgsrc']['name'];
+				}
+			}
+			else {
+				$prepared_params[] = $formvars['bgsrc_save'];
+			}
+
+			$sql = "
+				UPDATE
+					kvwmap.datendrucklayouts
+				SET
+					name                = $2,
+					layer_id            = $3,
+					format              = $4,
+					bgposx              = $5,
+					bgposy              = $6,
+					bgwidth             = $7,
+					bgheight            = $8,
+					dateposx            = $9,
+					dateposy            = $10,
+					datesize            = $11,
+					userposx            = $12,
+					userposy            = $13,
+					usersize            = $14,
+					font_date           = $15,
+					font_user           = $16,
+					gap                 = $17,
+					type                = $18,
+					margin_top          = $19,
+					margin_bottom       = $20,
+					margin_left         = $21,
+					margin_right        = $22,
+					dont_print_empty    = $23,
+					no_record_splitting = $24,
+					use_previews        = $25,
+					columns             = $26,
+					filename            = $27,
+					saved_layers_id 		= $28,
+					bgsrc 							= $29
+				WHERE
+					id = $1
+			";
+
+			$this->debug->write("<p>file:kvwmap class:ddl->save_ddl :", 4);
+			$this->database->execSQL($sql, 4, 1, false, $prepared_params);
+			for ($i = 0; $i < count($attributes['name']); $i++){
 				$columns = [
 					'ddl_id' =>	(int)$formvars['aktivesLayout'],
 					'name' => "'" . $attributes['name'][$i] . "'",
@@ -1887,7 +1932,15 @@ class ddl extends drucklayout{
 				$this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
 				$this->database->execSQL($sql,4, 1);
 			}
-			$sql = "DELETE FROM kvwmap.ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0)) AND ddl_id = ".(int)$formvars['aktivesLayout'];
+			$sql = "
+				DELETE FROM kvwmap.ddl_elemente
+				WHERE
+					(
+						(xpos IS NULL AND ypos IS NULL) OR
+						(xpos = 0 AND ypos = 0)
+					) AND
+					ddl_id = ".(int)$formvars['aktivesLayout'] . "
+			";
 			#echo $sql;
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
@@ -2100,7 +2153,7 @@ class ddl extends drucklayout{
 				name
 		";
 
-		#echo '<br>SQL zur Abfrage von Datendrucklayouts: ' . $sql;
+		// echo '<br>SQL zur Abfrage von Datendrucklayouts: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:ddl->load_layouts :<br>" . $sql, 4);
 		$ret1 = $this->database->execSQL($sql, 4, 1);
 		if ($ret1[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }

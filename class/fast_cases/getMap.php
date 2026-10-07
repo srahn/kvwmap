@@ -332,7 +332,7 @@ class GUI {
 	 * @param Boolean $strict_layer_name Optional Parameter. Wenn true wird die Layervariable name immer mit dem Layerattribute Name gesetzt
 	 *  																 unabhängig ob in der Stelle die Verwendung von alias für Layer gesetzt ist.
 	 */
-  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false) {
+  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false, $saved_layer_ids = array()) {
 		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
@@ -657,7 +657,14 @@ class GUI {
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
 				}
-        unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
+
+				if (count($saved_layer_ids) > 0) {
+					foreach ($layerset['list'] as $key => $layer) {
+						$layerset['list'][$key]['aktivstatus'] = (in_array($layer['layer_id'], $saved_layer_ids) ? 1 : 0);
+					}
+				}
+
+				unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
 				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {

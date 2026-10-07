@@ -2732,16 +2732,23 @@ class rolle {
 		return $ret;
 	}
 	
-	function getLayerComments($id, $stelle_id, $user_id) {
+	function getLayerComments($id = '', $stelle_id = '', $user_id = '') {
 		global $admin_stellen;
 		$conditions = array();
-		$conditions[] = "(user_id = " . $user_id . " OR user_id IS NULL)";
+		$layerComments = array();
+
+		if ($user_id != '') {
+			$conditions[] = "(user_id = " . $user_id . " OR user_id IS NULL)";
+		}
 		if ($stelle_id != '') {
 			$conditions[] = "stelle_id = " . $stelle_id;
 		}
 		if ($id != '') {
 			$conditions[] = "id = " . $id;
 		}
+
+		$where = (count($conditions) > 0 ? "\n			WHERE\n				" . implode(" AND\n				", $conditions) : "");
+
 		$sql = "
 			SELECT
 				id,
@@ -2751,9 +2758,8 @@ class rolle {
 				array_to_string(layers, ',') as layers,
 				query
 			FROM
-				kvwmap.rolle_saved_layers
-			WHERE
-				" . implode(" AND\n				", $conditions) . "
+				kvwmap.rolle_saved_layers"
+			. $where . "
 			ORDER BY
 				name
 		";
@@ -2762,7 +2768,8 @@ class rolle {
 		if (!$this->database->success) {
 			# Fehler bei Datenbankanfrage
 			$ret[0] = 1;
-			$ret[1] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
+			$ret[1] = $ret['msg'] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
+			$ret['success'] = false;
 		}
 		else {
 			while ($rs = pg_fetch_assoc($ret[1])) {
@@ -2770,6 +2777,8 @@ class rolle {
 			}
 			$ret[0] = 0;
 			$ret[1] = $layerComments;
+			$ret['success'] = true;
+			$ret['msg'] = 'Themenauswahl erfolgreich abgefragt.';
 		}
 		return $ret;
 	}
