@@ -802,8 +802,7 @@
 												); ?>
 											</td>
 											<td>
-												Themen-<br>
-												auswahl-<br>ID:&nbsp;<span data-tooltip="In der Karte, welche im Druck verwendet wird, werden alle Layer angezeigt, die in der ausgewählten Thmenauswahl enthalten sind und zur aktuellen Stelle gehören, unabhängig welcher Nutzer druckt. Ist keine ID angegeben, werden die Layer gedruckt, die gerade in der Karte für den aktiven Nutzer zum Zeitpunkt des Drucks eingeschaltet sind."></span>
+												Themenauswahl:&nbsp;<span data-tooltip="In der Karte, welche im Druck verwendet wird, werden alle Layer angezeigt, die in der ausgewählten Thmenauswahl enthalten sind und zur aktuellen Stelle gehören, unabhängig welcher Nutzer druckt. Ist keine ID angegeben, werden die Layer gedruckt, die gerade in der Karte für den aktiven Nutzer zum Zeitpunkt des Drucks eingeschaltet sind." style="--left: -500px"></span>
 											</td>
 										</tr>
 										<tr id="tr2_<? echo $this->ddl->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
