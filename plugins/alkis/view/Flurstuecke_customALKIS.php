@@ -59,8 +59,9 @@ send_selected_flurst = function(go, formnummer, wz, target){
 vorgangsnummer_input = function(flst){
 	clearMessageBox();
 	message([{ type: 'confirm', msg : '\
-		Bitte geben Sie eine gültige Vorgangsnummer an:<br><br>\
-		<input id="vorgangsnr" type="text">'
+		Der Zugriff auf die Eigentümerdaten wird protokolliert.<br>\
+		Bitte geben Sie hierfür eine gültige Vorgangsnummer oder einen sonstigen Grund für den Zugriff an:<br><br>\
+		<input id="vorgangsnr" type="text" style="width: 400px" maxlength="50">'
 	}],
 	0, 
 	0, 
@@ -77,7 +78,7 @@ request_eigentuemer = function(flst){
 		vnr.indexOf(' ') != -1 || 
 		vnr.length < 7
 	) {
-		alert('Bitte geben Sie eine gültige Vorgangsnummer an!');
+		alert('Bitte geben Sie eine gültige Vorgangsnummer oder einen Grund an!');
 	}
 	else {
 		var eigentuemer_auszuege = document.querySelectorAll('.auszug_' + flst);

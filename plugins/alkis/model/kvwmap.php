@@ -834,7 +834,7 @@
       for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
         $flst->Buchungen[$b]['eigentuemerliste'] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
       }
-      echo $flst->outputAlleEigentuemer($GUI->Stelle);
+      echo $flst->outputAlleEigentuemer($GUI->Stelle, $GUI->formvars['vorgangsnr']);
       $currenttime=date('Y-m-d H:i:s',time());
       $GUI->user->rolle->setConsumeALB($currenttime, 'Eigentümeranzeige', array($flst->FlurstKennz), 0, 'NULL', $GUI->formvars['vorgangsnr']);		# das Flurstückskennzeichen wird geloggt
     }
