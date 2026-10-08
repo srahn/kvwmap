@@ -106,7 +106,7 @@ function mapserverExp2SQL($exp, $classitem) {
 	if (strpos($exp, ' IN ') != false) {
 		$array = get_first_word_after($exp, ' IN');
 		$exp = str_replace(' IN ', '::text = ANY(ARRAY[', $exp);
-		$exp = str_replace($array, $array . '])', $exp);
+		$exp = str_replace($array, $array . ']::text[])', $exp);
 	}
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
