@@ -992,6 +992,7 @@ class data_import_export {
 			. ' -lco GEOMETRY_NAME=the_geom'
 			. ' -lco launder=NO'
 			. ' -lco precision=NO'
+			. ' -nlt CONVERT_TO_LINEAR'
 			. (strpos($options, '-lco FID') === false ? ' -lco FID=' . $this->unique_column : '')
 			. ' -nln ' . $tablename
 			. ($multi ? ' -nlt PROMOTE_TO_MULTI' : '')
