@@ -1139,7 +1139,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	}
 
 	zoomto_datasets = function(layer_id, tablename, columnname, selektieren){
-		if(check_for_selection(layer_id)){
+		if (document.getElementById('all_' + layer_id + '_2').checked || check_for_selection(layer_id)){
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.layer_tablename.value = tablename;
 			enclosingForm.layer_columnname.value = columnname;
