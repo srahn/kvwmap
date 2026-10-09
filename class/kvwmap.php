@@ -16090,7 +16090,7 @@ class GUI {
 		$stelle_id = $is_admin_stelle ? null : $this->Stelle->id;
 		$ret = $this->user->rolle->getLayerComments(null, $stelle_id, $this->user->id, $is_admin_stelle);
     if ($ret[0]) {
-      $this->Fehlermeldung='Es konnten keine gespeicherten Themen abgefragt werden.<br>'.$ret[1];
+      $this->Fehlermeldung='Es konnten keine gespeicherten Themen abgefragt werden.<br>' . print_r($ret[1], true);
     }
     else {
       $this->layerComments=$ret[1];
@@ -16111,8 +16111,11 @@ class GUI {
 				$stelle_id,
 				($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id)
 			);
-			if ($ret[1] == NULL) {
-				$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
+			if (!$ret['success']) {
+				$this->Fehlermeldung = 'Fehler bei der Abfrage der Themenauswahl,<br>' . $ret[msg];
+			}
+			if (count($ret[1]) === 0) {
+				$this->Fehlermeldung = 'Es wurden keine gespeicherten Themen gefunden für id: ' . $this->formvars['id']. ' stelle_id: ' . $stelle_id . ' user_id: ' . ($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id);
 			}
 			else {
 				$layerset = $this->user->rolle->getLayer('');
@@ -16127,17 +16130,17 @@ class GUI {
 						$formvars['group_'.$group['id']] = 0;		# und alle Obergruppen zuklappen
 					}
 				}
-				$layer_ids = explode(',', $ret[1][0]['layers']);
-				foreach($layer_ids as $layer_id){
+				$layer_ids = array_filter(explode(',', $ret[1][0]['layers']));
+				foreach($layer_ids as $layer_id) {
 					$formvars['thema'][$layer_id] = 1;
 					$groupid = $layerset['layer_ids'][$layer_id]['gruppe'];
-					do{
+					do {
 						$formvars['group_'.$groupid] = 1;
 						$groupid = $groups[$groupid]['obergruppe'];
 					} while ($groupid != '');
 				}
-				$query_ids = explode(',', $ret[1][0]['query']);
-				foreach($query_ids as $layer_id){
+				$query_ids = array_filter(explode(',', $ret[1][0]['query']));
+				foreach($query_ids as $layer_id) {
 					$formvars['qLayer'][$layer_id] = 1;
 				}
 				$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
