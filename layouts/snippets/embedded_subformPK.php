@@ -282,6 +282,7 @@
 				echo '<tr style="border: none">
 								<td'. get_td_class_or_style(array($dataset[$attributes['style'][0]], 'subFormListItem')) . '>'.($preview_link != '' ? $preview_link . '</td><td valign="top">' : '');
 
+				// $preview_function_buttons = '';
 				$preview_function_buttons = '
 					<div class="preview_func_div subform-add-btn">
 						<a
@@ -310,7 +311,7 @@
 					</div>
 				';
 				if ($this->formvars['embedded'] == 'true') {
-					echo '<a href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['layer_id'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].'\');">'.implode(' ', $output).'</a><div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'">' . $preview_function_buttons . '</div></td>';
+					echo '<a href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['layer_id'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].'\');">'.implode(' ', $output).'</a>' . $preview_function_buttons . '<div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'"></div></td>';
 				}
 				else {
 					echo '<a ';

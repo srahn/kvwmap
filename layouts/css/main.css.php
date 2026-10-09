@@ -2326,7 +2326,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .subFormListItem > a{
-	display: flex;
+	/* display: flex; */
 	align-items: center;
 }
 
@@ -2346,7 +2346,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	height: 4px;
 	border-radius: 50%;
 	content: '';
-	margin: 2px 7px 0px 10px;
+	margin: 8px 7px 0px 10px;
 	background-color: #236dbf;
 	vertical-align: top;
 	display: inline-block;
@@ -3376,6 +3376,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	height: 18px;
 }
 
+/*
 .subFormListItem {
 	display: flex;
 	align-items: center;
@@ -3389,7 +3390,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
+*/
 .preview_func_div {
 	display: flex;
 	align-items: center;
