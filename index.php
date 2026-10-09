@@ -1470,7 +1470,6 @@ function go_switch($go, $exit = false) {
 				$GUI->neuer_Layer_Datensatz_speichern();
 			} break;
 
-
 			case 'layer_charts_Anzeigen' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->sanitize([

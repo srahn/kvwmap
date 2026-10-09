@@ -5,7 +5,7 @@
 <br>
 <h2><?php echo $strTitleLayers; ?></h2>
 <? if ($this->Stelle->is_admin_stelle()) {
-	echo "<br>Adminstelle! Themenauswahlen aus allen Stellen und die, die keine user_id haben.<br>";
+	echo "<br>Adminstelle! Zusätzlich zu den eigenen werden alle angezeigt, die keine user_id haben.<br>";
 } ?>
 <br>
 <table id="LayerCommentSelectForm" cellpadding="0" cellspacing="0">

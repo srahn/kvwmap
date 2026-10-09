@@ -2732,22 +2732,38 @@ class rolle {
 		return $ret;
 	}
 	
-	function getLayerComments($id = '', $stelle_id = '', $user_id = '') {
-		global $admin_stellen;
-		$conditions = array();
-		$layerComments = array();
+	/**
+	 * Fragt die gespeicherten Themenauswahlen ab:
+	 * - Wenn nur die $id gegeben ist: nur diese,
+	 * - Wenn nur die $user_id und $stelle_id gegeben sind: nur für die dazugehörige Rolle
+	 * - Wenn $is_admin_stelle true ist: zusätzlich alle dessen user_id null ist, das sind die, die von Administratoren angelegt wurden und anderen zur Verfügung stehen sollen.
+	 */
+	function getLayerComments($id = null, $stelle_id = null, $user_id = null, $is_admin_stelle = false) {
+		$conditions = [];
+		$where_conditions = [];
+		$layerComments = [];
 
-		if ($user_id != '') {
-			$conditions[] = "(user_id = " . $user_id . " OR user_id IS NULL)";
-		}
-		if ($stelle_id != '') {
-			$conditions[] = "stelle_id = " . $stelle_id;
-		}
-		if ($id != '') {
-			$conditions[] = "id = " . $id;
+		if ($id) {
+			$conditions[] = 'id = ' . (int)$id;
 		}
 
-		$where = (count($conditions) > 0 ? "\n			WHERE\n				" . implode(" AND\n				", $conditions) : "");
+		if ($user_id) {
+			$conditions[] = 'user_id = ' . (int)$user_id;
+		}
+
+		if ($stelle_id) {
+			$conditions[] = 'stelle_id = ' . (int)$stelle_id;
+		}
+
+		if ($conditions) {
+			$where_conditions[] = '(' . implode(" AND\n\t\t\t\t", $conditions) . ')';
+		}
+
+		if ($is_admin_stelle) {
+			$where_conditions[] = 'user_id IS NULL';
+		}
+
+		$where = ($where_conditions ? "\n\t\t\tWHERE\n\t\t\t\t" . implode(" OR\n\t\t\t\t", $where_conditions) : '');
 
 		$sql = "
 			SELECT
@@ -2763,7 +2779,7 @@ class rolle {
 			ORDER BY
 				name
 		";
-		// echo '<br>Sql: ' . $sql;
+		// echo '<br>Abfrage der Themenauswahlen: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$this->database->success) {
 			# Fehler bei Datenbankanfrage

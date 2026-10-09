@@ -251,31 +251,6 @@ $GUI->mobile_get_data_version = function () use ($GUI) {
 	);
 };
 
-$GUI->mobile_get_data_version = function () use ($GUI) {
-	include_once(CLASSPATH . 'Layer.php');
-	$layer = Layer::find_by_id($GUI, $GUI->formvars['selected_layer_id']);
-	$sql = "
-		SELECT
-			gdi_md5_agg() WITHIN GROUP (ORDER BY tab) AS data_version
-		FROM
-			(
-				" . $layer->get('pfad') . "
-			) tab
-	";
-	$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
-	if ($ret[0]) {
-		return array(
-			'success' => false,
-			'err_msg' => err_msg($GUI->script_name, __LINE__, $sql)
-		);
-	}
-	$rs = pg_fetch_array($ret[1]);
-	return array(
-		'success' => true,
-		'dataVersion' => $rs['data_version']
-	);
-};
-
 $GUI->mobile_sync = function () use ($GUI) {
 	if (!$GUI->mobile_open_logfile($GUI->user->login_name)) { return array("success" => false, "msg" => $GUI->errmsg); };
 

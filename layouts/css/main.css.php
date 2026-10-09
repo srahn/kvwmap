@@ -3375,3 +3375,34 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	right: 0px;
 	height: 18px;
 }
+
+.subFormListItem {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.subFormListItem > a {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.preview_func_div {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: 10px;
+	white-space: nowrap;
+}
+
+.preview_func_div i {
+	cursor: pointer;
+	padding: 3px;
+}
+
+.subform-add-btn {
+	display: none;
+}

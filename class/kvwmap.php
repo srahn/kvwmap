@@ -12063,7 +12063,7 @@ class GUI {
 				}
       }
     }
-  }
+	}
 
 	function neuer_Layer_Datensatz($params = array()) {
 		$params = array_merge(array('output' => true, 'use_primary_from_new' => false), $params);
@@ -16086,10 +16086,9 @@ class GUI {
   }
 
 	function layerCommentSelectForm() {
-		if (!$this->Stelle->is_admin_stelle()) {
-			$stelle_id = $this->Stelle->id;
-		}
-    $ret=$this->user->rolle->getLayerComments(NULL, $stelle_id, $this->user->id);
+		$is_admin_stelle = $this->Stelle->is_admin_stelle();
+		$stelle_id = $is_admin_stelle ? null : $this->Stelle->id;
+		$ret = $this->user->rolle->getLayerComments(null, $stelle_id, $this->user->id, $is_admin_stelle);
     if ($ret[0]) {
       $this->Fehlermeldung='Es konnten keine gespeicherten Themen abgefragt werden.<br>'.$ret[1];
     }
@@ -16825,7 +16824,7 @@ class GUI {
 								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
 							}
 
-							#echo 'SQL zum Update des Datensatzes: ' . $sql;
+							// echo 'SQL zum Update des Datensatzes: ' . $sql;
 							$this->debug->show('<br>sql for update: ' . $sql);
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :", 4);

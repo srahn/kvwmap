@@ -601,7 +601,7 @@
 						}
 						$datapart .= 	' class="buttonlink"><span>'.$strShowPK.'</span></a>&nbsp;';
 					}
-					if ($attributes['subform_layer_privileg'][$j] > 0 AND $attribute_privileg > 0){
+					if ($attributes['subform_layer_privileg'][$j] > 0 AND $attribute_privileg > 0) {
 						$datapart .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=neuer_Layer_Datensatz&subform=true&selected_layer_id=' . $attributes['subform_layer_id'][$j] . '&csrf_token=' . $_SESSION['csrf_token'];
 						for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {
 							$datapart .= '&attributenames[' . $p . ']='.$attributes['subform_pkeys'][$j][$p];
@@ -734,13 +734,13 @@
 				$reloadParams .= '&attribute_privileg='.$attribute_privileg;
 				
 				$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px">';
-				if($gui->new_entry != true AND $subform_request){
+				if ($gui->new_entry != true AND $subform_request) {
 					$datapart .= '
 						<img src="' . GRAPHICSPATH . 'leer.gif" onload="reload_subform_list(this.parentElement);">
 					';
 				}
 				$datapart .= '</div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-				$datapart .= '</td></tr></table>';					
+				$datapart .= '</td></tr></table>';
 			}break;
 
 			case 'Time': {

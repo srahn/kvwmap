@@ -831,7 +831,7 @@
 											<td width="60px">&nbsp;Rand:</td>
 											<td><input	type="text" name="fontsize_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['fontsize']; ?>" size="5"> m</td>
 											<td colspan="3"><?
-												$result = $this->user->rolle->getLayerComments();
+												$result = $this->user->rolle->getLayerComments(null, null, null, true);
 												if (!$result['success']) { ?>
 													<span style="color: yellow; background-color: red;">
 														<b>Fehler beim Laden der Themenauswahl.</b>
