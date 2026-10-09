@@ -594,7 +594,7 @@ class flurstueck {
 		return $Eigentuemer;
 	}
 
-	function outputAlleEigentuemer($stelle){	?>
+	function outputAlleEigentuemer($stelle, $vorgangsnr = NULL){	?>
 		<table border="0" cellspacing="0" cellpadding="2">
 			<? 
 			for ($b=0; $b < count_or_0($this->Buchungen);$b++) {
@@ -607,7 +607,7 @@ class flurstueck {
 						$BestandStr.= 'zu '.$this->Buchungen[$b]['anteil'] . ', ';
 					}
 				}
-				$BestandStr.='<a target="root" href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$this->Buchungen[$b]['bezirk'].'-'.$this->Buchungen[$b]['blatt'].'&csrf_token=' . $_SESSION['csrf_token'] . '">'.$this->Buchungen[$b]['bezirk'].'-'.ltrim($this->Buchungen[$b]['blatt'], '0').'</a>';
+				$BestandStr.='<a target="root" href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$this->Buchungen[$b]['bezirk'].'-'.$this->Buchungen[$b]['blatt'].'&vorgangsnr=' . $vorgangsnr . '&csrf_token=' . $_SESSION['csrf_token'] . '">'.$this->Buchungen[$b]['bezirk'].'-'.ltrim($this->Buchungen[$b]['blatt'], '0').'</a>';
 				$BestandStr.=' '.str_pad($this->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 				$BestandStr.=', Laufende Nummer '.str_pad(intval($this->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 				if($this->Buchungen[$b]['sondereigentum'] != ''){

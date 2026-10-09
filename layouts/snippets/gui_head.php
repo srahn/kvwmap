@@ -28,7 +28,7 @@ if (defined('CUSTOM_STYLE') AND CUSTOM_STYLE != '') { ?>
 <?
 }
 
-$custom_snippets_style = INSTALLPATH . WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/css/' . basename($this->main, ".php") . '.css';
+$custom_snippets_style = WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/css/' . basename($this->main, ".php") . '.css';
 if (file_exists($custom_snippets_style)) { ?>
   <style>
     <? include($custom_snippets_style); ?>

@@ -75,9 +75,20 @@ class data_import_export {
 			} break;
 			case 'xml' : case 'gml' : {
 				if (strpos($filename, 'shp.xml') === false) {
-					$layers = $this->ogr_get_layers($filename);
-					$this->unique_column = 'ogc_fid';
-					$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, true, $adjustments);
+					if (strpos(file_get_contents($filename), 'http://www.adv-online.de/namespaces/adv/gid/7.1') !== false) {	# NAS
+						$contents = file_get_contents($filename);
+						$contents=str_replace('.xsd', '.xsd aaa.xsd', $contents);	# aaa.xsd ist für den NAS-Treiber nötig
+						file_put_contents($filename, $contents);
+						$options = '--config NAS_GFS_TEMPLATE ' . WWWROOT . APPLVERSION . '/plugins/alkis/config/alkis-schema.gfs';
+						$layers = $this->ogr_get_layers($filename, $options);
+						$this->unique_column = 'ogc_fid';
+						$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, true, $adjustments, $options);
+					}
+					else {	# GML
+						$layers = $this->ogr_get_layers($filename);
+						$this->unique_column = 'ogc_fid';
+						$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, true, $adjustments);
+					}
 				}
 			} break;
 			case 'kml' : case 'kmz' : {
@@ -380,7 +391,7 @@ class data_import_export {
 		}
 	}
 	
-	function import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, $ask_epsg, $adjustments){
+	function import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, $ask_epsg, $adjustments, $options = ''){
 		if(file_exists($filename)){
 			if($epsg == NULL AND $ask_epsg){
 				$this->ask_epsg = true;		# EPSG-Code nachfragen
@@ -388,7 +399,7 @@ class data_import_export {
 			}
 			foreach($layers as $layer) {
 				$table = 'a'.strtolower(sonderzeichen_umwandeln(substr(($layer ?: basename($filename)), 0, 30))). date("_Y_m_d_H_i_s", time());
-				$ret = $this->ogr2ogr_import($schema, $table, $epsg, $filename, $database, $layer, NULL, NULL, 'UTF-8');
+				$ret = $this->ogr2ogr_import($schema, $table, $epsg, $filename, $database, $layer, NULL, $options, 'UTF-8');
 				if ($ret !== 0) {
 					$custom_table['error'] = $layer . ': ' . $ret;
 					return array($custom_table);
@@ -981,6 +992,7 @@ class data_import_export {
 			. ' -lco GEOMETRY_NAME=the_geom'
 			. ' -lco launder=NO'
 			. ' -lco precision=NO'
+			. ' -nlt CONVERT_TO_LINEAR'
 			. (strpos($options, '-lco FID') === false ? ' -lco FID=' . $this->unique_column : '')
 			. ' -nln ' . $tablename
 			. ($multi ? ' -nlt PROMOTE_TO_MULTI' : '')
@@ -1074,8 +1086,8 @@ class data_import_export {
 		return $result;
 	}
 
-	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile, ' -q');
+	function ogr_get_layers($importfile, $options = ''){
+		$result = $this->ogrinfo($importfile, ' -q ' . $options);
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();

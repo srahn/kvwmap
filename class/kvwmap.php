@@ -346,7 +346,7 @@ class GUI {
 			date("Y:m:d H:i:s", time()) .
 			' IP: ' . get_remote_ip() .
 			' Port: ' . $_SERVER['REMOTE_PORT'] .
-			' User: ' . $login_name .
+			' User: ' . $this->formvars['login_name'] .
 			' User agent: ' .
 			getenv('HTTP_USER_AGENT')
 		);
