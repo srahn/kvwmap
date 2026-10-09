@@ -1410,9 +1410,53 @@ tbody.gle>tr {
 	margin: 2px 2px 2px 0;
 }
 
+/*
 .subFormListItem{
 	height: 20px;
 	padding: 0;
+}
+*/
+
+/*
+.subFormListItem {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	box-sizing: border-box;
+}
+*/
+
+/*
+.subFormListItem > a:before{
+	content:url('../../graphics/submenue.png');
+	vertical-align: top;
+}
+*/
+
+/*
+.subFormListItem > a {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+*/
+
+.subFormListItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.subFormListItem .left {
+  min-width: 0;
+}
+
+.subFormListItem .right {
+  white-space: nowrap;
+}
+
+.subFormListItem .bottom {
+  grid-column: 1 / -1;
 }
 
 .gle_hr{
@@ -1420,11 +1464,6 @@ tbody.gle>tr {
 	margin: 15 0; 
 	color: <? echo BG_GLEHEADER; ?>; 
 	background: <? echo BG_GLEHEADER; ?>;
-}
-
-.subFormListItem > a:before{
-	content:url('../../graphics/submenue.png');
-	vertical-align: top;
 }
 
 .calendar { /* Fuer IE <= 6 */

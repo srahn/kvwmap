@@ -19,19 +19,11 @@
 				$colspan = $table['max_cell_count'] - $cell_count + 1;
 				for($i = 0; $i < $cell_count; $i++) {
 					$cell = $row['cells'][$i];
-					if ($row['contains_attribute_names']) {
-						if ($cell_count > 1 AND $cell['properties'] == 'class="gle-attribute-name"') {
-							$width = 'width="1%"';
-						}
-						else {
-							$width = '';
-						}
-					}
-					$output .= '<td ' .
-						$width . ' ' .
-						($cell['id'] ? 'id="' . $cell['id'] . '"' : '') .
-						$cell['properties'] . ' ' .
-						(($colspan > 1 AND $i == $cell_count - 1) ? 'colspan="' . $colspan . '"' : '') .
+					$output .= '<td'
+						. ' ' . $cell['properties']
+						. (($row['contains_attribute_names'] AND $cell_count > 1 AND $cell['properties'] == 'class="gle-attribute-name"') ? ' width="1%"' : '')
+						. ($cell['id'] ? ' id="' . $cell['id'] . '"' : '')
+						. (($colspan > 1 AND $i == $cell_count - 1) ? ' colspan="' . $colspan . '"' : '') .
 					'>';
 					$output .= $cell['content'];
 					if ($cell['id']) {
@@ -1497,16 +1489,25 @@
 	* @param array $class_or_style Ein Array welches beliebig viele Klassennamen oder Styledefinitionen enthalten kann
 	* @return string Text in der Form ' class="class_name" style="css-text"'
 	*/
-	function get_td_class_or_style($class_or_style){
-		foreach($class_or_style as $elem){
-			if($elem != ''){
-				if(strpos($elem, ':') === false)$class[] = $elem;
-				else $style[] = $elem;
+	function get_td_class_or_style($class_or_style) {
+		$outputs = array();
+		foreach($class_or_style as $elem) {
+			if ($elem != '') {
+				if (strpos($elem, ':') === false) {
+					$class[] = $elem;
+				}
+				else {
+					$style[] = $elem;
+				}
 			}
 		}
-		if(!empty($class))$output = ' class="'.implode(' ', $class).'"';
-		if(!empty($style))$output.= ' style="'.implode(';', $style).'"';
-		return $output;
+		if (!empty($class)) {
+			$outputs[] = 'class="' . implode(' ', $class) . '"';
+		}
+		if (!empty($style)) {
+			$outputs[] = 'style="' . implode(';', $style) . '"';
+		}
+		return implode(' ', $outputs);
 	}
 	
 	function getGeomType($column_geomtype, $layer_datatype){
