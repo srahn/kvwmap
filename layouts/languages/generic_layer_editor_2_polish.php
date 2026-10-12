@@ -1,25 +1,28 @@
-<?php
- $strEditDataset="Edit Dataset";
- $strEditGeom="edytuj geometri?";
- $strMapZoom="fragment mapy";
- $strSelectAll="wybierz wszystkie";
- $strdelete="usu?";
- $strSelectedDatasets="wybrane rejestry danych";
- $strCSVExport="eksportuj do pliku CSV";
- $strCSVExportAll="wszystkie wyniki eksportuj do pliku CSV";
- $strMapSelect="selekcjonuj";
- $strzoomtodatasets="poka? na mapie";
- $strPrint="drukuj";
- $strCreateChart="poka? w formie wykresu";
- $strSelectAllShown="Select all shown datasets";
- $strSelectThisDataset="select dataset";
- $strNoMatch="No objects found in this layer!";
- $strDeleteThisDataset="delete dataset";
- $strCSVExportThis="export dataset into CSV";
- $strShowPK="show";
- $strNewPK="new";
- $strShowFK="show";
- $strNewFK="new";
- $strNewEmbeddedPK="new";
- $strShowAllSeparat="show all separately";
+
+ <?
+  $strCreateChart="poka? w formie wykresu";
+  $strCSVExport="eksportuj do pliku CSV";
+  $strCSVExportAll="wszystkie wyniki eksportuj do pliku CSV";
+  $strCSVExportThis="export dataset into CSV";
+  $strdelete="usu?";
+  $strDeleteThisDataset="delete dataset";
+  $strEditDataset="Edit Dataset";
+  $strEditGeom="edytuj geometri?";
+  $strMapSelect="selekcjonuj";
+  $strMapZoom="fragment mapy";
+  $strNewEmbeddedPK="new";
+  $strNewFK="new";
+  $strNewPK="new";
+  $strNoMatch="No objects found in this layer!";
+  $strPrint="drukuj";
+  $strRefAdd="Add Reference";
+  $strRefDel="Remove Reference";
+  $strSelectAll="wybierz wszystkie";
+  $strSelectAllShown="Select all shown datasets";
+  $strSelectedDatasets="wybrane rejestry danych";
+  $strSelectThisDataset="select dataset";
+  $strShowAllSeparat="show all separately";
+  $strShowFK="show";
+  $strShowPK="show";
+  $strzoomtodatasets="poka? na mapie";
 ?>
