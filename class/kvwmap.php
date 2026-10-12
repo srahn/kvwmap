@@ -10458,6 +10458,13 @@ class GUI {
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$layerset[0]['pfad'] = $this->formvars['query'] ?: $layerset[0]['pfad'];	// $this->formvars['query'] ist optional, falls man query vom Layer angepasst verwenden will
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+				if ($this->formvars['selected_attributes'] != '') {
+					$privileges['attributenames'] = array();
+					$selected_attributes = explode(',', $this->formvars['selected_attributes']);
+					foreach ($selected_attributes AS $attribute) {
+						$privileges['attributenames'][] = $attribute;
+					}
+				}
 				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
 				if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[0]['maintable'] = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
@@ -20908,8 +20915,8 @@ class db_mapObj{
 							}
 							$attributes['preview_attribute'][$i] = $subform[$k];
 							if ($options[1] != '') {
-								$further_options = explode(' ', $options[1]);		 # die weiteren Optionen exploden (opt1 opt2 opt3)
-								for($k = 0; $k < count($further_options); $k++) {
+								$further_options = explode(' ', $options[1]);				# die weiteren Optionen exploden (opt1 opt2 opt3)
+								for ($k = 0; $k < count($further_options); $k++) {
 									switch ($further_options[$k]) {
 										case 'no_new_window': {
 											$attributes['no_new_window'][$i] = true;

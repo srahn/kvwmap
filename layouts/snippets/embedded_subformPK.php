@@ -24,11 +24,23 @@ use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
 		return $nullable;
 	}
 
+	function fk_attributes_types($attributes, $fk_attributes, $type) {
+		return array_map(
+			function($name) use ($attributes, $type) {
+				return $attributes['type'][$attributes['indizes'][$name]];
+			},
+			$fk_attributes
+		);
+	}
+
 	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links bzw. editierbaren Datensätzen untereinander oder im Rasterlayout dargestellt
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	$attributes = $layer['attributes'];
-
+	$fk_attributes = $this->formvars['attributenames'];
+	if ($this->user->id == 1) {
+		// echo 'attributes: ' . print_r($attributes, true);
+	}
 	$size = 50;
 	$select_width = 'width: 235px';
 
@@ -54,7 +66,18 @@ use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
 					tabindex="1"
 					id="hinzufuegen_button_' . $layer['layer_id'] . '_' . $this->formvars['targetobject'] . '"
 					class="buttonlink subform-add-btn"
-					href="javascript:load_subform_child_candidates(\'' . $this->formvars['targetobject'] . '\', \'' . $this->formvars['selected_layer_id'] . '\', \'' . $layer['oid'] . '\', \'' . $this->formvars['preview_attribute'] . '\', \'' . implode('\',\'', $this->formvars['attributenames']) . '\', \'' . implode('\',\'', $this->formvars['values']) . '\');"
+					href="javascript:load_subform_child_candidates(
+						\'' . $this->formvars['targetobject'] . '\',
+						\'' . $this->formvars['selected_layer_id'] . '\',
+						\'' . $layer['oid'] . '\',
+						\'' . $attributes['type'][$attributes['indizes'][$layer['oid']]] . '\',
+						\'' . $layer['maintable'] . '\',
+						\'' . $this->formvars['preview_attribute'] . '\',
+						\'' . implode('\',\'', $this->formvars['attributenames']) . '\',
+						\'' . implode('\',\'', fk_attributes_types($attributes, $fk_attributes, 'form_element_type')) . '\',
+						\'' . implode('\',\'', fk_attributes_types($attributes, $fk_attributes, 'type')) . '\',
+						\'' . implode('\',\'', $this->formvars['values']) . '\'
+					);"
 					name="add_child"
 				><span>' . $strRefAdd . '</span></a>';
 		}
@@ -76,7 +99,7 @@ use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
 				if($target == 'root'){		# im Hauptfenster öffnen
 					$neu_link .= 'target="root" href="index.php?'.implode('&', $data).'">';
 				}
-				else{											# eingebettet öffnen
+				else {											# eingebettet öffnen
 					$data[] = 'embedded=true';
 					$data[] = 'targetobject='.$this->formvars['targetobject'];
 					$data[] = 'targetlayer_id='.$this->formvars['targetlayer_id'];
@@ -349,8 +372,13 @@ use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
 										href="javascript:void(0)"
 										onclick="checkForUnsavedChanges(event);subunlink_data(
 											'<? echo $layer['layer_id']; ?>',
+											'<? echo $layer['maintable']; ?>',
+											'<? echo $layer['oid']; ?>',
 											'<? echo $dataset[$layer['maintable'] . '_oid']; ?>',
+											'<? echo $attributes['type'][$attributes['indizes'][$layer['oid']]]; ?>',
 											'<? echo implode(',', $this->formvars['attributenames']); ?>',
+											'<? echo implode(',', fk_attributes_types($attributes, $this->formvars['attributenames'], 'form_element_type')); ?>',
+											'<? echo implode(',', fk_attributes_types($attributes, $this->formvars['attributenames'], 'type')); ?>',
 											'<? echo $this->formvars['targetobject']; ?>',
 											'<? echo $this->formvars['targetobject']; ?>'.split('_')[1]
 										)"

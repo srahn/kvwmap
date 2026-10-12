@@ -667,18 +667,31 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
 
+	get_form_field_names = function (layer_id, maintable, pk_name, pk_value, pk_type, fk_names, fk_form_types, fk_types) {
+		var formFieldNames = []
+		const fkNames = fk_names.split(',');
+		const fkFormTypes = fk_form_types.split(',');
+		const fkTypes = fk_types.split(',');
+		formFieldNames = fkNames.map((fk_name, index) => `${layer_id};${fk_name.trim()};${maintable};${pk_value};${fkFormTypes[index].trim()};1;${fkTypes[index].trim()};1`);
+		formFieldNames.push(`${layer_id};${pk_name};${maintable};${pk_value};text;1;${pk_type};1`);
+		return formFieldNames;
+	}
+
 	/**
 	 * Creates a select field with candidates to add to the subform
 	 * It fetch the candidates from server that have null values in foreign key columns given by attributenames
-	 * @param {string} targetobject				The id of the subform object.
-	 * @param {number} child_layer_id			The id from child layer.
-	 * @param {sting} child_pk_name				The primary key of child layer.
-	 * @param {string} preview_attribute	The option of that subformEmbeddedPK attribute that defines how to display thie child objects in the list. Can be attribute names and text separated by empty space.
-	 * @param {string} child_fk_names			A comma separated list of attributenames that belongs to the foreign key of child objects.
-	 * @param {string} child_fk_values		A comma separated list of values that belongs to the foreign key of child objects.
+	 * @param {string} targetobject					The id of the subform object.
+	 * @param {number} child_layer_id				The id from child layer.
+	 * @param {sting} child_pk_name					The primary key of child layer.
+	 * @param {string} child_pk_type				The type of child primary key.
+	 * @param {string} preview_attribute		The option of that subformEmbeddedPK attribute that defines how to display thie child objects in the list. Can be attribute names and text separated by empty space.
+	 * @param {string} child_fk_names				A comma separated list of attributenames that belongs to the foreign key of child objects.
+	 * @param {string} child_fk_form_types	The formelementtypes of foreign keys.
+	 * @param {string} child_fk_types				The datatype of foreign keys.
+	 * @param {string} child_fk_values			A comma separated list of values that belongs to the foreign key of child objects.
 	 */
-	load_subform_child_candidates = function(targetobject, child_layer_id, child_pk_name, preview_attribute, child_fk_names, child_fk_values) {
-		// console.log('load_subform_child_candidates with targetobject: %s, child_layer_id: %s, child_pk_name: %s, preview_attribute: %s, child_fk_names: %s, child_fk_values: %s', targetobject, child_layer_id, child_pk_name, preview_attribute, child_fk_names, child_fk_values);
+	load_subform_child_candidates = function(targetobject, child_layer_id, child_pk_name, child_pk_type, child_maintable, preview_attribute, child_fk_names, child_fk_form_types, child_fk_types, child_fk_values) {
+		// console.log('load_subform_child_candidates with targetobject: %o, child_layer_id: %o, child_pk_name: %o, child_pk_type: %o, child_maintable: %o, preview_attribute: %o, child_fk_names: %o, child_fk_form_types: %o, child_fk_types: %o, child_fk_values: %o', targetobject, child_layer_id, child_pk_name, child_pk_type, child_maintable, preview_attribute, child_fk_names, child_fk_form_types, child_fk_types, child_fk_values);
 
 		const div_id = 'child_candidate_selection_div_' + child_layer_id + '_' + targetobject;
 
@@ -690,6 +703,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			formData.append('value_' + name, '');
 			formData.append('operator_' + name, 'IS NULL');
 		});
+		formData.append('selected_attributes', 'gid,projekt,sammelprojekt_id');
+		formData.append('anzahl', 10000);
 		formData.append('mime_type', 'json');
 		formData.append('format', 'json');
 		startwaiting();
@@ -702,7 +717,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		.then(text => {
 			try {
 				const data = JSON.parse(text);
-				// console.log('data: %o', data);
+				console.log('data: %o', data);
 
 				const div = document.getElementById(div_id);
 				div.innerHTML = '';
@@ -743,7 +758,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 					console.log('onchange of select field event: %o', event);
 					const child_pk_value = event.target.value;
 					if (child_pk_value) {
-						subadd_data(child_layer_id, child_pk_value, child_fk_names, child_fk_values, targetobject, targetobject.split('_')[1]);
+						subadd_data(
+							child_layer_id,
+							child_maintable,
+							child_pk_name,
+							child_pk_value,
+							child_pk_type,
+							child_fk_names,
+							child_fk_form_types,
+							child_fk_types,
+							child_fk_values,
+							targetobject,
+							targetobject.split('_')[1]
+						);
 					}
 				};
 
@@ -936,33 +963,48 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	/**
 	 * Fügt den ausgewählten candidaten als child zum übergeordneten Objekt zu.
 	 * @param {number} layer_id					Die id des Sub-Layers zum dem der ausgewählte Datensatz gehört.
+	 * @param {string} maintable				Die Haupttabelle des Sub-Layers.
+	 * @param {string} pk_name					Der Name des Primary Key im untergeordneten Layer.
 	 * @param {string} pk_value					Der Wert des Primary Keys des untergeordneten Datensatzes, der hinzugefügt werden soll.
+	 * @param {string} pk_type					Der Datentyp des Primary Key Attributes des SubLayers.
 	 * @param {string} fk_names					Die kommaseparierten Namen der Attribute des Fremdschlüssel, die gesetzt werden sollen, damit der Datensatz zum übergeordneten Objekt gehört.
+	 * @param {string} fk_form_types		Die kommaseparierten FormElementTypen der Fremdschlüssel.
+	 * @param {string} fk_types					Die kommaseparierten Datentypen der Fremdschlüssel.
 	 * @param {string} fk_values				Die kommaseparierten Werte des Fremdschlüssels des zugeordneten Datensatzes. Das sind die Werte des Primary Keys des übergeordneten Objektes.
 	 * @param {number} targetlayer_id		Ist die id von dem Layer, zu dem das targetobject gehört.
 	 * @param {string} targetattribute	Ist das Attribut, zu dem das targetobject gehört.
 	*/
-	subadd_data = function(layer_id, pk_value, fk_names, fk_values, targetobject, targetattribute) {
-		console.log('subadd_data with layer_id: %s, pk_value: %s, fk_names: %s, fk_values: %s, targetobject: %s, targetattribute: %s', layer_id, pk_value, fk_names, fk_values, targetobject, targetattribute);
-		const fkNames = fk_names.split(',');
-		const fkValues = fk_values.split(',');
-		const tableName = targetobject.split('_')[1]; // muss auch noch an diese Funktion übergeben werden.
-		const formFieldNames = fkNames.map((key, i) => layer_id + ';' + key + ';' + tableName + ';' + pk_value + ';text;1;uuid;1');
-		formFieldNames.push(layer_id + ';' + 'uuid' + ';' + tableName + ';' + pk_value + ';text;1;uuid;1');
+	subadd_data = function(layer_id, maintable, pk_name, pk_value, pk_type, fk_names, fk_form_types, fk_types, fk_values, targetobject, targetattribute) {
+		// console.log(
+		// 	'subadd_data with layer_id: %s, maintable: %o, pk_name: %o, pk_value: %s, pk_type: %s, fk_names: %o, fk_form_types: %o, fk_types: %o, fk_values: %o, targetobject: %s, targetattribute: %s',
+		//   									layer_id,			maintable,		 pk_name, 		pk_value, 		pk_type, 		 fk_names,	 	 fk_form_types,			fk_types, 		fk_values, 		 targetobject, 		 targetattribute
+		// );
 
 		var formData = new FormData();
+		const form_field_names = get_form_field_names(
+			layer_id,
+			maintable,
+			pk_name,
+			pk_value,
+			pk_type,
+			fk_names,
+			fk_form_types,
+			fk_types
+		);
+
 		formData.append('go', 'Sachdaten_speichern');
 		formData.append('changed_' + layer_id + '_' + pk_value, 1);
 		formData.append('selected_layer_id', layer_id);
-		formData.append('form_field_names', formFieldNames.join('|'));
-		formFieldNames.forEach((name, i) => {
-			formData.append(name, fkValues[i]);
+		formData.append('form_field_names', form_field_names.join('|'));
+		form_field_names.forEach((name, i) => {
+			formData.append(name, fk_values.split(',')[i]);
 		});
 		formData.append('targetobject', targetobject);
 		formData.append('targetlayer_id', layer_id);
 		formData.append('targetattribute', targetattribute);
 		formData.append('embedded', 'true');
-		formData.append('list_edit', '');
+		formData.append('ref_edit', '1');
+		formData.append('csrf_token', csrf_token);
 		console.log('index.php' + new URLSearchParams(formData).toString());
 		ahah('index.php', formData, new Array(document.getElementById(targetobject)), new Array('execute_function'));
 	}
@@ -970,25 +1012,38 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	/**
 	 * Entfernt den ausgewählten untergelordneten Datensatz vom übergeordneten Datensatz.
 	 * @param {number} layer_id					Die id des Sub-Layers zum dem der ausgewählte Datensatz gehört.
-	 * @param {string} pk_value					Der Wert des Primary Keys des untergeordneten Datensatzes, der entfernt werden soll.
-	 * @param {string} fk_names					Die kommaseparierten Namen der Attribute des Fremdschlüssel, dessen Werte gelöscht werden sollen, damit der Datensatz nicht mehr zum übergeordneten Objekt gehört.
+	 * @param {string} maintable				Die Haupttabelle des Sub-Layers.
+	 * @param {string} pk_name					Der Name des Primary Key im untergeordneten Layer.
+	 * @param {string} pk_value					Der Wert des Primary Keys des untergeordneten Datensatzes, der hinzugefügt werden soll.
+	 * @param {string} pk_type					Der Datentyp des Primary Key Attributes des SubLayers.
+	 * @param {string} fk_names					Die kommaseparierten Namen der Attribute des Fremdschlüssel, die gesetzt werden sollen, damit der Datensatz zum übergeordneten Objekt gehört.
+	 * @param {string} fk_form_types		Die kommaseparierten FormElementTypen der Fremdschlüssel.
+	 * @param {string} fk_types					Die kommaseparierten Datentypen der Fremdschlüssel.
 	 * @param {number} targetlayer_id		Ist die id von dem Layer, zu dem das targetobject gehört.
-	 * @param {string} targetattribute	Ist das Attribut, zu dem das targetobject gehört.
-	 */
-	subunlink_data = function(layer_id, pk_value, fk_names, targetobject, targetattribute) {
-		console.log('subunlink_data with layer_id: %s, pk_value: %s, fk_names: %s, targetobject: %s, targetattribute: %s', layer_id, pk_value, fk_names, targetobject, targetattribute);
+	 * @param {string} targetattribute	Ist das Attribut, zu dem das targetobject gehört.	 */
+	subunlink_data = function(layer_id, maintable, pk_name, pk_value, pk_type, fk_names, fk_form_types, fk_types, targetobject, targetattribute) {
+		// console.log(
+		// 	'subunlink_data with layer_id: %s, maintable: %o, pk_name: %o, pk_value: %s, pk_type: %s, fk_names: %o, fk_form_types: %o, fk_types: %o, targetobject: %s, targetattribute: %s',
+		//   										 layer_id,			maintable,		 pk_name, 		pk_value, 		pk_type, 		 fk_names,	 	 fk_form_types,			fk_types, 	 targetobject, 		 targetattribute
+		// );
 		if (confirm('Wollen Sie die Zuordnung des ausgewählten Datensatzes zum übergeordneten wirklich entfernen?')) {
-			const fkNames = fk_names.split(',');
-			const tableName = targetobject.split('_')[1]; // muss auch noch an diese Funktion übergeben werden.
-			const formFieldNames = fkNames.map((key, i) => layer_id + ';' + key + ';' + tableName + ';' + pk_value + ';text;1;uuid;1');
-			formFieldNames.push(layer_id + ';' + 'uuid' + ';' + tableName + ';' + pk_value + ';text;1;uuid;1');
-
 			var formData = new FormData();
+			const form_field_names = get_form_field_names(
+				layer_id,
+				maintable,
+				pk_name,
+				pk_value,
+				pk_type,
+				fk_names,
+				fk_form_types,
+				fk_types
+			);
+
 			formData.append('go', 'Sachdaten_speichern');
 			formData.append('changed_' + layer_id + '_' + pk_value, 1);
 			formData.append('selected_layer_id', layer_id);
-			formData.append('form_field_names', formFieldNames.join('|'));
-			formFieldNames.forEach((name, i) => {
+			formData.append('form_field_names', form_field_names.join('|'));
+			form_field_names.forEach((name, i) => {
 				formData.append(name, '');
 			});
 			formData.append('targetobject', targetobject);
@@ -996,6 +1051,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			formData.append('targetattribute', targetattribute);
 			formData.append('embedded', 'true');
 			formData.append('list_edit', '');
+			formData.append('csrf_token', csrf_token);
 			// console.log('index.php' + new URLSearchParams(formData).toString());
 			ahah('index.php', formData, new Array(document.getElementById(targetobject)), new Array('execute_function'));
 		}
