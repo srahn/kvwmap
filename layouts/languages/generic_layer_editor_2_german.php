@@ -26,6 +26,8 @@
   $strNoMatch="Zu diesem Thema wurden keine Objekte gefunden!";
   $strPrint="drucken";
   $strPrintDataset="Datensatz drucken";
+  $strRefAdd="Hinzufügen";
+  $strRefDel="Zuordnung entfernen";
   $strRemember="merken";
   $strRememberDataset="Datensatz merken";
   $strSelectAll="alle auswählen";

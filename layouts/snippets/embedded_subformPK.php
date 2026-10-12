@@ -1,4 +1,7 @@
 <?
+
+use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
+
 	include(SNIPPETS . 'generic_form_parts.php');
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 	function fk_attributes_editable($attributes, $fk_attributes) {
@@ -10,6 +13,17 @@
 		}
 		return $editable;
 	}
+
+	function fk_attributes_nullable($attributes, $fk_attributes) {
+		$nullable = true;
+		foreach ($fk_attributes AS $name) {
+			if ($attributes['nullable'][$attributes['indizes'][$name]] != 1) {
+				$nullable = false;
+			}
+		}
+		return $nullable;
+	}
+
 	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links bzw. editierbaren Datensätzen untereinander oder im Rasterlayout dargestellt
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -30,15 +44,19 @@
 	$neu_link = '';
 
 	if ($layer['privileg'] > 0) {
-		if (fk_attributes_editable($attributes, $this->formvars['attributenames'])) {
-			// Wenn der Sub layer editierbar ist und die Attribute in attributenames editierbar.
+		if (
+			fk_attributes_editable($attributes, $this->formvars['attributenames']) AND
+			fk_attributes_nullable($attributes, $this->formvars['attributenames']) AND
+			$this->formvars['ref_edit']
+		) {
+			// Wenn der Sub layer editierbar ist und die Attribute in attributenames editierbar, nullable und ref_edit in der Attribut Option gesetzt.
 			$add_link = '<a
 					tabindex="1"
 					id="hinzufuegen_button_' . $layer['layer_id'] . '_' . $this->formvars['targetobject'] . '"
 					class="buttonlink subform-add-btn"
 					href="javascript:load_subform_child_candidates(\'' . $this->formvars['targetobject'] . '\', \'' . $this->formvars['selected_layer_id'] . '\', \'' . $layer['oid'] . '\', \'' . $this->formvars['preview_attribute'] . '\', \'' . implode('\',\'', $this->formvars['attributenames']) . '\', \'' . implode('\',\'', $this->formvars['values']) . '\');"
 					name="add_child"
-				><span>hinzufügen</span></a>';
+				><span>' . $strRefAdd . '</span></a>';
 		}
 		if ($this->formvars['attribute_privileg'] > 0) {
 			if ($attributes['privileg'][$attributes['indizes'][$attributes['the_geom']]] == 1) { # falls das Geometrie-Attribut editierbar ist, im Hauptfenster öffnen
@@ -324,32 +342,34 @@
 								>
 									<? echo implode(' ', $output); ?>
 								</a><?
+							}
+							if ($add_link != '') { ?>
+								<div class="subFormListItem right preview_func_div subform-add-btn">
+									<a
+										href="javascript:void(0)"
+										onclick="checkForUnsavedChanges(event);subunlink_data(
+											'<? echo $layer['layer_id']; ?>',
+											'<? echo $dataset[$layer['maintable'] . '_oid']; ?>',
+											'<? echo implode(',', $this->formvars['attributenames']); ?>',
+											'<? echo $this->formvars['targetobject']; ?>',
+											'<? echo $this->formvars['targetobject']; ?>'.split('_')[1]
+										)"
+									>
+										<i class="fa fa-link" title="<? echo $strRefDel; ?>"></i>
+									</a>
+									<a
+										href="javascript:void(0)"
+										onclick="checkForUnsavedChanges(event);subdelete_data(
+											'<? echo $layer['layer_id']; ?>',
+											'record_<? echo $dataset[$layer['maintable'].'_oid']; ?>',
+											'<? echo $dataset[$layer['maintable'].'_oid']; ?>',
+											'<? echo $this->formvars['targetobject']; ?>'
+										)"
+									>
+										<i class="fa fa-trash" title="' . $strDeleteThisDataset . '"></i>
+									</a>
+								</div><?
 							} ?>
-							<div class="subFormListItem right preview_func_div subform-add-btn">
-								<a
-									href="javascript:void(0)"
-									onclick="checkForUnsavedChanges(event);subunlink_data(
-										'<? echo $layer['layer_id']; ?>',
-										'<? echo $dataset[$layer['maintable'] . '_oid']; ?>',
-										'<? echo implode(',', $this->formvars['attributenames']); ?>',
-										'<? echo $this->formvars['targetobject']; ?>',
-										'<? echo $this->formvars['targetobject']; ?>'.split('_')[1]
-									)"
-								>
-									<i class="fa fa-link" title="Zuordnung entfernen"></i>
-								</a>
-								<a
-									href="javascript:void(0)"
-									onclick="checkForUnsavedChanges(event);subdelete_data(
-										'<? echo $layer['layer_id']; ?>',
-										'record_<? echo $dataset[$layer['maintable'].'_oid']; ?>',
-										'<? echo $dataset[$layer['maintable'].'_oid']; ?>',
-										'<? echo $this->formvars['targetobject']; ?>'
-									)"
-								>
-									<i class="fa fa-trash" title="' . $strDeleteThisDataset . '"></i>
-								</a>
-							</div>
 						</div><?
 						if ($this->formvars['embedded'] == 'true') { ?>
 							<div class="subFormListItem bottom subForm" id="<? echo $fromobject; ?>"></div><?

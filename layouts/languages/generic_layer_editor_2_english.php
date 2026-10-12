@@ -1,4 +1,5 @@
 <?php
+  $strRefAdd="Add Dataset";
   $strAllDatasets="all records found";
   $strAllDeselected = "Deselection finished";
   $strAllSelected = "Selection finished";
@@ -25,6 +26,8 @@
   $strNoMatch="No objects found in this layer!";
   $strPrint="print";
   $strPrintDataset="print record";
+  $strRefAdd="Add Reference";
+  $strRefDel="Remove Reference";
   $strRemember="bookmark";
   $strRememberDataset="bookmark record";
   $strSelectAll="select all";

@@ -3448,7 +3448,3 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	cursor: pointer;
 	padding: 3px;
 }
-
-.subform-add-btn {
-	display: none;
-}

@@ -20903,7 +20903,7 @@ class db_mapObj{
 							$attributes['subform_layer_id'][$i] = $subform[0];
 							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-							for($k = 1; $k < count($subform)-1; $k++) {
+							for ($k = 1; $k < count($subform)-1; $k++) {
 								$attributes['subform_pkeys'][$i][] = $subform[$k];
 							}
 							$attributes['preview_attribute'][$i] = $subform[$k];
@@ -20914,16 +20914,19 @@ class db_mapObj{
 										case 'no_new_window': {
 											$attributes['no_new_window'][$i] = true;
 										} break;
-										case 'embedded': {														# Subformular soll embedded angezeigt werden
+										case 'embedded': {															# Subformular soll embedded angezeigt werden
 											$attributes['embedded'][$i] = true;
 										} break;
-										case 'list_edit': {														# nur Listen-Editier-Modus
+										case 'list_edit': {															# nur Listen-Editier-Modus
 											$attributes['list_edit'][$i] = true;
 										} break;
-										case 'reload': {														# die komplette Sachdatenanzeige soll neu geladen werden
+										case 'ref_edit': {															# die Referenzen sind direkt im SubForm editierbar
+											$attributes['ref_edit'][$i] = true;
+										} break;
+										case 'reload': {																# die komplette Sachdatenanzeige soll neu geladen werden
 											$attributes['reload'][$i] = true;
 										} break;
-										case 'no_subform_reload': {														# die SubForm-Liste soll nicht neu geladen werden
+										case 'no_subform_reload': {											# die SubForm-Liste soll nicht neu geladen werden
 											$attributes['no_subform_reload'][$i] = true;
 										} break;										
 										case 'show_count': {														# die Anzahl der Subform-Datensätze anzeigen
