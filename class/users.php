@@ -1517,9 +1517,6 @@ class user {
 		if ($userdaten['ips']!='') {
 			$columns['ips'] = "'" . $userdaten['ips'] . "'";
 		}
-		if ($userdaten['totp_secret']!='') {
-			$columns['totp_secret'] = "'" . $userdaten['totp_secret'] . "'";
-		}
 		if($stellen[0] != ''){
 			$columns['stelle_id'] = $stellen[0];
 		}
