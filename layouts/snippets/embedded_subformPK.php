@@ -212,8 +212,10 @@
 <?  }	?>
 		<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
 			$preview_attributes = explode(' ', $this->formvars['preview_attribute']);
-			for ($k=0;$k<$anzObj;$k++) {
+			$preview_link = '';
+			for ($k = 0; $k < $anzObj; $k++) {
 				$preview = '';
+				$output = array();
 				$dataset = $layer['shape'][$k]; # der aktuelle Datensatz
 				for ($p = 0; $p < count($preview_attributes); $p++) {
 					$output[$p] = $preview_attributes[$p];
@@ -240,21 +242,26 @@
 										$preview = $this->get_dokument_vorschau($dataset[$attributes['name'][$j]], $layer['document_path'], $layer['document_url']);
 										switch ($preview['doc_type']) {
 											case 'local_img' : {	# Bilder mit Vorschaubild
-												$preview_link = '<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_image" src="' . $preview['thumb_src'] . '"></a>';
-												$preview_link = '<table><tr><td class="td_preview_image">' . $preview_link . '</td></tr></table>';
-											}break;
-											
+												$preview_link = '
+													<table>
+														<tr>
+															<td class="td_preview_image">
+																<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_image" src="' . $preview['thumb_src'] . '"></a>
+															</td>
+														</tr>
+													</table>
+												';
+											} break;
 											case 'local_doc' : case 'remote_url' : {	# lokale Dateien oder fremde URLs
 												$preview_link = '<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_doc" src="' . $preview['thumb_src'] . '"></a>';
-											}break;
-											
+											} break;
 											case 'videostream' : {	# Videostream
 												$preview_link = '
 													<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
 														<source src="' . $preview['doc_src'] . '" type="video/mp4">
 													</video>
-													';
-											}break;
+												';
+											 } break;
 										}
 										$output[$p] = '<table><tr><td>' . $preview['original_name'] . '</td>';
 									}
@@ -278,49 +285,77 @@
 							}
 						}
 					}
-				}
-				echo '<tr style="border: none">
-								<td'. get_td_class_or_style(array($dataset[$attributes['style'][0]], 'subFormListItem')) . '>'.($preview_link != '' ? $preview_link . '</td><td valign="top">' : '');
-
-				// $preview_function_buttons = '';
-				$preview_function_buttons = '
-					<div class="preview_func_div subform-add-btn">
-						<a
-							href="javascript:void(0)"
-							onclick="checkForUnsavedChanges(event);subunlink_data(
-								' . $layer['layer_id'] . ',
-								\'' . $dataset[$layer['maintable'].'_oid'] . '\',
-								\'' . implode('\',\'', $this->formvars['attributenames']) . '\',
-								\'' . $this->formvars['targetobject'] . '\',
-								\'' . $this->formvars['targetobject'] . '\'.split(\'_\')[1]
-							)"
-						>
-							<i class="fa fa-link" title="Zuordnung entfernen"></i>
-						</a>
-						<a
-							href="javascript:void(0)"
-							onclick="checkForUnsavedChanges(event);subdelete_data(
-								' . $layer['layer_id'] . ',
-								\'record_' . $dataset[$layer['maintable'].'_oid'] . '\',
-								\'' . $dataset[$layer['maintable'].'_oid'] . '\',
-								\'' . $this->formvars['targetobject'] . '\'
-							)"
-						>
-							<i class="fa fa-trash" title="' . $strDeleteThisDataset . '"></i>
-						</a>
-					</div>
-				';
-				if ($this->formvars['embedded'] == 'true') {
-					echo '<a href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['layer_id'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].'\');">'.implode(' ', $output).'</a>' . $preview_function_buttons . '<div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'"></div></td>';
-				}
-				else {
-					echo '<a ';
-									if ($this->formvars['no_new_window'] != true) {
-										echo 	' target="_blank"';
-									}
-					echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$layer['layer_id'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&subform_link=true&attribute_privileg='.$this->formvars['attribute_privileg'].'\')">'.implode(' ', $output).'</a>' . $preview_function_buttons . '</td>
-								</tr>';
-				}
+				} ?>
+				<tr style="border: none">
+					<td <? echo get_td_class_or_style(array($dataset[$attributes['style'][0]], 'subFormListItem')); ?>><?
+				if ($preview_link != '') {
+						echo $preview_link; ?>
+					</td>
+					<td valign="top"><?
+				} ?>
+						<div class="subFormListItem left"><?
+							$table_oid = $layer['maintable'] . '_oid';
+							$search_link = 'go=Layer-Suche_Suchen&selected_layer_id=' . $layer['layer_id'] . '&value_' . $table_oid . '=' . $dataset[$table_oid] . '&subform_link=true&attribute_privileg=' . $this->formvars['attribute_privileg'];
+							$fromobject = 'subform' . $this->formvars['targetlayer_id'] . '_' . $layer['layer_id'] . $this->formvars['count'] . '_' . $k;
+							if ($this->formvars['embedded'] == 'true') { ?>
+								<a
+									href="javascript:void(0);"
+									onclick="
+										checkForUnsavedChanges(event);
+										if (document.getElementById('<? echo $fromobject; ?>').innerHTML == '') {
+											ahah(
+												'index.php',
+												'<? echo $search_link; ?>&fromobject=<? echo $fromobject; ?>&targetobject=<? echo $this->formvars['targetobject']; ?>&reload=<? echo $this->formvars['reload']; ?>&embedded=true',
+												new Array(document.getElementById('<? echo $fromobject; ?>'), ''),
+												new Array('sethtml', 'execute_function')
+											)
+										};
+										clearsubforms('<? echo $this->formvars['targetlayer_id']; ?>_<? echo $layer['layer_id']; ?>');
+									"
+								>
+									<? echo implode(' ', $output); ?>
+								</a><?
+							}
+							else { ?>
+								<a
+									href="javascript:void(0);"
+									onclick="overlay_link('<? echo $search_link; ?>')"
+									<? echo ($this->formvars['no_new_window'] != true ? ' target="_blank"' : ''); ?>
+								>
+									<? echo implode(' ', $output); ?>
+								</a><?
+							} ?>
+							<div class="subFormListItem right preview_func_div subform-add-btn">
+								<a
+									href="javascript:void(0)"
+									onclick="checkForUnsavedChanges(event);subunlink_data(
+										'<? echo $layer['layer_id']; ?>',
+										'<? echo $dataset[$layer['maintable'] . '_oid']; ?>',
+										'<? echo implode(',', $this->formvars['attributenames']); ?>',
+										'<? echo $this->formvars['targetobject']; ?>',
+										'<? echo $this->formvars['targetobject']; ?>'.split('_')[1]
+									)"
+								>
+									<i class="fa fa-link" title="Zuordnung entfernen"></i>
+								</a>
+								<a
+									href="javascript:void(0)"
+									onclick="checkForUnsavedChanges(event);subdelete_data(
+										'<? echo $layer['layer_id']; ?>',
+										'record_<? echo $dataset[$layer['maintable'].'_oid']; ?>',
+										'<? echo $dataset[$layer['maintable'].'_oid']; ?>',
+										'<? echo $this->formvars['targetobject']; ?>'
+									)"
+								>
+									<i class="fa fa-trash" title="' . $strDeleteThisDataset . '"></i>
+								</a>
+							</div>
+						</div><?
+						if ($this->formvars['embedded'] == 'true') { ?>
+							<div class="subFormListItem bottom subForm" id="<? echo $fromobject; ?>"></div><?
+						} ?>
+					</td>
+				</tr><?
 			} ?>
 		</table>
 		<div id="child_candidate_selection_div_<? echo $layer['layer_id']; ?>_<? echo $this->formvars['targetobject']; ?>" class="subform-add-btn" style="margin-left: 7px">

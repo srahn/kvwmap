@@ -977,26 +977,28 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 	 */
 	subunlink_data = function(layer_id, pk_value, fk_names, targetobject, targetattribute) {
 		console.log('subunlink_data with layer_id: %s, pk_value: %s, fk_names: %s, targetobject: %s, targetattribute: %s', layer_id, pk_value, fk_names, targetobject, targetattribute);
-		const fkNames = fk_names.split(',');
-		const tableName = targetobject.split('_')[1]; // muss auch noch an diese Funktion übergeben werden.
-		const formFieldNames = fkNames.map((key, i) => layer_id + ';' + key + ';' + tableName + ';' + pk_value + ';text;1;uuid;1');
-		formFieldNames.push(layer_id + ';' + 'uuid' + ';' + tableName + ';' + pk_value + ';text;1;uuid;1');
+		if (confirm('Wollen Sie die Zuordnung des ausgewählten Datensatzes zum übergeordneten wirklich entfernen?')) {
+			const fkNames = fk_names.split(',');
+			const tableName = targetobject.split('_')[1]; // muss auch noch an diese Funktion übergeben werden.
+			const formFieldNames = fkNames.map((key, i) => layer_id + ';' + key + ';' + tableName + ';' + pk_value + ';text;1;uuid;1');
+			formFieldNames.push(layer_id + ';' + 'uuid' + ';' + tableName + ';' + pk_value + ';text;1;uuid;1');
 
-		var formData = new FormData();
-		formData.append('go', 'Sachdaten_speichern');
-		formData.append('changed_' + layer_id + '_' + pk_value, 1);
-		formData.append('selected_layer_id', layer_id);
-		formData.append('form_field_names', formFieldNames.join('|'));
-		formFieldNames.forEach((name, i) => {
-			formData.append(name, '');
-		});
-		formData.append('targetobject', targetobject);
-		formData.append('targetlayer_id', layer_id);
-		formData.append('targetattribute', targetattribute);
-		formData.append('embedded', 'true');
-		formData.append('list_edit', '');
-		// console.log('index.php' + new URLSearchParams(formData).toString());
-		ahah('index.php', formData, new Array(document.getElementById(targetobject)), new Array('execute_function'));
+			var formData = new FormData();
+			formData.append('go', 'Sachdaten_speichern');
+			formData.append('changed_' + layer_id + '_' + pk_value, 1);
+			formData.append('selected_layer_id', layer_id);
+			formData.append('form_field_names', formFieldNames.join('|'));
+			formFieldNames.forEach((name, i) => {
+				formData.append(name, '');
+			});
+			formData.append('targetobject', targetobject);
+			formData.append('targetlayer_id', layer_id);
+			formData.append('targetattribute', targetattribute);
+			formData.append('embedded', 'true');
+			formData.append('list_edit', '');
+			// console.log('index.php' + new URLSearchParams(formData).toString());
+			ahah('index.php', formData, new Array(document.getElementById(targetobject)), new Array('execute_function'));
+		}
 	}
 
 	/**

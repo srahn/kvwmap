@@ -2311,6 +2311,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	text-align: right;
 }
 
+/*
 .subForm:not(:empty){
 	border: 1px solid #bbb;
 	margin: 10px 5px 10px 5px;
@@ -2318,16 +2319,86 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	padding: 0 5px 5px 0;
 	background: #fdfdfd;
 }
-
+*/
+/*
 .subFormListItem{
 	height: 20px;
 	padding: 0 0 8px 0;
 	vertical-align: top;
 }
+*/
 
-.subFormListItem > a{
-	/* display: flex; */
+/*
+.subFormListItem {
+	display: flex;
 	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	box-sizing: border-box;
+}
+*/
+
+/*
+.subFormListItem > a{
+	display: flex;
+	align-items: center;
+}
+*/
+
+/*
+.subFormListItem > a:before{
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	content: '';
+	margin: 2px 7px 0px 10px;
+	background-color: #236dbf;
+	vertical-align: top;
+	display: inline-block;
+}
+*/
+
+.subFormListItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+	margin: -1px;
+}
+
+.subFormListItem .left {
+  min-width: 0;
+}
+
+.subFormListItem .left > a:before {
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	content: '';
+	margin: 6px 3px 0px 0px;
+	background-color: #236dbf;
+	vertical-align: top;
+	display: inline-block;
+}
+
+.subFormListItem .right {
+  white-space: nowrap;
+}
+
+.subFormListItem .bottom {
+	display: inline-block;
+  grid-column: 1 / -1;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.subFormListItem .bottom:not(:empty) {
+	display: inline-block;
+	border: 1px solid #bbb;
+	margin: 10px 5px 10px 5px;
+	box-shadow: 0px 0px 4px #999;
+	padding: 0 5px 5px 0;
+	background: #fdfdfd;
 }
 
 .subFormShowCount{
@@ -2339,17 +2410,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin: 15 0; 
 	color: <? echo BG_GLEHEADER; ?>; 
 	background: <? echo BG_GLEHEADER; ?>;
-}
-
-.subFormListItem > a:before{
-	width: 4px;
-	height: 4px;
-	border-radius: 50%;
-	content: '';
-	margin: 8px 7px 0px 10px;
-	background-color: #236dbf;
-	vertical-align: top;
-	display: inline-block;
 }
 
 .formelement-link {
@@ -3376,21 +3436,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	height: 18px;
 }
 
-/*
-.subFormListItem {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	width: 100%;
-	box-sizing: border-box;
-}
-
-.subFormListItem > a {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-*/
 .preview_func_div {
 	display: flex;
 	align-items: center;
