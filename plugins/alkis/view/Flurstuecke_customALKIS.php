@@ -59,9 +59,8 @@ send_selected_flurst = function(go, formnummer, wz, target){
 vorgangsnummer_input = function(flst){
 	clearMessageBox();
 	message([{ type: 'confirm', msg : '\
-		Der Zugriff auf die Eigentümerdaten wird protokolliert.<br>\
-		Bitte geben Sie hierfür eine gültige Vorgangsnummer oder einen sonstigen Grund für den Zugriff an:<br><br>\
-		<input id="vorgangsnr" type="text" style="width: 400px" maxlength="50">'
+		<? echo EIGENTUEMER_SEPARAT_MESSAGE; ?><br><br>\
+		<input id="vorgangsnr" type="text" style="width: 400px" maxlength="255">'
 	}],
 	0, 
 	0, 
