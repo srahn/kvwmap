@@ -2318,6 +2318,7 @@ class GUI {
         $reference_map->reference->status = MS_ON;
 				$reference_map->reference->color->setRGB(-1,-1,-1);
 				$reference_map->reference->outlinecolor->setRGB(255,0,0);
+				$reference_map->selectOutputFormat('png');
 
         # Scalebarobject
         $map->scalebar->status = MS_ON;
@@ -3706,7 +3707,7 @@ class GUI {
 				$img_refmap->saveImage();
 				$image = ob_get_clean();
 			}
-      $this->img['referenzkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
+			$this->img['referenzkarte'] = 'data:image/png;base64,'.base64_encode($image);
       $this->Lagebezeichung=$this->getLagebezeichnung($this->user->rolle->epsg_code);
     }
 	}
@@ -16675,7 +16676,7 @@ class GUI {
 						// } break;
 						default : {
 							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
-								if ($this->formvars[$form_fields[$i]] === '') {
+								if ($this->formvars[$form_fields[$i]] == '') {									
 									$eintrag = 'NULL';
 								}
 								else {
