@@ -606,6 +606,7 @@ class GUI {
         $reference_map->reference->status = MS_ON;
 				$reference_map->reference->color->setRGB(-1,-1,-1);
 				$reference_map->reference->outlinecolor->setRGB(255,0,0);
+				$reference_map->selectOutputFormat('png');
 
         # Scalebarobject
         $map->scalebar->status = MS_ON;
