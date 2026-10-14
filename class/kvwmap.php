@@ -13760,7 +13760,6 @@ class GUI {
 			echo utf8_decode(json_encode($result));
 			exit;
 		}
-		$larsObj->setData($this->formvars);
 		$result = $larsObj->insert_or_update();
 		echo utf8_decode(json_encode($result));
 	}

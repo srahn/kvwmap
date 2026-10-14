@@ -58,7 +58,7 @@
 			$('#container_paint').css('height', 'auto');
 			resizeBootstrapTable = function() {
 				//console.log('browserwidth: ' + document.body.width);
-				$('.bootstrap-table').css('width', (document.body.offsetWidth - 200) + 'px');
+				$('.bootstrap-table').css('width', (document.body.offsetWidth - 235) + 'px');
 			};
 			window.addEventListener('resize', resizeBootstrapTable);
 
@@ -79,15 +79,24 @@
 
 				// event handler
 				$('#data_table')
-				.one('load-success.bs.table', function (e, data) {
-					resizeBootstrapTable();
-					result.success('Tabelle erfolgreich geladen');
-					registerEventHandler();
-				})
-				.on('load-error.bs.table', function (e, status) {
-					console.log('loaderror');
-					result.error('Event: load-error.bs.table');
-				});
+					.one('load-success.bs.table', function (e, data) {
+						resizeBootstrapTable();
+						result.success('Tabelle erfolgreich geladen');
+						$('.sachdatenanzeige_footer').hide();
+						registerEventHandler();
+					})
+					.on('load-error.bs.table', function (e, status) {
+						console.log('loaderror');
+						result.error('Event: load-error.bs.table');
+					})
+					.bootstrapTable({
+						fixedHeader: true, // Aktiviert den festen Tabellenkopf
+						height: 300,       // Maximale Höhe der Tabelle (in Pixeln)
+						pagination: true,  // Aktiviert die Paginierung
+						filterControl: true, // Aktiviert den Filter
+						showSearch: true,  // Zeigt die Suchleiste an
+						pageSize: 10       // Anzahl der Einträge pro Seite
+					});
 			});
 
 			function jaNeinFormatter(value, row) {
@@ -101,6 +110,11 @@
 
 			function editFormatter(value, row) {
 				var output = '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $layerset['layer_id']; ?>&value_<? echo $layerset['oid']; ?>=' + row.<? echo $layerset['oid']; ?> + '&operator_<? echo $layerset['oid']; ?>==&csrf_token=<? echo $_SESSION['csrf_token']; ?>" target="editor" title="<? echo $strEditDataset; ?>"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
+				return output;
+			}
+
+			function openLinkFormatter(value, row) {
+				var output = `<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $layerset['layer_id']; ?>&value_<? echo $layerset['oid']; ?>=${value}&operator_<? echo $layerset['oid']; ?>==&csrf_token=<? echo $_SESSION['csrf_token']; ?>" target="editor" title="Datensatz ID: ${value} öffnen">${value}</a>`;
 				return output;
 			}
 		</script>
@@ -231,26 +245,41 @@
 					border-color: #1a252f !important;
 			}
 
-
-
-
 			.collapsedfull {
 				display: none;
 			}
 
-			.fixed-table-toolbar {
-				margin-right: 28px;
+			/* Container für die Tabelle */
+			.table-wrapper {
+				max-height:100%; /* Maximale Höhe des Containers (anpassen!) */
+				overflow: hidden; /* Verhindert horizontales Scrollen */
+				border: 1px solid #dee2e6; /* Optional: Rahmen für bessere Sichtbarkeit */
 			}
 
-
-			.fixed-table-container {
-				margin-left: 5px;
-				margin-right: 28px;
+			/* Tabellenkopf bleibt fest positioniert */
+			.table-fixed-header thead {
+				position: sticky;
+				top: 0;
+				background-color: white;
+				z-index: 10;
 			}
 
-			.fixed-table-body {
-				/* margin-right: 28px; */
+			/* Tabellenkörper scrollt vertikal */
+			.table-fixed-header tbody {
+				display: block;
+				max-height: calc(500px - 40px); /* Höhe des Containers minus Höhe des Headers */
+				overflow-y: auto;
 			}
+
+			/* Optional: Spaltenbreite anpassen */
+			.table-fixed-header th,
+			.table-fixed-header td {
+				min-width: 100px; /* Beispielwert */
+			}
+			.page-size {
+				color: gray;
+			}
+
 		</style>
 		<!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
 				Here is the result of event.
@@ -262,7 +291,7 @@
 				data-unique-id="<? echo $layerset['oid']; ?>"
 				data-toggle="table"
 				data-url="index.php"
-				data-height="100%"
+				data-height="900"
 				data-click-to-select="true"
 				data-filter-control="true"
 				data-sort-name="<? echo $sort_attribute['attributename']; ?>"
@@ -275,11 +304,11 @@
 				data-show-columns="true"
 				data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<? echo $layerset['layer_id']; ?>&anzahl=10000&mime_type=formatter&format=json"
 				data-pagination="true"
-				data-page-list=[10,25,50,100,250,500,1000,all]
+				data-page-list=[25,100,250,500,1000,all]
 				data-page-size="100"
-				data-toggle="table"
 				data-toolbar="#toolbar"
-				style="position:relative;overflow:auto;height:50%"
+				data-fixed-header="true"
+				data-toggle="table"
 			>
 				<thead>
 					<tr><?
@@ -299,16 +328,14 @@
 										data-filter-control="<? echo ($layerset['attributes']['type'][$key] === 'bool' ? 'select' : 'input'); ?>"<?
 										if ($layerset['attributes']['type'][$key] === 'bool') { ?>
 											data-formatter="boolTypeFormatter"<?
+										}
+										if ($layerset['oid'] == $layerset['attributes']['name'][$key]) { ?>
+											data-formatter="openLinkFormatter"<?
 										} ?>
 									><? echo $layerset['attributes']['alias'][$key]; ?>
 								</th><?
 							}
 						} ?>
-						<th
-							data-visible="true"
-							data-formatter="editFormatter"
-							data-switchable="false"
-						>Bearbeiten</th>
 				</thead>
 			</table>
 		</div><?

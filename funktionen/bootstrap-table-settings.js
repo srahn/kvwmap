@@ -30,9 +30,14 @@ writeSwitchedOn = function(evt) {
     url: url,
     data: params,
     success: function(response) {
-      //console.log('writeAttributeSetting success: ', response);
-      debug_r = response;
+      // console.log('writeSwitchedOn success: ', response);
       if (response.success) {
+        $('.th-inner.sortable').map(function(i, field) {
+          $(field).on(
+            'click',
+            writeSortDirection
+          )
+        });
         message([{ type: 'notice', msg: 'Einstellung gespeichert'}], 1000, 500, '13%');
       }
       else {
@@ -47,7 +52,7 @@ writeSwitchedOn = function(evt) {
 }
 
 writeSortDirection = function(evt) {
-  // console.log('writeSortDirection');
+  console.log(`writeSortDirection data-field: ${$(evt.target).parent().attr('data-field')}`);
   var target = $(evt.target),
       sortDirection,
       params = {

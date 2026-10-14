@@ -708,7 +708,8 @@ class PgObject {
 			$this->data = $data;
 		}
 		foreach ($this->identifiers AS $identifier) {
-			if ($this->data[$identifier['column']] == '' OR $this->data[$identifier['column']] == 0) { 
+			$value = $this->data[$identifier['column']];
+			if ((is_string($value) && $value === '') || (is_int($value) && $value === 0)) {
 				unset($this->data[$identifier['column']]);
 			}
 		}
@@ -1056,23 +1057,16 @@ class PgObject {
 		$this->debug->show('setKeysFromFormvars', PgObject::$write_debug);
 		$result = $this->getColumnsFromTable();
 		if (!$result['success']) {
-			echo '<br>hier';
 			return $result;
 		}
-		$this->data = array_map(
-			function($attribute) { return null; },
-			array_flip(
-				array_intersect(
-					array_keys($formvars),
-					array_map(
-						function($attribute) {
-							return $attribute['column_name'];
-						},
-						$this->columns
-					)
-				)
-			)
-		);
+
+		$this->data = array();
+		foreach ($this->columns AS $column) {
+			if (array_key_exists($column['column_name'], $formvars)) {
+				$this->set($column['column_name'], $formvars[$column['column_name']]);
+			}
+		}
+
 		return array(
 			'success' => true,
 			'data' => $this->data
