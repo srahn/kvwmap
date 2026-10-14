@@ -82,7 +82,7 @@ class ddl extends drucklayout{
     }
     # Nutzer
     if($this->layout['usersize'] AND $this->layout['font_user']){
-			echo $this->layout['font_user'];
+			// echo $this->layout['font_user'];
 			$x = $this->layout['userposx'];
 			$y = $this->layout['userposy'] - $offsety;
 			$this->putText('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name, $this->layout['usersize'], NULL, $x, $y, $offsetx);
