@@ -673,6 +673,10 @@ span[data-tooltip]:hover::after {
 	margin-left: 0px;
 }
 
+input[type="checkbox"]:indeterminate {
+  background-color: lightgray;
+}
+
 .input-form input[type=reset] {
 	float: none;
 	text-align: center;
