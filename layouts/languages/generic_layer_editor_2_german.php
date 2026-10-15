@@ -30,6 +30,7 @@
   $strRefDel="Zuordnung entfernen";
   $strRemember="merken";
   $strRememberDataset="Datensatz merken";
+  $strShowSingleDatasetLink="Zeigt Datensatz einzeln an";
   $strSelectAll="alle auswählen";
   $strSelectAllShown="alle angezeigten auswählen";
   $strSelectedDatasets="ausgewählte Datensätze";

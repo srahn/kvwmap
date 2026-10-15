@@ -874,9 +874,9 @@
 				$options = $attributes['options'][$j];
 				$link_type = explode(':', $options)[0];
 				for ($a = 0; $a < count($attributes['name']); $a++) {
-					if(strpos($options, '$'.$attributes['name'][$a]) !== false){
+					if (strpos($options, '$'.$attributes['name'][$a]) !== false){
 						$options = str_replace(
-							'$'.$attributes['name'][$a],
+							'$' . $attributes['name'][$a],
 							($link_type == 'mailto' ? rawurlencode($dataset[$attributes['name'][$a]]) : $dataset[$attributes['name'][$a]]),
 							$options
 						);
@@ -939,12 +939,19 @@
 								$href = $link_type . ':' . $mail_addresses[0] . '?' . implode('&', $params);
 							} break;
 						}
+						// $datapart .= '<a
+						// 	tabindex="1"
+						// 	target="' . $link_target . '"
+						// 	class="dynamicLink"
+						// 	onclick="' . $onclick . '"
+						// 	href="' . urlencode2(add_csrf($href)) . '"
+						// >' . 'a2:' . $alias . '</a><br>';	
 						$datapart .= '<a
 							tabindex="1"
 							target="' . $link_target . '"
 							class="dynamicLink"
 							onclick="' . $onclick . '"
-							href="' . urlencode2(add_csrf($href)) . '"
+							href="' . add_csrf($href) . '"
 						>' . $alias . '</a><br>';	
 					}
 				}
