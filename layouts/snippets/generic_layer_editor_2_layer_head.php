@@ -69,7 +69,20 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 									else { ?>
 										<td><a title="<? echo $strRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['layer_id']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['layer_id']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 									}	?>
-									<td><a title="<? echo $strCreateDatasetLink; ?>" href="javascript:void(0)" onclick="showURL('go=Layer-Suche_Suchen&selected_layer_id=<? echo $layer['layer_id']; ?>&value_<? echo $layer['maintable']; ?>_oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', '<? echo $strCreateDatasetLink; ?>');"><div class="button url_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td> <?
+									<td>
+										<a title="<? echo $strShowSingleDatasetLink; ?>" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $layer['layer_id']; ?>&value_<? echo $layer['maintable']; ?>_oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>">
+											<div class="button single_dataset">
+												<img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+											</div>
+										</a>
+									</td>
+									<td>
+										<a title="<? echo $strCreateDatasetLink; ?>" href="javascript:void(0)" onclick="showURL('go=Layer-Suche_Suchen&selected_layer_id=<? echo $layer['layer_id']; ?>&value_<? echo $layer['maintable']; ?>_oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', '<? echo $strCreateDatasetLink; ?>');">
+											<div class="button url_dataset">
+												<img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+											</div>
+										</a>
+									</td><?
 								}
 								if ($layer['privileg'] > '0') { ?>
 									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['layer_id']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['layer_id']; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="button use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>

@@ -872,8 +872,9 @@
 				$one_param_is_null = false;
 				$options = $attributes['options'][$j];
 				for ($a = 0; $a < count($attributes['name']); $a++) {
-					if(strpos($options, '$'.$attributes['name'][$a]) !== false){
-						$options = str_replace('$'.$attributes['name'][$a], rawurlencode($dataset[$attributes['name'][$a]]), $options);
+					if (strpos($options, '$'.$attributes['name'][$a]) !== false){
+						// $options = str_replace('$' . $attributes['name'][$a], rawurlencode($dataset[$attributes['name'][$a]]), $options);
+						$options = str_replace('$' . $attributes['name'][$a], $dataset[$attributes['name'][$a]], $options);
 						if ($dataset[$attributes['name'][$a]] == '') {
 							$one_param_is_null = true;
 						}
@@ -935,12 +936,19 @@
 								$href = $link_type . ':' . $mail_addresses[0] . '?' . implode('&', $params);
 							} break;
 						}
+						// $datapart .= '<a
+						// 	tabindex="1"
+						// 	target="' . $link_target . '"
+						// 	class="dynamicLink"
+						// 	onclick="' . $onclick . '"
+						// 	href="' . urlencode2(add_csrf($href)) . '"
+						// >' . 'a2:' . $alias . '</a><br>';	
 						$datapart .= '<a
 							tabindex="1"
 							target="' . $link_target . '"
 							class="dynamicLink"
 							onclick="' . $onclick . '"
-							href="' . urlencode2(add_csrf($href)) . '"
+							href="' . add_csrf($href) . '"
 						>' . $alias . '</a><br>';	
 					}
 				}

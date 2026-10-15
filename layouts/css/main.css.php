@@ -1284,6 +1284,10 @@ a.menuered:hover {
 	background-image: url(<? echo GRAPHICSPATH; ?>use_for_dataset.png);
 }
 
+.single_dataset {
+	background-image: url(<? echo GRAPHICSPATH; ?>button_ansicht.png);
+}
+
 .copy_dataset{
 	background-image: url(<? echo GRAPHICSPATH; ?>copy_dataset.png);
 }
