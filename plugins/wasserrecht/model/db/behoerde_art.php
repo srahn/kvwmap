@@ -1,7 +1,7 @@
 <?php
 class BehoerdeArt extends WrPgObject {
     
-    protected $tableName = 'fiswrv_behoerde_art';
+    public static $tableName = 'fiswrv_behoerde_art';
     /**
      * {@inheritDoc}
      * @see WrPgObject::toString()

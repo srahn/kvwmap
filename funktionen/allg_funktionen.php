@@ -106,7 +106,7 @@ function mapserverExp2SQL($exp, $classitem) {
 	if (strpos($exp, ' IN ') != false) {
 		$array = get_first_word_after($exp, ' IN');
 		$exp = str_replace(' IN ', '::text = ANY(ARRAY[', $exp);
-		$exp = str_replace($array, $array . '])', $exp);
+		$exp = str_replace($array, $array . ']::text[])', $exp);
 	}
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
@@ -218,9 +218,13 @@ function replace_tags($text, $tags) {
 }
 
 function format_human_filesize($bytes, $precision = 2) {
-	$sz = 'BKMGTP';
-	$factor = floor((strlen($bytes) - 1) / 3);
-	return sprintf("%." . $precision. "f", $bytes / pow(1024, $factor)) . ' ' . @$sz[$factor] . 'B';
+	$units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+	$factor = 0;
+	while ($bytes >= 1024 && $factor < count($units) - 1) {
+		$bytes /= 1024;
+		$factor++;
+	}
+	return sprintf("%.{$precision}f %s", $bytes, $units[$factor]);
 }
 
 function human_filesize($file) {
@@ -2131,14 +2135,20 @@ function urlEncodeUrl($url) {
 function url_get_contents($url, $username = NULL, $password = NULL, $useragent = NULL) {
 	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
-		$ctx['http']['timeout'] = 20;
+		$headers = [];
 		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
 		if ($useragent) {
-			$ctx['http']['header'] = 'User-Agent: ' . $useragent;
+			$headers[] = 'User-Agent: ' . $useragent;
 		}
 		if ($username) {
-			$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username . ':' . $password);
+			$headers[] = 'Authorization: Basic ' . base64_encode($username . ':' . $password);
 		}
+		$ctx['http']['header'] = implode("\r\n", $headers);
+		$ctx['http']['method'] = 'GET';
+		$ctx['http']['protocol_version'] = 1.1;
+		$ctx['http']['timeout'] = 20;
+		$ctx['http']['ignore_errors'] = true;
+
 		$proxy = getenv('HTTP_PROXY');
 		if ($proxy != '' AND $hostname != 'localhost') {
 			$ctx['http']['proxy'] = $proxy;
@@ -2353,7 +2363,6 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 			}
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
-				chmod(MAILQUEUEPATH, 'g+w');
 			}
 			$file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
 			$success = file_put_contents(

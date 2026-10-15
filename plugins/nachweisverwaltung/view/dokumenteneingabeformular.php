@@ -246,6 +246,10 @@ $legendheight = $this->map->height + 20;
 	.dokein-draw-child {
 		margin-left: 10px;
 	}
+
+	.slidinglegend_slideout {
+  	transform: translate3d(-25px,0px,0px);
+	}
 </style>
 
 
@@ -519,7 +523,6 @@ $legendheight = $this->map->height + 20;
 				<tr>
 					<td valign="top">
 						<div id="legenddiv" onclick="slide_legend_in(event)" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
-						<div id="legenddiv" onclick="slide_legend_in(event)"  class="slidinglegend_slideout">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left">

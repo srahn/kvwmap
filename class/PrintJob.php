@@ -71,6 +71,7 @@ class PrintJob extends PgObject {
 		$this->gui->formvars['chosen_layer_id'] = $this->get('layer_id');
 		$this->gui->formvars['checkbox_names_' . $this->get('layer_id')] = 'check;' . $this->get('table_alias') . ';' . $this->get('table_name') . ';' . $this->get('feature_id') . ';' . $this->get('layer_id');
 		$this->gui->formvars['check;' . $this->get('table_alias') . ';' . $this->get('table_name') . ';' . $this->get('feature_id') . ';' . $this->get('layer_id')] = 'on';
+		$this->gui->qlayerset[0]['shape'] = null;
 		$result = $this->gui->generischer_sachdaten_druck_createPDF();
 		$dest_path = pathinfo($this->get('pdf_path'),  PATHINFO_DIRNAME);
 		if (!is_dir($dest_path)) {
@@ -85,7 +86,8 @@ class PrintJob extends PgObject {
 		}
 		return array(
 			'success' => true,
-			'msg' => 'Datei ' . $this->get('pdf_path') . ' mit Druckjob id: ' . $this->get_id() . ' gedruckt.'
+			'msg' => 'Datei ' . $this->get('pdf_path') . ' mit Druckjob id: ' . $this->get_id() . ' gedruckt.',
+			'pdf_path' => $this->get('pdf_path')
 		);
 	}
 }

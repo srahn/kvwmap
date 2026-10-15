@@ -1226,6 +1226,9 @@ class GUI {
 				#$map->set('interlace', MS_ON);
 				$map->status = MS_ON;
 				$map->name = MAPFILENAME;
+				if ($this->user->rolle->epsg_code == 4326) {
+					$map->units = MS_DD;
+				}
 
 				if (MS_DEBUG_LEVEL !== NULL) {
 					$map->setConfigOption('MS_ERRORFILE', dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
@@ -2209,10 +2212,6 @@ class GUI {
 
 		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
-		if ($this->user->rolle->epsg_code == 4326) {
-			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-			$this->map_scaledenom = degree2meter($center_y) * $this->map_scaledenom;
-		}
     $this->switchScaleUnitIfNecessary();
 		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
@@ -3710,7 +3709,8 @@ class rolle {
 								' . $this->stelle_id . ", 
 								'" . $time . "', 
 								" . $layer[$i] . '
-							)';
+							)
+							ON CONFLICT (user_id, stelle_id, time_id, layer_id) DO NOTHING';
 						#echo '<p>SQL zum Eintragen des consumierten Layers: ' . $sql;
             $ret=$this->database->execSQL($sql,4, 1);
             if ($ret[0]) {
@@ -4370,7 +4370,7 @@ class db_mapObj{
 				}
 				else {
 					$type = $attributes['type'][$i];
-					$default = '(' . $attributes['default'][$i] . ')::' . $type;
+					$default = '(select ' . $attributes['default'][$i] . ')::' . $type;
 				}
 				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {

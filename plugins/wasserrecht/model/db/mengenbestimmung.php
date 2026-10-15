@@ -1,6 +1,6 @@
 <?php
 class Mengenbestimmung extends WrPgObject {
 
-	protected $tableName = 'fiswrv_mengenbestimmung';
+	public static $tableName = 'fiswrv_mengenbestimmung';
 }
 ?>

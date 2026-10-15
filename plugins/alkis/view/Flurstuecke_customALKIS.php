@@ -1118,7 +1118,7 @@ hide_versions = function(flst){
 <input type="hidden" name="selected_layer_id" value="<? echo $this->formvars['selected_layer_id']; ?>">
 
 <?
-if($this->formvars['go'] != 'neu Laden' AND $this->formvars['go'] != 'Layer-Suche' AND $this->formvars['go'] != 'Layer-Suche_Suchen' AND $this->formvars['go'] != 'Sachdaten'){
+if (!in_array($this->formvars['go'], ['neu Laden', 'Layer-Suche', 'Layer-Suche_Suchen', 'Sachdaten', 'Sachdaten_speichern'])){
 ?>
 <input name="go" type="hidden" value="">
 <input type="hidden" name="go_backup" value="">

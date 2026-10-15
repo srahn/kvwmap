@@ -346,7 +346,7 @@ class GUI {
 			date("Y:m:d H:i:s", time()) .
 			' IP: ' . get_remote_ip() .
 			' Port: ' . $_SERVER['REMOTE_PORT'] .
-			' User: ' . $login_name .
+			' User: ' . $this->formvars['login_name'] .
 			' User agent: ' .
 			getenv('HTTP_USER_AGENT')
 		);
@@ -1852,7 +1852,6 @@ class GUI {
 				$layersection = substr($layersection, 0, $pos_und);
 				$url = substr_replace($url, '', $pos_layers, $pos_und);		# layers rausschneiden
 			}
-			$url = substr_replace($url, '', $pos_layers);		# layers rausschneiden
 		}
 		else {
 			$layersection = $layer['wms_name'];
@@ -2198,6 +2197,9 @@ class GUI {
 				#$map->set('interlace', MS_ON);
 				$map->status = MS_ON;
 				$map->name = MAPFILENAME;
+				if ($this->user->rolle->epsg_code == 4326) {
+					$map->units = MS_DD;
+				}
 
 				if (MS_DEBUG_LEVEL !== NULL) {
 					$map->setConfigOption('MS_ERRORFILE', dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
@@ -3626,10 +3628,6 @@ class GUI {
 
 		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
-		if ($this->user->rolle->epsg_code == 4326) {
-			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-			$this->map_scaledenom = degree2meter($center_y) * $this->map_scaledenom;
-		}
     $this->switchScaleUnitIfNecessary();
 		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
@@ -6510,7 +6508,7 @@ class GUI {
 		$this->formvars['data'] = $datastring;
 		$this->formvars['query'] = $select;
 		$this->formvars['datentyp'] = $layerset[0]['datentyp'];
-		$this->formvars['classitem'] = ($auto_class_attribute != ''? $layerset[0]['classitem'] : NULL);
+		$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$this->formvars['connectiontype'] = 6;
 		if ($layerset[0]['labelitem'] != 'Cluster_FeatureCount') {
 			$this->formvars['labelitem'] = $layerset[0]['labelitem'];
@@ -6740,6 +6738,9 @@ class GUI {
 
 			# Fonts auslesen
 			$this->Document->fonts = $this->Document->get_fonts();
+			$this->Document->ttffonts = array_values(array_filter($this->Document->fonts, function ($font) {
+				return strtolower(pathinfo($font['value'], PATHINFO_EXTENSION)) === 'ttf';
+			}));
 			$this->Document->din_formats = $this->Document->get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
@@ -8513,7 +8514,13 @@ class GUI {
 			$layer = $this->map->getLayer($i);
 			$layer->name = sonderzeichen_umwandeln($layer->name);
 			$layer->metadata->set("ows_title", $layer->name);
-			$layer->metadata->set("ows_extent", implode(', ', $bb));
+			$rect = rectObj($bb[0], $bb[1], $bb[2], $bb[3]);
+			if ($layer->metadata->get('ows_srs') != 'EPSG:' . $this->user->rolle->epsg_code){
+				$projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
+				$projTO = new projectionObj("init=" . $layer->metadata->get('ows_srs'));
+				$rect->project($projFROM, $projTO);
+			}
+			$layer->metadata->set("ows_extent", round($rect->minx) . ' ' . round($rect->miny) . ' ' . round($rect->maxx) . ' ' . round($rect->maxy));
 			$layer->metadata->set("ows_srs", OWS_SRS . ' EPSG:3857');
 			$this->exportierte_layer[] = $layer->name;
 		}
@@ -10216,38 +10223,46 @@ class GUI {
 	}
 
 	function invitation_send_email($invitation) {
-		if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
-			$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $invitation->get('email'), null, MAILREPLYADDRESS, $invitation->get_subject(), $invitation->get_body(), '', 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $invitation->get('vorname') . ' ' . $invitation->get('name'), PUBLISHERNAME);
-			if (!$mail) {
-				$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
+		if ($this->formvars['send_email']) {
+			if (MAILMETHOD == 'PHPMailer' AND file_exists(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHPMailer/src/PHPMailer.php')) {
+				$mail = mail_att(PUBLISHERNAME, MAILREPLYADDRESS, $invitation->get('email'), null, MAILREPLYADDRESS, $invitation->get_subject(), $invitation->get_body(), '', 'PHPMailer', MAILSMTPSERVER, MAILSMTPPORT, $invitation->get('vorname') . ' ' . $invitation->get('name'), PUBLISHERNAME);
+				if (!$mail) {
+					$this->add_message('error', 'Fehler beim Versenden der Einladungs E-Mail.<br>Fehler: ' . $mail->ErrorInfo);
+				}
+				else {
+					$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $invitation->get('email'));
+				}
 			}
 			else {
-				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>Einladung erfolgreich per E-Mail gesendet an ' . $invitation->get('email'));
+			$result = mail_att(
+					PUBLISHERNAME, // from_name
+					MAILREPLYADDRESS, // from_email
+					$invitation->get('email'),
+					NULL, // cc_email
+					MAILREPLYADDRESS, // reply_email
+					$invitation->get_subject(),
+					$invitation->get_body(), // message
+					'', // attachment
+					MAILMETHOD, // mode
+					MAILSMTPSERVER,
+					MAILSMTPPORT,
+					$invitation->get('vorname') . ' ' . $invitation->get('name'),
+					PUBLISHERNAME
+				);
+
+				if ($result === 1) {
+					$this->add_message('notice', 'E-Mail erfolgreich in der Queue im Ordner: ' . MAILQUEUEPATH . ' abgelegt.');
+				}
+				else {
+					$this->add_message('info','Neuer Nutzer ist vorgemerkt.<br>Zum Einladen per E-Mail<br>klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>Die E-Mail enthält den Link zur Einladung.');
+				}
 			}
 		}
 		else {
-     $result = mail_att(
-        PUBLISHERNAME, // from_name
-        MAILREPLYADDRESS, // from_email
-        $invitation->get('email'),
-        NULL, // cc_email
-        MAILREPLYADDRESS, // reply_email
-        $invitation->get_subject(),
-        $invitation->get_body(), // message
-        '', // attachment
-        MAILMETHOD, // mode
-        MAILSMTPSERVER,
-        MAILSMTPPORT,
-        $invitation->get('vorname') . ' ' . $invitation->get('name'),
-				PUBLISHERNAME
-    	);
-
-			if ($result === 1) {
-				$this->add_message('notice', 'E-Mail erfolgreich in der Queue im Ordner: ' . MAILQUEUEPATH . ' abgelegt.');
-			}
-			else {
-				$this->add_message('info','Neuer Nutzer ist vorgemerkt.<br>Zum Einladen per E-Mail<br>klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>Die E-Mail enthält den Link zur Einladung.');
-			}
+			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+				Zum Einladen per E-Mail<br>
+				klicken Sie <a href="mailto:' . $invitation->mailto_text() . '">hier</a>!<br>
+				Die E-Mail enthält den Link zur Einladung.');
 		}
 	}
 
@@ -10399,7 +10414,7 @@ class GUI {
 		switch ($layerset[0]['connectiontype']) {
 			case MS_POSTGIS : {
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-				$layerset[0]['pfad'] = $this->formvars['query'] ?: $layerset[0]['pfad'];	// $this->formvars['query'] ist optional, falls man query vom Layer angepasst verwenden will
+				// $layerset[0]['pfad'] = $this->formvars['query'] ?: $layerset[0]['pfad'];	// $this->formvars['query'] ist optional, falls man query vom Layer angepasst verwenden will
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
 				if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
@@ -10501,12 +10516,20 @@ class GUI {
 									case 'IN' : case 'NOT IN' : {
 										$parts = explode('|', $value);
 										for($j = 0; $j < count($parts); $j++){
-											if(substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
-											if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
+											if ($parts[$j] != '') {
+												if (substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
+												if (substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
+											}
+											else {
+												$parts[$j] = "''";
+												$is_null = ($operator == 'IN'? ' OR ' : ' AND ') . $attr . ' IS NULL';
+											}
 										}
 										$instring = implode(',', $parts);
-										if($layerset[0]['attributes']['type'][$i] != 'bool')$attr = 'CAST('.$attr.' AS TEXT)';
-										$sql_where .= ' AND ' . $attr . ' ' . $operator . ' (' . $instring . ')';
+										if ($layerset[0]['attributes']['type'][$i] != 'bool') {
+											$attr = 'CAST('.$attr.' AS TEXT)';
+										}
+										$sql_where .= ' AND ' . $attr . ' ' . $operator . ' (' . $instring . ')' . $is_null;
 										if($value_like != ''){			# Parameter wieder auf die der LIKE-Suche setzen
 											$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] = $operator_like;
 											$this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]] = $value_like;
@@ -11669,6 +11692,37 @@ class GUI {
 								$this->formvars[$table['formfield'][$i]] = ''; # leeren, for the case weiter_erfassen angehakt
 							} break;
 
+							case ($table['type'][$i] == 'ExifLatLng') : {
+								$document_attribute_name = $attribute_options;
+
+								if (!$exif_data[$document_attribute_name]) {
+									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+								}
+								if ($exif_data[$document_attribute_name]['success']) {
+									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['LatLng'] ? "'" . $exif_data[$document_attribute_name]['LatLng'] . "'" : "NULL");
+								}
+							} break;
+
+							case ($table['type'][$i] == 'ExifRichtung') : {
+								$document_attribute_name = $attribute_options;
+								if (!$exif_data[$document_attribute_name]) {
+									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+								}
+								if ($exif_data[$document_attribute_name]['success']) {
+									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Richtung'] ? $exif_data[$document_attribute_name]['Richtung'] : "NULL");
+								}
+							} break;
+
+							case ($table['type'][$i] == 'ExifErstellungszeit') : {
+								$document_attribute_name = $attribute_options;
+								if (!$exif_data[$document_attribute_name]) {
+									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+								}
+								if ($exif_data[$document_attribute_name]['success']) {
+									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Erstellungszeit']  ? "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'" : "NULL");
+								}
+							} break;							
+
 							case (
 								$table['saveable'][$i] AND
 								$table['type'][$i] != 'SubFormPK' AND
@@ -11707,37 +11761,6 @@ class GUI {
 									};
 
 									$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]] . "'"; # Typ "normal"
-								}
-							} break;
-
-							case ($table['type'][$i] == 'ExifLatLng') : {
-								$document_attribute_name = $attribute_options;
-
-								if (!$exif_data[$document_attribute_name]) {
-									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
-								}
-								if ($exif_data[$document_attribute_name]['success']) {
-									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['LatLng'] ? "'" . $exif_data[$document_attribute_name]['LatLng'] . "'" : "NULL");
-								}
-							} break;
-
-							case ($table['type'][$i] == 'ExifRichtung') : {
-								$document_attribute_name = $attribute_options;
-								if (!$exif_data[$document_attribute_name]) {
-									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
-								}
-								if ($exif_data[$document_attribute_name]['success']) {
-									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Richtung'] ? $exif_data[$document_attribute_name]['Richtung'] : "NULL");
-								}
-							} break;
-
-							case ($table['type'][$i] == 'ExifErstellungszeit') : {
-								$document_attribute_name = $attribute_options;
-								if (!$exif_data[$document_attribute_name]) {
-									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
-								}
-								if ($exif_data[$document_attribute_name]['success']) {
-									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Erstellungszeit']  ? "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'" : "NULL");
 								}
 							} break;
 
@@ -13658,6 +13681,7 @@ class GUI {
 		if ($this->formvars['selected_layer_id'] != '') {
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true, $this->Stelle->id);
 			$this->stellen = $mapdb->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
 		}
@@ -16604,7 +16628,7 @@ class GUI {
 						// } break;
 						default : {
 							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
-								if ($this->formvars[$form_fields[$i]] === '') {
+								if ($this->formvars[$form_fields[$i]] == '') {									
 									$eintrag = 'NULL';
 								}
 								else {
@@ -19557,6 +19581,7 @@ class db_mapObj{
 				kvwmap.u_groups AS g ON l.gruppe = g.id LEFT JOIN
 				kvwmap.connections AS c ON l.connection_id = c.id
 			WHERE
+				" . ($this->nurAktiveLayer ? " (l.aktivstatus != 0) AND " : '') . "
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
@@ -22835,7 +22860,7 @@ DO $$
 				}
 				else {
 					$type = $attributes['type'][$i];
-					$default = '(' . $attributes['default'][$i] . ')::' . $type;
+					$default = '(select ' . $attributes['default'][$i] . ')::' . $type;
 				}
 				$ret1 = $layerdb->execSQL('SELECT ' . $default, 4, 0);
 				if ($ret1[0] == 0) {

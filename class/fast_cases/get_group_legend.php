@@ -607,6 +607,9 @@ class GUI {
 				#$map->set('interlace', MS_ON);
 				$map->status = MS_ON;
 				$map->name = MAPFILENAME;
+				if ($this->user->rolle->epsg_code == 4326) {
+					$map->units = MS_DD;
+				}
 
 				if (MS_DEBUG_LEVEL !== NULL) {
 					$map->setConfigOption('MS_ERRORFILE', dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
@@ -2047,12 +2050,13 @@ class GUI {
 		if (strpos(strtolower($url), 'version') === false) {
 			$url .= '&version=' . $layer['wms_server_version'];
 		}
-		$pos = strpos(strtolower($layer['connection']), 'layers');
-		if ($pos !== false) {
-			$layersection = substr($layer['connection'], $pos + 7);
-			$pos = strpos($layersection, '&');
-			if ($pos !== false) {
-				$layersection = substr($layersection, 0, $pos);
+		$pos_layers = strpos(strtolower($layer['connection']), 'layers');
+		if ($pos_layers !== false) {
+			$layersection = substr($layer['connection'], $pos_layers + 7);
+			$pos_und = strpos($layersection, '&');
+			if ($pos_und !== false) {
+				$layersection = substr($layersection, 0, $pos_und);
+				$url = substr_replace($url, '', $pos_layers, $pos_und);		# layers rausschneiden
 			}
 		}
 		else {

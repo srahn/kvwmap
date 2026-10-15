@@ -1,7 +1,7 @@
 <?php
 class Personen extends WrPgObject {
 
-	protected $tableName = 'fiswrv_personen';
+	public static $tableName = 'fiswrv_personen';
 	
 	public $adresse;
 	

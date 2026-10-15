@@ -1,7 +1,7 @@
 <?php
 class GewaesserbenutzungenWeeSatz extends WrPgObject {
 
-	protected $tableName = 'fiswrv_gewaesserbenutzungen_wee_satz';
+	public static $tableName = 'fiswrv_gewaesserbenutzungen_wee_satz';
 	
 	public function getSatzGW_Befreit() {
 	    return $this->data['satz_gw_befreit'];

@@ -10,4 +10,5 @@
 	$this->strMisses="Mrs.";
 	$this->strDivers="X";
 	$strStop="valid until";
+	$strSendEmail='send Email';
 ?>
