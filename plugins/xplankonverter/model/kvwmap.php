@@ -520,7 +520,7 @@
 
 	$GUI->xplankonverter_create_plaene = function() use ($GUI) {
 		# Anlegen von Plan und Bereich der Zusammenzeichnung
-		$result = $GUI->konvertierung->create_plaene_from_gmlas('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class, $GUI->konvertierung->get_id(), true);
+		$result = $GUI->konvertierung->create_plaene_from_gmlas('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class, $GUI->konvertierung->get_id(), true, true);
 		if (!$result['success']) {
 			$GUI->konvertierung->set('error_id', 3);
 			$GUI->konvertierung->update();
