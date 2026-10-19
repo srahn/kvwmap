@@ -65,7 +65,7 @@ use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
 			$add_link = '<a
 					tabindex="1"
 					id="hinzufuegen_button_' . $layer['layer_id'] . '_' . $this->formvars['targetobject'] . '"
-					class="buttonlink subform-add-btn"
+					class="buttonlink"
 					href="javascript:load_subform_child_candidates(
 						\'' . $this->formvars['targetobject'] . '\',
 						\'' . $this->formvars['selected_layer_id'] . '\',
@@ -334,7 +334,7 @@ use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
 					</td>
 					<td valign="top"><?
 				} ?>
-						<div class="subFormListItem left"><?
+						<div class="preview_div"><?
 							$table_oid = $layer['maintable'] . '_oid';
 							$search_link = 'go=Layer-Suche_Suchen&selected_layer_id=' . $layer['layer_id'] . '&value_' . $table_oid . '=' . $dataset[$table_oid] . '&subform_link=true&attribute_privileg=' . $this->formvars['attribute_privileg'];
 							$fromobject = 'subform' . $this->formvars['targetlayer_id'] . '_' . $layer['layer_id'] . $this->formvars['count'] . '_' . $k;
@@ -367,7 +367,7 @@ use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
 								</a><?
 							}
 							if ($add_link != '') { ?>
-								<div class="subFormListItem right preview_func_div subform-add-btn">
+								<div class="func_div">
 									<a
 										href="javascript:void(0)"
 										onclick="checkForUnsavedChanges(event);subunlink_data(
@@ -394,19 +394,19 @@ use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
 											'<? echo $this->formvars['targetobject']; ?>'
 										)"
 									>
-										<i class="fa fa-trash" title="' . $strDeleteThisDataset . '"></i>
+										<i class="fa fa-trash" title="<? echo $strDeleteThisDataset; ?>"></i>
 									</a>
 								</div><?
 							} ?>
 						</div><?
 						if ($this->formvars['embedded'] == 'true') { ?>
-							<div class="subFormListItem bottom subForm" id="<? echo $fromobject; ?>"></div><?
+							<div class="subForm" id="<? echo $fromobject; ?>"></div><?
 						} ?>
 					</td>
 				</tr><?
 			} ?>
 		</table>
-		<div id="child_candidate_selection_div_<? echo $layer['layer_id']; ?>_<? echo $this->formvars['targetobject']; ?>" class="subform-add-btn" style="margin-left: 7px">
+		<div id="child_candidate_selection_div_<? echo $layer['layer_id']; ?>_<? echo $this->formvars['targetobject']; ?>" style="margin-left: 7px">
 		</div>
 		<table width="100%">
 			<tr>

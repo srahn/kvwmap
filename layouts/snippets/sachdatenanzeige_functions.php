@@ -729,7 +729,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				const header = document.createElement('div');
 				header.style.fontSize = '12px';
 				header.style.marginBottom = '3px';
-				header.textContent = 'Wähle ein untergeordneten Datensatz zum hinzufügen aus der Liste:';
+				header.textContent = 'Wählen Sie einen untergeordneten Datensatz zum Hinzufügen aus der Liste:';
 				div.appendChild(header);
 
 				// Container für das <select> und den Abbruch-Button erstellen

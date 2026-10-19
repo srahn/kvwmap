@@ -1410,53 +1410,30 @@ tbody.gle>tr {
 	margin: 2px 2px 2px 0;
 }
 
-/*
 .subFormListItem{
 	height: 20px;
-	padding: 0;
-}
-*/
-
-/*
-.subFormListItem {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	width: 100%;
-	box-sizing: border-box;
-}
-*/
-
-/*
-.subFormListItem > a:before{
-	content:url('../../graphics/submenue.png');
+	padding: 0 4px 8px 0;
 	vertical-align: top;
 }
-*/
 
-/*
-.subFormListItem > a {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-*/
-
-.subFormListItem {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+.subFormListItem > .preview_div{
+	display: flex;
+	align-items: center;
 }
 
-.subFormListItem .left {
-  min-width: 0;
+.subFormListItem > .preview_div:before{
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	content: '';
+	margin: 2px 7px 0px 10px;
+	background-color: #236dbf;
+	vertical-align: top;
+	display: inline-block;
 }
 
-.subFormListItem .right {
-  white-space: nowrap;
-}
-
-.subFormListItem .bottom {
-  grid-column: 1 / -1;
+.subFormListItem > .preview_div > .func_div {
+	margin-left: auto;
 }
 
 .gle_hr{

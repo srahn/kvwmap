@@ -2319,7 +2319,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	text-align: right;
 }
 
-/*
 .subForm:not(:empty){
 	border: 1px solid #bbb;
 	margin: 10px 5px 10px 5px;
@@ -2327,34 +2326,19 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	padding: 0 5px 5px 0;
 	background: #fdfdfd;
 }
-*/
-/*
+
 .subFormListItem{
 	height: 20px;
-	padding: 0 0 8px 0;
+	padding: 0 4px 8px 0;
 	vertical-align: top;
 }
-*/
 
-/*
-.subFormListItem {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	width: 100%;
-	box-sizing: border-box;
-}
-*/
-
-/*
-.subFormListItem > a{
+.subFormListItem > .preview_div{
 	display: flex;
 	align-items: center;
 }
-*/
 
-/*
-.subFormListItem > a:before{
+.subFormListItem > .preview_div:before{
 	width: 4px;
 	height: 4px;
 	border-radius: 50%;
@@ -2364,49 +2348,9 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	vertical-align: top;
 	display: inline-block;
 }
-*/
 
-.subFormListItem {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-	margin: -1px;
-}
-
-.subFormListItem .left {
-  min-width: 0;
-}
-
-.subFormListItem .left > a:before {
-	width: 4px;
-	height: 4px;
-	border-radius: 50%;
-	content: '';
-	margin: 6px 3px 0px 0px;
-	background-color: #236dbf;
-	vertical-align: top;
-	display: inline-block;
-}
-
-.subFormListItem .right {
-  white-space: nowrap;
-}
-
-.subFormListItem .bottom {
-	display: inline-block;
-  grid-column: 1 / -1;
-	align-items: center;
-	justify-content: space-between;
-	width: 100%;
-	box-sizing: border-box;
-}
-
-.subFormListItem .bottom:not(:empty) {
-	display: inline-block;
-	border: 1px solid #bbb;
-	margin: 10px 5px 10px 5px;
-	box-shadow: 0px 0px 4px #999;
-	padding: 0 5px 5px 0;
-	background: #fdfdfd;
+.subFormListItem > .preview_div > .func_div {
+	margin-left: auto;
 }
 
 .subFormShowCount{
@@ -3442,17 +3386,4 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
   position: sticky;
 	right: 0px;
 	height: 18px;
-}
-
-.preview_func_div {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-left: 10px;
-	white-space: nowrap;
-}
-
-.preview_func_div i {
-	cursor: pointer;
-	padding: 3px;
 }
