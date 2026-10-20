@@ -63,22 +63,24 @@
 												</div>
 												<div id="hist_range_div">
 													<?
+														$start = -240;
+														$ende = 0;
+														$now = time();
 														if (rolle::$hist_timestamp != '') {
-															$start = -60;
-															$ende = 60;
-															$ref = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', rolle::$hist_timestamp)->getTimestamp();
+															$min = strtotime($start . ' months', $now);
+															$hist = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', rolle::$hist_timestamp)->getTimestamp();
+															$value = $start * ($now - $hist) / ($now - $min);
+															$value = max($start, min(0, $value));
 														}
 														else {
-															$start = -120;
-															$ende = 0;
-															$ref = time();
+															$value = 0;
 														}
 													?>
-													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="0" style="width: 6000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map_hist()">
-													<datalist style="display: flex; justify-content: space-between; width: 6030px;">
+													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="<? echo $value; ?>" style="width: 12000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map_hist()">
+													<datalist style="display: flex; justify-content: space-between; width: 12030px;">
 													<?
 														for ($m = $start; $m <= $ende; $m++) {
-															$ts = strtotime($m . " month", $ref);
+															$ts = strtotime($m . " month", $now);
 															echo '<option value="' . $m . '" label="' . date("m/y", $ts) . '">' . date("m/y", $ts) . '</option>';
 														}
 													?>

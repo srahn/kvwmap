@@ -834,25 +834,28 @@ function compare_view_for_layer(layer_id){
 }
 
 function set_hist_timestamp() {
+	var hist_range_div = document.getElementById('hist_range_div');
 	add_split_mapimgs();
 	if (hist_timestamp != '') {
-		var scroll = 2720;
 		new_hist_timestamp = structuredClone(hist_timestamp);
 	}
 	else {
-		var scroll = 6000;
 		new_hist_timestamp = new Date();
 	}
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
 	get_map(mapimg3, 'no_postgis_layer=1&hist_timestamp=' + ts);
-	//get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
-	document.GUI.hist_timestamp3.value = 0;
 	$('#hist_timestamp_form').show();
-	document.getElementById('hist_range_div').scrollLeft = scroll;
+	var range = document.GUI.hist_timestamp3;
+	const min = Number(range.min);
+  const max = Number(range.max);
+  const value = Number(range.value);
+	const ratio = (value - min) / (max - min);
+  const thumbPosition = ratio * range.offsetWidth;
+	hist_range_div.scrollLeft = thumbPosition - hist_range_div.clientWidth / 2;
 }
 
 function get_map_hist(){
-	var nht = structuredClone(new_hist_timestamp);
+	var nht = new Date();
 	nht.setMonth(nht.getMonth() + parseInt(document.GUI.hist_timestamp3.value));
 	let ts = nht.toLocaleString().replace(',', '');
 	document.GUI.hist_timestamp2.value = ts;
