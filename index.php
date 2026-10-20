@@ -228,7 +228,7 @@ else {
 }
 include(WWWROOT . APPLVERSION . 'start.php');
 
-if ($GUI->formvars['go'] == '' AND $GUI->formvars['login_name'] == '' AND $GUI->Stelle->start_page_params != '') {
+if ($GUI->formvars['go'] == '' AND $GUI->Stelle->start_page_params != '') {
 	parse_str($GUI->Stelle->start_page_params, $params);
 	$GUI->formvars = array_merge($GUI->formvars, $params);
 	$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
