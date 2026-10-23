@@ -834,22 +834,31 @@ function compare_view_for_layer(layer_id){
 }
 
 function set_hist_timestamp() {
+	const now = Math.floor(Date.now() / 1000);
 	var hist_range_div = document.getElementById('hist_range_div');
+	var range = document.GUI.hist_timestamp3;
+	let value;
 	add_split_mapimgs();
 	if (hist_timestamp != '') {
 		new_hist_timestamp = structuredClone(hist_timestamp);
+		let ts = new_hist_timestamp.toLocaleString().replace(',', '');
+		document.GUI.hist_timestamp2.value = ts;
+		const minDate = new Date();
+		minDate.setMonth(minDate.getMonth() + Number(range.min));
+		const min = Math.floor(minDate.getTime() / 1000);
+		const hist = Math.floor(new Date(new_hist_timestamp).getTime() / 1000);
+		value = range.min * (now - hist) / (now - min);
+		value = Math.max(range.min, Math.min(0, value));
 	}
 	else {
 		new_hist_timestamp = new Date();
+		value = 0;
 	}
+	range.value = value;
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
 	get_map(mapimg3, 'no_postgis_layer=1&hist_timestamp=' + ts);
 	$('#hist_timestamp_form').show();
-	var range = document.GUI.hist_timestamp3;
-	const min = Number(range.min);
-  const max = Number(range.max);
-  const value = Number(range.value);
-	const ratio = (value - min) / (max - min);
+	const ratio = (value - range.min) / (range.max - range.min);
   const thumbPosition = ratio * range.offsetWidth;
 	hist_range_div.scrollLeft = thumbPosition - hist_range_div.clientWidth / 2;
 }

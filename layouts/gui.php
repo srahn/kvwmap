@@ -66,17 +66,8 @@
 														$start = -240;
 														$ende = 0;
 														$now = time();
-														if (rolle::$hist_timestamp != '') {
-															$min = strtotime($start . ' months', $now);
-															$hist = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', rolle::$hist_timestamp)->getTimestamp();
-															$value = $start * ($now - $hist) / ($now - $min);
-															$value = max($start, min(0, $value));
-														}
-														else {
-															$value = 0;
-														}
 													?>
-													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="<? echo $value; ?>" style="width: 12000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map_hist()">
+													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="" style="width: 12000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map_hist()">
 													<datalist style="display: flex; justify-content: space-between; width: 12030px;">
 													<?
 														for ($m = $start; $m <= $ende; $m++) {
