@@ -1617,15 +1617,15 @@ class Konvertierung extends PgObject {
 						raeumlichergeltungsbereich,
 						verfahrensmerkmale,
 						externereferenz,
-						auslegungsenddatum,
 						gemeinde,
 						status,
 						plangeber,
 						rechtsstand,
 						auslegungsstartdatum,
+						auslegungsenddatum,
 						traegerbeteiligungsstartdatum,
-						aenderungenbisdatum,
 						traegerbeteiligungsenddatum,
+						aenderungenbisdatum,
 						verfahren,
 						sonstplanart,
 						planart,
@@ -1694,7 +1694,6 @@ class Konvertierung extends PgObject {
 							THEN externeref.externereferenz
 							ELSE NULL
 						END AS externereferenz,
-						NULLIF(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsenddatum,
 						CASE
 							WHEN count_gemeinde > 0
 							THEN gemeindelink.gemeinde
@@ -1703,10 +1702,43 @@ class Konvertierung extends PgObject {
 						(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
 						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
-						NULLIF(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsstartdatum,
-						NULLIF(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsstartdatum,
+						(
+							SELECT
+								array_agg(to_char(alsd.value, 'DD.MM.YYYY')::date ORDER BY alsd.value)
+							FROM
+								xplan_gmlas_tmp_56.bp_plan_auslegungsstartdatum alsd
+							WHERE
+								gmlas.id = alsd.parent_id AND
+								alsd.value IS NOT NULL
+						) AS auslegungsstartdatum,
+						(
+							SELECT
+								array_agg(to_char(aled.value, 'DD.MM.YYYY')::date ORDER BY aled.value)
+							FROM
+								xplan_gmlas_tmp_56.bp_plan_auslegungsenddatum aled
+							WHERE
+								gmlas.id = aled.parent_id AND
+								aled.value IS NOT NULL
+						) AS auslegungsenddatum,
+						(
+							SELECT
+								array_agg(to_char(tbsd.value, 'DD.MM.YYYY')::date ORDER BY tbsd.value)
+							FROM
+								xplan_gmlas_tmp_56.bp_plan_traegerbeteiligungsstartdatum tbsd
+							WHERE
+								gmlas.id = tbsd.parent_id AND
+								tbsd.value IS NOT NULL
+						) AS traegerbeteiligungsstartdatum,
+						(
+						SELECT
+							array_agg(to_char(tbed.value, 'DD.MM.YYYY')::date ORDER BY tbed.value)
+						FROM
+							xplan_gmlas_tmp_56.bp_plan_traegerbeteiligungsenddatum tbed
+						WHERE
+							gmlas.id = tbed.parent_id AND
+							tbed.value IS NOT NULL
+						) AS traegerbeteiligungsenddatum,
 						to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
-						NULLIF(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsenddatum,
 						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
 						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
 						gmlas.planart::xplan_gml." . strtolower($plan_class) . "art[] AS planart,
@@ -1783,10 +1815,6 @@ class Konvertierung extends PgObject {
 						" . $table_schema . "." . strtolower($plan_class) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
 						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
 						(
 							SELECT
 								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
@@ -1852,8 +1880,18 @@ class Konvertierung extends PgObject {
 					INSERT INTO xplan_gml." . strtolower($plan_class) . " (
 						gml_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
 						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz,
-						auslegungsenddatum, gemeinde, status, sachgebiet, plangeber, rechtsstand, wirksamkeitsdatum, auslegungsstartdatum,
-						traegerbeteiligungsstartdatum, entwurfsbeschlussdatum, aenderungenbisdatum, traegerbeteiligungsenddatum, verfahren, sonstplanart,
+						gemeinde,
+						status,
+						sachgebiet,
+						plangeber,
+						rechtsstand,
+						auslegungsstartdatum,
+						auslegungsenddatum,
+						traegerbeteiligungsstartdatum,
+						traegerbeteiligungsenddatum,
+						wirksamkeitsdatum,
+						entwurfsbeschlussdatum,
+						aenderungenbisdatum, verfahren, sonstplanart,
 						planart, planbeschlussdatum, aufstellungsbeschlussdatum,
 						zusammenzeichnung,
 						hatgenerattribut,
@@ -1893,7 +1931,6 @@ class Konvertierung extends PgObject {
 							THEN externeref.externereferenz
 							ELSE NULL
 						END AS externereferenz,
-						NULLIF(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsenddatum,
 						CASE
 							WHEN count_gemeinde > 0
 							THEN gemeindelink.gemeinde
@@ -1903,12 +1940,45 @@ class Konvertierung extends PgObject {
 						gmlas.sachgebiet AS sachgebiet,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
 						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
+						(
+							SELECT
+								array_agg(to_char(alsd.value, 'DD.MM.YYYY')::date ORDER BY alsd.value)
+							FROM
+								xplan_gmlas_tmp_56.fp_plan_auslegungsstartdatum alsd
+							WHERE
+								gmlas.id = alsd.parent_id AND
+								alsd.value IS NOT NULL
+						) AS auslegungsstartdatum,
+						(
+							SELECT
+								array_agg(to_char(aled.value, 'DD.MM.YYYY')::date ORDER BY aled.value)
+							FROM
+								xplan_gmlas_tmp_56.fp_plan_auslegungsenddatum aled
+							WHERE
+								gmlas.id = aled.parent_id AND
+								aled.value IS NOT NULL
+						) AS auslegungsenddatum,
+						(
+							SELECT
+								array_agg(to_char(tbsd.value, 'DD.MM.YYYY')::date ORDER BY tbsd.value)
+							FROM
+								xplan_gmlas_tmp_56.fp_plan_traegerbeteiligungsstartdatum tbsd
+							WHERE
+								gmlas.id = tbsd.parent_id AND
+								tbsd.value IS NOT NULL
+						) AS traegerbeteiligungsstartdatum,
+						(
+						SELECT
+							array_agg(to_char(tbed.value, 'DD.MM.YYYY')::date ORDER BY tbed.value)
+						FROM
+							xplan_gmlas_tmp_56.fp_plan_traegerbeteiligungsenddatum tbed
+						WHERE
+							gmlas.id = tbed.parent_id AND
+							tbed.value IS NOT NULL
+						) AS traegerbeteiligungsenddatum,
 						to_char(gmlas.wirksamkeitsdatum, 'DD.MM.YYYY')::date AS wirksamkeitsdatum,
-						NULLIF(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsstartdatum,
-						NULLIF(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsstartdatum,
 						to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY')::date AS entwurfsbeschlussdatum,
 						to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
-						NULLIF(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsenddatum,
 						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
 						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
 						gmlas.planart::xplan_gml." . strtolower($plan_class) . "art AS planart,
@@ -1966,10 +2036,6 @@ class Konvertierung extends PgObject {
 						" . $table_schema . "." . strtolower($plan_class) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
 						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
 						(
 							SELECT
 								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
