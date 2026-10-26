@@ -1536,7 +1536,7 @@ class Konvertierung extends PgObject {
 	*		$success boolean: Erfolg oder Fehler
 	*		$msg string: Fehlermeldung im Fehlerfall, sonst Erfolgsmeldung
 	*/
-	function create_plaene_from_gmlas($table_schema, $plan_class, $konvertierung_id = 0, $zusammenzeichnung = false) {
+	function create_plaene_from_gmlas($table_schema, $plan_class, $konvertierung_id = 0, $zusammenzeichnung = false, $suppress_err_msg = false) {
 		$planartAbk = $this->config['planart_abk'];
 
 		if ($konvertierung_id == 0) {
@@ -2328,33 +2328,12 @@ class Konvertierung extends PgObject {
 
 		switch ($this->get('planart')) {
 			case ('BP-Plan') : {
-				$sql .= "
-					INSERT INTO xplan_gml.bp_bereich (
-						gml_id, nummer, name, bedeutung, detailliertebedeutung, erstellungsmassstab, geltungsbereich, user_id, konvertierung_id, rasterbasis,
-						versionbaunvodatum, versionbaugbtext, versionsonstrechtsgrundlagetext, versionbaunvotext, versionsonstrechtsgrundlagedatum, versionbaugbdatum, gehoertzuplan
-					)
-					SELECT
-						trim(replace(lower(b.id), 'gml_', ''))::text::uuid AS id,
-						b.nummer AS nummer,
-						b.xplan_name AS name,
-						b.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
-						b.detailliertebedeutung AS detailliertebedeutung,
-						b.erstellungsmassstab AS erstellungsmassstab,
-						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS geltungsbereich,
-						" . $this->gui->user->id . " AS user_id,
-						k.id AS konvertierung_id,
-						trim(replace(lower(b.rasterbasis_href), '#gml_', ''))::text AS rasterbasis,
-						b.versionbaunvodatum AS versionbaunvodatum,
-						b.versionbaugbtext AS versionbaugbtext,
-						b.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
-						b.versionbaunvotext AS versionbaunvotext,
-						b.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
-						b.versionbaugbdatum AS versionbaugbdatum,
-						trim(replace(lower(b.gehoertzuplan_pkid), 'gml_', ''))::text::uuid	AS gehoertzuplan,
-						CASE WHEN refscantab.count_refscan = 0 THEN NULL ELSE refscantab.refscan END AS refscan
-					FROM
-						" . $table_schema . ".bp_bereich AS b JOIN
-						xplankonverter.konvertierungen k ON b.gehoertzuplan_pkid = k.beschreibung LEFT JOIN
+				$refscan_select = 'NULL';
+				$refscan_from = ''; 
+				if ($this->database->table_exists($table_schema, 'bp_bereich_refscan')) {
+					$refscan_select = "CASE WHEN refscantab.count_refscan = 0 THEN NULL ELSE refscantab.refscan END";
+					$refscan_from = "
+ LEFT JOIN
 						(
 							SELECT
 								count(*) AS count_refscan,
@@ -2375,7 +2354,53 @@ class Konvertierung extends PgObject {
 								" . $table_schema . ".xp_externereferenz er ON bs.xp_externereferenz_xp_externereferenz_pkid = er.ogr_pkid
 							GROUP BY
 								bs.parent_id
-						) refscantab ON b.id = refscantab.parent_id;
+						) refscantab ON b.id = refscantab.parent_id
+					";
+				}
+				$sql .= "
+					INSERT INTO xplan_gml.bp_bereich (
+						gml_id,
+						nummer,
+						name,
+						bedeutung,
+						detailliertebedeutung,
+						erstellungsmassstab,
+						geltungsbereich,
+						user_id,
+						konvertierung_id,
+						rasterbasis,
+						versionbaunvodatum,
+						versionbaugbtext,
+						versionsonstrechtsgrundlagetext,
+						versionbaunvotext,
+						versionsonstrechtsgrundlagedatum,
+						versionbaugbdatum,
+						gehoertzuplan,
+						refscan
+					)
+					SELECT
+						trim(replace(lower(b.id), 'gml_', ''))::text::uuid AS gml_id,
+						b.nummer AS nummer,
+						b.xplan_name AS name,
+						b.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
+						b.detailliertebedeutung AS detailliertebedeutung,
+						b.erstellungsmassstab AS erstellungsmassstab,
+						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS geltungsbereich,
+						" . $this->gui->user->id . " AS user_id,
+						k.id AS konvertierung_id,
+						trim(replace(lower(b.rasterbasis_href), '#gml_', ''))::text AS rasterbasis,
+						b.versionbaunvodatum AS versionbaunvodatum,
+						b.versionbaugbtext AS versionbaugbtext,
+						b.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
+						b.versionbaunvotext AS versionbaunvotext,
+						b.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
+						b.versionbaugbdatum AS versionbaugbdatum,
+						trim(replace(lower(b.gehoertzuplan_pkid), 'gml_', ''))::text::uuid	AS gehoertzuplan,
+						" . $refscan_select . " AS refscan
+					FROM
+						" . $table_schema . ".bp_bereich AS b JOIN
+						xplankonverter.konvertierungen k ON b.gehoertzuplan_pkid = k.beschreibung"
+						. $refscan_from . ";
 				";
 			} break;
 			case ('FP-Plan') : {
