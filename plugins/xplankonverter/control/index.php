@@ -42,6 +42,7 @@
 // xplankonverter_regeleditor_getxplanenumerationattributes2
 // xplankonverter_reindex_gml_ids
 // xplankonverter_replace_zusammenzeichnung
+// xplankonverter_replace_plan
 // xplankonverter_shapefile_loeschen
 // xplankonverter_shapefiles_index
 // xplankonverter_show_geltungsbereich_upload
@@ -440,7 +441,12 @@ function go_switch_xplankonverter($go) {
 				$job->update_attr("started_at = now()");
 				$GUI->upload_file = pathinfo($job->get('upload_file'), PATHINFO_FILENAME);
 				$parts = explode('__', $GUI->upload_file);
-				$GUI->formvars['planart'] = $parts[2] . '-Plan';
+				$mv_planart = Konvertierung::get_mv_planart($parts[2]);
+				if ($mv_planart === NULL) {
+					send_error('Der dritte Bestandteil des Dateinamens ' . $GUI->upload_file . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP, VB, VBP, VE, VEP, IS, IBS, Varianten von IBS mit 1, 2, 3 oder Kombinationen davon, AS, ABS, GS, FP, GFP, SFP, SO, EHS, SAS, SES, SUS, SEK, SP.', 'Planupload abgebrochen');
+					exit;
+				}
+				$GUI->formvars['planart'] = $mv_planart;
 
 				/**
 				 * 1. upload_zusammenzeichnung
@@ -566,6 +572,23 @@ function go_switch_xplankonverter($go) {
 
 				echo "\nImport und Konvertierung erfolgreich mit id: " . $GUI->konvertierung->get_id() . ' abgeschlossen.';
 			}
+		} break;
+
+		/**
+		 * Ein Plan wird durch einen anderen ersetzt
+		 */
+		case 'xplankonverter_replace_plan' : {
+			$GUI->checkCaseAllowed($go);
+			$result = $GUI->xplankonverter_replace_plan($GUI->formvars['konvertierung_id_origin'], $GUI->formvars['konvertierung_id_new']);
+			if (!$result['success']) {
+				$GUI->add_message('error', 'Fehler beim Ersetzen eines vorhandenen Plans!<br>' . $result['msg']);
+	    }
+			else {
+				$GUI->formvars['value_plan_gml_id'] = $result['new_gml_id'];
+				$GUI->formvars['operator_plan_gml_id'] = '=';
+				$GUI->formvars['selected_layer_id'] = $result['plan_layer_id'];
+			}
+			$GUI->GenerischeSuche_Suchen();
 		} break;
 
 		case 'xplankonverter_create_collection' : {

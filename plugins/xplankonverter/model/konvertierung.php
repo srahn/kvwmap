@@ -235,6 +235,26 @@ class Konvertierung extends PgObject {
 		return $config;
 	}
 
+	public static function get_mv_planart($kuerzel) {
+		$mv_planarten = [
+			'BP' => ['BP', 'VB', 'VBP', 'VE', 'VEP', 'IS', 'IBS(?!.*([123]).*\1)[123]{0,3}', 'AS', 'ABS', 'GS'],
+			'FP' => ['FP', 'GFP', 'SFP'],
+			'SO' => ['SO', 'EHS', 'SAS', 'SES', 'SUS', 'SEK', 'SP']
+		];
+
+		foreach ($mv_planarten as $planart => $kuerzel_liste) {
+			foreach ($kuerzel_liste as $k) {
+				$regex = $k === 'IBS(?!.*([123]).*\1)[123]{0,3}'
+					? '/^' . $k . '$/'
+					: '/^' . preg_quote($k, '/') . '$/';
+				if (preg_match($regex, $kuerzel)) {
+					return $planart . '-Plan';
+				}
+			}
+		}
+		return NULL;
+	}
+
 	function get_stelle_id_from_ags($ags) {
 		$pg_obj = new PgObject($this->gui, 'gebietseinheiten', 'gemeinden');
 		$result = $pg_obj->find_by('ags', $ags, '=', true);
@@ -2936,10 +2956,10 @@ class Konvertierung extends PgObject {
 			);
 		}
 
-		if (!in_array($parts[2], array('BP', 'FP', 'SO'))) {
+		if (self::get_mv_planart($parts[2]) === NULL) {
 			return array(
 				'success' => false,
-				'msg' => 'Der dritte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP, FP, SO.'
+				'msg' => 'Der dritte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP, VB, VBP, VE, VEP, IS, IBS, Varianten von IBS mit 1, 2, 3 oder Kombinationen davon, AS, ABS, GS, FP, GFP, SFP, SO, EHS, SAS, SES, SUS, SEK, SP.'
 			);
 		}
 

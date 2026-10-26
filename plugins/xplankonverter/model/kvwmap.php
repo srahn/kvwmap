@@ -518,6 +518,63 @@
 		);
 	};
 
+	$GUI->xplankonverter_replace_plan = function($konvertierung_id_origin, $konvertierung_id_new) use ($GUI) {
+		$msg = '';
+		if ($konvertierung_id_new == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es wurde kein Wert in konvertierung_id_new für die Ersetzung übergeben!'
+			);
+		}
+		$konvertierung_new = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id_new);
+		if ($konvertierung_new->get_id() == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Die Konvertierung mit id: ' . $konvertierung_id_new . ', die den alten Plan erstetzen soll, konnte nicht gefunden werden.'
+			);
+		}
+		$konvertierung_origin = new Konvertierung($GUI, $konvertierung_new->get('planart'));
+		if ($konvertierung_id_origin == '') {
+			$msg .= 'Es wurde keine Konvertierung-ID des zu ersetzenden Planes übergeben.';
+		}
+		else {
+			$konvertierung_origin = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id_origin);
+			if ($konvertierung_origin->get_id() == '') {
+				$msg .= 'Zur übergebenen id: ' . $konvertierung_id_origin . ' konnte keine Konvertierung gefunden werden.';
+			}
+		}
+		$msg .= '<br>konvertierung_new_data: ' . print_r($konvertierung_new->data, true);
+		if ($konvertierung_origin->get_id() == '' AND $konvertierung_new->get('ersetzt_konvertierung_id')) {
+			$konvertierung_origin = Konvertierung::find_by_id($GUI, 'id', $konvertierung_new->get('ersetzt_konvertierung_id'));
+		}
+
+		if ($konvertierung_origin->get_id() == '') {
+			return array(
+				'success' => false,
+				'msg' => $msg . ' Der zu ersetzende Plan konnte nicht gefunden werden!'
+			);
+		}
+
+		if (!isInStelleAllowed($GUI->Stelle, $konvertierung_origin->get('stelle_id'))) {
+			return array(
+				'success' => false,
+				'msg' => "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+				Die Konvertierung mit der ID={$konvertierung_origin->get_id()} gehört zur Stelle ID= {$konvertierung_origin->get('stelle_id')}<br>
+				Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+				Melden Sie sich mit einem anderen Benutzer an."
+			);
+		}
+
+		// $konvertierung_new->update_attr($data);
+		// $konvertierung_origin->destroy();
+		return array(
+			'success' => true,
+			'msg' => 'Alten Plan erfolgreich durch den neuen ersetzt.',
+			'new_gml_id' => $konvertierung_new->plan->get('gml_id'),
+			'plan_layer_id' => $konvertierung_new->plan->get_plan_layer_id()
+		);
+	};
+
 	$GUI->xplankonverter_create_plaene = function() use ($GUI) {
 		# Anlegen von Plan und Bereich der Zusammenzeichnung
 		$result = $GUI->konvertierung->create_plaene_from_gmlas('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class, $GUI->konvertierung->get_id(), true);
