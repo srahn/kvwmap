@@ -334,7 +334,7 @@
 
 	/**
 	 * This function save the uploaded file on the server, test if it is a zip file
-	 * and if it contain the correkt files. After this the files will be validated
+	 * and if it contain the correct files. After this the files will be validated
 	 * at XPlanung-Leitstelle. It removes uploaded files and returns messages in error case.
 	 * If both files are valid, it creates a konvertierung, saves the validation reports,
 	 * moves the data to uploaded_gml diretory, removes the tmp_dir and
@@ -642,7 +642,8 @@
 				$srcfile = $GUI->konvertierung->get_file_path('uploaded_xplan_gml') . $referenzfile;
 				$dstfile = SHAPEPATH . 'xplankonverter/plaene/' . $referenzfile;
 				if (!file_exists($srcfile)) {
-					send_error('Die in der externen Referenz bezeichnete Datei ' . $referenzfile . ' befand sich nicht in der hochgeladenen ZIP-Datei.', 'Planerzeugung abgebrochen');
+					$files = implode(', ', array_map('basename', array_filter(glob($GUI->konvertierung->get_file_path('uploaded_xplan_gml') . '/*'), 'is_file')));
+					send_error('Die in der externen Referenz bezeichnete Datei ' . $referenzfile . ' befand sich nicht in der hochgeladenen ZIP-Datei. Enthalten sind die folgenden: ' . $files . ' Passen Sie die Dateinamen ggf. an oder fügen Sie fehlende in der ZIP-Datei hinzu.', 'Planerzeugung abgebrochen');
 					exit;
 				}
 				rename($srcfile, $dstfile);
