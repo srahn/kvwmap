@@ -1743,12 +1743,6 @@ class stelle {
 						l.stelle_id = " . $this->id . " AND
 						foo.layer_id IS NULL";
 					#echo $sql.'<br>';
-					$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-					$this->database->execSQL($sql);
-					if (!$this->database->success) {
-						$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
-						return 0;
-					}
 				}
 				else {
 					# wenn nicht von Elternstelle übernommen, Defaultrechte übernehmen

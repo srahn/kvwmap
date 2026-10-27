@@ -2095,35 +2095,58 @@ class rolle {
 			}
 		}
 		else {
-			for ($j = 0; $j < count_or_0($layerids); $j++){
-				$sql = "
-					INSERT INTO kvwmap.u_groups2rolle 
+			$layerids = array_values(array_unique(array_map('intval',	$layerids ?? [])));
+			if (count($layerids) === 0) {
+					return 1;
+			}
+			$layerids_sql = implode(',', $layerids);
+	
+			$sql = "
 					WITH RECURSIVE cte (group_id) AS (
-						SELECT 
-            	coalesce(ul.group_id, l.gruppe) AS group_id
-						FROM
-          		kvwmap.used_layer ul JOIN
-            	kvwmap.layer l ON ul.layer_id = l.layer_id
-            WHERE 
-            	l.layer_id = " . $layerids[$j] . " AND
-            	ul.stelle_id = " . $stelle_id . "
-						UNION ALL
-						SELECT obergruppe FROM kvwmap.u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
+							SELECT
+									coalesce(ul.group_id, l.gruppe) AS group_id
+							FROM
+									kvwmap.used_layer ul
+									JOIN kvwmap.layer l
+											ON ul.layer_id = l.layer_id
+							WHERE
+									l.layer_id = ANY (
+											ARRAY[" . $layerids_sql . "]
+									)
+									AND ul.stelle_id = " . $stelle_id . "
+	
+							UNION
+	
+							SELECT
+									ug.obergruppe
+							FROM
+									kvwmap.u_groups ug
+									JOIN cte
+											ON cte.group_id = ug.id
+							WHERE
+									ug.obergruppe IS NOT NULL
 					)
-					SELECT 
-						" . $user_id . ", 
-						" . $stelle_id . ", 
-						group_id, 
-						0
+					INSERT INTO kvwmap.u_groups2rolle (
+							user_id,
+							stelle_id,
+							id,
+							status
+					)
+					SELECT
+							" . $user_id . ",
+							" . $stelle_id . ",
+							group_id,
+							0
 					FROM cte
-					ON CONFLICT (user_id, stelle_id, id) DO NOTHING;";
-				#echo '<br>Gruppen: '.$sql;
-				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
-				$this->database->execSQL($sql);
-				if (!$this->database->success) { 
-					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); 
-					return 0; 
-				}
+					WHERE group_id IS NOT NULL
+					ON CONFLICT (user_id, stelle_id, id) DO NOTHING;
+			";
+			#echo '<br>Gruppen: '.$sql;
+			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { 
+				$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); 
+				return 0; 
 			}
 		}
 		return 1;
