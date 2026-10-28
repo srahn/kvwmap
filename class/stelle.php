@@ -1524,6 +1524,7 @@ class stelle {
 		return 1;
 	}
 
+
 	/**
 	 * Function assign layers with $layer_ids to this stelle
 	 * ToDo sr: Beschreibung der 3 verschiedenen Fälle hinzufügen
@@ -1538,245 +1539,34 @@ class stelle {
 	 * @return Boolean Always 1
 	 */
 	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
-		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
-		# Hinzufügen von Layern zur Stelle
-		for ($i = 0; $i < count($layer_ids); $i++) {
-			$insert = "
-				stelle_id,
-				layer_id,
-				queryable,
-				use_geom,
-				minscale,
-				maxscale,
-				symbolscale,
-				offsite,
-				transparency,
-				template,
-				header,
-				footer,
-				privileg,
-				export_privileg,
-				postlabelcache,
-				requires,
-				start_aktiv";
-			if (!$assign_default_values) {
-				# Einstellungen von der ersten Elternstelle übernehmen (LIMTI 1)
-				$sql = "
-					INSERT INTO kvwmap.used_layer 
-						(" . $insert . ")
-					SELECT
-						" . $this->id . ",
-						" . $layer_ids[$i] . ",
-						queryable,
-						use_geom,
-						minscale, 
-						maxscale, 
-						symbolscale, 
-						offsite, 
-						transparency, 
-						template, 
-						header,
-						footer,
-						privileg,
-						export_privileg,
-						postlabelcache,
-						requires,
-						start_aktiv
-					FROM
-						kvwmap.used_layer as l,
-						kvwmap.stellen_hierarchie
-					WHERE
-						COALESCE((select use_parent_privileges from kvwmap.used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . "), true) AND
-						layer_id = " . $layer_ids[$i] . " AND
-						stelle_id = parent_id AND
-						child_id = " . $this->id . "
-					LIMIT 1
-					ON CONFLICT (stelle_id, layer_id) DO UPDATE SET
-						queryable = EXCLUDED.queryable, 
-						use_geom = EXCLUDED.use_geom, 
-						minscale = EXCLUDED.minscale, 
-						maxscale = EXCLUDED.maxscale, 
-						symbolscale = EXCLUDED.symbolscale, 
-						offsite = EXCLUDED.offsite, 
-						transparency = EXCLUDED.transparency, 
-						template = EXCLUDED.template, 
-						header = EXCLUDED.header,
-						footer = EXCLUDED.footer,
-						postlabelcache = EXCLUDED.postlabelcache,
-						privileg = EXCLUDED.privileg,
-						export_privileg = EXCLUDED.export_privileg,
-						requires = EXCLUDED.requires,
-						start_aktiv = EXCLUDED.start_aktiv
-				";
-				// echo $sql.'<br><br>';
-				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-				$ret = $this->database->execSQL($sql);
-				if (!$this->database->success) {
-					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
-					return 0;
-				}
-			}
-			if ($assign_default_values OR pg_affected_rows($ret[1]) == 0) {
-				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
-				$sql = "
-					INSERT INTO kvwmap.used_layer 
-						(" . $insert . ",
-						filter)
-					SELECT
-						'" . $this->id . "',
-						'" . $layer_ids[$i] . "',
-						queryable,
-						use_geom,
-						minscale, 
-						maxscale, 
-						symbolscale, 
-						offsite, 
-						transparency, 
-						template, 
-						NULL,
-						NULL,
-						" . ($privileg == 'editable'? "'1'" : 'privileg') . ",
-						export_privileg,
-						postlabelcache,
-						requires,
-						'0',
-						'" . $filter . "'
-					FROM
-						kvwmap.layer as l
-					WHERE
-						l.layer_id = " . $layer_ids[$i] . "
-					ON CONFLICT (stelle_id, layer_id) DO ";
-					if ($assign_default_values){
-						$sql .= "
-						UPDATE SET
-							queryable = EXCLUDED.queryable, 
-							use_geom = EXCLUDED.use_geom, 
-							minscale = EXCLUDED.minscale, 
-							maxscale = EXCLUDED.maxscale, 
-							symbolscale = EXCLUDED.symbolscale, 
-							offsite = EXCLUDED.offsite, 
-							transparency = EXCLUDED.transparency, 
-							template = EXCLUDED.template, 
-							postlabelcache = EXCLUDED.postlabelcache,
-							requires = EXCLUDED.requires
-						";
-					}
-					else {
-						$sql .= "NOTHING";
-					}
-				#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
-				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-				$ret = $this->database->execSQL($sql);
-				if (!$this->database->success) {
-					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
-					return 0;
-				}
-			}
-			if (!$assign_default_values AND pg_affected_rows($ret[1]) > 0) {
-				$insert = "
-					INSERT INTO kvwmap.layer_attributes2stelle (
-						layer_id,
-						attributename,
-						stelle_id,
-						privileg,
-						tooltip
-					)
-				";
-				# Rechte von der Elternstelle übernehmen (bei mehreren Elternstellen die höchsten Rechte)
-				$sql = $insert . "
-					SELECT * FROM (
-						SELECT 
-							layer_id,
-							attributename,
-							" . $this->id . ",
-							max(privileg) as privileg,
-							max(tooltip) as tooltip
-						FROM
-							kvwmap.layer_attributes2stelle l,
-							kvwmap.stellen_hierarchie
-						WHERE
-							(select use_parent_privileges from kvwmap.used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
-							layer_id = " . $layer_ids[$i] . " AND
-							stelle_id = parent_id AND
-							child_id = " . $this->id . "
-						GROUP BY layer_id, attributename
-					) as foo
-					ON CONFLICT (layer_id, attributename, stelle_id) DO UPDATE SET
-						layer_id = EXCLUDED.layer_id, 
-						attributename = EXCLUDED.attributename, 
-						stelle_id = EXCLUDED.stelle_id, 
-						privileg = EXCLUDED.privileg, 
-						tooltip = EXCLUDED.tooltip
-					";
-				#echo 'SQL zum Anlegen eines used layers :' . $sql . '<br>';
-				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-				$ret = $this->database->execSQL($sql);
-				if (!$this->database->success) {
-					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
-					return 0;
-				}
-				if (pg_affected_rows($ret[1]) != 0) {
-					# löschen der Einträge für "kein Zugriff" Rechte
-					$sql = "
-					DELETE FROM
-						kvwmap.layer_attributes2stelle
-					USING
-						kvwmap.layer_attributes2stelle l 
-						LEFT JOIN (
-							SELECT 
-								layer_id, stelle_id, attributename 
-							FROM 
-								kvwmap.layer_attributes2stelle l2 
-								JOIN kvwmap.stellen_hierarchie ON 
-								" . $this->id . " = child_id
-								WHERE
-								l2.layer_id = " . $layer_ids[$i] . " AND 
-								l2.stelle_id = parent_id
-						) as foo ON 
-							l.layer_id = foo.layer_id AND
-							l.attributename = foo.attributename
-					WHERE
-						layer_attributes2stelle.layer_id = l.layer_id AND
-						layer_attributes2stelle.attributename = l.attributename AND
-						layer_attributes2stelle.stelle_id = l.stelle_id AND
-						l.layer_id = " . $layer_ids[$i] . " AND 
-						l.stelle_id = " . $this->id . " AND
-						foo.layer_id IS NULL";
-					#echo $sql.'<br>';
-					$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-					$this->database->execSQL($sql);
-					if (!$this->database->success) {
-						$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
-						return 0;
-					}
-				}
-				else {
-					# wenn nicht von Elternstelle übernommen, Defaultrechte übernehmen
-					$sql = $insert . "
-						SELECT 
-							" . $layer_ids[$i] . ",
-							name,
-							" . $this->id . ",
-							" . ($privileg == 'editable'? '1' : 'privileg') . ",
-							query_tooltip 
-						FROM 
-							kvwmap.layer_attributes 
-						WHERE 
-							layer_id = " . $layer_ids[$i] . " AND 
-							privileg IS NOT NULL
-							ON CONFLICT (layer_id, attributename, stelle_id) DO NOTHING";
-				}
-				#echo $sql.'<br>';
-				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-				$this->database->execSQL($sql);
-				if (!$this->database->success) {
-					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
-					return 0;
-				}
-			}
+		$layer_ids_pg = '{' . implode(
+				',',
+				array_map('intval', array_unique($layer_ids))
+		) . '}';
+		
+		$sql = "
+				SELECT kvwmap.add_layers_to_stelle(
+						$1::integer[],
+						$2::integer,
+						$3::text,
+						$4::boolean,
+						$5::text
+				)
+		";
+		$this->database->execSQL($sql, 4, 1, false, [
+				$layer_ids_pg,
+				(int) $this->id,
+				$filter,
+				$assign_default_values ? 'true' : 'false',
+				$privileg
+		]);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+			return 0;
 		}
 		return 1;
 	}
+
 	
 	/**
 	 * check if layer_params are used in any layer or menue of stelle

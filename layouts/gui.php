@@ -63,22 +63,15 @@
 												</div>
 												<div id="hist_range_div">
 													<?
-														if (rolle::$hist_timestamp != '') {
-															$start = -60;
-															$ende = 60;
-															$ref = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', rolle::$hist_timestamp)->getTimestamp();
-														}
-														else {
-															$start = -120;
-															$ende = 0;
-															$ref = time();
-														}
+														$start = -240;
+														$ende = 0;
+														$now = time();
 													?>
-													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="0" style="width: 6000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map_hist()">
-													<datalist style="display: flex; justify-content: space-between; width: 6030px;">
+													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="" style="width: 12000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map_hist()">
+													<datalist style="display: flex; justify-content: space-between; width: 12030px;">
 													<?
 														for ($m = $start; $m <= $ende; $m++) {
-															$ts = strtotime($m . " month", $ref);
+															$ts = strtotime($m . " month", $now);
 															echo '<option value="' . $m . '" label="' . date("m/y", $ts) . '">' . date("m/y", $ts) . '</option>';
 														}
 													?>
