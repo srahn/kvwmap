@@ -183,7 +183,7 @@ function append_slash($var) {
 }
 
 function pg_quote($column) {
-	return (is_valid_pg_name($column) OR strpos($column, "'") === 0) ? $column : '"' . $column . '"';
+	return (strpos($column, "'") === 0) ? $column : '"' . $column . '"';
 }
 
 function is_valid_pg_name($name) {
