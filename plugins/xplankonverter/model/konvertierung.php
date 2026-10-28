@@ -567,27 +567,15 @@ class Konvertierung extends PgObject {
 			} break;
 			case 'dateiname_digital_mv' : {
 				if ($dateiname) {
-					$parts = explode('__', $dateiname);
-					$planart = $parts[2] . '-Plan';
-					$ags = $parts[1];
-					$num_items = array_map(
-						function ($item) {
-							return str_replace('Ae', '%Änderung', (ctype_digit($item) ? (string)(int)$item : $item));
-						},
-						explode('_', trim(str_replace('Ae', '_Änderung', $parts[3]), ','))
-					);
-					if (count($num_items) > 0) {
-						$num_expr = '%' . implode('%', $num_items);
-						// Abfragen des zum Nummernausdruck passenden Originalplans
-						$plaene = XP_Plan::find_where_by_planart(
-							$this->gui,
-							$planart,
-							"(gemeinde[1]).ags = '" . pg_escape_string($ags) . "' AND trim(BOTH ',' FROM nummer) LIKE '" . pg_escape_string($num_expr) . "'"
-						);
-						if (count($plaene) > 0) {
-							$ersetzt_konvertierung_id = $plaene[0]->get('konvertierung_id');
-						}
+					$sql = "
+						SELECT plandigitalisierung.get_konvertierung_id_origin('" . $dateiname . "', true) AS ersetzt_konvertierung_id
+					";
+					$result = $this->database->execSQL($sql, 4, 0);
+					if (!$result['success']) {
+						$this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0;
 					}
+			    $rs = pg_fetch_assoc($result[1]);
+					$ersetzt_konvertierung_id = $rs['ersetzt_konvertierung_id'];
 				}
 			} break;
 			case 'manuell' : {
