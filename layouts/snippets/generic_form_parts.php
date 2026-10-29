@@ -46,7 +46,7 @@
 	}
 
 	function attribute_tooltip($attributes, $j) {
-		if ($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time') {
+		if ($attributes['tooltip'][$j]!='') {
 			$title = 'externer Link';
 			$target = '';
 			$onclick = '';
