@@ -10,7 +10,7 @@ if (isset($argv)) {
 		$_REQUEST[$key] = $val;
 	}
 }
-
+date_default_timezone_set('Europe/Berlin');
 # Error Handling for Exceptions
 register_shutdown_function(function () {
 	global $errors;

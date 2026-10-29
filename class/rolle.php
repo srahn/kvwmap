@@ -2183,7 +2183,6 @@ class rolle {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . $result['msg'], 4);
 			return 0;
 		}
-		$role = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
 		$role->rectify_layer_params($role->get('layer_params'));
 		return 1;
 	}
@@ -2388,35 +2387,58 @@ class rolle {
 			}
 		}
 		else {
-			for ($j = 0; $j < count_or_0($layerids); $j++){
-				$sql = "
-					INSERT INTO kvwmap.u_groups2rolle 
+			$layerids = array_values(array_unique(array_map('intval',	$layerids ?? [])));
+			if (count($layerids) === 0) {
+					return 1;
+			}
+			$layerids_sql = implode(',', $layerids);
+	
+			$sql = "
 					WITH RECURSIVE cte (group_id) AS (
-						SELECT 
-            	coalesce(ul.group_id, l.gruppe) AS group_id
-						FROM
-          		kvwmap.used_layer ul JOIN
-            	kvwmap.layer l ON ul.layer_id = l.layer_id
-            WHERE 
-            	l.layer_id = " . $layerids[$j] . " AND
-            	ul.stelle_id = " . $stelle_id . "
-						UNION ALL
-						SELECT obergruppe FROM kvwmap.u_groups, cte WHERE cte.group_id = u_groups.id AND obergruppe IS NOT NULL
+							SELECT
+									coalesce(ul.group_id, l.gruppe) AS group_id
+							FROM
+									kvwmap.used_layer ul
+									JOIN kvwmap.layer l
+											ON ul.layer_id = l.layer_id
+							WHERE
+									l.layer_id = ANY (
+											ARRAY[" . $layerids_sql . "]
+									)
+									AND ul.stelle_id = " . $stelle_id . "
+	
+							UNION
+	
+							SELECT
+									ug.obergruppe
+							FROM
+									kvwmap.u_groups ug
+									JOIN cte
+											ON cte.group_id = ug.id
+							WHERE
+									ug.obergruppe IS NOT NULL
 					)
-					SELECT 
-						" . $user_id . ", 
-						" . $stelle_id . ", 
-						group_id, 
-						0
+					INSERT INTO kvwmap.u_groups2rolle (
+							user_id,
+							stelle_id,
+							id,
+							status
+					)
+					SELECT
+							" . $user_id . ",
+							" . $stelle_id . ",
+							group_id,
+							0
 					FROM cte
-					ON CONFLICT (user_id, stelle_id, id) DO NOTHING;";
-				#echo '<br>Gruppen: '.$sql;
-				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
-				$this->database->execSQL($sql);
-				if (!$this->database->success) { 
-					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); 
-					return 0; 
-				}
+					WHERE group_id IS NOT NULL
+					ON CONFLICT (user_id, stelle_id, id) DO NOTHING;
+			";
+			#echo '<br>Gruppen: '.$sql;
+			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { 
+				$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); 
+				return 0; 
 			}
 		}
 		return 1;
@@ -2473,60 +2495,49 @@ class rolle {
 	}
 
 	static function clear_groups2rolle($database) {
-		$sql = "
-			DELETE FROM
-				kvwmap.u_groups2rolle
-			USING 
-				kvwmap.u_groups2rolle g2r LEFT JOIN
-				(
-					SELECT DISTINCT
-						*
-					FROM
-						(
-							WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
-								(
-									SELECT DISTINCT
-										ul.stelle_id AS stelle_id,
-										r.user_id,
-										coalesce(ul.group_id, l.gruppe) AS group_id
-									FROM
-										kvwmap.used_layer ul JOIN
-										kvwmap.layer l ON ul.layer_id = l.layer_id JOIN
-										kvwmap.rolle r ON ul.stelle_id = r.stelle_id
-									UNION ALL
-									SELECT DISTINCT
-										stelle_id,
-										user_id,
-										gruppe
-									FROM
-										kvwmap.rollenlayer
-								)
-								UNION ALL
-								SELECT 
-										cte.stelle_id,
-										cte.user_id,
-										obergruppe AS group_id
-								FROM 
-										kvwmap.u_groups, cte 
-								WHERE 
-										cte.group_id = u_groups.id AND 
-										obergruppe IS NOT NULL
-							)
-							SELECT * FROM cte
-						) sub
-					WHERE
-						group_id IS NOT NULL
-				) n ON 
-					g2r.stelle_id = n.stelle_id AND 
-					g2r.user_id = n.user_id AND 
-					g2r.id = n.group_id
-			WHERE
-				g2r.stelle_id = u_groups2rolle.stelle_id AND 
-				g2r.user_id = u_groups2rolle.user_id AND 
-				g2r.id = u_groups2rolle.id AND 
-				n.stelle_id IS NULL AND
-				n.user_id IS NULL AND
-				n.group_id IS NULL
+		$sql = "			
+			SET jit = off;
+
+			WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
+					SELECT
+							ul.stelle_id,
+							r.user_id,
+							COALESCE(ul.group_id, l.gruppe) AS group_id
+					FROM kvwmap.used_layer ul
+					JOIN kvwmap.layer l
+							ON l.layer_id = ul.layer_id
+					JOIN kvwmap.rolle r
+							ON r.stelle_id = ul.stelle_id
+
+					union ALL
+
+					SELECT
+							stelle_id,
+							user_id,
+							gruppe AS group_id
+					FROM kvwmap.rollenlayer
+
+					UNION
+
+					SELECT
+							c.stelle_id,
+							c.user_id,
+							ug.obergruppe AS group_id
+					FROM cte c
+					JOIN kvwmap.u_groups ug
+							ON ug.id = c.group_id
+					WHERE ug.obergruppe IS NOT NULL
+			)
+			DELETE FROM kvwmap.u_groups2rolle AS target
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM cte n
+					WHERE n.stelle_id = target.stelle_id
+						AND n.user_id   = target.user_id
+						AND n.group_id  = target.id
+			);
+
+			SET jit = on;
 		";
 		// echo '<br>SQL zum Löschen nicht mehr benötigter groups2rolle Eintragungen: ' . $sql . '<br>'; 
 		$database->execSQL($sql);
