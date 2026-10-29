@@ -40,9 +40,9 @@ class Role extends PgObject {
 			'user_id' => $user_id,
 			'stelle_id' => $stelle_id
 		));
-		$role->user = Nutzer::find_by_id($gui, $user_id);
-		$stelle = new PgObject($gui, 'kvwmap', 'stelle', 'id');
-		$role->stelle = $stelle->find_by('id', $stelle_id);
+		// $role->user = Nutzer::find_by_id($gui, $user_id);
+		// $stelle = new PgObject($gui, 'kvwmap', 'stelle', 'id');
+		// $role->stelle = $stelle->find_by('id', $stelle_id);
 		return $role;
 	}
 

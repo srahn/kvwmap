@@ -1890,7 +1890,6 @@ class rolle {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . $result['msg'], 4);
 			return 0;
 		}
-		$role = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
 		$role->rectify_layer_params($role->get('layer_params'));
 		return 1;
 	}
