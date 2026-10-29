@@ -732,7 +732,7 @@ class GUI {
 							echo '<li><a href="javascript:void(0);" onclick="zoomToMaxLayerExtent(' . $this->formvars['layer_id'] . ')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
 						}
 						if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']) {
-							if ($layer[0]['name'] == LAYERNAME_FLURSTUECKE ) {
+							if (defined('LAYERNAME_FLURSTUECKE') AND $layer[0]['name'] == LAYERNAME_FLURSTUECKE ) {
 								echo '<li><a href="index.php?go=Flurstueck_Auswaehlen&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strSearch . '</a></li>';
 							}
 							else {

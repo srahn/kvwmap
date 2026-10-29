@@ -2202,60 +2202,49 @@ class rolle {
 	}
 
 	static function clear_groups2rolle($database) {
-		$sql = "
-			DELETE FROM
-				kvwmap.u_groups2rolle
-			USING 
-				kvwmap.u_groups2rolle g2r LEFT JOIN
-				(
-					SELECT DISTINCT
-						*
-					FROM
-						(
-							WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
-								(
-									SELECT DISTINCT
-										ul.stelle_id AS stelle_id,
-										r.user_id,
-										coalesce(ul.group_id, l.gruppe) AS group_id
-									FROM
-										kvwmap.used_layer ul JOIN
-										kvwmap.layer l ON ul.layer_id = l.layer_id JOIN
-										kvwmap.rolle r ON ul.stelle_id = r.stelle_id
-									UNION ALL
-									SELECT DISTINCT
-										stelle_id,
-										user_id,
-										gruppe
-									FROM
-										kvwmap.rollenlayer
-								)
-								UNION ALL
-								SELECT 
-										cte.stelle_id,
-										cte.user_id,
-										obergruppe AS group_id
-								FROM 
-										kvwmap.u_groups, cte 
-								WHERE 
-										cte.group_id = u_groups.id AND 
-										obergruppe IS NOT NULL
-							)
-							SELECT * FROM cte
-						) sub
-					WHERE
-						group_id IS NOT NULL
-				) n ON 
-					g2r.stelle_id = n.stelle_id AND 
-					g2r.user_id = n.user_id AND 
-					g2r.id = n.group_id
-			WHERE
-				g2r.stelle_id = u_groups2rolle.stelle_id AND 
-				g2r.user_id = u_groups2rolle.user_id AND 
-				g2r.id = u_groups2rolle.id AND 
-				n.stelle_id IS NULL AND
-				n.user_id IS NULL AND
-				n.group_id IS NULL
+		$sql = "			
+			SET jit = off;
+
+			WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
+					SELECT
+							ul.stelle_id,
+							r.user_id,
+							COALESCE(ul.group_id, l.gruppe) AS group_id
+					FROM kvwmap.used_layer ul
+					JOIN kvwmap.layer l
+							ON l.layer_id = ul.layer_id
+					JOIN kvwmap.rolle r
+							ON r.stelle_id = ul.stelle_id
+
+					union ALL
+
+					SELECT
+							stelle_id,
+							user_id,
+							gruppe AS group_id
+					FROM kvwmap.rollenlayer
+
+					UNION
+
+					SELECT
+							c.stelle_id,
+							c.user_id,
+							ug.obergruppe AS group_id
+					FROM cte c
+					JOIN kvwmap.u_groups ug
+							ON ug.id = c.group_id
+					WHERE ug.obergruppe IS NOT NULL
+			)
+			DELETE FROM kvwmap.u_groups2rolle AS target
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM cte n
+					WHERE n.stelle_id = target.stelle_id
+						AND n.user_id   = target.user_id
+						AND n.group_id  = target.id
+			);
+
+			SET jit = on;
 		";
 		// echo '<br>SQL zum Löschen nicht mehr benötigter groups2rolle Eintragungen: ' . $sql . '<br>'; 
 		$database->execSQL($sql);
