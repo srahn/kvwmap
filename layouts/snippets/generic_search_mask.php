@@ -72,7 +72,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 				) 
 			{
 				if ($this->attributes['group_id'][$i] != value_of($this->attributes['group_id'], $last_attribute_index)) { # wenn die vorige Gruppe anders ist, dann ...
-					$group = $this->attributes['groups'][$this->attributes['group_id'][$j]];
+					$group = $this->attributes['groups'][$this->attributes['group_id'][$i]];
 					$groupname = $group['name'];
 					$collapsed = $group['options']['collapsed'];
 
