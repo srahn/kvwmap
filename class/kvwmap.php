@@ -13501,12 +13501,7 @@ class GUI {
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
 		}
 		$this->main = 'data_export.php';
-		$saved_scale = $this->reduce_mapwidth(10);
 		$this->loadMap('DataBase');
-		if ($saved_scale != NULL) {
-			# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-			$this->scaleMap($saved_scale);
-		}
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 		$this->data_import_export = new data_import_export();
