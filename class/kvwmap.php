@@ -3993,6 +3993,7 @@ class GUI {
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
 			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
+			$sql = str_replace('!= <requires>' . $attributenames[$i] . '</requires>', " NOT IN (" . $value . ")", $sql);
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 		}
@@ -4876,6 +4877,7 @@ class GUI {
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
 			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
+			$sql = str_replace('!= <requires>' . $attributenames[$i] . '</requires>', " NOT IN (" . $value . ")", $sql);
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 			if ($this->formvars['attribute'] == $attributenames[$i]) {
@@ -20670,6 +20672,7 @@ class db_mapObj{
 														if (is_array($query_result[$k][$attributename])) {
 															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
 														}
+														$options = str_replace('!= <requires>' . $attributename.'</requires>',	" NOT IN ('" . $query_result[$k][$attributename] . "')", $options);
 														$options = str_replace('= <requires>' . $attributename.'</requires>',	" IN ('" . $query_result[$k][$attributename] . "')", $options);
 														$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);	# fallback
 													}

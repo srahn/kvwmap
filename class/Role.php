@@ -55,7 +55,7 @@ class Role extends PgObject {
 	 * @param int $parent_stelle_id
 	 * @return int 1 | 0 Wenn success 1 else 0
 	 */
-	public function set_rolle_from_default_user_or_parent_stelle($user_id, $stelle_id, $default_user_id, $parent_stelle_id) {
+	public static function set_rolle_from_default_user_or_parent_stelle($database, $user_id, $stelle_id, $default_user_id, $parent_stelle_id) {
 		$sql = "
 			INSERT INTO kvwmap.rolle (
 					user_id,
@@ -157,7 +157,7 @@ class Role extends PgObject {
 					stelle_id = " . ($parent_stelle_id ?? $stelle_id) . "
 				ON CONFLICT (user_id, stelle_id) DO NOTHING
 		";
-		$ret = $this->database->execSQL($sql);
+		$ret = $database->execSQL($sql);
 		if (!$ret['success']) {
 			echo '<br>Fehler in set_rolle_from_default_user_or_parent_stelle: ' . $ret['err_msg'];
 			return array(
@@ -180,7 +180,7 @@ class Role extends PgObject {
 	 * @param int $stelle_id
 	 * @return int 1 | 0 Wenn success 1 else 0
 	 */
-	function set_rolle_from_stelle_default($user_id, $stelle_id) {
+	public static function set_rolle_from_stelle_default($database, $user_id, $stelle_id) {
 		# Default - Rolleneinstellungen verwenden
 		$sql = "
 			INSERT INTO kvwmap.rolle (user_id, stelle_id, epsg_code, minx, miny, maxx, maxy)
@@ -198,7 +198,7 @@ class Role extends PgObject {
 				id = " . $stelle_id . "
 			ON CONFLICT (user_id, stelle_id) DO NOTHING
 		";
-		$ret = $this->database->execSQL($sql);
+		$ret = $database->execSQL($sql);
 		if (!$ret['success']) {
 			echo '<br>Fehler in set_rolle_from_default_user_or_parent_stelle: ' . $ret['err_msg'];
 			return array(

@@ -312,6 +312,7 @@ class GUI {
 				$selected_value = $attributevalues[$i];
 			}
 			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
+			$sql = str_replace('!= <requires>' . $attributenames[$i] . '</requires>', " NOT IN (" . $value . ")", $sql);
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 		}
