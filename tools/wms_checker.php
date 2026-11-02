@@ -177,7 +177,8 @@ while ($line = pg_fetch_assoc($ret[1])){
 	}
 	$bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
 	$exceptions = 'application/vnd.ogc.se_xml';
-	$url = $line["connection"] . "&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=" . $exceptions .  "&SRS=EPSG:" . $line["epsg_code"] . "&WIDTH=400&HEIGHT=400&BBOX=" . $bounding;
+	$srs = ($line["wms_server_version"] == '1.3.0'? 'CRS' : 'SRS');
+	$url = $line["connection"] . "&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=" . $exceptions .  "&" . $srs . "=EPSG:" . $line["epsg_code"] . "&WIDTH=400&HEIGHT=400&BBOX=" . $bounding;
 	if (strpos(strtolower($line["connection"]), 'version=') === false) $url .= '&VERSION=' . $line["wms_server_version"];
 	if (strpos(strtolower($line["connection"]), 'layers=' ) === false) $url .= '&LAYERS='  . $line["wms_name"];
 	if (strpos(strtolower($line["connection"]), 'format=' ) === false) $url .= '&FORMAT='  . $line["wms_format"];
