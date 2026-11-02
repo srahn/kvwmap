@@ -732,7 +732,7 @@ class GUI {
 							echo '<li><a href="javascript:void(0);" onclick="zoomToMaxLayerExtent(' . $this->formvars['layer_id'] . ')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
 						}
 						if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']) {
-							if ($layer[0]['name'] == LAYERNAME_FLURSTUECKE ) {
+							if (defined('LAYERNAME_FLURSTUECKE') AND $layer[0]['name'] == LAYERNAME_FLURSTUECKE ) {
 								echo '<li><a href="index.php?go=Flurstueck_Auswaehlen&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strSearch . '</a></li>';
 							}
 							else {
@@ -3986,6 +3986,7 @@ class GUI {
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
 			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
+			$sql = str_replace('!= <requires>' . $attributenames[$i] . '</requires>', " NOT IN (" . $value . ")", $sql);
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 		}
@@ -4869,6 +4870,7 @@ class GUI {
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for ($i = 0; $i < count($attributenames); $i++) {
 			$value = ($attributevalues[$i] != '' ? "'" . $attributevalues[$i] . "'" : 'NULL');
+			$sql = str_replace('!= <requires>' . $attributenames[$i] . '</requires>', " NOT IN (" . $value . ")", $sql);
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN (" . $value . ")", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', $value, $sql);	# fallback
 			if ($this->formvars['attribute'] == $attributenames[$i]) {
@@ -13449,12 +13451,7 @@ class GUI {
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
 		}
 		$this->main = 'data_export.php';
-		$saved_scale = $this->reduce_mapwidth(10);
 		$this->loadMap('DataBase');
-		if ($saved_scale != NULL) {
-			# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-			$this->scaleMap($saved_scale);
-		}
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 		$this->data_import_export = new data_import_export();
@@ -20614,6 +20611,7 @@ class db_mapObj{
 														if (is_array($query_result[$k][$attributename])) {
 															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
 														}
+														$options = str_replace('!= <requires>' . $attributename.'</requires>',	" NOT IN ('" . $query_result[$k][$attributename] . "')", $options);
 														$options = str_replace('= <requires>' . $attributename.'</requires>',	" IN ('" . $query_result[$k][$attributename] . "')", $options);
 														$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);	# fallback
 													}

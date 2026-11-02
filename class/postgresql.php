@@ -1052,6 +1052,15 @@ FROM
 			if (count($prepared_params) > 0) {
 				$query_id = 'query_' . rand();
 				$query = pg_prepare($this->dbConn, $query_id, $sql);
+				if ($query === false) {
+					$this->error = true;
+    			return array(
+						0 => false,
+						'success' => false,
+						'sql' => $sql,
+						'msg' => 'PREPARE fehlgeschlagen: ' . pg_last_error($this->dbConn) . ' sql:<br>' . $sql
+					);
+				}
 				$query = pg_execute($this->dbConn, $query_id, $prepared_params);
 			}
 			else {

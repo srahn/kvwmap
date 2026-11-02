@@ -1321,24 +1321,23 @@ class stelle {
 	/*
 	* Hinzufügen von Menuepunkten zur Stelle
 	*/
-	function addMenue($menue_ids) {
-		for ($i = 0; $i <@ count($menue_ids); $i++) {
-			$sql ="
-				INSERT INTO kvwmap.u_menue2stelle 
-					(
-						stelle_id,
-						menue_id
-					)
-				VALUES (
-					'" . $this->id ."',
-					'" . $menue_ids[$i] . "'
-				)
-				ON CONFLICT (stelle_id, menue_id) DO NOTHING
-			";
-			#echo '<br>stelle.php addMenue Sql: ' . $sql;
-			$this->debug->write("<p>file:stelle.php class:stelle->addMenue - Hinzufügen von Menuepunkten zur Stelle:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+	function addMenue($menue_ids) { 
+		if (empty($menue_ids)) { return 1; }
+		$values = array();
+
+		foreach ($menue_ids as $menue_id) {
+			$values[] = "(" . $this->id . ", " . $menue_id . ")";
+		}
+		$sql = "
+			INSERT INTO kvwmap.u_menue2stelle
+					(stelle_id, menue_id)
+			VALUES " . implode(", ", $values) . "
+			ON CONFLICT (stelle_id, menue_id) DO NOTHING
+		";
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__,	4);
+			return 0;
 		}
 		return 1;
 	}

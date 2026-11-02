@@ -1,4 +1,7 @@
 <?
+
+	if (!defined('SHAPEPATH'))exit;
+
 	$new_file_path = SHAPEPATH . '/xplankonverter';
 
 	if (XPLANKONVERTER_FILE_PATH != $new_file_path) {
