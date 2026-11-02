@@ -42,6 +42,8 @@
 // xplankonverter_regeleditor_getxplanenumerationattributes2
 // xplankonverter_reindex_gml_ids
 // xplankonverter_replace_zusammenzeichnung
+// xplankonverter_replace_plan
+// xplankonverter_replace_plan_auswahl
 // xplankonverter_shapefile_loeschen
 // xplankonverter_shapefiles_index
 // xplankonverter_show_geltungsbereich_upload
@@ -440,7 +442,12 @@ function go_switch_xplankonverter($go) {
 				$job->update_attr("started_at = now()");
 				$GUI->upload_file = pathinfo($job->get('upload_file'), PATHINFO_FILENAME);
 				$parts = explode('__', $GUI->upload_file);
-				$GUI->formvars['planart'] = $parts[2] . '-Plan';
+				$mv_planart = Konvertierung::get_mv_planart($parts[2]);
+				if ($mv_planart === NULL) {
+					send_error('Der dritte Bestandteil des Dateinamens ' . $GUI->upload_file . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP, VB, VBP, VE, VEP, IS, IBS, Varianten von IBS mit 1, 2, 3 oder Kombinationen davon, AS, ABS, GS, FP, GFP, SFP, SO, EHS, SAS, SES, SUS, SEK, SP.', 'Planupload abgebrochen');
+					exit;
+				}
+				$GUI->formvars['planart'] = $mv_planart;
 
 				/**
 				 * 1. upload_zusammenzeichnung
@@ -566,6 +573,51 @@ function go_switch_xplankonverter($go) {
 
 				echo "\nImport und Konvertierung erfolgreich mit id: " . $GUI->konvertierung->get_id() . ' abgeschlossen.';
 			}
+		} break;
+
+		case 'xplankonverter_replace_plan_auswahl' : {
+			$GUI->sanitize([
+				'konvertierung_id_new' => 'int',
+				'konvertierung_id_origin' => 'int'
+			]);
+			$result = $GUI->xplankonverter_replace_plan_auswahl($GUI->formvars['konvertierung_id_origin'], $GUI->formvars['konvertierung_id_new']);
+			if ($result['success'] === false) {
+				$GUI->Fehlermeldung = $result['msg'];
+			}
+			else {
+				$GUI->add_message('note', $result['msg']);
+			}
+			$GUI->main = '../../plugins/xplankonverter/view/plan/replace_plan_auswahl.php';
+			$GUI->output();
+		} break;
+
+		/**
+		 * Ein Plan wird durch einen anderen ersetzt
+		 */
+		case 'xplankonverter_replace_plan' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->sanitize([
+				'konvertierung_id_new' => 'int',
+				'konvertierung_id_origin' => 'int'
+			]);
+			$konvertierung_id_new = (int)$GUI->formvars['konvertierung_id_new'];
+			$konvertierung_id_origin = (int)$GUI->formvars['konvertierung_id_origin'];
+			$result = $GUI->xplankonverter_replace_plan($konvertierung_id_origin, $konvertierung_id_new);
+			if (!$result['success']) {
+				$GUI->add_message('error', $result['msg']);
+			}
+			else {
+				$GUI->add_message('notice', $result['msg']);
+			}
+			$result = $GUI->xplankonverter_replace_plan_auswahl(null, $konvertierung_id_new);
+			if ($result['success'] === false) {
+				$GUI->Fehlermeldung = $result['msg'];
+			}
+			else {
+				$GUI->add_message('note', $result['msg']);
+			}
+			$GUI->main = '../../plugins/xplankonverter/view/plan/replace_plan_auswahl.php';
+			$GUI->output();
 		} break;
 
 		case 'xplankonverter_create_collection' : {
