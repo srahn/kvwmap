@@ -1876,20 +1876,19 @@ class rolle {
 	 * @return int 1 | 0 Wenn success 1 else 0
 	 */
 	function setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id = NULL) {
-		$role = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
-
 		# trägt die Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
-			$result = $role->set_rolle_from_default_user_or_parent_stelle($user_id, $stelle_id, $default_user_id, $parent_stelle_id);
+			$result = Role::set_rolle_from_default_user_or_parent_stelle($this->database, $user_id, $stelle_id, $default_user_id, $parent_stelle_id);
 		}
 		else {
-			$result = $role->set_rolle_from_stelle_default($user_id, $stelle_id);
+			$result = Role::set_rolle_from_stelle_default($this->database, $user_id, $stelle_id);
 		}
 		$this->debug->write("<p>file:rolle.php class:rolle function:setRolle - Einfügen einer neuen Rolle:<br>" . $result['sql'], 4);
 		if (!$result['success']) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . $result['msg'], 4);
 			return 0;
 		}
+		$role = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
 		$role->rectify_layer_params($role->get('layer_params'));
 		return 1;
 	}
