@@ -43,6 +43,7 @@
 // xplankonverter_reindex_gml_ids
 // xplankonverter_replace_zusammenzeichnung
 // xplankonverter_replace_plan
+// xplankonverter_replace_plan_auswahl
 // xplankonverter_shapefile_loeschen
 // xplankonverter_shapefiles_index
 // xplankonverter_show_geltungsbereich_upload
@@ -574,21 +575,49 @@ function go_switch_xplankonverter($go) {
 			}
 		} break;
 
+		case 'xplankonverter_replace_plan_auswahl' : {
+			$GUI->sanitize([
+				'konvertierung_id_new' => 'int',
+				'konvertierung_id_origin' => 'int'
+			]);
+			$result = $GUI->xplankonverter_replace_plan_auswahl($GUI->formvars['konvertierung_id_origin'], $GUI->formvars['konvertierung_id_new']);
+			if ($result['success'] === false) {
+				$GUI->Fehlermeldung = $result['msg'];
+			}
+			else {
+				$GUI->add_message('note', $result['msg']);
+			}
+			$GUI->main = '../../plugins/xplankonverter/view/plan/replace_plan_auswahl.php';
+			$GUI->output();
+		} break;
+
 		/**
 		 * Ein Plan wird durch einen anderen ersetzt
 		 */
 		case 'xplankonverter_replace_plan' : {
 			$GUI->checkCaseAllowed($go);
-			$result = $GUI->xplankonverter_replace_plan($GUI->formvars['konvertierung_id_origin'], $GUI->formvars['konvertierung_id_new']);
+			$GUI->sanitize([
+				'konvertierung_id_new' => 'int',
+				'konvertierung_id_origin' => 'int'
+			]);
+			$konvertierung_id_new = (int)$GUI->formvars['konvertierung_id_new'];
+			$konvertierung_id_origin = (int)$GUI->formvars['konvertierung_id_origin'];
+			$result = $GUI->xplankonverter_replace_plan($konvertierung_id_origin, $konvertierung_id_new);
 			if (!$result['success']) {
-				$GUI->add_message('error', 'Fehler beim Ersetzen eines vorhandenen Plans!<br>' . $result['msg']);
-	    }
-			else {
-				$GUI->formvars['value_plan_gml_id'] = $result['new_gml_id'];
-				$GUI->formvars['operator_plan_gml_id'] = '=';
-				$GUI->formvars['selected_layer_id'] = $result['plan_layer_id'];
+				$GUI->add_message('error', $result['msg']);
 			}
-			$GUI->GenerischeSuche_Suchen();
+			else {
+				$GUI->add_message('notice', $result['msg']);
+			}
+			$result = $GUI->xplankonverter_replace_plan_auswahl(null, $konvertierung_id_new);
+			if ($result['success'] === false) {
+				$GUI->Fehlermeldung = $result['msg'];
+			}
+			else {
+				$GUI->add_message('note', $result['msg']);
+			}
+			$GUI->main = '../../plugins/xplankonverter/view/plan/replace_plan_auswahl.php';
+			$GUI->output();
 		} break;
 
 		case 'xplankonverter_create_collection' : {

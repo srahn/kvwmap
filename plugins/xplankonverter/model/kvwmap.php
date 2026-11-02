@@ -518,9 +518,55 @@
 		);
 	};
 
+	$GUI->xplankonverter_replace_plan_auswahl = function($konvertierung_id_origin, $konvertierung_id_new) use ($GUI) {
+		global $admin_stellen;
+		if (empty($konvertierung_id_new)) {
+			return array(
+				'success' => false,
+				'msg' => "Es wurde kein Plan ausgewählt, der für die Ersetzung verwendet werden soll. Der Parameter konvertierung_id_new ist leer."
+			);
+		}
+		$konvertierung_new = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id_new);
+		if (empty($konvertierung_new->get_id())) {
+			return array(
+				'success' => false,
+				'msg' => 'Die Konvertierung mit id: ' . $konvertierung_id_new . ', die den alten Plan erstetzen soll, konnte nicht gefunden werden.'
+			);
+		}
+		$GUI->konvertierung_new = $konvertierung_new;
+		$GUI->ersetzbare_konvertierungen = array_map(
+			function($konvertierung) {
+				return array(
+					'value' => $konvertierung->get('konvertierung_id'),
+					'output' => $konvertierung->get('anzeige_name') . " (" . $konvertierung->get('konvertierung_id') . ")"
+				);
+			},
+			$GUI->ersetzbare_konvertierungen = Konvertierung::find_by_same_ags($GUI, $konvertierung_new)
+		);
+
+		$GUI->konvertierung_id_origin = null;
+		$GUI->konvertierung_origin = null;
+		if (!empty($konvertierung_id_origin)) {
+			$konvertierung_origin = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id_origin);
+			if (empty($konvertierung_origin->get_id())) {
+				return array(
+					'success' => false,
+					'msg' => 'Die Konvertierung mit id: ' . $konvertierung_id_origin . ', die ersetzt werden soll, konnte nicht gefunden werden.'
+				);
+			}
+			$GUI->konvertierung_origin = $konvertierung_origin;
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Wähle einen Plan aus, der ersetzt werden soll.'
+		);
+	};
+
 	$GUI->xplankonverter_replace_plan = function($konvertierung_id_origin, $konvertierung_id_new) use ($GUI) {
+		global $admin_stellen;
 		$msg = '';
-		if ($konvertierung_id_new == '') {
+		if (empty($konvertierung_id_new)) {
 			return array(
 				'success' => false,
 				'msg' => 'Es wurde kein Wert in konvertierung_id_new für die Ersetzung übergeben!'
@@ -533,6 +579,8 @@
 				'msg' => 'Die Konvertierung mit id: ' . $konvertierung_id_new . ', die den alten Plan erstetzen soll, konnte nicht gefunden werden.'
 			);
 		}
+		$GUI->konvertierung_new = $konvertierung_new;
+
 		$konvertierung_origin = new Konvertierung($GUI, $konvertierung_new->get('planart'));
 		if ($konvertierung_id_origin == '') {
 			$msg .= 'Es wurde keine Konvertierung-ID des zu ersetzenden Planes übergeben.';
@@ -543,7 +591,6 @@
 				$msg .= 'Zur übergebenen id: ' . $konvertierung_id_origin . ' konnte keine Konvertierung gefunden werden.';
 			}
 		}
-		$msg .= '<br>konvertierung_new_data: ' . print_r($konvertierung_new->data, true);
 		if ($konvertierung_origin->get_id() == '' AND $konvertierung_new->get('ersetzt_konvertierung_id')) {
 			$konvertierung_origin = Konvertierung::find_by_id($GUI, 'id', $konvertierung_new->get('ersetzt_konvertierung_id'));
 		}
@@ -554,8 +601,9 @@
 				'msg' => $msg . ' Der zu ersetzende Plan konnte nicht gefunden werden!'
 			);
 		}
+		$GUI->konvertierung_origin = $konvertierung_origin;
 
-		if (!isInStelleAllowed($GUI->Stelle, $konvertierung_origin->get('stelle_id'))) {
+		if (!in_array($GUI->Stelle->id, $admin_stellen) && !isInStelleAllowed($GUI->Stelle, $konvertierung_origin->get('stelle_id'))) {
 			return array(
 				'success' => false,
 				'msg' => "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
@@ -565,13 +613,12 @@
 			);
 		}
 
-		// $konvertierung_new->update_attr($data);
-		// $konvertierung_origin->destroy();
+		// Neuen Plan veröffentlichen
+		$konvertierung_new->update_attr("veroeffentlichungsdatum = '" . $konvertierung_origin->get('veroeffentlichungsdatum') . "'");
+		$konvertierung_origin->destroy();
 		return array(
 			'success' => true,
-			'msg' => 'Alten Plan erfolgreich durch den neuen ersetzt.',
-			'new_gml_id' => $konvertierung_new->plan->get('gml_id'),
-			'plan_layer_id' => $konvertierung_new->plan->get_plan_layer_id()
+			'msg' => 'Alten Plan erfolgreich durch den neuen ersetzt.'
 		);
 	};
 

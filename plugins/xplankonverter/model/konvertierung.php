@@ -368,6 +368,29 @@ class Konvertierung extends PgObject {
 		return $konvertierung;
 	}
 
+	public static function find_by_same_ags($gui, $konvertierung) {
+		$plan = new XP_Plan($gui, $konvertierung->get('planart'));
+		$anzeige_name_function = $plan->get_anzeige_name_function();
+		$pg_obj = new PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
+		$konvertierungen = $pg_obj->find_where(
+			"
+				n.konvertierung_id = " . $konvertierung->get('id') . " AND
+				p.konvertierung_id != " . $konvertierung->get('id') . "
+			",
+			$anzeige_name_function,
+			"
+				p.konvertierung_id,
+				" . $anzeige_name_function . " AS anzeige_name
+			",
+			NULL,
+			"
+				xplan_gml." . $plan->tableName . " n JOIN
+  			xplan_gml." . $plan->tableName . " p ON (n.gemeinde[1]).rs = (p.gemeinde[1].rs)
+			"
+		);
+		return $konvertierungen;
+	}
+
 	public static	function find_where_with_plan($gui, $where, $order = '') {
 		$konvertierung = new Konvertierung($gui);
 		$konvertierungen = $konvertierung->find_where($where, $order);
@@ -3948,6 +3971,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 					$msg = 'Der Plan, der ersetzt werden soll konnte nicht gefunden werden.';
 				}
 				else {
+					$this->update_attr("ersetzt_konvertierung_id = " . $result['ersetzt_konvertierung_id'], true);
 					$upload->set('konvertierung_id_origin', $result['ersetzt_konvertierung_id']);
 					$result = $pk_obj->update_attr("konvertierung_id_new = " . $this->get('id'), true, "konvertierung_id_origin = " . $result['ersetzt_konvertierung_id']);
 					if (!$result['success']) {
@@ -3981,10 +4005,9 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 
 		return array(
 			'success' => true,
-			'msg' => 'Tabelle plankennzeichnung und uploads erfolgreich aktualisiert.'
+			'msg' => 'ersetzt_konvertierung_id und Tabelle plankennzeichnung und uploads erfolgreich aktualisiert.'
 		);
 	}
-
 
 	/*
 	* Checks if the geometry of the plan-geltungsbereich is similar to the geometry (95% area equality)
