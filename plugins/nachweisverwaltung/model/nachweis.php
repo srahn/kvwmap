@@ -1623,7 +1623,7 @@ class Nachweis {
     return $result;
   }
 	
-	function Geometrieuebernahme($ref_geom, $id, $gepruefte_Nachweise_bearbeiten){
+	function Geometrieuebernahme($ref_geom, $id, $gepruefte_Nachweise_bearbeiten, $user){
 		if (!$gepruefte_Nachweise_bearbeiten) {
 			$condition = ' AND geprueft = 0';
 		}
@@ -1632,7 +1632,9 @@ class Nachweis {
 							SELECT st_union(n2.the_geom) 
 							FROM nachweisverwaltung.n_nachweise n2
 							WHERE n2.id IN (".implode(',', $ref_geom).")
-						)
+						),
+            bearbeiter = '" . $user->Vorname . " " . $user->Name . "',
+            zeit = '" . date('Y-m-d G:i:s') . "'
 						WHERE n.id IN (".implode(',', $id).") " .
 						$condition;
 		$ret=$this->database->execSQL($sql,4, 1);
