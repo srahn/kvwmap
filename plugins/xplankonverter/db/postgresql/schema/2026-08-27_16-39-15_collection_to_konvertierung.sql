@@ -9,10 +9,10 @@ BEGIN;
   RETURNS TRIGGER
   LANGUAGE plpgsql AS $$
   BEGIN
-    DELETE FROM kvwmap.collections WHERE id = OLD.collection_id;
+    DELETE FROM kvwmap.collections WHERE id = OLD.layer_collection_id;
     RETURN OLD;
   END;
-  $$;  
+  $$;
 
   CREATE TRIGGER before_delete
   BEFORE DELETE ON xplankonverter.konvertierungen

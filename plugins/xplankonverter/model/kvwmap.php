@@ -334,7 +334,7 @@
 
 	/**
 	 * This function save the uploaded file on the server, test if it is a zip file
-	 * and if it contain the correkt files. After this the files will be validated
+	 * and if it contain the correct files. After this the files will be validated
 	 * at XPlanung-Leitstelle. It removes uploaded files and returns messages in error case.
 	 * If both files are valid, it creates a konvertierung, saves the validation reports,
 	 * moves the data to uploaded_gml diretory, removes the tmp_dir and
@@ -518,9 +518,113 @@
 		);
 	};
 
+	$GUI->xplankonverter_replace_plan_auswahl = function($konvertierung_id_origin, $konvertierung_id_new) use ($GUI) {
+		global $admin_stellen;
+		if (empty($konvertierung_id_new)) {
+			return array(
+				'success' => false,
+				'msg' => "Es wurde kein Plan ausgewählt, der für die Ersetzung verwendet werden soll. Der Parameter konvertierung_id_new ist leer."
+			);
+		}
+		$konvertierung_new = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id_new);
+		if (empty($konvertierung_new->get_id())) {
+			return array(
+				'success' => false,
+				'msg' => 'Die Konvertierung mit id: ' . $konvertierung_id_new . ', die den alten Plan erstetzen soll, konnte nicht gefunden werden.'
+			);
+		}
+		$GUI->konvertierung_new = $konvertierung_new;
+		$GUI->ersetzbare_konvertierungen = array_map(
+			function($konvertierung) {
+				return array(
+					'value' => $konvertierung->get('konvertierung_id'),
+					'output' => $konvertierung->get('anzeige_name') . " (" . $konvertierung->get('konvertierung_id') . ")"
+				);
+			},
+			$GUI->ersetzbare_konvertierungen = Konvertierung::find_by_same_ags($GUI, $konvertierung_new)
+		);
+
+		$GUI->konvertierung_id_origin = null;
+		$GUI->konvertierung_origin = null;
+		if (!empty($konvertierung_id_origin)) {
+			$konvertierung_origin = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id_origin);
+			if (empty($konvertierung_origin->get_id())) {
+				return array(
+					'success' => false,
+					'msg' => 'Die Konvertierung mit id: ' . $konvertierung_id_origin . ', die ersetzt werden soll, konnte nicht gefunden werden.'
+				);
+			}
+			$GUI->konvertierung_origin = $konvertierung_origin;
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Wähle einen Plan aus, der ersetzt werden soll.'
+		);
+	};
+
+	$GUI->xplankonverter_replace_plan = function($konvertierung_id_origin, $konvertierung_id_new) use ($GUI) {
+		global $admin_stellen;
+		$msg = '';
+		if (empty($konvertierung_id_new)) {
+			return array(
+				'success' => false,
+				'msg' => 'Es wurde kein Wert in konvertierung_id_new für die Ersetzung übergeben!'
+			);
+		}
+		$konvertierung_new = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id_new);
+		if ($konvertierung_new->get_id() == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Die Konvertierung mit id: ' . $konvertierung_id_new . ', die den alten Plan erstetzen soll, konnte nicht gefunden werden.'
+			);
+		}
+		$GUI->konvertierung_new = $konvertierung_new;
+
+		$konvertierung_origin = new Konvertierung($GUI, $konvertierung_new->get('planart'));
+		if ($konvertierung_id_origin == '') {
+			$msg .= 'Es wurde keine Konvertierung-ID des zu ersetzenden Planes übergeben.';
+		}
+		else {
+			$konvertierung_origin = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id_origin);
+			if ($konvertierung_origin->get_id() == '') {
+				$msg .= 'Zur übergebenen id: ' . $konvertierung_id_origin . ' konnte keine Konvertierung gefunden werden.';
+			}
+		}
+		if ($konvertierung_origin->get_id() == '' AND $konvertierung_new->get('ersetzt_konvertierung_id')) {
+			$konvertierung_origin = Konvertierung::find_by_id($GUI, 'id', $konvertierung_new->get('ersetzt_konvertierung_id'));
+		}
+
+		if ($konvertierung_origin->get_id() == '') {
+			return array(
+				'success' => false,
+				'msg' => $msg . ' Der zu ersetzende Plan konnte nicht gefunden werden!'
+			);
+		}
+		$GUI->konvertierung_origin = $konvertierung_origin;
+
+		if (!in_array($GUI->Stelle->id, $admin_stellen) && !isInStelleAllowed($GUI->Stelle, $konvertierung_origin->get('stelle_id'))) {
+			return array(
+				'success' => false,
+				'msg' => "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+				Die Konvertierung mit der ID={$konvertierung_origin->get_id()} gehört zur Stelle ID= {$konvertierung_origin->get('stelle_id')}<br>
+				Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+				Melden Sie sich mit einem anderen Benutzer an."
+			);
+		}
+
+		// Neuen Plan veröffentlichen
+		$konvertierung_new->update_attr("veroeffentlichungsdatum = '" . $konvertierung_origin->get('veroeffentlichungsdatum') . "'");
+		$konvertierung_origin->destroy();
+		return array(
+			'success' => true,
+			'msg' => 'Alten Plan erfolgreich durch den neuen ersetzt.'
+		);
+	};
+
 	$GUI->xplankonverter_create_plaene = function() use ($GUI) {
 		# Anlegen von Plan und Bereich der Zusammenzeichnung
-		$result = $GUI->konvertierung->create_plaene_from_gmlas('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class, $GUI->konvertierung->get_id(), true);
+		$result = $GUI->konvertierung->create_plaene_from_gmlas('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class, $GUI->konvertierung->get_id(), true, true);
 		if (!$result['success']) {
 			$GUI->konvertierung->set('error_id', 3);
 			$GUI->konvertierung->update();
@@ -585,7 +689,8 @@
 				$srcfile = $GUI->konvertierung->get_file_path('uploaded_xplan_gml') . $referenzfile;
 				$dstfile = SHAPEPATH . 'xplankonverter/plaene/' . $referenzfile;
 				if (!file_exists($srcfile)) {
-					send_error('Die in der externen Referenz bezeichnete Datei ' . $referenzfile . ' befand sich nicht in der hochgeladenen ZIP-Datei.', 'Planerzeugung abgebrochen');
+					$files = implode(', ', array_map('basename', array_filter(glob($GUI->konvertierung->get_file_path('uploaded_xplan_gml') . '/*'), 'is_file')));
+					send_error('Die in der externen Referenz bezeichnete Datei ' . $referenzfile . ' befand sich nicht in der hochgeladenen ZIP-Datei. Enthalten sind die folgenden: ' . $files . ' Passen Sie die Dateinamen ggf. an oder fügen Sie fehlende in der ZIP-Datei hinzu.', 'Planerzeugung abgebrochen');
 					exit;
 				}
 				rename($srcfile, $dstfile);

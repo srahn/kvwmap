@@ -200,7 +200,8 @@ class XP_Plan extends PgObject {
 	}
 
 	function get_anzeige_name() {
-		$results = $this->find_where(
+		$pg_obj = new PgObject($this->gui, XP_Plan::$schema, $this->tableName);
+		$results = $pg_obj->find_where(
       "gml_id = '" . $this->get('gml_id') . "'::uuid",
       NULL,
       $this->get_anzeige_name_function() . " AS anzeigename",

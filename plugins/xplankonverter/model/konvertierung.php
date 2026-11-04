@@ -235,6 +235,26 @@ class Konvertierung extends PgObject {
 		return $config;
 	}
 
+	public static function get_mv_planart($kuerzel) {
+		$mv_planarten = [
+			'BP' => ['BP', 'VB', 'VBP', 'VE', 'VEP', 'IS', 'IBS(?!.*([123]).*\1)[123]{0,3}', 'AS', 'ABS', 'GS'],
+			'FP' => ['FP', 'GFP', 'SFP'],
+			'SO' => ['SO', 'EHS', 'SAS', 'SES', 'SUS', 'SEK', 'SP']
+		];
+
+		foreach ($mv_planarten as $planart => $kuerzel_liste) {
+			foreach ($kuerzel_liste as $k) {
+				$regex = $k === 'IBS(?!.*([123]).*\1)[123]{0,3}'
+					? '/^' . $k . '$/'
+					: '/^' . preg_quote($k, '/') . '$/';
+				if (preg_match($regex, $kuerzel)) {
+					return $planart . '-Plan';
+				}
+			}
+		}
+		return NULL;
+	}
+
 	function get_stelle_id_from_ags($ags) {
 		$pg_obj = new PgObject($this->gui, 'gebietseinheiten', 'gemeinden');
 		$result = $pg_obj->find_by('ags', $ags, '=', true);
@@ -346,6 +366,29 @@ class Konvertierung extends PgObject {
 			$konvertierung->set_config($konvertierung->get('planart'));
 		}
 		return $konvertierung;
+	}
+
+	public static function find_by_same_ags($gui, $konvertierung) {
+		$plan = new XP_Plan($gui, $konvertierung->get('planart'));
+		$anzeige_name_function = $plan->get_anzeige_name_function();
+		$pg_obj = new PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
+		$konvertierungen = $pg_obj->find_where(
+			"
+				n.konvertierung_id = " . $konvertierung->get('id') . " AND
+				p.konvertierung_id != " . $konvertierung->get('id') . "
+			",
+			$anzeige_name_function,
+			"
+				p.konvertierung_id,
+				" . $anzeige_name_function . " AS anzeige_name
+			",
+			NULL,
+			"
+				xplan_gml." . $plan->tableName . " n JOIN
+  			xplan_gml." . $plan->tableName . " p ON (n.gemeinde[1]).rs = (p.gemeinde[1].rs)
+			"
+		);
+		return $konvertierungen;
 	}
 
 	public static	function find_where_with_plan($gui, $where, $order = '') {
@@ -547,27 +590,15 @@ class Konvertierung extends PgObject {
 			} break;
 			case 'dateiname_digital_mv' : {
 				if ($dateiname) {
-					$parts = explode('__', $dateiname);
-					$planart = $parts[2] . '-Plan';
-					$ags = $parts[1];
-					$num_items = array_map(
-						function ($item) {
-							return str_replace('Ae', '%Änderung', (ctype_digit($item) ? (string)(int)$item : $item));
-						},
-						explode('_', trim(str_replace('Ae', '_Änderung', $parts[3]), ','))
-					);
-					if (count($num_items) > 0) {
-						$num_expr = '%' . implode('%', $num_items);
-						// Abfragen des zum Nummernausdruck passenden Originalplans
-						$plaene = XP_Plan::find_where_by_planart(
-							$this->gui,
-							$planart,
-							"(gemeinde[1]).ags = '" . pg_escape_string($ags) . "' AND trim(BOTH ',' FROM nummer) LIKE '" . pg_escape_string($num_expr) . "'"
-						);
-						if (count($plaene) > 0) {
-							$ersetzt_konvertierung_id = $plaene[0]->get('konvertierung_id');
-						}
+					$sql = "
+						SELECT plandigitalisierung.get_konvertierung_id_origin('" . $dateiname . "', true) AS ersetzt_konvertierung_id
+					";
+					$result = $this->database->execSQL($sql, 4, 0);
+					if (!$result['success']) {
+						$this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0;
 					}
+			    $rs = pg_fetch_assoc($result[1]);
+					$ersetzt_konvertierung_id = $rs['ersetzt_konvertierung_id'];
 				}
 			} break;
 			case 'manuell' : {
@@ -1516,7 +1547,7 @@ class Konvertierung extends PgObject {
 	*		$success boolean: Erfolg oder Fehler
 	*		$msg string: Fehlermeldung im Fehlerfall, sonst Erfolgsmeldung
 	*/
-	function create_plaene_from_gmlas($table_schema, $plan_class, $konvertierung_id = 0, $zusammenzeichnung = false) {
+	function create_plaene_from_gmlas($table_schema, $plan_class, $konvertierung_id = 0, $zusammenzeichnung = false, $suppress_err_msg = false) {
 		$planartAbk = $this->config['planart_abk'];
 
 		if ($konvertierung_id == 0) {
@@ -1597,15 +1628,15 @@ class Konvertierung extends PgObject {
 						raeumlichergeltungsbereich,
 						verfahrensmerkmale,
 						externereferenz,
-						auslegungsenddatum,
 						gemeinde,
 						status,
 						plangeber,
 						rechtsstand,
 						auslegungsstartdatum,
+						auslegungsenddatum,
 						traegerbeteiligungsstartdatum,
-						aenderungenbisdatum,
 						traegerbeteiligungsenddatum,
+						aenderungenbisdatum,
 						verfahren,
 						sonstplanart,
 						planart,
@@ -1674,7 +1705,6 @@ class Konvertierung extends PgObject {
 							THEN externeref.externereferenz
 							ELSE NULL
 						END AS externereferenz,
-						NULLIF(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsenddatum,
 						CASE
 							WHEN count_gemeinde > 0
 							THEN gemeindelink.gemeinde
@@ -1683,10 +1713,43 @@ class Konvertierung extends PgObject {
 						(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
 						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
-						NULLIF(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsstartdatum,
-						NULLIF(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsstartdatum,
+						(
+							SELECT
+								array_agg(to_char(alsd.value, 'DD.MM.YYYY')::date ORDER BY alsd.value)
+							FROM
+								xplan_gmlas_tmp_56.bp_plan_auslegungsstartdatum alsd
+							WHERE
+								gmlas.id = alsd.parent_id AND
+								alsd.value IS NOT NULL
+						) AS auslegungsstartdatum,
+						(
+							SELECT
+								array_agg(to_char(aled.value, 'DD.MM.YYYY')::date ORDER BY aled.value)
+							FROM
+								xplan_gmlas_tmp_56.bp_plan_auslegungsenddatum aled
+							WHERE
+								gmlas.id = aled.parent_id AND
+								aled.value IS NOT NULL
+						) AS auslegungsenddatum,
+						(
+							SELECT
+								array_agg(to_char(tbsd.value, 'DD.MM.YYYY')::date ORDER BY tbsd.value)
+							FROM
+								xplan_gmlas_tmp_56.bp_plan_traegerbeteiligungsstartdatum tbsd
+							WHERE
+								gmlas.id = tbsd.parent_id AND
+								tbsd.value IS NOT NULL
+						) AS traegerbeteiligungsstartdatum,
+						(
+						SELECT
+							array_agg(to_char(tbed.value, 'DD.MM.YYYY')::date ORDER BY tbed.value)
+						FROM
+							xplan_gmlas_tmp_56.bp_plan_traegerbeteiligungsenddatum tbed
+						WHERE
+							gmlas.id = tbed.parent_id AND
+							tbed.value IS NOT NULL
+						) AS traegerbeteiligungsenddatum,
 						to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
-						NULLIF(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsenddatum,
 						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
 						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
 						gmlas.planart::xplan_gml." . strtolower($plan_class) . "art[] AS planart,
@@ -1763,10 +1826,6 @@ class Konvertierung extends PgObject {
 						" . $table_schema . "." . strtolower($plan_class) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
 						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
 						(
 							SELECT
 								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
@@ -1832,8 +1891,18 @@ class Konvertierung extends PgObject {
 					INSERT INTO xplan_gml." . strtolower($plan_class) . " (
 						gml_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
 						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz,
-						auslegungsenddatum, gemeinde, status, sachgebiet, plangeber, rechtsstand, wirksamkeitsdatum, auslegungsstartdatum,
-						traegerbeteiligungsstartdatum, entwurfsbeschlussdatum, aenderungenbisdatum, traegerbeteiligungsenddatum, verfahren, sonstplanart,
+						gemeinde,
+						status,
+						sachgebiet,
+						plangeber,
+						rechtsstand,
+						auslegungsstartdatum,
+						auslegungsenddatum,
+						traegerbeteiligungsstartdatum,
+						traegerbeteiligungsenddatum,
+						wirksamkeitsdatum,
+						entwurfsbeschlussdatum,
+						aenderungenbisdatum, verfahren, sonstplanart,
 						planart, planbeschlussdatum, aufstellungsbeschlussdatum,
 						zusammenzeichnung,
 						hatgenerattribut,
@@ -1873,7 +1942,6 @@ class Konvertierung extends PgObject {
 							THEN externeref.externereferenz
 							ELSE NULL
 						END AS externereferenz,
-						NULLIF(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsenddatum,
 						CASE
 							WHEN count_gemeinde > 0
 							THEN gemeindelink.gemeinde
@@ -1883,12 +1951,45 @@ class Konvertierung extends PgObject {
 						gmlas.sachgebiet AS sachgebiet,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
 						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
+						(
+							SELECT
+								array_agg(to_char(alsd.value, 'DD.MM.YYYY')::date ORDER BY alsd.value)
+							FROM
+								xplan_gmlas_tmp_56.fp_plan_auslegungsstartdatum alsd
+							WHERE
+								gmlas.id = alsd.parent_id AND
+								alsd.value IS NOT NULL
+						) AS auslegungsstartdatum,
+						(
+							SELECT
+								array_agg(to_char(aled.value, 'DD.MM.YYYY')::date ORDER BY aled.value)
+							FROM
+								xplan_gmlas_tmp_56.fp_plan_auslegungsenddatum aled
+							WHERE
+								gmlas.id = aled.parent_id AND
+								aled.value IS NOT NULL
+						) AS auslegungsenddatum,
+						(
+							SELECT
+								array_agg(to_char(tbsd.value, 'DD.MM.YYYY')::date ORDER BY tbsd.value)
+							FROM
+								xplan_gmlas_tmp_56.fp_plan_traegerbeteiligungsstartdatum tbsd
+							WHERE
+								gmlas.id = tbsd.parent_id AND
+								tbsd.value IS NOT NULL
+						) AS traegerbeteiligungsstartdatum,
+						(
+						SELECT
+							array_agg(to_char(tbed.value, 'DD.MM.YYYY')::date ORDER BY tbed.value)
+						FROM
+							xplan_gmlas_tmp_56.fp_plan_traegerbeteiligungsenddatum tbed
+						WHERE
+							gmlas.id = tbed.parent_id AND
+							tbed.value IS NOT NULL
+						) AS traegerbeteiligungsenddatum,
 						to_char(gmlas.wirksamkeitsdatum, 'DD.MM.YYYY')::date AS wirksamkeitsdatum,
-						NULLIF(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS auslegungsstartdatum,
-						NULLIF(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsstartdatum,
 						to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY')::date AS entwurfsbeschlussdatum,
 						to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
-						NULLIF(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[], '{NULL}') AS traegerbeteiligungsenddatum,
 						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
 						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
 						gmlas.planart::xplan_gml." . strtolower($plan_class) . "art AS planart,
@@ -1946,10 +2047,6 @@ class Konvertierung extends PgObject {
 						" . $table_schema . "." . strtolower($plan_class) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
 						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
 						(
 							SELECT
 								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
@@ -2308,33 +2405,12 @@ class Konvertierung extends PgObject {
 
 		switch ($this->get('planart')) {
 			case ('BP-Plan') : {
-				$sql .= "
-					INSERT INTO xplan_gml.bp_bereich (
-						gml_id, nummer, name, bedeutung, detailliertebedeutung, erstellungsmassstab, geltungsbereich, user_id, konvertierung_id, rasterbasis,
-						versionbaunvodatum, versionbaugbtext, versionsonstrechtsgrundlagetext, versionbaunvotext, versionsonstrechtsgrundlagedatum, versionbaugbdatum, gehoertzuplan
-					)
-					SELECT
-						trim(replace(lower(b.id), 'gml_', ''))::text::uuid AS id,
-						b.nummer AS nummer,
-						b.xplan_name AS name,
-						b.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
-						b.detailliertebedeutung AS detailliertebedeutung,
-						b.erstellungsmassstab AS erstellungsmassstab,
-						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS geltungsbereich,
-						" . $this->gui->user->id . " AS user_id,
-						k.id AS konvertierung_id,
-						trim(replace(lower(b.rasterbasis_href), '#gml_', ''))::text AS rasterbasis,
-						b.versionbaunvodatum AS versionbaunvodatum,
-						b.versionbaugbtext AS versionbaugbtext,
-						b.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
-						b.versionbaunvotext AS versionbaunvotext,
-						b.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
-						b.versionbaugbdatum AS versionbaugbdatum,
-						trim(replace(lower(b.gehoertzuplan_pkid), 'gml_', ''))::text::uuid	AS gehoertzuplan,
-						CASE WHEN refscantab.count_refscan = 0 THEN NULL ELSE refscantab.refscan END AS refscan
-					FROM
-						" . $table_schema . ".bp_bereich AS b JOIN
-						xplankonverter.konvertierungen k ON b.gehoertzuplan_pkid = k.beschreibung LEFT JOIN
+				$refscan_select = 'NULL';
+				$refscan_from = ''; 
+				if ($this->database->table_exists($table_schema, 'bp_bereich_refscan')) {
+					$refscan_select = "CASE WHEN refscantab.count_refscan = 0 THEN NULL ELSE refscantab.refscan END";
+					$refscan_from = "
+ LEFT JOIN
 						(
 							SELECT
 								count(*) AS count_refscan,
@@ -2355,7 +2431,53 @@ class Konvertierung extends PgObject {
 								" . $table_schema . ".xp_externereferenz er ON bs.xp_externereferenz_xp_externereferenz_pkid = er.ogr_pkid
 							GROUP BY
 								bs.parent_id
-						) refscantab ON b.id = refscantab.parent_id;
+						) refscantab ON b.id = refscantab.parent_id
+					";
+				}
+				$sql .= "
+					INSERT INTO xplan_gml.bp_bereich (
+						gml_id,
+						nummer,
+						name,
+						bedeutung,
+						detailliertebedeutung,
+						erstellungsmassstab,
+						geltungsbereich,
+						user_id,
+						konvertierung_id,
+						rasterbasis,
+						versionbaunvodatum,
+						versionbaugbtext,
+						versionsonstrechtsgrundlagetext,
+						versionbaunvotext,
+						versionsonstrechtsgrundlagedatum,
+						versionbaugbdatum,
+						gehoertzuplan,
+						refscan
+					)
+					SELECT
+						trim(replace(lower(b.id), 'gml_', ''))::text::uuid AS gml_id,
+						b.nummer AS nummer,
+						b.xplan_name AS name,
+						b.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
+						b.detailliertebedeutung AS detailliertebedeutung,
+						b.erstellungsmassstab AS erstellungsmassstab,
+						ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, " . XPLANKONVERTER_DEFAULT_EPSG. "))) AS geltungsbereich,
+						" . $this->gui->user->id . " AS user_id,
+						k.id AS konvertierung_id,
+						trim(replace(lower(b.rasterbasis_href), '#gml_', ''))::text AS rasterbasis,
+						b.versionbaunvodatum AS versionbaunvodatum,
+						b.versionbaugbtext AS versionbaugbtext,
+						b.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
+						b.versionbaunvotext AS versionbaunvotext,
+						b.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
+						b.versionbaugbdatum AS versionbaugbdatum,
+						trim(replace(lower(b.gehoertzuplan_pkid), 'gml_', ''))::text::uuid	AS gehoertzuplan,
+						" . $refscan_select . " AS refscan
+					FROM
+						" . $table_schema . ".bp_bereich AS b JOIN
+						xplankonverter.konvertierungen k ON b.gehoertzuplan_pkid = k.beschreibung"
+						. $refscan_from . ";
 				";
 			} break;
 			case ('FP-Plan') : {
@@ -2936,10 +3058,10 @@ class Konvertierung extends PgObject {
 			);
 		}
 
-		if (!in_array($parts[2], array('BP', 'FP', 'SO'))) {
+		if (self::get_mv_planart($parts[2]) === NULL) {
 			return array(
 				'success' => false,
-				'msg' => 'Der dritte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP, FP, SO.'
+				'msg' => 'Der dritte Bestandteil des GML-Dateinamens ' . $gml_file_name . ' ist keine gültige Planart. Es sind nur folgende Kürzel erlaubt: BP, VB, VBP, VE, VEP, IS, IBS, Varianten von IBS mit 1, 2, 3 oder Kombinationen davon, AS, ABS, GS, FP, GFP, SFP, SO, EHS, SAS, SES, SUS, SEK, SP.'
 			);
 		}
 
@@ -3849,6 +3971,7 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 					$msg = 'Der Plan, der ersetzt werden soll konnte nicht gefunden werden.';
 				}
 				else {
+					$this->update_attr("ersetzt_konvertierung_id = " . $result['ersetzt_konvertierung_id'], true);
 					$upload->set('konvertierung_id_origin', $result['ersetzt_konvertierung_id']);
 					$result = $pk_obj->update_attr("konvertierung_id_new = " . $this->get('id'), true, "konvertierung_id_origin = " . $result['ersetzt_konvertierung_id']);
 					if (!$result['success']) {
@@ -3882,10 +4005,9 @@ Das angegebene Datum der kontinuierlichen Aktualisierung bezieht sich auf die le
 
 		return array(
 			'success' => true,
-			'msg' => 'Tabelle plankennzeichnung und uploads erfolgreich aktualisiert.'
+			'msg' => 'ersetzt_konvertierung_id und Tabelle plankennzeichnung und uploads erfolgreich aktualisiert.'
 		);
 	}
-
 
 	/*
 	* Checks if the geometry of the plan-geltungsbereich is similar to the geometry (95% area equality)

@@ -904,9 +904,11 @@ SELECT EXISTS (
 )";
 		#echo '<br>' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
-		if($ret[0]==0) {
+		if ($ret[0] == 0) {
 			$row = pg_fetch_row($ret[1]);
-			if ($row[0] == 't') $table_exists = true;
+			if ($row[0] == 't') {
+				$table_exists = true;
+			}
 		}
 		return $table_exists;
 	}
