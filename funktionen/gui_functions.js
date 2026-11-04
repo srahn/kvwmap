@@ -39,7 +39,7 @@ window.addEventListener("beforeunload", function (e) {
 	}
 });
 
-window.addEventListener("unload", function () {
+window.addEventListener("pagehide", function () {
 	try {
 		if (window.opener && window.opener.document) {
 			window.opener.document.GUI.gle_changed.value = 0;
