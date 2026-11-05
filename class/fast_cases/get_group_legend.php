@@ -1684,8 +1684,12 @@ class GUI {
     return $legend;
 	}
 
-	function create_layer_legend($layer){
-		if (value_of($layer, 'requires') != '' )return;
+	function create_layer_legend($layer) {
+		[$id_value, $id_type] = split_id($layer['layer_id']);
+		$get_options_function = ($id_type === 'layer' ? 'getLayerOptions' : 'getCollectionLayerOptions');
+		if (value_of($layer, 'requires') != '' ) {
+			return;
+		}
 		$visible = $this->check_layer_visibility($layer);
 
 		$legend = '<tr id="legend_' . $layer['layer_id'] . '"><td valign="top">';
@@ -1774,7 +1778,7 @@ class GUI {
 				$legend .=  'type="checkbox" ';
 				$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema'.$layer['layer_id'].'\'), document.getElementById(\'qLayer'.$layer['layer_id'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
 			}
-			$legend .=  ' name="thema[' . $layer['layer_id'] . ']" value="1" ';
+			$legend .=  ' name="thema['.$layer['layer_id'].']" value="1" ';
 			if($layer['aktivstatus'] == 1){
 				$legend .=  'checked title="'.$this->deactivatelayer.'"';
 			}
@@ -1833,7 +1837,7 @@ class GUI {
 			$legend .= 'id="thema'.$layer['layer_id'].'" name="thema'.$layer['layer_id'].'" disabled="true"></td><td id="legend_layer_' . $layer['layer_id'] . '">';
 			$legend .= '<a ';
 			if ($this->user->rolle->showlayeroptions) {
-				$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
+				$legend .= ' oncontextmenu="' . $get_options_function . '(\'' . $layer['layer_id'] . '\'); return false;"';
 			}
 			$legend .= 'class="invisiblelayerlink boldhover" href="javascript:void(0)">';
 			$legend .= '<span class="legend_layer_hidden" ';
@@ -1860,11 +1864,13 @@ class GUI {
 
 	function create_layername_legend($layer){
 		global $layer_status;
+		[$id_value, $id_type] = split_id($layer_id);
+		$get_options_function = ($id_type === 'layer' ? 'getLayerOptions' : 'getCollectionLayerOptions');
 		$legend = '';
 		$legend .= '<a';
 		# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.
 		if ($this->user->rolle->showlayeroptions) {
-			$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
+			$legend .= ' oncontextmenu="' . $get_options_function . '(\'' . $layer['layer_id'] . '\'); return false;"';
 		}
 		$legend .= ' class="visiblelayerlink ' . ($layer['metalink']? 'metalink' : '') . ' ' . $layer['status'] . ' boldhover" href="javascript:void(0)">';
 		$legend .= '<span ';
@@ -1880,11 +1886,11 @@ class GUI {
 		if ($layer['aktivstatus'] == 1 and $this->user->rolle->showlayeroptions) {
 			$legend .= '&nbsp';
 			if ($layer['rollenfilter'] != '') {
-				$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions('.$layer['layer_id'] . ')">
+				$legend .= '<a href="javascript:void(0)" onclick="' . $get_options_function . '(\''.$layer['layer_id'] . '\')">
 					<i class="fa fa-filter button layerOptionsIcon" title="' . $layer['rollenfilter'] . '"></i>
 				</a>';
 			}
-			$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer['layer_id'] . ')">
+			$legend .= '<a href="javascript:void(0)" onclick="' . $get_options_function . '(\'' . $layer['layer_id'] . '\')">
 				<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
 			</a>';
 		}

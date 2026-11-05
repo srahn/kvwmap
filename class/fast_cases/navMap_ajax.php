@@ -166,7 +166,7 @@ function sanitize(&$value, $type) {
 function replace_params_link($str, $params, $layer_id) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(\'' . $layer_id .  '\')">' . $value . '</a>', $str);
 		}
 	}
 	return $str;
@@ -469,7 +469,7 @@ class GUI {
 	function zoom_to_max_layer_extent($layer_id) {
 		sanitize($layer_id, 'int');
 		# Abfragen der maximalen Ausdehnung aller Daten eines Layers
-		if ($layer_id > 0) {
+		if($layer_id > 0) {
 			$layer = $this->user->rolle->getLayer($layer_id)[0];
 		}
 		else {
@@ -507,16 +507,6 @@ class GUI {
 					$subquery .= ' WHERE ' . $filter;
 				}
 
-				$subquery = replace_params(
-					$subquery,
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language,
-					$layer['duplicate_criterion']
-				);
-
 				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
 				$sql = "
 					SELECT
@@ -546,14 +536,14 @@ class GUI {
 				# Abfragen der Layerausdehnung
 				$ret = $layerdb->execSQL($sql, 4, 0);
 				if ($ret[0]) {
-					echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql);
+					err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql);
 					return 0;
 				}
 				$rs = pg_fetch_array($ret[1]);
 			} break;
 
 			case MS_LAYER_RASTER : {
-				if ($layer['data'] != '') {
+				if ($layer[0]['data'] != '') {
 					# eine einzelne Rasterdatei
 					$raster_file = SHAPEPATH . $layer['data'];
 					if (file_exists($raster_file)) {
@@ -567,7 +557,7 @@ class GUI {
 				}
 				elseif ($layer['tileindex'] != '') {
 					# ein Tile-Index
-					$shape_file = SHAPEPATH.$layer['tileindex'];
+					$shape_file = SHAPEPATH.$layer[0]['tileindex'];
 					if (file_exists($shape_file)) {
 						$output = rand(0, 100000);
 						$command = OGR_BINPATH . 'ogrinfo -al -so ' . $shape_file . ' > ' . IMAGEPATH . $output . '.info';
@@ -579,8 +569,7 @@ class GUI {
 						$ur = explode(', ', trim($corners[1], '() '));
 					}
 				}
-				$extent = new rectObj();
-				$extent->setextent($ll[0], $ll[1], $ur[0], $ur[1]);
+				$extent = new rectObj($ll[0], $ll[1], $ur[0], $ur[1]);
 				$rasterProjection = new projectionObj("init=epsg:".$layer['epsg_code']);
 				$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 				$extent->project($rasterProjection, $userProjection);
@@ -617,8 +606,40 @@ class GUI {
 		}
 	}
 
-	function zoom_to_max_collection_extent($collection_id) {
+	function zoom_to_max_collection_layer_extent($collection_layer_id) {
+		[$id_value, $id_type] = split_id($collection_layer_id);
+		include_once(CLASSPATH . 'CollectionLayer.php');
 		include_once(CLASSPATH . 'Collection.php');
+		$result = CollectionLayer::find_by_id($this, $id_value);
+		if (!$result['success']) {
+			return $result;
+		}
+		$result = Collection::find_by_id($this, $result['collection_layer']->get('collection_id'));
+		if (!$result['success']) {
+			return $result;
+		}
+		$extent = explode(',', $result['collection']->get('extent'));
+		$minx = $extent[0];
+		$maxx = $extent[2];
+		$miny = $extent[1];
+		$maxy = $extent[3];
+		// echo '<br>box: ' . $minx . ' ' . $miny . ',' . $maxx . ' ' . $maxy;
+		$this->map->setextent($minx, $miny, $maxx, $maxy);
+		# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
+		$oPixelPos = new PointObj();
+		$oPixelPos->setXY($this->map->width / 2, $this->map->height / 2);
+		if ($layer['maxscale'] > 0 AND $layer['maxscale'] < $this->map->scaledenom) {
+			$nScale = $layer['maxscale'] - 1;
+		}
+		else {
+			$nScale = $this->map->scaledenom;
+		}
+		$this->map->zoomscale($nScale, $oPixelPos, $this->map->width, $this->map->height, $this->map->extent, $this->Stelle->MaxGeorefExt);
+		$this->map_scaledenom = $this->map->scaledenom;
+	}
+	
+	function zoom_to_max_collection_extent($collection_id) {
+		include_once(CLASSPATH . 'collection.php');
 		$result = Collection::find_by_id($this, $collection_id);
 		if ($result['success']) {
 			$collection = $result['collection'];
@@ -964,6 +985,10 @@ class GUI {
 		// zoom_to_max_layer_extent
 		if($this->formvars['zoom_layer_id'] != '') {
 			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
+		}
+		// zoom_to_max_collection_layer_extent
+		if (value_of($this->formvars, 'zoom_collection_layer_id') != '') {
+			$this->zoom_to_max_collection_layer_extent($this->formvars['zoom_collection_layer_id']);
 		}
 		// zoom_to_max_collection_extent
 		if (value_of($this->formvars, 'zoom_collection_id') != '') {

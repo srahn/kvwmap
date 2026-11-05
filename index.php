@@ -410,6 +410,11 @@ function go_switch($go, $exit = false) {
 				$GUI->getLayerOptions();
 			} break;
 
+			case 'getCollectionLayerOptions' : {
+				$GUI->sanitize(['collection_layer_id' => 'text']);
+				$GUI->getCollectionLayerOptions();
+			} break;
+
 			// case 'getGroupOptions' : {
 			// 	$GUI->getGroupOptions();
 			// } break;
@@ -2311,6 +2316,17 @@ function go_switch($go, $exit = false) {
 				$GUI->zoom_to_max_layer_extent($GUI->formvars['layer_id']);
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->saveMap('');
+				$GUI->legende = $GUI->create_dynamic_legend();
+				$GUI->output();
+			} break;
+
+			case "zoom_to_max_collection_layer_extent" : {
+				$GUI->loadMap('DataBase');
+				$GUI->zoom_to_max_collection_layer_extent($GUI->formvars['collection_layer_id']);
+				$currenttime = date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime, 'getMap', $GUI->user->rolle->last_time_id);
 				$GUI->drawMap();
 				$GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();

@@ -431,6 +431,10 @@ $GUI->nachweis_columns = [
 			if ($GUI->formvars['zoom_layer_id'] != '') {
 				$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);
 			}
+			// zoom_to_max_collection_layer_extent
+			if (value_of($this->formvars, 'zoom_collection_layer_id') != '') {
+				$this->zoom_to_max_collection_layer_extent($this->formvars['zoom_collection_layer_id']);
+			}
 			// zoom_to_max_collection_extent
 			if (value_of($this->formvars, 'zoom_collection_id') != '') {
 				$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
@@ -1671,6 +1675,9 @@ $GUI->nachweis_columns = [
     }
 		elseif ($GUI->formvars['zoom_layer_id'] != '') {
 			$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);
+		}
+		elseif ($GUI->formvars['zoom_collection_layer_id'] != '') {
+			$GUI->zoom_to_max_collection_layer_extent($GUI->formvars['zoom_collection_layer_id']);
 		}
 		elseif ($GUI->formvars['zoom_collection_id'] != '') {
 			$GUI->zoom_to_max_collection_extent($GUI->formvars['zoom_collection_id']);

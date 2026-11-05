@@ -11,6 +11,7 @@
 	$this->DisplayClasses = 'Klassen einblenden';
 	$this->entries = 'Einträge';
 	$this->FullCollectionExtent = 'zoom zu voller Planausdehnung';
+	$this->FullCollectionLayerExtent = 'zoom zu voller Ausdehnung';
 	$this->FullLayerExtent = 'zoom zu voller Layerausdehnung';
 	$this->HideClasses = 'Klassen ausblenden';
 	$this->histTimestamp = 'Zeitpunkt für historische Daten';

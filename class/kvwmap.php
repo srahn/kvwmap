@@ -1024,6 +1024,50 @@ class GUI {
 	// 	';
 	// }
 
+	function getCollectionLayerOptions() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		echo '
+		<div class="layerOptions" id="collection_layer_options_content_' . $this->formvars['collection_layer_id']. '">
+			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeCollectionLayerOptions(\'' . $this->formvars['collection_layer_id'] . '\');" title="Schlie&szlig;en"><img style="border:none" src="' . GRAPHICSPATH . 'exit2.png"></img></a></div>
+			<table width="100%" cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
+				<tr>
+					<td class="layerOptionsHeader">
+						<span class="fett">Optionen</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<ul>
+							<li>
+								<a href="javascript:void(0);" onclick="zoomToMaxCollectionLayerExtent(\'' . $this->formvars['collection_layer_id'] . '\')">' . ucfirst($this->FullCollectionLayerExtent) . '</a>
+							</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+						<table cellspacing="0" cellpadding="0">
+							<tr>
+								<td>
+								</td>
+								<td>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+		█
+		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
+		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
+		posy = document.getElementById(\'collection_options_' . $this->formvars['collection_layer_id'] . '\').getBoundingClientRect().top;
+		if(posy > legend_bottom - 150) posy = legend_bottom - 150;
+		document.getElementById(\'collection_options_content_' . $this->formvars['collection_layer_id'] . '\').style.top = posy - (13 + legend_top);
+		$(\'#collection_layer_options_content_' . $this->formvars['collection_layer_id'] . '\').show()
+		';		
+	}
+
 	function getCollectionOptions() {
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		echo '
@@ -1039,7 +1083,7 @@ class GUI {
 					<td>
 						<ul>
 							<li>
-								<a href="javascript:void(0);" onclick="zoomToMaxCollectionExtent(' . $this->formvars['collection_id'] . ')">' . ucfirst($this->FullCollectionExtent) . '</a>
+								<a href="javascript:void(0);" onclick="zoomToMaxCollectionExtent(\'' . $this->formvars['collection_id'] . '\')">' . ucfirst($this->FullCollectionExtent) . '</a>
 							</li>
 						</ul>
 					</td>
@@ -1382,6 +1426,7 @@ class GUI {
 		$legend .= '<input type="hidden" name="layers" value="'.$this->layer_id_string.'">';
 		$legend .= '<input type="hidden" name="zoom_layer_id" value="">';
 		$legend .= '<input type="hidden" name="zoom_collection_id" value="">';
+		$legend .= '<input type="hidden" name="zoom_collection_layer_id" value="">';
 		return $legend;
   }
 
@@ -1478,8 +1523,12 @@ class GUI {
     return $legend;
 	}
 
-	function create_layer_legend($layer){
-		if (value_of($layer, 'requires') != '' )return;
+	function create_layer_legend($layer) {
+		[$id_value, $id_type] = split_id($layer['layer_id']);
+		$get_options_function = ($id_type === 'layer' ? 'getLayerOptions' : 'getCollectionLayerOptions');
+		if (value_of($layer, 'requires') != '' ) {
+			return;
+		}
 		$visible = $this->check_layer_visibility($layer);
 
 		$legend = '<tr id="legend_' . $layer['layer_id'] . '"><td valign="top">';
@@ -1627,7 +1676,7 @@ class GUI {
 			$legend .= 'id="thema'.$layer['layer_id'].'" name="thema'.$layer['layer_id'].'" disabled="true"></td><td id="legend_layer_' . $layer['layer_id'] . '">';
 			$legend .= '<a ';
 			if ($this->user->rolle->showlayeroptions) {
-				$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
+				$legend .= ' oncontextmenu="' . $get_options_function . '(\'' . $layer['layer_id'] . '\'); return false;"';
 			}
 			$legend .= 'class="invisiblelayerlink boldhover" href="javascript:void(0)">';
 			$legend .= '<span class="legend_layer_hidden" ';
@@ -1654,11 +1703,13 @@ class GUI {
 
 	function create_layername_legend($layer){
 		global $layer_status;
+		[$id_value, $id_type] = split_id($layer['layer_id']);
+		$get_options_function = ($id_type === 'layer' ? 'getLayerOptions' : 'getCollectionLayerOptions');
 		$legend = '';
 		$legend .= '<a';
 		# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.
 		if ($this->user->rolle->showlayeroptions) {
-			$legend .= ' oncontextmenu="getLayerOptions(' . $layer['layer_id'] . '); return false;"';
+			$legend .= ' oncontextmenu="' . $get_options_function . '(\'' . $layer['layer_id'] . '\'); return false;"';
 		}
 		$legend .= ' class="visiblelayerlink ' . ($layer['metalink']? 'metalink' : '') . ' ' . $layer['status'] . ' boldhover" href="javascript:void(0)">';
 		$legend .= '<span ';
@@ -1674,11 +1725,11 @@ class GUI {
 		if ($layer['aktivstatus'] == 1 and $this->user->rolle->showlayeroptions) {
 			$legend .= '&nbsp';
 			if ($layer['rollenfilter'] != '') {
-				$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions('.$layer['layer_id'] . ')">
+				$legend .= '<a href="javascript:void(0)" onclick="' . $get_options_function . '(\''.$layer['layer_id'] . '\')">
 					<i class="fa fa-filter button layerOptionsIcon" title="' . $layer['rollenfilter'] . '"></i>
 				</a>';
 			}
-			$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer['layer_id'] . ')">
+			$legend .= '<a href="javascript:void(0)" onclick="' . $get_options_function . '(\'' . $layer['layer_id'] . '\')">
 				<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
 			</a>';
 		}
@@ -5976,6 +6027,10 @@ class GUI {
 		if ($this->formvars['zoom_layer_id'] != '') {
 			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 		}
+		// zoom_to_max_collection_layer_extent
+		if (value_of($this->formvars, 'zoom_collection_layer_id') != '') {
+			$this->zoom_to_max_collection_layer_extent($this->formvars['zoom_collection_layer_id']);
+		}
 		// zoom_to_max_collection_extent
 		if (value_of($this->formvars, 'zoom_collection_id') != '') {
 			$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
@@ -6113,6 +6168,10 @@ class GUI {
 		// zoom_to_max_layer_extent
 		if($this->formvars['zoom_layer_id'] != '') {
 			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
+		}
+		// zoom_to_max_collection_layer_extent
+		if (value_of($this->formvars, 'zoom_collection_layer_id') != '') {
+			$this->zoom_to_max_collection_layer_extent($this->formvars['zoom_collection_layer_id']);
 		}
 		// zoom_to_max_collection_extent
 		if (value_of($this->formvars, 'zoom_collection_id') != '') {
@@ -6988,6 +7047,10 @@ class GUI {
 		// zoom_to_max_layer_extent
 		if ($this->formvars['zoom_layer_id'] != '') {
 			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
+		}
+		// zoom_to_max_collection_layer_extent
+		if (value_of($this->formvars, 'zoom_collection_layer_id') != '') {
+			$this->zoom_to_max_collection_layer_extent($this->formvars['zoom_collection_layer_id']);
 		}
 		// zoom_to_max_collection_extent
 		if (value_of($this->formvars, 'zoom_collection_id') != '') {
@@ -12176,6 +12239,10 @@ class GUI {
 					if (value_of($this->formvars, 'zoom_layer_id') != '') {
 						$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 					}
+					// zoom_to_max_collection_layer_extent
+					if (value_of($this->formvars, 'zoom_collection_layer_id') != '') {
+						$this->zoom_to_max_collection_layer_extent($this->formvars['zoom_collection_layer_id']);
+					}
 					// zoom_to_max_collection_extent
 					if (value_of($this->formvars, 'zoom_collection_id') != '') {
 						$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
@@ -15821,6 +15888,10 @@ class GUI {
 		if (value_of($this->formvars, 'zoom_layer_id') != '') {
 			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 		}
+		// zoom_to_max_collection_layer_extent
+		if (value_of($this->formvars, 'zoom_collection_layer_id') != '') {
+			$this->zoom_to_max_collection_layer_extent($this->formvars['zoom_collection_layer_id']);
+		}
 		// zoom_to_max_collection_extent
 		if (value_of($this->formvars, 'zoom_collection_id') != '') {
 			$this->zoom_to_max_collection_extent($this->formvars['zoom_collection_id']);
@@ -18470,6 +18541,38 @@ class GUI {
 		}
 	}
 
+	function zoom_to_max_collection_layer_extent($collection_layer_id) {
+		[$id_value, $id_type] = split_id($collection_layer_id);
+		include_once(CLASSPATH . 'CollectionLayer.php');
+		include_once(CLASSPATH . 'Collection.php');
+		$result = CollectionLayer::find_by_id($this, $id_value);
+		if (!$result['success']) {
+			return $result;
+		}
+		$result = Collection::find_by_id($this, $result['collection_layer']->get('collection_id'));
+		if (!$result['success']) {
+			return $result;
+		}
+		$extent = explode(',', $result['collection']->get('extent'));
+		$minx = $extent[0];
+		$maxx = $extent[2];
+		$miny = $extent[1];
+		$maxy = $extent[3];
+		// echo '<br>box: ' . $minx . ' ' . $miny . ',' . $maxx . ' ' . $maxy;
+		$this->map->setextent($minx, $miny, $maxx, $maxy);
+		# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
+		$oPixelPos = new PointObj();
+		$oPixelPos->setXY($this->map->width / 2, $this->map->height / 2);
+		if ($layer['maxscale'] > 0 AND $layer['maxscale'] < $this->map->scaledenom) {
+			$nScale = $layer['maxscale'] - 1;
+		}
+		else {
+			$nScale = $this->map->scaledenom;
+		}
+		$this->map->zoomscale($nScale, $oPixelPos, $this->map->width, $this->map->height, $this->map->extent, $this->Stelle->MaxGeorefExt);
+		$this->map_scaledenom = $this->map->scaledenom;
+	}
+	
 	function zoom_to_max_collection_extent($collection_id) {
 		include_once(CLASSPATH . 'collection.php');
 		$result = Collection::find_by_id($this, $collection_id);
