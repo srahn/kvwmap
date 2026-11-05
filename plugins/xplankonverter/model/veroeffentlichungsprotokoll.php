@@ -71,7 +71,7 @@ class Veroeffentlichungsprotokoll extends PgObject {
       (AUSLEGUNG_MODE == 'dev' ? "u.login_name = 'pkorduan'" : "
         u.email IS NOT NULL AND u.email != '' AND
         (u.archived IS NULL OR u.archived > now()) AND
-        u.funktion NOT IN ('admin', 'regionaladmin', 'importer', 'dienstleister') AND
+        u.funktion NOT IN ('admin', 'regionaladmin', 'importer', 'dienstleister', 'nicht_zustaendiger_user') AND
         r.stelle_id = " . $stelle_id . "
       "),
       NULL,

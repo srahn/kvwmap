@@ -1083,7 +1083,7 @@ class GUI {
 					<td>
 						<ul>
 							<li>
-								<a href="javascript:void(0);" onclick="zoomToMaxCollectionExtent(\'' . $this->formvars['collection_id'] . '\')">' . ucfirst($this->FullCollectionExtent) . '</a>
+								<a href="javascript:void(0);" onclick="zoomToMaxCollectionExtent(' . $this->formvars['collection_id'] . ')">' . ucfirst($this->FullCollectionExtent) . '</a>
 							</li>
 						</ul>
 					</td>
@@ -18574,7 +18574,7 @@ class GUI {
 	}
 	
 	function zoom_to_max_collection_extent($collection_id) {
-		include_once(CLASSPATH . 'collection.php');
+		include_once(CLASSPATH . 'Collection.php');
 		$result = Collection::find_by_id($this, $collection_id);
 		if ($result['success']) {
 			$collection = $result['collection'];

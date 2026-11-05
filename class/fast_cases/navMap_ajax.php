@@ -639,7 +639,7 @@ class GUI {
 	}
 	
 	function zoom_to_max_collection_extent($collection_id) {
-		include_once(CLASSPATH . 'collection.php');
+		include_once(CLASSPATH . 'Collection.php');
 		$result = Collection::find_by_id($this, $collection_id);
 		if ($result['success']) {
 			$collection = $result['collection'];
