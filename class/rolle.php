@@ -1668,7 +1668,23 @@ class rolle {
 		}
 		foreach ($formvars['group_checkbox'] as $group_id => $aktiv_status) {
 			[$id_value, $id_type] = split_id($group_id);
-			if ($id_type === 'collection') {
+			if ($id_type === 'collection_layer') {
+				$sql = "
+					UPDATE
+						kvwmap.collection_layer2rolle clr
+					SET
+						aktivstatus = $1
+						" . ($aktiv_status == 0 ? ', querystatus = 0' : '') . "
+					WHERE
+						clr.user_id = $2 AND
+						clr.stelle_id = $3 AND
+						clr.collection_layer_id = $4
+				";
+				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $id_value);
+				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern des aktiven Collection Layers zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
+			}
+			elseif ($id_type === 'collection') {
 				$sql = "
 					UPDATE
 						kvwmap.collection_layer2rolle clr
@@ -1706,7 +1722,8 @@ class rolle {
 						cg.id = $4
 				";
 				$this->database->prepared_params = array($aktiv_status, $this->user_id, $this->stelle_id, $id_value);
-				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Collection Layer zur Rolle:", 4);
+				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der Layer der aktiven Collection Group zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel, false, $this->database->prepared_params);
 			}
 			else {
 				// normale Layergruppe
