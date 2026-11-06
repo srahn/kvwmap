@@ -819,11 +819,11 @@ class data_import_export {
         // fclose($newsql);
       // }
 
-			if ($ret == '') {
+			if ($ret == 0) {
 				$table = $this->formvars['schema_name'] . "." . $this->formvars['table_name'];
 				$sql = "
 					SELECT
-						count(*)
+						count(*)s
 					FROM
 						" . $table . ";
 				";
