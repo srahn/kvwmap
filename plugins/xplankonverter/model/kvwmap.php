@@ -1099,9 +1099,20 @@
 			$GUI->konvertierung->reset_mapping();
 			$GUI->konvertierung->mapping();
 			#$GUI->konvertierung->set_historie();
-			$GUI->konvertierung->set_status(
-				($GUI->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
-			);
+			// ToDo pk: Nicht nur prüfen ob validierung erfolgreich, sondern auch entsprechenden Status in import_job und uploads setzen
+			if ($GUI->konvertierung->validierung_erfolgreich()) {
+				$GUI->konvertierung->set_status('Konvertierung abgeschlossen');
+			}
+			else {
+				$GUI->konvertierung->set_status('Konvertierung abgebrochen');
+				if ($GUI->formvars['digital_mv'] AND $GUI->upload_file != '') {
+					return array(
+						'success' => false,
+						'msg' => 'Bei der Konvertierung ist mindestens ein Fehler aufgetreten. Siehe Validierungsergebnisse der Konvertierung.'
+					);
+				}
+			}
+
 			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);
 			// $result = $GUI->konvertierung->create_themenauswahl($GUI->xplan_layers);
 			// if (!$result['success']) {

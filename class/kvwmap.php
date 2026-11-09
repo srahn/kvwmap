@@ -109,6 +109,7 @@ class GUI {
 	var $custom_trigger_functions;
 	var $goNotExecutedInPlugins;
 	var $layer;
+	var $lb = '<br>';
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
@@ -122,6 +123,8 @@ class GUI {
 
 		global $log_loginfail;
 		$this->log_loginfail = $log_loginfail;
+
+		$this->lb = php_sapi_name() === 'cli' ? "\n" : '<br>';
 
 		# layout Templatedatei zur Anzeige der Daten
 		if ($main != "") {

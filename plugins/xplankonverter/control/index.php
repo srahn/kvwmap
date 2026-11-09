@@ -291,7 +291,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$create_ticket
 		) {
 			$ticket = create_ticket($msg);
-			$msg_zusatz .= "\n\nEs wurde ein Ticket angelegt (" . URL . APPLVERSION . "index.php?go=Layer-Suche_Suchen&selected_layer_id=258&value_id=" . $ticket->get_id() . "&operator_id==) Falls der Fehler durch das Testportal PlanDigital verursacht wurde und nicht in der XPlanGML begründet liegt, werden Sie über den Stand der Behebung informiert.";
+			$msg_zusatz .= $GUI->lb . $GUI->lb . "Es wurde ein Ticket angelegt (" . URL . APPLVERSION . "index.php?go=Layer-Suche_Suchen&selected_layer_id=258&value_id=" . $ticket->get_id() . "&operator_id==) Falls der Fehler durch das Testportal PlanDigital verursacht wurde und nicht in der XPlanGML begründet liegt, werden Sie über den Stand der Behebung informiert.";
 		}
 		if (
 			empty($GUI->formvars['suppress_ticket_and_notification']) AND
@@ -302,17 +302,19 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 				$result = $GUI->konvertierung->send_notification("Beim Hochladen {$GUI->konvertierung->config['genitiv']} {$GUI->konvertierung->get('bezeichnung')} id: {$GUI->konvertierung->get_id()} durch den Nutzer {$GUI->user->Vorname} {$GUI->user->Name} in der Stelle {$GUI->Stelle->Bezeichnung} ist ein Fehler aufgetreten.\n {$msg} {$msg_zusatz}");
 			}
 			else {
-				$result = $GUI->xplankonverter_send_notification('Bei der Ausführung des Anwendungsfalls ' . $GUI->go . " durch den Nutzer {$GUI->user->Vorname} {$GUI->user->Name} in der Stelle {$GUI->Stelle->Bezeichnung} ist ein Fehler aufgetreten.\n" . $msg . $msg_zusatz);
+				$result = $GUI->xplankonverter_send_notification('Bei der Ausführung des Anwendungsfalls ' . $GUI->go . " durch den Nutzer {$GUI->user->Vorname} {$GUI->user->Name} in der Stelle {$GUI->Stelle->Bezeichnung} ist ein Fehler aufgetreten." . $GUI->lb . $msg . $msg_zusatz);
 			}
 			if ($result['success']) {
-				$msg_zusatz .= "\n\nDie Mitarbeiter des ARL und der Administrator des PlanDigital-Portals wurden darüber per E-Mail informiert.";
+				$msg_zusatz .= $GUI->lb . $GUI->lb . "Die Mitarbeiter des ARL und der Administrator des PlanDigital-Portals wurden darüber per E-Mail informiert.";
 			}
 		}
 
 		if ($update_uploads) {
-			$GUI->konvertierung->destroy();
-			// echo "\nKonvertierung mit id: " . $GUI->konvertierung->get_id() . ' und dazugehöriger Plan gelöscht.';
-			$GUI->konvertierung->set('id', '');
+			if ($status != 'Konvertierung abgebrochen') {
+				$GUI->konvertierung->destroy();
+				// echo $GUI->lb . "Konvertierung mit id: " . $GUI->konvertierung->get_id() . ' und dazugehöriger Plan gelöscht.';
+				$GUI->konvertierung->set('id', '');
+			}
 			$result = $GUI->konvertierung->update_plankennzeichnung_and_uploads_table($status, $msg);
 		}
 
@@ -320,7 +322,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		// 	$log = new PgObject($GUI, 'xplankonverter', 'konvertierungen_log');
 		// 	$log->create(array(
 		// 		'konvertierung_id' => $GUI->konvertierung->get('id'),
-		// 		'message' => $msg . ($msg_zusatz !== '' ? "\n" . $msg_zusatz : ''),
+		// 		'message' => $msg . ($msg_zusatz !== '' ? $GUI->lb . $msg_zusatz : ''),
 		// 		'originator' => $GUI->user->Vorname . ' ' . $GUI->user->Name
 		// 	));
 		// }
@@ -337,7 +339,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 				));
 			}
 			else {
-				echo "\n" . str_replace('<p>', "\n", str_replace('<br>', "\n", $msg . ' ' . $status));
+				echo $GUI->lb . str_replace('<p>', $GUI->lb, str_replace('<br>', $GUI->lb, $msg . ' Status: ' . $status));
 			}
 		}
 	}
@@ -348,7 +350,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		$pgObj = new PgObject($GUI, 'feedback', 'tickets');
 		$ticket = $pgObj->create(array(
 			'titel' => 'Fehler beim Upload ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? ' ' . $GUI->konvertierung->get_id() : '') . ' in Stelle ' . $GUI->Stelle->id,
-			'anfrage' => 'Beim Hochladen ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? $GUI->konvertierung->get('bezeichnung') : '') . ($GUI->konvertierung ? ' id: ' . $GUI->konvertierung->get_id() : '') . " ist ein Fehler aufgetreten.\n" . pg_escape_string($msg),
+			'anfrage' => 'Beim Hochladen ' . $GUI->konvertierung->config['genitiv'] . ' ' . ($GUI->konvertierung ? $GUI->konvertierung->get('bezeichnung') : '') . ($GUI->konvertierung ? ' id: ' . $GUI->konvertierung->get_id() : '') . " ist ein Fehler aufgetreten." . $GUI->lb . pg_escape_string($msg),
 			'kategorie_id' => 3, # Planuploadfehler
 			'status_id' => 1, # erstellt
 			'dringlichkeit' => 3, # dringlich
@@ -427,18 +429,19 @@ function go_switch_xplankonverter($go) {
 			$GUI->formvars['digital_mv'] = 'true';
 			$GUI->formvars['skip_xplanvalidator'] = 'true';
 			$GUI->formvars['skip_geometrisch'] = 'true';
+			$GUI->sanitize(['limit' => 'int']);
 
 			// Abfragen der auszuführenden Jobs zum importierenden der Pläne
 			$pg_obj = new PgObject($GUI, 'xplankonverter', 'import_jobs');
+			$where = 
 			$jobs = $pg_obj->find_where(
-				"
-					started_at IS NULL AND
-					import_type = 'gml'
-				",
-				"upload_file"
+ 				($GUI->formvars['import_job_id'] ? 'id = ' . $GUI->formvars['import_job_id'] : "started_at IS NULL AND import_type = 'gml'"),
+				"upload_file",
+				'*',
+				$GUI->formvars['limit'] ?: NULL
 			);
 			foreach ($jobs AS $job) {
-				echo "\n" . date('Y-m-d H:m:s', time()) . " Start Job " . $job->get_id() . " " . $job->get('upload_file');
+				echo $GUI->lb . date('Y-m-d H:m:s', time()) . " Start Job " . $job->get_id() . " " . $job->get('upload_file');
 				$job->update_attr("started_at = now()");
 				$GUI->upload_file = pathinfo($job->get('upload_file'), PATHINFO_FILENAME);
 				$parts = explode('__', $GUI->upload_file);
@@ -453,7 +456,7 @@ function go_switch_xplankonverter($go) {
 				 * 1. upload_zusammenzeichnung
 				 * 1.1 upload_zusammenzeichnung
 				 */
-				echo "\n1.1 upload_zusammenzeichnung";
+				echo $GUI->lb . "1.1 upload_zusammenzeichnung";
 				$upload_file = array(
 					'tmp_name' => XPLANKONVERTER_FILE_PATH . $job->get('upload_file'),
 					'name' => basename(XPLANKONVERTER_FILE_PATH . $job->get('upload_file'))
@@ -469,7 +472,7 @@ function go_switch_xplankonverter($go) {
 				/**
 				 * 1.2 validate_uploaded_zusammenzeichnung
 				 */
-				echo "\n1.2 validate_uploaded_zusammenzeichnung";
+				echo $GUI->lb . "1.2 validate_uploaded_zusammenzeichnung";
 				$result = $GUI->xplankonverter_validate_uploaded_zusammenzeichnungen($upload_file, $result['upload_path']);
 				if (!$result['success']) {
 					send_error('Fehler beim validieren der hochgeladenen Zusammenzeichnung. ' . $result['msg'], 'Planupload abgebrochen');
@@ -479,7 +482,7 @@ function go_switch_xplankonverter($go) {
 				$GUI->formvars['konvertierung_id'] = $GUI->konvertierung->get_id();
 				$GUI->plan_class = $GUI->konvertierung->plan_class;
 				$GUI->konvertierung->update_plankennzeichnung_and_uploads_table('Plan hochgeladen', 'Plan erfolgreich hochgeladen und validiert.');
-				echo "\nKonvertierung mit id: " . $GUI->konvertierung->get_id() . ' angelegt.';
+				echo $GUI->lb . "Konvertierung mit id: " . $GUI->konvertierung->get_id() . ' angelegt.';
 
 				$result = array(
 					'success' => true,
@@ -490,20 +493,20 @@ function go_switch_xplankonverter($go) {
 				/**
 				 * 2. import_plan
 				 */
-				echo "\n2. import_plan";
+				echo $GUI->lb . "2. import_plan";
 				$GUI->xplankonverter_import_plan('uploaded_xplan_gml', 'batch_import');
 				$GUI->konvertierung->update_plankennzeichnung_and_uploads_table('Plan importiert', 'Plan erfolgreich importiert.');
 
 				$tmp_gml_id = $GUI->konvertierung->get_gml_id_from_gmlas_tmp('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class);
-				// echo "\nDie gml_id des eingelesenen Planes ist: " . $tmp_gml_id;
+				// echo $GUI->lb . "Die gml_id des eingelesenen Planes ist: " . $tmp_gml_id;
 				if ($GUI->konvertierung->plan_exists($tmp_gml_id)) {
-					echo "\nEin Plan mit gml_id: " . $tmp_gml_id . ' existiert schon im xplan_gml Schema.';
+					echo $GUI->lb . "Ein Plan mit gml_id: " . $tmp_gml_id . ' existiert schon im xplan_gml Schema.';
 					$GUI->konvertierung->set('error_id', 2);
 					$GUI->konvertierung->update();
 					/**
 					 * 2.1. reindex_gml
 					 */
-					echo "\n2.1. reindex_gml";
+					echo $GUI->lb . "2.1. reindex_gml";
 					$result = $GUI->xplankonverter_reindex_gml_ids($GUI->konvertierung->get_id());
 					if (! $result['success']) {
 						send_error($result['msg'], 'Reindizierung abgebrochen');
@@ -513,7 +516,7 @@ function go_switch_xplankonverter($go) {
 					/**
 					 * 2.2. import_reindexed_zusammenzeichnung
 					 */
-					echo "\n2.2 import_reindexed_zusammenzeichnung";
+					echo $GUI->lb . "2.2 import_reindexed_zusammenzeichnung";
 					$result = $GUI->xplankonverter_import_plan('reindexed_xplan_gml', 'batch_import');
 					if ($result !== '') {
 						send_error($result, 'Import reindizierter Plan abgebrochen');
@@ -539,7 +542,7 @@ function go_switch_xplankonverter($go) {
 				 * 3. create_plaene
 				 * 3.1 validate_imported_plan
 				 */
-				echo "\n3.1 validate_imported_plan";
+				echo $GUI->lb . "3.1 validate_imported_plan";
 				$result = $GUI->konvertierung->validate_imported_plan('mv', 'xplan_gmlas_tmp_' . $GUI->user->id);
 				if (!$result['success']) {
 					send_error('Validierung gegen das Profil MV nicht bestanden. ' . $result['msg'], 'Validierung importierter Plan abgebrochen');
@@ -550,13 +553,13 @@ function go_switch_xplankonverter($go) {
 				/**
 				 * 3.2 create_plaene
 				 */
-				echo "\n3.2 create_plaene";
+				echo $GUI->lb . "3.2 create_plaene";
 				$GUI->xplankonverter_create_plaene();
 				$GUI->konvertierung->update_plankennzeichnung_and_uploads_table('Plan angelegt', 'Plan erfolgreich angelegt.');
-				echo "\nPlan mit gml_id: " . $GUI->konvertierung->plan->get('gml_id') . ' im Schema xplan_gml angelegt.';
+				echo $GUI->lb . "Plan mit gml_id: " . $GUI->konvertierung->plan->get('gml_id') . ' im Schema xplan_gml angelegt.';
 
 				// 4. xplankonverter_konvertierung
-				echo "\n4. konvertierung";
+				echo $GUI->lb . "4. konvertierung";
 				$result = $GUI->xplankonverter_konvertierung($GUI->konvertierung->get_id(), false);
 				if (! $result['success']) {
 					send_error('Fehler bei der Konvertierung des angelegten Plans. ' . $result['msg'], 'Konvertierung abgebrochen');
@@ -565,13 +568,20 @@ function go_switch_xplankonverter($go) {
 				$GUI->konvertierung->update_plankennzeichnung_and_uploads_table('Konvertierung abgeschlossen', 'Angelegter Plan konvertiert.');
 
 				// 5. gml_generieren
-				echo "\n5. gml_generieren";
+				echo $GUI->lb . "5. gml_generieren";
 				include_once(PLUGINS . 'xplankonverter/model/build_gml.php');
 				include_once(PLUGINS . 'xplankonverter/model/TypeInfo.php');
 				$result = $GUI->xplankonverter_gml_generieren($GUI->konvertierung);
 				$GUI->konvertierung->update_plankennzeichnung_and_uploads_table('GML-Erstellung abgeschlossen', 'GML vom angelegten Plan erzeugt.');
 
-				echo "\nImport und Konvertierung erfolgreich mit id: " . $GUI->konvertierung->get_id() . ' abgeschlossen.';
+				$job->update_attr("finished_at = now()");
+				echo $GUI->lb . "Import und Konvertierung erfolgreich mit id: " . $GUI->konvertierung->get_id() . ' abgeschlossen.';
+			}
+			if ($GUI->is_admin_user($GUI->user->id) AND php_sapi_name() !== 'cli') {
+				new rolle($GUI->user->id, $GUI->Stelle->id, $GUI->pgdatabase);
+				$GUI->formvars['go'] = 'Layer-Suche_Suchen';
+				echo $GUI->lb . " formvars vor Suche: " . print_r($GUI->formvars, true) . $GUI->lb . ' stelle_id in rolle: ' . rolle::$stelle_ID;
+				$GUI->GenerischeSuche_Suchen();
 			}
 		} break;
 
@@ -1994,7 +2004,7 @@ function go_switch_xplankonverter($go) {
 
 			if (empty($GUI->formvars['suppress_ticket_and_notification'])) {
 				$GUI->debug->write('Sende Benachrichtigung.');
-				$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . ' ist von dem Nutzer ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . ' (login: ' . $GUI->user->login_name . ") aktualisiert worden.\n\nDiese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_konvertierung_anzeigen&planart=" . $GUI->formvars['planart'] . "}\n\nIhr Team von " . TITLE);
+				$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . ' ist von dem Nutzer ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . ' (login: ' . $GUI->user->login_name . ") aktualisiert worden." . $GUI->lb . $GUI->lb . "Diese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_konvertierung_anzeigen&planart=" . $GUI->formvars['planart'] . "}" . $GUI->lb . $GUI->lb . "Ihr Team von " . TITLE);
 				if (!$result['success']) {
 					send_error($result['msg']);
 					break;

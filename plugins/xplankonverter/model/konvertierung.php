@@ -3605,7 +3605,10 @@ class Konvertierung extends PgObject {
 	 * löscht sich am Ende selbst.
 	 */
 	function destroy() {
+		// echo 'Lösche Konvertierung ' . $this->get_id();
 		$this->debug->show('Lösche Konvertierung', Konvertierung::$write_debug);
+		$parts = explode('__', pathinfo($this->get('uploaded_xplan_gml_file_name'), PATHINFO_FILENAME));
+		$upload_file = implode('__', array_slice($parts, 0, 4));
 
 		$this->delete_upload_directory();
 
@@ -3620,6 +3623,8 @@ class Konvertierung extends PgObject {
 			$regel->destroy();
 		}
 
+		// ToDo: Lösche Validierungsergebnisse
+
 		# Lösche zugehörige Postgres gmlas und shape schemas
 		$this->destroy_gmlas_and_shape_schemas();
 		# TODO Lösche Shape Layer + Gruppe
@@ -3632,6 +3637,111 @@ class Konvertierung extends PgObject {
 
 		# Lösche flaechenschlussobjekte-topology to avoid duplicates of uuid
 		$this->clearTopology();
+
+		// Falls es plankennzeichnungen gibt
+		if ($this->database->table_exists('plandigitalisierung', 'plankennzeichnung')) {
+			// Lösche Plankennzeichnung der Konvertierung falls existent
+			$pg_obj = new PgObject($this->gui, 'plandigitalisierung', 'plankennzeichnung');
+			$result = $pg_obj->delete('konvertierung_id_origin = ' . $this->get_id());
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Löschen der zugehörigen Plankennzeichnung in der Datenbank : " . $result['err_msg']
+				));
+				exit;
+			}
+
+			// Entferne die konvertierung_id_new und gml_id_new in anderen Plankennzeichnungen
+			$result = $pg_obj->update_attr(
+				array(
+					'konvertierung_id_new = NULL',
+					'gml_id_new = NULL'
+				),
+				false,
+				'konvertierung_id_new = ' . $this->get_id()
+			);
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Löschen zugeordneter konvertierung_id in Plankennzeichnungen in der Datenbank : " . $result['err_msg']
+				));
+				exit;
+			}
+		} // Ende plankennzeichnungen exist
+
+		// Falls es uploads gibt
+		if ($this->database->table_exists('plandigitalisierung', 'uploads')) {
+			// Suche nach einem Upload der Konvertierung
+			$pg_obj = new PgObject($this->gui, 'plandigitalisierung', 'uploads');
+			$result = $pg_obj->find_by(
+				'konvertierung_id_new',
+				$this->get_id(),
+				'=',
+				true
+			);
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler bei der Suche nach einem Upload der Konvertierung in der Datenbank : " . $result['err_msg']
+				));
+				exit;
+			}
+			$upload = $result['feature'];
+			$upload_exists = ($upload->data ? true : false);
+		}
+		else {
+			$upload_exists = false;
+		}
+
+		if ($upload_exists) {
+
+			// Setze Upload Status, message und konvertierung_id zurück
+			$result = $upload->update_attr(
+				array(
+					'konvertierung_id_new = NULL',
+					'message = NULL',
+					"status = CASE WHEN konvertierung_id_origin IS NULL THEN 'Plan hochgeladen' ELSE 'Originalplan zugeordnet' END"
+				)
+			);
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Zurücksetzen der Werte der Plankennzeichnung in der Datenbank : " . $result['err_msg']
+				));
+				exit;
+			}
+
+			// Setzte import_jobs zurück falls vorhanden
+			$pg_obj = new PgObject($this->gui, 'xplankonverter', 'import_jobs');
+			$result = $pg_obj->update_attr(
+				array(
+					'started_at = NULL',
+					'finished_at = NULL'
+				),
+				false,
+				"upload_file LIKE '%" . $upload_file . "%'"
+			);
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Zurücksetzen der Werte des Import-Jobs in der Datenbank: " . $result['err_msg']
+				));
+				exit;
+			}
+		}
+		else {
+			// Upload existiert nicht
+
+			// Lösche import_job falls existent
+			$result = $pg_obj->delete("upload_file LIKE '%" . $upload_file . "%'");
+			if ($result['success'] === false) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Löschen des import_jobs in der Datenbank: " . $result['err_msg']
+				));
+				exit;
+			}
+		} // Ende upload_exist
 
 		# Lösche Konvertierung
 		$this->delete();
