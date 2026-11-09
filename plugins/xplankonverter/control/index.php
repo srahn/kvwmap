@@ -580,7 +580,6 @@ function go_switch_xplankonverter($go) {
 			if ($GUI->is_admin_user($GUI->user->id) AND php_sapi_name() !== 'cli') {
 				new rolle($GUI->user->id, $GUI->Stelle->id, $GUI->pgdatabase);
 				$GUI->formvars['go'] = 'Layer-Suche_Suchen';
-				echo $GUI->lb . " formvars vor Suche: " . print_r($GUI->formvars, true) . $GUI->lb . ' stelle_id in rolle: ' . rolle::$stelle_ID;
 				$GUI->GenerischeSuche_Suchen();
 			}
 		} break;
