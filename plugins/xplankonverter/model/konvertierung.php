@@ -1585,6 +1585,23 @@ class Konvertierung extends PgObject {
 			";
 		}
 		else {
+			$sql_generattribut_nachtraeglich_digitalisiert = '';
+			if ($this->gui->formvars['digital_mv']) {
+				$sql_generattribut_nachtraeglich_digitalisiert = "
+					UNION
+					SELECT
+						gamv.id,
+						(
+							'Erfassungsart',
+							CONCAT_WS(', ', 'nachträglich digitalisiert', COALESCE(pk.los, CASE WHEN pk.los_vier THEN 'Los 4' ELSE NULL END, pk.los_fuenf)),
+							'XP_StringAttribut'::xplan_gml.xp_generattributtyp
+						)::xplan_gml.xp_generattribut_erweitert
+					FROM
+						" . $table_schema . "." . strtolower($plan_class) . " gamv JOIN
+						plandigitalisierung.plankennzeichnung pk ON pk.konvertierung_id_new = " . $konvertierung_id . "
+				";
+			}
+
 			$sql = "
 				UPDATE
 					xplankonverter.konvertierungen k
@@ -1807,7 +1824,7 @@ class Konvertierung extends PgObject {
 										e_sub.art::xplan_gml.xp_externereferenzart,
 										e_sub.informationssystemurl,
 										e_sub.referenzname,
-										'" . URL . "/download/' || e_sub.referenzurl,
+										'" . URL . "download/' || e_sub.referenzurl,
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 										COALESCE(e_sub.beschreibung, e_sub.referenzname, e_sub.art, 'Dokument'),
 										to_char(e_sub.datum, 'DD.MM.YYYY'),
@@ -1828,22 +1845,27 @@ class Konvertierung extends PgObject {
 						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
 						(
 							SELECT
-								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
+								res.parent_id,
+								ARRAY_AGG(DISTINCT res.row) AS hatgenerattribut
 							FROM (
 								SELECT
-									hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
-								FROM " . $table_schema . ".bp_plan gap_1
-								LEFT JOIN " . $table_schema . ".bp_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id
-								INNER JOIN " . $table_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
+									hga_1.parent_id,
+									(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+								FROM
+									" . $table_schema . ".bp_plan gap_1 LEFT JOIN
+									" . $table_schema . ".bp_plan_hatgenerattribut hga_1 ON hga_1.parent_id = gap_1.id INNER JOIN
+									" . $table_schema . ".xp_stringattribut xpst ON xpst.ogr_pkid = hga_1.xp_generattribut_xp_stringattribut_pkid
 								UNION
 								SELECT
-									hga_2.parent_id,(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+									hga_2.parent_id,
+									(xpda.name,xpda.wert,'XP_DatumAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
 								FROM " . $table_schema . ".bp_plan gap_2
 								LEFT JOIN " . $table_schema . ".bp_plan_hatgenerattribut hga_2 ON hga_2.parent_id = gap_2.id
 								INNER JOIN " . $table_schema . ".xp_datumattribut xpda ON xpda.ogr_pkid = hga_2.xp_generattribut_xp_datumattribut_pkid
 								UNION
 								SELECT
-									hga_3.parent_id,(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
+									hga_3.parent_id,
+									(xpin.name,xpin.wert,'XP_IntegerAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
 								FROM " . $table_schema . ".bp_plan gap_3
 								LEFT JOIN " . $table_schema . ".bp_plan_hatgenerattribut hga_3 ON hga_3.parent_id = gap_3.id
 								INNER JOIN " . $table_schema . ".xp_integerattribut xpin ON xpin.ogr_pkid = hga_3.xp_generattribut_xp_integerattribut_pkid
@@ -1856,9 +1878,11 @@ class Konvertierung extends PgObject {
 								UNION
 								SELECT
 									hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
-								FROM " . $table_schema . ".bp_plan gap_5
-								LEFT JOIN " . $table_schema . ".bp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
-								INNER JOIN " . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+								FROM
+									" . $table_schema . ".bp_plan gap_5 LEFT JOIN
+									" . $table_schema . ".bp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id INNER JOIN
+									" . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid"
+								.	$sql_generattribut_nachtraeglich_digitalisiert . "
 							) res GROUP BY parent_id
 						) generattr_sub ON generattr_sub.parent_id = gmlas.id;
 				";
@@ -2026,9 +2050,9 @@ class Konvertierung extends PgObject {
 										e_sub.art::xplan_gml.xp_externereferenzart,
 										e_sub.informationssystemurl,
 										e_sub.referenzname,
-										e_sub.referenzurl,
+										'" . URL . "download/' || e_sub.referenzurl,
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-										e_sub.beschreibung,
+										COALESCE(e_sub.beschreibung, e_sub.referenzname, e_sub.art, 'Dokument'),
 										to_char(e_sub.datum, 'DD.MM.YYYY'),
 										e_sub.typ::xplan_gml.xp_externereferenztyp
 									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
@@ -2049,7 +2073,8 @@ class Konvertierung extends PgObject {
 						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
 						(
 							SELECT
-								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
+								res.parent_id,
+								ARRAY_AGG(DISTINCT res.row) AS hatgenerattribut
 							FROM (
 								SELECT
 									hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
@@ -2077,9 +2102,11 @@ class Konvertierung extends PgObject {
 								UNION
 								SELECT
 									hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
-								FROM " . $table_schema . ".fp_plan gap_5
-								LEFT JOIN " . $table_schema . ".fp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
-								INNER JOIN " . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+								FROM
+									" . $table_schema . ".fp_plan gap_5 LEFT JOIN
+									" . $table_schema . ".fp_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id INNER JOIN
+									" . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid"
+								.	$sql_generattribut_nachtraeglich_digitalisiert . "
 							) res GROUP BY parent_id
 						) generattr_sub ON generattr_sub.parent_id = gmlas.id;
 				";
@@ -2171,9 +2198,9 @@ class Konvertierung extends PgObject {
 										e_sub.art::xplan_gml.xp_externereferenzart,
 										e_sub.informationssystemurl,
 										e_sub.referenzname,
-										e_sub.referenzurl,
+										'" . URL . "download/' || e_sub.referenzurl,
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-										e_sub.beschreibung,
+										COALESCE(e_sub.beschreibung, e_sub.referenzname, e_sub.art, 'Dokument'),
 										to_char(e_sub.datum, 'DD.MM.YYYY'),
 										e_sub.typ::xplan_gml.xp_externereferenztyp
 									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
@@ -2194,7 +2221,8 @@ class Konvertierung extends PgObject {
 						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
 						(
 							SELECT
-								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
+								res.parent_id,
+								ARRAY_AGG(DISTINCT res.row) AS hatgenerattribut
 							FROM (
 								SELECT
 									hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
@@ -2222,9 +2250,11 @@ class Konvertierung extends PgObject {
 								UNION
 								SELECT
 									hga_5.parent_id,(xpdo.name,xpdo.wert,'XP_DoubleAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
-								FROM " . $table_schema . ".so_plan gap_5
-								LEFT JOIN " . $table_schema . ".so_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id
-								INNER JOIN " . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid
+								FROM
+									" . $table_schema . ".so_plan gap_5 LEFT JOIN
+									" . $table_schema . ".so_plan_hatgenerattribut hga_5 ON hga_5.parent_id = gap_5.id INNER JOIN
+									" . $table_schema . ".xp_doubleattribut xpdo ON xpdo.ogr_pkid = hga_5.xp_generattribut_xp_doubleattribut_pkid"
+								.	$sql_generattribut_nachtraeglich_digitalisiert . "
 							) res GROUP BY parent_id
 						) generattr_sub ON generattr_sub.parent_id = gmlas.id;
 				";
@@ -2365,7 +2395,8 @@ class Konvertierung extends PgObject {
 						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id LEFT JOIN
 						(
 							SELECT
-								res.parent_id,ARRAY_AGG(res.row) AS hatgenerattribut
+								res.parent_id,
+								ARRAY_AGG(DISTINCT res.row) AS hatgenerattribut
 							FROM (
 								SELECT
 									hga_1.parent_id,(xpst.name,xpst.wert,'XP_StringAttribut'::xplan_gml.xp_generattributtyp)::xplan_gml.xp_generattribut_erweitert
@@ -3574,7 +3605,10 @@ class Konvertierung extends PgObject {
 	 * löscht sich am Ende selbst.
 	 */
 	function destroy() {
+		// echo 'Lösche Konvertierung ' . $this->get_id();
 		$this->debug->show('Lösche Konvertierung', Konvertierung::$write_debug);
+		$parts = explode('__', pathinfo($this->get('uploaded_xplan_gml_file_name'), PATHINFO_FILENAME));
+		$upload_file = implode('__', array_slice($parts, 0, 4));
 
 		$this->delete_upload_directory();
 
@@ -3589,6 +3623,8 @@ class Konvertierung extends PgObject {
 			$regel->destroy();
 		}
 
+		// ToDo: Lösche Validierungsergebnisse
+
 		# Lösche zugehörige Postgres gmlas und shape schemas
 		$this->destroy_gmlas_and_shape_schemas();
 		# TODO Lösche Shape Layer + Gruppe
@@ -3601,6 +3637,111 @@ class Konvertierung extends PgObject {
 
 		# Lösche flaechenschlussobjekte-topology to avoid duplicates of uuid
 		$this->clearTopology();
+
+		// Falls es plankennzeichnungen gibt
+		if ($this->database->table_exists('plandigitalisierung', 'plankennzeichnung')) {
+			// Lösche Plankennzeichnung der Konvertierung falls existent
+			$pg_obj = new PgObject($this->gui, 'plandigitalisierung', 'plankennzeichnung');
+			$result = $pg_obj->delete('konvertierung_id_origin = ' . $this->get_id());
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Löschen der zugehörigen Plankennzeichnung in der Datenbank : " . $result['err_msg']
+				));
+				exit;
+			}
+
+			// Entferne die konvertierung_id_new und gml_id_new in anderen Plankennzeichnungen
+			$result = $pg_obj->update_attr(
+				array(
+					'konvertierung_id_new = NULL',
+					'gml_id_new = NULL'
+				),
+				false,
+				'konvertierung_id_new = ' . $this->get_id()
+			);
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Löschen zugeordneter konvertierung_id in Plankennzeichnungen in der Datenbank : " . $result['err_msg']
+				));
+				exit;
+			}
+		} // Ende plankennzeichnungen exist
+
+		// Falls es uploads gibt
+		if ($this->database->table_exists('plandigitalisierung', 'uploads')) {
+			// Suche nach einem Upload der Konvertierung
+			$pg_obj = new PgObject($this->gui, 'plandigitalisierung', 'uploads');
+			$result = $pg_obj->find_by(
+				'konvertierung_id_new',
+				$this->get_id(),
+				'=',
+				true
+			);
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler bei der Suche nach einem Upload der Konvertierung in der Datenbank : " . $result['err_msg']
+				));
+				exit;
+			}
+			$upload = $result['feature'];
+			$upload_exists = ($upload->data ? true : false);
+		}
+		else {
+			$upload_exists = false;
+		}
+
+		if ($upload_exists) {
+
+			// Setze Upload Status, message und konvertierung_id zurück
+			$result = $upload->update_attr(
+				array(
+					'konvertierung_id_new = NULL',
+					'message = NULL',
+					"status = CASE WHEN konvertierung_id_origin IS NULL THEN 'Plan hochgeladen' ELSE 'Originalplan zugeordnet' END"
+				)
+			);
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Zurücksetzen der Werte der Plankennzeichnung in der Datenbank : " . $result['err_msg']
+				));
+				exit;
+			}
+
+			// Setzte import_jobs zurück falls vorhanden
+			$pg_obj = new PgObject($this->gui, 'xplankonverter', 'import_jobs');
+			$result = $pg_obj->update_attr(
+				array(
+					'started_at = NULL',
+					'finished_at = NULL'
+				),
+				false,
+				"upload_file LIKE '%" . $upload_file . "%'"
+			);
+			if (!$result['success']) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Zurücksetzen der Werte des Import-Jobs in der Datenbank: " . $result['err_msg']
+				));
+				exit;
+			}
+		}
+		else {
+			// Upload existiert nicht
+
+			// Lösche import_job falls existent
+			$result = $pg_obj->delete("upload_file LIKE '%" . $upload_file . "%'");
+			if ($result['success'] === false) {
+				echo json_encode(array(
+					'success' => false,
+					'msg' => "Fehler beim Löschen des import_jobs in der Datenbank: " . $result['err_msg']
+				));
+				exit;
+			}
+		} // Ende upload_exist
 
 		# Lösche Konvertierung
 		$this->delete();

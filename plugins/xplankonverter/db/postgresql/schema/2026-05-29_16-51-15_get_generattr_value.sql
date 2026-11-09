@@ -10,7 +10,7 @@ BEGIN;
 
     FOREACH attr IN ARRAY attrs
     LOOP
-      IF attr.name = name THEN
+      IF attr.name ILIKE name THEN
         RETURN attr.wert;
       END IF;
     END LOOP;

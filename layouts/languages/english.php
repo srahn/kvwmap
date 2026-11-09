@@ -10,6 +10,7 @@
 	$this->deactivatequery = 'Deactivate query';
 	$this->DisplayClasses = 'Display Classes';
 	$this->entries = 'Entries';
+	$this->FullCollectionLayerExtent = 'zoom to Collection Layer Extent';
 	$this->FullCollectionExtent = 'zoom to Collection Extent';
 	$this->FullLayerExtent = 'zoom to Layer Exent';
 	$this->HideClasses = 'Hide Classes';

@@ -912,6 +912,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	var browserheight = '';
 	var legendtouched = '';
 	var zoom_layer_id = '';
+	var zoom_collection_layer_id = '';
 	var zoom_collection_id = '';
 	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
 	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
@@ -920,6 +921,9 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	if(document.GUI.legendtouched)legendtouched = document.GUI.legendtouched.value;
 	if (document.GUI.zoom_layer_id) {
 		zoom_layer_id = document.GUI.zoom_layer_id.value;
+	}
+	if (document.GUI.zoom_collection_layer_id) {
+		zoom_collection_layer_id = document.GUI.zoom_collection_layer_id.value;
 	}
 	if (document.GUI.zoom_collection_id) {
 		zoom_collection_id = document.GUI.zoom_collection_id.value;
@@ -931,7 +935,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
-	postdata = postdata+"&mime_type=map_ajax&legendtouched="+legendtouched+"&zoom_layer_id="+zoom_layer_id+"&zoom_collection_id="+zoom_collection_id+"&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
+	postdata = postdata+"&mime_type=map_ajax&legendtouched="+legendtouched+"&zoom_layer_id="+zoom_layer_id+"&zoom_collection_layer_id="+zoom_collection_layer_id+"&zoom_collection_id="+zoom_collection_id+"&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
 	postdata.split("&")
 		.forEach(function (item) {
@@ -1399,6 +1403,13 @@ function zoomToMaxLayerExtent(zoom_layer_id) {
 	currentform.zoom_layer_id.value = '';
 }
 
+function zoomToMaxCollectionLayerExtent(collection_layer_id) {
+	currentform.zoom_collection_layer_id.value = collection_layer_id;
+	currentform.legendtouched.value = 1;
+	neuLaden();
+	currentform.zoom_collection_layer_id.value = '';
+}
+
 function zoomToMaxCollectionExtent(collection_id) {
 	currentform.zoom_collection_id.value = collection_id;
 	currentform.legendtouched.value = 1;
@@ -1406,12 +1417,20 @@ function zoomToMaxCollectionExtent(collection_id) {
 	currentform.zoom_collection_id.value = '';
 }
 
-function getLayerOptions(layer_id){
+function getLayerOptions(layer_id) {
 	if (document.GUI.layer_options_open.value != '') {
 		closeLayerOptions(document.GUI.layer_options_open.value);
 	}
 	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_content_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
 	document.GUI.layer_options_open.value = layer_id;
+}
+
+function getCollectionLayerOptions(collection_layer_id) {
+	if (document.GUI.layer_options_open.value != '') {
+		closeLayerOptions(document.GUI.layer_options_open.value);
+	}
+	ahah('index.php', 'go=getCollectionLayerOptions&collection_layer_id=' + collection_layer_id, new Array(document.getElementById('options_content_'+collection_layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
+	document.GUI.layer_options_open.value = collection_layer_id;
 }
 
 // function getGroupOptions(group_id) {
@@ -1430,9 +1449,14 @@ function getCollectionOptions(collection_id) {
 	document.GUI.group_options_open.value = collection_id;
 }
 
-function closeLayerOptions(layer_id){
+function closeLayerOptions(layer_id) {
 	document.GUI.layer_options_open.value = '';
-	document.getElementById('options_content_'+layer_id).innerHTML=' ';
+	document.getElementById(`options_content_${layer_id}`).innerHTML=' ';
+}
+
+function closeCollectionLayerOptions(collection_layer_id) {
+	document.GUI.layer_options_open.value = '';
+	document.getElementById(`collection_layer_options_content_${collection_layer_id}`).innerHTML=' ';
 }
 
 // function closeGroupOptions(group_id) {

@@ -97,7 +97,7 @@ function value_of($array, $key) {
 function replace_params_link($str, $params, $layer_id) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(\'' . $layer_id .  '\')">' . $value . '</a>', $str);
 		}
 	}
 	return $str;
