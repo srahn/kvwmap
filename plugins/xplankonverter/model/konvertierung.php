@@ -1593,7 +1593,29 @@ class Konvertierung extends PgObject {
 						gamv.id,
 						(
 							'Erfassungsart',
-							CONCAT_WS(', ', 'nachträglich digitalisiert', COALESCE(pk.los, CASE WHEN pk.los_vier THEN 'Los 4' ELSE NULL END, pk.los_fuenf)),
+							'nachträglich digitalisiert',
+							'XP_StringAttribut'::xplan_gml.xp_generattributtyp
+						)::xplan_gml.xp_generattribut_erweitert
+					FROM
+						" . $table_schema . "." . strtolower($plan_class) . " gamv JOIN
+						plandigitalisierung.plankennzeichnung pk ON pk.konvertierung_id_new = " . $konvertierung_id . "
+					UNION
+					SELECT
+						gamv.id,
+						(
+							'Erfassungslos',
+							COALESCE(pk.los, CASE WHEN pk.los_vier THEN 'Los 4' ELSE NULL END, pk.los_fuenf, 'keine Angabe'),
+							'XP_StringAttribut'::xplan_gml.xp_generattributtyp
+						)::xplan_gml.xp_generattribut_erweitert
+					FROM
+						" . $table_schema . "." . strtolower($plan_class) . " gamv JOIN
+						plandigitalisierung.plankennzeichnung pk ON pk.konvertierung_id_new = " . $konvertierung_id . "
+					UNION
+					SELECT
+						gamv.id,
+						(
+							'Erfassungstiefe',
+							'Fachobjekte mit dem Rechtscharakter einer nachrichtlichen Übernahme sind nicht Teil dieser Erfassung.',
 							'XP_StringAttribut'::xplan_gml.xp_generattributtyp
 						)::xplan_gml.xp_generattribut_erweitert
 					FROM
@@ -3713,14 +3735,7 @@ class Konvertierung extends PgObject {
 
 			// Setzte import_jobs zurück falls vorhanden
 			$pg_obj = new PgObject($this->gui, 'xplankonverter', 'import_jobs');
-			$result = $pg_obj->update_attr(
-				array(
-					'started_at = NULL',
-					'finished_at = NULL'
-				),
-				false,
-				"upload_file LIKE '%" . $upload_file . "%'"
-			);
+			$result = $pg_obj->delete("upload_file LIKE '%" . $upload_file . "%'");
 			if (!$result['success']) {
 				echo json_encode(array(
 					'success' => false,
