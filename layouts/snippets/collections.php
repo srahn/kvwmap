@@ -36,10 +36,10 @@
                     <?php } ?>
 
                     <td class="actions">
-                        <a href="?go=collection_editor&selected_collection_id=<?php echo urlencode($collection->get_id()); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="Bearbeiten">
+                        <a href="?go=Collection_Formular&selected_collection_id=<?php echo urlencode($collection->get_id()); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="Bearbeiten">
                             <i class="fa fa-pencil"></i>
                         </a>
-                        <a href="?go=collection_delete&selected_collection_id=<?php echo urlencode($collection->get_id()); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="Löschen" onclick="return confirm('Soll dieser Datensatz wirklich gelöscht werden?');">
+                        <a href="?go=Collection_Delete&selected_collection_id=<?php echo urlencode($collection->get_id()); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="Löschen" onclick="return confirm('Soll dieser Datensatz wirklich gelöscht werden?');">
                             <i class="fa fa-trash-o"></i>
                         </a>
                     </td>

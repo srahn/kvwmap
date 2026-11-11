@@ -431,14 +431,14 @@ class GUI {
 	}	
 
 	function get_group_legend() {
-    # Änderungen in den Gruppen werden gesetzt
-    $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
-    $this->loadMap('DataBase');
+		# Änderungen in den Gruppen werden gesetzt
+		$this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
+		$this->loadMap('DataBase');
 		for($i = 0; $i < count_or_0($this->layers_replace_scale ?: []); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
-    echo $this->create_group_legend($this->formvars['group']);
-  }
+		echo $this->create_group_legend($this->formvars['group']);
+	}
 
 	/**
 	 * function uses the following formvars to set the filter for reading layers
@@ -853,17 +853,25 @@ class GUI {
 		return 1;
 	}
 
-	function list_subgroups($groupid){
+	function list_subgroups($groupid) {
 		$subgroups = '';
-		if($groupid != ''){
-			$group = $this->groupset[$groupid];
-			if(value_of($group, 'untergruppen') != ''){
-				foreach($group['untergruppen'] as $untergruppe){
-					$subgroups .= ', '.$this->list_subgroups($untergruppe);
+		if ($groupid != '') {
+			[$id_value, $id_type] = split_id($groupid);
+			if ($id_type === 'layer') {
+				$group = $this->groupset[$groupid];
+				if (value_of($group, 'untergruppen') != '') {
+					foreach($group['untergruppen'] as $untergruppe) {
+						[$id_value, $id_type] = split_id($untergruppe);
+						if ($id_type === 'layer') {
+							$subgroups .= ', ' . $this->list_subgroups($untergruppe);
+						}
+					}
+					return $groupid.$subgroups;
 				}
-				return $groupid.$subgroups;
+				else {
+					return $groupid;
+				}
 			}
-			else return $groupid;
 		}
 	}
 
@@ -3490,9 +3498,9 @@ class db_mapObj {
 			ORDER BY
 				drawingorder
 		";
-		# echo '<br>SQL zur Abfrage der Layer: ' . $sql;
+		// echo '<br>SQL zur Abfrage der Layer: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>", 4);
-		$ret = $this->db->execSQL($sql, 4, 0, true);
+		$ret = $this->db->execSQL($sql, 4, 0, false);
 		$layer = array();
 		$layer['list'] = array();
 		$this->disabled_classes = $this->read_disabled_classes();
