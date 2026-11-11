@@ -5,6 +5,7 @@
 	$strCreateRandomPassword="create random password";
 	$strFurtherOptions="further options";
 	$strSaveAllLayerAttributes="save all layer attributes";
+	$strWriteEmptyFilters = "Write empty filters";
 	$strShowMobileLog  =  "Show kvmobile Logfiles";
 	$strTitle="Administration";
 	$strUpdate="Update";

@@ -198,6 +198,9 @@ function toggleGroup(group, show){
 					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=save_all_layer_attributes&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strSaveAllLayerAttributes; ?></a></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3;">
+					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=leere_Filter_neu_schreiben&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strWriteEmptyFilters; ?></a></span></td>
+				</tr>
+				<tr style="border:1px solid #C3C7C3;">
 					<td align="center">
 						<span class="fett create_inserts_from_dataset" onclick="$('.create_inserts_from_dataset').toggle();"><a href="#"><? echo  $strCreateInsertsFromDataset; ?></a></span>
 						<style>

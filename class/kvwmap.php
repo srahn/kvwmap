@@ -5728,6 +5728,10 @@ echo '			</table>
 			case "save_all_layer_attributes" : {
 				$this->save_all_layer_attributes();
 			} break;
+			case "leere_Filter_neu_schreiben" : {
+				$this->leere_Filter_neu_schreiben();
+				$this->showAdminFunctions();
+			} break;
 			case "custom"	: {
 				$admin_function_file = WWWROOT . CUSTOM_PATH . 'layouts/adminfunctions.php';
 				if (file_exists($admin_function_file)) {
@@ -14387,7 +14391,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
 	function Filter_speichern($formvars) {
-		include_once(CLASSPATH . 'Layer.php');
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     if($formvars['selected_layers'] != ''){
       $this->selected_layers = explode(', ', $formvars['selected_layers']);
@@ -14472,21 +14475,28 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         }
       }
     }
-		for ($i = 0; $i < count($this->selected_layers); $i++) {
-			$this->filterstring = $this->compose_filter(
-				$mapDB->read_attribute_filter($this->formvars['stelle'], $this->selected_layers[$i]),
-				Layer::find_by_id($this, $this->selected_layers[$i])->get('epsg_code')
-			);
-			$result = $mapDB->write_filter(
-				$this->filterstring,
-				$formvars['stelle'],
-				$this->selected_layers[$i]
-			);
-			// if ($result AND $this->filterstring != '') {
-			// 	$this->add_message('info', 'Folgenden Filter für Layer ' . $this->selected_layers[$i] . ' in Stelle ' . $formvars['stelle'] . ' geschrieben:<br>' . $this->filterstring);
-			// }
-		}
+		$this->Filter_schreiben($mapDB, [$this->formvars['stelle'] => $this->selected_layers]);
 		$this->filterverwaltung();
+	}
+
+	function Filter_schreiben($mapDB, $used_layer) {
+		include_once(CLASSPATH . 'Layer.php');
+		foreach($used_layer as $stellen_id => $layer_ids) {
+			foreach($layer_ids as $layer_id) {
+				$epsg[$layer_id] = $epsg[$layer_id] ?: Layer::find_by_id($this, $layer_id)->get('epsg_code');
+				$this->filterstring = $this->compose_filter($mapDB->read_attribute_filter($stellen_id, $layer_id), $epsg[$layer_id]);
+				$result = $mapDB->write_filter($this->filterstring, $stellen_id, $layer_id);
+			}
+		}
+	}
+
+	function leere_Filter_neu_schreiben(){
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$used_layer = $mapDB->get_used_layer_with_empty_filter();
+		if (!empty($used_layer)) {
+			$this->Filter_schreiben($mapDB, $used_layer);
+		}
+		$this->add_message('notice', count($used_layer) . ' leere Filter wurden neu geschrieben.');
 	}
 
 	/**
@@ -19692,6 +19702,29 @@ class db_mapObj{
 			$filter[] = $rs;
 		}
 		return $filter;
+	}
+
+	function get_used_layer_with_empty_filter() {
+		$used_layer = [];
+		$sql = "
+			select 
+				ul.stelle_id, ul.layer_id
+			from
+				kvwmap.used_layer ul,
+				kvwmap.u_attributfilter2used_layer f
+			where
+				ul.layer_id = f.layer_id and 
+				ul.stelle_id = f.stelle_id and
+				(ul.filter is null or ul.filter = '')
+		";
+		# echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_layer_with_empty_filter :<br>" . $sql, 4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__,4); return 0; }
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$used_layer[$rs['stelle_id']][] = $rs['layer_id'];
+		}
+		return $used_layer;
 	}
 
 	function getFilter($layer_id, $stelle_id){
