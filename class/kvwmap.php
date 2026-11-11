@@ -16222,7 +16222,8 @@ class GUI {
 			else {
 				$layer_comment = $ret[1][0];
 				foreach(json_decode($layer_comment['layer_params'], true) AS $layer_param) {
-					rolle::$layer_params[array_keys($layer_param)[0]] = array_values($layer_param)[0];
+					$key = array_key_first($layer_param);
+    			rolle::$layer_params[$key] = $layer_param[$key];
 				}
 				foreach (rolle::$layer_params as $param_key => $value) {
 					$layer_params[] = '"' . $param_key . '":"' . $value . '"';
