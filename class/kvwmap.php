@@ -2402,7 +2402,7 @@ class GUI {
 				// echo '<p>Alle Gruppen: ' . print_r($this->groupset, true);
 
 				# Filter für read_Layer
-				$mapDB->nurAktiveLayer = $this->user->rolle->hide_deactivated_layers ?? value_of($this->formvars, 'nurAktiveLayer');
+				$mapDB->nurAktiveLayer = ($this->user->rolle->hide_deactivated_layers OR value_of($this->formvars, 'nurAktiveLayer'));
 				$mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
 				$mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
 				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
@@ -16145,7 +16145,7 @@ class GUI {
 
 	function layerCommentStore(){
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->nurAktiveLayer = true;
+		$this->formvars['nurAktiveLayer'] = true;
 		$this->loadMap('DataBase');
 		$this->layerset['layer_params'] = $this->mapDB->get_layer_params_layer(null, array_keys($this->layerset['layer_ids']));
 		$ret = $this->user->rolle->insertLayerComment($this->layerset, $this->formvars['comment'], $this->user->stelle_id, $this->user->id);
