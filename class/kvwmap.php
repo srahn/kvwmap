@@ -16137,7 +16137,7 @@ class GUI {
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->nurAktiveLayer = true;
 		$this->loadMap('DataBase');
-		$this->layerset['layer_params'] = $this->mapDB->get_layer_params_layer(null, array_keys($this->layer['layer_ids']));
+		$this->layerset['layer_params'] = $this->mapDB->get_layer_params_layer(null, array_keys($this->layerset['layer_ids']));
 		$ret = $this->user->rolle->insertLayerComment($this->layerset, $this->formvars['comment'], $this->user->stelle_id, $this->user->id);
 		$this->add_message('notice', 'Themenauswahl gespeichert.');
 		$this->drawMap();
@@ -16192,6 +16192,9 @@ class GUI {
 		if ($this->formvars['id']) {
 			if (!$this->Stelle->is_admin_stelle()) {
 				$stelle_id = $this->Stelle->id;
+			}
+			else {
+				$stelle_id = null;
 			}
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$groups = $mapDB->read_Groups();

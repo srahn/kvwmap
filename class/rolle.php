@@ -2777,7 +2777,7 @@ class rolle {
 		}
 
 		if ($user_id) {
-			$conditions[] = 'user_id = ' . (int)$user_id;
+			$conditions[] = "(user_id = " . (int)$user_id . " OR user_id IS NULL)";
 		}
 
 		if ($stelle_id) {
