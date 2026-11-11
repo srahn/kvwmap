@@ -11890,7 +11890,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									!in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE')) OR
 									$params['use_primary_from_new']
 								) AND  # Primärschlüssel werden nicht mitübergeben
-								!in_array($formElementType, array('Time', 'User', 'UserID', 'Stelle', 'StelleID', 'ClientID')) AND # und automatisch generierte Typen auch nicht
+								!in_array($formElementType, array('Time', 'User', 'UserID', 'Stelle', 'StelleID', 'ClientID', 'Dokument')) AND # und automatisch generierte Typen und Dokumente auch nicht
 								$dont_use_for_new != 1
 							) {
 								$element[3] = '';
