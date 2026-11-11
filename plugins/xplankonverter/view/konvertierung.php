@@ -537,15 +537,7 @@
 								&nbsp;
 							</td>
 							<td>
-								<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=2&value_konvertierung_id=<? echo $konvertierung->get_id(); ?>&operator_konvertierung_id=="><i class="fa fa-upload" aria-hidden="true" style="color: gray !important"></i> Hochladen von weiteren Dokumenten</a>
-							<td>
-						</tr>
-						<tr>
-							<td>
-								&nbsp;
-							</td>
-							<td>
-								<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=2&value_konvertierung_id=<? echo $konvertierung->get_id(); ?>&operator_konvertierung_id=="><i class="fa fa-upload" aria-hidden="true" style="color: gray !important"></i> Hochladen von weiteren Dokumenten</a>
+								<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&value_konvertierung_id=<? echo $konvertierung->get_id(); ?>&operator_konvertierung_id=="><i class="fa fa-upload" aria-hidden="true" style="color: gray !important"></i> Hochladen von weiteren Dokumenten</a>
 							<td>
 						</tr>
 					</table>
