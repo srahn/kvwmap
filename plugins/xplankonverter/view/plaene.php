@@ -574,7 +574,7 @@
 			output += '<a ' +
 									'title="Validierungsergebnisse der Konvertierung anzeigen" ' +
 									'class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" ' +
-									'href="index.php?go=Layer-Suche_Suchen&selected_layer_id=522&konvertierung_id_operator==&konvertierung_id_value=' + row.konvertierung_id +
+									'href="index.php?go=Layer-Suche_Suchen&selected_layer_id=522&konvertierung_id_operator==&konvertierung_id_value=' + row.konvertierung_id + '"' +
 									'onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"' +
 								'>' +
 									 '<i class="fa fa-lg fa-list-alt"></i>' +
@@ -604,7 +604,11 @@
 									 <i class="fa fa-plus-circle" style="position: absolute; top: 14px; left: 25px;"></i>\
 								</a>'; <?
 		} ?>
-
+		output += `<a
+				title="Neue Version des Plans hochladen"
+				class="btn btn-link btn-xs xpk-func-btn"
+				href="index.php?go=xplankonverter_konvertierung_anzeigen&planart=BP-Plan&konvertierung_id=${row.konvertierung_id}&csrf_token=<? echo $_SESSION['csrf_token']; ?>"
+			><i class="fa fa-lg fa-refresh"></i></a>`;
 		output += '</span>';
 		return output;
 	}
