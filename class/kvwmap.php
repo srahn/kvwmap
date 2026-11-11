@@ -9261,7 +9261,7 @@ class GUI {
     $end = strrpos($this->layerdata['data'], ')');
     $data_sql = substr($this->layerdata['data'], $begin, $end - $begin);
 
-		$classification_params = $mapDB->get_layer_params_layer(NULL, $this->formvars['selected_layer_id'], 'classification');
+		$classification_params = $mapDB->get_layer_params_layer(NULL, [$this->formvars['selected_layer_id']], 'classification');
 		if (!empty($classification_params)) {
 			foreach ($classification_params as $classification_param) {
 				$params[$classification_param['key']] = $this->formvars['options_layer_parameter_' . $classification_param['key']];
@@ -16145,12 +16145,14 @@ class GUI {
 
 	function layerCommentStore(){
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		$this->nurAktiveLayer = true;
 		$this->loadMap('DataBase');
-    $ret=$this->user->rolle->insertLayerComment($this->layerset, $this->formvars['comment'], $this->user->stelle_id, $this->user->id);
-    $this->add_message('notice', 'Themenauswahl gespeichert.');
-    $this->drawMap();
-    $this->output();
-  }
+		$this->layerset['layer_params'] = $this->mapDB->get_layer_params_layer(null, array_keys($this->layer['layer_ids']));
+		$ret = $this->user->rolle->insertLayerComment($this->layerset, $this->formvars['comment'], $this->user->stelle_id, $this->user->id);
+		$this->add_message('notice', 'Themenauswahl gespeichert.');
+		$this->drawMap();
+		$this->output();
+	}
 
   function DeleteStoredMapExtent(){
     $this->user->rolle->deleteMapComment($this->formvars['storetime']);
@@ -16215,6 +16217,14 @@ class GUI {
 				$this->Fehlermeldung = 'Es wurden keine gespeicherten Themen gefunden für id: ' . $this->formvars['id']. ' stelle_id: ' . $stelle_id . ' user_id: ' . ($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id);
 			}
 			else {
+				$layer_comment = $ret[1][0];
+				foreach(json_decode($layer_comment['layer_params'], true) AS $layer_param) {
+					rolle::$layer_params[array_keys($layer_param)[0]] = array_values($layer_param)[0];
+				}
+				foreach (rolle::$layer_params as $param_key => $value) {
+					$layer_params[] = '"' . $param_key . '":"' . $value . '"';
+				}
+				$this->user->rolle->set_layer_params(implode(',', $layer_params));
 				$layerset = $this->user->rolle->getLayer('');
 
 				$this->reset_layers(NULL, true);
@@ -16227,7 +16237,7 @@ class GUI {
 						$formvars['group_'.$group['id']] = 0;		# und alle Obergruppen zuklappen
 					}
 				}
-				$layer_ids = array_filter(explode(',', $ret[1][0]['layers']));
+				$layer_ids = array_filter(explode(',', $layer_comment['layers']));
 				foreach($layer_ids as $layer_id) {
 					$formvars['thema'][$layer_id] = 1;
 					$groupid = $layerset['layer_ids'][$layer_id]['gruppe'];
@@ -16236,7 +16246,7 @@ class GUI {
 						$groupid = $groups[$groupid]['obergruppe'];
 					} while ($groupid != '');
 				}
-				$query_ids = array_filter(explode(',', $ret[1][0]['query']));
+				$query_ids = array_filter(explode(',', $layer_comment['query']));
 				foreach($query_ids as $layer_id) {
 					$formvars['qLayer'][$layer_id] = 1;
 				}
@@ -19084,7 +19094,7 @@ class GUI {
 			$selectable_layer_params = $stelle->selectable_layer_params;
 		}
 		else{		# Parameter abfragen, die nur dieser Layer hat
-			$selectable_layer_params = implode(', ', array_keys($mapDB->get_layer_params_layer(NULL, $layer_id, $only_from_attribute)));
+			$selectable_layer_params = implode(', ', array_keys($mapDB->get_layer_params_layer(NULL, [$layer_id], $only_from_attribute)));
 			$rolle = $this->user->rolle;
 		}
 		$params = $rolle->get_layer_params($selectable_layer_params, $this->pgdatabase);
@@ -22709,12 +22719,33 @@ DO $$
   }
 
 	function remove_layer_from_rolle_saved_layers($layer_id) {
-		$sql = '
-			UPDATE kvwmap.rolle_saved_layers
-			SET layers = array_remove(layers, ' . $layer_id . ')
-			WHERE ' . $layer_id . ' = ANY(layers);';
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->remove_layer_from_rolle_saved_layers:<br>" . $sql,4);
-		$ret = $this->db->execSQL($sql);
+		// $sql = '
+		// 	UPDATE kvwmap.rolle_saved_layers
+		// 	SET layers = array_remove(layers, ' . $layer_id . ')
+		// 	WHERE ' . $layer_id . ' = ANY(layers);';
+		$sql = "
+  		UPDATE kvwmap.rolle_saved_layers
+  		SET
+    		layers = ARRAY(
+      		SELECT layer
+      		FROM unnest(layers) WITH ORDINALITY AS l(layer, idx)
+      		WHERE layer <> $1
+      		ORDER BY idx
+    		),
+    		klassifizierungen = ARRAY(
+      		SELECT klassifizierung
+      		FROM unnest(klassifizierungen) WITH ORDINALITY AS k(klassifizierung, idx)
+      		WHERE NOT EXISTS (
+        		SELECT 1
+        		FROM unnest(layers) WITH ORDINALITY AS l(layer, idx)
+        		WHERE layer = $1 AND l.idx = k.idx
+      		)
+      		ORDER BY idx
+    		)
+  		WHERE $1 = ANY(layers)
+		";
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->remove_layer_from_rolle_saved_layers:<br>" . $sql, 4);
+		$ret = $this->db->execSQL($sql, 4, 1, false, array($layer_id));
 		if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 	}			
 
@@ -23396,7 +23427,7 @@ DO $$
 		return $layer_params;
 	}
 
-	function get_layer_params_layer($param_id = NULL, $layer_id = NULL, $only_from_attribute = '') {
+	function get_layer_params_layer($param_id = NULL, $layer_id = [], $only_from_attribute = '') {
 		$params = array();
 		$sql = "
 			SELECT
@@ -23413,8 +23444,8 @@ DO $$
 		if ($param_id != NULL) {
 			$sql .= " AND p.id = ".$params_id;
 		}
-		if ($layer_id != NULL) {
-			$sql .= " AND l.layer_id = " . $layer_id;
+		if (count($layer_id) > 0) {
+			$sql .= " AND l.layer_id IN (" . implode(', ', $layer_id) . ")";
 		}
 		$ret = $this->db->execSQL($sql);
 		if ($ret[0]) {

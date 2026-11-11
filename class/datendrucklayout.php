@@ -1213,10 +1213,14 @@ class ddl extends drucklayout{
 				if (!$layer_comments_result['success']) {
 					throw new Exception('Fehler beim Laden der Themenauswahl. ' . $layer_comments_result['msg']);
 				}
-				if (count($layer_comments_result[1]) == 0) {
+				if (count($layer_comments_result[1]) === 0) {
 					throw new Exception('Fehler beim Laden der Themenauswahl. Keine Themenauswahl mit der ID ' . $this->layout['saved_layers_id'] . ' gefunden.');
 				}
-				$saved_layer_ids = explode(',', $layer_comments_result[1][0]['layers']);
+				$layer_comment = $layer_comments_result[1][0];
+				$saved_layer_ids = explode(',', $layer_comment['layers']);
+				foreach(json_decode($layer_comment['layer_params'], true) AS $layer_param) {
+					rolle::$layer_params[array_keys($layer_param)[0]] = array_values($layer_param)[0];
+				}
 			}
 
 			$this->gui->loadmap('DataBase', array(), false, $saved_layer_ids);

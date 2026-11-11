@@ -2152,14 +2152,16 @@ class rolle {
 					stelle_id,
 					name,
 					layers,
-					query
+					query,
+					layer_params
 				)
 				SELECT " .
 					$user_id . "," .
 					$stelle_id . ",
 					name,
 					layers,
-					query
+					query,
+					layer_params
 				FROM
 					kvwmap.rolle_saved_layers
 				WHERE
@@ -2799,7 +2801,8 @@ class rolle {
 				stelle_id,
 				name,
 				array_to_string(layers, ',') as layers,
-				query
+				query,
+				layer_params
 			FROM
 				kvwmap.rolle_saved_layers"
 			. $where . "
@@ -2869,12 +2872,22 @@ class rolle {
 				}
 			}
 		}
+
 		$record = array(
 			'user_id' => $user_id ?: 'NULL',
 			'stelle_id' => $stelle_id ?: 'NULL',
 			'name' => "'" . $comment . "'",
 			'layers' => "'{" . implode(',', $layers) . "}'",
-			'query' => "'" . implode(',', $query) . "'"
+			'query' => "'" . implode(',', $query) . "'",
+			'layer_params' => "'" . json_encode(
+				array_map(
+					function($param) {
+						return array($param['key'] => rolle::$layer_params[$param['key']]);
+					},
+					array_values($layerset['layer_params'])
+				),
+				JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+			) . "'::jsonb"
 		);
 		$sql = "
 			INSERT INTO
