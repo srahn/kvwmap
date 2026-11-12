@@ -1508,16 +1508,25 @@ class GUI {
 		return $drawing_order;
 	}
 
-	function list_subgroups($groupid){
-		if($groupid != ''){
-			$group = $this->groupset[$groupid];
-			if($group['untergruppen'] != ''){
-				foreach($group['untergruppen'] as $untergruppe){
-					$subgroups .= ', '.$this->list_subgroups($untergruppe);
+	function list_subgroups($groupid) {
+		$subgroups = '';
+		if ($groupid != '') {
+			[$id_value, $id_type] = split_id($groupid);
+			if ($id_type === 'layer') {
+				$group = $this->groupset[$groupid];
+				if (value_of($group, 'untergruppen') != '') {
+					foreach($group['untergruppen'] as $untergruppe) {
+						[$id_value, $id_type] = split_id($untergruppe);
+						if ($id_type === 'layer') {
+							$subgroups .= ', ' . $this->list_subgroups($untergruppe);
+						}
+					}
+					return $groupid.$subgroups;
 				}
-				return $groupid.$subgroups;
+				else {
+					return $groupid;
+				}
 			}
-			else return $groupid;
 		}
 	}
 

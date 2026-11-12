@@ -2517,42 +2517,54 @@ class rolle {
 			SET jit = off;
 
 			WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
-					SELECT
-							ul.stelle_id,
-							r.user_id,
-							COALESCE(ul.group_id, l.gruppe) AS group_id
-					FROM kvwmap.used_layer ul
-					JOIN kvwmap.layer l
-							ON l.layer_id = ul.layer_id
-					JOIN kvwmap.rolle r
-							ON r.stelle_id = ul.stelle_id
+				SELECT
+					ul.stelle_id,
+					r.user_id,
+					COALESCE(ul.group_id, l.gruppe) AS group_id
+				FROM
+					kvwmap.used_layer ul JOIN
+					kvwmap.layer l ON l.layer_id = ul.layer_id JOIN
+					kvwmap.rolle r ON r.stelle_id = ul.stelle_id
 
-					union ALL
+				UNION
 
-					SELECT
-							stelle_id,
-							user_id,
-							gruppe AS group_id
-					FROM kvwmap.rollenlayer
+				SELECT
+					g2r.stelle_id,
+					g2r.user_id,
+					g2r.id
+				FROM
+					kvwmap.u_groups2rolle g2r JOIN
+					kvwmap.collections c ON g2r.id = c.group_id
 
-					UNION
+				UNION ALL
 
-					SELECT
-							c.stelle_id,
-							c.user_id,
-							ug.obergruppe AS group_id
-					FROM cte c
-					JOIN kvwmap.u_groups ug
-							ON ug.id = c.group_id
-					WHERE ug.obergruppe IS NOT NULL
+				SELECT
+					stelle_id,
+					user_id,
+					gruppe AS group_id
+				FROM
+					kvwmap.rollenlayer
+
+				UNION
+
+				SELECT
+					c.stelle_id,
+					c.user_id,
+					ug.obergruppe AS group_id
+				FROM
+					cte c JOIN
+					kvwmap.u_groups ug ON ug.id = c.group_id
+				WHERE
+					ug.obergruppe IS NOT NULL
 			)
 			DELETE FROM kvwmap.u_groups2rolle AS target
 			WHERE NOT EXISTS (
-					SELECT 1
-					FROM cte n
-					WHERE n.stelle_id = target.stelle_id
-						AND n.user_id   = target.user_id
-						AND n.group_id  = target.id
+				SELECT 1
+				FROM cte n
+				WHERE
+					n.stelle_id = target.stelle_id AND
+					n.user_id   = target.user_id AND
+					n.group_id  = target.id
 			);
 
 			SET jit = on;

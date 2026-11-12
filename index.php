@@ -1813,18 +1813,18 @@ function go_switch($go, $exit = false) {
 				$GUI->Layergruppe_Loeschen();
 			} break;
 
-			case 'collections_anzeigen' : {
-				$GUI->checkCaseAllowed('collections_anzeigen');
-				$GUI->collections_anzeigen();
+			case 'Collections_Anzeigen' : {
+				$GUI->checkCaseAllowed('Collections_Anzeigen');
+				$GUI->Collections_Anzeigen();
 			} break;
 
-			case 'collection_editor' : {
-				$GUI->checkCaseAllowed('collections_anzeigen');
-				$GUI->collection_editor();
+			case 'Collection_Formular' : {
+				$GUI->checkCaseAllowed('Collections_Anzeigen');
+				$GUI->Collection_Formular();
 			} break;
 
-			case 'collection_save' : {
-				$GUI->checkCaseAllowed('collections_anzeigen');
+			case 'Collection_Update' : {
+				$GUI->checkCaseAllowed('Collections_Anzeigen');
 				$GUI->sanitize([
 					'id' => 'int',
 					'group_id' => 'int',
@@ -1847,45 +1847,46 @@ function go_switch($go, $exit = false) {
 				else {
 					$collection = new Collection($GUI);
 				}
-				$result = $GUI->collection_save($collection);
+				$result = $GUI->Collection_Update($collection);
 				if ($result['success']) {
 					$GUI->add_message('notice', $result['msg']);
-					$GUI->collections_anzeigen();
+					$GUI->Collections_Anzeigen();
 				}
 				else {
 					$GUI->add_message('error', $result['err_msg']);
-					$GUI->collection_editor();
+					$GUI->Collection_Formular();
 				}
 			} break;
 
-			case 'collection_delete' : {
-				$GUI->checkCaseAllowed('collections_anzeigen');
-				$GUI->collection_delete();
+			case 'Collection_Delete' : {
+				$GUI->checkCaseAllowed('Collections_Anzeigen');
+				$GUI->Collection_Delete();
 			} break;
 
+			// Formular für neue Collection anzeigen
 			case 'Collection_Neu' : {
-				$GUI->checkCaseAllowed('collections_anzeigen');
+				$GUI->checkCaseAllowed('Collections_Anzeigen');
 				$GUI->collection_neu();
 			}
 			break;
 
 			case 'Collection_Anlegen' : {
-				$GUI->checkCaseAllowed('collections_anzeigen');
+				$GUI->checkCaseAllowed('Collections_Anzeigen');
 				include_once(CLASSPATH . 'LayerGroup.php');
 
 				if ($GUI->formvars['group_id'] == '') {
 					$GUI->add_message('Error', 'Es wurde keine Gruppe angegeben unter der die Collection eingebunden werden soll.');
-					$GUI->Collection_Neu(); break;
+					$GUI->collection_neu(); break;
 				}
 
 				if ($GUI->formvars['collection_layer_group_id'] == '') {
 					$GUI->add_message('Error', 'Es wurde keine Gruppe angegeben dessen Layer zur Collection gehören sollen.');
-					$GUI->Collection_Neu(); break;
+					$GUI->collection_neu(); break;
 				}
 
 				if ($GUI->formvars['filter'] == '') {
 					$GUI->add_message('Error', 'Es wurde kein Filterausdruck angegeben.');
-					$GUI->Collection_Neu(); break;
+					$GUI->collection_neu(); break;
 				}
 
 				$collection_group = LayerGroup::find_by_id($GUI, $GUI->formvars['group_id']);
@@ -1894,7 +1895,7 @@ function go_switch($go, $exit = false) {
 				$result = $collection_layer_group->get_layers_recursive($collection_layer_group->get_id());
 				if (!$result['success']) {
 					$GUI->add_message('Error', 'Fehler beim Abfragen der Layer, die zur Collection gehören sollen. ' . $result['msg']);
-					$GUI->Collection_Neu(); break;
+					$GUI->collection_neu(); break;
 				}
 				$layer = $result['layers'];
 
@@ -1902,7 +1903,7 @@ function go_switch($go, $exit = false) {
 					$result = $collection_layer_group->get_layers_with_content($layer, $GUI->formvars['filter']);
 					if (!$result['success']) {
 						$GUI->add_message('Error', 'Fehler beim Abfragen der Layer der Collection die Content haben. ' . $result['msg']);
-						$GUI->Collection_Neu(); break;
+						$GUI->collection_neu(); break;
 					}
 					$layer = $result['layers_with_content'];
 				}
@@ -1916,7 +1917,7 @@ function go_switch($go, $exit = false) {
 				);
 				if (!$result['success']) {
 					$GUI->add_message('Error', 'Fehler beim Anlegen der Collection.<br>Meldung: ' . $result['msg']);
-					$GUI->Collection_Neu(); break;
+					$GUI->collection_neu(); break;
 				}
 
 				$GUI->add_message('Notice', $result['msg']);

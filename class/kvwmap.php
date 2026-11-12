@@ -1380,14 +1380,14 @@ class GUI {
 	}
 
 	function get_group_legend() {
-    # Änderungen in den Gruppen werden gesetzt
-    $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
-    $this->loadMap('DataBase');
+		# Änderungen in den Gruppen werden gesetzt
+		$this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
+		$this->loadMap('DataBase');
 		for($i = 0; $i < count_or_0($this->layers_replace_scale ?: []); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
-    echo $this->create_group_legend($this->formvars['group']);
-  }
+		echo $this->create_group_legend($this->formvars['group']);
+	}
 
   function close_group_legend() {
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
@@ -1418,10 +1418,11 @@ class GUI {
 			}
 			$legend .= "</script>";
 		}
-		else{		# Layer in Zeichenreihenfolge in Gruppen
+		else {
+			// Layer in Zeichenreihenfolge in Gruppen
 			$legend = '';
-			foreach($this->groupset as $group){
-				if ($group['obergruppe'] == ''){
+			foreach($this->groupset as $group) {
+				if ($group['obergruppe'] == '') {
 					$legend .= $this->create_group_legend($group['id']);
 				}
 			}
@@ -1989,17 +1990,25 @@ class GUI {
 		}
 	}
 
-	function list_subgroups($groupid){
+	function list_subgroups($groupid) {
 		$subgroups = '';
-		if($groupid != ''){
-			$group = $this->groupset[$groupid];
-			if(value_of($group, 'untergruppen') != ''){
-				foreach($group['untergruppen'] as $untergruppe){
-					$subgroups .= ', '.$this->list_subgroups($untergruppe);
+		if ($groupid != '') {
+			[$id_value, $id_type] = split_id($groupid);
+			if ($id_type === 'layer') {
+				$group = $this->groupset[$groupid];
+				if (value_of($group, 'untergruppen') != '') {
+					foreach($group['untergruppen'] as $untergruppe) {
+						[$id_value, $id_type] = split_id($untergruppe);
+						if ($id_type === 'layer') {
+							$subgroups .= ', ' . $this->list_subgroups($untergruppe);
+						}
+					}
+					return $groupid.$subgroups;
 				}
-				return $groupid.$subgroups;
+				else {
+					return $groupid;
+				}
 			}
-			else return $groupid;
 		}
 	}
 
@@ -10097,7 +10106,7 @@ class GUI {
 		$this->output();
 	}
 
-	function collection_editor() {
+	function Collection_Formular() {
 		include_once(CLASSPATH . 'Collection.php');
 		$this->sanitize([
 			'selected_collection_id' => 'int'
@@ -10107,25 +10116,21 @@ class GUI {
 			$this->add_message('error', $result['msg']);
 		}
 		$this->collection = $result['collection'];
-		$this->main = 'collection_editor.php';
+		$this->main = 'Collection_Formular.php';
 		$this->output();
 	}
 
-	function collection_save($collection) {
+	/**
+	 * pkweiter
+	 */
+	function Collection_Update($collection) {
+		include(LAYOUTPATH . 'languages/collection_formular_' . rolle::$language . '.php');
 		$collection->data = formvars_strip($this->formvars, array('id', 'bezeichnung', 'group_id', 'filter', 'extent'), 'keep');
 		$results = $collection->validate();
 		if (empty($results)) {
-			if ($collection->get_id() == '') {
-				$results = $collection->create();
-				if ($results['success']) {
-					$results['msg'] = $strCollectionSaveSuccessMsg;
-				}
-			}
-			else {
-				$results = $collection->update();
-				if ($results['success']) {
-					$results['msg'] = $strCollectionUpdateSuccessMsg;
-				}
+			$results = $collection->update();
+			if ($results['success']) {
+				$results['msg'] = $strCollectionUpdateSuccessMsg;
 			}
 		}
 		else {
@@ -10143,7 +10148,7 @@ class GUI {
 		return $results;
 	}
 
-	function collection_delete() {
+	function Collection_Delete() {
 		include_once(CLASSPATH . 'Collection.php');
 		$this->sanitize([
 			'selected_collection_id' => 'int'
@@ -10154,12 +10159,18 @@ class GUI {
 		}
 		$this->collection = $result['collection'];
 		$this->collection->delete();
+		rolle::clear_groups2rolle($this->pgdatabase);
 		$this->collections_anzeigen();
 	}
 
+	/**
+	 * Funktion läd ein collections object und zeigt es in einem Formular an mit dem man
+	 * das Objekt über den case Collection_Anlegen in der Datenbank erzeugen kann.
+	 */
 	function collection_neu() {
 		include_once(CLASSPATH . 'Collection.php');
 		if ($this->formvars['selected_collection_id'] != '') {
+			// lade vorhandene Collection (zum kopieren geeignet)
 			$result = $this->collection = Collection::find_by_id($this, $this->formvars['selected_collection_id']);
 			if (!$result['success']) {
 				return $result;
@@ -10167,20 +10178,25 @@ class GUI {
 			$this->collection = $result['collection'];
 		}
 		else {
+			// lade eine neue Collection
 			$this->collection = new Collection($this);
 			$this->collection->setKeysFromTable();
 			if ($this->formvars['selected_group_id'] != '') {
+				// übernehme die Werte von der ausgewählten Layergruppe
 				include_once(CLASSPATH . 'LayerGroup.php');
 				$this->layer_group = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 				$this->collection->set('bezeichnung', $this->layer_group->get('gruppenname'));
 				$this->collection->set('group_id', $this->layer_group->get('obergruppe'));
+				$this->collection->set('filter', $this->layer_group->get('filter'));
 				$this->collection->set('collection_layer_group_id', $this->layer_group->get_id());
 				$this->collection->set('only_with_content', 'false');
 				$this->collection->set('stelle_id', $this->Stelle->id);
-				}
+			}
 			else {
+				// übernehme die Werte aus den Formularvariablen
 				$this->collection->set('bezeichnung', $this->formvars['bezeichnung']);
 				$this->collection->set('group_id', $this->formvars['group_id']);
+				$this->collection->set('filter', $this->formvars['filter']);
 				$this->collection->set('collection_layer_group_id', $this->formvars['collection_layer_group_id']);
 				$this->collection->set('only_with_content', $this->formvars['only_with_content'] === 'true');
 				$this->collection->set('stelle_id', $this->formvars['stelle_id']);
@@ -19351,7 +19367,7 @@ class GUI {
 	}
 
 	/**
-	 * Function create a collection based on given layer and filter
+	 * Function create a collection based on given layer and filter in the database
 	 * @param String $name The name of the collection
 	 * @param Integer $collection_group_id 	The id of the group where the collection shall be included below in the legend tree
 	 * @param String $filter 								The filter for the collection.
@@ -19379,6 +19395,11 @@ class GUI {
 		$collection = $result['collection'];
 		$result = $collection->add_to_rollen($stelle_id);
 		if (! $result['success']) {
+			return $result;
+		}
+		$result = $collection->add_group_to_rollen($stelle_id);
+		if (! $result['success']) {
+			$collection->delete();
 			return $result;
 		}
 
@@ -19436,6 +19457,9 @@ class GUI {
 		if (!$result['success']) {
 			return $result;
 		}
+
+
+
 		return array(
 			'success' => true,
 			'msg' => 'Collection mit id: ' . $collection->get_id() . ' mit ' . count($layers) . ' Collection Layern angelegt und der Stelle ' . $stelle_id . ' zugeordnet.',
