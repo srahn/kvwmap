@@ -1283,7 +1283,7 @@ class ddl extends drucklayout{
 						$this->pdf->transaction('abort');
 						$i--;
 						$this->i_on_page = -1;
-						#$this->maxy = 0;
+						$this->maxy = 0;
 						if (!$this->initial_yoffset) {
 							# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt,
 							# um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
