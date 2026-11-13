@@ -2834,6 +2834,7 @@ function mouseup(evt){
 		function add_buffer_submit(){
 			top.$(\'#message_box\').hide();
 			if (enclosingForm.buffer_width.value) {
+				enclosingForm.buffer_width.value = enclosingForm.buffer_width.value.replace(\',\', \'.\');
 				enclosingForm.secondpoly.value = true;
 				enclosingForm.firstpoly.value = true;
 				if (enclosingForm.newpathwkt.value != "") {
