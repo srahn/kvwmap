@@ -6460,7 +6460,7 @@ echo '			</table>
 			}
 		}
 		else{         # selektieren (eigenen Style verwenden)
-			$class_ids = $dbmap->getClassIdsFromObjects($select, $layerset[0]['layer_id'], $layerset[0]['classitem']);
+			$class_ids = $dbmap->getClassIdsFromObjects($layerdb, $select, $layerset[0]['layer_id'], $layerset[0]['classitem']);
 			foreach ($class_ids as $class_id) {
 				$dbmap->copyClass($class_id, -$layer_id);
 			}
@@ -22901,7 +22901,7 @@ DO $$
 		return $rs;
 	}
 	
-  function getClassIdsFromObjects($select, $layer_id, $classitem){
+  function getClassIdsFromObjects($layerdb, $select, $layer_id, $classitem){
     # diese Funktion bestimmt für ein über die oid gegebenes Objekt welche Klasse dieses Objekt hat
     $classes = $this->read_Classes($layer_id);
     $anzahl = count($classes);
@@ -22919,7 +22919,7 @@ DO $$
 				FROM 
 					(' . $select . ') as foo';
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
-			$ret = $this->db->execSQL($sql);
+			$ret = $layerdb->execSQL($sql);
 			if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 			$rs = pg_fetch_all($ret[1]);
 			return array_unique(array_column($rs, 'class_id'));
