@@ -23307,15 +23307,8 @@ DO $$
 				LEFT JOIN kvwmap.used_layer ul ON l.layer_id = ul.layer_id
 				LEFT JOIN kvwmap.rolle radm ON ul.stelle_id = radm.stelle_id
 			";
-			$where[] = "(radm.user_id = " . $this->User_ID . " OR ul.layer_id IS NULL)";
-		}
+			$where[] = "((radm.user_id = " . $this->User_ID . " AND ul.stelle_id = " . $this->Stelle_ID . ") OR (ul.layer_id IS NULL AND l.edited_by = " . $this->User_ID . "))";
 
-		if (
-			!$only_listed AND # $only_listed ist true bei der Layer-Übersicht. Dann sollen alle Layer geladen werden (d.h. auch die, die der Nutzer gar nicht hat in seinen Stellen).
-			# Show non-admin users only layers that they self have shared
-			!$this->GUI->is_admin_user($this->GUI->user->id)
-		) {
-			$where[] = "l.shared_from = " . $this->GUI->user->id;
 		}
 
 		if ($order != '') {
