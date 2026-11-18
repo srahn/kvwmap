@@ -16,6 +16,7 @@
   $strEditAll="mehrere bearbeiten";
   $strEditDataset="Datensatz bearbeiten";
   $strEditGeom="Geometrie&nbsp;bearbeiten";
+  $strExpandButton="Seite maximieren / minimieren";
   $strExport="exportieren";
   $strExportThis="Datensatz exportieren";
   $strMapZoom="Zoom auf Objekt";

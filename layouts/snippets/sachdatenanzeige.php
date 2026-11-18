@@ -11,7 +11,7 @@
 
 <div id="overlayheader2" class="gle_tabs px17 fett" style="display: none"></div><?
 if ($this->formvars['window_type'] != 'overlay') { ?>
-	<a href="javascript:expand();" style="float: left; margin: 2px 0px 0px 2px;" title="<? echo $strToBottom; ?>">
+	<a href="javascript:expand();" style="float: left; margin: 2px 0px 0px 2px;" title="<? echo $strExpandButton; ?>">
 		<i id="expand_collapse_button" class="fa fa-expand hover-border" aria-hidden="true"></i>
 	</a><?
 } ?>
