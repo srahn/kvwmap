@@ -146,6 +146,15 @@ body {
 	margin: auto;
 }
 
+.tab_div {
+	display: grid; 
+	gap: 7px;
+}
+
+.tab_div:not(:has(> :not(.collapsed))) {
+  gap: 0;
+}
+
 .collapsed, div:not(.gle_tabular)~.collapsedfull {
 	visibility: collapse;
   height: 0;
