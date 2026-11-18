@@ -119,6 +119,31 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 
+	expand = function() {
+		guiTable = document.getElementById('gui-table');
+		contentDiv = document.getElementById('contentdiv');
+		innerContentDiv = document.getElementById('innercontentdiv');
+		layer = document.getElementById('layer');
+		expandCollapsButton = document.getElementById('expand_collapse_button');
+		if (contentDiv.style.width == 'max-content') {
+			guiTable.style.width = '100%';
+			contentDiv.style.setProperty("width", "100%", "important");
+			contentDiv.style.maxWidth = '100%';
+			innerContentDiv.style.width = '100%';
+			layer.style.margin = '0px';
+			expandCollapsButton.classList.replace("fa-expand", "fa-compress");
+		}
+		else {
+			console.log('collapse');
+			guiTable.style.width = '1100px';
+			contentDiv.style.setProperty("width", "max-content", "important");
+			contentDiv.style.maxWidth = "calc(100vw - 240px)";
+			innerContentDiv.style.width = 'fit-content';
+			layer.style.margin = '18px 8px 8px 8px';
+			expandCollapsButton.classList.replace("fa-compress", "fa-expand");
+		}
+	}
+
 	toggle_group = function(id, gle_view = '1') {
 		var groups = [];
 		var group_imgs = [];
