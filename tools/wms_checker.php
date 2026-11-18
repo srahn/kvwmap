@@ -176,7 +176,7 @@ while ($line = pg_fetch_assoc($ret[1])){
 		echo 'EPSG-Code fehlt in Layer: ';
 	}
 	$bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
-	$exceptions = 'application/vnd.ogc.se_xml';
+	$exceptions = ($line["wms_server_version"] == '1.3.0'? 'XML' : 'application/vnd.ogc.se_xml');
 	$srs = ($line["wms_server_version"] == '1.3.0'? 'CRS' : 'SRS');
 	$url = $line["connection"] . "&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=" . $exceptions .  "&" . $srs . "=EPSG:" . $line["epsg_code"] . "&WIDTH=400&HEIGHT=400&BBOX=" . $bounding;
 	if (strpos(strtolower($line["connection"]), 'version=') === false) $url .= '&VERSION=' . $line["wms_server_version"];
@@ -184,10 +184,6 @@ while ($line = pg_fetch_assoc($ret[1])){
 	if (strpos(strtolower($line["connection"]), 'format=' ) === false) $url .= '&FORMAT='  . $line["wms_format"];
 	if (strpos(strtolower($line["connection"]), 'styles=' ) === false) $url .= '&STYLES=';
   $status = checkStatus($url, $line['wms_auth_username'], $line['wms_auth_password']);
-	if (!$status[0] AND strpos($status[1], 'application/vnd.ogc.se_xml') !== false) {
-		$url = str_replace('application/vnd.ogc.se_xml', 'XML', $url);
-		$status = checkStatus($url, $line['wms_auth_username'], $line['wms_auth_password']);
-	}
 	if (!$status[0]) {
 		$color = '#db5a5a';
 	}
