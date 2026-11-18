@@ -608,6 +608,35 @@ $GUI->nachweis_columns = [
 		return 1;
 	};
 
+	$GUI->saveLeaRecherche = function($lea_id, $user_id, $stelle_id) use ($GUI){
+		$sql = "
+			INSERT INTO lenris.lea_recherchen 
+				(lea_id, user_id,	stelle_id, zeit, search_params)
+			VALUES (
+				" . $lea_id . ",
+				" . $user_id . ",
+				" . $stelle_id . ",
+				now(),
+				(SELECT 
+					jsonb_object_agg(key, value)
+				FROM 
+					kvwmap.rolle_nachweise,
+					jsonb_each(to_jsonb(rolle_nachweise) - ARRAY['user_id', 'stelle_id', 'showhauptart', 'markhauptart', 'order', 'columns'])
+				where
+					user_id = " . $user_id . " and
+					stelle_id = " . $stelle_id . " and
+					value <> 'null'::jsonb and 
+					value <> '\"\"'::jsonb)
+			)
+			RETURNING id;
+		";
+		#echo $sql;
+		$GUI->debug->write("<p>saveLeaRecherche - Speichern der Nachweissuchparameter",4);
+		$ret = $GUI->pgdatabase->execSQL($sql,4, 1);
+		$rs = pg_fetch_assoc($ret[1]);
+		return $rs['id'];
+	};
+
 	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchfortfuehrung2,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $suchbemerkung, $flur_thematisch, $alle_der_messung, $order) use ($GUI){
 		if($suchhauptart == NULL)$suchhauptart = array();
 		if($suchunterart == NULL)$suchunterart = array();
@@ -629,8 +658,8 @@ $GUI->nachweis_columns = [
 		$sql.= "suchfortfuehrung = " . $suchfortfuehrung . ",";
 		if ($suchfortfuehrung2 == '') {$suchfortfuehrung2 = 'NULL';}
 		$sql.= "suchfortfuehrung2 = " . $suchfortfuehrung2 . ",";
-		if ($suchpolygon!='') { $sql.= "suchpolygon = '" . $suchpolygon . "',"; }
-		if ($suchantrnr!='') { $sql.= "suchantrnr = '" . $suchantrnr . "',"; }
+		$sql.= "suchpolygon = '" . $suchpolygon . "',";
+		$sql.= "suchantrnr = '" . $suchantrnr . "',";
 		$sql.= "sdatum = '" . $sdatum . "',";
 		$sql.= "sdatum2 = '" . $sdatum2 . "',";
 		if ($svermstelle!='') { $sql.= "svermStelle = " . $svermstelle . ","; }else{$sql.='svermStelle = NULL,' ;}
@@ -874,6 +903,9 @@ $GUI->nachweis_columns = [
 				$GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
 			}
 			$GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchfortfuehrung2'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchbemerkung'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung'], $GUI->formvars['order']);
+			if ($GUI->formvars['lea_id'] != '') {
+				$lea_recherche_id = $GUI->saveLeaRecherche($GUI->formvars['lea_id'], $GUI->user->rolle->user_id, $GUI->user->rolle->stelle_id);
+			}
 			# Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
 			# bzw. was als Suchparameter im Formular angegeben wurde.
 			$GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchhauptart']);
