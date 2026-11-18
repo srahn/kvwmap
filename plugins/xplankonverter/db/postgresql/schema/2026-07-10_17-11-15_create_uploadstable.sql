@@ -1,19 +1,4 @@
 BEGIN;
-  CREATE TABLE IF NOT EXISTS plandigitalisierung.uploads (
-    id serial NOT NULL,
-    stelle_id integer NOT NULL,
-    dateiname varchar NOT NULL,
-    uploaded_at timestamp without time zone DEFAULT now() NOT NULL,
-    status varchar DEFAULT 'hochgeladen'::character varying NOT NULL,
-    ags integer NULL,
-    konvertierung_id_new integer NULL,
-    konvertierung_id_origin integer NULL,
-    message varchar NULL,
-    CONSTRAINT uploads_pk PRIMARY KEY (id)
-  );
-  ALTER TABLE plandigitalisierung.uploads ADD CONSTRAINT uploads_konvertierung_new_fk FOREIGN KEY (konvertierung_id_new) REFERENCES xplankonverter.konvertierungen(id) ON UPDATE CASCADE ON DELETE SET NULL;
-  ALTER TABLE plandigitalisierung.uploads ADD CONSTRAINT uploads_konvertierung_origin_fk FOREIGN KEY (konvertierung_id_origin) REFERENCES xplankonverter.konvertierungen(id) ON UPDATE CASCADE ON DELETE SET NULL;
-
   ALTER TABLE xplankonverter.konvertierungen ADD COLUMN IF NOT EXISTS ersetzt_konvertierung_id integer;
 
   ALTER TABLE xplankonverter.konvertierungen_log
