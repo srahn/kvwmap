@@ -1223,17 +1223,19 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT DISTINCT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, g.gemarkungsname, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
-          $sql.=" FROM ";
-					if($gemarkung != '' AND $flur_thematisch == 0){
-						$sql.=" alkis.pp_flur as flur, ";
-					}
-					$sql.=" nachweisverwaltung.n_nachweise AS n";
-					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-          $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
-					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
-					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
-          $sql.=" LEFT JOIN alkis.pp_gemarkung g on substr(n.flurid::text, 1, 6) = g.schluesselgesamt";
+          $sql ="
+            SELECT DISTINCT 
+              " . $order_rissnummer . ", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, g.gemarkungsname, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name " . 
+              ($this->lenris_plugin? ', cn.client_nachweis_id, cn.client_id ' : "") . "
+            FROM " .
+					    (($gemarkung != '' AND $flur_thematisch == 0)? ' alkis.pp_flur as flur, ' : '') . "
+						  nachweisverwaltung.n_nachweise AS n " .
+              ($this->lenris_plugin? 'JOIN lenris.client_nachweise cn ON cn.nachweis_id = n.id' : '') . "
+					    LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id 
+              LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id 
+              LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id 
+              LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart 
+              LEFT JOIN alkis.pp_gemarkung g on substr(n.flurid::text, 1, 6) = g.schluesselgesamt";
 					if($alle_der_messung){
 						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.id = n2.id OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
 						$n = 'n2';
@@ -1360,13 +1362,19 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-					$sql ="SELECT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, g.gemarkungsname, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
-          $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
-					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-          $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
-          $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					
-					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
-          $sql.=" LEFT JOIN alkis.pp_gemarkung g on substr(n.flurid::text, 1, 6) = g.schluesselgesamt";
+
+          $sql ="
+            SELECT  
+              " . $order_rissnummer . ", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, g.gemarkungsname, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name " . 
+              ($this->lenris_plugin? ', cn.client_nachweis_id, cn.client_id ' : "") . "
+            FROM 
+						  nachweisverwaltung.n_nachweise AS n " .
+              ($this->lenris_plugin? 'JOIN lenris.client_nachweise cn ON cn.nachweis_id = n.id' : '') . "
+					    LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id 
+              LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id 
+              LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id 
+              LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart 
+              LEFT JOIN alkis.pp_gemarkung g on substr(n.flurid::text, 1, 6) = g.schluesselgesamt";
 					if($alle_der_messung){
 						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.id = n2.id OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
 						$n = 'n2';

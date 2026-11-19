@@ -637,6 +637,29 @@ $GUI->nachweis_columns = [
 		return $rs['id'];
 	};
 
+	$GUI->saveLeaRechercheErgebnis = function($lea_recherche_id, $nachweise) use ($GUI) {
+    if (empty($nachweise)) {
+      return;
+    }
+    $values = [];
+    foreach ($nachweise as $nachweis) {
+    	$values[] = "(
+      	" . $lea_recherche_id . ",
+        " . $nachweis['client_id'] . ",
+        " . $nachweis['client_nachweis_id'] . ",
+        " . $nachweis['flurid'] . ",
+        '" . $nachweis['blattnummer'] . "',
+        " . $nachweis['vermstelle'] . ",
+        '" . $nachweis['stammnr'] . "'
+      )";
+    }
+    $sql = "
+        INSERT INTO lenris.lea_recherche_ergebnisse
+            (recherche_id, client_id, client_nachweis_id, flurid, blattnummer, vermstelle, stammnr)
+        VALUES " . implode(',', $values);
+    $ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
+	};
+
 	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchfortfuehrung2,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $suchbemerkung, $flur_thematisch, $alle_der_messung, $order) use ($GUI){
 		if($suchhauptart == NULL)$suchhauptart = array();
 		if($suchunterart == NULL)$suchunterart = array();
@@ -948,6 +971,9 @@ $GUI->nachweis_columns = [
 						$GUI->user->rolle->saveSettings($GUI->map->extent);
 					}
 					$GUI->zoomed = true;
+				}
+				if ($lea_recherche_id) {
+					$GUI->saveLeaRechercheErgebnis($lea_recherche_id, $GUI->nachweis->Dokumente);
 				}
 				# Anzeige des Rechercheergebnisses
         $GUI->nachweisAnzeige();
