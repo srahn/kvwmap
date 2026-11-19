@@ -124,22 +124,27 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		contentDiv = document.getElementById('contentdiv');
 		innerContentDiv = document.getElementById('innercontentdiv');
 		layer = document.getElementById('layer');
+		menueTable = document.getElementById('menueTable');
 		expandCollapsButton = document.getElementById('expand_collapse_button');
 		if (contentDiv.style.width == 'max-content') {
 			guiTable.style.width = '100%';
 			contentDiv.style.setProperty("width", "100%", "important");
 			contentDiv.style.maxWidth = '100%';
+			contentDiv.style.maxHeight = 'calc(100vh - 198px)';
 			innerContentDiv.style.width = '100%';
 			layer.style.margin = '0px';
+			menueTable.style.height = '100%';
 			expandCollapsButton.classList.replace("fa-expand", "fa-compress");
 		}
 		else {
 			console.log('collapse');
 			guiTable.style.width = '1100px';
 			contentDiv.style.setProperty("width", "max-content", "important");
-			contentDiv.style.maxWidth = "calc(100vw - 240px)";
+			contentDiv.style.maxWidth = 'calc(100vw - 240px)';
+			contentDiv.style.maxHeight = '<? echo $this->user->rolle->nImageHeight; ?>px';
 			innerContentDiv.style.width = 'fit-content';
 			layer.style.margin = '18px 8px 8px 8px';
+			menueTable.style.height = '<? echo $menue_height; ?>px';
 			expandCollapsButton.classList.replace("fa-compress", "fa-expand");
 		}
 	}
