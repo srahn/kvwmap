@@ -83,16 +83,16 @@ include_once(CLASSPATH . 'FormObject.php');
 	<tr>
 		<th align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_notification; ?>*</th>
 		<td style="border-bottom:1px solid #C3C7C3">
-			<textarea id="notification" name="notification" cols="80" rows="10" placeholder="<? echo $strPlaceholder_notification; ?>"><?	echo $this->notification->get('notification'); ?></textarea>
+			<textarea id="notification" name="notification" cols="80" rows="10" placeholder="<? echo $strPlaceholder_notification; ?>"><?	echo $this->formvars['notification'] ?? $this->notification->get('notification'); ?></textarea>
 		</td>
 	</tr>
 	<tr>
 		<th align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_veroeffentlichungsdatum; ?> <span data-tooltip="<?php echo $strVeroeffentlichungsdatumHint; ?>"></span></th>
-		<td style="border-bottom:1px solid #C3C7C3"><input id="veroeffentlichungsdatum" name="veroeffentlichungsdatum" type="text" value="<?php echo $this->notification->get('veroeffentlichungsdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
+		<td style="border-bottom:1px solid #C3C7C3"><input id="veroeffentlichungsdatum" name="veroeffentlichungsdatum" type="text" value="<?php echo $this->formvars['veroeffentlichungsdatum'] ?? $this->notification->get('veroeffentlichungsdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
 	</tr>
 	<tr>
 		<th align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_ablaufdatum; ?>* <span data-tooltip="<?php echo $strAblaufdatumHint; ?>"></span></th>
-		<td style="border-bottom:1px solid #C3C7C3"><input id="ablaufdatum" name="ablaufdatum" type="text" value="<?php echo $this->notification->get('ablaufdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
+		<td style="border-bottom:1px solid #C3C7C3"><input id="ablaufdatum" name="ablaufdatum" type="text" value="<?php echo $this->formvars['ablaufdatum'] ?? $this->notification->get('ablaufdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
 	</tr>
 	<tr>
 		<th align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_stellen_filter; ?> <span data-tooltip="<?php echo $strStellenFilterHint; ?>"></span></th>
