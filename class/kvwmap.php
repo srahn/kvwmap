@@ -5929,12 +5929,20 @@ class GUI {
 		$this->title='Speicherung aller Layerattribute';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->layerdaten = $mapDB->get_layers_of_type(MS_POSTGIS, NULL);
-		for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
-			$layer = $mapDB->get_Layer($this->layerdaten['ID'][$i]);
+		for ($j = 0; $j < count($this->layerdaten['ID']); $j++) {
+			$layer = $mapDB->get_Layer($this->layerdaten['ID'][$j]);
 			if ($layer['pfad'] != '' AND $layer['connectiontype'] == 6) {
 				$this->param['str1'] .= 'Layer: ' . $layer['name'] . '<br>';
 				$layerdb = $mapDB->getlayerdatabase($layer['layer_id'], $this->Stelle->pgdbhost);
 				$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
+				$old_attributes = $mapDB->read_layer_attributes($layer['layer_id'], $layerdb, NULL, false, false, false, false);
+				for ($i = 0; $i < count($attributes)-2; $i++) {
+					$attributes[$i]['order'] = $last_order = $old_attributes['order'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: ($last_order +  0.01);
+					$attributes[$i]['default'] = $old_attributes['default'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: $attributes[$i]['default'];
+				}
+				unset($attributes['the_geom']);
+				unset($attributes['the_geom_id']);
+				usort($attributes, 'compare_orders2');
 				$mapDB->save_postgis_attributes($layerdb, $layer['layer_id'], $attributes, '', '');
 				$mapDB->delete_old_attributes($layer['layer_id'], $attributes);
 			}
