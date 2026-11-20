@@ -12870,8 +12870,8 @@ class GUI {
 		$pathinfo = pathinfo($document_file);
 		$this->mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerset = $this->user->rolle->getLayer($layer_id);
-		$layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-		$attributes = $mapDB->read_layer_attributes($layer_id, $layerdb, NULL, false, true);
+		$layerdb = $this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+		$attributes = $this->mapDB->read_layer_attributes($layer_id, $layerdb, NULL, false, true);
 
 		# Suche durchführen um die Variablen im dynamischen Pfad ersetzen zu können
 		$this->formvars['selected_layer_id'] = $layer_id;
@@ -12886,7 +12886,7 @@ class GUI {
 				$options = $attributes['options_struct'][$i];
 				$dokument_attribute = $attributes['name'][$i];
 				$dokument_is_array = substr($attributes['type'][$i], 0, 1) == '_';
-				$doc_paths = $mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $options['dynamic_path'], array_keys($this->qlayerset[0]['shape'][0]), array_values($this->qlayerset[0]['shape'][0]), $layerdb, $pathinfo['filename']);
+				$doc_paths = $this->mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $options['dynamic_path'], array_keys($this->qlayerset[0]['shape'][0]), array_values($this->qlayerset[0]['shape'][0]), $layerdb, $pathinfo['filename']);
 				$document_path = dirname($doc_paths['doc_path'] . 'x') . '/';
 				break;
 			}
