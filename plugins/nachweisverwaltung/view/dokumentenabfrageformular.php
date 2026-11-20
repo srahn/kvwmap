@@ -109,7 +109,7 @@ function updateGemarkungsschluessel(value){
 	update_flur_thematisch();
 }
 
-function clear(){
+function clear_search(){
 	document.GUI.gemschl2.value = '';
 	document.GUI.suchgemarkung.value = '';
 	document.GUI.suchflur.value = '';
@@ -123,6 +123,7 @@ function clear(){
 	document.GUI.sdatum2.value = '';
 	document.GUI.sVermStelle.value = '';
 	document.GUI.suchbemerkung.value = '';
+	SVG.restart();
 }
 
 function show_dokauswahlen(){
@@ -324,7 +325,7 @@ else {
 								</td>
 							</tr>
 							<tr>
-								<td colspan="3"><span class="fett">Auswahl über Attribute</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a></td>
+								<td colspan="3"><span class="fett">Auswahl über Attribute</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:clear_search();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a></td>
 							</tr>
 							<tr>
 								<td>
@@ -476,6 +477,23 @@ else {
 				<tr> 
 					<td colspan="2"><hr align="center"></td>
 				</tr>
+				<? if ($this->formvars['lea_id'] != '') { ?>
+				<tr>
+					<td>
+						<select name="lea_recherche_id" onchange="clear_search();document.GUI.submit();">
+							<option value="">  -- bisherige Recherchen --  </option>
+							<?
+								foreach ($this->lea_recherchen as $lea_recherche) {
+									echo '<option value="' . $lea_recherche['id'] . '">' . $lea_recherche['zeit'] . '</option>';
+								}
+							?>
+						</select>
+					</td>
+				</tr>
+				<tr> 
+					<td colspan="2"><hr align="center"></td>
+				</tr>
+				<? } ?>
 				<tr>
 					<td colspan="2">
 						Geometrie übernehmen von:<br>

@@ -608,6 +608,28 @@ $GUI->nachweis_columns = [
 		return 1;
 	};
 
+	$GUI->getLeaRecherchen = function($lea_id, $user_id, $stelle_id, $recherche_id = NULL) use ($GUI){
+		$lea_recherchen = [];
+		$sql = "
+			SELECT
+				*
+			FROM 
+				lenris.lea_recherchen 
+			WHERE
+					lea_id = " . $lea_id . " AND 
+					user_id = " . $user_id . " AND
+					stelle_id = " . $stelle_id . 
+					($recherche_id? ' AND id = ' . $recherche_id : '')
+		;
+		#echo $sql;
+		$GUI->debug->write("<p>getLeaRecherchen - Laden der Nachweissuchparameter",4);
+		$ret = $GUI->pgdatabase->execSQL($sql,4, 1);
+		while($rs = pg_fetch_assoc($ret[1])){
+			$lea_recherchen[$rs['id']] = $rs;
+		}
+		return $lea_recherchen;
+	};
+
 	$GUI->saveLeaRecherche = function($lea_id, $user_id, $stelle_id) use ($GUI){
 		$sql = "
 			INSERT INTO lenris.lea_recherchen 
@@ -1986,8 +2008,29 @@ $GUI->nachweis_columns = [
 		$GUI->dokauswahlset=$GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, NULL);
 		if($GUI->formvars['CMD'] == ''){		# wenn nicht navigiert wurde
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-			$nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
-			$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+
+			if($GUI->formvars['lea_id'] != '') {
+				$GUI->zoomToLEA($nachweis, $GUI->formvars['lea_id'], 10);
+				$GUI->lea_recherchen = $GUI->getLeaRecherchen($GUI->formvars['lea_id'], $GUI->user->id, $GUI->Stelle->id);
+				if ($GUI->formvars['lea_recherche_id'] != '') {
+					$lea_search_params = json_decode($GUI->lea_recherchen[$GUI->formvars['lea_recherche_id']]['search_params'], true);
+					$lea_search_params['suchhauptart'] = array_filter(explode(',', $lea_search_params['suchhauptart']));
+					$lea_search_params['suchunterart'] = array_filter(explode(',', $lea_search_params['suchunterart']));
+					$GUI->formvars = array_merge($GUI->formvars, $lea_search_params);
+					if($GUI->formvars['suchpolygon'] != ''){
+						$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
+						$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
+						$GUI->formvars['firstpoly'] = 'true';
+						$GUI->formvars['last_doing'] = 'draw_second_polygon';
+						$GUI->formvars['last_button'] = 'pgon0';
+					}
+				}
+			}
+			if ($GUI->formvars['lea_recherche_id'] == '') {
+				$nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
+				$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+			}
+
 			if($GUI->formvars['FlurstKennz'] != ''){		# über die Flurstückssuche gefundene Flurstücke -> Geometrie als Suchpolygon übernehmen
 				$GUI->formvars['suchpolygon'] = $GUI->pgdatabase->getGeomfromFlurstuecke($GUI->formvars['FlurstKennz'], $GUI->user->rolle->epsg_code);
 			}
@@ -2044,9 +2087,6 @@ $GUI->nachweis_columns = [
       # Nur Navigieren
       $GUI->navMap($GUI->formvars['CMD']);
     }
-		elseif($GUI->formvars['lea_id'] != '') {
-			$GUI->zoomToLEA($nachweis, $GUI->formvars['lea_id'], 10);
-		}
 	
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
     
