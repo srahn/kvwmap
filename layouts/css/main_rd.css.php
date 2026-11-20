@@ -1412,7 +1412,28 @@ tbody.gle>tr {
 
 .subFormListItem{
 	height: 20px;
-	padding: 0;
+	padding: 0 4px 8px 0;
+	vertical-align: top;
+}
+
+.subFormListItem > .preview_div{
+	display: flex;
+	align-items: center;
+}
+
+.subFormListItem > .preview_div:before{
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	content: '';
+	margin: 2px 7px 0px 10px;
+	background-color: #236dbf;
+	vertical-align: top;
+	display: inline-block;
+}
+
+.subFormListItem > .preview_div > .func_div {
+	margin-left: auto;
 }
 
 .gle_hr{
@@ -1420,11 +1441,6 @@ tbody.gle>tr {
 	margin: 15 0; 
 	color: <? echo BG_GLEHEADER; ?>; 
 	background: <? echo BG_GLEHEADER; ?>;
-}
-
-.subFormListItem > a:before{
-	content:url('../../graphics/submenue.png');
-	vertical-align: top;
 }
 
 .calendar { /* Fuer IE <= 6 */

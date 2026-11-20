@@ -73,9 +73,7 @@ else
       # echo "sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -xu ${mail_smtp_user} -xp ****** -u \"${subject}\" ${content_type_options[@]} -m \"${message}\"" >> $job_log_file
       echo "E-Mail aus Datei ${file} gesendet" >> $job_log_file
     else
-      #echo Mit attachment sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -u ${subject} -m ${message} -a $attachment
-      #sendEmail -v -t $to_email -f $from_email -s ${smtp} -o tls=yes  -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -u "TestPlandigital" -m "Testcontent" -a $attachment > /dev/null 2>&1
-      #sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=auto -u "${subject}" -m "${message}" -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=UTF-8 -o message-content-type=text/plain;charset=UTF-8 -a $attachment > $logfile 2>&1
+      #echo Mit attachment
       printf '%s' "$message" | sendEmail \
         -v \
         -t "$to_email" \

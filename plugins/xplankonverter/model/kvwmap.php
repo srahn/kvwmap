@@ -1114,21 +1114,6 @@
 			}
 
 			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);
-			// $result = $GUI->konvertierung->create_themenauswahl($GUI->xplan_layers);
-			// if (!$result['success']) {
-			// 	if ($output) {
-			// 		# Validierungsergebnisse anzeigen.
-			// 		$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
-			// 		$GUI->Fehlermeldung = $result['msg'];
-			// 		$GUI->data = array(
-			// 			'success' => false,
-			// 			'msg' => $GUI->Fehlermeldung
-			// 		);
-			// 		$GUI->output();
-			// 		return false;
-			// 	}
-			// 	return $result;
-			// }
 			$result = $GUI->konvertierung->create_layer_collection($GUI->xplan_layers);
 			if (!$result['success']) {
 				if ($output) {

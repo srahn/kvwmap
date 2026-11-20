@@ -119,6 +119,36 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 
+	expand = function() {
+		guiTable = document.getElementById('gui-table');
+		contentDiv = document.getElementById('contentdiv');
+		innerContentDiv = document.getElementById('innercontentdiv');
+		layer = document.getElementById('layer');
+		menueTable = document.getElementById('menueTable');
+		expandCollapsButton = document.getElementById('expand_collapse_button');
+		if (contentDiv.style.width == 'max-content') {
+			guiTable.style.width = '100%';
+			contentDiv.style.setProperty("width", "100%", "important");
+			contentDiv.style.maxWidth = '100%';
+			contentDiv.style.maxHeight = 'calc(100vh - 198px)';
+			innerContentDiv.style.width = '100%';
+			layer.style.margin = '0px';
+			menueTable.style.height = '100%';
+			expandCollapsButton.classList.replace("fa-expand", "fa-compress");
+		}
+		else {
+			console.log('collapse');
+			guiTable.style.width = '1100px';
+			contentDiv.style.setProperty("width", "max-content", "important");
+			contentDiv.style.maxWidth = 'calc(100vw - 240px)';
+			contentDiv.style.maxHeight = '<? echo $this->user->rolle->nImageHeight; ?>px';
+			innerContentDiv.style.width = 'fit-content';
+			layer.style.margin = '18px 8px 8px 8px';
+			menueTable.style.height = '<? echo $menue_height; ?>px';
+			expandCollapsButton.classList.replace("fa-compress", "fa-expand");
+		}
+	}
+
 	toggle_group = function(id, gle_view = '1') {
 		var groups = [];
 		var group_imgs = [];
@@ -186,11 +216,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 				field = scope.querySelector('.attr_' + layer_id + '_' + rule.attribute);
 			}
 			else {
-				field = document.querySelector('#value_' + layer_id + '_' + rule.attribute + '_' + k + ' ' + '.attr_' + layer_id + '_' + rule.attribute);
-				// field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
+				// field = document.querySelector('#value_' + layer_id + '_' + rule.attribute + '_' + k + ' ' + '.attr_' + layer_id + '_' + rule.attribute);
+				field = document.getElementById(layer_id + '_' + rule.attribute + '_' + k);
 			if (!field) {
-					field = document.querySelector('#value_' + layer_id + '_' + rule.attribute + '_' + k + ' ' + '.attr_' + layer_id + '_' + rule.attribute);
-					// field = document.getElementById(layer_id + '_' + rule.attribute + '_' + '0_' + k);		// Radiobuttons haben noch einen Zähler zusätzlich
+					// field = document.querySelector('#value_' + layer_id + '_' + rule.attribute + '_' + k + ' ' + '.attr_' + layer_id + '_' + rule.attribute);
+					field = document.getElementById(layer_id + '_' + rule.attribute + '_' + '0_' + k);		// Radiobuttons haben noch einen Zähler zusätzlich
 				}
 			}
 			return field === null ? false : field_has_value(field, rule.operator, rule.value);
@@ -262,7 +292,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 						group_display = '';
 					}
 				})
-				row.closest('div').closest('tr').style.display = group_display;
+				row.closest('div').style.display = group_display;
 			}
 		})
 		// visibility of tabs
@@ -305,11 +335,15 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 			}
 		}
 		else {
-			if (operator == 'IN') {
-				return Array.isArray(value) && value.includes(field_value);
-			}
-			else {
-				return eval("'" + field_value + "' " + operator + " '" + value + "'");
+			switch (operator) {
+				case 'IN' :
+					return Array.isArray(value) && value.includes(field_value);
+				break;
+				case 'NOT IN' :
+					return Array.isArray(value) && !value.includes(field_value);
+				break;
+				default :
+					return eval("'" + field_value + "' " + operator + " '" + value + "'");
 			}
 		}
 	}
@@ -662,7 +696,146 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		if(further_params)params += further_params;
 		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
-	
+
+	get_form_field_names = function (layer_id, maintable, pk_name, pk_value, pk_type, fk_names, fk_form_types, fk_types) {
+		var formFieldNames = []
+		const fkNames = fk_names.split(',');
+		const fkFormTypes = fk_form_types.split(',');
+		const fkTypes = fk_types.split(',');
+		formFieldNames = fkNames.map((fk_name, index) => `${layer_id};${fk_name.trim()};${maintable};${pk_value};${fkFormTypes[index].trim()};1;${fkTypes[index].trim()};1`);
+		formFieldNames.push(`${layer_id};${pk_name};${maintable};${pk_value};text;1;${pk_type};1`);
+		return formFieldNames;
+	}
+
+	/**
+	 * Creates a select field with candidates to add to the subform
+	 * It fetch the candidates from server that have null values in foreign key columns given by attributenames
+	 * @param {string} targetobject					The id of the subform object.
+	 * @param {number} child_layer_id				The id from child layer.
+	 * @param {sting} child_pk_name					The primary key of child layer.
+	 * @param {string} child_pk_type				The type of child primary key.
+	 * @param {string} preview_attribute		The option of that subformEmbeddedPK attribute that defines how to display thie child objects in the list. Can be attribute names and text separated by empty space.
+	 * @param {string} child_fk_names				A comma separated list of attributenames that belongs to the foreign key of child objects.
+	 * @param {string} child_fk_form_types	The formelementtypes of foreign keys.
+	 * @param {string} child_fk_types				The datatype of foreign keys.
+	 * @param {string} child_fk_values			A comma separated list of values that belongs to the foreign key of child objects.
+	 */
+	load_subform_child_candidates = function(targetobject, child_layer_id, child_pk_name, child_pk_type, child_maintable, preview_attribute, child_fk_names, child_fk_form_types, child_fk_types, child_fk_values) {
+		// console.log('load_subform_child_candidates with targetobject: %o, child_layer_id: %o, child_pk_name: %o, child_pk_type: %o, child_maintable: %o, preview_attribute: %o, child_fk_names: %o, child_fk_form_types: %o, child_fk_types: %o, child_fk_values: %o', targetobject, child_layer_id, child_pk_name, child_pk_type, child_maintable, preview_attribute, child_fk_names, child_fk_form_types, child_fk_types, child_fk_values);
+
+		const div_id = 'child_candidate_selection_div_' + child_layer_id + '_' + targetobject;
+
+		let formData = new FormData();
+		formData.append('go', 'Layer-Suche_Suchen');
+		formData.append('selected_layer_id', child_layer_id);
+		child_fk_names.split(',').forEach(name => {
+			name = name.trim();
+			formData.append('value_' + name, '');
+			formData.append('operator_' + name, 'IS NULL');
+		});
+		formData.append('selected_attributes', 'gid,projekt,sammelprojekt_id');
+		formData.append('anzahl', 10000);
+		formData.append('mime_type', 'json');
+		formData.append('format', 'json');
+		startwaiting();
+
+		let response = fetch('index.php', {
+			method: 'POST',
+			body: formData
+		})
+		.then(response => response.text())
+		.then(text => {
+			try {
+				const data = JSON.parse(text);
+				console.log('data: %o', data);
+
+				const div = document.getElementById(div_id);
+				div.innerHTML = '';
+
+				const add_button = document.getElementById(`hinzufuegen_button_${child_layer_id}_${targetobject}`);
+				add_button.style.display = 'none';
+
+				// Überschrift direkt in den div einfügen
+				const header = document.createElement('div');
+				header.style.fontSize = '12px';
+				header.style.marginBottom = '3px';
+				header.textContent = 'Wählen Sie einen untergeordneten Datensatz zum Hinzufügen aus der Liste:';
+				div.appendChild(header);
+
+				// Container für das <select> und den Abbruch-Button erstellen
+				const container = document.createElement('div');
+				container.style.display = 'flex'; // Flexbox für horizontale Anordnung
+				container.style.alignItems = 'center'; // Vertikale Zentrierung
+				container.style.width = 'fit-content'; // Container passt sich dem Inhalt an
+
+				// Abbruch-Button erstellen
+				const closeButton = document.createElement('a');
+				closeButton.href = 'javascript:void(0)';
+				closeButton.style.marginLeft = '5px'; // Abstand zum <select>-Element
+				closeButton.innerHTML = '<i class="fa fa-close" title="Abbrechen"></i>';
+				closeButton.onclick = function() {
+					div.style.display = 'none';
+					add_button.style.display = 'inline-block';
+				};
+
+				// <select>-Element erstellen
+				const select = document.createElement('select');
+				select.name = 'child_candidate_id';
+				select.style.width = 'fit-content'; // Select-Feld passt sich der Breite der Optionen an
+
+				// Event-Listener zuweisen
+				select.onchange = function(event) {
+					console.log('onchange of select field event: %o', event);
+					const child_pk_value = event.target.value;
+					if (child_pk_value) {
+						subadd_data(
+							child_layer_id,
+							child_maintable,
+							child_pk_name,
+							child_pk_value,
+							child_pk_type,
+							child_fk_names,
+							child_fk_form_types,
+							child_fk_types,
+							child_fk_values,
+							targetobject,
+							targetobject.split('_')[1]
+						);
+					}
+				};
+
+				// Standard-Option hinzufügen
+				const option = document.createElement('option');
+				option.value = '';
+				option.textContent = '-- Bitte wählen --';
+				select.appendChild(option);
+
+				// Daten durchlaufen und Optionen hinzufügen
+				data.forEach(item => {
+					const option = document.createElement('option');
+					option.value = item[child_pk_name];
+					option.textContent = preview_attribute.split(' ').map(name => name in item ? item[name] : name).join(' ');
+					select.appendChild(option);
+				});
+
+				// Abbruch-Button und <select>-Element zum Container hinzufügen
+				container.appendChild(select);
+				container.appendChild(closeButton);
+
+				// Container zum div hinzufügen
+				div.appendChild(container);
+
+				// div sichtbar machen
+				div.style.display = 'block';
+
+
+				stopwaiting();
+			} catch(err) {
+				message([{ 'type': 'error', 'msg' : err.name + ': ' + err.message + ' in Zeile: ' + err.lineNumber + ' Response: ' + text}]);
+			}
+		});
+	}
+
 	convert_belated = function(field){
 		if (field.type == 'file' && field.files && field.files.length > 0) {
 			file = field.files[0];
@@ -817,16 +990,117 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		overlay_submit(enclosingForm, false);
 	}
 
-	subdelete_data = function(layer_id, fromobject, oid, reload_object){
-		// layer_id ist die von dem Layer, in dem der Datensatz geloescht werden soll
-		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt, welches entfernt wird
-		// reload_object ist die id vom gesamten Subformular, welches nach Loeschung des Datensatzes aktualisiert werden soll (optional)
+	/**
+	 * Fügt den ausgewählten candidaten als child zum übergeordneten Objekt zu.
+	 * @param {number} layer_id					Die id des Sub-Layers zum dem der ausgewählte Datensatz gehört.
+	 * @param {string} maintable				Die Haupttabelle des Sub-Layers.
+	 * @param {string} pk_name					Der Name des Primary Key im untergeordneten Layer.
+	 * @param {string} pk_value					Der Wert des Primary Keys des untergeordneten Datensatzes, der hinzugefügt werden soll.
+	 * @param {string} pk_type					Der Datentyp des Primary Key Attributes des SubLayers.
+	 * @param {string} fk_names					Die kommaseparierten Namen der Attribute des Fremdschlüssel, die gesetzt werden sollen, damit der Datensatz zum übergeordneten Objekt gehört.
+	 * @param {string} fk_form_types		Die kommaseparierten FormElementTypen der Fremdschlüssel.
+	 * @param {string} fk_types					Die kommaseparierten Datentypen der Fremdschlüssel.
+	 * @param {string} fk_values				Die kommaseparierten Werte des Fremdschlüssels des zugeordneten Datensatzes. Das sind die Werte des Primary Keys des übergeordneten Objektes.
+	 * @param {number} targetlayer_id		Ist die id von dem Layer, zu dem das targetobject gehört.
+	 * @param {string} targetattribute	Ist das Attribut, zu dem das targetobject gehört.
+	*/
+	subadd_data = function(layer_id, maintable, pk_name, pk_value, pk_type, fk_names, fk_form_types, fk_types, fk_values, targetobject, targetattribute) {
+		// console.log(
+		// 	'subadd_data with layer_id: %s, maintable: %o, pk_name: %o, pk_value: %s, pk_type: %s, fk_names: %o, fk_form_types: %o, fk_types: %o, fk_values: %o, targetobject: %s, targetattribute: %s',
+		//   									layer_id,			maintable,		 pk_name, 		pk_value, 		pk_type, 		 fk_names,	 	 fk_form_types,			fk_types, 		fk_values, 		 targetobject, 		 targetattribute
+		// );
+
+		var formData = new FormData();
+		const form_field_names = get_form_field_names(
+			layer_id,
+			maintable,
+			pk_name,
+			pk_value,
+			pk_type,
+			fk_names,
+			fk_form_types,
+			fk_types
+		);
+
+		formData.append('go', 'Sachdaten_speichern');
+		formData.append('changed_' + layer_id + '_' + pk_value, 1);
+		formData.append('selected_layer_id', layer_id);
+		formData.append('form_field_names', form_field_names.join('|'));
+		form_field_names.forEach((name, i) => {
+			formData.append(name, fk_values.split(',')[i]);
+		});
+		formData.append('targetobject', targetobject);
+		formData.append('targetlayer_id', layer_id);
+		formData.append('targetattribute', targetattribute);
+		formData.append('embedded', 'true');
+		formData.append('ref_edit', '1');
+		formData.append('csrf_token', csrf_token);
+		console.log('index.php' + new URLSearchParams(formData).toString());
+		ahah('index.php', formData, new Array(document.getElementById(targetobject)), new Array('execute_function'));
+	}
+
+	/**
+	 * Entfernt den ausgewählten untergelordneten Datensatz vom übergeordneten Datensatz.
+	 * @param {number} layer_id					Die id des Sub-Layers zum dem der ausgewählte Datensatz gehört.
+	 * @param {string} maintable				Die Haupttabelle des Sub-Layers.
+	 * @param {string} pk_name					Der Name des Primary Key im untergeordneten Layer.
+	 * @param {string} pk_value					Der Wert des Primary Keys des untergeordneten Datensatzes, der hinzugefügt werden soll.
+	 * @param {string} pk_type					Der Datentyp des Primary Key Attributes des SubLayers.
+	 * @param {string} fk_names					Die kommaseparierten Namen der Attribute des Fremdschlüssel, die gesetzt werden sollen, damit der Datensatz zum übergeordneten Objekt gehört.
+	 * @param {string} fk_form_types		Die kommaseparierten FormElementTypen der Fremdschlüssel.
+	 * @param {string} fk_types					Die kommaseparierten Datentypen der Fremdschlüssel.
+	 * @param {number} targetlayer_id		Ist die id von dem Layer, zu dem das targetobject gehört.
+	 * @param {string} targetattribute	Ist das Attribut, zu dem das targetobject gehört.	 */
+	subunlink_data = function(layer_id, maintable, pk_name, pk_value, pk_type, fk_names, fk_form_types, fk_types, targetobject, targetattribute) {
+		// console.log(
+		// 	'subunlink_data with layer_id: %s, maintable: %o, pk_name: %o, pk_value: %s, pk_type: %s, fk_names: %o, fk_form_types: %o, fk_types: %o, targetobject: %s, targetattribute: %s',
+		//   										 layer_id,			maintable,		 pk_name, 		pk_value, 		pk_type, 		 fk_names,	 	 fk_form_types,			fk_types, 	 targetobject, 		 targetattribute
+		// );
+		if (confirm('Wollen Sie die Zuordnung des ausgewählten Datensatzes zum übergeordneten wirklich entfernen?')) {
+			var formData = new FormData();
+			const form_field_names = get_form_field_names(
+				layer_id,
+				maintable,
+				pk_name,
+				pk_value,
+				pk_type,
+				fk_names,
+				fk_form_types,
+				fk_types
+			);
+
+			formData.append('go', 'Sachdaten_speichern');
+			formData.append('changed_' + layer_id + '_' + pk_value, 1);
+			formData.append('selected_layer_id', layer_id);
+			formData.append('form_field_names', form_field_names.join('|'));
+			form_field_names.forEach((name, i) => {
+				formData.append(name, '');
+			});
+			formData.append('targetobject', targetobject);
+			formData.append('targetlayer_id', layer_id);
+			formData.append('targetattribute', targetattribute);
+			formData.append('embedded', 'true');
+			formData.append('list_edit', '');
+			formData.append('csrf_token', csrf_token);
+			// console.log('index.php' + new URLSearchParams(formData).toString());
+			ahah('index.php', formData, new Array(document.getElementById(targetobject)), new Array('execute_function'));
+		}
+	}
+
+	/**
+	 * @params number layer_id			Ist die von dem Layer, in dem der Datensatz geloescht werden soll.
+	 * @params string fromobject		Ist die id von dem div, welches das Formular des Datensatzes enthält, welches entfernt wird.
+	 * @params string oid						Die id des zu löschenden Datensatzes.
+	 * @params string reload_object	Ist die id vom gesamten Subformular, welches nach Löschung des Datensatzes aktualisiert werden soll (optional).
+	 */
+	subdelete_data = function(layer_id, fromobject, oid, reload_object) {
 		if (confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')) {
 			var formData = new FormData();
 			formData.append('go', 'Layer_Datensatz_Loeschen');
 			formData.append('chosen_layer_id', layer_id);
 			formData.append('oid', oid);
 			formData.append('reload_object', reload_object);
+			// console.log('lösche mit url: index.php' + new URLSearchParams(formData).toString());
 			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 		}
 	}
@@ -855,10 +1129,14 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		}
 	}
 
+	/**
+	 * Speicherung der Daten im SubFormular
+	 * @param {number} layer_id			Ist die von dem Layer, in dem die Datensätze gespeichert werden soll.
+	 * @param {string} fromobject		Ist die id von dem div, welches das Formular der Datensätze enthält.
+	 * @param {string} targetobject	Ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll.
+	 */
 	subsave_data = function(layer_id, fromobject, targetobject, reload) {
-		// layer_id ist die von dem Layer, in dem die Datensätze gespeichert werden soll
-		// fromobject ist die id von dem div, welches das Formular der Datensätze enthält
-		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
+		console.log('subsave_data with layer_id: %s, formobject: %s, targetobject: %s und reload: %o', layer_id, fromobject, targetobject, reload);
 		form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_' + layer_id));
 		form_fieldstring = '';
 		var formData = new FormData();
@@ -905,12 +1183,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.p
 		ahah('index.php', formData, new Array(''), new Array('execute_function'));
 	}
 
-	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, list_edit){
-		// layer_id ist die von dem Layer, in dem ein neuer Datensatz gespeichert werden soll
-		// fromobject ist die id von dem div, welches das Formular zur Eingabe des neuen Datensatzes enthaelt
-		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
-		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
-		// targetattribute ist das Attribut, zu dem das targetobject gehoert
+	/**
+	 * Funktion speichert einen im Subformular eingegebenen Datensatz
+	 * @param {number} layer_id					Ist die id von dem Layer, in dem ein neuer Datensatz gespeichert werden soll.
+	 * @param {string} fromobject				Ist die id von dem div, welches das Formular zur Eingabe des neuen Datensatzes enthält.
+	 * @param {string} targetobject			Ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll.
+	 * @param {number} targetlayer_id		Ist die von dem Layer, zu dem das targetobject gehört.
+	 * @param {string} targetattribute	Ist das Attribut, zu dem das targetobject gehört.
+	 */
+	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, list_edit) {
+		console.log('subsave_new_layer_data with layer_id: %s, fromobject: %s, targetobject: %s, targetlayer_id: %s, targetattribute: %s, reload: %o, list_edit: %o', layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, list_edit);
   	form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_'+layer_id));
 		form_fieldstring = '';
 		var formData = new FormData();

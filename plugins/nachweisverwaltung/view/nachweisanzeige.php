@@ -553,7 +553,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           </td>
 
 					<?
-						output_columns($this, $i, ['id', 'gemarkung', 'flur']);
+						output_columns($this, $i, ['id', 'gemarkung', 'gemarkungsname', 'flur']);
 
        			if (NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer') {
 							output_columns($this, $i, ['stammnr', 'blattnummer']);

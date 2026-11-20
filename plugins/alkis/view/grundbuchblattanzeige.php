@@ -28,7 +28,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->buchungen = $this->gbblaetter[$gb];
 	$alle_flst_pro_buchung = array();	
 	$currenttime=date('Y-m-d H:i:s',time());
-	$this->user->rolle->setConsumeALB($currenttime, 'Grundbuchblattanzeige', array($this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']), 0, 'NULL');		# das Grundbuchblattkennzeichen wird geloggt
+	$this->user->rolle->setConsumeALB($currenttime, 'Grundbuchblattanzeige', array($this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']), 0, 'NULL', $this->formvars['vorgangsnr']);		# das Grundbuchblattkennzeichen wird geloggt
   $anzObj=count($this->buchungen);
   if ($anzObj>0) { 
 		$flst=new flurstueck($this->buchungen[0]['flurstkennz'],$this->pgdatabase);

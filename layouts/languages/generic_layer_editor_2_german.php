@@ -14,7 +14,9 @@
   $strDeselectAllShown = "alle angezeigten deselektieren";
   $strDontRememberDataset="Datensatz nicht mehr merken";
   $strEditAll="mehrere bearbeiten";
+  $strEditDataset="Datensatz bearbeiten";
   $strEditGeom="Geometrie&nbsp;bearbeiten";
+  $strExpandButton="Seite maximieren / minimieren";
   $strExport="exportieren";
   $strExportThis="Datensatz exportieren";
   $strMapZoom="Zoom auf Objekt";
@@ -25,6 +27,8 @@
   $strNoMatch="Zu diesem Thema wurden keine Objekte gefunden!";
   $strPrint="drucken";
   $strPrintDataset="Datensatz drucken";
+  $strRefAdd="Hinzufügen";
+  $strRefDel="Zuordnung entfernen";
   $strRemember="merken";
   $strRememberDataset="Datensatz merken";
   $strShowSingleDatasetLink="Zeigt Datensatz einzeln an";

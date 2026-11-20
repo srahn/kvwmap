@@ -123,9 +123,7 @@
 			coordsTxt = document.getElementById(\'input_coords\').value.replace(/\s\s+/g, \' \');
 			epsgcode = document.getElementById(\'epsg_code\').value.trim();
 			if (coordsTxt) {
-				if (coordsTxt.includes(",") && (coordsTxt.match(/,/g) || []).length == 1) {
-					delimiter = ",";
-				}
+				coordsTxt = coordsTxt.replace(/,/g, ".");
 				coords = coordsTxt.split(delimiter);
 				rw = coords[0].trim();
 				hw = coords[1].trim();

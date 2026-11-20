@@ -319,7 +319,7 @@ SYMBOLSET
 			0 1
 			1 0
 		END
-	END 
+	END
 
 	SYMBOL #32
 		NAME "filledcircle"
@@ -669,5 +669,75 @@ SYMBOLSET
 			5 8.66
 		END
 	END
+
+	SYMBOL #63
+		NAME "Schraffur diagonal steigend"
+		Type VECTOR
+		TRANSPARENT 0
+		POINTS 
+			0 1
+			1 0
+		END
+	END
+
+	SYMBOL #64
+		NAME "Schraffur horizontal"
+		Type VECTOR
+		TRANSPARENT 0
+		POINTS 
+			0 0
+			1 0
+		END
+	END
+
+	SYMBOL #65
+		NAME "Schraffur diagonal fallend"
+		Type VECTOR
+		TRANSPARENT 0
+		POINTS 
+			0 0
+			1 1
+		END
+	END
+
+	SYMBOL #66
+		NAME "Schraffur senkrecht"
+		Type VECTOR
+		TRANSPARENT 0
+		POINTS 
+			0 0
+			0 1
+		END
+	END
+
+  SYMBOL #67
+    NAME "coole_orte_kuehler_innenraum"
+    TYPE SVG
+    IMAGE coole_orte_kuehler_innenraum.svg
+  END
+
+  SYMBOL #68
+    NAME "coole_orte_refill_station"
+    TYPE SVG
+    IMAGE coole_orte_refill_station.svg
+  END
+
+  SYMBOL #69
+    NAME "coole_orte_schatten"
+    TYPE SVG
+    IMAGE coole_orte_schatten.svg
+  END
+
+  SYMBOL #70
+    NAME "coole_orte_sonstig"
+    TYPE SVG
+    IMAGE coole_orte_sonstig.svg
+  END
+
+  SYMBOL #71
+    NAME "coole_orte_trinkbrunnen"
+    TYPE SVG
+    IMAGE coole_orte_trinkbrunnen.svg
+  END
 
 END

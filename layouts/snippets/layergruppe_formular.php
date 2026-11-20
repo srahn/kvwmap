@@ -52,7 +52,7 @@
 			</table>
 			<input type="hidden" name="go" value="Layergruppe">
 			<input type="hidden" name="selected_group_id" value="<? echo  $this->layergruppe->get('id'); ?>"><?php
-				if ($this->isCaseAllowed('collections_anzeigen')) { ?>
+				if ($this->isCaseAllowed('Collections_Anzeigen')) { ?>
 					<input value="Layer Collection anlegen" title="Layer Collection anlegen" type="button" class="layergruppe-button" onclick="gotoCollectionNew(<?php echo  $this->layergruppe->get('id'); ?>)"><?
 				} ?>
 		</div>

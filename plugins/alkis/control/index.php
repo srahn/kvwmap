@@ -88,6 +88,12 @@ function go_switch_alkis($go){
 			$GUI->Flurstueck_GetVersionen();
 		} break;
 
+		case "Flurstueck_GetEigentuemer" : {
+			$GUI->sanitize(['flurstkennz' => 'text']);
+			include_once(PLUGINS.'alkis/model/kvwmap.php');
+			$GUI->Flurstueck_GetEigentuemer();
+		} break;		
+
 		case "Flurstueck_Auswaehlen_Suchen" : {
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->flurstSuchen();

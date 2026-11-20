@@ -26,6 +26,27 @@
 		message([{ type: 'info', msg: ' '}]);
 		ahah('index.php', 'go=checkClassCompleteness&layer_id=' + document.GUI.selected_layer_id.value, new Array(document.getElementById('messages').childNodes[1].childNodes[1]), new Array("sethtml"));
 	}
+
+	function selectall(checkbox) {
+    const checkboxes = document.querySelectorAll('[name^="class_id["]');
+  	// Wenn mindestens eine Checkbox unchecked ist → alle checken,
+    // ansonsten alle unchecken.
+  	const checked = [...checkboxes].some(checkbox => !checkbox.checked);
+
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = checked;
+    });
+		checkbox.checked = checked;
+	}
+
+	function delete_selected() {
+		check = confirm('Wollen Sie die ausgewählten Klassen wirklich löschen?');
+		if (check == true) {
+			document.GUI.go.value = 'Klasseneditor_Klasse_Löschen';
+			document.GUI.submit();
+		}
+	}
+
 	
 </script>
 
@@ -105,7 +126,8 @@
 		<td align="center" style="padding-top: 10px;">
 		<table id="layer_klasseneditor" border="0" cellspacing="0" cellpadding="3" style="background-color: #f8f8f9; width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr>
-			<td style="border-bottom:1px solid #C3C7C3"></td>		
+				<td style="border-bottom:1px solid #C3C7C3"></td>
+				<td style="border-bottom:1px solid #C3C7C3"></td>
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strID; ?></td>
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strClass; ?></td><?
 				foreach($supportedLanguages as $language){
@@ -137,6 +159,9 @@
 				}
 				echo '
 			<tr style="background-color:'.$tr_color.'">
+				<td style="border-bottom:1px solid #C3C7C3">
+					<input type="checkbox" name="class_id['.$this->classes[$i]['class_id'].']" value="'.$this->classes[$i]['class_id'].'">
+				</td>
 				<td style="border-bottom:1px solid #C3C7C3">
 					<a href="index.php?go=Style_Label_Editor&selected_layer_id=' . $this->formvars['selected_layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '&class_id=' . $this->classes[$i]['class_id'] . '">
 						<img src="' . TEMPPATH_REL . $this->getlegendimage($this->layerdata, $this->classes[$i], NULL) . '">
@@ -219,12 +244,18 @@
 			if($this->layerdata['editable']){
 			?>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="10">					
-					<a style="float: left;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<? echo $strAddClass; ?>">
+				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
+					<input type="checkbox" style="vertical-align: center" onclick="selectall(this);">
+					<a href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<? echo $strAddClass; ?>">
 						<i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i>
 					</a>
 					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="margin-left: 10px; padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>
 					<a href="javascript:void(0);" onclick="checkClassCompleteness();" class="buttonlink" style="margin-left: 10px; padding: 6px; line-height: 13px;" title="<? echo $strCheckClassCompleteness; ?>">Check</a>
+				</td>
+				<td colspan="2" align="right">
+					<a href="javascript:void(0);" onclick="delete_selected();" title="<? echo $this->strDelete; ?>">
+						<i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i>
+					</a>
 				</td>
 			</tr>
 			<tr id="autoClassForm" style="display:none">

@@ -1,11 +1,46 @@
 <?
+
+use PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Logical\AndTest;
+
 	include(SNIPPETS . 'generic_form_parts.php');
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
+	function fk_attributes_editable($attributes, $fk_attributes) {
+		$editable = true;
+		foreach ($fk_attributes AS $name) {
+			if ($attributes['privileg'][$attributes['indizes'][$name]] == 0) {
+				$editable = false;
+			}
+		}
+		return $editable;
+	}
+
+	function fk_attributes_nullable($attributes, $fk_attributes) {
+		$nullable = true;
+		foreach ($fk_attributes AS $name) {
+			if ($attributes['nullable'][$attributes['indizes'][$name]] != 1) {
+				$nullable = false;
+			}
+		}
+		return $nullable;
+	}
+
+	function fk_attributes_types($attributes, $fk_attributes, $type) {
+		return array_map(
+			function($name) use ($attributes, $type) {
+				return $attributes['type'][$attributes['indizes'][$name]];
+			},
+			$fk_attributes
+		);
+	}
+
 	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links bzw. editierbaren Datensätzen untereinander oder im Rasterlayout dargestellt
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	$attributes = $layer['attributes'];
-
+	$fk_attributes = $this->formvars['attributenames'];
+	if ($this->user->id == 1) {
+		// echo 'attributes: ' . print_r($attributes, true);
+	}
 	$size = 50;
 	$select_width = 'width: 235px';
 
@@ -17,49 +52,78 @@
   }
 
 	#	Link für neuen Datensatz zusammenbauen
+	$add_link = '';
 	$neu_link = '';
-	if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
-		if($attributes['privileg'][$attributes['indizes'][$attributes['the_geom']]] == 1){		# falls das Geometrie-Attribut editierbar ist, im Hauptfenster öffnen
-			$target = 'root';
+
+	if ($layer['privileg'] > 0) {
+		if (
+			fk_attributes_editable($attributes, $this->formvars['attributenames']) AND
+			fk_attributes_nullable($attributes, $this->formvars['attributenames']) AND
+			$this->formvars['ref_edit']
+		) {
+			// Wenn der Sub layer editierbar ist und die Attribute in attributenames editierbar, nullable und ref_edit in der Attribut Option gesetzt.
+			$add_link = '<a
+					tabindex="1"
+					id="hinzufuegen_button_' . $layer['layer_id'] . '_' . $this->formvars['targetobject'] . '"
+					class="buttonlink"
+					href="javascript:load_subform_child_candidates(
+						\'' . $this->formvars['targetobject'] . '\',
+						\'' . $this->formvars['selected_layer_id'] . '\',
+						\'' . $layer['oid'] . '\',
+						\'' . $attributes['type'][$attributes['indizes'][$layer['oid']]] . '\',
+						\'' . $layer['maintable'] . '\',
+						\'' . $this->formvars['preview_attribute'] . '\',
+						\'' . implode('\',\'', $this->formvars['attributenames']) . '\',
+						\'' . implode('\',\'', fk_attributes_types($attributes, $fk_attributes, 'form_element_type')) . '\',
+						\'' . implode('\',\'', fk_attributes_types($attributes, $fk_attributes, 'type')) . '\',
+						\'' . implode('\',\'', $this->formvars['values']) . '\'
+					);"
+					name="add_child"
+				><span>' . $strRefAdd . '</span></a>';
 		}
-		$data = array();
-		$data[] = 'go=neuer_Layer_Datensatz';
-		$data[] = 'selected_layer_id=' . $this->formvars['selected_layer_id'];
-		for ($p = 0; $p < count($this->formvars['attributenames']); $p++) {
-			$data[] = 'attributenames[' . $p . ']=' . $this->formvars['attributenames'][$p];
-			$data[] = 'values[' . $p . ']=' . $this->formvars['values'][$p];
-		}
-		if ($this->formvars['embedded'] == 'true'){
-			$data[] = 'fromobject=new_dataset_'.$this->formvars['targetobject'];
-			$data[] = 'weiter_erfassen='.$this->formvars['weiter_erfassen'];
-			$neu_link = '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" ';
-			if($target == 'root'){		# im Hauptfenster öffnen
-				$neu_link .= 'target="root" href="index.php?'.implode('&', $data).'">';
+		if ($this->formvars['attribute_privileg'] > 0) {
+			if ($attributes['privileg'][$attributes['indizes'][$attributes['the_geom']]] == 1) { # falls das Geometrie-Attribut editierbar ist, im Hauptfenster öffnen
+				$target = 'root';
 			}
-			else{											# eingebettet öffnen
-				$data[] = 'embedded=true';
-				$data[] = 'targetobject='.$this->formvars['targetobject'];
-				$data[] = 'targetlayer_id='.$this->formvars['targetlayer_id'];
-				$data[] = 'targetattribute='.$this->formvars['targetattribute'];
-				$data[] = 'reload='.$this->formvars['reload'];
+			$data = array();
+			$data[] = 'go=neuer_Layer_Datensatz';
+			$data[] = 'selected_layer_id=' . $this->formvars['selected_layer_id'];
+			for ($p = 0; $p < count($this->formvars['attributenames']); $p++) {
+				$data[] = 'attributenames[' . $p . ']=' . $this->formvars['attributenames'][$p];
+				$data[] = 'values[' . $p . ']=' . $this->formvars['values'][$p];
+			}
+			if ($this->formvars['embedded'] == 'true') {
+				$data[] = 'fromobject=new_dataset_'.$this->formvars['targetobject'];
+				$data[] = 'weiter_erfassen='.$this->formvars['weiter_erfassen'];
+				$neu_link = '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" ';
+				if($target == 'root'){		# im Hauptfenster öffnen
+					$neu_link .= 'target="root" href="index.php?'.implode('&', $data).'">';
+				}
+				else {											# eingebettet öffnen
+					$data[] = 'embedded=true';
+					$data[] = 'targetobject='.$this->formvars['targetobject'];
+					$data[] = 'targetlayer_id='.$this->formvars['targetlayer_id'];
+					$data[] = 'targetattribute='.$this->formvars['targetattribute'];
+					$data[] = 'reload='.$this->formvars['reload'];
+					$neu_link .= '
+						href="javascript:ahah(\'index.php\', \''.implode('&', $data).'\',
+						new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
+						new Array(\'sethtml\', \'execute_function\'));
+						clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$this->formvars['selected_layer_id'].'\');">';
+				}
+				$neu_link .= '<span>'.$strNewEmbeddedPK.'</span></a>';
+			}
+			else {
+				$data[] = 'subform=true';
+				$data[] = 'layer_id_mother=' . $this->formvars['targetlayer_id'];
+				$data[] = 'oid_mother=' . $this->formvars['oid_mother'];
+				$data[] = 'tablename_mother=' . $this->formvars['tablename_mother'];
+				$data[] = 'columnname_mother=' . $this->formvars['columnname_mother'];
 				$neu_link .= '
-					href="javascript:ahah(\'index.php\', \''.implode('&', $data).'\',
-					new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
-					new Array(\'sethtml\', \'execute_function\'));
-					clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$this->formvars['selected_layer_id'].'\');">';
+				<a class="buttonlink" ' . ($this->formvars['no_new_window'] != true ? ' target="_blank"': '') . '	href="javascript:overlay_link(\'&' . implode('&', $data) . '\', false, \'' . $target . '\')">
+					<span>&nbsp;' . $strNewEmbeddedPK . '</span>
+				</a>';
 			}
-			$neu_link .= '<span>'.$strNewEmbeddedPK.'</span></a>';
-		}
-		else {
-			$data[] = 'subform=true';
-			$data[] = 'layer_id_mother=' . $this->formvars['targetlayer_id'];
-			$data[] = 'oid_mother=' . $this->formvars['oid_mother'];
-			$data[] = 'tablename_mother=' . $this->formvars['tablename_mother'];
-			$data[] = 'columnname_mother=' . $this->formvars['columnname_mother']; 
-			$neu_link .= '
-			<a class="buttonlink" ' . ($this->formvars['no_new_window'] != true ? ' target="_blank"': '') . '	href="javascript:overlay_link(\'&' . implode('&', $data) . '\', false, \'' . $target . '\')">
-				<span>&nbsp;' . $strNewEmbeddedPK . '</span>
-			</a>';
 		}
 	}
 
@@ -161,28 +225,25 @@
 	<?
 			}
 		} ?>
-		<div style="width: 100%;text-align: center;margin-top: 4px">
-	<? if ($anzObj > 0){
-			if ($editable AND $this->formvars['list_edit']) { ?>
-				<a tabindex="1" class="buttonlink" href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 0)"><span><? echo $this->strCancel; ?></span></a>
-			<? }
-			if($editable OR $layer['template'] == 'generic_layer_editor_doc_raster.php'){ ?>
-				<a id="subform_save_button_<? echo $layer['layer_id']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subsave_data(<? echo $layer['layer_id']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>Speichern</span></a>
-				<a id="subdelete_all_button_<? echo $layer['layer_id']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subdelete_all(<? echo $layer['layer_id']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>alle Löschen</span></a>
-	<?	}
-		}
-		
-		echo $neu_link;
-		
-		if ($this->formvars['list_edit']) {
-			echo '&nbsp;<a tabindex="1" class="show_all_button buttonlink" href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
-			for($p = 0; $p < count($this->formvars['attributenames']); $p++){
-				echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
-				echo '&operator_'.$this->formvars['attributenames'][$p].'==';
-			}				
-			echo '&subform_link=true\')"><span>'.$strShowAllSeparat.'</span></a>';
-		}
-			?>
+		<div style="width: 100%;text-align: center;margin-top: 4px"><?
+			if ($anzObj > 0) {
+				if ($editable AND $this->formvars['list_edit']) { ?>
+					<a tabindex="1" class="buttonlink" href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 0)"><span><? echo $this->strCancel; ?></span></a><?
+				}
+				if ($editable OR $layer['template'] == 'generic_layer_editor_doc_raster.php') { ?>
+					<a id="subform_save_button_<? echo $layer['layer_id']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subsave_data(<? echo $layer['layer_id']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>Speichern</span></a>
+					<a id="subdelete_all_button_<? echo $layer['layer_id']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subdelete_all(<? echo $layer['layer_id']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>alle Löschen</span></a><?
+				}
+			}
+			echo $neu_link;
+			if ($this->formvars['list_edit']) {
+				echo '&nbsp;<a tabindex="1" class="show_all_button buttonlink" href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
+				for ($p = 0; $p < count($this->formvars['attributenames']); $p++) {
+					echo '&value_' . $this->formvars['attributenames'][$p] . '=' . $this->formvars['values'][$p];
+					echo '&operator_' . $this->formvars['attributenames'][$p] . '==';
+				}
+				echo '&subform_link=true\')"><span>' . $strShowAllSeparat . '</span></a>';
+			} ?>
 		</div>
 	<?
 	}		# Ende list-edit oder Rasterlayout, Anfang "normale" Subformliste
@@ -192,8 +253,10 @@
 <?  }	?>
 		<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
 			$preview_attributes = explode(' ', $this->formvars['preview_attribute']);
-			for ($k=0;$k<$anzObj;$k++) {
+			$preview_link = '';
+			for ($k = 0; $k < $anzObj; $k++) {
 				$preview = '';
+				$output = array();
 				$dataset = $layer['shape'][$k]; # der aktuelle Datensatz
 				for ($p = 0; $p < count($preview_attributes); $p++) {
 					$output[$p] = $preview_attributes[$p];
@@ -220,21 +283,26 @@
 										$preview = $this->get_dokument_vorschau($dataset[$attributes['name'][$j]], $layer['document_path'], $layer['document_url']);
 										switch ($preview['doc_type']) {
 											case 'local_img' : {	# Bilder mit Vorschaubild
-												$preview_link = '<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_image" src="' . $preview['thumb_src'] . '"></a>';
-												$preview_link = '<table><tr><td class="td_preview_image">' . $preview_link . '</td></tr></table>';
-											}break;
-											
+												$preview_link = '
+													<table>
+														<tr>
+															<td class="td_preview_image">
+																<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_image" src="' . $preview['thumb_src'] . '"></a>
+															</td>
+														</tr>
+													</table>
+												';
+											} break;
 											case 'local_doc' : case 'remote_url' : {	# lokale Dateien oder fremde URLs
 												$preview_link = '<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_doc" src="' . $preview['thumb_src'] . '"></a>';
-											}break;
-											
+											} break;
 											case 'videostream' : {	# Videostream
 												$preview_link = '
 													<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
 														<source src="' . $preview['doc_src'] . '" type="video/mp4">
 													</video>
-													';
-											}break;
+												';
+											 } break;
 										}
 										$output[$p] = '<table><tr><td>' . $preview['original_name'] . '</td>';
 									}
@@ -258,24 +326,88 @@
 							}
 						}
 					}
-				}
-				echo '<tr style="border: none">
-								<td'. get_td_class_or_style(array($dataset[$attributes['style'][0]], 'subFormListItem')) . '>'.($preview_link != ''? $preview_link.'</td><td valign="top">' : '');
-								
-				if ($this->formvars['embedded'] == 'true') {
-					echo '<a href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['layer_id'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].'\');">'.implode(' ', $output).'</a><div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['layer_id'].$this->formvars['count'].'_'.$k.'"></div></td>';
-				}
-				else {
-					echo '<a ';
-									if ($this->formvars['no_new_window'] != true) {
-										echo 	' target="_blank"';
-									}
-					echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$layer['layer_id'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&subform_link=true&attribute_privileg='.$this->formvars['attribute_privileg'].'\')">'.implode(' ', $output).'</a></td>
-								</tr>';
-				}
+				} ?>
+				<tr style="border: none">
+					<td <? echo get_td_class_or_style(array($dataset[$attributes['style'][0]], 'subFormListItem')); ?>><?
+				if ($preview_link != '') {
+						echo $preview_link; ?>
+					</td>
+					<td valign="top"><?
+				} ?>
+						<div class="preview_div"><?
+							$table_oid = $layer['maintable'] . '_oid';
+							$search_link = 'go=Layer-Suche_Suchen&selected_layer_id=' . $layer['layer_id'] . '&value_' . $table_oid . '=' . $dataset[$table_oid] . '&subform_link=true&attribute_privileg=' . $this->formvars['attribute_privileg'];
+							$fromobject = 'subform' . $this->formvars['targetlayer_id'] . '_' . $layer['layer_id'] . $this->formvars['count'] . '_' . $k;
+							if ($this->formvars['embedded'] == 'true') { ?>
+								<a
+									href="javascript:void(0);"
+									onclick="
+										checkForUnsavedChanges(event);
+										if (document.getElementById('<? echo $fromobject; ?>').innerHTML == '') {
+											ahah(
+												'index.php',
+												'<? echo $search_link; ?>&fromobject=<? echo $fromobject; ?>&targetobject=<? echo $this->formvars['targetobject']; ?>&reload=<? echo $this->formvars['reload']; ?>&embedded=true',
+												new Array(document.getElementById('<? echo $fromobject; ?>'), ''),
+												new Array('sethtml', 'execute_function')
+											)
+										};
+										clearsubforms('<? echo $this->formvars['targetlayer_id']; ?>_<? echo $layer['layer_id']; ?>');
+									"
+								>
+									<? echo implode(' ', $output); ?>
+								</a><?
+							}
+							else { ?>
+								<a
+									href="javascript:void(0);"
+									onclick="overlay_link('<? echo $search_link; ?>')"
+									<? echo ($this->formvars['no_new_window'] != true ? ' target="_blank"' : ''); ?>
+								>
+									<? echo implode(' ', $output); ?>
+								</a><?
+							}
+							if ($add_link != '') { ?>
+								<div class="func_div">
+									<a
+										href="javascript:void(0)"
+										onclick="checkForUnsavedChanges(event);subunlink_data(
+											'<? echo $layer['layer_id']; ?>',
+											'<? echo $layer['maintable']; ?>',
+											'<? echo $layer['oid']; ?>',
+											'<? echo $dataset[$layer['maintable'] . '_oid']; ?>',
+											'<? echo $attributes['type'][$attributes['indizes'][$layer['oid']]]; ?>',
+											'<? echo implode(',', $this->formvars['attributenames']); ?>',
+											'<? echo implode(',', fk_attributes_types($attributes, $this->formvars['attributenames'], 'form_element_type')); ?>',
+											'<? echo implode(',', fk_attributes_types($attributes, $this->formvars['attributenames'], 'type')); ?>',
+											'<? echo $this->formvars['targetobject']; ?>',
+											'<? echo $this->formvars['targetobject']; ?>'.split('_')[1]
+										)"
+									>
+										<i class="fa fa-link" title="<? echo $strRefDel; ?>"></i>
+									</a>
+									<a
+										href="javascript:void(0)"
+										onclick="checkForUnsavedChanges(event);subdelete_data(
+											'<? echo $layer['layer_id']; ?>',
+											'record_<? echo $dataset[$layer['maintable'].'_oid']; ?>',
+											'<? echo $dataset[$layer['maintable'].'_oid']; ?>',
+											'<? echo $this->formvars['targetobject']; ?>'
+										)"
+									>
+										<i class="fa fa-trash" title="<? echo $strDeleteThisDataset; ?>"></i>
+									</a>
+								</div><?
+							} ?>
+						</div><?
+						if ($this->formvars['embedded'] == 'true') { ?>
+							<div class="subForm" id="<? echo $fromobject; ?>"></div><?
+						} ?>
+					</td>
+				</tr><?
 			} ?>
 		</table>
-
+		<div id="child_candidate_selection_div_<? echo $layer['layer_id']; ?>_<? echo $this->formvars['targetobject']; ?>" style="margin-left: 7px">
+		</div>
 		<table width="100%">
 			<tr>
 				<td class="gle_neu_link"><?
@@ -285,7 +417,7 @@
 						if ($this->formvars['embedded'] == 'true') {
 							echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="list_edit_button buttonlink" href="javascript:void(0);" onclick="checkForUnsavedChanges(event); reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strShowAll.'</span></a>';
 						}
-						else{		# alle separat anzeigen
+						else {		# alle separat anzeigen
 							echo '&nbsp;<a tabindex="1" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
 							for($p = 0; $p < count($this->formvars['attributenames']); $p++){
 								echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
@@ -294,7 +426,7 @@
 							echo '&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
 						}
 					}
-					# neu
+					echo $add_link;
 					echo $neu_link;
 					?>
 				</td>

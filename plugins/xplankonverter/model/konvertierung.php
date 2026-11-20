@@ -935,34 +935,6 @@ class Konvertierung extends PgObject {
 		}
 	}
 
-	function create_themenauswahl($xplan_layers) {
-		// echo "\ncreate_themenauswahl with " . count($xplan_layers) . " xplan_layers von Plan " . $this->plan->get('gml_id') . " für Konvertierung id: " . $this->get($this->identifier);
-		include_once(CLASSPATH . 'RolleSavedLayers.php');
-		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
-		// echo "\ngml_id nach get_layers_with_content: " . $this->plan->get('gml_id');
-		if (! $result['success']) {
-			return $result;
-		}
-		$layers_with_content = $result['layers_with_content'];
-		$layers_with_content[] = array('id' => $this->plan->get_plan_layer_id());
-		$layers_with_content[] = array('id' => $this->plan->get_bereich_layer_id());
-		$layerset = array('list' => array());
-		foreach ($layers_with_content AS $layer) {
-			// echo "\nLayer with content: " . $layer['id'] . ' ' . $layer['name'] . ' ' . $layer['alias'];
-			$layerset['list'][] = array(
-				'layer_id' => $layer['id'],
-				'aktivstatus' => 1,
-				'querystatus' => 0
-			);
-		}
-		if ($rolle_saved_layer = RolleSavedLayers::find_by_name($this->gui, $this->plan->get('anzeigename'))) {
-			$rolle_saved_layer->delete(); // Drop LayerComment if already exists and overwrite in next step.
-		}
-		$result = $this->gui->user->rolle->insertLayerComment($layerset, $this->plan->get('anzeigename') . ' (' . $this->plan->get('gml_id') . ')', $this->get('stelle_id'), NULL);
-		$this->update_attr(array('layer_selection_id = ' . $result['id']), true);
-		return $result;
-	}
-
 	function create_layer_collection($xplan_layers) {
 		// echo "\ncreate_layer_collection " . $this->plan->get('anzeigename') . " from " . count($xplan_layers) . " xplan_layers für Plan " . $this->plan->get('gml_id') . " Nutzer in Stelle " . $this->get('stelle_id');
 		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));

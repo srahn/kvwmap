@@ -431,14 +431,14 @@ class GUI {
 	}	
 
 	function get_group_legend() {
-    # Änderungen in den Gruppen werden gesetzt
-    $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
-    $this->loadMap('DataBase');
+		# Änderungen in den Gruppen werden gesetzt
+		$this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
+		$this->loadMap('DataBase');
 		for($i = 0; $i < count_or_0($this->layers_replace_scale ?: []); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
-    echo $this->create_group_legend($this->formvars['group']);
-  }
+		echo $this->create_group_legend($this->formvars['group']);
+	}
 
 	/**
 	 * function uses the following formvars to set the filter for reading layers
@@ -454,7 +454,7 @@ class GUI {
 	 * @param Boolean $strict_layer_name Optional Parameter. Wenn true wird die Layervariable name immer mit dem Layerattribute Name gesetzt
 	 *  																 unabhängig ob in der Stelle die Verwendung von alias für Layer gesetzt ist.
 	 */
-  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false) {
+  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false, $saved_layer_ids = array()) {
 		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
@@ -728,6 +728,7 @@ class GUI {
         $reference_map->reference->status = MS_ON;
 				$reference_map->reference->color->setRGB(-1,-1,-1);
 				$reference_map->reference->outlinecolor->setRGB(255,0,0);
+				$reference_map->selectOutputFormat('png');
 
         # Scalebarobject
         $map->scalebar->status = MS_ON;
@@ -779,7 +780,14 @@ class GUI {
 					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
 					$layerset['anzLayer'] = count($layerset['list']);
 				}
-        unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
+
+				if (count($saved_layer_ids) > 0) {
+					foreach ($layerset['list'] as $key => $layer) {
+						$layerset['list'][$key]['aktivstatus'] = (in_array($layer['layer_id'], $saved_layer_ids) ? 1 : 0);
+					}
+				}
+
+				unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
 				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
@@ -845,17 +853,25 @@ class GUI {
 		return 1;
 	}
 
-	function list_subgroups($groupid){
+	function list_subgroups($groupid) {
 		$subgroups = '';
-		if($groupid != ''){
-			$group = $this->groupset[$groupid];
-			if(value_of($group, 'untergruppen') != ''){
-				foreach($group['untergruppen'] as $untergruppe){
-					$subgroups .= ', '.$this->list_subgroups($untergruppe);
+		if ($groupid != '') {
+			[$id_value, $id_type] = split_id($groupid);
+			if ($id_type === 'layer') {
+				$group = $this->groupset[$groupid];
+				if (value_of($group, 'untergruppen') != '') {
+					foreach($group['untergruppen'] as $untergruppe) {
+						[$id_value, $id_type] = split_id($untergruppe);
+						if ($id_type === 'layer') {
+							$subgroups .= ', ' . $this->list_subgroups($untergruppe);
+						}
+					}
+					return $groupid.$subgroups;
 				}
-				return $groupid.$subgroups;
+				else {
+					return $groupid;
+				}
 			}
-			else return $groupid;
 		}
 	}
 
@@ -3181,7 +3197,6 @@ class db_mapObj {
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$collection_layer = array();
 		$collection_layer['list'] = array();
-		$this->disabled_classes = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
@@ -3482,9 +3497,9 @@ class db_mapObj {
 			ORDER BY
 				drawingorder
 		";
-		# echo '<br>SQL zur Abfrage der Layer: ' . $sql;
+		// echo '<br>SQL zur Abfrage der Layer: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>", 4);
-		$ret = $this->db->execSQL($sql, 4, 0, true);
+		$ret = $this->db->execSQL($sql, 4, 0, false);
 		$layer = array();
 		$layer['list'] = array();
 		$this->disabled_classes = $this->read_disabled_classes();
@@ -3742,6 +3757,8 @@ class db_mapObj {
 				($id != NULL ? " AND l.id = " . $id : '') .
 				($typ != NULL ? " AND l.typ = '" . $typ . "'" : '') . 
 				($autodelete != NULL ? " AND l.autodelete = '" . $autodelete . "'" : '') . "
+			ORDER BY
+				id DESC
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
 		#echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;

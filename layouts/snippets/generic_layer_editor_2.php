@@ -229,7 +229,7 @@ if ($doit == true) {
 
 						if (!$layer_has_tabs AND !empty($layer['attributes']['groups'])) {
 							# wenn es keine Tabs gibt, Tab-div beginnen
-							echo '<div style="display: grid; gap: 7px;">';
+							echo '<div class="tab_div">';
 						}
 						
 						for($j = 0; $j < count_or_0($layer['attributes']['name']); $j++) {
@@ -243,7 +243,7 @@ if ($doit == true) {
 				
 							if ($layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j-1]) {
 								# wenn der vorige Tab anders ist, Tab-div beginnen
-								echo '<div style="display: grid; gap: 7px;">';
+								echo '<div class="tab_div">';
 							}
 							if (
 								$layer['attributes']['group_id'][$j] != value_of($layer['attributes']['group_id'], $j-1) or 

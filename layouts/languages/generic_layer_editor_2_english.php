@@ -1,4 +1,5 @@
 <?php
+  $strRefAdd="Add Dataset";
   $strAllDatasets="all records found";
   $strAllDeselected = "Deselection finished";
   $strAllSelected = "Selection finished";
@@ -13,7 +14,9 @@
   $strDeselectAllShown = "Deselect all shown records";
   $strDontRememberDataset="bookmark record no longer";
   $strEditAll="edit multiple";
+  $strEditDataset="Edit Dataset";
   $strEditGeom="Edit Geometry";
+  $strExpandButton = "Maximize / Minimize Page";
   $strExport="export";
   $strExportThis="export record";
   $strMapZoom="Zoom to object";
@@ -24,6 +27,8 @@
   $strNoMatch="No objects found in this layer!";
   $strPrint="print";
   $strPrintDataset="print record";
+  $strRefAdd="Add Reference";
+  $strRefDel="Remove Reference";
   $strRemember="bookmark";
   $strRememberDataset="bookmark record";
   $strSelectAll="select all";

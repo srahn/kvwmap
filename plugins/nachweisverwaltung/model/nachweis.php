@@ -547,6 +547,7 @@ class Nachweis {
   
   function pruefeEingabedaten($id, $datum, $VermStelle, $hauptart, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr, $pok_pflicht){
 		global $nachweis_unique_attributes;
+    global $nachweis_unset_attributes;
 		# Test ob schon ein Nachweis mit dieser Kombination existiert
 		if($pok_pflicht AND $nachweis_unique_attributes != NULL){
 			if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$test_fortfuehrung = $fortfuehrung;
@@ -568,47 +569,54 @@ class Nachweis {
     if ($umring == ''){
       $errmsg.='Bitte legen Sie das Polygon für den einzuarbeitenden Nachweis fest! <br>';
     }
-            
-    # test auf korrekte Vermessungstelle 
-    $sql='SELECT * FROM nachweisverwaltung.n_vermstelle WHERE id='.$VermStelle;
-    $queryret=$this->database->execSQL($sql,4, 0);
-    if ($queryret[0]) {
-      $errmsg.='Fehler bei der Vermessungstellenauswahl! <br>';
-    }
-    else {
-      if (pg_num_rows($queryret[1])==0) {
-        $errmsg.='Die Vermessungsstelle ist nicht bekannt. <br>';
+    
+    if (!in_array('vermstelle', $nachweis_unset_attributes)) {
+      # test auf korrekte Vermessungstelle 
+      $sql='SELECT * FROM nachweisverwaltung.n_vermstelle WHERE id='.$VermStelle;
+      $queryret=$this->database->execSQL($sql,4, 0);
+      if ($queryret[0]) {
+        $errmsg.='Fehler bei der Vermessungstellenauswahl! <br>';
+      }
+      else {
+        if (pg_num_rows($queryret[1])==0) {
+          $errmsg.='Die Vermessungsstelle ist nicht bekannt. <br>';
+        }
       }
     }
     
-    # test des Datum
-    if ($datum=='') {
-      $errmsg.='Bitte geben Sie ein Datum an!<br>';
-    }
-    else{
-			# richtigkeit des Datums checken
-			$explosion = explode('.', $datum);
-			if (checkdate($explosion[1], $explosion[0], $explosion[2])==false) {
-				$errmsg.= 'Datum ist nicht korrekt angegeben! <br<' ;
-			}
-			# prüfen ob Datum in Zukunft
-			$realtime=time();
-			$Zeit=mktime(0, 0, 0, $explosion[1], $explosion[0], $explosion[2]);
-			if ($realtime < $Zeit) {
-				$errmsg.='Das angegebene Datum liegt in der Zukunft! <br>' ;
-			} 
-    }    
-    
-    #Test des Blattformat
-    if ($Blattformat==''){
-      $errmsg.='Bitte das Blattformat des Dokuments angeben! <br>';
-   }
-    else{
-      $nums= array ("A4","A3","SF");
-      if(!in_array($Blattformat, $nums)){
-        $errmsg.='Die Auswahl des Blattformat ist nicht korrekt! <br>';
+    if (!in_array('datum', $nachweis_unset_attributes)) {
+      # test des Datum
+      if ($datum=='') {
+        $errmsg.='Bitte geben Sie ein Datum an!<br>';
+      }
+      else{
+        # richtigkeit des Datums checken
+        $explosion = explode('.', $datum);
+        if (checkdate($explosion[1], $explosion[0], $explosion[2])==false) {
+          $errmsg.= 'Datum ist nicht korrekt angegeben! <br<' ;
+        }
+        # prüfen ob Datum in Zukunft
+        $realtime=time();
+        $Zeit=mktime(0, 0, 0, $explosion[1], $explosion[0], $explosion[2]);
+        if ($realtime < $Zeit) {
+          $errmsg.='Das angegebene Datum liegt in der Zukunft! <br>' ;
+        } 
       }
     }
+    
+    if (!in_array('datum', $nachweis_unset_attributes)) {
+      #Test des Blattformat
+      if ($Blattformat==''){
+        $errmsg.='Bitte das Blattformat des Dokuments angeben! <br>';
+      }
+      else{
+        $nums= array ("A4","A3","SF");
+        if(!in_array($Blattformat, $nums)){
+          $errmsg.='Die Auswahl des Blattformat ist nicht korrekt! <br>';
+        }
+      }
+    }
+    
     # Test der Dokumentenart  
     if ($hauptart==''){
         $errmsg.='Bitte wählen Sie die Art des einzugebenden Dokuments aus! <br>';
@@ -1125,6 +1133,7 @@ class Nachweis {
 						($this->lenris_plugin? 'cn.client_nachweis_id, c.email, ' : "n.id as client_nachweis_id, '" . NACHWEISE_EMAIL . "' as email, ") . "
 						n.*,
             substr(flurid::text, 1, 6) as gemarkung, 
+            g.gemarkungsname,
             substr(flurid::text, 7, 3) as flur,
 						st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,
 						v.name AS vermst, 
@@ -1141,6 +1150,7 @@ class Nachweis {
             LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id 
 						LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id 
 						LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart
+            LEFT JOIN alkis.pp_gemarkung g on substr(n.flurid::text, 1, 6) = g.schluesselgesamt
 					WHERE 
 						true ";
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit." AND ";
@@ -1213,7 +1223,7 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT DISTINCT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+          $sql ="SELECT DISTINCT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, g.gemarkungsname, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == 0){
 						$sql.=" alkis.pp_flur as flur, ";
@@ -1223,6 +1233,7 @@ class Nachweis {
           $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
+          $sql.=" LEFT JOIN alkis.pp_gemarkung g on substr(n.flurid::text, 1, 6) = g.schluesselgesamt";
 					if($alle_der_messung){
 						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.id = n2.id OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
 						$n = 'n2';
@@ -1349,12 +1360,13 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-					$sql ="SELECT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+					$sql ="SELECT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, g.gemarkungsname, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
+          $sql.=" LEFT JOIN alkis.pp_gemarkung g on substr(n.flurid::text, 1, 6) = g.schluesselgesamt";
 					if($alle_der_messung){
 						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.id = n2.id OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
 						$n = 'n2';
@@ -1407,12 +1419,13 @@ class Nachweis {
                      AND ln2a.client_id = n2a.client_id";
         }
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
-				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*, substr(flurid::text, 1, 6) as gemarkung, substr(flurid::text, 7, 3) as flur, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*, substr(flurid::text, 1, 6) as gemarkung, g.gemarkungsname, substr(flurid::text, 7, 3) as flur, v.name AS vermst, r.name as rissfuehrer, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
         $sql.=" FROM " . $n2a . " AS n2a, nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
         $sql.=" LEFT JOIN nachweisverwaltung.n_rissfuehrer r ON n.rissfuehrer_id = r.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
-				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";				
+				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";		
+        $sql.=" LEFT JOIN alkis.pp_gemarkung g on substr(n.flurid::text, 1, 6) = g.schluesselgesamt";		
         $sql.=" WHERE n.id = n2a.nachweis_id";
         $sql.= $where;
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;

@@ -482,23 +482,19 @@ function compare_names($a, $b){
 }
 
 function compare_orders($a, $b){
-	if($a->order > $b->order)return 1;
-  else return 0;
+	return $a->order <=> $b->order;
 }
 
 function compare_orders2($a, $b){
-	if($a['order'] > $b['order'])return 1;
-	else return 0;
+	return $a['order'] <=> $b['order'];
 }
 
 function compare_groups($a, $b){
-  if($a->group > $b->group)return 1;
-  else return 0;
+  return $a->group <=> $b->group;
 }
 
 function compare_legendorder($a, $b){
-	if($a['legendorder'] > $b['legendorder'])return 1;
-	else return 0;
+	return $a['legendorder'] <=> $b['legendorder'];
 }
 
 function pg_escape_string_or_array($data){

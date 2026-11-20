@@ -1497,9 +1497,11 @@ class rolle {
 				l.query as pfad,
 				1 as queryable,
 				gle_view,
-				'(' || nullif(rollenfilter, '') || ')' as filter
+				'(' || nullif(rollenfilter, '') || ')' as filter,
+				coalesce(ul.export_privileg, 1) as export_privileg
 			FROM
 				kvwmap.rollenlayer AS l
+				LEFT JOIN kvwmap.used_layer ul ON l.original_layer_id = ul.layer_id AND ul.stelle_id = " . $this->stelle_id . "
 			WHERE
 				l.stelle_id = " . $this->stelle_id . " AND
 				l.user_id = " . $this->user_id . "
@@ -2150,14 +2152,16 @@ class rolle {
 					stelle_id,
 					name,
 					layers,
-					query
+					query,
+					layer_params
 				)
 				SELECT " .
 					$user_id . "," .
 					$stelle_id . ",
 					name,
 					layers,
-					query
+					query,
+					layer_params
 				FROM
 					kvwmap.rolle_saved_layers
 				WHERE
@@ -2513,42 +2517,54 @@ class rolle {
 			SET jit = off;
 
 			WITH RECURSIVE cte (stelle_id, user_id, group_id) AS (
-					SELECT
-							ul.stelle_id,
-							r.user_id,
-							COALESCE(ul.group_id, l.gruppe) AS group_id
-					FROM kvwmap.used_layer ul
-					JOIN kvwmap.layer l
-							ON l.layer_id = ul.layer_id
-					JOIN kvwmap.rolle r
-							ON r.stelle_id = ul.stelle_id
+				SELECT
+					ul.stelle_id,
+					r.user_id,
+					COALESCE(ul.group_id, l.gruppe) AS group_id
+				FROM
+					kvwmap.used_layer ul JOIN
+					kvwmap.layer l ON l.layer_id = ul.layer_id JOIN
+					kvwmap.rolle r ON r.stelle_id = ul.stelle_id
 
-					union ALL
+				UNION
 
-					SELECT
-							stelle_id,
-							user_id,
-							gruppe AS group_id
-					FROM kvwmap.rollenlayer
+				SELECT
+					g2r.stelle_id,
+					g2r.user_id,
+					g2r.id
+				FROM
+					kvwmap.u_groups2rolle g2r JOIN
+					kvwmap.collections c ON g2r.id = c.group_id
 
-					UNION
+				UNION ALL
 
-					SELECT
-							c.stelle_id,
-							c.user_id,
-							ug.obergruppe AS group_id
-					FROM cte c
-					JOIN kvwmap.u_groups ug
-							ON ug.id = c.group_id
-					WHERE ug.obergruppe IS NOT NULL
+				SELECT
+					stelle_id,
+					user_id,
+					gruppe AS group_id
+				FROM
+					kvwmap.rollenlayer
+
+				UNION
+
+				SELECT
+					c.stelle_id,
+					c.user_id,
+					ug.obergruppe AS group_id
+				FROM
+					cte c JOIN
+					kvwmap.u_groups ug ON ug.id = c.group_id
+				WHERE
+					ug.obergruppe IS NOT NULL
 			)
 			DELETE FROM kvwmap.u_groups2rolle AS target
 			WHERE NOT EXISTS (
-					SELECT 1
-					FROM cte n
-					WHERE n.stelle_id = target.stelle_id
-						AND n.user_id   = target.user_id
-						AND n.group_id  = target.id
+				SELECT 1
+				FROM cte n
+				WHERE
+					n.stelle_id = target.stelle_id AND
+					n.user_id   = target.user_id AND
+					n.group_id  = target.id
 			);
 
 			SET jit = on;
@@ -2757,16 +2773,39 @@ class rolle {
 		return $ret;
 	}
 	
-	function getLayerComments($id, $stelle_id, $user_id) {
-		global $admin_stellen;
-		$conditions = array();
-		$conditions[] = "(user_id = " . $user_id . " OR user_id IS NULL)";
-		if ($stelle_id != '') {
-			$conditions[] = "stelle_id = " . $stelle_id;
+	/**
+	 * Fragt die gespeicherten Themenauswahlen ab:
+	 * - Wenn nur die $id gegeben ist: nur diese,
+	 * - Wenn nur die $user_id und $stelle_id gegeben sind: nur für die dazugehörige Rolle
+	 * - Wenn $is_admin_stelle true ist: zusätzlich alle dessen user_id null ist, das sind die, die von Administratoren angelegt wurden und anderen zur Verfügung stehen sollen.
+	 */
+	function getLayerComments($id = null, $stelle_id = null, $user_id = null, $is_admin_stelle = false) {
+		$conditions = [];
+		$where_conditions = [];
+		$layerComments = [];
+
+		if ($id) {
+			$conditions[] = 'id = ' . (int)$id;
 		}
-		if ($id != '') {
-			$conditions[] = "id = " . $id;
+
+		if ($user_id) {
+			$conditions[] = "(user_id = " . (int)$user_id . " OR user_id IS NULL)";
 		}
+
+		if ($stelle_id) {
+			$conditions[] = 'stelle_id = ' . (int)$stelle_id;
+		}
+
+		if ($conditions) {
+			$where_conditions[] = '(' . implode(" AND\n\t\t\t\t", $conditions) . ')';
+		}
+
+		if ($is_admin_stelle) {
+			$where_conditions[] = 'user_id IS NULL';
+		}
+
+		$where = ($where_conditions ? "\n\t\t\tWHERE\n\t\t\t\t" . implode(" OR\n\t\t\t\t", $where_conditions) : '');
+
 		$sql = "
 			SELECT
 				id,
@@ -2774,20 +2813,21 @@ class rolle {
 				stelle_id,
 				name,
 				array_to_string(layers, ',') as layers,
-				query
+				query,
+				layer_params
 			FROM
-				kvwmap.rolle_saved_layers
-			WHERE
-				" . implode(" AND\n				", $conditions) . "
+				kvwmap.rolle_saved_layers"
+			. $where . "
 			ORDER BY
 				name
 		";
-		// echo '<br>Sql: ' . $sql;
+		// echo '<br>Abfrage der Themenauswahlen: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$this->database->success) {
 			# Fehler bei Datenbankanfrage
 			$ret[0] = 1;
-			$ret[1] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
+			$ret[1] = $ret['msg'] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
+			$ret['success'] = false;
 		}
 		else {
 			while ($rs = pg_fetch_assoc($ret[1])) {
@@ -2795,6 +2835,8 @@ class rolle {
 			}
 			$ret[0] = 0;
 			$ret[1] = $layerComments;
+			$ret['success'] = true;
+			$ret['msg'] = 'Themenauswahl erfolgreich abgefragt.';
 		}
 		return $ret;
 	}
@@ -2842,12 +2884,22 @@ class rolle {
 				}
 			}
 		}
+
 		$record = array(
 			'user_id' => $user_id ?: 'NULL',
 			'stelle_id' => $stelle_id ?: 'NULL',
 			'name' => "'" . $comment . "'",
 			'layers' => "'{" . implode(',', $layers) . "}'",
-			'query' => "'" . implode(',', $query) . "'"
+			'query' => "'" . implode(',', $query) . "'",
+			'layer_params' => "'" . json_encode(
+				array_map(
+					function($param) {
+						return array($param['key'] => rolle::$layer_params[$param['key']]);
+					},
+					array_values($layerset['layer_params'])
+				),
+				JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+			) . "'::jsonb"
 		);
 		$sql = "
 			INSERT INTO
@@ -2908,20 +2960,21 @@ class rolle {
 		}
 	}
 
-	function setConsumeALB($time,$format,$log_number,$wz,$pagecount) {
+	function setConsumeALB($time,$format,$log_number,$wz,$pagecount, $vorgangsnr = NULL) {
 		if (LOG_CONSUME_ACTIVITY==1) {
 			for($i = 0; $i < count($log_number); $i++){
 				# function setzt eine ALB-PDF-EXportaktivität
 				$sql = "
 					INSERT INTO 
-						kvwmap.u_consumeALB 
+						kvwmap.u_consumeALB (user_id, stelle_id, time_id, format, log_number, wz, vorgang)
 					VALUES (
 						" . $this->user_id . ",
 						" . $this->stelle_id . ",
 						'" . $time . "',
 						'" . $format . "',
 						'" . $log_number[$i] . "',
-						'" . $wz . "'
+						'" . $wz . "',
+						" . quote_or_null($vorgangsnr) . "
 					)
 					ON CONFLICT (user_id, stelle_id, time_id, log_number) DO NOTHING";
 				#echo $sql.'<br>';

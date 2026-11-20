@@ -70,26 +70,71 @@ class wfs{
 		return $featuretype_names;
 	}
 
-	function get_feature_request($request, $bbox, $filter, $maxfeatures){
-		# entweder wird eine fertige request-URL übergeben oder an Hand der bbox bzw. des Filters gebildet
-		if($request == NULL){
-			$request = $this->url.'&service=WFS&request=GetFeature&version='.$this->version.'&typename='.$this->typename;
-			$request .= '&srsName=EPSG:'.$this->epsg;
-			if($bbox != ''){
-				$request .= '&bbox='.$bbox;
-				if($this->version == '1.1.0')$request .= ',EPSG:'.$this->epsg;
+	
+function get_feature_request($request, $bbox, $filter, $maxfeatures) {
+	// Entweder fertige Request-URL verwenden oder selbst erzeugen
+	if ($request == NULL) {
+		$params = array(
+				'SERVICE' => 'WFS',
+				'REQUEST' => 'GetFeature',
+				'VERSION' => $this->version
+		);
+
+		// WFS-Version berücksichtigen
+		if (version_compare($this->version, '2.0.0', '>=')) {
+			$params['TYPENAMES'] = $this->typename;
+			// Namespace-Zuordnung für WFS 2.0
+			if (!empty($this->namespace) &&
+					!empty($this->targetnamespace)) {
+
+					$params['NAMESPACES'] =
+							'xmlns(' . $this->namespace . ',' .
+							$this->targetnamespace . ')';
 			}
-			if ($filter != '') {
-				$request .= '&filter='.urlencode($filter);
-			}
-			if ($maxfeatures != '') {
-				$request .= '&maxfeatures='.$maxfeatures;
-			}
+		} 
+		else {
+			$params['TYPENAME'] = $this->typename;
 		}
-		#echo $request;
-		$this->gml = url_get_contents($request, $this->username, $this->password);
-		return $request;
+
+		// Koordinatenreferenzsystem
+		$params['SRSNAME'] = 'EPSG:' . $this->epsg;
+
+		// Bounding Box
+		if ($bbox != '') {
+			$params['BBOX'] = $bbox . ',EPSG:' . $this->epsg;
+		}
+
+		// Filter
+		if ($filter != '') {
+			$params['FILTER'] = $filter;
+		}
+
+		// Maximale Trefferzahl
+		if ($maxfeatures != '') {
+				if (version_compare($this->version, '2.0.0', '>=')) {
+						$params['COUNT'] = $maxfeatures;
+				} else {
+						$params['MAXFEATURES'] = $maxfeatures;
+				}
+		}
+
+		// URL-Parameter erzeugen
+		$separator = (strpos($this->url, '?') !== false) ? '&' : '?';
+
+		$request = $this->url . $separator . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
 	}
+
+	// echo $request;
+	// WFS-Request ausführen
+	$this->gml = url_get_contents(
+			$request,
+			$this->username,
+			$this->password
+	);
+
+	return $request;
+}
+
 
 	function describe_featuretype_request() {
 		$request = $this->url . (substr(trim($this->url), -1) == '?' ? '' : '&') . 'SERVICE=WFS&REQUEST=DescribeFeatureType&VERSION=' . $this->version . '&TYPENAME=' . $this->typename;
@@ -101,72 +146,115 @@ class wfs{
 		$this->targetnamespace = substr($exp[1], 0, strpos($exp[1], '"'));
 	}
 	
-	function create_filter($attributenames, $operators, $values){
-		# Diese Funktion generiert aus Attributnamen, Operatoren und Werten einen über 'And' verknüpften WFS-Filterstring
-		if($this->namespace != '')$namespace = $this->namespace.':';
-		$count = count_or_0($attributenames);
-		if($count > 0){
-			$filter = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">';
-			if($count > 1){
-				$filter .= '<ogc:And>';
-			}
-			for($i = 0; $i < $count; $i++){
-				$operator_attributes = '';
-				switch ($operators[$i]){
-					case '=' : {
-						$operator = 'PropertyIsEqualTo';
-					}break;
-					
-					case '!=' : {
-						$operator = 'PropertyIsNotEqualTo';
-					}break;
-					
-					case '<' : {
-						$operator = 'PropertyIsLessThan';
-					}break;
-					
-					case '>' : {
-						$operator = 'PropertyIsGreaterThan';
-					}break;
-					
-					case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
-						$operator = 'PropertyIsLike';
-						$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
-						if (strpos($values[$i], '%') === false) {
-							$values[$i] = '%' . $values[$i] . '%';
-						}
-						$values[$i] = str_replace('%', '*', $values[$i]);
-					}break;
-				}
-				
-				$filter .= '<ogc:'.$operator.$operator_attributes.'>';
-				$filter .= '<ogc:PropertyName>'.$namespace.$attributenames[$i].'</ogc:PropertyName>';
-				$filter .= '<ogc:Literal>'.$values[$i].'</ogc:Literal>';
-				$filter .= '</ogc:'.$operator.'>';
-			}
-			if($count > 1){
-				$filter .= '</ogc:And>';
-			}
-			$filter .= '</ogc:Filter>';
-			#$filter .= '&namespace=xmlns('.$this->namespace.'='.$this->targetnamespace.')';
-		}
-		return $filter;
-				
-		
-   /*     <Filter>
-    * 			<AND>
-    * 				<PropertyIsLike wildcard='*' singleChar='.' escape='!'>
-								<PropertyName>NAME</PropertyName>
-								<Literal>Syd*</Literal>
-							</PropertyIsLike>
-							<PropertyIsEqualTo>
-								<PropertyName>POP_RANGE</PropertyName>
-								<Literal>4</Literal>
-							</PropertyIsEqualTo>
-						</AND>
-					</Filter>
-			*/
+	
+function create_filter($attributenames, $operators, $values, $version = null) {
+	// Filter-Syntax abhängig von der WFS-Version
+	if (version_compare($this->version, '2.0.0', '>=')) {
+			$prefix = 'fes';
+			$filter_namespace = 'http://www.opengis.net/fes/2.0';
+			$property_element = 'ValueReference';
+			$like_escape_attribute = 'escapeChar';
+	} else {
+			$prefix = 'ogc';
+			$filter_namespace = 'http://www.opengis.net/ogc';
+			$property_element = 'PropertyName';
+			$like_escape_attribute = 'escape';
 	}
+
+	$count = count_or_0($attributenames);
+	if ($count == 0) {
+			return '';
+	}
+
+	// Filter öffnen
+	$filter = '<' . $prefix . ':Filter xmlns:' .
+						$prefix . '="' . $filter_namespace . '"';
+
+	// Optionalen Attribut-Namespace ergänzen
+	$namespace = '';
+	if (!empty($this->namespace)) {
+			$namespace = $this->namespace . ':';
+
+			if (!empty($this->targetnamespace)) {
+					$filter .= ' xmlns:' . $this->namespace . '="' .
+							htmlspecialchars($this->targetnamespace, ENT_XML1, 'UTF-8') . '"';
+			}
+	}
+
+	$filter .= '>';
+
+	// Mehrere Bedingungen mit AND verknüpfen
+	if ($count > 1) {
+			$filter .= '<' . $prefix . ':And>';
+	}
+
+	for ($i = 0; $i < $count; $i++) {
+		$operator_attributes = '';
+		switch ($operators[$i]) {
+			case '=':
+					$operator = 'PropertyIsEqualTo';
+					break;
+			case '!=':
+					$operator = 'PropertyIsNotEqualTo';
+					break;
+			case '<':
+					$operator = 'PropertyIsLessThan';
+					break;
+			case '>':
+					$operator = 'PropertyIsGreaterThan';
+					break;
+			case 'LIKE':
+					$operator = 'PropertyIsLike';
+					$operator_attributes =
+							' wildCard="*" singleChar="." ' .
+							$like_escape_attribute . '="!"';
+					if (strpos($values[$i], '%') === false) {
+							$values[$i] = '%' . $values[$i] . '%';
+					}
+					$values[$i] = str_replace('%', '*', $values[$i]);
+					break;
+			default:
+					throw new InvalidArgumentException(
+							'Nicht unterstützter WFS-Operator: ' . $operators[$i]
+					);
+			}
+
+			// XML-Sonderzeichen maskieren
+			$attribute = htmlspecialchars(
+					$namespace . $attributenames[$i],
+					ENT_XML1 | ENT_QUOTES,
+					'UTF-8'
+			);
+
+			$value = htmlspecialchars(
+					(string)$values[$i],
+					ENT_XML1 | ENT_QUOTES,
+					'UTF-8'
+			);
+
+			$filter .= '<' . $prefix . ':' . $operator .
+								 $operator_attributes . '>';
+
+			$filter .= '<' . $prefix . ':' . $property_element . '>' .
+								 $attribute .
+								 '</' . $prefix . ':' . $property_element . '>';
+
+			$filter .= '<' . $prefix . ':Literal>' .
+								 $value .
+								 '</' . $prefix . ':Literal>';
+
+			$filter .= '</' . $prefix . ':' . $operator . '>';
+	}
+
+	if ($count > 1) {
+			$filter .= '</' . $prefix . ':And>';
+	}
+
+	$filter .= '</' . $prefix . ':Filter>';
+
+	return $filter;
+}
+
 
 	/**
 	* Diese Funktion parst das GML und sucht nach dem übergebenem Tagnamen '$parse_object' und erstellt ein Array von Objekten, die diesem Namen entsprechen

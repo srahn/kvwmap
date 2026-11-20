@@ -19,19 +19,11 @@
 				$colspan = $table['max_cell_count'] - $cell_count + 1;
 				for($i = 0; $i < $cell_count; $i++) {
 					$cell = $row['cells'][$i];
-					if ($row['contains_attribute_names']) {
-						if ($cell_count > 1 AND $cell['properties'] == 'class="gle-attribute-name"') {
-							$width = 'width="' . ($i == 0 ? '10%' : '1%') . '"';
-						}
-						else {
-							$width = '';
-						}
-					}
-					$output .= '<td ' .
-						$width . ' ' .
-						($cell['id'] ? 'id="' . $cell['id'] . '"' : '') .
-						$cell['properties'] . ' ' .
-						(($colspan > 1 AND $i == $cell_count - 1) ? 'colspan="' . $colspan . '"' : '') .
+					$output .= '<td'
+						. ' ' . $cell['properties']
+						. (($row['contains_attribute_names'] AND $cell_count > 1 AND $cell['properties'] == 'class="gle-attribute-name"') ? ' width="1%"' : '')
+						. ($cell['id'] ? ' id="' . $cell['id'] . '"' : '')
+						. (($colspan > 1 AND $i == $cell_count - 1) ? ' colspan="' . $colspan . '"' : '') .
 					'>';
 					$output .= $cell['content'];
 					if ($cell['id']) {
@@ -73,11 +65,11 @@
 	}
 
 	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true, $field_id = NULL, $calendar = true) {
-		$field_id = $field_id ?: $layer_id.'_'.$attributes['name'][$j].'_'.$k;
-		$datapart = '<table ';
-		if($attributes['group_id'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
-		else $datapart .= 'width="100%"';
-		$datapart .= '><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
+		$field_id = $field_id ?: $layer_id.'_'.$attributes['name'][$j].'_'.$k;		
+		$datapart = '<table style="';
+		if($attributes['group_id'][0] != '' AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width: 200px';
+		else $datapart .= 'width: max-content';
+		$datapart .= '"><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
 		if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
 		if (
 			$sort_links AND
@@ -601,7 +593,7 @@
 						}
 						$datapart .= 	' class="buttonlink"><span>'.$strShowPK.'</span></a>&nbsp;';
 					}
-					if ($attributes['subform_layer_privileg'][$j] > 0 AND $attribute_privileg > 0){
+					if ($attributes['subform_layer_privileg'][$j] > 0 AND $attribute_privileg > 0) {
 						$datapart .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=neuer_Layer_Datensatz&subform=true&selected_layer_id=' . $attributes['subform_layer_id'][$j] . '&csrf_token=' . $_SESSION['csrf_token'];
 						for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {
 							$datapart .= '&attributenames[' . $p . ']='.$attributes['subform_pkeys'][$j][$p];
@@ -715,9 +707,18 @@
 				$reloadParams .= '&count='.$k;
 				$reloadParams .= '&no_new_window='.$attributes['no_new_window'][$j];
 				$reloadParams .= '&embedded_subformPK=true';
-				if($attributes['embedded'][$j] == true)$reloadParams .= '&embedded=true';
-				if($attributes['list_edit'][$j] == true)$reloadParams .= '&list_edit=true';
-				if($attributes['show_count'][$j] == true)$reloadParams .= '&show_count=true';
+				if ($attributes['embedded'][$j] == true) {
+					$reloadParams .= '&embedded=true';
+				}
+				if ($attributes['list_edit'][$j] == true) {
+					$reloadParams .= '&list_edit=true';
+				}
+				if ($attributes['ref_edit'][$j] == true) {
+					$reloadParams .= '&ref_edit=true';
+				}
+				if ($attributes['show_count'][$j] == true) {
+					$reloadParams .= '&show_count=true';
+				}
 				$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&targetlayer_id='.$layer_id;
@@ -734,13 +735,13 @@
 				$reloadParams .= '&attribute_privileg='.$attribute_privileg;
 				
 				$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px">';
-				if($gui->new_entry != true AND $subform_request){
+				if ($gui->new_entry != true AND $subform_request) {
 					$datapart .= '
 						<img src="' . GRAPHICSPATH . 'leer.gif" onload="reload_subform_list(this.parentElement);">
 					';
 				}
 				$datapart .= '</div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-				$datapart .= '</td></tr></table>';					
+				$datapart .= '</td></tr></table>';
 			}break;
 
 			case 'Time': {
@@ -1504,16 +1505,25 @@
 	* @param array $class_or_style Ein Array welches beliebig viele Klassennamen oder Styledefinitionen enthalten kann
 	* @return string Text in der Form ' class="class_name" style="css-text"'
 	*/
-	function get_td_class_or_style($class_or_style){
-		foreach($class_or_style as $elem){
-			if($elem != ''){
-				if(strpos($elem, ':') === false)$class[] = $elem;
-				else $style[] = $elem;
+	function get_td_class_or_style($class_or_style) {
+		$outputs = array();
+		foreach($class_or_style as $elem) {
+			if ($elem != '') {
+				if (strpos($elem, ':') === false) {
+					$class[] = $elem;
+				}
+				else {
+					$style[] = $elem;
+				}
 			}
 		}
-		if(!empty($class))$output = ' class="'.implode(' ', $class).'"';
-		if(!empty($style))$output.= ' style="'.implode(';', $style).'"';
-		return $output;
+		if (!empty($class)) {
+			$outputs[] = 'class="' . implode(' ', $class) . '"';
+		}
+		if (!empty($style)) {
+			$outputs[] = 'style="' . implode(';', $style) . '"';
+		}
+		return implode(' ', $outputs);
 	}
 	
 	function getGeomType($column_geomtype, $layer_datatype){

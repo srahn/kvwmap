@@ -215,10 +215,8 @@
 		document.getElementById('datendrucklayouteditor_formular_scroll').scrollTop = 0;
 	}
 </script>
-
 <br>
 <input type="hidden" name="go" value="sachdaten_druck_editor">
-
 <h2><?php echo $this->titel; ?></h2><?
 	if ($this->formvars['selected_layer_id']) { ?>
 		<a
@@ -322,10 +320,11 @@
 	</div>
 	<div id="datendrucklayouteditor_formular">
 		<div id="datendrucklayouteditor_formular_scroll">
+			<? $table_width = 600; ?>
 			<table border="0" cellspacing="0" cellpadding="0" style="width: 100%">
 				<tr>
 					<td>
-						<table width="597" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+						<table width="<?php echo $table_width; ?>" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 							<tr>
 								<td colspan="2" class="fett" align="center" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3">&nbsp;Themen-Auswahl</td>
 							</tr>
@@ -357,7 +356,7 @@
 					</tr>
 					<tr>
 						<td>
-							 <table width="597" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							 <table width="<?php echo $table_width; ?>" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td class="fett" colspan="2" align="center" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3">&nbsp;Layout-Auswahl</td>
 									<td class="fett" align="center" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3">&nbsp;Stelle</td>
@@ -399,7 +398,7 @@
 					</tr>
 					<tr>
 						<td>
-							<table width="597" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table width="<?php echo $table_width; ?>" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td colspan="4" class="fett" align="center" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3">&nbsp;Layoutdaten</td>
 								</tr>
@@ -490,7 +489,7 @@
 								</tr>
 							</table>
 							<br>
-							<table width="597" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table width="<?php echo $table_width; ?>" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td class="fett" align="center" style="border-bottom:2px solid #C3C7C3;border-top:2px solid #C3C7C3" colspan="8">&nbsp;Grafik&nbsp;</td>
 								</tr>
@@ -502,7 +501,10 @@
 									<td><input type="text" name="bgwidth" value="<? echo $this->ddl->selectedlayout[0]['bgwidth'] ?>" size="5"></td>
 								</tr>
 								<tr>
-									<td width="50%" style="border-right:1px solid #C3C7C3" colspan=4><input type="file" name="bgsrc" size="10"></td>
+									<td width="50%" style="border-right:1px solid #C3C7C3" colspan=4>
+										<input type="file" name="bgsrc" size="10">
+										<span data-tooltip="Es werden nur Dateien im jpeg-Format unterstützt."></span>
+									</td>
 									<td>&nbsp;y:</td>
 									<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposy" value="<? echo $this->ddl->selectedlayout[0]['bgposy'] ?>" size="5"></td>
 									<td>&nbsp;Höhe:</td>
@@ -510,7 +512,7 @@
 								</tr>
 							</table>
 							<br>
-							<table id="ddl_attributes" border="0" cellpadding="3" cellspacing="0" style="width: 710px; border-bottom:1px solid #C3C7C3">
+							<table id="ddl_attributes" border="0" cellpadding="3" cellspacing="0" style="width: 100%; border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td align="center" style="border-top:2px solid #C3C7C3" colspan=8><span class="fett">&nbsp;Attribute</span></td>
 								</tr><?
@@ -785,16 +787,23 @@
 												</label>
 											</td>
 											<td>
-												<input
-													id="border_<? echo $this->ddl->attributes['the_geom']; ?>"
-													type="checkbox"
-													name="border_<? echo $this->ddl->attributes['the_geom']; ?>"
-													value="1"
-													style="margin-left: 0px;"<?
-													echo ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['border'] == '1' ? ' checked="true"' : ''); ?>
-												>
+												<? echo output_select(
+													'border_' . $this->ddl->attributes['the_geom'],
+													[
+														['value' => 0, 'output' => 'nein'],
+														['value' => 1, 'output' => 'ja'],
+														['value' => 2, 'output' => 'andere Objekte ausblenden'],
+													],
+													$this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['border'],
+													null,
+													null,
+													null,
+													'width: 190px'
+												); ?>
 											</td>
-											<td></td>
+											<td>
+												Themenauswahl:&nbsp;<span data-tooltip="In der Karte, welche im Druck verwendet wird, werden alle Layer angezeigt, die in der ausgewählten Themenauswahl enthalten sind und zur aktuellen Stelle gehören, unabhängig welcher Nutzer druckt. Ist keine Themenauswahl angegeben, werden die Layer gedruckt, die gerade in der Karte für den aktiven Nutzer zum Zeitpunkt des Drucks eingeschaltet sind. Hier stehen alle Themenauswahlen zur Auswahl, die keine user_id haben." style="--left: -500px"></span>
+											</td>
 										</tr>
 										<tr id="tr2_<? echo $this->ddl->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
 											<td>&nbsp;&nbsp;&nbsp;y:</td>
@@ -819,14 +828,39 @@
 												>
 											</td>
 											<td width="60px">&nbsp;Rand:</td>
-											<td><input	type="text" name="fontsize_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['fontsize']; ?>" size="5">m</td>
-											<td colspan="3"></td>
+											<td><input	type="text" name="fontsize_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['fontsize']; ?>" size="5"> m</td>
+											<td colspan="3"><?
+												$result = $this->user->rolle->getLayerComments(null, null, null, true);
+												if (!$result['success']) { ?>
+													<span style="color: yellow; background-color: red;">
+														<b>Fehler beim Laden der Themenauswahl.</b>
+														<p><? echo $result['msg']; ?></p>
+													</span><?
+												}
+												else {
+													$layer_comments = $result[1];
+													echo FormObject::createSelectField(
+														'saved_layers_id', // name
+														array_map(
+															function($layer_comment) {
+																return array(
+																	'value' => $layer_comment['id'],
+																	'output' => $layer_comment['name'] . ' (' . $layer_comment['id'] . ')'
+																);
+															},
+															$layer_comments
+														), // options
+														$this->ddl->selectedlayout[0]['saved_layers_id'], // value
+														1 // size
+													);
+												} ?>
+											</td>
 										</tr><?
 									}
 								} ?>
 							</table>
 							<br>
-							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">	
+							<table width="600" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">	
 								<tr>
 									<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Datum&nbsp;</td>
 									<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Nutzer&nbsp;</td>
@@ -867,7 +901,7 @@
 								</tr>
 							</table>
 							<br>
-							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table width="<?php echo $table_width; ?>" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
 										<span id="freitexte">Freitexte</span>&nbsp;
@@ -880,7 +914,7 @@
 								</tr>				
 							</table>
 							<br>
-							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table width="<?php echo $table_width; ?>" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
 										<span id="linien">Linien</span>
@@ -906,10 +940,19 @@
 											</tr>
 											<tr>
 												<td>&nbsp;y:</td>
-												<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5"></td>
-												<td>&nbsp;y:</td>
-												<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
-												<td colspan="2"></td>
+												<td style="border-right:1px solid #C3C7C3">
+													<input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5">
+												</td>
+												<td>
+													&nbsp;y:
+												</td>
+												<td style="border-right:1px solid #C3C7C3">
+													<input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5">
+												</td>
+												<td colspan="2">
+													Linienfarbe:<br><?
+													echo $this->ddl->output_color_select('linecolor' . $i, $this->ddl->selectedlayout[0]['lines'][$i]['linecolor']); ?>
+												</td>
 											</tr>
 											<tr>
 												<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
@@ -944,7 +987,7 @@
 								</tr>
 							</table>
 							<br>
-							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table width="<?php echo $table_width; ?>" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
 										<span id="rechtecke">Rechtecke</span>
@@ -970,9 +1013,13 @@
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['posy'] ?>" size="5"></td>
 										<td>&nbsp;y:</td>
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposy'] ?>" size="5"></td>
-										<td colspan="2">
+										<td>
+											Linienfarbe:
+											<? echo $this->ddl->output_color_select('rectlinecolor' . $i, $this->ddl->selectedlayout[0]['rectangles'][$i]['linecolor']);	?>
+										</td>
+										<td>
 											Füllfarbe:
-											<? echo $this->ddl->output_color_select('rectcolor' . $i, $this->ddl->selectedlayout[0]['rectangles'][$i]['color']);	?>
+											<? echo $this->ddl->output_color_select('rectbgrcolor' . $i, $this->ddl->selectedlayout[0]['rectangles'][$i]['bgrcolor']);	?>
 										</td>
 									</tr>
 									<tr>

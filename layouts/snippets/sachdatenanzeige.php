@@ -9,9 +9,13 @@
 	keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
 </script>
 
-<div id="overlayheader2" class="gle_tabs px17 fett" style="display: none"></div>
-
-<a href="javascript:scrollbottom();" style="float: right; margin-top: 10;" title="<? echo $strToBottom; ?>">
+<div id="overlayheader2" class="gle_tabs px17 fett" style="display: none"></div><?
+if ($this->formvars['window_type'] != 'overlay') { ?>
+	<a href="javascript:expand();" style="float: left; margin: 2px 0px 0px 2px;" title="<? echo $strExpandButton; ?>">
+		<i id="expand_collapse_button" class="fa fa-expand hover-border" aria-hidden="true"></i>
+	</a><?
+} ?>
+<a href="javascript:scrollbottom();" style="float: right; margin-top: 2;" title="<? echo $strToBottom; ?>">
 	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
 </a>
 <a name="oben"></a><?
@@ -27,12 +31,12 @@ if ($anzLayer==0 AND $this->user->rolle->singlequery == 2) { ?>
 	<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoQueryableLayers; ?></span><br/><?
 } 
 
-if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') {
+if ($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') {
 	global $sizes;
 	$size = $sizes[$this->user->rolle->gui];	?>
 	<div id="contentdiv" onscroll="save_scrollposition();" style="scroll-behavior: smooth; max-height:<? echo $this->user->rolle->nImageHeight; ?>px; width: max-content; max-width: calc(100vw - <? echo ($size['menue']['width'] + 20); ?>px); overflow-y: auto;overflow-x: auto; border-bottom: 1px solid #bbb">
-		<div style="margin-right: 10px; width: fit-content;">
-<? }
+		<div id="innercontentdiv" style="margin-right: 10px; width: fit-content;"><?
+}
 
 $queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
 $active_layer_tab = null;
@@ -49,43 +53,41 @@ for ($i = 0; $i < $anzLayer; $i++) {
 	}
 }
 
-for($i=0;$i<$anzLayer;$i++){	
+for ($i = 0; $i < $anzLayer; $i++) {	
 	$gesamt = $this->qlayerset[$i]['count'];
-  if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
-	   # Blätterfunktion
-	   if(value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['layer_id']) == ''){
-		   $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] = 0;
-		 }
-		 $von = $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] + 1;
-	   $bis = $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] + $this->formvars['anzahl'];
-	   if($bis > $gesamt){
-	   	$bis = $gesamt;
-	   }
-	   $this->qlayerset[$i]['paging'] = '
-	   <table border="0" cellpadding="2" width="100%" cellspacing="0" class="sachdatenanzeige_paging">
-
-	   	<tr valign="top">
-	   		<td align="right" width="38%">';
-	   		if($this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
+	if ($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1) {
+		# Blätterfunktion
+		if (value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['layer_id']) == ''){
+			$this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] = 0;
+		}
+		$von = $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] + 1;
+	  $bis = $this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] + $this->formvars['anzahl'];
+	  if($bis > $gesamt){
+			$bis = $gesamt;
+		}
+		$this->qlayerset[$i]['paging'] = '
+		<table border="0" cellpadding="2" width="100%" cellspacing="0" class="sachdatenanzeige_paging">
+			<tr valign="top">
+				<td align="right" width="38%">';
+				if ($this->formvars['offset_'.$this->qlayerset[$i]['layer_id']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == '') {
 					$this->qlayerset[$i]['paging'].= '<a href="javascript:firstdatasets('.$this->qlayerset[$i]['layer_id'].');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-	   			$this->qlayerset[$i]['paging'].= '<a href="javascript:prevdatasets('.$this->qlayerset[$i]['layer_id'].');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
-	   		}
-	      $this->qlayerset[$i]['paging'].= '
+					$this->qlayerset[$i]['paging'].= '<a href="javascript:prevdatasets('.$this->qlayerset[$i]['layer_id'].');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
+				}
+				$this->qlayerset[$i]['paging'].= '
 				</td>
 				<td width="200px" align="center">
 					<span class="fett">'.$von.' - '.$bis.' '.$strFromDatasets.' '.$gesamt.'</span>
 				</td>
-	      <td width="38%">';
-	      if($bis < $gesamt AND value_of($this->formvars, 'printversion') == ''){
-	      	$this->qlayerset[$i]['paging'].= '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['layer_id'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+				<td width="38%">';
+				if($bis < $gesamt AND value_of($this->formvars, 'printversion') == ''){
+					$this->qlayerset[$i]['paging'].= '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['layer_id'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
 					$this->qlayerset[$i]['paging'].= '<a href="javascript:lastdatasets('.$this->qlayerset[$i]['layer_id'].', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
-	      }
-	      $this->qlayerset[$i]['paging'].= '
+				}
+				$this->qlayerset[$i]['paging'].= '
 				</td>
-	    </tr>
-
-	   </table>';	 
-  }
+			</tr>
+		</table>';
+	}
 
 	if (isset($this->queried_layers[$this->qlayerset[$i]['layer_id']])) {
 		if ($active_layer_tab == $this->qlayerset[$i]['layer_id']) {
@@ -141,7 +143,9 @@ for($i=0;$i<$anzLayer;$i++){
 		}
 	}
 	
-	echo value_of($this->qlayerset[$i], 'paging');
+	if ($this->qlayerset[$i]['template'] !== 'generic_layer_editor_bootstrap.php') {
+		echo value_of($this->qlayerset[$i], 'paging');
+	}
 	
 	echo '
 		</div>
@@ -175,7 +179,7 @@ if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != '
 </div></div>
 <? } ?>
 
-<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sachdatenanzeige_footer">
 	<tr>
 		<td align="right">
 		</td>
@@ -203,7 +207,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 				document.getElementById('overlayheader2').innerHTML = '<? echo $layer_tabs; ?>';
 			</script>
 <?	}	?>
-		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
 				<? if($this->formvars['window_type'] == 'overlay'){ ?>
@@ -301,7 +305,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
   <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo value_of($this->formvars, 'searchradius'); ?>">
   <input name="CMD" type="hidden" value="<?php echo value_of($this->formvars, 'CMD'); ?>">
 	<? if(value_of($this->formvars, 'printversion') == '' AND $this->currentform != 'document.GUI2'){ ?>
-  <table width="100%" border="0" cellpadding="2" cellspacing="0" id="sachdatenanzeige_footer">
+  <table width="100%" border="0" cellpadding="2" cellspacing="0" class="sachdatenanzeige_footer">
     <tr bgcolor="<?php echo BG_DEFAULT ?>" align="center">
       <td><a href="index.php?searchradius=<?php echo value_of($this->formvars, 'searchradius'); ?>" onclick="checkForUnsavedChanges(event);"><? echo $strbacktomap;?></a></td>
     </tr>

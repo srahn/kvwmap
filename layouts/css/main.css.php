@@ -146,6 +146,15 @@ body {
 	margin: auto;
 }
 
+.tab_div {
+	display: grid; 
+	gap: 7px;
+}
+
+.tab_div:not(:has(> :not(.collapsed))) {
+  gap: 0;
+}
+
 .collapsed, div:not(.gle_tabular)~.collapsedfull {
 	visibility: collapse;
   height: 0;
@@ -1646,7 +1655,9 @@ a.menuered:hover {
 	position: relative;
 }
 
-.dropZone{
+/* Dragging von divs */
+
+div.dropZone{
 	position: relative;
 	z-index: 1000;
 	margin: 0;
@@ -1654,19 +1665,67 @@ a.menuered:hover {
 	width: 100%;
 }
 
-.dropZone.ready{
+div.dropZone.ready{
 	margin: -12 0 -12 15;
 	height: 25px;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
-.dropZone.over{
+div.dropZone.over{
 	height: 51px;
 	margin: -13 0 -13 15;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
-.dragObject{
+/* Dragging von trs */
+
+tr.DropZone {
+    height: 0px;
+    position: relative;
+    z-index: 1000;
+}
+
+tr.DropZone td {
+    position: relative;
+    height: 0px;
+    transition: height 0.1s ease;
+}
+
+tr.DropZone td::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    right: 0;
+    top: 0px;
+    height: 0px;
+    z-index: 1000;
+		transition: height 0.1s ease;
+}
+
+tr.DropZone.ready td::before {
+    top: -13px;
+    height: 28px;
+		transition: height 0.1s ease;
+}
+
+tr.DropZone.over td {
+    height: 26px;
+		transition: height 0.1s ease;
+}
+
+tr.DropZone.over td::before {
+    top: -13px;
+    height: 52px;
+		transition: height 0.1s ease;
+}
+
+/* ------  */
+
+td.dragHandle, td.dragHandle input {
+	cursor: grab;
+}
+
+div.dragObject{
 	background-color: #f6f6f6;
 	box-shadow: 1px 1px 4px #aaa;
 	z-index: 100;
@@ -1679,7 +1738,7 @@ a.menuered:hover {
 	text-align: start;
 }
 
-.dragObject:hover{
+div.dragObject:hover{
 	background-color: #fcfcfc;
 }
 
@@ -2279,13 +2338,28 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .subFormListItem{
 	height: 20px;
-	padding: 0 0 8px 0;
+	padding: 0 4px 8px 0;
 	vertical-align: top;
 }
 
-.subFormListItem > a{
+.subFormListItem > .preview_div{
 	display: flex;
 	align-items: center;
+}
+
+.subFormListItem > .preview_div:before{
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	content: '';
+	margin: 2px 7px 0px 10px;
+	background-color: #236dbf;
+	vertical-align: top;
+	display: inline-block;
+}
+
+.subFormListItem > .preview_div > .func_div {
+	margin-left: auto;
 }
 
 .subFormShowCount{
@@ -2297,17 +2371,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin: 15 0; 
 	color: <? echo BG_GLEHEADER; ?>; 
 	background: <? echo BG_GLEHEADER; ?>;
-}
-
-.subFormListItem > a:before{
-	width: 4px;
-	height: 4px;
-	border-radius: 50%;
-	content: '';
-	margin: 2px 7px 0px 10px;
-	background-color: #236dbf;
-	vertical-align: top;
-	display: inline-block;
 }
 
 .formelement-link {
