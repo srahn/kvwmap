@@ -6407,6 +6407,7 @@ class GUI {
 	}
 
 	function zoomto_selected_datasets(){
+		$this->main = 'map.php';
     $dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
 		if ($this->formvars['chosen_layer_id'] > 0) {
@@ -6429,6 +6430,12 @@ class GUI {
         $oids[] = $element[3];
       }
     }
+		if (empty($oids) AND $this->qlayerset[0]['shape']) {
+			# es wurden keine Checkboxen aus einer Sachdatenanzeige übergeben, sondern vorher eine Suche gemacht
+			foreach($this->qlayerset[0]['shape'] as $dataset) {
+				$oids[] = $dataset[$layerset[0]['maintable'] . '_oid'];
+			}
+		}
 		if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] AND $this->formvars['no_query'] != true){
 			$this->last_query = $this->user->rolle->get_last_query($this->formvars['chosen_layer_id']);
 			$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
@@ -6441,7 +6448,7 @@ class GUI {
 		$this->loadMap('DataBase');
     if ($oids != '') {
       # Polygon abfragen und Extent setzen
-      $rect = $dbmap->zoomToDatasets($oids, $layerset[0], $this->formvars['layer_columnname'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
+      $rect = $dbmap->zoomToDatasets($oids, $layerset[0], $layerset[0]['attributes']['the_geom'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 	    if (MAPSERVERVERSION > 600) {
 				$this->map_scaledenom = $this->map->scaledenom;
