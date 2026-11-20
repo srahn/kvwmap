@@ -9,9 +9,13 @@
 	keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
 </script>
 
-<div id="overlayheader2" class="gle_tabs px17 fett" style="display: none"></div>
-
-<a href="javascript:scrollbottom();" style="float: right; margin-top: 10;" title="<? echo $strToBottom; ?>">
+<div id="overlayheader2" class="gle_tabs px17 fett" style="display: none"></div><?
+if ($this->formvars['window_type'] != 'overlay') { ?>
+	<a href="javascript:expand();" style="float: left; margin: 2px 0px 0px 2px;" title="<? echo $strExpandButton; ?>">
+		<i id="expand_collapse_button" class="fa fa-expand hover-border" aria-hidden="true"></i>
+	</a><?
+} ?>
+<a href="javascript:scrollbottom();" style="float: right; margin-top: 2;" title="<? echo $strToBottom; ?>">
 	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
 </a>
 <a name="oben"></a><?
@@ -27,12 +31,12 @@ if ($anzLayer==0 AND $this->user->rolle->singlequery == 2) { ?>
 	<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoQueryableLayers; ?></span><br/><?
 } 
 
-if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') {
+if ($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') {
 	global $sizes;
 	$size = $sizes[$this->user->rolle->gui];	?>
 	<div id="contentdiv" onscroll="save_scrollposition();" style="scroll-behavior: smooth; max-height:<? echo $this->user->rolle->nImageHeight; ?>px; width: max-content; max-width: calc(100vw - <? echo ($size['menue']['width'] + 20); ?>px); overflow-y: auto;overflow-x: auto; border-bottom: 1px solid #bbb">
-		<div style="margin-right: 10px; width: fit-content;">
-<? }
+		<div id="innercontentdiv" style="margin-right: 10px; width: fit-content;"><?
+}
 
 $queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
 $active_layer_tab = null;

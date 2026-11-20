@@ -16,6 +16,7 @@
   $strEditAll="edit multiple";
   $strEditDataset="Edit Dataset";
   $strEditGeom="Edit Geometry";
+  $strExpandButton = "Maximize / Minimize Page";
   $strExport="export";
   $strExportThis="export record";
   $strMapZoom="Zoom to object";

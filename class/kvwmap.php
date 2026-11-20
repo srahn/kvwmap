@@ -5929,12 +5929,20 @@ class GUI {
 		$this->title='Speicherung aller Layerattribute';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->layerdaten = $mapDB->get_layers_of_type(MS_POSTGIS, NULL);
-		for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
-			$layer = $mapDB->get_Layer($this->layerdaten['ID'][$i]);
+		for ($j = 0; $j < count($this->layerdaten['ID']); $j++) {
+			$layer = $mapDB->get_Layer($this->layerdaten['ID'][$j]);
 			if ($layer['pfad'] != '' AND $layer['connectiontype'] == 6) {
 				$this->param['str1'] .= 'Layer: ' . $layer['name'] . '<br>';
 				$layerdb = $mapDB->getlayerdatabase($layer['layer_id'], $this->Stelle->pgdbhost);
 				$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
+				$old_attributes = $mapDB->read_layer_attributes($layer['layer_id'], $layerdb, NULL, false, false, false, false);
+				for ($i = 0; $i < count($attributes)-2; $i++) {
+					$attributes[$i]['order'] = $last_order = $old_attributes['order'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: ($last_order +  0.01);
+					$attributes[$i]['default'] = $old_attributes['default'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: $attributes[$i]['default'];
+				}
+				unset($attributes['the_geom']);
+				unset($attributes['the_geom_id']);
+				usort($attributes, 'compare_orders2');
 				$mapDB->save_postgis_attributes($layerdb, $layer['layer_id'], $attributes, '', '');
 				$mapDB->delete_old_attributes($layer['layer_id'], $attributes);
 			}
@@ -6399,6 +6407,7 @@ class GUI {
 	}
 
 	function zoomto_selected_datasets(){
+		$this->main = 'map.php';
     $dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
 		if ($this->formvars['chosen_layer_id'] > 0) {
@@ -6421,6 +6430,12 @@ class GUI {
         $oids[] = $element[3];
       }
     }
+		if (empty($oids) AND $this->qlayerset[0]['shape']) {
+			# es wurden keine Checkboxen aus einer Sachdatenanzeige übergeben, sondern vorher eine Suche gemacht
+			foreach($this->qlayerset[0]['shape'] as $dataset) {
+				$oids[] = $dataset[$layerset[0]['maintable'] . '_oid'];
+			}
+		}
 		if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] AND $this->formvars['no_query'] != true){
 			$this->last_query = $this->user->rolle->get_last_query($this->formvars['chosen_layer_id']);
 			$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
@@ -6433,7 +6448,7 @@ class GUI {
 		$this->loadMap('DataBase');
     if ($oids != '') {
       # Polygon abfragen und Extent setzen
-      $rect = $dbmap->zoomToDatasets($oids, $layerset[0], $this->formvars['layer_columnname'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
+      $rect = $dbmap->zoomToDatasets($oids, $layerset[0], $layerset[0]['attributes']['the_geom'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 	    if (MAPSERVERVERSION > 600) {
 				$this->map_scaledenom = $this->map->scaledenom;
@@ -10910,16 +10925,18 @@ class GUI {
 				$username = $layerset[0]['wms_auth_username'];
 				$password = $layerset[0]['wms_auth_password'];
 				$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
+				$wfs->describe_featuretype_request();
+				$wfs->getTargetNamespace();
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], NULL, $privileges['attributenames'], false, true);
 
 				# Filterstring erstellen
 				for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
-				if($this->formvars['value_'.$layerset[0]['attributes']['name'][$i]] != '' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
-					$attributenames[] = $layerset[0]['attributes']['name'][$i];
-					$operators[] = $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]];
-					$values[] = $this->formvars['value_'.$layerset[0]['attributes']['name'][$i]];
-				}
+					if($this->formvars['value_'.$layerset[0]['attributes']['name'][$i]] != '' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
+						$attributenames[] = $layerset[0]['attributes']['name'][$i];
+						$operators[] = $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]];
+						$values[] = $this->formvars['value_'.$layerset[0]['attributes']['name'][$i]];
+					}
 				}
 				$filter = $wfs->create_filter($attributenames, $operators, $values);
 				# Abfrage mit Filter absetzen
@@ -12853,8 +12870,8 @@ class GUI {
 		$pathinfo = pathinfo($document_file);
 		$this->mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerset = $this->user->rolle->getLayer($layer_id);
-		$layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-		$attributes = $mapDB->read_layer_attributes($layer_id, $layerdb, NULL, false, true);
+		$layerdb = $this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+		$attributes = $this->mapDB->read_layer_attributes($layer_id, $layerdb, NULL, false, true);
 
 		# Suche durchführen um die Variablen im dynamischen Pfad ersetzen zu können
 		$this->formvars['selected_layer_id'] = $layer_id;
@@ -12869,7 +12886,7 @@ class GUI {
 				$options = $attributes['options_struct'][$i];
 				$dokument_attribute = $attributes['name'][$i];
 				$dokument_is_array = substr($attributes['type'][$i], 0, 1) == '_';
-				$doc_paths = $mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $options['dynamic_path'], array_keys($this->qlayerset[0]['shape'][0]), array_values($this->qlayerset[0]['shape'][0]), $layerdb, $pathinfo['filename']);
+				$doc_paths = $this->mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $options['dynamic_path'], array_keys($this->qlayerset[0]['shape'][0]), array_values($this->qlayerset[0]['shape'][0]), $layerdb, $pathinfo['filename']);
 				$document_path = dirname($doc_paths['doc_path'] . 'x') . '/';
 				break;
 			}
@@ -19621,7 +19638,6 @@ class db_mapObj{
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$collection_layer = array();
 		$collection_layer['list'] = array();
-		$this->disabled_classes = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
@@ -23307,15 +23323,8 @@ DO $$
 				LEFT JOIN kvwmap.used_layer ul ON l.layer_id = ul.layer_id
 				LEFT JOIN kvwmap.rolle radm ON ul.stelle_id = radm.stelle_id
 			";
-			$where[] = "(radm.user_id = " . $this->User_ID . " OR ul.layer_id IS NULL)";
-		}
+			$where[] = "((radm.user_id = " . $this->User_ID . " AND ul.stelle_id = " . $this->Stelle_ID . ") OR (ul.layer_id IS NULL AND l.edited_by = " . $this->User_ID . "))";
 
-		if (
-			!$only_listed AND # $only_listed ist true bei der Layer-Übersicht. Dann sollen alle Layer geladen werden (d.h. auch die, die der Nutzer gar nicht hat in seinen Stellen).
-			# Show non-admin users only layers that they self have shared
-			!$this->GUI->is_admin_user($this->GUI->user->id)
-		) {
-			$where[] = "l.shared_from = " . $this->GUI->user->id;
 		}
 
 		if ($order != '') {

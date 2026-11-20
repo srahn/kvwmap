@@ -2530,7 +2530,6 @@ class db_mapObj {
 		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$collection_layer = array();
 		$collection_layer['list'] = array();
-		$this->disabled_classes = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {

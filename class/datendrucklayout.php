@@ -1242,6 +1242,7 @@ class ddl extends drucklayout{
 		for ($i = 0; $i < count_or_0($result); $i++) {
 			if ($use_variable_layouts AND is_numeric($result[$i][$this->layerset['ddl_attribute']])) {
 				$this->layout = $this->load_layouts(NULL, $result[$i][$this->layerset['ddl_attribute']], NULL, array(0,1))[0];
+				$this->pdf->ezSetMargins($this->layout['margin_top'], $this->layout['margin_bottom'], $this->layout['margin_left'], $this->layout['margin_right']);
 			}
 			$lastpage = end($this->pdf->objects['3']['info']['pages']) + 1;
 			$this->i_on_page++;
