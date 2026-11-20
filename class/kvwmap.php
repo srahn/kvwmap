@@ -10925,16 +10925,18 @@ class GUI {
 				$username = $layerset[0]['wms_auth_username'];
 				$password = $layerset[0]['wms_auth_password'];
 				$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
+				$wfs->describe_featuretype_request();
+				$wfs->getTargetNamespace();
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], NULL, $privileges['attributenames'], false, true);
 
 				# Filterstring erstellen
 				for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
-				if($this->formvars['value_'.$layerset[0]['attributes']['name'][$i]] != '' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
-					$attributenames[] = $layerset[0]['attributes']['name'][$i];
-					$operators[] = $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]];
-					$values[] = $this->formvars['value_'.$layerset[0]['attributes']['name'][$i]];
-				}
+					if($this->formvars['value_'.$layerset[0]['attributes']['name'][$i]] != '' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
+						$attributenames[] = $layerset[0]['attributes']['name'][$i];
+						$operators[] = $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]];
+						$values[] = $this->formvars['value_'.$layerset[0]['attributes']['name'][$i]];
+					}
 				}
 				$filter = $wfs->create_filter($attributenames, $operators, $values);
 				# Abfrage mit Filter absetzen
