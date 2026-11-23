@@ -2007,6 +2007,9 @@ $GUI->nachweis_columns = [
 		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);		
 		# die Namen aller gespeicherten Dokumentauswahlen dieser Rolle laden
 		$GUI->dokauswahlset=$GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, NULL);
+		# aktuellen Kartenausschnitt laden + zeichnen!
+		$saved_scale = $GUI->reduce_mapwidth(207);
+		$GUI->loadMap('DataBase');
 		if($GUI->formvars['CMD'] == ''){		# wenn nicht navigiert wurde
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 
@@ -2079,9 +2082,6 @@ $GUI->nachweis_columns = [
     $GUI->FormObjVermStelle=$GUI->getFormObjVermStelle('sVermStelle', $GUI->formvars['sVermStelle']);
 		$GUI->FormObjVermStelle->addJavaScript('onchange', "document.getElementById('abfrageart_attr').checked = true;");
     $GUI->FormObjVermStelle->insertOption('', NULL, '--- Auswahl ---', 0);    
-    # aktuellen Kartenausschnitt laden + zeichnen!
-    $saved_scale = $GUI->reduce_mapwidth(207);
-		$GUI->loadMap('DataBase');
 		if($saved_scale != NULL AND !isset($GUI->formvars['datum']))$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     if ($GUI->formvars['CMD']!='') {
       # Nur Navigieren
