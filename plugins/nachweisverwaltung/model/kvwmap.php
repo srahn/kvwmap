@@ -2004,6 +2004,7 @@ $GUI->nachweis_columns = [
 			$GUI->delete_Dokumentauswahl($GUI->formvars['dokauswahlen']);
 			$GUI->formvars['dokauswahl_name'] = '';
 		}
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);		
 		# die Namen aller gespeicherten Dokumentauswahlen dieser Rolle laden
 		$GUI->dokauswahlset=$GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, NULL);
 		if($GUI->formvars['CMD'] == ''){		# wenn nicht navigiert wurde
@@ -2057,7 +2058,6 @@ $GUI->nachweis_columns = [
     $GUI->titel='Dokumentenrecherche';
     $GUI->main= PLUGINS."nachweisverwaltung/view/dokumentenabfrageformular.php";
     
-		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		$GUI->hauptdokumentarten = $nachweis->getHauptDokumentarten();
     $GUI->dokumentarten = $nachweis->getDokumentarten();
 			
