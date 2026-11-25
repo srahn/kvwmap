@@ -1936,7 +1936,12 @@ FROM
 		if ($buchungsstelle!='') {
       $sql.=" AND s.gml_id='".$buchungsstelle."'";
     }		
-		if(!$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'gem', 'b'));
+		if (!$without_temporal_filter) {
+			$sql.= $this->build_temporal_filter(array('f', 's', 'g', 'gem'));
+			if ($FlurstKennz == '') {
+				$sql.= $this->build_temporal_filter(array('b'));
+			}
+		}
     $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>a')::integer,f.flurstueckskennzeichen";
 		#echo '<br>getBuchungenFromGrundbuch: ' . $sql;
     $ret=$this->execSQL($sql, 4, 0);
