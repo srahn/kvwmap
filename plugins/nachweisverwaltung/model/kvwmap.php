@@ -673,12 +673,13 @@ $GUI->nachweis_columns = [
         '" . $nachweis['blattnummer'] . "',
         " . $nachweis['vermstelle'] . ",
         '" . $nachweis['stammnr'] . "',
-				'" . $nachweis['rissnummer'] . "'
+				'" . $nachweis['rissnummer'] . "',
+				" . $nachweis['art'] . "
       )";
     }
     $sql = "
         INSERT INTO lenris.lea_recherche_ergebnisse
-            (recherche_id, client_id, client_nachweis_id, flurid, blattnummer, vermstelle, stammnr, rissnummer)
+            (recherche_id, client_id, client_nachweis_id, flurid, blattnummer, vermstelle, stammnr, rissnummer, art)
         VALUES " . implode(',', $values);
     $ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
 	};
