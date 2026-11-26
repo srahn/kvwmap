@@ -37,6 +37,7 @@
 		}
 	}
 
+
 	function show_vertices(){
 		SVG.show_vertices();
 	}
@@ -1504,9 +1505,78 @@ function mouseup(evt){
 
 	';
 	
+
 	$ortho_point_functions = '
 
 	ortho_point_functions = true;
+
+	
+	async function import_custom_points(id) {
+		const group = document.getElementById(id);
+
+		if (!group) {
+				throw new Error("SVG-Gruppe nicht gefunden.");
+		}
+
+		// 1. Koordinaten aus SVG extrahieren
+		const circles = group.querySelectorAll("circle");
+		const rows = [];
+
+		circles.forEach(circle => {
+				const x = circle.getAttribute("x");
+				const y = circle.getAttribute("y");
+
+				if (x !== null && y !== null) {
+						rows.push(x + ";" + y);
+				}
+		});
+
+		if (rows.length === 0) {
+				throw new Error("Keine gültigen Koordinaten gefunden.");
+		}
+
+		const csv = rows.join("\n");
+
+		// 2. Erster Request: Datei hochladen
+		const uploadData = new FormData();
+
+		uploadData.append(
+				"file1",
+				new Blob([csv], { type: "text/plain" }),
+				"koordinaten.txt"
+		);
+
+		uploadData.append("go", "Punktliste_Anzeigen_Datei laden");
+
+		const uploadResponse = await top.fetch("index.php", {
+				method: "POST",
+				body: uploadData
+		});
+
+		if (!uploadResponse.ok) {
+				throw new Error("Datei-Upload fehlgeschlagen.");
+		}
+
+		// 3. Zweiter Request: Koordinaten importieren
+		const importData = new FormData();
+
+		importData.append("column0", "x");
+		importData.append("column1", "y");
+		importData.append("epsg", "' . $this->user->rolle->epsg_code . '");
+		importData.append("delimiter", ";");
+		importData.append("file1", "koordinaten.txt");
+		importData.append("go", "Punktliste_Anzeigen_Anzeigen");
+
+		const importResponse = await top.fetch("index.php", {
+				method: "POST",
+				body: importData
+		});
+
+		if (!importResponse.ok) {
+				throw new Error("Koordinatenimport fehlgeschlagen.");
+		}
+		console.log(rows.length + " Punkte zum Import übertragen.");
+	}
 	
 	function ortho_point(){
 		enclosingForm.last_doing.value = "ortho_point";

@@ -121,13 +121,13 @@ class data_import_export {
 				$custom_tables = $this->import_custom_geotif($filename, $pgdatabase, $epsg);
 			} break;
 			case 'csv' : {
-				$formvars['file1'] = $filename;
+				$formvars['file1'] = basename($filename);
 				$formvars['delimiter'] = ';'; 
 				$epsg = -1;
-				$custom_tables = $this->import_custom_csv($formvars, $pgdatabase, true, false);
+				$custom_tables = $this->import_custom_csv($user, $formvars, $pgdatabase, true, false);
 			} break;	
 			case 'point' : {
-				$custom_tables = $this->import_custom_csv($formvars, $pgdatabase);
+				$custom_tables = $this->import_custom_csv($user, $formvars, $pgdatabase);
 			} break;
 		}
 		if ($custom_tables != NULL) {
@@ -625,9 +625,9 @@ class data_import_export {
 		if($_files['file1']['name']){
 			$user_upload_folder = UPLOADPATH.$user->id.'/';
 			@mkdir($user_upload_folder);
-			$this->pointfile = $user_upload_folder.$_files['file1']['name'];
+			$this->pointfile = $_files['file1']['name'];
 			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
-				$rows = file($this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+				$rows = file($user_upload_folder . $this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 				$delimiters = implode($this->delimiters);
 				while(count_or_0($this->delimiters) > 0 AND count_or_0($this->columns) < 2){
 					$this->delimiter = array_shift($this->delimiters);
@@ -642,10 +642,11 @@ class data_import_export {
 		}
 	}
 
-	function import_custom_csv($formvars, $pgdatabase, $headlines = NULL, $with_coords = true){
-		$encoding = $this->getEncoding($formvars['file1']);
-		$rows = file($formvars['file1'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-		$tablename = 'a'.strtolower(sonderzeichen_umwandeln(substr(basename($formvars['file1']), 0, 15))). date("_Y_m_d_H_i_s", time());
+	function import_custom_csv($user, $formvars, $pgdatabase, $headlines = NULL, $with_coords = true){
+		$file = UPLOADPATH . $user->id . '/' . $formvars['file1'];
+		$encoding = $this->getEncoding($file);
+		$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+		$tablename = 'a'.strtolower(sonderzeichen_umwandeln(substr(basename($file), 0, 15))). date("_Y_m_d_H_i_s", time());
 		$i = 0;
 		while (trim($rows[$i], $formvars['delimiter']."\n\r") == '') {	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
 			$i++;
