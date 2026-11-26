@@ -69,6 +69,10 @@
 	function remove_ortho_points(){
 		SVG.remove_ortho_points();
 	}
+
+	function import_custom_points(id){
+		SVG.import_custom_points(id);
+	}
 	
 	function moveback(){	
 		SVG.moveback();
@@ -1520,7 +1524,7 @@ function mouseup(evt){
 
 		// 1. Koordinaten aus SVG extrahieren
 		const circles = group.querySelectorAll("circle");
-		const rows = [];
+		const rows = ["x;y"];
 
 		circles.forEach(circle => {
 				const x = circle.getAttribute("x");
@@ -1543,9 +1547,10 @@ function mouseup(evt){
 		uploadData.append(
 				"file1",
 				new Blob([csv], { type: "text/plain" }),
-				"koordinaten.txt"
+				"berechnete Punkte"
 		);
 
+		uploadData.append("no_output", "1");
 		uploadData.append("go", "Punktliste_Anzeigen_Datei laden");
 
 		const uploadResponse = await top.fetch("index.php", {
@@ -1564,7 +1569,8 @@ function mouseup(evt){
 		importData.append("column1", "y");
 		importData.append("epsg", "' . $this->user->rolle->epsg_code . '");
 		importData.append("delimiter", ";");
-		importData.append("file1", "koordinaten.txt");
+		importData.append("file1", "berechnete Punkte");
+		importData.append("no_output", "1");
 		importData.append("go", "Punktliste_Anzeigen_Anzeigen");
 
 		const importResponse = await top.fetch("index.php", {
@@ -1576,6 +1582,8 @@ function mouseup(evt){
 				throw new Error("Koordinatenimport fehlgeschlagen.");
 		}
 		console.log(rows.length + " Punkte zum Import übertragen.");
+		top.document.GUI.legendtouched.value = 1;
+		top.neuLaden();
 	}
 	
 	function ortho_point(){
@@ -1590,7 +1598,7 @@ function mouseup(evt){
 		content = \'<div style="height: 30px">Orthogonalpunktberechnung</div>\';
 		content+= \'<span class="px15">1. Setzen Sie in der Karte durch 2 Klicks die beiden Punkte für die Bezugslinie.</span>\';
 		content+= \'<div id="ortho_points"></div>\';
-		content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null, 0, 0, false)"><input type="button" value="Beenden" onclick="remove_ortho_points();$(\\\'#message_box\\\').hide();">\';
+		content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null, 0, 0, false)"><input type="button" style="margin-right: 10px" value="Speichern" onclick="import_custom_points(\\\'ortho_point_vertices\\\');"><input type="button" value="Beenden" onclick="remove_ortho_points();$(\\\'#message_box\\\').hide();">\';
 		Msg.html(content);
 		create_all_ortho_points();
 	}

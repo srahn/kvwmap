@@ -626,7 +626,7 @@ class data_import_export {
 			$user_upload_folder = UPLOADPATH.$user->id.'/';
 			@mkdir($user_upload_folder);
 			$this->pointfile = $_files['file1']['name'];
-			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
+			if(move_uploaded_file($_files['file1']['tmp_name'], $user_upload_folder . $this->pointfile)){
 				$rows = file($user_upload_folder . $this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 				$delimiters = implode($this->delimiters);
 				while(count_or_0($this->delimiters) > 0 AND count_or_0($this->columns) < 2){
@@ -636,7 +636,6 @@ class data_import_export {
 						$i++;
 					}
 					$this->columns = explode($this->delimiter, utf8_encode($rows[$i]));
-					echo '<br>';
 				}
 			}
 		}

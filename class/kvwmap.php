@@ -13359,24 +13359,28 @@ class GUI {
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$this->data_import_export->pointlist = $this->data_import_export->load_custom_pointlist($this->user);
-    $this->output();
+    if (!$this->formvars['no_output']) {
+			$this->output();
+		}
 	}
 
 	function create_point_rollenlayer_import(){
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->process_import_file(NULL, NULL, 1, $this->Stelle, $this->user, $this->pgdatabase, $this->formvars['epsg'], 'point', $this->formvars);
-		if ($layer_id != NULL) {
-			$this->loadMap('DataBase');
-			$this->zoom_to_max_layer_extent($layer_id);
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->drawMap();
-			$this->saveMap('');
-			$this->output();
+		$layer_id = $this->data_import_export->process_import_file(NULL, NULL, $this->formvars['file1'], $this->Stelle, $this->user, $this->pgdatabase, $this->formvars['epsg'], 'point', $this->formvars);
+		if (!$this->formvars['no_output']) {
+			if ($layer_id != NULL) {
+				$this->loadMap('DataBase');
+				$this->zoom_to_max_layer_extent($layer_id);
+				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+				$this->drawMap();
+				$this->saveMap('');
+				$this->output();
+			}
+			else {
+				$this->create_point_rollenlayer();
+			}
 		}
-		else {
-			$this->create_point_rollenlayer();
-		}    
 	}
 
   function shp_import_speichern(){
