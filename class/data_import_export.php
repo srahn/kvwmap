@@ -679,7 +679,7 @@ class data_import_export {
 		}
 		$sql = '
 			CREATE TABLE ' . CUSTOM_SHAPE_SCHEMA . '.' . $tablename  .' (
-				gid serial,
+				gid serial PRIMARY KEY,
 				"' . implode('" varchar, "', $table_columns) . "\" varchar
 			);
 			" . ($with_coords ? "

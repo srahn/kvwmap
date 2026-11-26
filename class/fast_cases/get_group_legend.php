@@ -1702,7 +1702,7 @@ class GUI {
 
 	function create_layer_legend($layer) {
 		[$id_value, $id_type] = split_id($layer['layer_id']);
-		$get_options_function = ($id_type === 'layer' ? 'getLayerOptions' : 'getCollectionLayerOptions');
+		$get_options_function = ($id_type === 'collection_layer' ? 'getCollectionLayerOptions' : 'getLayerOptions');
 		if (value_of($layer, 'requires') != '' ) {
 			return;
 		}
@@ -1881,7 +1881,7 @@ class GUI {
 	function create_layername_legend($layer){
 		global $layer_status;
 		[$id_value, $id_type] = split_id($layer_id);
-		$get_options_function = ($id_type === 'layer' ? 'getLayerOptions' : 'getCollectionLayerOptions');
+		$get_options_function = ($id_type === 'collection_layer' ? 'getCollectionLayerOptions' : 'getLayerOptions');
 		$legend = '';
 		$legend .= '<a';
 		# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.

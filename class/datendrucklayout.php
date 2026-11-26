@@ -1141,7 +1141,7 @@ class ddl extends drucklayout{
 			}break;			
 			case 'Checkbox' : {
 				$option = $this->attributes['options_struct'][$j];
-				$output = ($value != 'f' ? ($option['print']['true'] != '' ? $option['print']['true'] : 'ja') : ($option['print']['false'] != '' ? $option['print']['false'] : 'nein'));
+				$output = ($value == 't' ? ($option['print']['true'] ?: 'ja') : ($option['print']['false'] ?: 'nein'));
 			} break;
 			case 'Zahl': {
 				$output = (!$preview? tausenderTrenner($value) : $value);

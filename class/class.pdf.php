@@ -2038,6 +2038,22 @@ class Cpdf
             return false;
         }
 
+        # fehlende Zeichenbreiten für Umlaute hinzufügen (Bug in PDF Class)
+        $encodingMap = [
+            223 => 'germandbls',
+            228 => 'adieresis',
+            246 => 'odieresis',
+            252 => 'udieresis',
+            255 => 'ydieresis',
+        ];
+
+        foreach ($encodingMap as $code => $glyphName) {
+            if (isset($cachedFont['C'][$glyphName])) {
+                $cachedFont['C'][$code] = $cachedFont['C'][$glyphName];
+                $cachedFont['codeToName'][$code] = $glyphName;
+            }
+        }
+
         $cachedFont['_version_'] = 4;
         // store the data in as cached file and in $this->fonts array
         $this->fonts[$font] = $cachedFont;

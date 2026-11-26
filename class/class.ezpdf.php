@@ -1969,12 +1969,12 @@ class Cezpdf extends Cpdf
                     $right = $this->ez['pageWidth'] - $this->ez['rightMargin'] - ((is_array($options) && isset($options['right'])) ? $options['right'] : 0);
                 }
                 
-                if ($just == 'full' && (empty($lines[$i + 1]) || $c == $i + 1)) {
-                    // do not fully justify if its the absolute last line (taking line breaks into account)
-                    $tmp = $this->addText($left, $this->y, $size, $line, $right - $left, $just, 0, 0, 1);
-                    if (!strlen($tmp)) {
-                        $just = "left";
-                    }
+                if ($just == 'full') {
+									// Prüfen, ob dies die letzte Zeile des aktuellen Absatzes ist
+									$tmp = $this->addText($left, $this->y, $size, $line, $right - $left, $just, 0, 0, 1);
+									if (!strlen($tmp)) {
+											$just = 'left';
+									}
                 }
 
                 $line = $this->addText($left, $this->y, $size, $line, $right - $left, $just, 0, 0, $test);
