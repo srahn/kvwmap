@@ -10,6 +10,9 @@
 
 	global $last_x;$last_x = 0;
 	global $events;$events = true;	
+
+	$map_width = $this->user->rolle->nImageWidth;
+	$map_height = $this->user->rolle->nImageHeight;
 	
 	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons
 	include(LAYOUTPATH.'snippets/SVGvars_navscript.php'); 		# zuweisen von: $SVGvars_navscript
@@ -69,7 +72,8 @@
 	<input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
 	<input type="hidden" name="scale" value="<?php echo $this->user->rolle->pixsize; ?>">
 	<input type="hidden" name="layer_options_open" value="">
-<input type="hidden" name="collection_options_open" value="">
+	<input type="hidden" name="collection_options_open" value="">
+	<input type="hidden" name="legendtouched" value="0">
 
 <SCRIPT type="text/ecmascript"><!--
 
