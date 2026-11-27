@@ -950,7 +950,7 @@ $GUI->nachweis_columns = [
 				$GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
 			}
 			$GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchfortfuehrung2'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchbemerkung'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung'], $GUI->formvars['order']);
-			if ($GUI->formvars['lea_id'] != '') {
+			if ($GUI->formvars['lea_id'] != '' AND $GUI->formvars['abfrageart'] != 'lea_id') {
 				$lea_recherche_id = $GUI->saveLeaRecherche($GUI->formvars['lea_id'], $GUI->user->rolle->user_id, $GUI->user->rolle->stelle_id);
 			}
 			# Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
