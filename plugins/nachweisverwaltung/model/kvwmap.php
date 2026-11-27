@@ -608,18 +608,21 @@ $GUI->nachweis_columns = [
 		return 1;
 	};
 
-	$GUI->getLeaRecherchen = function($lea_id, $user_id, $stelle_id, $recherche_id = NULL) use ($GUI){
+	$GUI->getLeaRecherchen = function($lea_id, $recherche_id = NULL) use ($GUI){
 		$lea_recherchen = [];
 		$sql = "
 			SELECT
-				*
+				r.*,
+				u.vorname,
+				u.name
 			FROM 
-				lenris.lea_recherchen 
+				lenris.lea_recherchen r
+				LEFT JOIN kvwmap.user u ON u.id = r.user_id
 			WHERE
-					lea_id = " . $lea_id . " AND 
-					user_id = " . $user_id . " AND
-					stelle_id = " . $stelle_id . 
-					($recherche_id? ' AND id = ' . $recherche_id : '')
+				lea_id = " . $lea_id .
+				($recherche_id? ' AND id = ' . $recherche_id : '') . "
+			ORDER BY
+				zeit DESC"
 		;
 		#echo $sql;
 		$GUI->debug->write("<p>getLeaRecherchen - Laden der Nachweissuchparameter",4);
@@ -2017,7 +2020,7 @@ $GUI->nachweis_columns = [
 
 			if($GUI->formvars['lea_id'] != '') {
 				$GUI->zoomToLEA($nachweis, $GUI->formvars['lea_id'], 10);
-				$GUI->lea_recherchen = $GUI->getLeaRecherchen($GUI->formvars['lea_id'], $GUI->user->id, $GUI->Stelle->id);
+				$GUI->lea_recherchen = $GUI->getLeaRecherchen($GUI->formvars['lea_id']);
 				if ($GUI->formvars['lea_recherche_id'] != '') {
 					$lea_search_params = json_decode($GUI->lea_recherchen[$GUI->formvars['lea_recherche_id']]['search_params'], true);
 					$lea_search_params['suchhauptart'] = array_filter(explode(',', $lea_search_params['suchhauptart']));

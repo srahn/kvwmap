@@ -484,7 +484,7 @@ else {
 							<option value="">  -- bisherige Recherchen --  </option>
 							<?
 								foreach ($this->lea_recherchen as $lea_recherche) {
-									echo '<option value="' . $lea_recherche['id'] . '">' . $lea_recherche['zeit'] . '</option>';
+									echo '<option value="' . $lea_recherche['id'] . '">' . $lea_recherche['zeit'] . ' ' . $lea_recherche['vorname'] . ' ' . $lea_recherche['name'] . '</option>';
 								}
 							?>
 						</select>
