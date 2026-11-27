@@ -96,10 +96,10 @@
   .llr_group {
     position: relative;
     border: 1px solid #949ca8;
-    margin: 7px 2px 5px 7px;
+    margin: 7px 2px 5px 7px !important;
     text-align: left;
-    height: auto;
-    padding: 0 0 2px 0;
+    height: auto !important;
+    padding: 0 0 2px 0 !important;
     display: grid;
     grid-template-rows: min-content 1fr;
     transition: 0.2s ease;
