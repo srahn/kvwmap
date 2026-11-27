@@ -877,7 +877,7 @@
 					if (strpos($options, '$'.$attributes['name'][$a]) !== false){
 						$options = str_replace(
 							'$' . $attributes['name'][$a],
-							($link_type == 'mailto' ? rawurlencode($dataset[$attributes['name'][$a]]) : $dataset[$attributes['name'][$a]]),
+							$dataset[$attributes['name'][$a]],
 							$options
 						);
 						if ($dataset[$attributes['name'][$a]] == '') {
@@ -936,8 +936,11 @@
 									$params[] = 'cc=' . implode(';', array_slice($mail_addresses, 1));
 								}
 								$params[] = $url_parts[1];
-								$href = $link_type . ':' . $mail_addresses[0] . '?' . implode('&', $params);
+								$href = $link_type . ':' . $mail_addresses[0] . '?' . urlencode2(implode('&', $params));
 							} break;
+							default : {
+								$href = urlencode2($href);
+							}
 						}
 						// $datapart .= '<a
 						// 	tabindex="1"
