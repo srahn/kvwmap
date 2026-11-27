@@ -15397,7 +15397,7 @@ class GUI {
 			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id, true);
 			$this->formvars['nachname'] 									= $this->userdaten[0]['name'];
 			$this->formvars['vorname'] 										= $this->userdaten[0]['vorname'];
-			$this->formvars['loginname'] 									= $this->userdaten[0]['login_name'];
+			$this->formvars['login_name']									= $this->userdaten[0]['login_name'];
 			$this->formvars['namenszusatz'] 							= $this->userdaten[0]['namenszusatz'];
 			$this->formvars['password_setting_time'] 			= $this->userdaten[0]['password_setting_time'];
 			$this->formvars['password_expired'] 					= $this->userdaten[0]['password_expired'] === 't';

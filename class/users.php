@@ -1378,7 +1378,7 @@ class user {
 		$postfix = '';
 		do {
 			$login_name = strtolower(substr($vorname, 0, 1)) . strtolower($nachname) . $postfix;
-			$ret = $this->loginname_exists($login_name);
+			$ret = $this->user_fields_exist(['login_name' => $login_name]);
 			if (!$ret['success']) {
 				return array(
 					'login_name' => $login_name,
@@ -1400,33 +1400,54 @@ class user {
 		);
 	}
 
-	function loginname_exists($login, $id = NULL) {
-		$Meldung='';
-		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt und diesen dann zurückliefern
-		$sql ="
-			SELECT
-				*
-			FROM
-				kvwmap.user
-			WHERE
-				login_name = '" . $login . "'
-		";
-		if ($id != NULL) {
-			$sql.= "
-				AND id != " . $id;
-		}
-		$ret = $this->database->execSQL($sql,4, 0);
-		if (!$this->database->success) {
+	function user_fields_exist($userdata, $fields) {
+    $selects = array();
+    $conditions = array();
+
+    foreach ($fields as $field) {
+			if (!isset($userdata[$field])) {
+					continue;
+			}
+			$value = pg_escape_string($userdata[$field]);
+			$selects[] = "
+				COALESCE(BOOL_OR(" . $field . " = '" . $value . "'), FALSE) AS " . $field . "_exists
+			";
+			$conditions[] = $field . " = '" . $value . "'";
+    }
+
+    if (empty($selects)) {
 			return array(
 				'success' => false,
-				'message' => 'Fehler bei der Überprüfung ob der Login-Name ' . $login . ' bereits existiert: ' . $ret[1]
+				'message' => 'Keine gültigen Felder zur Überprüfung übergeben.'
 			);
-		}
-		return array(
-			'success' => true,
-			'login_name_exists' => pg_num_rows($ret[1]) > 0
-		);
-	}
+    }
+
+    $sql = "
+			SELECT
+				" . implode(",", $selects) . "
+			FROM
+				kvwmap.user
+    ";
+
+    if (!empty($userdata['id'])) {
+        $sql .= " WHERE id != " . intval($userdata['id']);
+    }
+		// echo $sql;
+    $ret = $this->database->execSQL($sql, 4, 0);
+    if (!$this->database->success) {
+			return array(
+				'success' => false,
+				'message' => 'Fehler bei der Überprüfung der Benutzerdaten: ' . $ret[1]
+			);
+    }
+    $result = pg_fetch_assoc($ret[1]);
+    foreach ($result as $key => $value) {
+    	$result[$key] = ($value === 't');
+    }
+    return array(
+        'success' => true
+    ) + $result;
+}
 
 	/**
 	 * Check the data in $userdaten
@@ -1449,15 +1470,18 @@ class user {
 		}
 		if ($userdaten['nachname'] == '') { $Meldung .= '<br>Nachname fehlt.'; }
 		if ($userdaten['vorname'] == '') { $Meldung .= '<br>Vorname fehlt.'; }
-		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
+		if ($userdaten['login_name'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
 		else {
-			$ret = $this->loginname_exists($userdaten['loginname'], $userdaten['id']);
+			$ret = $this->user_fields_exist($userdaten, ['login_name', 'email']);
 			if (!$ret['success']) {
 				$Meldung .= $ret['message'];
 			}
 			else {
 				if ($ret['login_name_exists']) {
 					$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
+				}
+				if ($ret['email_exists']) {
+					$Meldung .= '<br>Es existiert bereits ein Nutzer mit dieser Emailadresse.';
 				}
 			}
 		}
@@ -1565,7 +1589,7 @@ class user {
 			SET
 				name = '" . $userdaten['nachname'] . "',
 				vorname = '" . $userdaten['vorname'] . "',
-				login_name = '" . trim($userdaten['loginname']) . "',
+				login_name = '" . trim($userdaten['login_name']) . "',
 				namenszusatz = '" . $userdaten['namenszusatz'] . "',
 				start = " . ($userdaten['start'] ? "'" . $userdaten['start'] . "'" : 'NULL') . ",
 				stop = " . ($userdaten['stop'] ? "'" . $userdaten['stop'] . "'" : 'NULL') . ",

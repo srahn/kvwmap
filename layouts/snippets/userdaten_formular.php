@@ -47,7 +47,7 @@
 	function resetPassword() {
 		// das Passwort und der Loginname wird zweimal URL codiert, damit es auch in der Mail URL codiert erscheint
 		var newPassword = getRandomPassword();
-		var loginName = document.GUI.loginname.value;
+		var loginName = document.GUI.login_name.value;
 		var name = document.GUI.vorname.value + ' ' + document.GUI.nachname.value;
 		var link = window.location.href.split('?')[0] + '%3Fgo=logout%26login_name=' + encodeURIComponent(encodeURIComponent(loginName)) + '%26passwort=' + encodeURIComponent(encodeURIComponent(newPassword));
 		var text = '<? echo str_replace(chr(13).chr(10), '%0A', $this->user_stelle->reset_password_text); ?>';
@@ -200,7 +200,7 @@
 
 		<div class="form_formular-input form_formular-aic">
 			<div><? echo $strLogInName;?>&nbsp;*</div>
-			<div><input name="loginname" readonly onfocus="this.removeAttribute('readonly');" type="text" value="<? echo $this->formvars['loginname']; ?>" maxlength="100"></div>
+			<div><input name="login_name" readonly onfocus="this.removeAttribute('readonly');" type="text" value="<? echo $this->formvars['login_name']; ?>" maxlength="100"></div>
 		</div>
 
 		<div class="form_formular-input form_formular-aic">
@@ -490,7 +490,7 @@
 			<div class="form_formular-input form_formular-aic">
 				<div><? echo $strChangeUser;?></div>
 				<div>
-					<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
+					<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['login_name']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
 				</div>
 			</div><?
 		} ?>

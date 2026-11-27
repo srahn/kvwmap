@@ -137,7 +137,7 @@ if ($gast_export === false) {
 			$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 			$go = 'login';
 		}
-		$GUI->formvars['login_name'] = $_SESSION['login_name'];
+		#$GUI->formvars['login_name'] = $_SESSION['login_name'];
 		$GUI->debug->write('Ist angemeldet als: ' . $_SESSION['login_name'], 4, $GUI->echo);
 		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->pgdatabase);
 		if ($GUI->user->login_name == '') {
