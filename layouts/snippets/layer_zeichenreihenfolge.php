@@ -12,6 +12,13 @@
   .lzr_order {
     margin: 4px 3px 3px 3px
   }
+
+  .dragobject span{
+    display: inline-block;
+    max-width: 400px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
   
 </style>
 
