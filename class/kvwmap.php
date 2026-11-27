@@ -22659,7 +22659,7 @@ DO $$
 		$groups = [];
 		for ($i = 0; $i < count($formvars['attributes']); $i++) {
 			$attribute_name = $formvars['attributes'][$i];
-			if ($attribute_name != '') {
+			if (array_key_exists($attribute_name, $attributes['indizes'])) {
 				$alias_rows = ["alias" => "'" . $formvars['alias_' . $attribute_name] . "'"];
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') {
